@@ -4,7 +4,15 @@ import (
     "fmt"
 	"os/exec"
 	"net/http"
+	"strings"
+	"encoding/json"
+	"strconv"
 )
+
+type RFSimMetaDataResponse struct {
+	File string
+	BoundingBox [4]float64
+}
 
 /* /home/ec2-user/Signal-Server/signalserverHD -sdf /home/ec2-user/efs -lat 51.849 -lon -2.2299 -txh 25 -f 450 -erp 20 -rxh 2 -rt 10 -o test2 -R 10 -res 3600 -pm 3 */
 const SignalServerBinaryPath = "/home/ec2-user/Signal-Server/signalserverHD"
@@ -58,8 +66,18 @@ func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
     output, err := exec.Command(SignalServerBinaryPath, Args...).CombinedOutput()
     if err!=nil {
         fmt.Println(err.Error())
-    }
-	fmt.Println(string(output))
+	}
+	boundingBox := strings.SplitN(string(output),"|",-1)
+	var boundingBoxFloat [4]float64
+	var j = 0
+	for i := 0; i < len(boundingBox); i++ {
+		fmt.Println(boundingBox[i])
+		f, err := strconv.ParseFloat(boundingBox[i], 64)
+		if err == nil && j < 4 {
+			boundingBoxFloat[j] = f
+			j++
+		}
+	}
 
 	/* Convert from ppm to png */
 	fmt.Println("Converting output to png")
@@ -68,13 +86,37 @@ func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
 
     if err!=nil {
         fmt.Println(errConvert.Error())
-    }
-	fmt.Println(string(outputConvert))
-	http.ServeFile(writer, request, OutputArg + ".png")
+	}
+	fmt.Println(outputConvert)
+	metadataResponse := RFSimMetaDataResponse{"", boundingBoxFloat}
+	js, err := json.Marshal(metadataResponse)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write(js)
+}
+
+func serveRFFile(writer http.ResponseWriter, request *http.Request) {
+	/* Get GET Parameters from URL*/
+	var FileArg = ""
+	for k, v := range request.URL.Query() {
+		switch k {
+		case "file":
+			FileArg = v[0]
+		default:
+			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
+		}
+	}
+	/* Security: ServeFile removes '..' from paths*/
+	http.ServeFile(writer, request, OutputArg + FileArg + ".png")
 }
 
 func main() {
 	fmt.Println("Starting RF Coverage WebServer")
-	http.HandleFunc("/", serveRFRequest)
+	http.HandleFunc("/coverage-request/", serveRFRequest)
+	http.HandleFunc("/coverage-file/", serveRFFile)
 	http.ListenAndServe(":80", nil)
 }

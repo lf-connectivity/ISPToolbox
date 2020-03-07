@@ -110,13 +110,18 @@ func serveRFFile(writer http.ResponseWriter, request *http.Request) {
 			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
 		}
 	}
-	/* Security: ServeFile removes '..' from paths*/
+	/* Security: ServeFile removes '..' from paths */
 	http.ServeFile(writer, request, OutputArg + FileArg + ".png")
+}
+
+func serveStatusOk (writer http.ResponseWriter, request *http.Request) {
+	writer.WriteHeader(http.StatusOK)
 }
 
 func main() {
 	fmt.Println("Starting RF Coverage WebServer")
 	http.HandleFunc("/coverage-request/", serveRFRequest)
 	http.HandleFunc("/coverage-file/", serveRFFile)
+	http.HandleFunc("/", serveStatusOk)
 	http.ListenAndServe(":80", nil)
 }

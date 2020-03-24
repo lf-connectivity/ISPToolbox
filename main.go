@@ -1,26 +1,31 @@
 package main
 
 import (
-    "fmt"
-	"os/exec"
-	"net/http"
-	"strings"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os/exec"
+	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 type RFSimMetaDataResponse struct {
-	File string
+	File        string
 	BoundingBox [4]float64
 }
 
 /* /home/ec2-user/Signal-Server/signalserverHD -sdf /home/ec2-user/efs -lat 51.849 -lon -2.2299 -txh 25 -f 450 -erp 20 -rxh 2 -rt 10 -o test2 -R 10 -res 3600 -pm 3 */
 const SignalServerBinaryPath = "/home/ec2-user/Signal-Server/signalserverHD"
 const SDFFilePath = "/home/ec2-user/efs"
-const OutputArg = "/home/ec2-user/output/test"
+const OutputArg = "/home/ec2-user/output/"
 const ConvertPath = "/usr/bin/convert"
+const StaticFilePathTest = "/home/ec2-user/RFCoverageWebServer/static/"
+const AccessControlAllowOriginURLS = "*"
 
 func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLS)
 	var LatArg = "51.849"
 	var LngArg = "-2.2299"
 	var TxHArg = "25"
@@ -41,33 +46,39 @@ func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
 		case "txh":
 			TxHArg = v[0]
 		case "freq":
-			FreqArg= v[0]
+			FreqArg = v[0]
 		case "Erp":
-			ErpArg= v[0]
-		case "Rx":
-			RxHArg= v[0]
+			ErpArg = v[0]
+		case "rxh":
+			RxHArg = v[0]
 		case "Rt":
-			RtArg= v[0]
+			RtArg = v[0]
 		case "R":
-			RArg= v[0]
+			RArg = v[0]
 		case "Res":
-			ResArg= v[0]
+			ResArg = v[0]
 		case "Pm":
-			PmArg= v[0]
+			PmArg = v[0]
 		default:
 			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
 		}
 	}
-	Args := []string{"-sdf", SDFFilePath, "-lat", LatArg, "-lon", LngArg, "-txh", TxHArg, "-f", FreqArg, "-erp", ErpArg, "-rxh", RxHArg, "-rt",RtArg, "-o",OutputArg, "-R", RArg, "-res",ResArg, "-pm", PmArg}
+	/*Create Temporary File*/
+	file, err := ioutil.TempFile(OutputArg, "output-*")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	Args := []string{"-sdf", SDFFilePath, "-lat", LatArg, "-lon", LngArg, "-txh", TxHArg, "-f", FreqArg, "-erp", ErpArg, "-rxh", RxHArg, "-rt", RtArg, "-o", file.Name(), "-R", RArg, "-res", ResArg, "-pm", PmArg}
 	fmt.Printf("%#v\n", Args)
 
 	/* Run Request through signal server */
 	fmt.Println("Running RF Simulation")
-    output, err := exec.Command(SignalServerBinaryPath, Args...).CombinedOutput()
-    if err!=nil {
-        fmt.Println(err.Error())
+	output, err := exec.Command(SignalServerBinaryPath, Args...).CombinedOutput()
+	if err != nil {
+		fmt.Println(err.Error())
 	}
-	boundingBox := strings.SplitN(string(output),"|",-1)
+	boundingBox := strings.SplitN(string(output), "|", -1)
 	var boundingBoxFloat [4]float64
 	var j = 0
 	for i := 0; i < len(boundingBox); i++ {
@@ -81,14 +92,14 @@ func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
 
 	/* Convert from ppm to png */
 	fmt.Println("Converting output to png")
-	ConvertArgs := []string{OutputArg+".ppm", OutputArg+".png"}
+	ConvertArgs := []string{file.Name() + ".ppm", file.Name() + ".png"}
 	outputConvert, errConvert := exec.Command(ConvertPath, ConvertArgs...).CombinedOutput()
 
-    if err!=nil {
-        fmt.Println(errConvert.Error())
+	if err != nil {
+		fmt.Println(errConvert.Error())
 	}
 	fmt.Println(outputConvert)
-	metadataResponse := RFSimMetaDataResponse{"", boundingBoxFloat}
+	metadataResponse := RFSimMetaDataResponse{filepath.Base(file.Name()), boundingBoxFloat}
 	js, err := json.Marshal(metadataResponse)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
@@ -99,29 +110,31 @@ func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
 	writer.Write(js)
 }
 
-func serveRFFile(writer http.ResponseWriter, request *http.Request) {
+func serveRFFileHandler(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLS)
 	/* Get GET Parameters from URL*/
-	var FileArg = ""
 	for k, v := range request.URL.Query() {
 		switch k {
-		case "file":
-			FileArg = v[0]
 		default:
 			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
 		}
 	}
 	/* Security: ServeFile removes '..' from paths */
-	http.ServeFile(writer, request, OutputArg + FileArg + ".png")
+	fmt.Println(request.URL.Path[len("/coverage-file/"):])
+	http.ServeFile(writer, request, OutputArg+request.URL.Path[len("/coverage-file/"):])
 }
 
-func serveStatusOk (writer http.ResponseWriter, request *http.Request) {
+func serveStatusOk(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLS)
 	writer.WriteHeader(http.StatusOK)
 }
 
 func main() {
 	fmt.Println("Starting RF Coverage WebServer")
+	fs := http.FileServer(http.Dir(StaticFilePathTest))
 	http.HandleFunc("/coverage-request/", serveRFRequest)
-	http.HandleFunc("/coverage-file/", serveRFFile)
+	http.HandleFunc("/coverage-file/", serveRFFileHandler)
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", serveStatusOk)
 	http.ListenAndServe(":80", nil)
 }

@@ -22,6 +22,8 @@ const SDFFilePath = "/home/ec2-user/efs"
 const OutputArg = "/home/ec2-user/output/"
 const ConvertPath = "/usr/bin/convert"
 const StaticFilePathTest = "/home/ec2-user/RFCoverageWebServer/static/"
+const SpeedTestFilePathTest = "/home/ec2-user/RFCoverageWebServer/speedtest/"
+
 const AccessControlAllowOriginURLS = "*"
 
 func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
@@ -131,10 +133,13 @@ func serveStatusOk(writer http.ResponseWriter, request *http.Request) {
 
 func main() {
 	fmt.Println("Starting RF Coverage WebServer")
-	fs := http.FileServer(http.Dir(StaticFilePathTest))
+	staticfs := http.FileServer(http.Dir(StaticFilePathTest))
+	speedtestfs := http.FileServer(http.Dir(SpeedTestFilePathTest))
 	http.HandleFunc("/coverage-request/", serveRFRequest)
 	http.HandleFunc("/coverage-file/", serveRFFileHandler)
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	http.Handle("/static/", http.StripPrefix("/static/", staticfs))
+	http.Handle("/speedtest/", http.StripPrefix("/speedtest/", speedtestfs))
+
 	http.HandleFunc("/", serveStatusOk)
 	http.ListenAndServe(":80", nil)
 }

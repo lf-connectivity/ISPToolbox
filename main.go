@@ -23,6 +23,8 @@ const OutputArg = "/home/ec2-user/output/"
 const ConvertPath = "/usr/bin/convert"
 const StaticFilePathTest = "/home/ec2-user/RFCoverageWebServer/static/"
 const SpeedTestFilePathTest = "/home/ec2-user/RFCoverageWebServer/speedtest/"
+const SpeedTestDevFilePathTest = "/home/ec2-user/RFCoverageWebServer/speedtestdev/"
+const LidarFilePathTest = "/home/ec2-user/RFCoverageWebServer/lidarviewer/"
 
 const AccessControlAllowOriginURLS = "*"
 
@@ -135,10 +137,15 @@ func main() {
 	fmt.Println("Starting RF Coverage WebServer")
 	staticfs := http.FileServer(http.Dir(StaticFilePathTest))
 	speedtestfs := http.FileServer(http.Dir(SpeedTestFilePathTest))
+	speedtestdevfs := http.FileServer(http.Dir(SpeedTestDevFilePathTest))
+	lidarfs := http.FileServer(http.Dir(LidarFilePathTest))
+
 	http.HandleFunc("/coverage-request/", serveRFRequest)
 	http.HandleFunc("/coverage-file/", serveRFFileHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", staticfs))
 	http.Handle("/speedtest/", http.StripPrefix("/speedtest/", speedtestfs))
+	http.Handle("/speedtestdev/", http.StripPrefix("/speedtestdev/", speedtestdevfs))
+	http.Handle("/lidarviewer/", http.StripPrefix("/lidarviewer/", lidarfs))
 
 	http.HandleFunc("/", serveStatusOk)
 	http.ListenAndServe(":80", nil)

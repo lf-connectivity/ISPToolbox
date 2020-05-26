@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/jackc/pgx"
 )
 
 type RFSimMetaDataResponse struct {
@@ -133,6 +136,81 @@ func serveStatusOk(writer http.ResponseWriter, request *http.Request) {
 	writer.WriteHeader(http.StatusOK)
 }
 
+/**********************************************/
+/* Market Sizing API + Connection to Database */
+/**********************************************/
+const (
+	host     = "microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com"
+	port     = 5432
+	user     = "fbcmasteruser"
+	dbname   = "postgres"
+)
+
+type MarketSizingResponse struct {
+	Error        int `json:"error"`
+	Numbuildings int `json:"numbuildings"`
+}
+
+func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLS)
+	/* Get GET Parameters from URL*/
+	var coords = ""
+	for k, v := range request.URL.Query() {
+		switch k {
+		case "coordinates":
+			coords = v[0]
+		default:
+			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
+		}
+	}
+	coords2 := strings.Split(coords, "%2C")
+	var coords3 = ""
+	if len(coords2) > 0 {
+		coords3 = coords2[0]
+	}
+	for i := 1; i < len(coords2); i++ {
+		var sep = ","
+		if (i % 2) != 0 {
+			sep = " "
+		}
+		coords3 += sep + coords2[i]
+	}
+	coord_query := "POLYGON((" + coords3 + "))"
+
+	/* PGX Connection */
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
+	conn, err := pgx.Connect(context.Background(), dsn)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close(context.Background())
+
+	rows, QueryErr := conn.Query(context.Background(), "SELECT gid, us_state, ST_AsText(geog) FROM microsoftfootprints WHERE ST_Intersects(geog, $1);", coord_query)
+	if QueryErr != nil {
+		panic(QueryErr)
+	}
+	defer rows.Close()
+	var sum = 0
+	for rows.Next() {
+		var n int32
+		var state string
+		var polygon string
+		err = rows.Scan(&n, &state, &polygon)
+		if err != nil {
+			panic(err)
+		}
+		sum += 1
+	}
+	response := MarketSizingResponse{
+		Error:        0,
+		Numbuildings: sum,
+	}
+	if err := json.NewEncoder(writer).Encode(response); err != nil {
+		panic(err)
+	}
+	writer.Header().Set("Content-Type", "application/json")
+}
+
 func main() {
 	fmt.Println("Starting RF Coverage WebServer")
 	staticfs := http.FileServer(http.Dir(StaticFilePathTest))
@@ -142,6 +220,7 @@ func main() {
 
 	http.HandleFunc("/coverage-request/", serveRFRequest)
 	http.HandleFunc("/coverage-file/", serveRFFileHandler)
+	http.HandleFunc("/market-size/", serveMarketSizingRequest)
 	http.Handle("/static/", http.StripPrefix("/static/", staticfs))
 	http.Handle("/speedtest/", http.StripPrefix("/speedtest/", speedtestfs))
 	http.Handle("/speedtestdev/", http.StripPrefix("/speedtestdev/", speedtestdevfs))

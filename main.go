@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx" // sudo go get -u github.com/jackc/pgx
 )
 
 type RFSimMetaDataResponse struct {
@@ -149,6 +149,7 @@ const (
 type MarketSizingResponse struct {
 	Error        int `json:"error"`
 	Numbuildings int `json:"numbuildings"`
+	BuildingPolygons []string `json:"polygons"`
 }
 
 func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request) {
@@ -191,6 +192,7 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 	}
 	defer rows.Close()
 	var sum = 0
+	var polygons []string
 	for rows.Next() {
 		var n int32
 		var state string
@@ -200,10 +202,12 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 			panic(err)
 		}
 		sum += 1
+		polygons = append(polygons, polygon)
 	}
 	response := MarketSizingResponse{
 		Error:        0,
 		Numbuildings: sum,
+		BuildingPolygons: polygons,
 	}
 	if err := json.NewEncoder(writer).Encode(response); err != nil {
 		panic(err)

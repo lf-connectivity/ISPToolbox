@@ -31,6 +31,8 @@ const LidarFilePathTest = "/home/ec2-user/RFCoverageWebServer/lidarviewer/"
 
 const AccessControlAllowOriginURLS = "*"
 
+const AccessControlAllowOriginURLSQuery = "https://www.facebook.com"
+
 func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLS)
 	var LatArg = "51.849"
@@ -147,13 +149,13 @@ const (
 )
 
 type MarketSizingResponse struct {
-	Error        int `json:"error"`
-	Numbuildings int `json:"numbuildings"`
+	Error            int      `json:"error"`
+	Numbuildings     int      `json:"numbuildings"`
 	BuildingPolygons []string `json:"polygons"`
 }
 
 func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLS)
+	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLSQuery)
 	/* Get GET Parameters from URL*/
 	var coords = ""
 	for k, v := range request.URL.Query() {
@@ -186,7 +188,7 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 	}
 	defer conn.Close(context.Background())
 
-	rows, QueryErr := conn.Query(context.Background(), "SELECT gid, us_state, ST_AsText(geog) FROM microsoftfootprints WHERE ST_Intersects(geog, $1);", coord_query)
+	rows, QueryErr := conn.Query(context.Background(), "SELECT gid, us_state, ST_AsGeoJSON(geog) FROM microsoftfootprints WHERE ST_Intersects(geog, $1);", coord_query)
 	if QueryErr != nil {
 		panic(QueryErr)
 	}
@@ -205,8 +207,8 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 		polygons = append(polygons, polygon)
 	}
 	response := MarketSizingResponse{
-		Error:        0,
-		Numbuildings: sum,
+		Error:            0,
+		Numbuildings:     sum,
 		BuildingPolygons: polygons,
 	}
 	if err := json.NewEncoder(writer).Encode(response); err != nil {

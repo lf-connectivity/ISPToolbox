@@ -156,8 +156,8 @@ type MarketSizingResponse struct {
 }
 
 func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request) {
-	if(strings.HasSuffix(request.Header.Get("Referrer"), AccessControlAllowOriginURLSSuffix)) {
-		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Referrer"))
+	if(strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix)) {
+		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
 	/* Get GET Parameters from URL*/
 	var coords = ""

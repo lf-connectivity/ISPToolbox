@@ -32,6 +32,7 @@ const LidarFilePathTest = "/home/ec2-user/RFCoverageWebServer/lidarviewer/"
 const AccessControlAllowOriginURLS = "*"
 
 const AccessControlAllowOriginURLSQuery = "https://www.facebook.com"
+const AccessControlAllowOriginURLSSuffix = "facebook.com"
 
 func serveRFRequest(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLS)
@@ -155,7 +156,9 @@ type MarketSizingResponse struct {
 }
 
 func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Access-Control-Allow-Origin", AccessControlAllowOriginURLSQuery)
+	if(strings.HasSuffix(request.Header.Get("Referrer"), AccessControlAllowOriginURLSSuffix)) {
+		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Referrer"))
+	}
 	/* Get GET Parameters from URL*/
 	var coords = ""
 	for k, v := range request.URL.Query() {

@@ -149,6 +149,74 @@ const (
 	dbname   = "postgres"
 )
 
+type MarketSizingIncomeResponse struct {
+	Error           int        `json:"error"`
+	AvgIncome    	float32    `json:"avgincome"`
+	AvgError 		float32    `json:"avgerror"`
+}
+
+func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Request) {
+	if(strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix)) {
+		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+	}
+	/* Get GET Parameters from URL*/
+	var coords = ""
+	for k, v := range request.URL.Query() {
+		switch k {
+		case "coordinates":
+			coords = v[0]
+		default:
+			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
+		}
+	}
+	coords2 := strings.Split(coords, "%2C")
+	var coords3 = ""
+	if len(coords2) > 0 {
+		coords3 = coords2[0]
+	}
+	for i := 1; i < len(coords2); i++ {
+		var sep = ","
+		if (i % 2) != 0 {
+			sep = " "
+		}
+		coords3 += sep + coords2[i]
+	}
+	coord_query := "POLYGON((" + coords3 + "))"
+
+	/* PGX Connection */
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
+	conn, err := pgx.Connect(context.Background(), dsn)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close(context.Background())
+	println(coord_query)
+
+	rows, QueryErr := conn.Query(context.Background(), "SELECT AVG(tract.income2018) AS avg_income, AVG(tract.error2018) AS avg_error FROM (SELECT * FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(microsoftfootprints.geog, $1)) AS intersecting_footprints  LEFT JOIN microsoftfootprint2tracts ON intersecting_footprints.gid = microsoftfootprint2tracts.footprintgid) AS intersecting_footprints_mapped LEFT JOIN tract on intersecting_footprints_mapped.tractgids[1]=tract.gid;", coord_query)
+	if QueryErr != nil {
+		panic(QueryErr)
+	}
+	defer rows.Close()
+	var avg_income float32
+	var avg_error  float32
+	for rows.Next() {
+		err = rows.Scan(&avg_income, &avg_error)
+		if err != nil {
+			panic(err)
+		}
+
+	}
+	response := MarketSizingIncomeResponse {
+		Error:            0,
+		AvgIncome:    	avg_income,
+		AvgError:  avg_error,
+	}
+	if err := json.NewEncoder(writer).Encode(response); err != nil {
+		panic(err)
+	}
+	writer.Header().Set("Content-Type", "application/json")
+}
+
 type MarketSizingResponse struct {
 	Error            int      `json:"error"`
 	Numbuildings     int      `json:"numbuildings"`
@@ -227,6 +295,7 @@ func main() {
 	speedtestdevfs := http.FileServer(http.Dir(SpeedTestDevFilePathTest))
 	lidarfs := http.FileServer(http.Dir(LidarFilePathTest))
 
+	http.HandleFunc("/market-income/", serveMarketSizingIncomeRequest);
 	http.HandleFunc("/coverage-request/", serveRFRequest)
 	http.HandleFunc("/coverage-file/", serveRFFileHandler)
 	http.HandleFunc("/market-size/", serveMarketSizingRequest)

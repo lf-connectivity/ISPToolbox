@@ -190,9 +190,28 @@ func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Re
 		panic(err)
 	}
 	defer conn.Close(context.Background())
-	println(coord_query)
 
-	rows, QueryErr := conn.Query(context.Background(), "SELECT AVG(tract.income2018) AS avg_income, AVG(tract.error2018) AS avg_error FROM (SELECT * FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(microsoftfootprints.geog, $1)) AS intersecting_footprints  LEFT JOIN microsoftfootprint2tracts ON intersecting_footprints.gid = microsoftfootprint2tracts.footprintgid) AS intersecting_footprints_mapped LEFT JOIN tract on intersecting_footprints_mapped.tractgids[1]=tract.gid;", coord_query)
+	rows, QueryErr := conn.Query(context.Background(),
+`
+SELECT Avg(avgbuildingvalues.avgincome2018building) AS avgincome2018, 
+       Avg(avgbuildingvalues.avgerror2018building)  AS avgerror2018 
+FROM   (SELECT unnested_intersecting_footprints.gid, 
+               Avg(tract.income2018) AS avgincome2018building, 
+               Avg(tract.error2018)  AS avgerror2018building 
+        FROM   (SELECT intersecting_footprints.*, 
+                       Unnest(microsoftfootprint2tracts.tractgids) AS tractgid 
+                FROM   (SELECT * 
+                        FROM   microsoftfootprints 
+                        WHERE  St_intersects(microsoftfootprints.geog, 
+$1
+)) AS intersecting_footprints 
+LEFT JOIN microsoftfootprint2tracts 
+       ON intersecting_footprints.gid = microsoftfootprint2tracts.footprintgid) 
+AS unnested_intersecting_footprints 
+LEFT JOIN tract 
+       ON tract.gid = unnested_intersecting_footprints.tractgid 
+ GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues;`,
+ 		coord_query)
 	if QueryErr != nil {
 		panic(QueryErr)
 	}

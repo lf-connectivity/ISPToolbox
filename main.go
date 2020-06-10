@@ -159,6 +159,7 @@ func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Re
 	if(strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix)) {
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
+	var error = 0
 	/* Get GET Parameters from URL*/
 	var coords = ""
 	for k, v := range request.URL.Query() {
@@ -187,7 +188,7 @@ func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Re
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
 	conn, err := pgx.Connect(context.Background(), dsn)
 	if err != nil {
-		panic(err)
+		error = -2
 	}
 	defer conn.Close(context.Background())
 
@@ -213,7 +214,7 @@ LEFT JOIN tract
  GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues;`,
  		coord_query)
 	if QueryErr != nil {
-		panic(QueryErr)
+		error = -1
 	}
 	defer rows.Close()
 	var avg_income float32
@@ -221,12 +222,12 @@ LEFT JOIN tract
 	for rows.Next() {
 		err = rows.Scan(&avg_income, &avg_error)
 		if err != nil {
-			panic(err)
+			error = -1
 		}
 
 	}
 	response := MarketSizingIncomeResponse {
-		Error:            0,
+		Error:            error,
 		AvgIncome:    	avg_income,
 		AvgError:  avg_error,
 	}

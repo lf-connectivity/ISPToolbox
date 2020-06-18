@@ -285,7 +285,7 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 	}
 	defer rows.Close()
 	var sum = 0
-	var polygons []string
+	var polygons = []string{}
 	for rows.Next() {
 		var n int32
 		var state string
@@ -354,7 +354,7 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 		panic(QueryErr)
 	}
 	defer rows.Close()
-	var competitors []string
+	var competitors = []string{}
 	for rows.Next() {
 		var competitor string
 		err = rows.Scan(&competitor)

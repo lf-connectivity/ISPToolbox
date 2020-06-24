@@ -311,6 +311,9 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 type MarketCompetitionResponse struct {
 	Error       int      `json:"error"`
 	Competitors []string `json:"competitors"`
+	Down        []int    `json:"down_ad_speed"`
+	Up          []int    `json:"up_ad_speed"`
+	Tech        [][]int  `json:"tech_used"`
 }
 
 func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Request) {
@@ -349,23 +352,36 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 	}
 	defer conn.Close(context.Background())
 
-	rows, QueryErr := conn.Query(context.Background(), "SELECT DISTINCT providername FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, $1) LIMIT 16;", coord_query)
+	rows, QueryErr := conn.Query(context.Background(), "SELECT providername, MAX(maxaddown) as maxaddown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, $1) AND maxaddown > 0 AND maxadup > 0 GROUP BY providername ORDER BY maxaddown DESC LIMIT 16;", coord_query)
 	if QueryErr != nil {
 		panic(QueryErr)
 	}
+
 	defer rows.Close()
 	var competitors = []string{}
+	var downs = []int{}
+	var ups = []int{}
+	var techs = [][]int{}
 	for rows.Next() {
 		var competitor string
-		err = rows.Scan(&competitor)
+		var up int
+		var down int
+		var tech = []int{}
+		err = rows.Scan(&competitor, &down, &up, &tech)
 		if err != nil {
 			panic(err)
 		}
 		competitors = append(competitors, competitor)
+		downs = append(downs, down)
+		ups = append(ups, up)
+		techs = append(techs, tech)
 	}
 	response := MarketCompetitionResponse{
 		Error:       0,
 		Competitors: competitors,
+		Down:        downs,
+		Up:          ups,
+		Tech:        techs,
 	}
 	if err := json.NewEncoder(writer).Encode(response); err != nil {
 		panic(err)

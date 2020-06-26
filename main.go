@@ -149,6 +149,59 @@ const (
 	dbname   = "postgres"
 )
 
+type MarketSizingCountResponse struct {
+	Error         int `json:"error"`
+	BuildingCount int `json:"buildingcount"`
+}
+
+func serveMarketSizingCountRequest(writer http.ResponseWriter, request *http.Request) {
+	if strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix) {
+		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+	}
+	var error = 0
+	/* Get GET Parameters from URL*/
+	var geojson = ""
+	for k, v := range request.URL.Query() {
+		switch k {
+		case "geojson":
+			geojson = v[0]
+		default:
+			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
+		}
+	}
+	println(geojson)
+
+	/* PGX Connection */
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
+	conn, err := pgx.Connect(context.Background(), dsn)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close(context.Background())
+
+	rows, QueryErr := conn.Query(context.Background(), "SELECT COUNT(*) FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 100001) AS a;", geojson)
+	if QueryErr != nil {
+		error = -1
+		println(QueryErr)
+	}
+	defer rows.Close()
+	var count int
+	for rows.Next() {
+		err = rows.Scan(&count)
+		if err != nil {
+			error = -1
+		}
+	}
+	response := MarketSizingCountResponse{
+		Error:         error,
+		BuildingCount: count,
+	}
+	if err := json.NewEncoder(writer).Encode(response); err != nil {
+		panic(err)
+	}
+	writer.Header().Set("Content-Type", "application/json")
+}
+
 type MarketSizingIncomeResponse struct {
 	Error     int     `json:"error"`
 	AvgIncome float32 `json:"avgincome"`
@@ -399,6 +452,7 @@ func main() {
 	http.HandleFunc("/market-income/", serveMarketSizingIncomeRequest)
 	http.HandleFunc("/market-competition/", serveMarketCompetitionRequest)
 
+	http.HandleFunc("/market-count/", serveMarketSizingCountRequest)
 	http.HandleFunc("/coverage-request/", serveRFRequest)
 	http.HandleFunc("/coverage-file/", serveRFFileHandler)
 	http.HandleFunc("/market-size/", serveMarketSizingRequest)

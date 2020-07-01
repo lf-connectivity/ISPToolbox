@@ -281,8 +281,8 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 type MarketCompetitionResponse struct {
 	Error       int      `json:"error"`
 	Competitors []string `json:"competitors"`
-	Down        []int    `json:"down_ad_speed"`
-	Up          []int    `json:"up_ad_speed"`
+	Down        []float32    `json:"down_ad_speed"`
+	Up          []float32    `json:"up_ad_speed"`
 	Tech        [][]int  `json:"tech_used"`
 }
 
@@ -315,13 +315,13 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 
 	defer rows.Close()
 	var competitors = []string{}
-	var downs = []int{}
-	var ups = []int{}
+	var downs = []float32{}
+	var ups = []float32{}
 	var techs = [][]int{}
 	for rows.Next() {
 		var competitor string
-		var up int
-		var down int
+		var up float32
+		var down float32
 		var tech = []int{}
 		err = rows.Scan(&competitor, &down, &up, &tech)
 		if err != nil {

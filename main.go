@@ -102,9 +102,9 @@ func serveMarketSizingCountRequest(writer http.ResponseWriter, request *http.Req
 	/* Run Query on DB */
 	var query_skeleton string
 	if( isGeojson) {
-		query_skeleton = "SELECT COUNT(*) FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 100001) AS a;"
+		query_skeleton = "SELECT COUNT(*) FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 10001) AS a;"
 	} else {
-		query_skeleton = "SELECT COUNT(*) FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(geog, $1) LIMIT 100001) AS a;"
+		query_skeleton = "SELECT COUNT(*) FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(geog, $1) LIMIT 10001) AS a;"
 	}
 	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
 

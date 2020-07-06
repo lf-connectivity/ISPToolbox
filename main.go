@@ -278,6 +278,7 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 	writer.Header().Set("Content-Type", "application/json")
 }
 
+
 type MarketCompetitionResponse struct {
 	Error       int      `json:"error"`
 	Competitors []string `json:"competitors"`
@@ -345,6 +346,75 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 	writer.Header().Set("Content-Type", "application/json")
 }
 
+type MarketRDOFResponse struct {
+	Error         int `json:"error"`
+	CensusBlockGroup []string `json:"censusblockgroup"`
+	County      []string `json:"county"`
+	Geojson     []string `json:"geojson"`
+	Reserve     []int `json:"reserve"`
+	Locations   []int `json:"locations"`
+}
+
+func serveMarketRDOFRequest(writer http.ResponseWriter, request *http.Request) {
+	if strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix) {
+		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+	}
+	var error = 0
+	/* Get GET Parameters from URL*/
+	query, isGeojson := processArguments(request)
+
+	/* PGX Connection */
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
+	conn, err := pgx.Connect(context.Background(), dsn)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close(context.Background())
+
+	/* Run Query on DB */
+	var query_skeleton string
+	if( isGeojson) {
+		query_skeleton = "SELECT cbg_id, county, ST_AsGeoJSON(geog), reserve, locations FROM auction_904_shp WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 100;"
+	} else {
+		query_skeleton = "SELECT cbg_id, county, ST_AsGeoJSON(geog), reserve, locations FROM auction_904_shp WHERE ST_Intersects(geog, $1) LIMIT 100;"
+	}
+	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
+
+	if QueryErr != nil {
+		error = -1
+		println(QueryErr)
+	}
+	defer rows.Close()
+
+	var cbgs, countys, geojsons = []string{}, []string{}, []string{}
+	var reserves, locations = []int{}, []int{}
+	var reserve, location int
+	var cbg, county, geojson string
+	for rows.Next() {
+		err = rows.Scan(&cbg, &county, &geojson, &reserve, &location)
+		if err != nil {
+			error = -1
+		}
+		cbgs = append(cbgs, cbg)
+		countys = append(countys, county)
+		geojsons = append(geojsons, geojson)
+		reserves = append(reserves, reserve)
+		locations = append(locations, location)
+	}
+	response := MarketRDOFResponse {
+		Error:         error,
+		CensusBlockGroup: cbgs,
+		County:      countys,
+		Geojson:     geojsons,
+		Reserve:     reserves,
+		Locations:   locations,
+	}
+	if err := json.NewEncoder(writer).Encode(response); err != nil {
+		panic(err)
+	}
+	writer.Header().Set("Content-Type", "application/json")
+}
+
 func main() {
 	fmt.Println("Starting HomesPassed WebServer")
 
@@ -352,6 +422,8 @@ func main() {
 	http.HandleFunc("/market-competition/", serveMarketCompetitionRequest)
 	http.HandleFunc("/market-count/", serveMarketSizingCountRequest)
 	http.HandleFunc("/market-size/", serveMarketSizingRequest)
+	http.HandleFunc("/market-rdof/", serveMarketRDOFRequest)
+
 
 	staticfs := http.FileServer(http.Dir(StaticFilePathTest))
 	speedtestfs := http.FileServer(http.Dir(SpeedTestFilePathTest))

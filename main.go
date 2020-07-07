@@ -415,6 +415,71 @@ func serveMarketRDOFRequest(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 }
 
+type MarketDataAvailable struct {
+	Error         int `json:"error"`
+	Data bool `json:"data"`
+}
+
+/* Simply Checks if Request Overlaps with 50 states + DC */
+func serveMarketDataAvailableRequest(writer http.ResponseWriter, request *http.Request) {
+	if strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix) {
+		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
+	}
+	var error = 0
+	/* Get GET Parameters from URL*/
+	query, isGeojson := processArguments(request)
+
+	/* PGX Connection */
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
+	conn, err := pgx.Connect(context.Background(), dsn)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close(context.Background())
+
+	/* Run Query on DB */
+	var query_skeleton string
+	if( isGeojson) {
+		query_skeleton = "SELECT GEOID FROM tl_2017_us_state WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1));"
+	} else {
+		query_skeleton = "SELECT GEOID FROM tl_2017_us_state WHERE ST_Intersects(geog, $1);"
+	}
+	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
+
+	if QueryErr != nil {
+		error = -1
+		println(QueryErr)
+	}
+	defer rows.Close()
+
+	var data_available = false
+	var geoid string
+	for rows.Next() {
+		err = rows.Scan(&geoid)
+		if err != nil {
+			error = -1
+		}
+		switch geoid{
+		case "60":
+		case "66":
+		case "69":
+		case "78":
+		case "72":
+		default:
+			data_available = true
+			break
+		}
+	}
+	response := MarketDataAvailable {
+		Error:         error,
+		Data: data_available,
+	}
+	if err := json.NewEncoder(writer).Encode(response); err != nil {
+		panic(err)
+	}
+	writer.Header().Set("Content-Type", "application/json")
+}
+
 func main() {
 	fmt.Println("Starting HomesPassed WebServer")
 
@@ -423,7 +488,7 @@ func main() {
 	http.HandleFunc("/market-count/", serveMarketSizingCountRequest)
 	http.HandleFunc("/market-size/", serveMarketSizingRequest)
 	http.HandleFunc("/market-rdof/", serveMarketRDOFRequest)
-
+	http.HandleFunc("/market-data-available/", serveMarketDataAvailableRequest)
 
 	staticfs := http.FileServer(http.Dir(StaticFilePathTest))
 	speedtestfs := http.FileServer(http.Dir(SpeedTestFilePathTest))

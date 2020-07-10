@@ -305,9 +305,9 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 	/* Run Query on DB */
 	var query_skeleton string
 	if( isGeojson) {
-		query_skeleton = "SELECT providername, MAX(maxaddown) as maxaddown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, ST_GeomFromGeoJSON($1)) AND maxaddown > 0 AND maxadup > 0 GROUP BY providername ORDER BY maxaddown DESC LIMIT 16;"
+		query_skeleton = "SELECT providername, MAX(maxaddown) as maxdown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, ST_GeomFromGeoJSON($1)) AND consumer > 0 GROUP BY providername ORDER BY maxdown DESC LIMIT 6;"
 	} else {
-		query_skeleton = "SELECT providername, MAX(maxaddown) as maxaddown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, $1) AND maxaddown > 0 AND maxadup > 0 GROUP BY providername ORDER BY maxaddown DESC LIMIT 16;"
+		query_skeleton = "SELECT providername, MAX(maxaddown) as maxdown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, $1) AND consumer > 0 GROUP BY providername ORDER BY maxdown DESC LIMIT 6;"
 	}
 	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
 	if QueryErr != nil {

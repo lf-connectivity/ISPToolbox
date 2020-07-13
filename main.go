@@ -38,45 +38,19 @@ const (
 	dbname   = "postgres"
 )
 
-func processArguments(request *http.Request) (query string, isGeojson bool){
+func processArguments(request *http.Request) (geojson string){
 	/* Get GET Parameters from URL*/
-	var coords, geojson string
 	for k, v := range request.URL.Query() {
 		switch k {
-		case "coordinates":
-			coords = v[0]
 		case "geojson":
 			geojson= v[0]
 		default:
 			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
 		}
 	}
-	if len(coords) > 0 {
-		query = formatCoordinates(coords)
-		isGeojson = false
-	} else {
-		query = geojson 
-		isGeojson = true
-	}
 	return
 }
 
-func formatCoordinates(coords string) (coord_query string){
-	coords2 := strings.Split(coords, "%2C")
-	var coords3 = ""
-	if len(coords2) > 0 {
-		coords3 = coords2[0]
-	}
-	for i := 1; i < len(coords2); i++ {
-		var sep = ","
-		if (i % 2) != 0 {
-			sep = " "
-		}
-		coords3 += sep + coords2[i]
-	}
-	coord_query = "POLYGON((" + coords3 + "))"
-	return
-}
 
 type MarketSizingCountResponse struct {
 	Error         int `json:"error"`
@@ -89,7 +63,7 @@ func serveMarketSizingCountRequest(writer http.ResponseWriter, request *http.Req
 	}
 	var error = 0
 	/* Get GET Parameters from URL*/
-	query, isGeojson := processArguments(request)
+	query := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -101,11 +75,8 @@ func serveMarketSizingCountRequest(writer http.ResponseWriter, request *http.Req
 
 	/* Run Query on DB */
 	var query_skeleton string
-	if( isGeojson) {
-		query_skeleton = "SELECT COUNT(*) FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 10001) AS a;"
-	} else {
-		query_skeleton = "SELECT COUNT(*) FROM (SELECT * FROM microsoftfootprints WHERE ST_Intersects(geog, $1) LIMIT 10001) AS a;"
-	}
+	query_skeleton = "SELECT COUNT(*) FROM (SELECT * FROM msftcombined WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 10001) AS a;"
+	
 	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
 
 	if QueryErr != nil {
@@ -142,7 +113,7 @@ func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Re
 	}
 	var error = 0
 	/* Get GET Parameters from URL*/
-	query, isGeojson := processArguments(request)
+	query := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -154,8 +125,7 @@ func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Re
 
 	/* Run Query on DB */
 	var query_skeleton string
-	if( isGeojson) {
-		query_skeleton = `
+	query_skeleton = `
 		SELECT Avg(avgbuildingvalues.avgincome2018building) AS avgincome2018, 
 			   Avg(avgbuildingvalues.avgerror2018building)  AS avgerror2018 
 		FROM   (SELECT unnested_intersecting_footprints.gid, 
@@ -174,27 +144,7 @@ func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Re
 		LEFT JOIN tract 
 			   ON tract.gid = unnested_intersecting_footprints.tractgid 
 		 GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues;`
-	} else {
-		query_skeleton = `
-		SELECT Avg(avgbuildingvalues.avgincome2018building) AS avgincome2018, 
-			   Avg(avgbuildingvalues.avgerror2018building)  AS avgerror2018 
-		FROM   (SELECT unnested_intersecting_footprints.gid, 
-					   Avg(tract.income2018) AS avgincome2018building, 
-					   Avg(tract.error2018)  AS avgerror2018building 
-				FROM   (SELECT intersecting_footprints.*, 
-							   Unnest(microsoftfootprint2tracts.tractgids) AS tractgid 
-						FROM   (SELECT * 
-								FROM   microsoftfootprints 
-								WHERE  St_intersects(microsoftfootprints.geog, 
-		$1
-		) LIMIT 10001) AS intersecting_footprints 
-		LEFT JOIN microsoftfootprint2tracts 
-			   ON intersecting_footprints.gid = microsoftfootprint2tracts.footprintgid) 
-		AS unnested_intersecting_footprints 
-		LEFT JOIN tract 
-			   ON tract.gid = unnested_intersecting_footprints.tractgid 
-		 GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues;`
-	}
+	
 	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
 
 	if QueryErr != nil {
@@ -232,7 +182,7 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
 	/* Get GET Parameters from URL*/
-	query, isGeojson := processArguments(request)
+	query := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -244,11 +194,8 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 
 	/* Run Query on DB */
 	var query_skeleton string
-	if( isGeojson) {
-		query_skeleton = "SELECT gid, us_state, ST_AsGeoJSON(geog) FROM microsoftfootprints WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 10001;"
-	} else {
-		query_skeleton = "SELECT gid, us_state, ST_AsGeoJSON(geog) FROM microsoftfootprints WHERE ST_Intersects(geog, $1) LIMIT 10001;"
-	}
+	query_skeleton = "SELECT ST_AsGeoJSON(geog) FROM msftcombined WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 10001;"
+
 	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
 	if QueryErr != nil {
 		panic(QueryErr)
@@ -257,10 +204,8 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 	var sum = 0
 	var polygons = []string{}
 	for rows.Next() {
-		var n int32
-		var state string
 		var polygon string
-		err = rows.Scan(&n, &state, &polygon)
+		err = rows.Scan(&polygon)
 		if err != nil {
 			panic(err)
 		}
@@ -292,7 +237,7 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
 	/* Get GET Parameters from URL*/
-	query, isGeojson := processArguments(request)
+	query := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -304,11 +249,8 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 
 	/* Run Query on DB */
 	var query_skeleton string
-	if( isGeojson) {
-		query_skeleton = "SELECT providername, MAX(maxaddown) as maxdown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, ST_GeomFromGeoJSON($1)) AND consumer > 0 GROUP BY providername ORDER BY maxdown DESC LIMIT 6;"
-	} else {
-		query_skeleton = "SELECT providername, MAX(maxaddown) as maxdown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, $1) AND consumer > 0 GROUP BY providername ORDER BY maxdown DESC LIMIT 6;"
-	}
+	query_skeleton = "SELECT providername, MAX(maxaddown) as maxdown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, ST_GeomFromGeoJSON($1)) AND consumer > 0 GROUP BY providername ORDER BY maxdown DESC LIMIT 6;"
+
 	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
 	if QueryErr != nil {
 		panic(QueryErr)
@@ -361,7 +303,7 @@ func serveMarketRDOFRequest(writer http.ResponseWriter, request *http.Request) {
 	}
 	var error = 0
 	/* Get GET Parameters from URL*/
-	query, isGeojson := processArguments(request)
+	query := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -373,11 +315,8 @@ func serveMarketRDOFRequest(writer http.ResponseWriter, request *http.Request) {
 
 	/* Run Query on DB */
 	var query_skeleton string
-	if( isGeojson) {
 		query_skeleton = "SELECT cbg_id, county, ST_AsGeoJSON(geog), reserve, locations FROM auction_904_shp WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 100;"
-	} else {
-		query_skeleton = "SELECT cbg_id, county, ST_AsGeoJSON(geog), reserve, locations FROM auction_904_shp WHERE ST_Intersects(geog, $1) LIMIT 100;"
-	}
+
 	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
 
 	if QueryErr != nil {
@@ -427,7 +366,7 @@ func serveMarketDataAvailableRequest(writer http.ResponseWriter, request *http.R
 	}
 	var error = 0
 	/* Get GET Parameters from URL*/
-	query, isGeojson := processArguments(request)
+	query := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -439,11 +378,8 @@ func serveMarketDataAvailableRequest(writer http.ResponseWriter, request *http.R
 
 	/* Run Query on DB */
 	var query_skeleton string
-	if( isGeojson) {
-		query_skeleton = "SELECT GEOID FROM tl_2017_us_state WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1));"
-	} else {
-		query_skeleton = "SELECT GEOID FROM tl_2017_us_state WHERE ST_Intersects(geog, $1);"
-	}
+	query_skeleton = "SELECT GEOID FROM tl_2017_us_state WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1));"
+
 	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
 
 	if QueryErr != nil {

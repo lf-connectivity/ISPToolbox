@@ -11,4 +11,4 @@
 # that this script will be executed during boot.
 
 touch /var/lock/subsys/local
-/home/ec2-user/RFCoverageWebServer/main
+/home/ec2-user/RFCoverageWebServer/build_and_run.sh

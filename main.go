@@ -53,9 +53,13 @@ func processArguments(request *http.Request) (geojson string, exclude string){
 	return
 }
 
-func formatQuerySkeleton(skeleton string, addExclude bool) (string){
+func formatQuerySkeleton(skeleton string, addExclude bool, includeExclude bool) (string){
 	if (addExclude) {
-		return fmt.Sprintf(skeleton, "St_intersects(geog, St_geomfromgeojson($1)) AND NOT St_intersects(geog, St_geomfromgeojson($2))")
+		if (includeExclude){
+			return fmt.Sprintf(skeleton, "St_intersects(geog, St_geomfromgeojson($1)) AND St_intersects(geog, St_geomfromgeojson($2))")
+		} else {
+			return fmt.Sprintf(skeleton, "St_intersects(geog, St_geomfromgeojson($1)) AND NOT St_intersects(geog, St_geomfromgeojson($2))")
+		}
 	} else {
 		return fmt.Sprintf(skeleton, "St_intersects(geog, St_geomfromgeojson($1))")
 	}
@@ -93,7 +97,7 @@ FROM   (SELECT *
 		LIMIT  10001) AS a;`
 
 	var useExclude = len(exclude) != 0
-	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude , false)
 	var rows pgx.Rows
 	var QueryErr error
 	if (useExclude){
@@ -114,6 +118,7 @@ FROM   (SELECT *
 			errorCode = -1
 		}
 	}
+	println(count)
 	response := MarketSizingCountResponse{
 		Error:         errorCode,
 		BuildingCount: count,
@@ -169,7 +174,7 @@ FROM   (SELECT unnested_intersecting_footprints.gid,
 	 GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues; `
 	
 	var useExclude = len(exclude) != 0
-	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude, false)
 	var rows pgx.Rows
 	var QueryErr error
 	if (useExclude){
@@ -231,7 +236,7 @@ WHERE  %s
 LIMIT  10001;`
 
 	var useExclude = len(exclude) != 0
-	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude, false)
 	var rows pgx.Rows
 	var QueryErr error
 	if (useExclude){
@@ -307,7 +312,7 @@ ORDER  BY maxdown DESC
 LIMIT  6; `
 
 	var useExclude = len(exclude) != 0
-	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude, false)
 	var rows pgx.Rows
 	var QueryErr error
 	if (useExclude){
@@ -388,7 +393,7 @@ FROM   auction_904_shp
 WHERE  %s
 LIMIT  100;`
 	var useExclude = len(exclude) != 0
-	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude, false)
 	var rows pgx.Rows
 	var QueryErr error
 	if (useExclude){
@@ -462,7 +467,7 @@ FROM   tl_2017_us_state
 WHERE  %s;`
 
 	var useExclude = len(exclude) != 0
-	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude, true)
 	var rows pgx.Rows
 	var QueryErr error
 	if (useExclude){

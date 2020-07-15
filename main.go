@@ -38,17 +38,27 @@ const (
 	dbname   = "postgres"
 )
 
-func processArguments(request *http.Request) (geojson string){
+func processArguments(request *http.Request) (geojson string, exclude string){
 	/* Get GET Parameters from URL*/
 	for k, v := range request.URL.Query() {
 		switch k {
 		case "geojson":
-			geojson= v[0]
+			geojson = v[0]
+		case "exclude":
+			exclude = v[0]
 		default:
 			fmt.Println("Unknown argument:" + k + "|" + (v[0]))
 		}
 	}
 	return
+}
+
+func formatQuerySkeleton(skeleton string, addExclude bool) (string){
+	if (addExclude) {
+		return fmt.Sprintf(skeleton, "St_intersects(geog, St_geomfromgeojson($1)) AND NOT St_intersects(geog, St_geomfromgeojson($2))")
+	} else {
+		return fmt.Sprintf(skeleton, "St_intersects(geog, St_geomfromgeojson($1))")
+	}
 }
 
 
@@ -61,9 +71,9 @@ func serveMarketSizingCountRequest(writer http.ResponseWriter, request *http.Req
 	if strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix) {
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
-	var error = 0
+	var errorCode = 0
 	/* Get GET Parameters from URL*/
-	query := processArguments(request)
+	query, exclude := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -75,12 +85,25 @@ func serveMarketSizingCountRequest(writer http.ResponseWriter, request *http.Req
 
 	/* Run Query on DB */
 	var query_skeleton string
-	query_skeleton = "SELECT COUNT(*) FROM (SELECT * FROM msftcombined WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 10001) AS a;"
-	
-	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
+	query_skeleton = `
+SELECT Count(*) 
+FROM   (SELECT * 
+		FROM   msftcombined 
+		WHERE  %s
+		LIMIT  10001) AS a;`
+
+	var useExclude = len(exclude) != 0
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	var rows pgx.Rows
+	var QueryErr error
+	if (useExclude){
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query, exclude)
+	} else {
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query)
+	}
 
 	if QueryErr != nil {
-		error = -1
+		errorCode = -1
 		println(QueryErr)
 	}
 	defer rows.Close()
@@ -88,11 +111,11 @@ func serveMarketSizingCountRequest(writer http.ResponseWriter, request *http.Req
 	for rows.Next() {
 		err = rows.Scan(&count)
 		if err != nil {
-			error = -1
+			errorCode = -1
 		}
 	}
 	response := MarketSizingCountResponse{
-		Error:         error,
+		Error:         errorCode,
 		BuildingCount: count,
 	}
 	if err := json.NewEncoder(writer).Encode(response); err != nil {
@@ -111,44 +134,51 @@ func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Re
 	if strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix) {
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
-	var error = 0
+	var errorCode = 0
 	/* Get GET Parameters from URL*/
-	query := processArguments(request)
+	query, exclude := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
 	conn, err := pgx.Connect(context.Background(), dsn)
 	if err != nil {
-		error = -2
+		errorCode = -2
 	}
 	defer conn.Close(context.Background())
 
 	/* Run Query on DB */
 	var query_skeleton string
 	query_skeleton = `
-		SELECT Avg(avgbuildingvalues.avgincome2018building) AS avgincome2018, 
-			   Avg(avgbuildingvalues.avgerror2018building)  AS avgerror2018 
-		FROM   (SELECT unnested_intersecting_footprints.gid, 
-					   Avg(tract.income2018) AS avgincome2018building, 
-					   Avg(tract.error2018)  AS avgerror2018building 
-				FROM   (SELECT intersecting_footprints.*, 
-							   Unnest(microsoftfootprint2tracts.tractgids) AS tractgid 
-						FROM   (SELECT * 
-								FROM   microsoftfootprints 
-								WHERE  St_intersects(microsoftfootprints.geog, 
-									ST_GeomFromGeoJSON($1)
-		) LIMIT 10001) AS intersecting_footprints 
-		LEFT JOIN microsoftfootprint2tracts 
-			   ON intersecting_footprints.gid = microsoftfootprint2tracts.footprintgid) 
-		AS unnested_intersecting_footprints 
-		LEFT JOIN tract 
-			   ON tract.gid = unnested_intersecting_footprints.tractgid 
-		 GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues;`
+SELECT Avg(avgbuildingvalues.avgincome2018building) AS avgincome2018, 
+	Avg(avgbuildingvalues.avgerror2018building)  AS avgerror2018 
+FROM   (SELECT unnested_intersecting_footprints.gid, 
+			Avg(tract.income2018) AS avgincome2018building, 
+			Avg(tract.error2018)  AS avgerror2018building 
+	 FROM   (SELECT intersecting_footprints.*, 
+					Unnest(microsoftfootprint2tracts.tractgids) AS tractgid 
+			 FROM   (SELECT * 
+					 FROM   microsoftfootprints 
+					 WHERE  %s
+					 LIMIT  10001) AS intersecting_footprints 
+					LEFT JOIN microsoftfootprint2tracts 
+						   ON intersecting_footprints.gid = 
+							  microsoftfootprint2tracts.footprintgid) AS 
+			unnested_intersecting_footprints 
+			LEFT JOIN tract 
+				   ON tract.gid = unnested_intersecting_footprints.tractgid 
+	 GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues; `
 	
-	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
-
+	var useExclude = len(exclude) != 0
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	var rows pgx.Rows
+	var QueryErr error
+	if (useExclude){
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query, exclude)
+	} else {
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query)
+	}
 	if QueryErr != nil {
-		error = -1
+		errorCode = -1
 	}
 	defer rows.Close()
 	var avg_income float32
@@ -156,12 +186,12 @@ func serveMarketSizingIncomeRequest(writer http.ResponseWriter, request *http.Re
 	for rows.Next() {
 		err = rows.Scan(&avg_income, &avg_error)
 		if err != nil {
-			error = -1
+			errorCode = -1
 		}
 
 	}
 	response := MarketSizingIncomeResponse{
-		Error:     error,
+		Error:     errorCode,
 		AvgIncome: avg_income,
 		AvgError:  avg_error,
 	}
@@ -182,7 +212,7 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
 	/* Get GET Parameters from URL*/
-	query := processArguments(request)
+	query, exclude := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -194,12 +224,25 @@ func serveMarketSizingRequest(writer http.ResponseWriter, request *http.Request)
 
 	/* Run Query on DB */
 	var query_skeleton string
-	query_skeleton = "SELECT ST_AsGeoJSON(geog) FROM msftcombined WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 10001;"
+	query_skeleton =`
+SELECT St_asgeojson(geog) 
+FROM   msftcombined 
+WHERE  %s
+LIMIT  10001;`
 
-	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
+	var useExclude = len(exclude) != 0
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	var rows pgx.Rows
+	var QueryErr error
+	if (useExclude){
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query, exclude)
+	} else {
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query)
+	}
 	if QueryErr != nil {
 		panic(QueryErr)
 	}
+
 	defer rows.Close()
 	var sum = 0
 	var polygons = []string{}
@@ -237,7 +280,7 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
 	/* Get GET Parameters from URL*/
-	query := processArguments(request)
+	query, exclude := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -249,9 +292,29 @@ func serveMarketCompetitionRequest(writer http.ResponseWriter, request *http.Req
 
 	/* Run Query on DB */
 	var query_skeleton string
-	query_skeleton = "SELECT providername, MAX(maxaddown) as maxdown, MAX(maxadup) as maxadup, ARRAY_AGG(DISTINCT techcode) as tech FROM form477jun2019 JOIN blocks on blocks.geoid10=form477jun2019.blockcode WHERE ST_Intersects(blocks.geog, ST_GeomFromGeoJSON($1)) AND consumer > 0 GROUP BY providername ORDER BY maxdown DESC LIMIT 6;"
+	query_skeleton = `
+SELECT providername, 
+	Max(maxaddown)               AS maxdown, 
+	Max(maxadup)                 AS maxadup, 
+	Array_agg(DISTINCT techcode) AS tech 
+FROM   form477jun2019 
+	JOIN blocks 
+	  ON blocks.geoid10 = form477jun2019.blockcode 
+WHERE  %s
+	AND consumer > 0
+GROUP  BY providername 
+ORDER  BY maxdown DESC 
+LIMIT  6; `
 
-	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
+	var useExclude = len(exclude) != 0
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	var rows pgx.Rows
+	var QueryErr error
+	if (useExclude){
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query, exclude)
+	} else {
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query)
+	}
 	if QueryErr != nil {
 		panic(QueryErr)
 	}
@@ -301,9 +364,9 @@ func serveMarketRDOFRequest(writer http.ResponseWriter, request *http.Request) {
 	if strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix) {
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
-	var error = 0
+	var errorCode = 0
 	/* Get GET Parameters from URL*/
-	query := processArguments(request)
+	query, exclude := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -315,12 +378,27 @@ func serveMarketRDOFRequest(writer http.ResponseWriter, request *http.Request) {
 
 	/* Run Query on DB */
 	var query_skeleton string
-		query_skeleton = "SELECT cbg_id, county, ST_AsGeoJSON(geog), reserve, locations FROM auction_904_shp WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1)) LIMIT 100;"
-
-	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
+		query_skeleton = `
+SELECT cbg_id, 
+       county, 
+       St_asgeojson(geog), 
+       reserve, 
+       locations 
+FROM   auction_904_shp 
+WHERE  %s
+LIMIT  100;`
+	var useExclude = len(exclude) != 0
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	var rows pgx.Rows
+	var QueryErr error
+	if (useExclude){
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query, exclude)
+	} else {
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query)
+	}
 
 	if QueryErr != nil {
-		error = -1
+		errorCode = -1
 		println(QueryErr)
 	}
 	defer rows.Close()
@@ -332,7 +410,7 @@ func serveMarketRDOFRequest(writer http.ResponseWriter, request *http.Request) {
 	for rows.Next() {
 		err = rows.Scan(&cbg, &county, &geojson, &reserve, &location)
 		if err != nil {
-			error = -1
+			errorCode = -1
 		}
 		cbgs = append(cbgs, cbg)
 		countys = append(countys, county)
@@ -341,7 +419,7 @@ func serveMarketRDOFRequest(writer http.ResponseWriter, request *http.Request) {
 		locations = append(locations, location)
 	}
 	response := MarketRDOFResponse {
-		Error:         error,
+		Error:         errorCode,
 		CensusBlockGroup: cbgs,
 		County:      countys,
 		Geojson:     geojsons,
@@ -364,9 +442,9 @@ func serveMarketDataAvailableRequest(writer http.ResponseWriter, request *http.R
 	if strings.HasSuffix(request.Header.Get("Origin"), AccessControlAllowOriginURLSSuffix) {
 		writer.Header().Set("Access-Control-Allow-Origin", request.Header.Get("Origin"))
 	}
-	var error = 0
+	var errorCode = 0
 	/* Get GET Parameters from URL*/
-	query := processArguments(request)
+	query, exclude := processArguments(request)
 
 	/* PGX Connection */
 	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + strconv.Itoa(port)
@@ -378,12 +456,22 @@ func serveMarketDataAvailableRequest(writer http.ResponseWriter, request *http.R
 
 	/* Run Query on DB */
 	var query_skeleton string
-	query_skeleton = "SELECT GEOID FROM tl_2017_us_state WHERE ST_Intersects(geog, ST_GeomFromGeoJSON($1));"
+	query_skeleton = `
+SELECT geoid 
+FROM   tl_2017_us_state 
+WHERE  %s;`
 
-	rows, QueryErr := conn.Query(context.Background(), query_skeleton, query)
-
+	var useExclude = len(exclude) != 0
+	query_skeleton = formatQuerySkeleton(query_skeleton, useExclude )
+	var rows pgx.Rows
+	var QueryErr error
+	if (useExclude){
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query, exclude)
+	} else {
+		rows, QueryErr = conn.Query(context.Background(), query_skeleton, query)
+	}
 	if QueryErr != nil {
-		error = -1
+		errorCode = -1
 		println(QueryErr)
 	}
 	defer rows.Close()
@@ -393,7 +481,7 @@ func serveMarketDataAvailableRequest(writer http.ResponseWriter, request *http.R
 	for rows.Next() {
 		err = rows.Scan(&geoid)
 		if err != nil {
-			error = -1
+			errorCode = -1
 		}
 		switch geoid{
 		case "60":
@@ -407,7 +495,7 @@ func serveMarketDataAvailableRequest(writer http.ResponseWriter, request *http.R
 		}
 	}
 	response := MarketDataAvailable {
-		Error:         error,
+		Error:         errorCode,
 		Data: data_available,
 	}
 	if err := json.NewEncoder(writer).Encode(response); err != nil {

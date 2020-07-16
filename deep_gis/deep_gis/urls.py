@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from deep_gis import views
+from gis_creator import views
 
 urlpatterns = [
     path('aoi/', views.index)

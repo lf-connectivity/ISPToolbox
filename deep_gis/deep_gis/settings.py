@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'gis_creator.apps.GisCreatorConfig'
 ]
 
@@ -75,7 +76,7 @@ WSGI_APPLICATION = 'deep_gis.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'django_db',
         'USER' : 'fbcmasteruser',
         'HOST' : 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',

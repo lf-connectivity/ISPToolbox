@@ -18,5 +18,8 @@ from django.urls import path
 from gis_creator import views
 
 urlpatterns = [
-    path('aoi/', views.index)
+    path('aoi/', views.index),
+    path('task/<str:task_id>/', views.TaskView.as_view(), name='task'),
+    path('progress/<str:task_id>/', views.ProgressView.as_view(), name='progress'),
+    path('result/<str:task_id>/', views.ResultView.as_view(), name='result')
 ]

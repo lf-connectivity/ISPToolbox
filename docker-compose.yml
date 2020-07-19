@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+    deep_gis:
+        build: ./deep_gis
+        volumes:
+            - ./deep_gis:/usr/src/app
+        ports:
+            - 8020:80
+    house_counter:
+        build: ./house_counter
+        ports:
+            - 8010:80         

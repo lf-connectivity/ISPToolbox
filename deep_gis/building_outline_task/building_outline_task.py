@@ -610,13 +610,6 @@ def polygonize_buildings(mask: Image.Image, mode: str = "HOUGH") -> List[Polygon
 
         building_polygons.append(accepted_poly)
 
-    import matplotlib.pyplot as plt
-
-    for p in building_polygons:
-        x,y = p.exterior.xy
-        plt.plot(x,y)
-    plt.savefig('/home/ubuntu/foo.png')
-
     return building_polygons
 
 def xy_to_latlon(geo_trans, x, y):

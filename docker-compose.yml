@@ -1,13 +1,23 @@
 version: '3'
 
 services:
-    deep_gis:
+    deepgis:
         build: ./deep_gis
         volumes:
             - ./deep_gis:/usr/src/app
         ports:
             - 8020:80
-    house_counter:
+    homespassed:
         build: ./house_counter
         ports:
-            - 8010:80         
+            - 8010:80      
+    nginx:
+        build: ./nginx
+        ports:
+            - 80:80
+        expose:
+            - 8010
+            - 8020
+        depends_on:
+            - homespassed
+            - deepgis

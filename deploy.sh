@@ -4,6 +4,6 @@ aws elb deregister-instances-from-load-balancer --load-balancer-name WISPCatLB -
 sudo docker stop `sudo docker ps -q`
 cd ~/RFCoverageWebServer/
 git pull
-docker-compose build
+sudo docker-compose build
 sudo docker-compose up -d
 aws elb register-instances-with-load-balancer --load-balancer-name WISPCatLB --instances $INSTANCE_ID

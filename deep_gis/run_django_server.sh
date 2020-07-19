@@ -1,0 +1,1 @@
+gunicorn deep_gis.wsgi --bind :8020 -w 8

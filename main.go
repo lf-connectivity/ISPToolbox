@@ -529,5 +529,5 @@ func main() {
 	http.Handle("/lidarviewer/", http.StripPrefix("/lidarviewer/", lidarfs))
 
 	http.HandleFunc("/", serveStatusOk)
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":8010", nil)
 }

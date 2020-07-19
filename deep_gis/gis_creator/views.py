@@ -48,6 +48,7 @@ class ProgressView(View):
             filtered_fields = list(filter(lambda x: (
                 x != 'output_geometryCollection' and x != 'input_geometryCollection'), [field.name for field in pipeline._meta.fields]))
             response_data['progress'] = model_to_dict(pipeline, fields=filtered_fields)
+            response_data['progress']['created'] = pipeline.created
 
         if task.status == 'SUCCESS':
             response_data['results'] = task.get()

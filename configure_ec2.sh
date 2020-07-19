@@ -1,4 +1,6 @@
 #!/bin/bash
+sudo cp /mnt/efs/fs1/alex/* ~/.aws
+sudo chown -R ec2-user:ec2-user ~/.aws
 yum update
 sudo amazon-linux-extras install epel
 sudo yum install redis

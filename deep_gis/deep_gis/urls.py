@@ -21,5 +21,6 @@ urlpatterns = [
     path('gis/aoi/', views.index),
     path('gis/task/<str:task_id>/', views.TaskView.as_view(), name='task'),
     path('gis/progress/<str:task_id>/', views.ProgressView.as_view(), name='progress'),
-    path('gis/result/<str:task_id>/', views.ResultView.as_view(), name='result')
+    path('gis/result/<str:task_id>/', views.ResultView.as_view(), name='result'),
+    path('gis/osmBuildings/', views.OSMBuildingsView.as_view(), name='osmBuildings')
 ]

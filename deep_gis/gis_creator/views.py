@@ -8,6 +8,7 @@ import json
 from django.contrib.gis.geos import GEOSGeometry
 
 from celery import current_app
+from gis_creator.OSMView import OSMBuildingsView
 
 # Create your views here.
 from django.http import HttpResponse, JsonResponse
@@ -17,7 +18,6 @@ def index(request):
     # Get Area of Interest From Client
     geojson = request.GET.get('geojson', '{}')
     # Create Async Task through Celery and Respond with the Task ID
-    print(json.dumps(json.loads(geojson)))
     run = BuildingDetection(input_geometryCollection=GEOSGeometry(geojson))
     run.save()
     task = createBuildingsGeojson.delay(geojson, run.pk)

@@ -76,8 +76,12 @@ WSGI_APPLICATION = 'deep_gis.wsgi.application'
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+        'NAME': 'django_dev',
+    },
+    'gis_data': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'django_db',
+        'NAME': 'postgres',
         'USER' : 'fbcmasteruser',
         'HOST' : 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
         'PORT' : '5432',

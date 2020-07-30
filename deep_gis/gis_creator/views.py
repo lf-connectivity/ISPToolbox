@@ -8,7 +8,7 @@ import json
 from django.contrib.gis.geos import GEOSGeometry
 
 from celery import current_app
-from gis_creator.market_evaluator_views.OSMView import OSMBuildingsView
+from gis_creator.market_evaluator_views.MarketEvaluator import *
 
 # Create your views here.
 from django.http import HttpResponse, JsonResponse

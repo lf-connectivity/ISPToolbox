@@ -22,5 +22,11 @@ urlpatterns = [
     path('gis/task/<str:task_id>/', views.TaskView.as_view(), name='task'),
     path('gis/progress/<str:task_id>/', views.ProgressView.as_view(), name='progress'),
     path('gis/result/<str:task_id>/', views.ResultView.as_view(), name='result'),
-    path('gis/osmBuildings/', views.OSMBuildingsView.as_view(), name='osmBuildings')
+    path('gis/osmBuildings/', views.BuildingsView.as_view(), name='osmBuildings'),
+    path('market-evaluator/market-income/', views.IncomeView.as_view(), name='PRIncome'),
+    path('market-evaluator/market-competition/', views.Form477View.as_view(), name='PRIncome'),
+    path('market-evaluator/market-count/', views.CountBuildingsView.as_view(), name='PRIncome'),
+    path('market-evaluator/market-size/', views.BuildingsView.as_view(), name='BuildingOutlines'),
+    path('market-evaluator/market-rdof/', views.RDOFView.as_view(), name='PRIncome'),
+    path('market-evaluator/market-data-available/', views.DataAvailableView.as_view(), name='PRIncome')
 ]

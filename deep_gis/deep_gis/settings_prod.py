@@ -81,6 +81,13 @@ DATABASES = {
         'USER' : 'fbcmasteruser',
         'HOST' : 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
         'PORT' : '5432',
+    },
+    'gis_data': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'postgres',
+        'USER' : 'fbcmasteruser',
+        'HOST' : 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
+        'PORT' : '5432',
     }
 }
 

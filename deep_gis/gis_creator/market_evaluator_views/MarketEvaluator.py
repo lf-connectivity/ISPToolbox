@@ -293,6 +293,8 @@ class IncomeView(View):
         query_skeleton = income_skeleton_simple 
         if checkIfPrecomputedAvailable(geojson, exclude):
             query_skeleton = income_skeleton
+        else :
+            exclude = '{}'
         query_skeleton = getQueryTemplate(query_skeleton, exclude != '{}', False)
         with connections['gis_data'].cursor() as cursor :
             cursor.execute(query_skeleton, [geojson, exclude] if exclude != '{}' else [geojson])

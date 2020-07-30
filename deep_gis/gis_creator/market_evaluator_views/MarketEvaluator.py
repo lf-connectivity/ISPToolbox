@@ -54,13 +54,13 @@ def checkIfAvailable(include, exclude, switcher):
                 break
     return resp
 
-def getMicrosoftBuildings(include, exclude):
+def getMicrosoftBuildings(include, exclude, offset):
     resp = {'error' : -1}
     try:
         with connections['gis_data'].cursor() as cursor :
-            query_skeleton = "SELECT St_asgeojson(geog) FROM msftcombined WHERE {} LIMIT  10001;"
+            query_skeleton = "SELECT St_asgeojson(geog) FROM msftcombined WHERE {} LIMIT 10001 OFFSET %s;"
             query_skeleton = getQueryTemplate(query_skeleton, exclude != '{}', False)
-            cursor.execute(query_skeleton, [include, exclude] if exclude != '{}' else [include])
+            cursor.execute(query_skeleton, [include, exclude, offset] if exclude != '{}' else [include, offset])
             polygons = [row[0] for row in cursor.fetchall()]
             resp = {'error' : 0, "numbuildings" : len(polygons), 'polygons' : polygons}
     except:
@@ -122,6 +122,7 @@ class BuildingsView(View):
     def get(self, request):
         geojson = request.GET.get('geojson', '{}')
         geojson_exclude = request.GET.get('exclude', '{}')
+        offset = request.GET.get('offset', 0)
         # Parse Geojsons
         include = shape(json.loads(geojson))
         exclude = None
@@ -132,14 +133,14 @@ class BuildingsView(View):
         # Check if Query is in US
         query_in_us = checkIfPrecomputedAvailable(geojson, geojson_exclude )
         if query_in_us:
-            response = getMicrosoftBuildings(geojson, geojson_exclude)
+            response = getMicrosoftBuildings(geojson, geojson_exclude, offset)
         else:
             response = getOSMBuildings(include, exclude)
         # Respond
         return JsonResponse(response)
 
 
-def getMicrosoftBuildingsCount(include, exclude):
+def getMicrosoftBuildingsCount(include, exclude, offset):
     resp = {'error' : -1}
     try:
         with connections['gis_data'].cursor() as cursor :
@@ -147,10 +148,10 @@ def getMicrosoftBuildingsCount(include, exclude):
 FROM   (SELECT * 
 		FROM   msftcombined 
 		WHERE  {}
-		LIMIT  10001) AS a;
+		LIMIT  10001 OFFSET %s) as a;
         """
             query_skeleton = getQueryTemplate(query_skeleton, exclude != '{}', False)
-            cursor.execute(query_skeleton, [include, exclude] if  exclude != '{}' else [include])
+            cursor.execute(query_skeleton, [include, exclude, offset] if  exclude != '{}' else [include, offset])
             row = cursor.fetchone()
             resp = {'error' : 0, "buildingcount" : row[0]}
     except Exception as e:
@@ -199,6 +200,8 @@ class CountBuildingsView(View):
     def get(self, request):
         geojson = request.GET.get('geojson', '{}')
         geojson_exclude = request.GET.get('exclude', '{}')
+        offset = request.GET.get('offset', 0)
+
         # Parse Geojsons
         include = shape(json.loads(geojson))
         exclude = None
@@ -209,7 +212,7 @@ class CountBuildingsView(View):
         # Check if Query is in US
         query_in_us = checkIfPrecomputedAvailable(geojson, geojson_exclude )
         if query_in_us:
-            response = getMicrosoftBuildingsCount(geojson, geojson_exclude)
+            response = getMicrosoftBuildingsCount(geojson, geojson_exclude, offset)
         else:
             response = getOSMBuildingsCount(include, exclude)
         # Respond

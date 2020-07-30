@@ -99,7 +99,7 @@ def getOSMBuildings(includeGeom, excludeGeom):
         ## Get Buildings
         buildings = {k:v for (k,v) in nodes.items() if (('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
         ## Build Geojsons
-        geometries = [{'type' : 'Polygon', "coordinates" : [[[nodesInclude[n]['lon'], nodesInclude[n]['lat']]  for n in b['nodes'] ]]} for (k,b) in buildings.items()]
+        geometries = [str({'type' : 'Polygon', "coordinates" : [[[nodesInclude[n]['lon'], nodesInclude[n]['lat']]  for n in b['nodes'] ]]}) for (k,b) in buildings.items()]
         response = {'error' : 0, "numbuildings" : len(buildings), "polygons": geometries}
     except:
         logging.info("OSM query failed")

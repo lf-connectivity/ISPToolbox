@@ -364,7 +364,7 @@ class Form477View(View):
             provider_skeleton, exclude != '{}', False)
         with connections['gis_data'].cursor() as cursor:
             cursor.execute(query_skeleton, [
-                           geojson, exclude] if exclude != '{}' else [geojson])
+                           geojson, exclude, offset] if exclude != '{}' else [geojson, offset])
             rows = [row for row in cursor.fetchall()]
             competitors = [row[0] for row in rows]
             maxdown = [row[1] for row in rows]

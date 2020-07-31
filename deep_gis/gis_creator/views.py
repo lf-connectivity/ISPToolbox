@@ -27,6 +27,9 @@ def index(request):
     # Instantiate Model 'Building Detection' to track progress
     return JsonResponse({'taskid': task.id})
 
+class HealthCheckView(View):
+    def get(self, request):
+        return HttpResponse()
 
 class TaskView(View):
     def get(self, request, task_id):

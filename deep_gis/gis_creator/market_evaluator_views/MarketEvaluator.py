@@ -79,6 +79,9 @@ def getMicrosoftBuildings(include, exclude, offset):
         resp['error'] = -2
     return resp
 
+def computeBBSize(bb):
+    return abs((bb[0] - bb[2]) * (bb[1] - bb[3]))
+
 
 def getOSMBuildings(includeGeom, excludeGeom):
     response = {'error': -1}
@@ -91,6 +94,10 @@ def getOSMBuildings(includeGeom, excludeGeom):
         if excludeGeom:
             bbExclude = [a.bounds for a in excludeGeom]
         # Query OSM BB's
+        if any(map(lambda x: computeBBSize(x) >= 0.25, bbIncludes)):
+            return {'error' : -3}
+        elif any(map(lambda x: computeBBSize(x) >= 0.25, bbExclude)):
+            return {'error' : -4}
         osmInclude = [getOSMNodes(bbox) for bbox in bbIncludes]
         osmExclude = []
         if bbExclude:
@@ -120,7 +127,7 @@ def getOSMBuildings(includeGeom, excludeGeom):
                                  [[nodesInclude[n]['lon'], nodesInclude[n]['lat']] for n in b['nodes']]]}) for (k, b) in buildings.items()]
         response = {'error': 0, "numbuildings": len(
             buildings), "polygons": geometries}
-    except:
+    except Exception as e:
         logging.info("OSM query failed")
 
     return response
@@ -157,7 +164,7 @@ class BuildingsView(View):
         if query_in_us:
             response = getMicrosoftBuildings(geojson, geojson_exclude, offset)
         else:
-            if offset > 0:
+            if int(offset) > 0:
                 response = {'error': 0, "numbuildings": 0, "polygons": []}
             else:
                 response = getOSMBuildings(include, exclude)
@@ -272,7 +279,6 @@ LIMIT  100;
 """
                 query_skeleton = getQueryTemplate(
                     query_skeleton, geojson_exclude != '{}', False)
-                print(query_skeleton)
                 cursor.execute(query_skeleton, [
                                geojson, geojson_exclude] if geojson_exclude != '{}' else [geojson])
                 results = [row for row in cursor.fetchall()]

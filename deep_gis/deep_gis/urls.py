@@ -26,6 +26,7 @@ urlpatterns = [
     path('gis/osmBuildings/', views.BuildingsView.as_view(), name='osmBuildings'),
     path('market-evaluator/market-income/', views.IncomeView.as_view(), name='PRIncome'),
     path('market-evaluator/market-competition/', views.Form477View.as_view(), name='PRIncome'),
+    path('market-evaluator/market-providers/', views.ServiceProviders.as_view(), name='Providers'),
     path('market-evaluator/market-count/', views.CountBuildingsView.as_view(), name='PRIncome'),
     path('market-evaluator/market-size/', views.BuildingsView.as_view(), name='BuildingOutlines'),
     path('market-evaluator/market-rdof/', views.RDOFView.as_view(), name='PRIncome'),

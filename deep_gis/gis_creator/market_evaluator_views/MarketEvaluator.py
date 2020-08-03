@@ -358,6 +358,11 @@ class IncomeView(View):
             resp = {'avgincome':  results[0]}  # , 'avgerror' : results[1]}
             if precomputedAvailable:
                 resp['numbuildings'] = results[2]
+            else:
+                if int(offset) > 0:
+                    resp = {'avgincome' : None, "numbuildings" : 0}
+                else :
+                    resp['numbuildings'] = 1
         return JsonResponse(resp)
 
 
@@ -381,3 +386,37 @@ class Form477View(View):
                     "down_ad_speed": maxdown, "up_ad_speed": maxup, "tech_used": tech}
 
         return JsonResponse(resp)
+
+service_provider_skeleton = """SELECT providername, 
+	maxaddown              AS maxdown, 
+	maxadup                AS maxadup, 
+	techcode AS tech 
+FROM   form477jun2019 
+	JOIN tl_2019_blocks_census 
+	  ON tl_2019_blocks_census.geoid10 = form477jun2019.blockcode 
+WHERE  {}
+	AND consumer > 0
+LIMIT  100 OFFSET %s;
+"""
+
+class ServiceProviders(View):
+    def get(self, request):
+        resp = {'error' : -1}
+        geojson = request.GET.get('geojson', '{}')
+        exclude = request.GET.get('exclude', '{}')
+        offset = request.GET.get('offset', 0)
+        try :
+            query_skeleton = getQueryTemplate(service_provider_skeleton, exclude != '{}', False)
+            with connections['gis_data'].cursor() as cursor:
+                cursor.execute(query_skeleton, [geojson, exclude, offset] if exclude != '{}' else [geojson, offset])
+                rows = [row for row in cursor.fetchall()]
+                competitors = [row[0] for row in rows]
+                maxdown = [row[1] for row in rows]
+                maxup = [row[2] for row in rows]
+                tech = [row[3] for row in rows]
+                resp = {'error': 0, 'competitors': competitors, "down_ad_speed": maxdown, "up_ad_speed": maxup, "tech_used": tech}
+        except:
+            resp['error'] = -2
+
+        return JsonResponse(resp)
+

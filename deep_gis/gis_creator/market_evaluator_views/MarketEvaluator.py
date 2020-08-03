@@ -80,7 +80,8 @@ def getMicrosoftBuildings(include, exclude, offset):
     return resp
 
 def computeBBSize(bb):
-    return abs((bb[0] - bb[2]) * (bb[1] - bb[3]))
+    size = abs((bb[0] - bb[2]) * (bb[1] - bb[3]))
+    return size
 
 
 def getOSMBuildings(includeGeom, excludeGeom):

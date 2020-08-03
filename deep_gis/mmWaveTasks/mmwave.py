@@ -10,13 +10,30 @@ def getTreeRaster(areaOfInterest: List) -> Dict:
 def combineAreas(nodesInclude : List, nodesExclude : List) -> Dict:
     return {}
 
+def splitBB(aoi: List) -> List:
+    lons = [aoi[1], (aoi[3] + aoi[1]) / 2.0, aoi[3]]
+    lats = [aoi[0], (aoi[2] + aoi[0]) / 2.0, aoi[2]]
+    bbs = []
+    for i in range(2):
+        for j in range(2):
+            bbs.append([lats[i], lons[j], lats[i + 1], lons[j+1]])
+    return bbs
+
 def getOSMNodes(areaOfInterest: List) -> Dict:
     logging.info('Using OSM Generated Footprints')
     headers = {'Accept': 'application/json'}
     url = 'https://api.openstreetmap.org/api/0.6/map?bbox=' + ','.join([str(i) for i in areaOfInterest])
     response = requests.get(url, headers=headers)
-    responseObj = response.json()
-    nodes = {node['id'] : node for node in responseObj['elements']}
+    nodes = {}
+    if response.status_code == 400:
+        ## Exceeded 50,000 Nodes - errror codes / Time to Break Up this Request and Merge
+        splitBBoxes = splitBB(areaOfInterest)
+        splitNodes = [ getOSMNodes(bb) for bb in splitBBoxes]
+        for bbnodes in splitNodes:
+            nodes.update(bbnodes)
+    else:
+        responseObj = response.json()
+        nodes = {node['id'] : node for node in responseObj['elements']}
     return nodes
     
 def getAreaOfInterest(areaOfInterest: List, source : str = 'osm') -> Dict:

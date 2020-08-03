@@ -53,7 +53,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_REGEX_WHITELIST = [
-    r"^https://\w+\.facebook\.com$",
+    r"^https://.*\.facebook\.com$",
 ]
 
 ROOT_URLCONF = 'deep_gis.urls'

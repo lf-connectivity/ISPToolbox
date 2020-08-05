@@ -16,6 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from webserver.IspToolboxApp import views
+from rest_framework import routers
+
+# REST API Router
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'groups', views.GroupViewSet)
 
 urlpatterns = [
     path('', views.HealthCheckView.as_view(), name='healthcheck'),
@@ -33,5 +39,10 @@ urlpatterns = [
     path('market-evaluator/market-count/', views.CountBuildingsView.as_view(), name='PRIncome'),
     path('market-evaluator/market-size/', views.BuildingsView.as_view(), name='BuildingOutlines'),
     path('market-evaluator/market-rdof/', views.RDOFView.as_view(), name='PRIncome'),
-    path('market-evaluator/market-data-available/', views.DataAvailableView.as_view(), name='PRIncome')
+    path('market-evaluator/market-data-available/', views.DataAvailableView.as_view(), name='PRIncome'),
+    # Path mmWave Planner
+    path('mmwave-planner/', views.MMWavePlannerView.as_view(), name='mmwaveplanner'),
+    # REST API Endpoints
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api/', include(router.urls)),
 ]

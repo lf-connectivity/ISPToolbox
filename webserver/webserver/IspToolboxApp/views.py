@@ -10,8 +10,11 @@ from django.contrib.gis.geos import GEOSGeometry
 from celery import current_app
 from webserver.IspToolboxApp.Views.market_evaluator_views.MarketEvaluator import *
 from webserver.IspToolboxApp.Views.market_evaluator_views.GrantViews import *
+from webserver.IspToolboxApp.Views.mmWaveViews import *
+from webserver.IspToolboxApp.Views.mmWavePlannerViews import *
 
 from django.http import HttpResponse, JsonResponse
+
 # Create your views here.
 
 class SocialLoginView(View):
@@ -70,3 +73,5 @@ class ResultView(View):
         if pipeline and pipeline.output_geometryCollection != None:
             return JsonResponse({'result': json.loads(pipeline.output_geometryCollection.geojson)})
         return JsonResponse({'result': None})
+
+

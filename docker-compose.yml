@@ -2,9 +2,9 @@ version: '3'
 
 services:
     deepgis:
-        build: ./deep_gis
+        build: ./webserver
         volumes:
-            - ./deep_gis:/usr/src/app
+            - ./webserver:/usr/src/app
         ports:
             - 8020:80
     homespassed:

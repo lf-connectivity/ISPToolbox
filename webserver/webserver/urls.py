@@ -14,11 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from gis_creator import views
+from django.urls import path, include
+from webserver.IspToolboxApp import views
 
 urlpatterns = [
     path('', views.HealthCheckView.as_view(), name='healthcheck'),
+    path('admin/', admin.site.urls),
+    path('login/', views.SocialLoginView.as_view(), name='login'),
+    path('accounts/', include('allauth.urls')),
     path('gis/aoi/', views.index),
     path('gis/task/<str:task_id>/', views.TaskView.as_view(), name='task'),
     path('gis/progress/<str:task_id>/', views.ProgressView.as_view(), name='progress'),

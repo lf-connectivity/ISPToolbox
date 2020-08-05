@@ -13,7 +13,7 @@ import torch.cuda as cuda
 from typing import List, Tuple, Optional
 from shapely.geometry import Polygon, mapping
 import json
-from building_outline_task.vectorize_polygon import vectorize_building_prediction
+from .vectorize_polygon import vectorize_building_prediction
 import logging
 
 logger = logging.getLogger(__name__)

@@ -1,18 +1,21 @@
 from django.shortcuts import render
-from gis_creator.tasks import createBuildingsGeojson
+from webserver.IspToolboxApp.tasks import createBuildingsGeojson
 from django.views import View
-from gis_creator.models import BuildingDetection
+from webserver.IspToolboxApp.models import BuildingDetection
 from django.core.serializers import serialize
 from django.forms.models import model_to_dict
 import json
 from django.contrib.gis.geos import GEOSGeometry
 
 from celery import current_app
-from gis_creator.market_evaluator_views.MarketEvaluator import *
+from webserver.IspToolboxApp.Views.market_evaluator_views.MarketEvaluator import *
 
-# Create your views here.
 from django.http import HttpResponse, JsonResponse
+# Create your views here.
 
+class SocialLoginView(View):
+    def get(self, request):
+        return render(request, 'index.html')
 
 def index(request):
     # Get Area of Interest From Client

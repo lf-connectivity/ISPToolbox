@@ -10,7 +10,7 @@ import numpy as np
 from shapely.geometry import MultiPolygon, Polygon
 from shapely.ops import unary_union
 from sklearn.cluster import MeanShift
-from building_outline_task.line_operations import (
+from .line_operations import (
     find_line_intersections,
     merge_similar_lines,
 )

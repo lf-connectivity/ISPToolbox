@@ -1,7 +1,7 @@
 
 from django.views import View
 from django.contrib.gis.geos import GEOSGeometry
-from mmWaveTasks.mmwave import getOSMNodes
+from webserver.IspToolboxApp.Tasks.mmWaveTasks.mmwave import getOSMNodes
 from shapely.geometry import shape
 import json
 import logging

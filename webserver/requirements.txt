@@ -5,7 +5,8 @@ celery==4.4.6
 certifi==2020.6.20
 chardet==3.0.4
 Django==3.0.8
-django-cors-headers==3.4.0 
+django-cors-headers==3.4.0
+django-allauth==0.42.0
 future==0.18.2
 geojson==2.5.0
 gunicorn==20.0.4

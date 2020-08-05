@@ -5,6 +5,7 @@ sleep 5
 sudo docker stop `sudo docker ps -q`
 cd ~/RFCoverageWebServer/
 git pull origin master
+sudo docker image prune
 sudo docker-compose build
 sudo docker-compose up -d
 aws elb register-instances-with-load-balancer --load-balancer-name WISPCatLB --instances $INSTANCE_ID

@@ -19,7 +19,6 @@ from webserver.IspToolboxApp import views
 
 urlpatterns = [
     path('', views.HealthCheckView.as_view(), name='healthcheck'),
-    path('admin/', admin.site.urls),
     path('login/', views.SocialLoginView.as_view(), name='login'),
     path('accounts/', include('allauth.urls')),
     path('gis/aoi/', views.index),

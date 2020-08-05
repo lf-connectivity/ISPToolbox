@@ -6,18 +6,16 @@ services:
         volumes:
             - ./webserver:/usr/src/app
         ports:
-            - 80:80
+            - 8020:80
     # homespassed:
     #     build: ./house_counter
     #     ports:
     #         - 8010:80      
-    # nginx:
-    #     build: ./nginx
-    #     ports:
-    #         - 80:80
-    #     expose:
-    #         - 8010
-    #         - 8020
-    #     depends_on:
-    #         - homespassed
-    #         - deepgis
+    nginx:
+        build: ./nginx
+        ports:
+            - 80:80
+        expose:
+            - 8020
+        depends_on:
+            - deepgis

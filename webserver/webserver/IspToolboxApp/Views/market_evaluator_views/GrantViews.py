@@ -8,7 +8,7 @@ class SelectCensusGroupView(View):
         cbgid = request.GET.get('cbgid', '-1')
         resp = {'error' : -1}
         try:
-            query_skeleton = """SELECT census_id, state_abbreviation, county_name, eligible_locations, reserve_price, St_asgeojson(geog) FROM rdofjun2020 JOIN tl_2019_bg ON census_id = geoid WHERE census_id = '281339506001'"""
+            query_skeleton = """SELECT cbg_id, state_abbr, county, locations, reserve,St_asgeojson(geog) FROM auction_904_shp WHERE census_id = %s"""
             with connections['gis_data'].cursor() as cursor:
                 cursor.execute(query_skeleton, [cbgid])
                 result = cursor.fetchone()   

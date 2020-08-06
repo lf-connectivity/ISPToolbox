@@ -1,0 +1,5 @@
+.planner-map {
+    width: 100%;
+    height: calc(100vh);
+    z-index: 0;
+}

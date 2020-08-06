@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     'rest_framework',
 ]
 
+STATIC_URL = '/static/'
+
+
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
@@ -102,6 +105,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ## CSP
+    'csp.middleware.CSPMiddleware',
+]
+
+CSP_INCLUDE_NONCE_IN = [
+    'default-src',
+    'script-src',
+    'style-src',
 ]
 
 CORS_ORIGIN_REGEX_WHITELIST = [

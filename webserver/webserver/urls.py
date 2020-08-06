@@ -17,6 +17,9 @@ from django.contrib import admin
 from django.urls import path, include
 from webserver.IspToolboxApp import views
 from rest_framework import routers
+from django.conf.urls.static import static
+from django.conf import settings
+
 
 # REST API Router
 router = routers.DefaultRouter()

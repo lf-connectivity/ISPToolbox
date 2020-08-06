@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework import permissions
 
+
 class IsOwner(permissions.BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.

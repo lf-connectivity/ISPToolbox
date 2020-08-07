@@ -16,14 +16,26 @@
     <title>ISP Toolbox - mmWave Planner</title>
 </head>
 <body>
-    <h1>mmWave Planner</h1>
-    <div id='map' class='planner-map container-fluid'></div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">mmWave Planner</a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <div class="my-2 my-lg-0">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                      <a class="nav-link" href="#">Help Center</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id='map' class='container-fluid planner-map'></div>
     <script nonce="{{request.csp_nonce}}">
         mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleHljaG9uZyIsImEiOiJjazNxYzJ2YnYwMDNxM2NsZHMzd3Nsd3BwIn0.YqwoJq4jWP8WchOP9xeO4A';
         var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
-            center: [-121.12195014953612, 37.48367020029532], // starting position [lng, lat]
+            center: [-121.12273335456848,
+          37.481303376709754], // starting position [lng, lat]
             zoom: 17 // starting zoom
         });
         var Draw = new MapboxDraw();
@@ -32,8 +44,34 @@
         // If no position is specified the control defaults to `top-right`. See the docs 
         // for more details: https://docs.mapbox.com/mapbox-gl-js/api/#map#addcontrol
 
-        map.addControl(Draw, 'top-left');
+        map.addControl(Draw, 'bottom-right');
     </script>
+    <p>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">Select Network Type</button>
+        <a class="btn btn-primary" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">Add Fiber POP</a>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">Select Service Area</button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" aria-controls="multiCollapseExample1 multiCollapseExample2">Generate/Import GIS Data</button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" aria-controls="multiCollapseExample1 multiCollapseExample2">Modify GIS Data</button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" aria-controls="multiCollapseExample1 multiCollapseExample2">Generate Network</button>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target=".multi-collapse" aria-expanded="false" aria-controls="multiCollapseExample1 multiCollapseExample2">Modify Network</button>
+
+      </p>
+      <div class="row">
+        <div class="col">
+          <div class="collapse multi-collapse" id="multiCollapseExample1">
+            <div class="card card-body">
+              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="collapse multi-collapse" id="multiCollapseExample2">
+            <div class="card card-body">
+              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+            </div>
+          </div>
+        </div>
+      </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

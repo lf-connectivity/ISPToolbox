@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'corsheaders',
     'webserver.IspToolboxApp.apps.IspToolboxConfig',
-    ## All Auth
+    ## Social Auth
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     # REST API
     'rest_framework',
+    #CSP
+    'csp',
 ]
 
 STATIC_URL = '/static/'
@@ -67,9 +69,12 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+LOGIN_REDIRECT_URL = "/mmwave-planner"
+
+#facebook
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
-        'METHOD': 'oauth2',
+        'METHOD': 'js_sdk',
         'SDK_URL': '//connect.facebook.net/en_US/sdk.js',
         'SCOPE': ['email', 'public_profile'],
         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
@@ -89,10 +94,10 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'EXCHANGE_TOKEN': True,
         'VERIFIED_EMAIL': False,
-        'VERSION': 'v7.0',
+        'VERSION': 'v8.0',
     }
 }
-#facebook
+
 SOCIAL_AUTH_FACEBOOK_KEY = '2704261536510806'  # App ID
 SOCIAL_AUTH_FACEBOOK_SECRET ='64d98e46c80c8659bd9eed0d67335259' #app key
 

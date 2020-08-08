@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">mmWave Planner</a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="my-2 my-lg-0">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Help Center</a>
+                </li>
+            </ul>
+        </div>
+        {% if user.is_authenticated %}
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              Welcome {{user}}!
+            </li>
+        </ul>
+        <button type="button" class="btn btn-primary" data-toggle="modal" >
+            <a href="/accounts/logout">
+                Logout
+            </a>
+        </button>
+        {% else %}
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+            Login
+        </button>
+        {% endif %}
+    </div>
+</nav>

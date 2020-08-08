@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'corsheaders',
     'webserver.IspToolboxApp.apps.IspToolboxConfig',
-    ## All Auth
+    ## Social Auth
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     # REST API
     'rest_framework',
+    #CSP
+    'csp',
 ]
 
 STATIC_URL = '/static/'
@@ -66,10 +68,13 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+LOGIN_REDIRECT_URL = "/mmwave-planner"
+
+#facebook
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
-        'METHOD': 'oauth2',
-        'SDK_URL': '//connect.facebook.net/en_US/sdk.js',
+        'METHOD': 'js_sdk',
+        'SDK_URL': '//connect.facebook.net/{locale}/sdk.js',
         'SCOPE': ['email', 'public_profile'],
         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
         'INIT_PARAMS': {'cookie': True},
@@ -87,11 +92,12 @@ SOCIALACCOUNT_PROVIDERS = {
             'updated_time',
         ],
         'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': 'path.to.callable',
         'VERIFIED_EMAIL': False,
-        'VERSION': 'v7.0',
+        'VERSION': 'v8.0',
     }
 }
-#facebook
+
 SOCIAL_AUTH_FACEBOOK_KEY = '2704261536510806'  # App ID
 SOCIAL_AUTH_FACEBOOK_SECRET ='64d98e46c80c8659bd9eed0d67335259' #app key
 
@@ -197,6 +203,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
 
 CELERY_BROKER_URL = 'redis://:zuckerbucks3212313212312313bucks@ip-172-31-27-23.us-east-2.compute.internal:6379'
 CELERY_RESULT_BACKEND = 'redis://:zuckerbucks3212313212312313bucks@ip-172-31-27-23.us-east-2.compute.internal:6379'

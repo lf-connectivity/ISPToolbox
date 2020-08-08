@@ -19,7 +19,7 @@ from webserver.IspToolboxApp import views
 from rest_framework import routers
 from django.conf.urls.static import static
 from django.conf import settings
-
+from django.contrib.auth import views as auth_views
 
 # REST API Router
 router = routers.DefaultRouter()
@@ -27,14 +27,18 @@ router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
+    # Health Check Endpoint
     path('', views.HealthCheckView.as_view(), name='healthcheck'),
     path('login/', views.SocialLoginView.as_view(), name='login'),
-    path('accounts/', include('allauth.urls')),
+    path(r'accounts/', include('allauth.urls')),
+    ## Async Jobs
     path('gis/aoi/', views.index),
     path('gis/task/<str:task_id>/', views.TaskView.as_view(), name='task'),
     path('gis/progress/<str:task_id>/', views.ProgressView.as_view(), name='progress'),
     path('gis/result/<str:task_id>/', views.ResultView.as_view(), name='result'),
     path('gis/osmBuildings/', views.BuildingsView.as_view(), name='osmBuildings'),
+    ## Market Evaluator
     path('market-evaluator/grants/', views.SelectCensusGroupView.as_view(), name='select_cbg'),
     path('market-evaluator/market-income/', views.IncomeView.as_view(), name='PRIncome'),
     path('market-evaluator/market-competition/', views.Form477View.as_view(), name='PRIncome'),

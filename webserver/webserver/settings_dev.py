@@ -95,8 +95,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_REGEX_WHITELIST = [
-    r"^https://\w+.\d*.od\.facebook\.com$",
-    r"^https://\w+\.facebook\.com$"
+    r"^https://(.+\.)?facebook\.com$",
 ]
 
 ROOT_URLCONF = 'webserver.urls'

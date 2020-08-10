@@ -32,7 +32,7 @@ def getQueryParams(request):
         body = json.loads(body_unicode)
         geojson = json.dumps(body.get('geojson',{}))
         exclude = json.dumps(body.get('exclude',{}))
-        offset = body.get('exclude', 0)
+        offset = body.get('offset', 0)
     except:
         geojson = request.GET.get('geojson', '{}')
         exclude = request.GET.get('exclude', '{}')
@@ -155,7 +155,7 @@ def getOSMBuildings(includeGeom, excludeGeom):
 
     return response
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class DataAvailableView(View):
     def get(self, request):
         resp = {"error": -1, "data": False}
@@ -167,6 +167,9 @@ class DataAvailableView(View):
         except:
             logging.info("Failed to indicate if data is available")
         return JsonResponse(resp)
+    
+    def post(self, request):
+        return self.get(request)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -391,6 +394,7 @@ class IncomeView(View):
         return self.get(request)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class Form477View(View):
     def get(self, request):
         resp = {'error': -1}
@@ -410,6 +414,9 @@ class Form477View(View):
                     "down_ad_speed": maxdown, "up_ad_speed": maxup, "tech_used": tech}
 
         return JsonResponse(resp)
+
+    def post(self, request):
+        return self.get(request)
 
 service_provider_skeleton = """SELECT providername, 
 	maxaddown              AS maxdown, 

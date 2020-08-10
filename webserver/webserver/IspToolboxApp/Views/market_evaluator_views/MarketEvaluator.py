@@ -7,6 +7,8 @@ import json
 import logging
 from django.http import JsonResponse
 from django.db import connections
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 
 def getQueryTemplate(skeleton, addExclude, includeExclude):
@@ -17,6 +19,26 @@ def getQueryTemplate(skeleton, addExclude, includeExclude):
             return skeleton.format("St_intersects(geog, St_geomfromgeojson(%s)) AND NOT St_intersects(geog, St_geomfromgeojson(%s))")
     else:
         return skeleton.format("St_intersects(geog, St_geomfromgeojson(%s))")
+
+
+def getQueryParams(request):
+    # Check Body First:
+    geojson = '{}'
+    exclude = '{}'
+    offset = 0
+    try:
+        body = request.body
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        geojson = json.dumps(body.get('geojson',{}))
+        exclude = json.dumps(body.get('exclude',{}))
+        offset = body.get('exclude', 0)
+    except:
+        geojson = request.GET.get('geojson', '{}')
+        exclude = request.GET.get('exclude', '{}')
+        offset = request.GET.get('offset', 0)
+    return geojson, exclude, offset
+
 
 
 def filterByPolygon(nodes, polygon):
@@ -138,8 +160,7 @@ class DataAvailableView(View):
     def get(self, request):
         resp = {"error": -1, "data": False}
         try:
-            geojson = request.GET.get('geojson', '{}')
-            geojson_exclude = request.GET.get('exclude', '{}')
+            geojson, geojson_exclude, _ = getQueryParams(request)
             query_available = checkIfIncomeProvidersAvailable(
                 geojson, geojson_exclude)
             resp = {"error": 0, "data": query_available}
@@ -148,11 +169,10 @@ class DataAvailableView(View):
         return JsonResponse(resp)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class BuildingsView(View):
     def get(self, request):
-        geojson = request.GET.get('geojson', '{}')
-        geojson_exclude = request.GET.get('exclude', '{}')
-        offset = request.GET.get('offset', 0)
+        geojson, geojson_exclude, offset = getQueryParams(request)
         # Parse Geojsons
         include = shape(json.loads(geojson))
         exclude = None
@@ -171,6 +191,9 @@ class BuildingsView(View):
                 response = getOSMBuildings(include, exclude)
         # Respond
         return JsonResponse(response)
+    
+    def post(self, request):
+        return self.get(request)
 
 
 def getMicrosoftBuildingsCount(include, exclude, offset):
@@ -236,12 +259,10 @@ def getOSMBuildingsCount(includeGeom, excludeGeom):
 
     return response
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class CountBuildingsView(View):
     def get(self, request):
-        geojson = request.GET.get('geojson', '{}')
-        geojson_exclude = request.GET.get('exclude', '{}')
-        offset = request.GET.get('offset', 0)
+        geojson, geojson_exclude, offset = getQueryParams(request)
 
         # Parse Geojsons
         include = shape(json.loads(geojson))
@@ -260,11 +281,13 @@ class CountBuildingsView(View):
         # Respond
         return JsonResponse(response)
 
+    def post(self, request):
+        return self.get(request)
+
 
 class RDOFView(View):
     def get(self, request):
-        geojson = request.GET.get('geojson', '{}')
-        geojson_exclude = request.GET.get('exclude', '{}')
+        geojson, geojson_exclude, offset = getQueryParams(request)
 
         resp = {'error': -1}
         try:
@@ -334,12 +357,11 @@ ORDER  BY maxdown DESC
 LIMIT  6 OFFSET %s;
 """
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class IncomeView(View):
     def get(self, request):
-        geojson = request.GET.get('geojson', '{}')
-        exclude = request.GET.get('exclude', '{}')
-        offset = request.GET.get('offset', 0)
+        geojson, exclude, offset = getQueryParams(request)
+
         resp = {'error': -1}
         precomputedAvailable = checkIfPrecomputedAvailable(geojson, exclude)
         query_skeleton = income_skeleton_simple
@@ -365,13 +387,15 @@ class IncomeView(View):
                     resp['numbuildings'] = 1
         return JsonResponse(resp)
 
+    def post(self, request):
+        return self.get(request)
+
 
 class Form477View(View):
     def get(self, request):
         resp = {'error': -1}
-        geojson = request.GET.get('geojson', '{}')
-        exclude = request.GET.get('exclude', '{}')
-        offset = request.GET.get('offset', 0)
+        geojson, exclude, offset = getQueryParams(request)
+
         query_skeleton = getQueryTemplate(
             provider_skeleton, exclude != '{}', False)
         with connections['gis_data'].cursor() as cursor:
@@ -399,12 +423,12 @@ WHERE  {}
 LIMIT  100 OFFSET %s;
 """
 
+@method_decorator(csrf_exempt, name='dispatch')
 class ServiceProviders(View):
     def get(self, request):
         resp = {'error' : -1}
-        geojson = request.GET.get('geojson', '{}')
-        exclude = request.GET.get('exclude', '{}')
-        offset = request.GET.get('offset', 0)
+        geojson, exclude, offset = getQueryParams(request)
+
         try :
             query_skeleton = getQueryTemplate(service_provider_skeleton, exclude != '{}', False)
             with connections['gis_data'].cursor() as cursor:
@@ -420,3 +444,5 @@ class ServiceProviders(View):
 
         return JsonResponse(resp)
 
+    def post(self, request):
+        return self.get(request)

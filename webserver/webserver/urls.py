@@ -14,10 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+
 from django.urls import path, include
 from webserver.IspToolboxApp import views
 from rest_framework import routers
 from django.conf.urls.static import static
+from django.conf.urls import  url
+
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 
@@ -49,6 +52,7 @@ urlpatterns = [
     path('market-evaluator/market-data-available/', views.DataAvailableView.as_view(), name='PRIncome'),
     # Path mmWave Planner
     path('mmwave-planner/', views.MMWavePlannerView.as_view(), name='mmwaveplanner'),
+    path('help-center/', views.MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),
     # REST API Endpoints
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),

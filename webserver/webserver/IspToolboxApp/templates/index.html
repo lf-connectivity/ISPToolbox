@@ -6,6 +6,6 @@
 <Title>Social Login</Title></head>
 <body>
     {{user}}
-    <button><a href='{% provider_login_url "facebook" method="js_sdk" %}'>Login with Facebook</a></button>
+    <button onClick='{% provider_login_url "facebook" method="js_sdk" %}'>Login with Facebook</button>
 </body>
 </html>

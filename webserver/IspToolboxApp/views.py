@@ -1,24 +1,23 @@
 from django.shortcuts import render
-from webserver.IspToolboxApp.tasks import createBuildingsGeojson
+from IspToolboxApp.tasks import createBuildingsGeojson
 from django.views import View
-from webserver.IspToolboxApp.models import BuildingDetection
+from IspToolboxApp.models import BuildingDetection
 from django.core.serializers import serialize
 from django.forms.models import model_to_dict
 import json
 from django.contrib.gis.geos import GEOSGeometry
 
 from celery import current_app
-from webserver.IspToolboxApp.Views.market_evaluator_views.MarketEvaluator import *
-from webserver.IspToolboxApp.Views.market_evaluator_views.GrantViews import *
-from webserver.IspToolboxApp.Views.mmWaveViews import *
-from webserver.IspToolboxApp.Views.mmWavePlannerViews import *
+from IspToolboxApp.Views.market_evaluator_views.MarketEvaluator import *
+from IspToolboxApp.Views.market_evaluator_views.GrantViews import *
+from IspToolboxApp.Views.mmWaveViews import *
+from IspToolboxApp.Views.mmWavePlannerViews import *
 
 from django.http import HttpResponse, JsonResponse
 
 # Create your views here.
 
 class SocialLoginView(View):
-    @csp_update( STYLE_SRC=["'self'",'https://connect.facebook.net','https://stackpath.bootstrapcdn.com',"https://api.mapbox.com" ,"'sha256-79N6gSeZI5t5qx+vbMcu8ufgWx5WX0+dxsLp2JgNxy0='", "'sha256-tsYFq5pUcggQKFXnvmlvUrk8MgTJLL1Gjnqenv201b8='"],SCRIPT_SRC=["'self'",'http://connect.facebook.net', 'https://api.mapbox.com', 'https://code.jquery.com', 'https://cdnjs.cloudflare.com/', 'https://stackpath.bootstrapcdn.com',"'unsafe-inline'"],IMG_SRC=['data: blob:'], CHILD_SRC=['blob:'], WORKER_SRC=['blob:'], CONNECT_SRC=['https://*.tiles.mapbox.com', 'https://api.mapbox.com', 'https://events.mapbox.com'])
     def get(self, request):
         return render(request, 'index.html')
 

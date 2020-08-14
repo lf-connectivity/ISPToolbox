@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'corsheaders',
-    'webserver.IspToolboxApp.apps.IspToolboxConfig',
+    'IspToolboxApp',
     ## Social Auth
     'django.contrib.sites',
     'allauth',

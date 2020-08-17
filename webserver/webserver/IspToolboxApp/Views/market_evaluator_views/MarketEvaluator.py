@@ -40,6 +40,37 @@ def getQueryParams(request):
     return geojson, exclude, offset
 
 
+def getUniqueBuildingNodes(nodes):
+    buildings = {k: v for (k, v) in nodes.items() if (
+        ('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
+    return buildings
+
+def getAllNodes(nodes_list):
+    nodes = {}
+    for d in nodes_list:
+        nodes.update(d)
+    return nodes
+
+def filterIncludeExclude(building_shape, include, exclude):
+    overlaps_include = False
+    for polygon in include:
+        if polygon.intersects(building_shape):
+            overlaps_include = True
+            break
+    if overlaps_include and exclude is not None:
+        for polygon in exclude:
+            if polygon.intersects(building_shape):
+                overlaps_include = False
+                break
+    return overlaps_include
+
+
+def filterBuildingNodes(buildings, nodes, include, exclude):
+    building_shapes = {k: {'type': 'Polygon', "coordinates": [[[nodes[n]['lon'], nodes[n]['lat']] for n in b['nodes']]]} for (k, b) in buildings.items()}
+    buildings_shapely = [shape(v) for (k,v) in building_shapes.items()]
+    matching_buildings = [k for (k,v) in building_shapes.items() if filterIncludeExclude(shape(v), include, exclude)]        
+    return matching_buildings, building_shapes
+
 
 def filterByPolygon(nodes, polygon):
     buildings = {k: v for (k, v) in nodes.items() if (
@@ -122,34 +153,18 @@ def getOSMBuildings(includeGeom, excludeGeom):
         elif any(map(lambda x: computeBBSize(x) >= 0.25, bbExclude)):
             return {'error' : -4}
         osmInclude = [getOSMNodes(bbox) for bbox in bbIncludes]
-        osmExclude = []
-        if bbExclude:
-            osmExclude = [getOSMNodes(bbox) for bbox in bbExclude]
-        # Filter and combine results
-        # Filtering
-        osmIncludeFiltered = [filterByPolygon(
-            nodes, polygon) for nodes, polygon in zip(osmInclude, includeGeom)]
-        osmExcludeFiltered = []
-        if excludeGeom:
-            osmExcludeFiltered = [filterByPolygon(
-                nodes, polygon) for nodes, polygon in zip(osmExclude, excludeGeom)]
+        
+        # Combine all nodes into dict
+        allNodes = getAllNodes(osmInclude)
 
-        nodesInclude = {}
-        for inc in osmIncludeFiltered:
-            nodesInclude.update(inc)
-        nodesExclude = {}
-        for exc in osmExcludeFiltered:
-            nodesExclude.update(exc)
-        nodes = {k: nodesInclude[k]
-                 for k in set(nodesInclude) - set(nodesExclude)}
-        # Get Buildings
-        buildings = {k: v for (k, v) in nodes.items() if (
-            ('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
-        # Build Geojsons
-        geometries = [json.dumps({'type': 'Polygon', "coordinates": [
-                                 [[nodesInclude[n]['lon'], nodesInclude[n]['lat']] for n in b['nodes']]]}) for (k, b) in buildings.items()]
-        response = {'error': 0, "numbuildings": len(
-            buildings), "polygons": geometries}
+        # Combine all includes into unique building keys:
+        buildingNodes = getUniqueBuildingNodes(allNodes)
+
+        # Filter Buildings
+        filteredBuildingsKeys, building_geojson_dict = filterBuildingNodes(buildingNodes, allNodes, includeGeom, excludeGeom)
+        
+        geometries = [json.dumps(building_geojson_dict[k]) for k in filteredBuildingsKeys]
+        response = {'error': 0, "numbuildings": len(filteredBuildingsKeys), "polygons": geometries}
     except Exception as e:
         logging.info("OSM query failed")
 

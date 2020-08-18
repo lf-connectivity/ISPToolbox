@@ -1,7 +1,7 @@
 #!/bin/bash
 INSTANCE_ID=$(ec2-metadata -i | awk '{ print $2 }')
 aws elb deregister-instances-from-load-balancer --load-balancer-name WISPCatLB --instances $INSTANCE_ID
-sleep 5
+sleep 60
 sudo docker stop `sudo docker ps -q`
 cd ~/RFCoverageWebServer/
 git pull origin master

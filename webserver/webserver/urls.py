@@ -57,6 +57,12 @@ urlpatterns = [
     path('market-evaluator/market-size/', views.BuildingsView.as_view(), name='BuildingOutlines'),
     path('market-evaluator/market-rdof/', views.RDOFView.as_view(), name='PRIncome'),
     path('market-evaluator/market-data-available/', views.DataAvailableView.as_view(), name='PRIncome'),
+    # Pipeline Functions for MarketEvaluator
+    path('market-evaluator/', views.MarketEvaluatorPipelineView.as_view(), name='marketEvalAsync'),
+    path('market-evaluator/buildings/', views.MarketEvaluatorPipelineBuildings.as_view(), name='marketEvalAsyncBuildings'),
+    path('market-evaluator/income/', views.MarketEvaluatorPipelineIncome.as_view(), name='marketEvalAsyncIncome'),
+    path('market-evaluator/service-providers/', views.MarketEvaluatorPipelineServiceProviders.as_view(), name='marketEvalAsyncServiceProviders'),
+
     # Path mmWave Planner
     path('mmwave-planner/', views.MMWavePlannerView.as_view(), name='mmwaveplanner'),
     path('help-center/', views.MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),

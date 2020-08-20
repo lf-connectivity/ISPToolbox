@@ -12,6 +12,7 @@ from IspToolboxApp.Views.market_evaluator_views.MarketEvaluator import *
 from IspToolboxApp.Views.market_evaluator_views.GrantViews import *
 from IspToolboxApp.Views.mmWaveViews import *
 from IspToolboxApp.Views.mmWavePlannerViews import *
+from IspToolboxApp.Views.MarketEvaluatorView import MarketEvaluatorPipelineView, MarketEvaluatorPipelineBuildings, MarketEvaluatorPipelineServiceProviders, MarketEvaluatorPipelineIncome
 
 from django.http import HttpResponse, JsonResponse
 

@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.gis.db import models as gis_models
 from IspToolboxApp.Models.mmWaveModels import *
+from django.conf import settings
+from IspToolboxApp.Models.open_source_data import *
+from IspToolboxApp.Models.MarketEvaluatorModels import *
 
 from wagtail.core.models import Page
 from wagtail.core.fields import RichTextField
@@ -47,3 +50,7 @@ class BuildingDetection(models.Model):
 
     def __str__(self):
         return self.task
+
+
+
+

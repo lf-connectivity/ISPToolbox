@@ -2,6 +2,8 @@ import requests
 from typing import List, Dict
 import logging
 import json
+import time
+import random
 
 
 def getTreeRaster(areaOfInterest: List) -> Dict:
@@ -23,17 +25,28 @@ def getOSMNodes(areaOfInterest: List) -> Dict:
     logging.info('Using OSM Generated Footprints')
     headers = {'Accept': 'application/json'}
     url = 'https://api.openstreetmap.org/api/0.6/map?bbox=' + ','.join([str(i) for i in areaOfInterest])
-    response = requests.get(url, headers=headers)
-    nodes = {}
-    if response.status_code == 400:
-        ## Exceeded 50,000 Nodes - errror codes / Time to Break Up this Request and Merge
-        splitBBoxes = splitBB(areaOfInterest)
-        splitNodes = [ getOSMNodes(bb) for bb in splitBBoxes]
-        for bbnodes in splitNodes:
-            nodes.update(bbnodes)
-    else:
-        responseObj = response.json()
-        nodes = {node['id'] : node for node in responseObj['elements']}
+    ## Exponential Backoff
+    backoff = 0
+    while True:
+        response = requests.get(url, headers=headers)
+        nodes = {}
+        if response.status_code == 400:
+            ## Exceeded 50,000 Nodes - errror codes / Time to Break Up this Request and Merge
+            splitBBoxes = splitBB(areaOfInterest)
+            splitNodes = [ getOSMNodes(bb) for bb in splitBBoxes]
+            for bbnodes in splitNodes:
+                nodes.update(bbnodes)
+            break
+        else:
+            try:
+                responseObj = response.json()
+                nodes = {node['id'] : node for node in responseObj['elements']}
+                break
+            except:
+                logging.info('Hit OSM limit, using exponential backoff' + str(2**backoff))
+                time.sleep(2**backoff + random.randint(0,2))
+                backoff += 1
+
     return nodes
     
 def getAreaOfInterest(areaOfInterest: List, source : str = 'osm') -> Dict:

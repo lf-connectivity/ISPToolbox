@@ -3,6 +3,7 @@ from IspToolboxApp.Tasks.building_outline_task.building_outline_task import getB
 from IspToolboxApp.models import BuildingDetection
 from django.contrib.gis.geos import GEOSGeometry
 from datetime import datetime
+from IspToolboxApp.Tasks.MarketEvaluatorTasks import *
 
 
 @shared_task

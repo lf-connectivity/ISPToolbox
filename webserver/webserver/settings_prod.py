@@ -47,11 +47,31 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     # REST API
     'rest_framework',
-    #CSP
-    'csp',
+    ## Wagtail CMS
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.admin',
+    'wagtail.core',
+
+    'modelcluster',
+    'taggit',
 ]
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+WAGTAIL_SITE_NAME='Help Center'
+
+CSP_EXCLUDE_URL_PREFIXES= ('cms/', 'pages/',)
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -74,7 +94,7 @@ LOGIN_REDIRECT_URL = "/mmwave-planner"
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'METHOD': 'js_sdk',
-        'SDK_URL': '//connect.facebook.net/{locale}/sdk.js',
+        'SDK_URL': '//connect.facebook.net/en_US/sdk.js',
         'SCOPE': ['email', 'public_profile'],
         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
         'INIT_PARAMS': {'cookie': True},
@@ -92,7 +112,6 @@ SOCIALACCOUNT_PROVIDERS = {
             'updated_time',
         ],
         'EXCHANGE_TOKEN': True,
-        'LOCALE_FUNC': 'path.to.callable',
         'VERIFIED_EMAIL': False,
         'VERSION': 'v8.0',
     }
@@ -110,8 +129,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ## CSP
-    'csp.middleware.CSPMiddleware',
+    ## Wagtail CMS
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 CSP_INCLUDE_NONCE_IN = [
@@ -129,7 +148,7 @@ ROOT_URLCONF = 'webserver.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'IspToolboxApp', 'templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

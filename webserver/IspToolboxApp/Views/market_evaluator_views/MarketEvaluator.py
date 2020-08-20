@@ -1,6 +1,6 @@
 
 from django.views import View
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, GeometryCollection
 from IspToolboxApp.Tasks.mmWaveTasks.mmwave import getOSMNodes
 from shapely.geometry import shape
 import json
@@ -9,7 +9,6 @@ from django.http import JsonResponse
 from django.db import connections
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-
 
 def getQueryTemplate(skeleton, addExclude, includeExclude):
     if addExclude:
@@ -468,3 +467,4 @@ class ServiceProviders(View):
 
     def post(self, request):
         return self.get(request)
+

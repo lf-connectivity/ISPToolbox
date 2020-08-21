@@ -1,6 +1,6 @@
 
 from django.views import View
-from django.contrib.gis.geos import GEOSGeometry, GeometryCollection
+from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, WKBWriter
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from IspToolboxApp.models import MarketEvaluatorPipeline
@@ -105,13 +105,17 @@ class MarketEvaluatorPipelineView(View):
         include = body.get('include', {})
         exclude = body.get('exclude', {})
 
+        # Reduce Dimensions of Inputs to 2, Just in Case User uploads 3D Geojson
+        wkb_w = WKBWriter()
+        wkb_w.outdim = 2
+
         # Instantiate Model 'Market Evaluator Pipeline' to track progress
-        print(include)
-        run = MarketEvaluatorPipeline(include_geojson=GEOSGeometry(json.dumps(include)))
+        include = GEOSGeometry(json.dumps(include))
+        run = MarketEvaluatorPipeline(include_geojson=GEOSGeometry(wkb_w.write_hex(include)))
         run.save(update_fields=['include_geojson'])
         try:
             exclude = GEOSGeometry(json.dumps(exclude))
-            run.exclude_geojson = exclude
+            run.exclude_geojson = GEOSGeometry(wkb_w.write_hex(exclude))
             run.save(update_fields=['exclude_geojson'])
         except:
             logging.info('Failed to get exclude')

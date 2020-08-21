@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS =  ['*'] #['*.fbctower.com']
 
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'corsheaders',
     'IspToolboxApp',
+    ## S3 Static File Storage
+    'storages',
     ## Social Auth
     'django.contrib.sites',
     'allauth',
@@ -65,7 +67,7 @@ INSTALLED_APPS = [
 ]
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_collect')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
@@ -81,7 +83,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-SITE_ID=3
+SITE_ID=2
 
 AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',

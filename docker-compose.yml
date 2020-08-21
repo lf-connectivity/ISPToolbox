@@ -19,3 +19,10 @@ services:
             - 8020
         depends_on:
             - deepgis
+    celery:
+        build: ./webserver
+        command: celery -A webserver worker -l info
+        volumes:
+            - ./webserver/:/usr/src/app/
+        environment:
+            - DJANGO_SETTINGS_MODULE=webserver.settings_prod

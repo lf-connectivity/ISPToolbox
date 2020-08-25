@@ -107,6 +107,7 @@ AUTHENTICATION_BACKENDS = (
 
 LOGIN_REDIRECT_URL = "/mmwave-planner"
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 #facebook
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {

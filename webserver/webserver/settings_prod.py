@@ -242,8 +242,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-CELERY_BROKER_URL = 'redis://:zuckerbucks3212313212312313bucks@ip-172-31-27-23.us-east-2.compute.internal:6379'
-CELERY_RESULT_BACKEND = 'redis://:zuckerbucks3212313212312313bucks@ip-172-31-27-23.us-east-2.compute.internal:6379'
+CELERY_BROKER_URL = 'redis://isptoolbox-redis-prod.i0t4gq.ng.0001.use2.cache.amazonaws.com:6379'
+CELERY_RESULT_BACKEND = 'redis://isptoolbox-redis-prod.i0t4gq.ng.0001.use2.cache.amazonaws.com:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'

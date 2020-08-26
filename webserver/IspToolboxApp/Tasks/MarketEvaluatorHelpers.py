@@ -120,11 +120,6 @@ def getOSMBuildings(include, exclude, callback = None):
             includeGeom = [includeGeom]
         bbIncludes = [a.bounds for a in includeGeom]
 
-        # Query OSM BB's
-        if any(map(lambda x: computeBBSize(x) >= 0.25, bbIncludes)):
-            response['error'] = "bounding box too large"
-            return response
-
         osmInclude = [getOSMNodes(bbox) for bbox in bbIncludes]
         
         # Combine all nodes into dict

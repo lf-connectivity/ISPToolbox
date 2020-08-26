@@ -171,8 +171,12 @@ WSGI_APPLICATION = 'webserver.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-        'NAME': 'django_dev',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'django_test',
+        'USER' : 'postgres',
+        'PASSWORD' : 'password',
+        'HOST' : 'localhost',
+        'PORT' : '5432',
     },
     'gis_data': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',

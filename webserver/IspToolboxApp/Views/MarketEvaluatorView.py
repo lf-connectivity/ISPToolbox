@@ -17,6 +17,8 @@ class MarketEvaluatorPipelineBuildings(View):
         buildingoffset = int(request.GET.get('offset', 0 ))
         try:
             results = MarketEvaluatorPipeline.objects.get(pk=uuid)
+            if not results.isAccessAuthorized(request):
+                return JsonResponse(resp)
 
             buildingOutlines = json.dumps({'type' : 'GeometryCollection' , 'geometries' : []})
             buildingCount = 0
@@ -54,6 +56,8 @@ class MarketEvaluatorPipelineServiceProviders(View):
 
         try:
             results = MarketEvaluatorPipeline.objects.get(pk=uuid)
+            if not results.isAccessAuthorized(request):
+                return JsonResponse(resp)
             resp = results.genServiceProviders(offset)
         except Exception as e:
             resp['error'] = str(e)
@@ -67,6 +71,8 @@ class MarketEvaluatorPipelineIncome(View):
         offset = int(request.GET.get('offset', 0 ))
         try:
             results = MarketEvaluatorPipeline.objects.get(pk=uuid)
+            if not results.isAccessAuthorized(request):
+                return JsonResponse(resp)
 
         except Exception as e:
             resp['error'] = str(e)
@@ -80,6 +86,9 @@ class MarketEvaluatorPipelineView(View):
         resp = {'error' : None}
         try:
             results = MarketEvaluatorPipeline.objects.only("incomeServiceProvidersAvailable","buildingPrecomputed", "buildingCompleted", "buildingError",  'averageMedianIncome', "incomeComplete", "incomeError","serviceProviderComplete","serviceProviderError",'completed','error').get(pk=uuid)
+            if not results.isAccessAuthorized(request):
+                return JsonResponse(resp)
+
             resp = {
                 'incomeServiceProvidersAvailable' : results.incomeServiceProvidersAvailable,
                 'buildingPrecomputed' : results.buildingPrecomputed,
@@ -124,4 +133,4 @@ class MarketEvaluatorPipelineView(View):
         run.task = task.id
         run.save(update_fields=['task'])
 
-        return JsonResponse({'uuid': run.uuid})
+        return JsonResponse({'uuid': run.uuid, 'token' : run.token})

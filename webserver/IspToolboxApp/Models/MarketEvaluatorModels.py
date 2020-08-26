@@ -1,8 +1,14 @@
 from django.db import models
 import uuid
+import secrets
+import datetime
+import pytz
 from django.contrib.gis.db import models as gis_models
 from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate
 from django.db import connections
+
+def createTokenDefault():
+    return secrets.token_urlsafe(32)
 
 class ServiceProvider(models.Model):
     logrecno = models.IntegerField(primary_key=True)
@@ -14,7 +20,8 @@ class ServiceProvider(models.Model):
 class MarketEvaluatorPipeline(models.Model):
     uuid = models.UUIDField(primary_key=True, default = uuid.uuid4, editable=False)
     task = models.CharField(max_length=100, db_index=True, blank=True, null=True)
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    token = models.CharField(max_length=32,  default=createTokenDefault, editable=False)
+
     created = models.DateTimeField(auto_now_add=True)
     include_geojson = gis_models.GeometryField()
     exclude_geojson = gis_models.GeometryField(null=True, blank=True)
@@ -96,6 +103,9 @@ class MarketEvaluatorPipeline(models.Model):
             resp = {'error': 0, 'competitors': competitors,
                     "down_ad_speed": maxdown, "up_ad_speed": maxup, "tech_used": tech}
             return resp
+
+    def isAccessAuthorized(self, request):
+        return request.META['HTTP_AUTHORIZATION'].replace('Token ', '') == self.token and ((datetime.datetime.utcnow().replace(tzinfo=pytz.utc) - self.created).total_seconds() < 604800)
 
 
 income_skeleton = """

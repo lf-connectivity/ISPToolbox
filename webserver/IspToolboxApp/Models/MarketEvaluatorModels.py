@@ -20,7 +20,7 @@ class ServiceProvider(models.Model):
 class MarketEvaluatorPipeline(models.Model):
     uuid = models.UUIDField(primary_key=True, default = uuid.uuid4, editable=False)
     task = models.CharField(max_length=100, db_index=True, blank=True, null=True)
-    token = models.CharField(max_length=32,  default=createTokenDefault, editable=False)
+    token = models.CharField(max_length=50,  default=createTokenDefault, editable=False)
 
     created = models.DateTimeField(auto_now_add=True)
     include_geojson = gis_models.GeometryField()

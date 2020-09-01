@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from IspToolboxApp.tasks import createBuildingsGeojson
+import IspToolboxApp.tasks as tasks
 from django.views import View
 from IspToolboxApp.models import BuildingDetection
 from django.core.serializers import serialize
@@ -28,7 +28,7 @@ def index(request):
     # Create Async Task through Celery and Respond with the Task ID
     run = BuildingDetection(input_geometryCollection=GEOSGeometry(geojson))
     run.save()
-    task = createBuildingsGeojson.delay(geojson, run.pk)
+    task = tasks.createBuildingsGeojson.delay(geojson, run.pk)
     run.task = task.id
     run.save()
 

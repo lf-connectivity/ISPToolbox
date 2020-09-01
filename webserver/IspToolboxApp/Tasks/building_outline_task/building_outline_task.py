@@ -387,15 +387,15 @@ def bbox_to_bing_tiles(min_lat, min_lon, max_lat, max_lon, level):
             res.append((x, y))
     return res
 
-def getTiles(bb):
+def getTiles(bb,level=target_zoom):
     delta = 1.0e-10
     deltas = (delta, delta, -delta, -delta)
     return bbox_to_bing_tiles(
-        *[sum(x) for x in zip(bb, deltas)], level=target_zoom
+        *[sum(x) for x in zip(bb, deltas)], level=level
     )
 
 mapbox_access_token = "pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ"
-def getTileImages(tiles, supersample=3, progressUpdate=None):
+def getTileImages(tiles, supersample=3, progressUpdate=None, level=target_zoom):
     urlTemplate = 'https://api.tiles.mapbox.com/v4/mapbox.satellite/{}/{}/{}.png?access_token={}'
     images = []
     for tile in tiles:
@@ -405,7 +405,7 @@ def getTileImages(tiles, supersample=3, progressUpdate=None):
             for i in range(2**supersample):
                 x = tile[0] * (2**supersample) + i
                 y = tile[1] * (2**supersample) + j
-                url = urlTemplate.format(target_zoom + supersample,x,y,mapbox_access_token)
+                url = urlTemplate.format(level + supersample,x,y,mapbox_access_token)
                 response = requests.get(url, stream=True)
                 response.raw.decode_content = True
                 image_data = io.BytesIO(response.raw.read())

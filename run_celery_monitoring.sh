@@ -1,0 +1,2 @@
+cd webserver
+DJANGO_SETTINGS_MODULE=webserver.settings_prod flower -A webserver

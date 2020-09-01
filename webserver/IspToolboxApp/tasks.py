@@ -4,6 +4,7 @@ from IspToolboxApp.models import BuildingDetection
 from django.contrib.gis.geos import GEOSGeometry
 from datetime import datetime
 from IspToolboxApp.Tasks.MarketEvaluatorTasks import *
+from IspToolboxApp.Tasks.TreeTasks import *
 
 
 @shared_task

@@ -6,7 +6,6 @@ import logging
 
 from datetime import datetime
 import IspToolboxApp.views 
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import *
 
 @shared_task
 def genMarketEvaluatorData(uuid):

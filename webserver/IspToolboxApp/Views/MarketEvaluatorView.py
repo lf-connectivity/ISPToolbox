@@ -4,7 +4,7 @@ from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, WKBWriter
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from IspToolboxApp.models import MarketEvaluatorPipeline
-from IspToolboxApp.Tasks.MarketEvaluatorTasks import genMarketEvaluatorData
+import IspToolboxApp.Tasks.MarketEvaluatorTasks
 from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getMicrosoftBuildingsOffset
 from django.http import JsonResponse
 import json
@@ -129,7 +129,7 @@ class MarketEvaluatorPipelineView(View):
         except:
             logging.info('Failed to get exclude')
         
-        task = genMarketEvaluatorData.delay(run.uuid)
+        task = IspToolboxApp.Tasks.MarketEvaluatorTasks.genMarketEvaluatorData.delay(run.uuid)
         run.task = task.id
         run.save(update_fields=['task'])
 

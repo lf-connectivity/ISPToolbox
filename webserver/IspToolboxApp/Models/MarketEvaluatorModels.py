@@ -50,6 +50,9 @@ class MarketEvaluatorPipeline(models.Model):
     completed = models.DateTimeField(blank=True, null=True)
     error = models.CharField(max_length=100, blank=True, null=True)
 
+    class Meta:
+        ordering = ('created', )
+
     def genMarketEvaluatorIncome(self):
         include = self.include_geojson
         exclude = self.exclude_geojson

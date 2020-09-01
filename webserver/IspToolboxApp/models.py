@@ -10,6 +10,10 @@ from wagtail.core.fields import RichTextField
 from wagtail.admin.edit_handlers import FieldPanel
 from wagtail.search import index
 
+from django.contrib import admin
+
+admin.site.register(MarketEvaluatorPipeline)
+
 class HomePage(Page):
     body = RichTextField(blank=True)
 

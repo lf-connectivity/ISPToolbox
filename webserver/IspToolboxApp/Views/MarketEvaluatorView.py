@@ -48,6 +48,21 @@ class MarketEvaluatorPipelineBuildings(View):
             
         return JsonResponse(resp)
 
+class MarketEvaluatorPipelineBroadbandNow(View):
+    def get(self, request):
+        resp = {'error': None}
+        uuid = request.GET.get('uuid', '')
+        try:
+            results = MarketEvaluatorPipeline.objects.get(pk=uuid)
+            if not results.isAccessAuthorized(request):
+                return JsonResponse(resp)
+            resp = results.genBroadbandNow()
+        except Exception as e:
+            resp['error'] = str(e)
+            
+        return JsonResponse(resp)
+
+
 class MarketEvaluatorPipelineServiceProviders(View):
     def get(self, request):
         resp = {'error' : None}

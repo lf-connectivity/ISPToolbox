@@ -107,9 +107,28 @@ class MarketEvaluatorPipeline(models.Model):
                     "down_ad_speed": maxdown, "up_ad_speed": maxup, "tech_used": tech}
             return resp
 
+    def genBroadbandNow(self):
+        include = self.include_geojson
+        with connections['gis_data'].cursor() as cursor:
+            a = broadbandnow_skeleton.format(include.json)
+            cursor.execute(broadbandnow_skeleton, [include.json])
+            column_names = cursor.description
+            rows = [row for row in cursor.fetchall()]
+            return {col.name : [row[idx] for row in rows]  for idx, col in enumerate(column_names)}
+
     def isAccessAuthorized(self, request):
         return request.META['HTTP_AUTHORIZATION'].replace('Token ', '') == self.token and ((datetime.datetime.utcnow().replace(tzinfo=pytz.utc) - self.created).total_seconds() < 604800)
 
+
+broadbandnow_skeleton = """
+SELECT * FROM
+    (
+        SELECT geoid FROM tl_2019_us_county  WHERE St_intersects(geog, St_geomfromgeojson(%s))
+    ) as intersect_county
+    JOIN broadband_data_bbn
+        ON "COUNTY ID" = CAST(geoid AS numeric)
+;
+"""
 
 income_skeleton = """
 SELECT Avg(avgbuildingvalues.avgincome2018building) AS avgincome2018, 

@@ -62,6 +62,7 @@ urlpatterns = [
     path('market-evaluator/buildings/', views.MarketEvaluatorPipelineBuildings.as_view(), name='marketEvalAsyncBuildings'),
     path('market-evaluator/income/', views.MarketEvaluatorPipelineIncome.as_view(), name='marketEvalAsyncIncome'),
     path('market-evaluator/service-providers/', views.MarketEvaluatorPipelineServiceProviders.as_view(), name='marketEvalAsyncServiceProviders'),
+    path('market-evaluator/broadbandnow/', views.MarketEvaluatorPipelineBroadbandNow.as_view(), name='bbnow'),
 
     # Path mmWave Planner
     path('mmwave-planner/', views.MMWavePlannerView.as_view(), name='mmwaveplanner'),

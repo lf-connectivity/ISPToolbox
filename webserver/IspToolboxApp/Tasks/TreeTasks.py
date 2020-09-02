@@ -1,7 +1,7 @@
 from celery import shared_task
 from IspToolboxApp.Tasks.building_outline_task.building_outline_task import getTiles, getTileImages
 import pickle
-import detectree as dtr
+# import detectree as dtr
 import tempfile
 import boto3
 

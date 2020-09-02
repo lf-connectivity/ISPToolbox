@@ -57,6 +57,7 @@ class MarketEvaluatorPipelineBroadbandNow(View):
             if not results.isAccessAuthorized(request):
                 return JsonResponse(resp)
             resp = results.genBroadbandNow()
+            resp['error'] = None
         except Exception as e:
             resp['error'] = str(e)
             

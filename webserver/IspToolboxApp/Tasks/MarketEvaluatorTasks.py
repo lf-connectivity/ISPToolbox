@@ -1,8 +1,9 @@
 from celery import shared_task
 from IspToolboxApp.models import MarketEvaluatorPipeline, ServiceProvider
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedAvailable, checkIfIncomeProvidersAvailable
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedAvailable, checkIfIncomeProvidersAvailable, queryBuildingOutlines
 from django.contrib.gis.geos import GEOSGeometry
 import logging
+import json
 
 from datetime import datetime
 import IspToolboxApp.views 

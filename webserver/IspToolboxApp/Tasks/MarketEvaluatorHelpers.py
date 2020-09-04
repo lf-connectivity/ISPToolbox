@@ -3,7 +3,13 @@ import logging
 import json
 from shapely.geometry import shape
 from IspToolboxApp.Tasks.mmWaveTasks.mmwave import getOSMNodes
-
+from zipfile import ZipFile
+import tempfile
+import os
+import rasterio
+import rasterio.features
+import rasterio.warp
+import defusedxml
 
 def getUniqueBuildingNodes(nodes):
     buildings = {k: v for (k, v) in nodes.items() if (('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
@@ -202,3 +208,82 @@ def getMicrosoftBuildingsOffset(include, exclude, offset):
         resp =  {"type": "GeometryCollection", "geometries": []}
     return resp
 
+
+############################
+# KMZ PROCESSING FUNCTIONS #
+############################
+
+def createPipelineFromKMZ(file):
+    # unzip KMZ file
+    tempdir = tempfile.TemporaryDirectory()
+    with ZipFile(file, 'r') as zipfile:
+        zipfile.extractall(tempdir.name)
+    kml_files = [_ for _ in os.listdir(tempdir.name) if _.endswith('.kml')]
+    if len(kml_files) > 0:
+        kmlfile = defusedxml.ElementTree.parse(os.path.join(tempdir.name, kml_files[0]))
+        overlays = findChildrenContains(kmlfile.getroot(), 'groundoverlay')
+        overlayProps = [getOverlayStats(o) for o in overlays]
+        # covert rasters to GeometryField
+        geometries_raster = createGeoJsonsFromCoverageOverlays(overlayProps, tempdir.name)
+        # get polygons from KMZ
+        geometries_polygon = createGeoJsonsFromKML(kmlfile)
+        geometry_collection = {'type' : 'GeometryCollection', 'geometries' : geometries_raster + geometries_polygon}
+        return geometry_collection
+    else:
+        return None
+    
+def findChildrenContains(element, subtag):
+    """ Finds All children that contain subtag. subtag must be lowercase
+    returns List or None if no subtags exist"""
+    try:
+        return list(filter(lambda e : subtag in e.tag.lower(), element.iter()) )
+    except: 
+        return []
+
+def createGeoJsonsFromKML(kmlfile):
+    polygons = findChildrenContains(kmlfile.getroot(), 'polygon')
+    geom = [getPolygonCoords(p) for p in polygons]
+    return geom
+    
+def getPolygonCoords(polygon):
+    try:
+        outerboundary = findChildrenContains(polygon, 'outerboundaryis')
+        innerboundaries = findChildrenContains(polygon, 'innerboundaryis')
+        outerboundaries = [convertBoundaryToCoordinates(b) for b in outerboundary]
+        innerboundaries = [convertBoundaryToCoordinates(b) for b in innerboundaries]
+        return {'type' : 'Polygon', 'coordinates' : outerboundaries + innerboundaries}
+    except:
+        return []
+
+def convertBoundaryToCoordinates(boundary):
+    coords_str = findChildrenContains(boundary, 'coordinates').text
+    coord_tuples = coords_str.split()
+    coord_tuples_split = [ t.split(',') for t in coord_tuples]
+    coords = [float(x) for x in t for t in coord_tuples_split]
+    # Remove Altitude Parameter to ensure database accepts
+    coords = [ t[:2] for t in coords]
+    return coords
+
+def getOverlayStats(overlay):
+    try:
+        image = findChildrenContains(overlay, 'href')[0].text
+        north = float(findChildrenContains(overlay, 'north')[0].text)
+        south = float(findChildrenContains(overlay, 'south')[0].text)
+        east = float(findChildrenContains(overlay, 'east')[0].text)
+        west = float(findChildrenContains(overlay, 'west')[0].text)
+        return {'image' : image, 'bb' : [north, east, south, west]}
+    except:
+        return None
+
+def createGeoJsonsFromCoverageOverlays(overlays, root_directory):
+    geometries = []
+    for overlay in overlays:
+        imgpath = os.path.join(root_directory, overlay['image'])
+        bb = overlay['bb']
+        with rasterio.open(imgpath) as r:
+            mask = r.dataset_mask()
+            raster_transform = rasterio.transform.from_bounds(bb[3], bb[2], bb[1], bb[0], r.width, r.height)
+            for geom, val in rasterio.features.shapes(mask, transform=raster_transform):
+                geometries.append(geom)
+
+    return geometries

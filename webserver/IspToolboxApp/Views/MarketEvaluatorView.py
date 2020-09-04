@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from IspToolboxApp.models import MarketEvaluatorPipeline
 import IspToolboxApp.Tasks.MarketEvaluatorTasks
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getMicrosoftBuildingsOffset
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getMicrosoftBuildingsOffset, createPipelineFromKMZ
 from django.http import JsonResponse
 import json
 import logging
@@ -94,6 +94,40 @@ class MarketEvaluatorPipelineIncome(View):
             resp['error'] = str(e)
             
         return JsonResponse(resp)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MarketEvaluatorPipelineKMZ(View):
+    def post(self, request):
+        resp = {'error' : None}
+        try:
+            files = request.FILES
+            # TODO: LIMIT file size upload
+            gc = createPipelineFromKMZ(files['kmz'])
+            pipeline = MarketEvaluatorPipeline(include_geojson=GEOSGeometry(json.dumps(gc)))
+            pipeline.save()
+            resp = {'uuid': pipeline.uuid, 'token' : pipeline.token, 'error' : None}
+            task = IspToolboxApp.Tasks.MarketEvaluatorTasks.genMarketEvaluatorData.delay(pipeline.uuid)
+            pipeline.task = task.id
+            pipeline.save(update_fields=['task'])
+        
+        except Exception as e:
+            resp['error'] = str(e)
+
+        return JsonResponse(resp)
+    def get(self, request):
+        resp = {'error' : None}
+        try:
+            uuid = request.GET.get('uuid', '')
+            results = MarketEvaluatorPipeline.objects.only("include_geojson", "exclude_geojson").get(pk=uuid)
+            if not results.isAccessAuthorized(request):
+                return JsonResponse(resp)
+            else:
+                resp = {'error' : None, 'include' : results.include_geojson.json, 'exclude' : results.exclude_geojson.json if results.exclude_geojson else None}
+        except Exception as e:
+            resp['error'] = 'Failed to load pipeline'
+
+        return JsonResponse(resp)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class MarketEvaluatorPipelineView(View):

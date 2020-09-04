@@ -59,6 +59,7 @@ urlpatterns = [
     path('market-evaluator/market-data-available/', views.DataAvailableView.as_view(), name='PRIncome'),
     # Pipeline Functions for MarketEvaluator
     path('market-evaluator/', views.MarketEvaluatorPipelineView.as_view(), name='marketEvalAsync'),
+    path('market-evaluator/kmz/', views.MarketEvaluatorPipelineKMZ.as_view(), name='marketEvalKMZAsync'),
     path('market-evaluator/buildings/', views.MarketEvaluatorPipelineBuildings.as_view(), name='marketEvalAsyncBuildings'),
     path('market-evaluator/income/', views.MarketEvaluatorPipelineIncome.as_view(), name='marketEvalAsyncIncome'),
     path('market-evaluator/service-providers/', views.MarketEvaluatorPipelineServiceProviders.as_view(), name='marketEvalAsyncServiceProviders'),

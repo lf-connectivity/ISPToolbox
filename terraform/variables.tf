@@ -5,17 +5,15 @@ variable "aws_region" {
 
 variable "aws_account_id" {
   description = "AWS account ID"
-  default =
+  default = "fbc-tower-design"
 }
 
 variable "access_key" {
   description = "AWS access_key"
-  default = ""
 }
 
 variable "secret_key" {
   description = "AWS secret_key"
-  default = ""
 }
 
 variable "az_count" {

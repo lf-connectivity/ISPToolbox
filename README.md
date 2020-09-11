@@ -1,14 +1,10 @@
-# RFCoverageWebServer
-Go based RF coverage webserver
-
-Requires Signal Server HD binary, with SDF files
-Requires ImageMagick library convert utility
-`sudo yum install ImageMagick`
-
-Must add rc.local file to /etc/rc.local for run on bootup
-This script adds the efs filesystem
-
-Make sure you add aws cli for s3 functionality
+# ISP Toolbox Webserver
+ISP Toolbox Backend Server Code
+- powers market evaluator, network cost comparison
+hosted: AWS, EC2
+database: AWS Postgres
+KV store: Elasticache
+domain: https://fbctower.com
 
 Worker command (GPU):
 `celery worker -A deep_gis --loglevel=info`

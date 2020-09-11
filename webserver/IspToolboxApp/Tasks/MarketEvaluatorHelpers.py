@@ -284,6 +284,7 @@ def createGeoJsonsFromCoverageOverlays(overlays, root_directory):
             mask = r.dataset_mask()
             raster_transform = rasterio.transform.from_bounds(bb[3], bb[2], bb[1], bb[0], r.width, r.height)
             for geom, val in rasterio.features.shapes(mask, transform=raster_transform):
-                geometries.append(geom)
+                if val > 0:
+                    geometries.append(geom)
 
     return geometries

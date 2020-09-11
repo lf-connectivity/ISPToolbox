@@ -9,7 +9,7 @@ import os
 import rasterio
 import rasterio.features
 import rasterio.warp
-import defusedxml
+from defusedxml import ElementTree
 
 def getUniqueBuildingNodes(nodes):
     buildings = {k: v for (k, v) in nodes.items() if (('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
@@ -220,7 +220,7 @@ def createPipelineFromKMZ(file):
         zipfile.extractall(tempdir.name)
     kml_files = [_ for _ in os.listdir(tempdir.name) if _.endswith('.kml')]
     if len(kml_files) > 0:
-        kmlfile = defusedxml.ElementTree.parse(os.path.join(tempdir.name, kml_files[0]))
+        kmlfile = ElementTree.parse(os.path.join(tempdir.name, kml_files[0]))
         overlays = findChildrenContains(kmlfile.getroot(), 'groundoverlay')
         overlayProps = [getOverlayStats(o) for o in overlays]
         # covert rasters to GeometryField

@@ -1,20 +1,15 @@
-from django.test import TestCase
-import IspToolboxApp.tasks as tasks
-from shutil import copyfile
+from django.test import TestCase, Client
 
-# Create your tests here.
-# class SimpleUSGeoJsonTests(TestCase):
-#     def test_single_polygon(self):
+class TestHealthCheckEndpoint(TestCase):
+    def test_healthcheck(self):
+        client = Client()
+        response = client.get('/')
+        self.assertIs(response.status_code, 200)
 
-class TestDetectTree(TestCase):
-    def test_loading_images(self):
-        bb = [-121.1252439022064, 37.480579692661436, -121.12149953842162, 37.4824186878121]
-        imgs = tasks.loadImagesFromMapBox(bb)
-        for idx, img in enumerate(imgs):
-            copyfile(img.name, str(idx) + '.png')
-        
-        classified_imgs = tasks.classifyTrees(imgs)
-        for idx, img in enumerate(classified_imgs):
-            copyfile(img.name, str(idx) + '.tif')
-
+class TestKMZEndpoints(TestCase):
+    def test_kmz_endpoint(self):
+        client = Client()
+        response = client.post('/market-evaluator/kmz/')
+        print(response)
+        self.assertIs(response.status_code, 200)
         

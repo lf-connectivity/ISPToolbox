@@ -6,6 +6,9 @@ database: AWS Postgres
 KV store: Elasticache
 domain: https://fbctower.com
 
+`docker-compose build`
+`docker-compose run`
+
 Worker command (GPU):
 `celery worker -A deep_gis --loglevel=info`
 

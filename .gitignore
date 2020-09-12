@@ -24,3 +24,4 @@ static_collect
 terraform/.terraform
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
+terraform/terraform.tfstate.d

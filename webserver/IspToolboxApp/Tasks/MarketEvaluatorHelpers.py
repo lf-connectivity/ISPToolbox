@@ -219,18 +219,18 @@ def createPipelineFromKMZ(file):
         with ZipFile(file, 'r') as zipfile:
             zipfile.extractall(tempdir)
         kml_files = [_ for _ in os.listdir(tempdir) if _.endswith('.kml')]
-        if len(kml_files) > 0:
-            kmlfile = ElementTree.parse(os.path.join(tempdir, kml_files[0]))
+        geometries = []
+        for kml in kml_files:
+            kmlfile = ElementTree.parse(os.path.join(tempdir, kml))
             overlays = findChildrenContains(kmlfile.getroot(), 'groundoverlay')
             overlayProps = [getOverlayStats(o) for o in overlays]
             # covert rasters to GeometryField
             geometries_raster = createGeoJsonsFromCoverageOverlays(overlayProps, tempdir)
             # get polygons from KMZ
             geometries_polygon = createGeoJsonsFromKML(kmlfile)
-            geometry_collection = {'type' : 'GeometryCollection', 'geometries' : geometries_raster + geometries_polygon}
-            return geometry_collection
-        else:
-            return None
+            geometries += geometries_raster + geometries_polygon
+        geometry_collection = {'type' : 'GeometryCollection', 'geometries' : geometries}
+        return geometry_collection
     return None
     
 def findChildrenContains(element, subtag):

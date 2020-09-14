@@ -6,11 +6,7 @@ services:
         volumes:
             - ./webserver:/usr/src/app
         ports:
-            - 8020:80
-    # homespassed:
-    #     build: ./house_counter
-    #     ports:
-    #         - 8010:80      
+            - 8020:80   
     nginx:
         build: ./nginx
         ports:

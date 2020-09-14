@@ -265,7 +265,10 @@ def convertBoundaryToCoordinates(boundary):
         # Remove Altitude Parameter to ensure database accepts
         return [ t[:2] for t in coords]
     coords = findChildrenContains(boundary, 'coordinates')
-    return [parseCoords(c) for c in coords]
+    if len(coords) > 0:
+        return parseCoords(coords[0])
+    else:
+        return []
 
 def getOverlayStats(overlay):
     try:

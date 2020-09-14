@@ -215,22 +215,23 @@ def getMicrosoftBuildingsOffset(include, exclude, offset):
 
 def createPipelineFromKMZ(file):
     # unzip KMZ file
-    tempdir = tempfile.TemporaryDirectory()
-    with ZipFile(file, 'r') as zipfile:
-        zipfile.extractall(tempdir.name)
-    kml_files = [_ for _ in os.listdir(tempdir.name) if _.endswith('.kml')]
-    if len(kml_files) > 0:
-        kmlfile = ElementTree.parse(os.path.join(tempdir.name, kml_files[0]))
-        overlays = findChildrenContains(kmlfile.getroot(), 'groundoverlay')
-        overlayProps = [getOverlayStats(o) for o in overlays]
-        # covert rasters to GeometryField
-        geometries_raster = createGeoJsonsFromCoverageOverlays(overlayProps, tempdir.name)
-        # get polygons from KMZ
-        geometries_polygon = createGeoJsonsFromKML(kmlfile)
-        geometry_collection = {'type' : 'GeometryCollection', 'geometries' : geometries_raster + geometries_polygon}
-        return geometry_collection
-    else:
-        return None
+    with tempfile.TemporaryDirectory() as tempdir:
+        with ZipFile(file, 'r') as zipfile:
+            zipfile.extractall(tempdir)
+        kml_files = [_ for _ in os.listdir(tempdir) if _.endswith('.kml')]
+        if len(kml_files) > 0:
+            kmlfile = ElementTree.parse(os.path.join(tempdir, kml_files[0]))
+            overlays = findChildrenContains(kmlfile.getroot(), 'groundoverlay')
+            overlayProps = [getOverlayStats(o) for o in overlays]
+            # covert rasters to GeometryField
+            geometries_raster = createGeoJsonsFromCoverageOverlays(overlayProps, tempdir)
+            # get polygons from KMZ
+            geometries_polygon = createGeoJsonsFromKML(kmlfile)
+            geometry_collection = {'type' : 'GeometryCollection', 'geometries' : geometries_raster + geometries_polygon}
+            return geometry_collection
+        else:
+            return None
+    return None
     
 def findChildrenContains(element, subtag):
     """ Finds All children that contain subtag. subtag must be lowercase
@@ -252,17 +253,19 @@ def getPolygonCoords(polygon):
         outerboundaries = [convertBoundaryToCoordinates(b) for b in outerboundary]
         innerboundaries = [convertBoundaryToCoordinates(b) for b in innerboundaries]
         return {'type' : 'Polygon', 'coordinates' : outerboundaries + innerboundaries}
-    except:
-        return []
+    except Exception as e:
+        return {}
 
 def convertBoundaryToCoordinates(boundary):
-    coords_str = findChildrenContains(boundary, 'coordinates').text
-    coord_tuples = coords_str.split()
-    coord_tuples_split = [ t.split(',') for t in coord_tuples]
-    coords = [float(x) for x in t for t in coord_tuples_split]
-    # Remove Altitude Parameter to ensure database accepts
-    coords = [ t[:2] for t in coords]
-    return coords
+    def parseCoords(c):
+        coords_str= c.text
+        coord_tuples = coords_str.split()
+        coord_tuples_split = [ t.split(',') for t in coord_tuples]
+        coords = [[float(x) for x in t] for t in coord_tuples_split]
+        # Remove Altitude Parameter to ensure database accepts
+        return [ t[:2] for t in coords]
+    coords = findChildrenContains(boundary, 'coordinates')
+    return [parseCoords(c) for c in coords]
 
 def getOverlayStats(overlay):
     try:

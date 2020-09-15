@@ -1,7 +1,8 @@
 from PIL import Image
 import requests
 import io
-
+img_dim = 256
+target_zoom = 15
 
 mapbox_access_token = "pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ"
 def getTileImages(tiles, supersample=3, progressUpdate=None):

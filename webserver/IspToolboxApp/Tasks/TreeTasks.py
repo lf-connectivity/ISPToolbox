@@ -29,7 +29,8 @@ def loadImagesFromMapBox(bounding_box):
     return image_fps
 
 def classifyTrees(images):
-    c = dtr.Classifier()
+    # c = dtr.Classifier()
+    c = None
     clf = None
 
     tmp = tempfile.TemporaryFile()

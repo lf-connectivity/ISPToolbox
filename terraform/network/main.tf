@@ -5,8 +5,19 @@ provider "aws" {
   region = var.aws_region
 }
 
-### Network
+terraform {
+  backend "s3" {
+    # Replace this with your bucket name!
+    bucket         = "wisp-terraform-up-and-running-state"
+    key            = "network/terraform.tfstate"
+    region         = "us-west-2"
+    # Replace this with your DynamoDB table name!
+    dynamodb_table = "terraform-up-and-running-locks"
+    encrypt        = true
+  }
+}
 
+### Network
 # Fetch AZs in the current region
 data "aws_availability_zones" "available" {}
 
@@ -157,15 +168,15 @@ resource "aws_security_group" "ecs_tasks" {
 }
 
 ### Aws Certificate Manager
-resource "aws_acm_certificate" "cert" {
-  domain_name       = "*.fbctower.com"
-  validation_method = "DNS"
+# resource "aws_acm_certificate" "cert" {
+#   domain_name       = "*.fbctower.com"
+#   validation_method = "DNS"
 
-  tags = {
-    Environment = "wisp"
-  }
+#   tags = {
+#     Environment = "wisp"
+#   }
 
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+# }

@@ -23,8 +23,7 @@ variable "az_count" {
 
 variable "app_image" {
   description = "Docker image to run in the ECS cluster"
-  # default     = "nginx:latest"
-  default     = "623762516657.dkr.ecr.us-west-2.amazonaws.com/victor-repo:latest"
+  default     = "nginx:latest"
 }
 
 variable "app_port" {

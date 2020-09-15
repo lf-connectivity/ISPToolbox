@@ -5,6 +5,18 @@ provider "aws" {
   region = var.aws_region
 }
 
+terraform {
+  backend "s3" {
+    # Replace this with your bucket name!
+    bucket         = "wisp-terraform-up-and-running-state"
+    key            = "computation/terraform.tfstate"
+    region         = "us-west-2"
+    # Replace this with your DynamoDB table name!
+    dynamodb_table = "terraform-up-and-running-locks"
+    encrypt        = true
+  }
+}
+
 ### Network
 # Fetch AZs in the current region
 data "aws_availability_zones" "available" {}

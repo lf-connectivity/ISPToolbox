@@ -8,10 +8,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
+      # Start Services - Redis and PostGIS
       redis:
         image: redis:6.0.8
-        env:
-          REDIS_PASSWORD: zuckerbucks3212313212312313bucks
         ports:
           - 6379:6379
         options: >-
@@ -30,7 +29,7 @@ jobs:
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2      
     - name: Setup Python 3.8
       uses: actions/setup-python@v1
       with:

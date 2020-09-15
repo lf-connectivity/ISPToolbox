@@ -69,9 +69,11 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
       run: |
         docker-compose build
-        docker tag isptoolbox-nginx:latest $ECR_REGISTRY/$ECR_REPOSITORY/isptoolbox-nginx:latest
-        docker tag isptoolbox-celery:latest $ECR_REGISTRY/$ECR_REPOSITORY/isptoolbox-celery:latest
-        docker tag isptoolbox-django:latest $ECR_REGISTRY/$ECR_REPOSITORY/isptoolbox-django:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY/isptoolbox-django:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY/isptoolbox-celery:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY/isptoolbox-nginx:latest
+        echo $ECR_REGISTRY
+        echo $ECR_REPOSITORY
+        docker tag isptoolbox-nginx:latest $ECR_REGISTRY/isptoolbox-nginx:latest
+        docker tag isptoolbox-celery:latest $ECR_REGISTRY/isptoolbox-celery:latest
+        docker tag isptoolbox-django:latest $ECR_REGISTRY/isptoolbox-django:latest
+        docker push $ECR_REGISTRY/isptoolbox-django:latest
+        docker push $ECR_REGISTRY/isptoolbox-celery:latest
+        docker push $ECR_REGISTRY/isptoolbox-nginx:latest

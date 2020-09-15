@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgis:11-3.0
+        image: postgis/postgis:11-3.0
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password

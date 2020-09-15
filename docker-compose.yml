@@ -2,14 +2,14 @@ version: '3'
 
 services:
     webserver:
-        image: isptoolbox/django
+        image: isptoolbox-django
         build: ./webserver
         volumes:
             - ./webserver:/usr/src/app
         expose:
             - 8020
     nginx:
-        image: isptoolbox/nginx
+        image: isptoolbox-nginx
         build: ./nginx
         ports:
             - 80:80
@@ -18,7 +18,7 @@ services:
         depends_on:
             - webserver
     celery:
-        image: isptoolbox/celery
+        image: isptoolbox-celery
         build: ./webserver
         command: celery -A webserver worker -l info
         volumes:

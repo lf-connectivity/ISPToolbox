@@ -8,6 +8,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
+      redis:
+        image: redis:6.0.8
+        env:
+          REDIS_PASSWORD: zuckerbucks3212313212312313bucks
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
       postgres:
         image: postgis/postgis:11-3.0
         env:

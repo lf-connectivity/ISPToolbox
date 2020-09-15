@@ -10,4 +10,4 @@ ADD . /usr/src/app
 
 CMD ["/usr/src/app/run_django_server.sh"]
 
-EXPOSE 80
+EXPOSE 8020

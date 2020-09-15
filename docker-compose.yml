@@ -5,8 +5,8 @@ services:
         build: ./webserver
         volumes:
             - ./webserver:/usr/src/app
-        ports:
-            - 8020:80   
+        expose:
+            - 8020
     nginx:
         build: ./nginx
         ports:

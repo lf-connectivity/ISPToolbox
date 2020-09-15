@@ -155,3 +155,17 @@ resource "aws_security_group" "ecs_tasks" {
     Name = "aws_security_group-ecs_tasks"
   }
 }
+
+### Aws Certificate Manager
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "*.fbctower.com"
+  validation_method = "DNS"
+
+  tags = {
+    Environment = "wisp"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}

@@ -23,7 +23,8 @@ variable "az_count" {
 
 variable "app_image" {
   description = "Docker image to run in the ECS cluster"
-  default     = "nginx:latest"
+  # default     = "nginx:latest"
+  default     = "623762516657.dkr.ecr.us-west-2.amazonaws.com/victor-repo:latest"
 }
 
 variable "app_port" {
@@ -47,7 +48,7 @@ variable "fargate_memory" {
 }
 
 variable "vpc_id" {
-  default = "vpc-034bb7611a83ddbac"
+  default = "vpc-05b042b728cf7e9b1"
 }
 
 variable "aws_subnet_privates" {

@@ -3,6 +3,7 @@ import tempfile
 import shutil
 import os
 import json
+from IspToolboxApp.Tests.marketing_model_tests import TestMarketingModels
 
 class TestHealthCheckEndpoint(TestCase):
     def test_healthcheck(self):
@@ -17,7 +18,7 @@ class TestKMZEndpoints(TestCase):
         self.assertIs(response.status_code, 200)
         
 class TestKMZUpload(TestCase):
-    def test_kmz_endpoint(self):
+    def test_kmz_upload(self):
         client = Client()
         kml = b"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">

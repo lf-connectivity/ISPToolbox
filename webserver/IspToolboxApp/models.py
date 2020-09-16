@@ -4,6 +4,7 @@ from IspToolboxApp.Models.mmWaveModels import *
 from django.conf import settings
 from IspToolboxApp.Models.open_source_data import *
 from IspToolboxApp.Models.MarketEvaluatorModels import *
+from IspToolboxApp.Models.MarketingModels import MarketingAccount, MarketingAudience
 
 from wagtail.core.models import Page
 from wagtail.core.fields import RichTextField
@@ -13,6 +14,8 @@ from wagtail.search import index
 from django.contrib import admin
 
 admin.site.register(MarketEvaluatorPipeline)
+admin.site.register(MarketingAudience)
+admin.site.register(MarketingAccount)
 
 class HomePage(Page):
     body = RichTextField(blank=True)

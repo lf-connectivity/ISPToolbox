@@ -125,6 +125,13 @@ resource "aws_security_group" "lb" {
 
   ingress {
     protocol    = "tcp"
+    from_port   = 443
+    to_port     = 443
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol    = "tcp"
     from_port   = 80
     to_port     = 80
     cidr_blocks = ["0.0.0.0/0"]
@@ -150,8 +157,8 @@ resource "aws_security_group" "ecs_tasks" {
 
   ingress {
     protocol        = "tcp"
-    from_port       = var.app_port
-    to_port         = var.app_port
+    from_port       = 80
+    to_port         = 80
     security_groups = [aws_security_group.lb.id]
   }
 
@@ -168,15 +175,15 @@ resource "aws_security_group" "ecs_tasks" {
 }
 
 ### Aws Certificate Manager
-# resource "aws_acm_certificate" "cert" {
-#   domain_name       = "*.fbctower.com"
-#   validation_method = "DNS"
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "*.fbctower.com"
+  validation_method = "DNS"
 
-#   tags = {
-#     Environment = "wisp"
-#   }
+  tags = {
+    Name = "aws_acm_certificate-cert"
+  }
 
-#   lifecycle {
-#     create_before_destroy = true
-#   }
-# }
+  lifecycle {
+    create_before_destroy = true
+  }
+}

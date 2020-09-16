@@ -17,9 +17,14 @@ terraform {
   }
 }
 
-### Network
+
+### ======================================== Network ========================================
 # Fetch AZs in the current region
 data "aws_availability_zones" "available" {}
+
+data "aws_acm_certificate" "cert" {
+  domain = "*.fbctower.com"
+}
 
 data "aws_subnet_ids" "public_selected" {
   vpc_id = var.vpc_id
@@ -50,8 +55,10 @@ data "aws_security_group" "ecs_tasks" {
     values = ["aws_security_group-ecs_tasks"]
   }
 }
+### ======================================== Network ========================================
 
-### ECR
+
+### ======================================== ECR ========================================
 resource "aws_ecr_repository" "main" {
   name                 = "${terraform.workspace}-repo"
   image_tag_mutability = "MUTABLE"
@@ -60,16 +67,91 @@ resource "aws_ecr_repository" "main" {
     scan_on_push = true
   }
 }
+### ======================================== ECR ========================================
 
-### ALB
+
+### ======================================== S3 ========================================
+# resource "aws_s3_bucket" "log_bucket" {
+#   bucket = "my-tf-log-bucket"
+#   acl    = "log-delivery-write"
+# }
+
+# resource "aws_s3_bucket" "main" {
+#   bucket = "my-tf-test-bucket"
+#   acl    = "private"
+
+#   logging {
+#     target_bucket = aws_s3_bucket.log_bucket.id
+#     target_prefix = "log/"
+#   }
+# }
+
+# resource "aws_s3_bucket" "main" {
+#   bucket = "${terraform.workspace}-wisp-tf-s3"
+#   acl    = "private"
+
+#   tags   = {
+#     Name = "${terraform.workspace}-aws_s3_bucket-main"
+#   }
+# }
+
+# resource "aws_s3_bucket_policy" "main" {
+#   bucket = aws_s3_bucket.main.id
+
+#   policy = <<POLICY
+# {
+#     "Version": "2012-10-17",
+#     "Statement": [
+#         {
+#             "Effect": "Allow",
+#             "Principal": {
+#                 "AWS": "arn:aws:iam::797873946194:root"
+#             },
+#             "Action": "s3:PutObject",
+#             "Resource": "arn:aws:s3:::victor-wisp-tf-s3/logs/AWSLogs/623762516657/*"
+#         },
+#         {
+#             "Effect": "Allow",
+#             "Principal": {
+#                 "Service": "delivery.logs.amazonaws.com"
+#             },
+#             "Action": "s3:PutObject",
+#             "Resource": "arn:aws:s3:::victor-wisp-tf-s3/logs/AWSLogs/623762516657/*",
+#             "Condition": {
+#                 "StringEquals": {
+#                     "s3:x-amz-acl": "bucket-owner-full-control"
+#                 }
+#             }
+#         },
+#         {
+#             "Effect": "Allow",
+#             "Principal": {
+#                 "Service": "delivery.logs.amazonaws.com"
+#             },
+#             "Action": "s3:GetBucketAcl",
+#             "Resource": "arn:aws:s3:::victor-wisp-tf-s3"
+#         }
+#     ]
+# }
+# POLICY
+# }
+### ======================================== S3 ========================================
+
+
+### ======================================== ALB ========================================
 resource "aws_alb" "main" {
-  name            = "${terraform.workspace}-tf-ecs-alb"
+  name            = "${terraform.workspace}-wisp-ecs-alb"
   subnets         = data.aws_subnet_ids.public_selected.ids
   security_groups = [data.aws_security_group.lb.id]
+  # access_logs {
+  #   bucket  = aws_s3_bucket.main.bucket
+  #   prefix  = "log"
+  #   enabled = true
+  # }
 }
 
-resource "aws_alb_target_group" "app" {
-  name        = "${terraform.workspace}-tf-ecs-alb-group"
+resource "aws_alb_target_group" "main" {
+  name        = "${terraform.workspace}-wisp-ecs-alb-group"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -77,20 +159,41 @@ resource "aws_alb_target_group" "app" {
 }
 
 # Redirect all traffic from the ALB to the target group
-resource "aws_alb_listener" "front_end" {
+resource "aws_alb_listener" "https" {
   load_balancer_arn = aws_alb.main.id
-  port              = "80"
-  protocol          = "HTTP"
+  port              = 443
+  protocol          = "HTTPS"
+	ssl_policy        = "ELBSecurityPolicy-2016-08"
+  depends_on        = [aws_alb_target_group.main]
+	certificate_arn   = data.aws_acm_certificate.cert.arn
 
   default_action {
-    target_group_arn = aws_alb_target_group.app.id
+    target_group_arn = aws_alb_target_group.main.arn
     type             = "forward"
   }
 }
 
-### ECS
+resource "aws_alb_listener" "http" {
+  load_balancer_arn = aws_alb.main.id
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = aws_alb_target_group.main.arn
+    type             = "forward"
+  }
+}
+
+resource "aws_lb_listener_certificate" "https" {
+  listener_arn    = aws_alb_listener.https.arn
+  certificate_arn = data.aws_acm_certificate.cert.arn
+}
+### ======================================== ALB ========================================
+
+
+### ======================================== ECS ========================================
 resource "aws_iam_role" "ecsTaskExecutionRole" {
-  name               = "${terraform.workspace}-tf-ecs-role"
+  name               = "${terraform.workspace}-wisp-ecs-role"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
@@ -111,11 +214,14 @@ resource "aws_iam_role_policy_attachment" "ecsTaskExecutionRole_policy" {
 }
 
 resource "aws_ecs_cluster" "main" {
-  name = "${terraform.workspace}-tf-ecs-cluster"
+  name = "${terraform.workspace}-wisp-ecs-cluster"
 }
 
-resource "aws_ecs_task_definition" "app" {
-  family                   = "app"
+
+    ## ---------------------------------------- ECS service & task ----------------------------------------
+        # ........................................ Django ........................................
+resource "aws_ecs_task_definition" "main" {
+  family                   = "wisp-app"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.fargate_cpu
@@ -128,12 +234,12 @@ resource "aws_ecs_task_definition" "app" {
     "cpu": ${var.fargate_cpu},
     "image": "${var.app_image}",
     "memory": ${var.fargate_memory},
-    "name": "${terraform.workspace}-app",
+    "name": "${terraform.workspace}-wisp-app",
     "networkMode": "awsvpc",
     "portMappings": [
       {
-        "containerPort": ${var.app_port},
-        "hostPort": ${var.app_port}
+        "containerPort": 80,
+        "hostPort": 80
       }
     ]
   }
@@ -142,9 +248,9 @@ DEFINITION
 }
 
 resource "aws_ecs_service" "main" {
-  name            = "${terraform.workspace}-tf-ecs-service"
+  name            = "${terraform.workspace}-wisp-ecs-service"
   cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.app.arn
+  task_definition = aws_ecs_task_definition.main.arn
   desired_count   = var.app_count
   launch_type     = "FARGATE"
 
@@ -154,12 +260,16 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.app.id
-    container_name   = "${terraform.workspace}-app"
-    container_port   = var.app_port
+    target_group_arn = aws_alb_target_group.main.arn
+    container_name   = "${terraform.workspace}-wisp-app"
+    container_port   = 80
   }
 
   depends_on = [
-    aws_alb_listener.front_end,
+    aws_alb_listener.https,
+    aws_alb_listener.http,
   ]
 }
+        # ........................................ Django ........................................
+    ## ---------------------------------------- ECS service & task ----------------------------------------
+### ======================================== ECS ========================================

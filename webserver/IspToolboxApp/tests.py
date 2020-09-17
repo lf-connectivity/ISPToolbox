@@ -4,6 +4,7 @@ import shutil
 import os
 import json
 from IspToolboxApp.Tests.marketing_model_tests import TestMarketingModels
+from IspToolboxApp.Tests.marketing_views_tests import TestMarketingViews
 
 class TestHealthCheckEndpoint(TestCase):
     def test_healthcheck(self):
@@ -66,6 +67,8 @@ class TestKMZUpload(TestCase):
                 self.assertIs(content['error'], None)
                 self.assertTrue(len(content['uuid']) > 20)
                 self.assertIs(response.status_code, 200)
+        except Exception as e:
+          self.assertTrue(False)
         finally:
             shutil.rmtree(tmpdir)
             shutil.rmtree(tmpdirout)

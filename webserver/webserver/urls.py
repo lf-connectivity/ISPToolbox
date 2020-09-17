@@ -64,7 +64,10 @@ urlpatterns = [
     path('market-evaluator/income/', views.MarketEvaluatorPipelineIncome.as_view(), name='marketEvalAsyncIncome'),
     path('market-evaluator/service-providers/', views.MarketEvaluatorPipelineServiceProviders.as_view(), name='marketEvalAsyncServiceProviders'),
     path('market-evaluator/broadbandnow/', views.MarketEvaluatorPipelineBroadbandNow.as_view(), name='bbnow'),
-
+    # GeoTargeting Views
+    path('marketing/audience/', views.MarketingAudienceView.as_view(), name="marketing_audience"),
+    path('marketing/account/', views.MarketingAccountView.as_view(), name="marketing_account"),
+    path('marketing/geocheck/', views.MarketingAudienceGeoPixelCheck.as_view(), name="marketing_geocheck"),
     # Path mmWave Planner
     path('mmwave-planner/', views.MMWavePlannerView.as_view(), name='mmwaveplanner'),
     path('help-center/', views.MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),

@@ -3,6 +3,10 @@ from django.contrib.gis.db import models as gis_models
 from django.contrib.gis.geos import Point
 
 import uuid
+import secrets
+
+def createToken():
+    return secrets.token_urlsafe(32)
 
 class MarketingAccount(models.Model):
     # Meta Data
@@ -15,6 +19,7 @@ class MarketingAudience(models.Model):
     uuid = models.UUIDField(primary_key=True, default = uuid.uuid4, editable=False)
     created = models.DateTimeField(auto_now_add=True)
     account = models.ForeignKey(MarketingAccount, on_delete=models.CASCADE)
+    token = models.CharField(max_length=50, default=createToken, editable=False)
 
     # Area of Interest
     include_geojson = gis_models.GeometryField()
@@ -32,4 +37,3 @@ class MarketingAudience(models.Model):
 
         except Exception as e:
             return False
-

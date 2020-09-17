@@ -13,6 +13,7 @@ from IspToolboxApp.Views.market_evaluator_views.GrantViews import *
 from IspToolboxApp.Views.mmWaveViews import *
 from IspToolboxApp.Views.mmWavePlannerViews import *
 from IspToolboxApp.Views.MarketEvaluatorView import MarketEvaluatorPipelineKMZ, MarketEvaluatorPipelineBroadbandNow, MarketEvaluatorPipelineView, MarketEvaluatorPipelineBuildings, MarketEvaluatorPipelineServiceProviders, MarketEvaluatorPipelineIncome
+from IspToolboxApp.Views.RetargetingPixelView import MarketingAccountView, MarketingAudienceGeoPixelCheck, MarketingAudienceView
 
 from django.http import HttpResponse, JsonResponse
 

@@ -47,99 +47,38 @@ urlpatterns = [
     # Async Jobs
     path('gis/aoi/', views.index),
     path('gis/task/<str:task_id>/', views.TaskView.as_view(), name='task'),
-    path(
-        'gis/progress/<str:task_id>/',
-        views.ProgressView.as_view(),
-        name='progress'),
-    path(
-        'gis/result/<str:task_id>/',
-        views.ResultView.as_view(),
-        name='result'),
-    path(
-        'gis/osmBuildings/',
-        BuildingsView.as_view(),
-        name='osmBuildings'),
+    path('gis/progress/<str:task_id>/', views.ProgressView.as_view(), name='progress'),
+    path('gis/result/<str:task_id>/', views.ResultView.as_view(), name='result'),
+    path('gis/osmBuildings/', BuildingsView.as_view(), name='osmBuildings'),
     # Market Evaluator
-    path(
-        'market-evaluator/grants/',
-        SelectCensusGroupView.as_view(),
-        name='select_cbg'),
-    path(
-        'market-evaluator/market-income/',
-        IncomeView.as_view(),
-        name='PRIncome'),
-    path('market-evaluator/market-competition/',
-         Form477View.as_view(), name='PRIncome'),
-    path(
-        'market-evaluator/market-providers/',
-        ServiceProviders.as_view(),
-        name='Providers'),
-    path(
-        'market-evaluator/market-count/',
-        CountBuildingsView.as_view(),
-        name='PRIncome'),
-    path(
-        'market-evaluator/market-size/',
-        BuildingsView.as_view(),
-        name='BuildingOutlines'),
-    path(
-        'market-evaluator/market-rdof/',
-        RDOFView.as_view(),
-        name='PRIncome'),
-    path('market-evaluator/market-data-available/',
-         DataAvailableView.as_view(), name='PRIncome'),
+    path('market-evaluator/grants/', SelectCensusGroupView.as_view(), name='select_cbg'),
+    path('market-evaluator/market-income/', IncomeView.as_view(), name='PRIncome'),
+    path('market-evaluator/market-competition/',  Form477View.as_view(), name='PRIncome'),
+    path('market-evaluator/market-providers/', ServiceProviders.as_view(), name='Providers'),
+    path('market-evaluator/market-count/', CountBuildingsView.as_view(), name='PRIncome'),
+    path('market-evaluator/market-size/', BuildingsView.as_view(), name='BuildingOutlines'),
+    path('market-evaluator/market-rdof/', RDOFView.as_view(), name='PRIncome'),
+    path('market-evaluator/market-data-available/',  DataAvailableView.as_view(), name='PRIncome'),
     # Pipeline Functions for MarketEvaluator
+    path('market-evaluator/', MarketEvaluatorPipelineView.as_view(), name='marketEvalAsync'),
+    path('market-evaluator/kmz/', MarketEvaluatorPipelineKMZ.as_view(), name='marketEvalKMZAsync'),
+    path('market-evaluator/buildings/', MarketEvaluatorPipelineBuildings.as_view(), name='marketEvalAsyncBuildings'),
+    path('market-evaluator/income/', MarketEvaluatorPipelineIncome.as_view(), name='marketEvalAsyncIncome'),
     path(
-        'market-evaluator/',
-        MarketEvaluatorPipelineView.as_view(),
-        name='marketEvalAsync'),
-    path(
-        'market-evaluator/kmz/',
-        MarketEvaluatorPipelineKMZ.as_view(),
-        name='marketEvalKMZAsync'),
-    path(
-        'market-evaluator/buildings/',
-        MarketEvaluatorPipelineBuildings.as_view(),
-        name='marketEvalAsyncBuildings'),
-    path(
-        'market-evaluator/income/',
-        MarketEvaluatorPipelineIncome.as_view(),
-        name='marketEvalAsyncIncome'),
-    path('market-evaluator/service-providers/',
-         MarketEvaluatorPipelineServiceProviders.as_view(),
-         name='marketEvalAsyncServiceProviders'),
-    path(
-        'market-evaluator/broadbandnow/',
-        MarketEvaluatorPipelineBroadbandNow.as_view(),
-        name='bbnow'),
+        'market-evaluator/service-providers/',
+        MarketEvaluatorPipelineServiceProviders.as_view(),
+        name='marketEvalAsyncServiceProviders'
+    ),
+    path('market-evaluator/broadbandnow/', MarketEvaluatorPipelineBroadbandNow.as_view(), name='bbnow'),
     # GeoTargeting Views
-    path(
-        'marketing/audience/',
-        MarketingAudienceView.as_view(),
-        name="marketing_audience"),
-    path(
-        'marketing/account/',
-        MarketingAccountView.as_view(),
-        name="marketing_account"),
-    path(
-        'marketing/geocheck/',
-        MarketingAudienceGeoPixelCheck.as_view(),
-        name="marketing_geocheck"),
+    path('marketing/audience/', MarketingAudienceView.as_view(), name="marketing_audience"),
+    path('marketing/account/', MarketingAccountView.as_view(), name="marketing_account"),
+    path('marketing/geocheck/', MarketingAudienceGeoPixelCheck.as_view(), name="marketing_geocheck"),
     # Path mmWave Planner
-    path(
-        'mmwave-planner/',
-        MMWavePlannerView.as_view(),
-        name='mmwaveplanner'),
-    path(
-        'help-center/',
-        MMWaveHelpCenterView.as_view(),
-        name='mmwaveplanner-helpcenter'),
+    path('mmwave-planner/', MMWavePlannerView.as_view(), name='mmwaveplanner'),
+    path('help-center/', MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),
     # REST API Endpoints
-    path(
-        'api-auth/',
-        include(
-            'rest_framework.urls',
-            namespace='rest_framework')),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),
     # CMS
     path('cms/', include(wagtailadmin_urls)),

@@ -26,6 +26,16 @@ variable "app_image" {
   default     = "nginx:latest"
 }
 
+variable "nginx_image" {
+  description = "Nginx image to run in the ECS cluster"
+  default = "isptoolbox-nginx:latest"
+}
+
+variable "django_image" {
+  description = "Django image to run in the ECS cluster"
+  default = "isptoolbox-django:latest"
+}
+
 variable "app_port" {
   description = "Port exposed by the docker image to redirect traffic to"
   default     = 80
@@ -38,14 +48,33 @@ variable "app_count" {
 
 variable "fargate_cpu" {
   description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
-  default     = "256"
+  default     = "2048"
 }
 
 variable "fargate_memory" {
   description = "Fargate instance memory to provision (in MiB)"
-  default     = "512"
+  default     = "4096"
 }
 
+variable "nginx_cpu" {
+  description = "nginx instance CPU units to provision (1 vCPU = 1024 CPU units)"
+  default     = "1024"
+}
+
+variable "nginx_memory" {
+  description = "nginx instance memory to provision (in MiB)"
+  default     = "2048"
+}
+
+variable "django_cpu" {
+  description = "django instance CPU units to provision (1 vCPU = 1024 CPU units)"
+  default     = "1024"
+}
+
+variable "django_memory" {
+  description = "django instance memory to provision (in MiB)"
+  default     = "2048"
+}
 variable "vpc_id" {
   default = "vpc-05b042b728cf7e9b1"
 }

@@ -217,9 +217,14 @@ resource "aws_ecs_cluster" "main" {
   name = "${terraform.workspace}-wisp-ecs-cluster"
 }
 
-
+data "aws_ecr_repository" "django" {
+  name = "isptoolbox-django"
+}
+data "aws_ecr_repository" "nginx" {
+  name = "isptoolbox-nginx"
+}
     ## ---------------------------------------- ECS service & task ----------------------------------------
-        # ........................................ Django ........................................
+        # ........................................ Webserver ........................................
 resource "aws_ecs_task_definition" "main" {
   family                   = "wisp-app"
   network_mode             = "awsvpc"
@@ -231,15 +236,30 @@ resource "aws_ecs_task_definition" "main" {
   container_definitions = <<DEFINITION
 [
   {
-    "cpu": ${var.fargate_cpu},
-    "image": "${var.app_image}",
-    "memory": ${var.fargate_memory},
-    "name": "${terraform.workspace}-wisp-app",
-    "networkMode": "awsvpc",
+    "cpu": ${var.nginx_cpu},
+    "image": "${data.aws_ecr_repository.nginx.repository_url}:latest",
+    "memory": ${var.nginx_memory},
+    "name": "${terraform.workspace}-wisp-app-nginx",
     "portMappings": [
       {
-        "containerPort": 80,
-        "hostPort": 80
+        "containerPort": 80
+      }
+    ],
+    "dependsOn" : [
+      {
+        "condition" : "START",
+        "containerName" : "django_webserver"
+      }
+    ]
+  },
+  {
+    "cpu": ${var.django_cpu},
+    "image": "${data.aws_ecr_repository.django.repository_url}:latest",
+    "memory": ${var.django_memory},
+    "name": "django_webserver",
+    "portMappings": [
+      {
+        "containerPort": 8020
       }
     ]
   }
@@ -261,7 +281,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = aws_alb_target_group.main.arn
-    container_name   = "${terraform.workspace}-wisp-app"
+    container_name   = "${terraform.workspace}-wisp-app-nginx"
     container_port   = 80
   }
 

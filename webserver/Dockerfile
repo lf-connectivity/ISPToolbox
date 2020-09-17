@@ -8,6 +8,5 @@ RUN pip install -r requirements.txt
 
 ADD . /usr/src/app
 
+EXPOSE 8000
 CMD ["/usr/src/app/run_django_server.sh"]
-
-EXPOSE 8020

@@ -1,22 +1,19 @@
 version: '3'
 
 services:
-    webserver:
+    django_webserver:
         image: isptoolbox-django
         build: ./webserver
         volumes:
             - ./webserver:/usr/src/app
-        expose:
-            - 8020
+        ports:
+            - 80:80
     nginx:
         image: isptoolbox-nginx
         build: ./nginx
-        ports:
-            - 80:80
-        expose:
-            - 8020
+        network_mode: 'service:django_webserver'
         depends_on:
-            - webserver
+            - django_webserver
     celery:
         image: isptoolbox-celery
         build: ./webserver

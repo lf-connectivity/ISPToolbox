@@ -1,7 +1,7 @@
 from django.test import TestCase
-from IspToolboxApp.models import MarketingAccount, MarketingAudience
+from IspToolboxApp.Models.MarketingModels import MarketingAccount, MarketingAudience
 from django.contrib.gis.geos import GEOSGeometry
-import json
+
 
 class TestMarketingModels(TestCase):
     def test_models_simple(self):
@@ -22,7 +22,8 @@ class TestMarketingModels(TestCase):
         ]
     ]
 }"""
-        targeting_audience = MarketingAudience(include_geojson=GEOSGeometry(geojson), account=new_account)
+        targeting_audience = MarketingAudience(
+            include_geojson=GEOSGeometry(geojson), account=new_account)
         targeting_audience.save()
         self.assertTrue(
             targeting_audience.checkUserInside(-121.31970405578612, 38.00035618059361)
@@ -43,12 +44,14 @@ class TestMarketingModels(TestCase):
           ]
     ]
 }"""
-        targeting_audience.exclude_geojson=GEOSGeometry(exclude_geojson)
+        targeting_audience.exclude_geojson = GEOSGeometry(exclude_geojson)
         targeting_audience.save()
         self.assertFalse(
             targeting_audience.checkUserInside(-121.31970405578612, 38.00035618059361)
         )
-        audience2 = MarketingAudience(include_geojson=GEOSGeometry(exclude_geojson), account=new_account)
+        audience2 = MarketingAudience(
+            include_geojson=GEOSGeometry(exclude_geojson),
+            account=new_account)
         audience2.save()
 
         new_account.refresh_from_db()

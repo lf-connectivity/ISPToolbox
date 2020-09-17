@@ -7,13 +7,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('IspToolboxApp', '0002_form477jun2019_marketevaluatorpipeline_serviceprovider_tl2019blockscensus'),
+        ('IspToolboxApp',
+         '0002_form477jun2019_marketevaluatorpipeline_serviceprovider_tl2019blockscensus'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='marketevaluatorpipeline',
             name='token',
-            field=models.CharField(default=IspToolboxApp.Models.MarketEvaluatorModels.createTokenDefault, editable=False, max_length=50),
+            field=models.CharField(
+                default=IspToolboxApp.Models.MarketEvaluatorModels.createTokenDefault,
+                editable=False,
+                max_length=50),
         ),
     ]

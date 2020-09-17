@@ -2,7 +2,6 @@
 
 import logging
 import math
-import sys
 from itertools import combinations
 from typing import List, Optional, Tuple
 
@@ -28,7 +27,9 @@ def merge_similar_lines(
     lines_y = []
     for line in lines:
         # Calculate orientation (theta) based on slope
-        orientation_i = math.atan2((line[0][1] - line[1][1]), (line[0][0] - line[1][0]))
+        orientation_i = math.atan2(
+            (line[0][1] - line[1][1]),
+            (line[0][0] - line[1][0]))
         if (abs(math.degrees(orientation_i)) > 45) and abs(
             math.degrees(orientation_i)
         ) < (90 + 45):
@@ -40,8 +41,14 @@ def merge_similar_lines(
     lines_x = sorted(lines_x, key=lambda l: l[0][0])
     lines_y = sorted(lines_y, key=lambda l: l[0][1])
 
-    grouped_lines_x = _group_lines(lines_x, max_distance_to_merge, max_angle_to_merge)
-    grouped_lines_y = _group_lines(lines_y, max_distance_to_merge, max_angle_to_merge)
+    grouped_lines_x = _group_lines(
+        lines_x,
+        max_distance_to_merge,
+        max_angle_to_merge)
+    grouped_lines_y = _group_lines(
+        lines_y,
+        max_distance_to_merge,
+        max_angle_to_merge)
 
     merged_lines_x = [_merge_lines(group) for group in grouped_lines_x]
     merged_lines_y = [_merge_lines(group) for group in grouped_lines_y]
@@ -88,13 +95,16 @@ def find_line_intersections(
         if intersection:
             intersection_points.append(intersection)
 
-    logger.debug("Found {}intersection points.".format(len(intersection_points)))
+    logger.debug(
+        "Found {}intersection points.".format(
+            len(intersection_points)))
 
     if bounding_box is None:
         return intersection_points
 
     # Filter for points contained within (0,0, size[0], size[1]) bounding box
-    logger.debug("Filtering to following bounding box: {}".format(bounding_box))
+    logger.debug(
+        "Filtering to following bounding box: {}".format(bounding_box))
     filtered_int_pts = []
     for pt in intersection_points:
         if (
@@ -134,10 +144,8 @@ def _are_lines_similar(
     )
 
     # If angle between lines is above max_angle, return False
-    if (
-        int(abs(abs(math.degrees(orientation_a)) - abs(math.degrees(orientation_b))))
-        > max_angle
-    ):
+    if (int(abs(abs(math.degrees(orientation_a)) -
+                abs(math.degrees(orientation_b)))) > max_angle):
         return False
 
     # Distance and angle between lines is below threshold, so lines are similar
@@ -192,7 +200,8 @@ def _group_lines(
     return grouped_lines
 
 
-def _merge_lines(lines: List[List[Tuple[float, float]]]) -> List[Tuple[float, float]]:
+def _merge_lines(lines: List[List[Tuple[float, float]]]
+                 ) -> List[Tuple[float, float]]:
     """
     Merges a group of lines into a single line using the first line in a group
     as the reference.
@@ -212,9 +221,8 @@ def _merge_lines(lines: List[List[Tuple[float, float]]]) -> List[Tuple[float, fl
         points.append(line[0])
         points.append(line[1])
 
-    if (abs(math.degrees(orientation_a)) > 45) and abs(math.degrees(orientation_a)) < (
-        90 + 45
-    ):
+    if (abs(math.degrees(orientation_a)) > 45) and abs(
+            math.degrees(orientation_a)) < (90 + 45):
         # sort by y
         points = sorted(points, key=lambda point: point[1])
     else:
@@ -276,16 +284,32 @@ def get_distance(
     Calculates the distance between endpoints and the other line -- returns the minimum of results
     """
     dist1 = _calculate_distance_from_point_to_line(
-        line1[0][0], line1[0][1], line2[0][0], line2[0][1], line2[1][0], line2[1][1]
-    )
+        line1[0][0],
+        line1[0][1],
+        line2[0][0],
+        line2[0][1],
+        line2[1][0],
+        line2[1][1])
     dist2 = _calculate_distance_from_point_to_line(
-        line1[1][0], line1[1][1], line2[0][0], line2[0][1], line2[1][0], line2[1][1]
-    )
+        line1[1][0],
+        line1[1][1],
+        line2[0][0],
+        line2[0][1],
+        line2[1][0],
+        line2[1][1])
     dist3 = _calculate_distance_from_point_to_line(
-        line2[0][0], line2[0][1], line1[0][0], line1[0][1], line1[1][0], line1[1][1]
-    )
+        line2[0][0],
+        line2[0][1],
+        line1[0][0],
+        line1[0][1],
+        line1[1][0],
+        line1[1][1])
     dist4 = _calculate_distance_from_point_to_line(
-        line2[1][0], line2[1][1], line1[0][0], line1[0][1], line1[1][0], line1[1][1]
-    )
+        line2[1][0],
+        line2[1][1],
+        line1[0][0],
+        line1[0][1],
+        line1[1][0],
+        line1[1][1])
 
     return min(dist1, dist2, dist3, dist4)

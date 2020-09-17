@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import logging
-import timeit
 from math import atan2, floor
 from typing import List, Optional, Tuple, Union
 
@@ -72,8 +71,8 @@ def rotated_subimage(
     y = int(center[1] - height / 2)
 
     return image[
-        y - height_buffer : y + height + height_buffer,
-        x - width_buffer : x + width + width_buffer,
+        y - height_buffer: y + height + height_buffer,
+        x - width_buffer: x + width + width_buffer,
     ]
 
 
@@ -93,7 +92,8 @@ def subimage(
     x = int(center[0] - width / 2)
     y = int(center[1] - height / 2)
 
-    return image[y - buffer : y + height + buffer, x - buffer : x + width + buffer]
+    return image[y - buffer: y + height +
+                 buffer, x - buffer: x + width + buffer]
 
 
 def pad_image(img: np.array, pad_length: int, pad_val: int = 0) -> np.array:
@@ -117,14 +117,17 @@ def rotate_to_original_orientation(
     )
 
     # Create new matrix by horizontally stacking a ones vector and the polygon
-    # coordinates. Dimensions need to match with the rotation matrix for dot product
+    # coordinates. Dimensions need to match with the rotation matrix for dot
+    # product
     ones = np.ones(shape=(len(coords), 1))
     coords_ones_hstack = np.hstack([coords, ones])
 
     # Transform coordinates
-    reverse_transform_coordinates = inverse_rotation_matrix.dot(coords_ones_hstack.T).T
+    reverse_transform_coordinates = inverse_rotation_matrix.dot(
+        coords_ones_hstack.T).T
 
-    # Translate back to original coordinates using original center and subimage center
+    # Translate back to original coordinates using original center and
+    # subimage center
     translation_mat = np.array(
         [
             original_center[0] - subimage_center[0],
@@ -148,8 +151,12 @@ def find_principal_axis(
     Hough lines transformation, choosing the first, highest-ranking edge.
     """
     if subimg.size > 0:
-        edges = cv2.Canny(subimg, CANNY_EDGE_LOWER_THRESHOLD, CANNY_EDGE_UPPER_THRESHOLD)
-        lines = cv2.HoughLines(edges, 1, np.pi / 180, MINIMUM_INTERSECTIONS_TO_BE_LINE)
+        edges = cv2.Canny(
+            subimg,
+            CANNY_EDGE_LOWER_THRESHOLD,
+            CANNY_EDGE_UPPER_THRESHOLD)
+        lines = cv2.HoughLines(edges, 1, np.pi /
+                               180, MINIMUM_INTERSECTIONS_TO_BE_LINE)
         theta = lines[0][0][1] / np.pi * 180 if lines is not None else None
 
         # If width > height, rotate so that principal axis is horizontal
@@ -158,6 +165,7 @@ def find_principal_axis(
         return theta
     else:
         return None
+
 
 def extend_lines_to_edge(
     lines: List[Tuple[float, float, float, float]],
@@ -225,7 +233,8 @@ def aggregate_nearby_coordinates(
         if distance > nearby_distance:
 
             # Aggregate previous coordinates
-            centroid = calculate_centroid(coordinates, group_start_idx, group_end_idx)
+            centroid = calculate_centroid(
+                coordinates, group_start_idx, group_end_idx)
             aggregated_coordinates.append(centroid)
 
             # Reset aggregation variables
@@ -240,7 +249,8 @@ def aggregate_nearby_coordinates(
             if aggregated_distance + distance < max_distance:
                 aggregated_distance += distance
                 group_end_idx = idx
-            # If the result is greater than max distance, aggregate previous coordinates
+            # If the result is greater than max distance, aggregate previous
+            # coordinates
             else:
                 centroid = calculate_centroid(
                     coordinates, group_start_idx, group_end_idx
@@ -254,7 +264,8 @@ def aggregate_nearby_coordinates(
     if aggregated_distance == 0:
         aggregated_coordinates.append(coordinates[-1])
     elif aggregated_distance > 0:
-        centroid = calculate_centroid(coordinates, group_start_idx, group_end_idx)
+        centroid = calculate_centroid(
+            coordinates, group_start_idx, group_end_idx)
         aggregated_coordinates.append(centroid)
 
     return [round(c) for c in aggregated_coordinates]
@@ -335,8 +346,10 @@ def subrectangles_from_grid(
         x_idx = 1
         while x_idx < len(x_coords):
             subrectangles.append(
-                (x_coords[x_wall], y_coords[y_wall], x_coords[x_idx], y_coords[y_idx])
-            )
+                (x_coords[x_wall],
+                 y_coords[y_wall],
+                    x_coords[x_idx],
+                    y_coords[y_idx]))
             x_wall = x_idx
             x_idx += 1
         y_wall = y_idx
@@ -364,16 +377,20 @@ def split_subrectangle(
         return split_subrectangles
 
     # Add top-left rectangle
-    split_subrectangles.append((subrectangle[0], subrectangle[1], center_x, center_y))
+    split_subrectangles.append(
+        (subrectangle[0], subrectangle[1], center_x, center_y))
 
     # Add top-right rectangle
-    split_subrectangles.append((center_x, subrectangle[1], subrectangle[2], center_y))
+    split_subrectangles.append(
+        (center_x, subrectangle[1], subrectangle[2], center_y))
 
     # Add bottom-left rectangle
-    split_subrectangles.append((subrectangle[0], center_y, center_x, subrectangle[3]))
+    split_subrectangles.append(
+        (subrectangle[0], center_y, center_x, subrectangle[3]))
 
     # Add bottom-right rectangle
-    split_subrectangles.append((center_x, center_y, subrectangle[2], subrectangle[3]))
+    split_subrectangles.append(
+        (center_x, center_y, subrectangle[2], subrectangle[3]))
 
     return split_subrectangles
 
@@ -474,7 +491,8 @@ def find_filled_subrectangles(
         # If filled percentage is above the split threshold,
         # split the subrectangle into quadrants and add to subreactangles
         if not end_inspection and filled_pixel_count / subarea >= split_threshold:
-            split_subrects = split_subrectangle(subrectangle, minimum_split_distance)
+            split_subrects = split_subrectangle(
+                subrectangle, minimum_split_distance)
             subrectangles_to_inspect.extend(split_subrects)
 
     return filled_subrectangles
@@ -511,7 +529,8 @@ def combine_subrectangles_into_polygon(
     return unary_union(subrectangle_polygons)
 
 
-def select_largest_polygon(unary_union_result: Union[Polygon, MultiPolygon]) -> Polygon:
+def select_largest_polygon(
+        unary_union_result: Union[Polygon, MultiPolygon]) -> Polygon:
     """
     Select the largest polygon from the result of combine_subrectangles_into_polygon
     """
@@ -523,7 +542,9 @@ def select_largest_polygon(unary_union_result: Union[Polygon, MultiPolygon]) -> 
     return max(unary_union_result, key=lambda p: p.area)
 
 
-def vectorize_building_prediction(img: np.array, contour: np.array) -> np.array:
+def vectorize_building_prediction(
+        img: np.array,
+        contour: np.array) -> np.array:
     # Use bounding rectangle to get cropped image
     original_center, min_area_rect_size, _ = cv2.minAreaRect(contour)
     min_area_rect_width = floor(min_area_rect_size[0])
@@ -606,7 +627,8 @@ def vectorize_building_prediction(img: np.array, contour: np.array) -> np.array:
         )
 
         # Find intersection of lines
-        intersections = find_line_intersections(merged_lines, subimg_bounding_box)
+        intersections = find_line_intersections(
+            merged_lines, subimg_bounding_box)
 
     # If lines or intersections were not detected, use minimum area rectangle vertices
     # as starting point for intersections
@@ -621,9 +643,8 @@ def vectorize_building_prediction(img: np.array, contour: np.array) -> np.array:
         if len(intersections) == 0:
             return None
     else:
-        mean_shift_result = MeanShift(bandwidth=MAXIMUM_AGGREGATION_DISTANCE).fit(
-            intersections
-        )  # 1
+        mean_shift_result = MeanShift(
+            bandwidth=MAXIMUM_AGGREGATION_DISTANCE).fit(intersections)  # 1
         intersections = [
             (int(cc[0]), int(cc[1]))
             for cc in mean_shift_result.cluster_centers_.tolist()
@@ -648,7 +669,8 @@ def vectorize_building_prediction(img: np.array, contour: np.array) -> np.array:
     subrectangle_coordinates = [
         coordinates_from_bounding_box(fs) for fs in filled_subrectangles
     ]
-    subrectangle_union = combine_subrectangles_into_polygon(subrectangle_coordinates)
+    subrectangle_union = combine_subrectangles_into_polygon(
+        subrectangle_coordinates)
     polygon = select_largest_polygon(subrectangle_union)
     # If polygon was not detected, is not valid, or is empty, return early
     if not polygon or polygon.is_empty or not polygon.is_valid:

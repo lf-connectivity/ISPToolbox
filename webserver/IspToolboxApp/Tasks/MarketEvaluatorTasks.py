@@ -1,12 +1,12 @@
 from celery import shared_task
-from IspToolboxApp.models import MarketEvaluatorPipeline, ServiceProvider
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedAvailable, checkIfIncomeProvidersAvailable, queryBuildingOutlines
+from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedAvailable, \
+    checkIfIncomeProvidersAvailable, queryBuildingOutlines
 from django.contrib.gis.geos import GEOSGeometry
-import logging
 import json
 
 from datetime import datetime
-import IspToolboxApp.views 
+
 
 @shared_task
 def genMarketEvaluatorData(uuid):
@@ -18,27 +18,30 @@ def genMarketEvaluatorData(uuid):
         pipelineStatus.buildingCompleted = datetime.now()
         pipelineStatus.save(update_fields=['buildingCompleted'])
 
-    genServiceProviders.delay(uuid);
-    genMedianIncome.delay(uuid);
+    genServiceProviders.delay(uuid)
+    genMedianIncome.delay(uuid)
 
     pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
     pipelineStatus.completed = datetime.now()
     pipelineStatus.save(update_fields=['completed'])
     return uuid
 
+
 @shared_task
 def genPrecomputedBuilingsAvailable(uuid):
     pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
     pipelineStatus.buildingPrecomputed = checkIfPrecomputedAvailable(
         pipelineStatus.include_geojson.json,
-        pipelineStatus.exclude_geojson.json if pipelineStatus.exclude_geojson else pipelineStatus.exclude_geojson
-    )
+        pipelineStatus.exclude_geojson.json if pipelineStatus.exclude_geojson else pipelineStatus.exclude_geojson)
     pipelineStatus.incomeServiceProvidersAvailable = checkIfIncomeProvidersAvailable(
         pipelineStatus.include_geojson.json,
-        pipelineStatus.exclude_geojson.json if pipelineStatus.exclude_geojson else pipelineStatus.exclude_geojson
-    )
-    pipelineStatus.save(update_fields=['buildingPrecomputed','incomeServiceProvidersAvailable'])
+        pipelineStatus.exclude_geojson.json if pipelineStatus.exclude_geojson else pipelineStatus.exclude_geojson)
+    pipelineStatus.save(
+        update_fields=[
+            'buildingPrecomputed',
+            'incomeServiceProvidersAvailable'])
     return pipelineStatus.buildingPrecomputed
+
 
 @shared_task
 def genBuildingOutlines(uuid):
@@ -46,21 +49,38 @@ def genBuildingOutlines(uuid):
 
     def callbackUpdateProgress(buildingCount, buildingPolygons):
         pipelineStatus.buildingCount = buildingCount
-        pipelineStatus.buildingPolygons = GEOSGeometry(json.dumps(buildingPolygons))
-        pipelineStatus.save(update_fields=['buildingCount','buildingPolygons'])
+        pipelineStatus.buildingPolygons = GEOSGeometry(
+            json.dumps(buildingPolygons))
+        pipelineStatus.save(
+            update_fields=[
+                'buildingCount',
+                'buildingPolygons'])
 
-    buildingOutlinesResponse = queryBuildingOutlines(pipelineStatus.include_geojson, pipelineStatus.exclude_geojson, callback=callbackUpdateProgress)
+    buildingOutlinesResponse = queryBuildingOutlines(
+        pipelineStatus.include_geojson,
+        pipelineStatus.exclude_geojson,
+        callback=callbackUpdateProgress)
 
-    if buildingOutlinesResponse['error'] == None:
-        pipelineStatus.buildingCount = len(buildingOutlinesResponse['buildings']['geometries'])
-        pipelineStatus.buildingPolygons = GEOSGeometry(json.dumps(buildingOutlinesResponse['buildings']))
+    if buildingOutlinesResponse['error'] is None:
+        pipelineStatus.buildingCount = len(
+            buildingOutlinesResponse['buildings']['geometries'])
+        pipelineStatus.buildingPolygons = GEOSGeometry(
+            json.dumps(buildingOutlinesResponse['buildings']))
         pipelineStatus.buildingCompleted = datetime.now()
-        pipelineStatus.save(update_fields=['buildingCount','buildingPolygons','buildingCompleted'])
+        pipelineStatus.save(
+            update_fields=[
+                'buildingCount',
+                'buildingPolygons',
+                'buildingCompleted'])
     else:
         pipelineStatus.buildingCompleted = datetime.now()
         pipelineStatus.error = buildingOutlinesResponse['error']
-        pipelineStatus.save(update_fields=['buildingCount','buildingPolygons','buildingCompleted'])
-    
+        pipelineStatus.save(
+            update_fields=[
+                'buildingCount',
+                'buildingPolygons',
+                'buildingCompleted'])
+
     return None
 
 
@@ -71,6 +91,7 @@ def genServiceProviders(uuid):
     pipelineStatus.save(update_fields=['serviceProviderComplete'])
     return None
 
+
 @shared_task
 def genMedianIncome(uuid):
     pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
@@ -78,4 +99,3 @@ def genMedianIncome(uuid):
     pipelineStatus.incomeComplete = datetime.now()
     pipelineStatus.save(update_fields=['incomeComplete'])
     return None
-

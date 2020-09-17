@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS =  ['*'] #['*.fbctower.com']
+ALLOWED_HOSTS = ['*']  # ['*.fbctower.com']
 
 
 # Application definition
@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'corsheaders',
     'IspToolboxApp',
-    ## S3 Static File Storage
+    # S3 Static File Storage
     'storages',
-    ## Social Auth
+    # Social Auth
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     # REST API
     'rest_framework',
-    ## Wagtail CMS
+    # Wagtail CMS
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
     'wagtail.embeds',
@@ -71,7 +71,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_collect')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-## Static Files S3
+# Static Files S3
 AWS_DEFAULT_ACL = 'public-read'
 AWS_STORAGE_BUCKET_NAME = 'isptoolbox-static'
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
@@ -86,9 +86,9 @@ STATICFILES_DIRS = [
 STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-WAGTAIL_SITE_NAME='Help Center'
+WAGTAIL_SITE_NAME = 'Help Center'
 
-CSP_EXCLUDE_URL_PREFIXES= ('cms/', 'pages/',)
+CSP_EXCLUDE_URL_PREFIXES = ('cms/', 'pages/',)
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -98,7 +98,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-SITE_ID=3
+SITE_ID = 3
 
 AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -108,7 +108,7 @@ AUTHENTICATION_BACKENDS = (
 LOGIN_REDIRECT_URL = "/mmwave-planner"
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-#facebook
+# facebook
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'METHOD': 'js_sdk',
@@ -135,9 +135,6 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-SOCIAL_AUTH_FACEBOOK_KEY = '2704261536510806'  # App ID
-SOCIAL_AUTH_FACEBOOK_SECRET ='64d98e46c80c8659bd9eed0d67335259' #app key
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -147,7 +144,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ## Wagtail CMS
+    # Wagtail CMS
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
@@ -166,7 +163,7 @@ ROOT_URLCONF = 'webserver.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'IspToolboxApp', 'templates'),],
+        'DIRS': [os.path.join(BASE_DIR, 'IspToolboxApp', 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -189,16 +186,16 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'django_db',
-        'USER' : 'fbcmasteruser',
-        'HOST' : 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
-        'PORT' : '5432',
+        'USER': 'fbcmasteruser',
+        'HOST': 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
+        'PORT': '5432',
     },
     'gis_data': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'postgres',
-        'USER' : 'fbcmasteruser',
-        'HOST' : 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
-        'PORT' : '5432',
+        'USER': 'fbcmasteruser',
+        'HOST': 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 

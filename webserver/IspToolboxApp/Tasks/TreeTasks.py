@@ -5,6 +5,7 @@ import pickle
 import tempfile
 import boto3
 
+
 @shared_task
 def createTreeGeoTiff(id):
     # Load design
@@ -28,6 +29,7 @@ def loadImagesFromMapBox(bounding_box):
         image_fps.append(temp)
     return image_fps
 
+
 def classifyTrees(images):
     # c = dtr.Classifier()
     c = None
@@ -35,9 +37,12 @@ def classifyTrees(images):
 
     tmp = tempfile.TemporaryFile()
     s3 = boto3.client('s3')
-    s3.download_fileobj('isptoolbox-internal-blobs', 'tree-files/classifier_detectree.pickle', tmp)
+    s3.download_fileobj(
+        'isptoolbox-internal-blobs',
+        'tree-files/classifier_detectree.pickle',
+        tmp)
     tmp.seek(0)
-    
+
     clf = pickle.load(tmp)
     classified_imgs = []
     for img in images:

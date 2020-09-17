@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS =  ['*'] #['*.fbctower.com']
+ALLOWED_HOSTS = ['*']  # ['*.fbctower.com']
 
 
 # Application definition
@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'corsheaders',
     'IspToolboxApp',
-    ## S3 Static File Storage
+    # S3 Static File Storage
     'storages',
-    ## Social Auth
+    # Social Auth
     'django.contrib.sites',
     'allauth',
     'allauth.account',
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     # REST API
     'rest_framework',
-    ## Wagtail CMS
+    # Wagtail CMS
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
     'wagtail.embeds',
@@ -71,9 +71,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_collect')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-WAGTAIL_SITE_NAME='Help Center'
+WAGTAIL_SITE_NAME = 'Help Center'
 
-CSP_EXCLUDE_URL_PREFIXES= ('cms/', 'pages/',)
+CSP_EXCLUDE_URL_PREFIXES = ('cms/', 'pages/',)
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -83,7 +83,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-SITE_ID=2
+SITE_ID = 2
 
 AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -92,7 +92,7 @@ AUTHENTICATION_BACKENDS = (
 
 LOGIN_REDIRECT_URL = "/mmwave-planner"
 
-#facebook
+# facebook
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'METHOD': 'js_sdk',
@@ -119,9 +119,6 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-SOCIAL_AUTH_FACEBOOK_KEY = '2704261536510806'  # App ID
-SOCIAL_AUTH_FACEBOOK_SECRET ='64d98e46c80c8659bd9eed0d67335259' #app key
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -131,7 +128,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ## Wagtail CMS
+    # Wagtail CMS
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
@@ -150,7 +147,7 @@ ROOT_URLCONF = 'webserver.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'IspToolboxApp', 'templates'),],
+        'DIRS': [os.path.join(BASE_DIR, 'IspToolboxApp', 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -173,17 +170,17 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'django_test',
-        'USER' : 'postgres',
-        'PASSWORD' : 'password',
-        'HOST' : 'localhost',
-        'PORT' : '5432',
+        'USER': 'postgres',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '5432',
     },
     'gis_data': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'postgres',
-        'USER' : 'fbcmasteruser',
-        'HOST' : 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
-        'PORT' : '5432',
+        'USER': 'fbcmasteruser',
+        'HOST': 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 

@@ -5,21 +5,33 @@ from django.contrib.gis.geos import Point
 import uuid
 import secrets
 
+
 def createToken():
     return secrets.token_urlsafe(32)
 
+
 class MarketingAccount(models.Model):
     # Meta Data
-    uuid = models.UUIDField(primary_key=True, default = uuid.uuid4, editable=False)
+    uuid = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False)
     created = models.DateTimeField(auto_now_add=True)
     fbid = models.BigIntegerField(editable=False)
 
+
 class MarketingAudience(models.Model):
     # Meta Data
-    uuid = models.UUIDField(primary_key=True, default = uuid.uuid4, editable=False)
+    uuid = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False)
     created = models.DateTimeField(auto_now_add=True)
     account = models.ForeignKey(MarketingAccount, on_delete=models.CASCADE)
-    token = models.CharField(max_length=50, default=createToken, editable=False)
+    token = models.CharField(
+        max_length=50,
+        default=createToken,
+        editable=False)
 
     # Area of Interest
     include_geojson = gis_models.GeometryField()
@@ -29,11 +41,11 @@ class MarketingAudience(models.Model):
         try:
             pt = Point(longitude, latitude)
             intersects_include = pt.intersects(self.include_geojson)
-            intersects_exclude = pt.intersects(self.exclude_geojson) if self.exclude_geojson else False
+            intersects_exclude = pt.intersects(
+                self.exclude_geojson) if self.exclude_geojson else False
             if intersects_include and not intersects_exclude:
                 return True
             else:
                 return False
-
-        except Exception as e:
+        except Exception:
             return False

@@ -4,8 +4,10 @@
 #   * Make sure each model has one field with primary_key=True
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
+# Feel free to rename the models, but don't rename db_table values or
+# field names.
 from django.contrib.gis.db import models
+
 
 class Form477Jun2019(models.Model):
     logrecno = models.AutoField(primary_key=True)
@@ -13,7 +15,8 @@ class Form477Jun2019(models.Model):
     frn = models.IntegerField(blank=True, null=True)
     providername = models.CharField(max_length=255, blank=True, null=True)
     dbaname = models.CharField(max_length=255, blank=True, null=True)
-    holdingcompanyname = models.CharField(max_length=255, blank=True, null=True)
+    holdingcompanyname = models.CharField(
+        max_length=255, blank=True, null=True)
     hoconum = models.IntegerField(blank=True, null=True)
     hocofinal = models.CharField(max_length=255, blank=True, null=True)
     stateabbr = models.CharField(max_length=20, blank=True, null=True)
@@ -29,6 +32,7 @@ class Form477Jun2019(models.Model):
     class Meta:
         managed = False
         db_table = 'form477jun2019'
+
 
 class Tl2019BlocksCensus(models.Model):
     gid = models.AutoField(primary_key=True)

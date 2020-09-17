@@ -10,7 +10,7 @@ from PIL import Image
 import numpy as np
 from time import time
 import torch.cuda as cuda
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from shapely.geometry import Polygon, mapping
 import json
 from .vectorize_polygon import vectorize_building_prediction
@@ -21,6 +21,7 @@ logger.setLevel(logging.INFO)
 
 GROUPS_IN_NORMALIZATION = 32
 NON_LINEARITY = {"sigmoid": nn.Sigmoid, "log_softmax": nn.LogSoftmax}
+
 
 class DecoderBlock(nn.Module):
     def __init__(self, in_channels, n_filters, group=1):
@@ -75,6 +76,7 @@ class DecoderBlock(nn.Module):
         x = self.relu3(x)
         return x
 
+
 class Hourglass(nn.Module):
     def __init__(self, block, num_blocks, planes, depth):
         super(Hourglass, self).__init__()
@@ -120,6 +122,7 @@ class Hourglass(nn.Module):
     def forward(self, x):
         return self._hour_glass_forward(self.depth, x)
 
+
 class BasicBlockGN(nn.Module):
     """
     Basic Resnet Block with Group Norm.
@@ -131,12 +134,21 @@ class BasicBlockGN(nn.Module):
         super(BasicBlockGN, self).__init__()
 
         self.conv1 = nn.Conv2d(
-            inplanes, planes, kernel_size=3, stride=stride, padding=1, bias=True
-        )
+            inplanes,
+            planes,
+            kernel_size=3,
+            stride=stride,
+            padding=1,
+            bias=True)
         self.bn1 = nn.GroupNorm(GROUPS_IN_NORMALIZATION, planes)
         self.relu = nn.ReLU(inplace=True)
 
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, padding=1, bias=True)
+        self.conv2 = nn.Conv2d(
+            planes,
+            planes,
+            kernel_size=3,
+            padding=1,
+            bias=True)
         self.bn2 = nn.GroupNorm(GROUPS_IN_NORMALIZATION, planes)
         self.is_downsample = True if downsample is not None else False
         if self.is_downsample:
@@ -158,6 +170,7 @@ class BasicBlockGN(nn.Module):
         out = self.relu(out)
 
         return out
+
 
 class HourglassNetGNMS(nn.Module):
     """Hourglass model using Group Normalization with Multi-Scale Output."""
@@ -211,7 +224,12 @@ class HourglassNetGNMS(nn.Module):
             score.append(nn.Conv2d(ch, num_classes, kernel_size=1, bias=True))
             if i < num_stacks - 1:
                 fc_.append(nn.Conv2d(ch, ch, kernel_size=1, bias=True))
-                score_.append(nn.Conv2d(num_classes, ch, kernel_size=1, bias=True))
+                score_.append(
+                    nn.Conv2d(
+                        num_classes,
+                        ch,
+                        kernel_size=1,
+                        bias=True))
         self.hg = nn.ModuleList(hg)
         self.res = nn.ModuleList(res)
         self.fc = nn.ModuleList(fc)
@@ -300,23 +318,27 @@ class HourglassNetGNMS(nn.Module):
         else:
             return torch.sigmoid(f5)
 
+
 def load_state_dict(model, state_dict):
-        """
-        This is a wrapper function around model.load_state_dict to deal with
-        the details around saving/loading into multi-gpu settings
-        """
-        # Remove 'module.' prefix so parameters can be loaded in a standardized way.
-        prefix = "module."
-        # Realize the keys generator into a list so we modify the keys as we iterate.
-        for key in list(state_dict.keys()):
-            if key.startswith(prefix):
-                state_dict[key[len(prefix) :]] = state_dict.pop(key)
-        # Load parameters into model
-        if type(model) in (nn.parallel.DistributedDataParallel, nn.DataParallel):
-            model.module.load_state_dict(state_dict)
-        else:
-            model.load_state_dict(state_dict)
-        return model
+    """
+    This is a wrapper function around model.load_state_dict to deal with
+    the details around saving/loading into multi-gpu settings
+    """
+    # Remove 'module.' prefix so parameters can be loaded in a standardized
+    # way.
+    prefix = "module."
+    # Realize the keys generator into a list so we modify the keys as we
+    # iterate.
+    for key in list(state_dict.keys()):
+        if key.startswith(prefix):
+            state_dict[key[len(prefix):]] = state_dict.pop(key)
+    # Load parameters into model
+    if type(model) in (nn.parallel.DistributedDataParallel, nn.DataParallel):
+        model.module.load_state_dict(state_dict)
+    else:
+        model.load_state_dict(state_dict)
+    return model
+
 
 net_filepath = "/mnt/efs/fs1/deep_gis/HourglassNetGNMS2259.dat"
 
@@ -327,14 +349,15 @@ tile_pixels = 2048
 
 class GeoJSON:
     """GeoJSON class which allows to calculate bbox"""
+
     def __init__(self, geojson):
         if geojson['type'] == 'FeatureCollection':
             self.coords = list(self._flatten([f['geometry']['coordinates']
-                           for f in geojson['features']]))
+                                              for f in geojson['features']]))
             self.features_count = len(geojson['features'])
         elif geojson['type'] == 'Feature':
             self.coords = list(self._flatten([
-                        geojson['geometry']['coordinates']]))
+                geojson['geometry']['coordinates']]))
             self.features_count = 1
         else:
             self.coords = list(self._flatten([geojson['coordinates']]))
@@ -352,16 +375,18 @@ class GeoJSON:
         return [min(self.coords[::2]), min(self.coords[1::2]),
                 max(self.coords[::2]), max(self.coords[1::2])]
 
+
 def getBoundingBox(inputGeoJson):
     gj = geojson.loads(inputGeoJson)
     return GeoJSON(gj).bbox()
 
+
 def deg2num(lat_deg, lon_deg, zoom):
-  lat_rad = math.radians(lat_deg)
-  n = 2.0 ** zoom
-  xtile = int((lon_deg + 180.0) / 360.0 * n)
-  ytile = int((1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n)
-  return (xtile, ytile)
+    lat_rad = math.radians(lat_deg)
+    n = 2.0 ** zoom
+    xtile = int((lon_deg + 180.0) / 360.0 * n)
+    ytile = int((1.0 - math.asinh(math.tan(lat_rad)) / math.pi) / 2.0 * n)
+    return (xtile, ytile)
 
 
 def bbox_latlon_to_xy(min_lat, min_lon, max_lat, max_lon, level):
@@ -374,8 +399,10 @@ def bbox_latlon_to_xy(min_lat, min_lon, max_lat, max_lon, level):
     """
     x1, y1 = deg2num(min_lon, min_lat, level)
     x2, y2 = deg2num(max_lon, max_lat, level)
-    assert x2 >= x1, "latitude should not cross 180: {}, {}".format(min_lon, max_lon)
+    assert x2 >= x1, "latitude should not cross 180: {}, {}".format(
+        min_lon, max_lon)
     return x1, min(y1, y2), x2, max(y1, y2)
+
 
 def bbox_to_bing_tiles(min_lat, min_lon, max_lat, max_lon, level):
     min_x, min_y, max_x, max_y = bbox_latlon_to_xy(
@@ -387,25 +414,36 @@ def bbox_to_bing_tiles(min_lat, min_lon, max_lat, max_lon, level):
             res.append((x, y))
     return res
 
-def getTiles(bb,level=target_zoom):
+
+def getTiles(bb, level=target_zoom):
     delta = 1.0e-10
     deltas = (delta, delta, -delta, -delta)
     return bbox_to_bing_tiles(
         *[sum(x) for x in zip(bb, deltas)], level=level
     )
 
+
 mapbox_access_token = "pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ"
-def getTileImages(tiles, supersample=3, progressUpdate=None, level=target_zoom):
+
+
+def getTileImages(
+        tiles,
+        supersample=3,
+        progressUpdate=None,
+        level=target_zoom):
     urlTemplate = 'https://api.tiles.mapbox.com/v4/mapbox.satellite/{}/{}/{}.png?access_token={}'
     images = []
     for tile in tiles:
         # super sample
-        dst = Image.new('RGB', (img_dim * (2**supersample), img_dim * (2**supersample)))
+        dst = Image.new('RGB',
+                        (img_dim * (2**supersample),
+                         img_dim * (2**supersample)))
         for j in range(2**supersample):
             for i in range(2**supersample):
                 x = tile[0] * (2**supersample) + i
                 y = tile[1] * (2**supersample) + j
-                url = urlTemplate.format(level + supersample,x,y,mapbox_access_token)
+                url = urlTemplate.format(
+                    level + supersample, x, y, mapbox_access_token)
                 response = requests.get(url, stream=True)
                 response.raw.decode_content = True
                 image_data = io.BytesIO(response.raw.read())
@@ -416,7 +454,8 @@ def getTileImages(tiles, supersample=3, progressUpdate=None, level=target_zoom):
             progressUpdate()
     return images
 
-def run_inference(net, array, on_gpu= True):
+
+def run_inference(net, array, on_gpu=True):
     """
     Inference the model on the input array
     @param net: pretrained model
@@ -440,7 +479,7 @@ def run_inference(net, array, on_gpu= True):
             scored = scored[-1]
 
         if on_gpu:
-            ## Synchronize Cuda Operation
+            # Synchronize Cuda Operation
             torch.cuda.synchronize()
 
         average = scored[0, :, :, :]
@@ -455,12 +494,14 @@ def run_inference(net, array, on_gpu= True):
         )
         return average_cpu[0, :, :]
 
+
 def loopInference(sat_imgs):
     output_mode = "L"
     masks = []
     net = HourglassNetGNMS()
     net_hourglass_checkpoint = torch.load(io.open(net_filepath, "rb"))
-    net_hourglass = load_state_dict(net, net_hourglass_checkpoint["model_state_dict"])
+    net_hourglass = load_state_dict(
+        net, net_hourglass_checkpoint["model_state_dict"])
     num_gpus = cuda.device_count()
     assert num_gpus >= 1, "Prediction needs one or more GPUs but no GPU detected"
 
@@ -471,24 +512,32 @@ def loopInference(sat_imgs):
 
     for i, img in enumerate(sat_imgs):
         img_np = np.array(img).transpose(2, 0, 1)
-        out_np = (run_inference(net_hourglass, img_np, on_gpu=True) * 255).astype(np.uint8)
+        out_np = (
+            run_inference(
+                net_hourglass,
+                img_np,
+                on_gpu=True) *
+            255).astype(
+            np.uint8)
         out_pil = Image.fromarray(out_np, mode=output_mode)
         masks.append(out_pil)
     return masks
 
+
 def _get_xy_range_from_tile_names(zoom, tiles):
-    x0 = min(tiles,key=lambda x:x[0])[0]
-    x1 = max(tiles,key=lambda x:x[0])[0]
-    y0 = min(tiles,key=lambda x:x[1])[1]
-    y1 = max(tiles,key=lambda x:x[1])[1]
+    x0 = min(tiles, key=lambda x: x[0])[0]
+    x1 = max(tiles, key=lambda x: x[0])[0]
+    y0 = min(tiles, key=lambda x: x[1])[1]
+    y1 = max(tiles, key=lambda x: x[1])[1]
     return (x0, x1, y0, y1)
 
+
 def num2deg(xtile, ytile, zoom):
-  n = 2.0 ** zoom
-  lon_deg = xtile / n * 360.0 - 180.0
-  lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
-  lat_deg = math.degrees(lat_rad)
-  return (lat_deg, lon_deg)
+    n = 2.0 ** zoom
+    lon_deg = xtile / n * 360.0 - 180.0
+    lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
+    lat_deg = math.degrees(lat_rad)
+    return (lat_deg, lon_deg)
 
 
 def stitchMasks(masks, tiles, target_zoom=target_zoom):
@@ -514,7 +563,10 @@ def stitchMasks(masks, tiles, target_zoom=target_zoom):
 
     return out, (min_lon, min_lat, max_lon, max_lat)
 
+
 BUILDING_WHITE_THRESHOLD = 0.2 * 255
+
+
 def threshold_buildings(mask):
     building_raster_np = np.array(mask)
 
@@ -523,18 +575,24 @@ def threshold_buildings(mask):
     )
     return Image.fromarray(building_raster_img)
 
+
 def min_area_rect_polygon_from_contour(contour: np.array) -> Polygon:
     rect = cv2.minAreaRect(contour)
     box = cv2.boxPoints(rect)
     box = box.astype("int")
     return Polygon(shell=box)
 
+
 BUILDING_WHITE_THRESHOLD = 0.2 * 255
 BUILDING_SIMPLIFY_AREA_THRESHOLD = 0.05
 BUILDING_POLYGON_SIMPLIFY_TOLERANCE = 1
 BUILDING_MINIMUM_AREA = 1.0
 BUILDING_MINIMUM_AREA_HOUGH = 300
-def polygonize_buildings(mask: Image.Image, mode: str = "HOUGH") -> List[Polygon]:
+
+
+def polygonize_buildings(
+        mask: Image.Image,
+        mode: str = "HOUGH") -> List[Polygon]:
     """
     Polygonize a building prediction mask in PIL Image
     Output the building polygons
@@ -612,6 +670,7 @@ def polygonize_buildings(mask: Image.Image, mode: str = "HOUGH") -> List[Polygon
 
     return building_polygons
 
+
 def xy_to_latlon(geo_trans, x, y):
     """Returns global lat, long coordinates from pixel x, y coords
     params:
@@ -626,6 +685,7 @@ def xy_to_latlon(geo_trans, x, y):
     lon = a * x + b * y + xoff
     lat = d * x + e * y + yoff
     return (lon, lat)
+
 
 def convert_polygons_to_latlon(
     polygons: List[Polygon],

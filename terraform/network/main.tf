@@ -21,51 +21,51 @@ terraform {
 # Fetch AZs in the current region
 data "aws_availability_zones" "available" {}
 
-resource "aws_vpc" "main" {
+resource "aws_vpc" "isptoolbox" {
   cidr_block = "172.17.0.0/16"
 
   tags = {
-    Name = "aws_vpc-main"
+    Name = "isptoolbox_vpc-isptoolbox"
   }
 }
 
 # Create var.az_count private subnets, each in a different AZ
-resource "aws_subnet" "private" {
+resource "aws_subnet" "private_isptoolbox" {
   count             = var.az_count
-  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
+  cidr_block        = cidrsubnet(aws_vpc.isptoolbox.cidr_block, 8, count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
-  vpc_id            = aws_vpc.main.id
+  vpc_id            = aws_vpc.isptoolbox.id
 
   tags = {
-    Name = "aws_subnet-private-${count.index}"
+    Name = "isptoolbox_subnet-private-${count.index}"
   }
 }
 
 # Create var.az_count public subnets, each in a different AZ
-resource "aws_subnet" "public" {
+resource "aws_subnet" "public_isptoolbox" {
   count                   = var.az_count
-  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, var.az_count + count.index)
+  cidr_block              = cidrsubnet(aws_vpc.isptoolbox.cidr_block, 8, var.az_count + count.index)
   availability_zone       = data.aws_availability_zones.available.names[count.index]
-  vpc_id                  = aws_vpc.main.id
+  vpc_id                  = aws_vpc.isptoolbox.id
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "aws_subnet-public-${count.index}"
+    Name = "isptoolbox_subnet-public-${count.index}"
   }
 }
 
 # IGW for the public subnet
 resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.isptoolbox.id
 
   tags = {
-    Name = "aws_internet_gateway-gw"
+    Name = "isptoolbox_internet_gateway-gw"
   }
 }
 
 # Route the public subnet traffic through the IGW
 resource "aws_route" "internet_access" {
-  route_table_id         = aws_vpc.main.main_route_table_id
+  route_table_id         = aws_vpc.isptoolbox.main_route_table_id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.gw.id
 }
@@ -77,17 +77,17 @@ resource "aws_eip" "gw" {
   depends_on = [aws_internet_gateway.gw]
 
   tags = {
-    Name = "aws_eip-gw-${count.index}"
+    Name = "isptoolbox_eip-gw-${count.index}"
   }
 }
 
 resource "aws_nat_gateway" "gw" {
   count         = var.az_count
-  subnet_id     = element(aws_subnet.public.*.id, count.index)
+  subnet_id     = element(aws_subnet.public_isptoolbox.*.id, count.index)
   allocation_id = element(aws_eip.gw.*.id, count.index)
 
   tags = {
-    Name = "aws_nat_gateway-gw-${count.index}"
+    Name = "isptoolbox_nat_gateway-gw-${count.index}"
   }
 }
 
@@ -95,7 +95,7 @@ resource "aws_nat_gateway" "gw" {
 # And make it route non-local traffic through the NAT gateway to the internet
 resource "aws_route_table" "private" {
   count  = var.az_count
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.isptoolbox.id
 
   route {
     cidr_block     = "0.0.0.0/0"
@@ -103,14 +103,14 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "aws_route_table-private-${count.index}"
+    Name = "isptoolbox_route_table-private-${count.index}"
   }
 }
 
 # Explicitely associate the newly created route tables to the private subnets (so they don't default to the main route table)
 resource "aws_route_table_association" "private" {
   count          = var.az_count
-  subnet_id      = element(aws_subnet.private.*.id, count.index)
+  subnet_id      = element(aws_subnet.private_isptoolbox.*.id, count.index)
   route_table_id = element(aws_route_table.private.*.id, count.index)
 }
 
@@ -121,7 +121,7 @@ resource "aws_route_table_association" "private" {
 resource "aws_security_group" "lb" {
   name        = "tf-ecs-alb"
   description = "controls access to the ALB"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = aws_vpc.isptoolbox.id
 
   ingress {
     protocol    = "tcp"
@@ -145,7 +145,7 @@ resource "aws_security_group" "lb" {
   }
 
   tags = {
-    Name = "aws_security_group-lb"
+    Name = "isptoolbox_security_group-lb"
   }
 }
 
@@ -153,7 +153,7 @@ resource "aws_security_group" "lb" {
 resource "aws_security_group" "ecs_tasks" {
   name        = "tf-ecs-tasks"
   description = "allow inbound access from the ALB only"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = aws_vpc.isptoolbox.id
 
   ingress {
     protocol        = "tcp"
@@ -170,7 +170,7 @@ resource "aws_security_group" "ecs_tasks" {
   }
 
   tags = {
-    Name = "aws_security_group-ecs_tasks"
+    Name = "isptoolbox_security_group-ecs_tasks"
   }
 }
 
@@ -180,7 +180,7 @@ resource "aws_acm_certificate" "cert" {
   validation_method = "DNS"
 
   tags = {
-    Name = "aws_acm_certificate-cert"
+    Name = "isptoolbox_acm_certificate-cert"
   }
 
   lifecycle {

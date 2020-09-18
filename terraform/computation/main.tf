@@ -45,14 +45,14 @@ data "aws_subnet_ids" "private_selected" {
 data "aws_security_group" "lb" {
   filter {
     name = "tag:Name"
-    values = ["ISPToolbox-ALB-SG"]
+    values = ["isptoolbox_security_group-lb"]
   }
 }
 
 data "aws_security_group" "ecs_tasks" {
   filter {
     name = "tag:Name"
-    values = ["ISPToolbox-ECS-SG"]
+    values = ["isptoolbox_security_group-ecs_tasks"]
   }
 }
 ### ======================================== Network ========================================
@@ -188,10 +188,9 @@ resource "aws_elasticache_replication_group" "isptoolbox_redis" {
 ### ======================================== Elasticache ========================================
 
 ### ======================================== Database ========================================
-# data "aws_db_instance" "database" {
-#  db_instance_identifier = "microsoft-building-footprints"
-# }
-# {"name" : "POSTGRES_DB",   "value" : "${aws_db_instance.database.address}"}
+data "aws_db_instance" "database" {
+ db_instance_identifier = "microsoft-building-footprints"
+}
 
 ### ======================================== Database ========================================
 
@@ -314,7 +313,18 @@ resource "aws_ecs_task_definition" "main" {
       }
     ],
     "environment" : [
-      {"name" : "REDIS_BACKEND", "value" : "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}"}
+      {"name" : "REDIS_BACKEND", "value" : "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"},
+      {"name" : "POSTGRES_DB",   "value" : "${data.aws_db_instance.database.address}"}
+    ]
+  },
+  {
+    "cpu": ${var.celery_cpu},
+    "image": "${aws_ecr_repository.celery.repository_url}:latest",
+    "memory": ${var.celery_memory},
+    "name": "${terraform.workspace}-isptoolbox-webserver-celery",
+    "environment" : [
+      {"name" : "REDIS_BACKEND", "value" : "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"},
+      {"name" : "POSTGRES_DB",   "value" : "${data.aws_db_instance.database.address}"}
     ]
   }
 ]

@@ -48,12 +48,12 @@ variable "app_count" {
 
 variable "fargate_cpu" {
   description = "Fargate instance CPU units to provision (1 vCPU = 1024 CPU units)"
-  default     = "2048"
+  default     = "4096"
 }
 
 variable "fargate_memory" {
   description = "Fargate instance memory to provision (in MiB)"
-  default     = "4096"
+  default     = "8192"
 }
 
 variable "nginx_cpu" {
@@ -63,7 +63,7 @@ variable "nginx_cpu" {
 
 variable "nginx_memory" {
   description = "nginx instance memory to provision (in MiB)"
-  default     = "2048"
+  default     = "1024"
 }
 
 variable "django_cpu" {
@@ -73,18 +73,29 @@ variable "django_cpu" {
 
 variable "django_memory" {
   description = "django instance memory to provision (in MiB)"
+  default     = "1024"
+}
+
+variable "celery_cpu" {
+  description = "celery instance CPU units to provision (1 vCPU = 1024 CPU units)"
   default     = "2048"
 }
+
+variable "celery_memory" {
+  description = "celery instance memory to provision (in MiB)"
+  default     = "2048"
+}
+
 variable "vpc_id" {
-  default = "vpc-0391b5488b2625125"
+  default = "vpc-00fc5161aed753684"
 }
 
 variable "aws_subnet_privates" {
   type    = list(string)
-  default = ["isptoolbox-private-1"]
+  default = ["isptoolbox_subnet-private-0", "isptoolbox_subnet-private-1"]
 }
 
 variable "aws_subnet_publics" {
   type    = list(string)
-  default = ["isptoolbox-public-1", "isptoolbox-public-2"]
+  default = ["isptoolbox_subnet-public-0", "isptoolbox_subnet-public-1"]
 }

@@ -45,14 +45,14 @@ data "aws_subnet_ids" "private_selected" {
 data "aws_security_group" "lb" {
   filter {
     name = "tag:Name"
-    values = ["aws_security_group-lb"]
+    values = ["ISPToolbox-ALB-SG"]
   }
 }
 
 data "aws_security_group" "ecs_tasks" {
   filter {
     name = "tag:Name"
-    values = ["aws_security_group-ecs_tasks"]
+    values = ["ISPToolbox-ECS-SG"]
   }
 }
 ### ======================================== Network ========================================
@@ -66,6 +66,22 @@ resource "aws_ecr_repository" "main" {
   image_scanning_configuration {
     scan_on_push = true
   }
+}
+
+resource "aws_ecr_repository" "django" {
+  name = "isptoolbox-django"
+  image_tag_mutability = "MUTABLE"
+
+}
+
+resource "aws_ecr_repository" "nginx" {
+  name = "isptoolbox-nginx"
+  image_tag_mutability = "MUTABLE"
+}
+
+resource "aws_ecr_repository" "celery" {
+  name = "isptoolbox-celery"
+  image_tag_mutability = "MUTABLE"
 }
 ### ======================================== ECR ========================================
 
@@ -157,17 +173,27 @@ resource "aws_route53_record" "test_domain_record" {
 ### ======================================== route53 ========================================
 
 ### ======================================== Elasticache ========================================
-resource "aws_elasticache_cluster" "isptoolbox_redis" {
-  cluster_id           = "isptoolbox-redis"
-  engine               = "redis"
-  node_type            = "cache.r4.large"
-  num_cache_nodes      = 1
-  parameter_group_name = "default.redis5.0"
-  engine_version       = "5.0.6"
-  port                 = 6379
+resource "aws_elasticache_replication_group" "isptoolbox_redis" {
+  automatic_failover_enabled    = true
+  replication_group_id          = "isptoolbox-redis-replication"
+  replication_group_description = "isptoolbox redis"
+  node_type                     = "cache.r4.large"
+  number_cache_clusters         = 2
+  parameter_group_name          = "default.redis5.0"
+  port                          = 6379
+  engine                        = "redis"
+  engine_version                = "5.0.6"
 }
+
 ### ======================================== Elasticache ========================================
 
+### ======================================== Database ========================================
+# data "aws_db_instance" "database" {
+#  db_instance_identifier = "microsoft-building-footprints"
+# }
+# {"name" : "POSTGRES_DB",   "value" : "${aws_db_instance.database.address}"}
+
+### ======================================== Database ========================================
 
 ### ======================================== ALB ========================================
 resource "aws_alb" "main" {
@@ -248,16 +274,10 @@ resource "aws_ecs_cluster" "main" {
   name = "${terraform.workspace}-wisp-ecs-cluster"
 }
 
-data "aws_ecr_repository" "django" {
-  name = "isptoolbox-django"
-}
-data "aws_ecr_repository" "nginx" {
-  name = "isptoolbox-nginx"
-}
     ## ---------------------------------------- ECS service & task ----------------------------------------
         # ........................................ Webserver ........................................
 resource "aws_ecs_task_definition" "main" {
-  family                   = "wisp-app"
+  family                   = "isptoolbox-webserver"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.fargate_cpu
@@ -268,9 +288,9 @@ resource "aws_ecs_task_definition" "main" {
 [
   {
     "cpu": ${var.nginx_cpu},
-    "image": "${data.aws_ecr_repository.nginx.repository_url}:latest",
+    "image": "${aws_ecr_repository.nginx.repository_url}:latest",
     "memory": ${var.nginx_memory},
-    "name": "${terraform.workspace}-wisp-app-nginx",
+    "name": "${terraform.workspace}-isptoolbox-webserver-nginx",
     "portMappings": [
       {
         "containerPort": 80
@@ -285,13 +305,16 @@ resource "aws_ecs_task_definition" "main" {
   },
   {
     "cpu": ${var.django_cpu},
-    "image": "${data.aws_ecr_repository.django.repository_url}:latest",
+    "image": "${aws_ecr_repository.django.repository_url}:latest",
     "memory": ${var.django_memory},
     "name": "django_webserver",
     "portMappings": [
       {
         "containerPort": 8020
       }
+    ],
+    "environment" : [
+      {"name" : "REDIS_BACKEND", "value" : "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}"}
     ]
   }
 ]
@@ -312,7 +335,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = aws_alb_target_group.main.arn
-    container_name   = "${terraform.workspace}-wisp-app-nginx"
+    container_name   = "${terraform.workspace}-isptoolbox-webserver-nginx"
     container_port   = 80
   }
 

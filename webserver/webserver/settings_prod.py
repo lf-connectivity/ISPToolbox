@@ -187,14 +187,14 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'django_db',
         'USER': 'fbcmasteruser',
-        'HOST': 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
+        'HOST': os.environ.get('POSTGRES_DB', 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com'),
         'PORT': '5432',
     },
     'gis_data': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'postgres',
         'USER': 'fbcmasteruser',
-        'HOST': 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com',
+        'HOST': os.environ.get('POSTGRES_DB', 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com'),
         'PORT': '5432',
     }
 }
@@ -239,8 +239,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-CELERY_BROKER_URL = 'redis://isptoolbox-redis-prod.i0t4gq.ng.0001.use2.cache.amazonaws.com:6379'
-CELERY_RESULT_BACKEND = 'redis://isptoolbox-redis-prod.i0t4gq.ng.0001.use2.cache.amazonaws.com:6379'
+CELERY_BROKER_URL = os.environ.get('REDIS_BACKEND', 'redis://isptoolbox-redis-prod.i0t4gq.ng.0001.use2.cache.amazonaws.com:6379')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_BACKEND', 'redis://isptoolbox-redis-prod.i0t4gq.ng.0001.use2.cache.amazonaws.com:6379')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'

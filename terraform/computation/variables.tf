@@ -1,6 +1,6 @@
 variable "aws_region" {
   description = "The AWS region to create things in."
-  default     = "us-west-2"
+  default     = "us-east-2"
 }
 
 variable "aws_account_id" {
@@ -76,15 +76,15 @@ variable "django_memory" {
   default     = "2048"
 }
 variable "vpc_id" {
-  default = "vpc-05b042b728cf7e9b1"
+  default = "vpc-0391b5488b2625125"
 }
 
 variable "aws_subnet_privates" {
   type    = list(string)
-  default = ["aws_subnet-private-0", "aws_subnet-private-1"]
+  default = ["isptoolbox-private-1"]
 }
 
 variable "aws_subnet_publics" {
   type    = list(string)
-  default = ["aws_subnet-public-0", "aws_subnet-public-1"]
+  default = ["isptoolbox-public-1", "isptoolbox-public-2"]
 }

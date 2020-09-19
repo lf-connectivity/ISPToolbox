@@ -10,7 +10,7 @@ terraform {
     # Replace this with your bucket name!
     bucket         = "wisp-terraform-up-and-running-state"
     key            = "computation/terraform.tfstate"
-    region         = "us-west-2"
+    region         = "us-west-1"
     # Replace this with your DynamoDB table name!
     dynamodb_table = "terraform-up-and-running-locks"
     encrypt        = true
@@ -211,7 +211,6 @@ resource "aws_alb_target_group" "main" {
   port        = 80
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
-  target_type = "ip"
 }
 
 # Redirect all traffic from the ALB to the target group
@@ -277,8 +276,6 @@ resource "aws_ecs_cluster" "main" {
         # ........................................ Webserver ........................................
 resource "aws_ecs_task_definition" "main" {
   family                   = "isptoolbox-webserver"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
   cpu                      = var.fargate_cpu
   memory                   = var.fargate_memory
   execution_role_arn       = aws_iam_role.ecsTaskExecutionRole.arn
@@ -289,16 +286,19 @@ resource "aws_ecs_task_definition" "main" {
     "cpu": ${var.nginx_cpu},
     "image": "${aws_ecr_repository.nginx.repository_url}:latest",
     "memory": ${var.nginx_memory},
-    "name": "${terraform.workspace}-isptoolbox-webserver-nginx",
+    "name": "nginx",
+    "links": ["django-app"],
     "portMappings": [
       {
-        "containerPort": 80
+        "containerPort": 80,
+        "hostPort": 0,
+        "protocol": "tcp"
       }
     ],
     "dependsOn" : [
       {
         "condition" : "START",
-        "containerName" : "django_webserver"
+        "containerName" : "django-app"
       }
     ]
   },
@@ -306,25 +306,19 @@ resource "aws_ecs_task_definition" "main" {
     "cpu": ${var.django_cpu},
     "image": "${aws_ecr_repository.django.repository_url}:latest",
     "memory": ${var.django_memory},
-    "name": "django_webserver",
+    "name": "django-app",
+    "links": [],
     "portMappings": [
       {
-        "containerPort": 8020
+        "containerPort": 8000,
+        "hostPort": 0,
+        "protocol": "tcp"
       }
     ],
     "environment" : [
       {"name" : "REDIS_BACKEND", "value" : "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"},
-      {"name" : "POSTGRES_DB",   "value" : "${data.aws_db_instance.database.address}"}
-    ]
-  },
-  {
-    "cpu": ${var.celery_cpu},
-    "image": "${aws_ecr_repository.celery.repository_url}:latest",
-    "memory": ${var.celery_memory},
-    "name": "${terraform.workspace}-isptoolbox-webserver-celery",
-    "environment" : [
-      {"name" : "REDIS_BACKEND", "value" : "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"},
-      {"name" : "POSTGRES_DB",   "value" : "${data.aws_db_instance.database.address}"}
+      {"name" : "POSTGRES_DB",   "value" : "${data.aws_db_instance.database.address}"},
+      {"name": "UPDATE_DEF", "value" : "0"}
     ]
   }
 ]
@@ -336,16 +330,10 @@ resource "aws_ecs_service" "main" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
   desired_count   = var.app_count
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    security_groups = [data.aws_security_group.ecs_tasks.id]
-    subnets         = data.aws_subnet_ids.private_selected.ids
-  }
 
   load_balancer {
     target_group_arn = aws_alb_target_group.main.arn
-    container_name   = "${terraform.workspace}-isptoolbox-webserver-nginx"
+    container_name   = "nginx"
     container_port   = 80
   }
 
@@ -353,6 +341,54 @@ resource "aws_ecs_service" "main" {
     aws_alb_listener.https,
     aws_alb_listener.http,
   ]
+}
+
+# ECS Security group (traffic ALB -> ECS, ssh -> ECS)
+resource "aws_security_group" "ecs" {
+  name        = "ecs_security_group"
+  description = "Allows inbound access from the ALB only"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [data.aws_security_group.lb.id]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_launch_configuration" "ecs" {
+  name                        = "isptoolbox-webserver-launch-config"
+  image_id                    = "ami-0405ccdd08efac995"
+  instance_type               = "m4.large"
+  security_groups             = [aws_security_group.ecs.id]
+  associate_public_ip_address = true
+  user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${terraform.workspace}-wisp-ecs-cluster' > /etc/ecs/ecs.config"
+}
+
+resource "aws_autoscaling_group" "ecs-cluster" {
+  name                 = "${aws_ecs_cluster.main.name}_auto_scaling_group"
+  min_size             = 1
+  max_size             = 2
+  desired_capacity     = 2
+  health_check_type    = "EC2"
+
+  launch_configuration = aws_launch_configuration.ecs.name
+  vpc_zone_identifier  = data.aws_subnet_ids.public_selected.ids
 }
         # ........................................ Django ........................................
     ## ---------------------------------------- ECS service & task ----------------------------------------

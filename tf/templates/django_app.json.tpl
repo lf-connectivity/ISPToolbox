@@ -36,8 +36,8 @@
         "value": "5432"
       },
       {
-        "name": "ALLOWED_HOSTS",
-        "value": "${allowed_hosts}"
+        "name" : "REDIS_BACKEND",
+        "value" : "${redis}"
       }
     ],
     "mountPoints": [

@@ -184,7 +184,6 @@ resource "aws_elasticache_replication_group" "isptoolbox_redis" {
   engine                        = "redis"
   engine_version                = "5.0.6"
 }
-
 ### ======================================== Elasticache ========================================
 
 ### ======================================== Database ========================================

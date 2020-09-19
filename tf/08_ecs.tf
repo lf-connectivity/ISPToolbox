@@ -68,6 +68,7 @@ data "template_file" "app" {
     rds_username            = var.rds_username
     rds_password            = var.rds_password
     rds_hostname            = aws_db_instance.production.address
+    redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
     allowed_hosts           = var.allowed_hosts
   }
 }
@@ -75,7 +76,7 @@ data "template_file" "app" {
 resource "aws_ecs_task_definition" "app" {
   family                = "django-app"
   container_definitions = data.template_file.app.rendered
-  depends_on            = [aws_db_instance.production]
+  depends_on            = [aws_db_instance.production, aws_elasticache_replication_group.isptoolbox_redis]
 
   volume {
     name      = "static_volume"

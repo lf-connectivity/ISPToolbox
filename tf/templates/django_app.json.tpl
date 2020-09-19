@@ -16,6 +16,10 @@
     "command": ["gunicorn", "webserver.wsgi","-b", "0.0.0.0", "-w","6"],
     "environment": [
       {
+        "name": "DEBUG",
+        "value": "TRUE"
+      },
+      {
         "name": "RDS_DB_NAME",
         "value": "${rds_db_name}"
       },

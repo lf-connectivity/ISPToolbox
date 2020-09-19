@@ -2,9 +2,29 @@ resource "aws_ecs_cluster" "production" {
   name = "${var.ecs_cluster_name}-cluster"
 }
 
+data "aws_ami" "ecs" {
+  most_recent = true # get the latest version
+
+  filter {
+    name = "name"
+    values = [
+      "amzn2-ami-ecs-*"] # ECS optimized image
+  }
+
+  filter {
+    name = "virtualization-type"
+    values = [
+      "hvm"]
+  }
+
+  owners = [
+    "amazon" # Only official images
+  ]
+}
+
 resource "aws_launch_configuration" "ecs" {
   name                        = "${var.ecs_cluster_name}-cluster"
-  image_id                    = lookup(var.amis, var.region)
+  image_id                    = data.aws_ami.ecs.id
   instance_type               = var.instance_type
   security_groups             = [aws_security_group.ecs.id]
   iam_instance_profile        = aws_iam_instance_profile.ecs.name

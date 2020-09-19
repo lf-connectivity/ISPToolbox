@@ -5,7 +5,6 @@ variable "region" {
   default     = "us-west-1"
 }
 
-
 # networking
 
 variable "public_subnet_1_cidr" {
@@ -43,14 +42,9 @@ variable "health_check_path" {
 
 variable "ecs_cluster_name" {
   description = "Name of the ECS cluster"
-  default     = "production"
+  default     = "isptoolbox-production"
 }
-variable "amis" {
-  description = "Which AMI to spawn."
-  default = {
-    us-west-1 = "ami-0667a9cc6a93f50fe"
-  }
-}
+
 variable "instance_type" {
   default = "t3.xlarge"
 }

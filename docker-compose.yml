@@ -1,19 +1,22 @@
 version: '3'
 
 services:
-    django_webserver:
+    django-app:
         image: isptoolbox-django
         build: ./webserver
         volumes:
             - ./webserver:/usr/src/app
         ports:
             - 80:80
+        command: gunicorn webserver.wsgi -b 0.0.0.0 -w 6
+        environment:
+            - DJANGO_SETTINGS_MODULE=webserver.settings_prod
     nginx:
         image: isptoolbox-nginx
         build: ./nginx
-        network_mode: 'service:django_webserver'
+        network_mode: 'service:django-app'
         depends_on:
-            - django_webserver
+            - django-app
     celery:
         image: isptoolbox-celery
         build: ./webserver

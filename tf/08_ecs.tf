@@ -13,12 +13,36 @@ resource "aws_launch_configuration" "ecs" {
   user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${var.ecs_cluster_name}-cluster' > /etc/ecs/ecs.config"
 }
 
+resource "aws_ecr_repository" "django" {
+  name = "isptoolbox-django"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_repository" "nginx" {
+  name = "isptoolbox-nginx"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_repository" "celery" {
+  name = "isptoolbox-celery"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
 data "template_file" "app" {
   template = file("templates/django_app.json.tpl")
 
   vars = {
-    docker_image_url_django = var.docker_image_url_django
-    docker_image_url_nginx  = var.docker_image_url_nginx
+    docker_image_url_django = "${aws_ecr_repository.django.repository_url}:latest"
+    docker_image_url_nginx  = "${aws_ecr_repository.nginx.repository_url}:latest"
     region                  = var.region
     rds_db_name             = var.rds_db_name
     rds_username            = var.rds_username
@@ -45,7 +69,7 @@ resource "aws_ecs_service" "production" {
   task_definition = aws_ecs_task_definition.app.arn
   iam_role        = aws_iam_role.ecs-service-role.arn
   desired_count   = var.app_count
-  depends_on      = [aws_alb_listener.ecs-alb-http-listener, aws_iam_role_policy.ecs-service-role-policy]
+  depends_on      = [aws_alb_listener.ecs-alb-http-listener, aws_alb_listener.http, aws_iam_role_policy.ecs-service-role-policy]
 
   load_balancer {
     target_group_arn = aws_alb_target_group.default-target-group.arn

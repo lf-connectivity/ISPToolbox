@@ -35,7 +35,7 @@ variable "availability_zones" {
 
 variable "health_check_path" {
   description = "Health check path for the default target group"
-  default     = "/ping/"
+  default     = "/static/"
 }
 
 
@@ -52,16 +52,9 @@ variable "amis" {
   }
 }
 variable "instance_type" {
-  default = "t2.micro"
+  default = "t3.xlarge"
 }
-variable "docker_image_url_django" {
-  description = "Docker image to run in the ECS cluster"
-  default     = "<AWS_ACCOUNT_ID>.dkr.ecr.us-west-1.amazonaws.com/django-app:latest"
-}
-variable "docker_image_url_nginx" {
-  description = "Docker image to run in the ECS cluster"
-  default     = "<AWS_ACCOUNT_ID>.dkr.ecr.us-west-1.amazonaws.com/nginx:latest"
-}
+
 variable "app_count" {
   description = "Number of Docker containers to run"
   default     = 2
@@ -115,6 +108,7 @@ variable "rds_username" {
 }
 variable "rds_password" {
   description = "RDS database password"
+  default = "longlegslongtighs"
 }
 variable "rds_instance_class" {
   description = "RDS instance type"
@@ -123,8 +117,3 @@ variable "rds_instance_class" {
 
 
 # domain
-
-variable "certificate_arn" {
-  description = "AWS Certificate Manager ARN for validated domain"
-  default     = "YOUR ARN"
-}

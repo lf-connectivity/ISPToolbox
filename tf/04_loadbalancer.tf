@@ -25,17 +25,41 @@ resource "aws_alb_target_group" "default-target-group" {
   }
 }
 
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "*.fbctower.com"
+  validation_method = "DNS"
+
+  tags = {
+    Name = "isptoolbox_acm_certificate-cert"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 # Listener (redirects traffic from the load balancer to the target group)
 resource "aws_alb_listener" "ecs-alb-http-listener" {
   load_balancer_arn = aws_lb.production.id
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = var.certificate_arn
+  certificate_arn   = aws_acm_certificate.cert.arn
   depends_on        = [aws_alb_target_group.default-target-group]
 
   default_action {
     type             = "forward"
     target_group_arn = aws_alb_target_group.default-target-group.arn
+  }
+}
+
+resource "aws_alb_listener" "http" {
+  load_balancer_arn = aws_lb.production.id
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = aws_alb_target_group.default-target-group.arn
+    type             = "forward"
   }
 }

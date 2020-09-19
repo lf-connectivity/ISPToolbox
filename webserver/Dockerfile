@@ -9,4 +9,4 @@ RUN pip install -r requirements.txt
 ADD . /usr/src/app
 
 EXPOSE 8000
-CMD ["/usr/src/app/run_django_server.sh"]
+CMD ["gunicorn webserver.wsgi -b 0.0.0.0 -w 6"]

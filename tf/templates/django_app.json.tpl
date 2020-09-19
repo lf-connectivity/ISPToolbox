@@ -3,8 +3,8 @@
     "name": "django-app",
     "image": "${docker_image_url_django}",
     "essential": true,
-    "cpu": 10,
-    "memory": 512,
+    "cpu": 2048,
+    "memory": 1024,
     "links": [],
     "portMappings": [
       {
@@ -13,7 +13,7 @@
         "protocol": "tcp"
       }
     ],
-    "command": ["gunicorn", "-w", "3", "-b", ":8000", "hello_django.wsgi:application"],
+    "command": ["gunicorn", "webserver.wsgi","-b", "0.0.0.0", "-w","6"],
     "environment": [
       {
         "name": "RDS_DB_NAME",

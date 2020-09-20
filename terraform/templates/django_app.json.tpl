@@ -4,7 +4,7 @@
     "image": "${docker_image_url_django}",
     "essential": true,
     "cpu": 2048,
-    "memory": 1024,
+    "memory": 4096,
     "links": [],
     "portMappings": [
       {
@@ -13,31 +13,19 @@
         "protocol": "tcp"
       }
     ],
-    "command": ["gunicorn", "webserver.wsgi","-b", "0.0.0.0", "-w","6"],
+    "command": ["gunicorn", "webserver.wsgi","-b", "0.0.0.0", "-w","4"],
     "environment": [
       {
         "name": "DEBUG",
+        "value": "false"
+      },
+      {
+        "name": "PROD",
         "value": "TRUE"
       },
       {
-        "name": "RDS_DB_NAME",
-        "value": "${rds_db_name}"
-      },
-      {
-        "name": "RDS_USERNAME",
-        "value": "${rds_username}"
-      },
-      {
-        "name": "RDS_PASSWORD",
-        "value": "${rds_password}"
-      },
-      {
-        "name": "RDS_HOSTNAME",
+        "name": "POSTGRES_DB",
         "value": "${rds_hostname}"
-      },
-      {
-        "name": "RDS_PORT",
-        "value": "5432"
       },
       {
         "name" : "REDIS_BACKEND",
@@ -63,8 +51,8 @@
     "name": "nginx",
     "image": "${docker_image_url_nginx}",
     "essential": true,
-    "cpu": 10,
-    "memory": 128,
+    "cpu": 512,
+    "memory": 1024,
     "links": ["django-app"],
     "portMappings": [
       {

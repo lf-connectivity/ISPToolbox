@@ -64,10 +64,7 @@ data "template_file" "app" {
     docker_image_url_django = "${aws_ecr_repository.django.repository_url}:latest"
     docker_image_url_nginx  = "${aws_ecr_repository.nginx.repository_url}:latest"
     region                  = var.region
-    rds_db_name             = var.rds_db_name
-    rds_username            = var.rds_username
-    rds_password            = var.rds_password
-    rds_hostname            = aws_db_instance.production.address
+    rds_hostname            = data.aws_db_instance.database.address
     redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
     allowed_hosts           = var.allowed_hosts
   }
@@ -76,7 +73,7 @@ data "template_file" "app" {
 resource "aws_ecs_task_definition" "app" {
   family                = "django-app"
   container_definitions = data.template_file.app.rendered
-  depends_on            = [aws_db_instance.production, aws_elasticache_replication_group.isptoolbox_redis]
+  depends_on            = [aws_elasticache_replication_group.isptoolbox_redis]
 
   volume {
     name      = "static_volume"
@@ -97,4 +94,30 @@ resource "aws_ecs_service" "production" {
     container_name   = "nginx"
     container_port   = 80
   }
+}
+
+
+data "template_file" "celery_app" {
+  template = file("templates/celery_app.json.tpl")
+
+  vars = {
+    docker_image_url_celery = "${aws_ecr_repository.celery.repository_url}:latest"
+    region                  = var.region
+    rds_hostname            = data.aws_db_instance.database.address
+    redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
+  }
+}
+
+resource "aws_ecs_task_definition" "celery-app" {
+  family                = "celery-app"
+  container_definitions = data.template_file.celery_app.rendered
+  depends_on            = [aws_elasticache_replication_group.isptoolbox_redis]
+}
+
+resource "aws_ecs_service" "async-production" {
+  name            = "${var.ecs_cluster_name}-async-service"
+  cluster         = aws_ecs_cluster.production.id
+  task_definition = aws_ecs_task_definition.celery-app.arn
+  desired_count   = var.app_count
+  depends_on      = [aws_iam_role_policy.ecs-service-role-policy]
 }

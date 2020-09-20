@@ -23,8 +23,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-if "DEBUG" in os.environ:
+if "DEBUG" in os.environ and os.environ.get("DEBUG").lower() == 'true':
     DEBUG= True
+
+if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Static Files S3
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_STORAGE_BUCKET_NAME = 'isptoolbox-static'
+    AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_LOCATION = 'static'
+
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'IspToolboxApp/static'),
+    ]
+    STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 ALLOWED_HOSTS = ['*']  # ['*.fbctower.com']
 
@@ -86,6 +103,8 @@ REST_FRAMEWORK = {
 }
 
 SITE_ID = 2
+if 'POSTGRES_DB' in os.environ:
+    SITE_ID = 3
 
 AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',

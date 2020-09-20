@@ -34,7 +34,7 @@ variable "availability_zones" {
 
 variable "health_check_path" {
   description = "Health check path for the default target group"
-  default     = "/static/"
+  default     = "/"
 }
 
 
@@ -70,7 +70,7 @@ variable "log_retention_in_days" {
 
 variable "ssh_pubkey_file" {
   description = "Path to an SSH public key"
-  default     = "~/.ssh/id_rsa.pub"
+  default     = "id_rsa.pub"
 }
 
 
@@ -88,26 +88,3 @@ variable "autoscale_desired" {
   description = "Desired autoscale (number of EC2)"
   default     = "4"
 }
-
-
-# rds
-
-variable "rds_db_name" {
-  description = "RDS database name"
-  default     = "mydb"
-}
-variable "rds_username" {
-  description = "RDS database username"
-  default     = "foo"
-}
-variable "rds_password" {
-  description = "RDS database password"
-  default = "longlegslongtighs"
-}
-variable "rds_instance_class" {
-  description = "RDS instance type"
-  default     = "db.t2.micro"
-}
-
-
-# domain

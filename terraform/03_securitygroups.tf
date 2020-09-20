@@ -74,3 +74,24 @@ resource "aws_security_group" "rds" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# Elasticache Security Group (traffic ECS -> Redis)
+resource "aws_security_group" "redis" {
+  name        = "isptoolbox-redis-security-group"
+  description = "Allows inbound access from ECS only"
+  vpc_id      = aws_vpc.production-vpc.id
+
+  ingress {
+    protocol        = "tcp"
+    from_port       = "6379"
+    to_port         = "6379"
+    security_groups = [aws_security_group.ecs.id]
+  }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}

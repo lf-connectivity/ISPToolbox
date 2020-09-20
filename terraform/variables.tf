@@ -78,7 +78,7 @@ variable "ssh_pubkey_file" {
 
 variable "autoscale_min" {
   description = "Minimum autoscale (number of EC2)"
-  default     = "1"
+  default     = "2"
 }
 variable "autoscale_max" {
   description = "Maximum autoscale (number of EC2)"

@@ -1,5 +1,8 @@
-resource "aws_ecs_cluster" "production" {
-  name = "${var.ecs_cluster_name}-cluster"
+resource "aws_ecs_cluster" "webserver-production" {
+  name = "${var.ecs_cluster_name}-webserver-cluster"
+}
+resource "aws_ecs_cluster" "async-production" {
+  name = "${var.ecs_cluster_name}-async-cluster"
 }
 
 data "aws_ami" "ecs" {
@@ -22,15 +25,26 @@ data "aws_ami" "ecs" {
   ]
 }
 
-resource "aws_launch_configuration" "ecs" {
-  name                        = "${var.ecs_cluster_name}-cluster"
+resource "aws_launch_configuration" "ecs-webserver" {
+  name                        = aws_ecs_cluster.webserver-production.name
   image_id                    = data.aws_ami.ecs.id
   instance_type               = var.instance_type
   security_groups             = [aws_security_group.ecs.id]
   iam_instance_profile        = aws_iam_instance_profile.ecs.name
   key_name                    = aws_key_pair.production.key_name
   associate_public_ip_address = true
-  user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${var.ecs_cluster_name}-cluster' > /etc/ecs/ecs.config"
+  user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${aws_ecs_cluster.webserver-production.name}' > /etc/ecs/ecs.config"
+}
+
+resource "aws_launch_configuration" "ecs-async" {
+  name                        = aws_ecs_cluster.async-production.name
+  image_id                    = data.aws_ami.ecs.id
+  instance_type               = var.instance_type
+  security_groups             = [aws_security_group.ecs.id]
+  iam_instance_profile        = aws_iam_instance_profile.ecs.name
+  key_name                    = aws_key_pair.production.key_name
+  associate_public_ip_address = true
+  user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${aws_ecs_cluster.async-production.name}' > /etc/ecs/ecs.config"
 }
 
 resource "aws_ecr_repository" "django" {
@@ -82,8 +96,8 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 resource "aws_ecs_service" "production" {
-  name            = "${var.ecs_cluster_name}-service"
-  cluster         = aws_ecs_cluster.production.id
+  name            = "${var.ecs_cluster_name}-webserver-service"
+  cluster         = aws_ecs_cluster.webserver-production.id
   task_definition = aws_ecs_task_definition.app.arn
   iam_role        = aws_iam_role.ecs-service-role.arn
   desired_count   = var.app_count
@@ -116,7 +130,7 @@ resource "aws_ecs_task_definition" "celery-app" {
 
 resource "aws_ecs_service" "async-production" {
   name            = "${var.ecs_cluster_name}-async-service"
-  cluster         = aws_ecs_cluster.production.id
+  cluster         = aws_ecs_cluster.async-production.id
   task_definition = aws_ecs_task_definition.celery-app.arn
   desired_count   = var.app_count
   depends_on      = [aws_iam_role_policy.ecs-service-role-policy]

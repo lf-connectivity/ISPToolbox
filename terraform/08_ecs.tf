@@ -63,14 +63,6 @@ resource "aws_ecr_repository" "nginx" {
   }
 }
 
-resource "aws_ecr_repository" "celery" {
-  name = "isptoolbox-celery"
-  image_tag_mutability = "MUTABLE"
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-
 data "template_file" "app" {
   template = file("templates/django_app.json.tpl")
 
@@ -108,6 +100,9 @@ resource "aws_ecs_service" "production" {
     container_name   = "nginx"
     container_port   = 80
   }
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
 }
 
 
@@ -115,7 +110,7 @@ data "template_file" "celery_app" {
   template = file("templates/celery_app.json.tpl")
 
   vars = {
-    docker_image_url_celery = "${aws_ecr_repository.celery.repository_url}:latest"
+    docker_image_url_celery = "${aws_ecr_repository.django.repository_url}:latest"
     region                  = var.region
     rds_hostname            = data.aws_db_instance.database.address
     redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
@@ -134,4 +129,7 @@ resource "aws_ecs_service" "async-production" {
   task_definition = aws_ecs_task_definition.celery-app.arn
   desired_count   = var.app_count
   depends_on      = [aws_iam_role_policy.ecs-service-role-policy]
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
 }

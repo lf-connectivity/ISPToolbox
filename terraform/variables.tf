@@ -70,7 +70,7 @@ variable "log_retention_in_days" {
 
 variable "ssh_pubkey_file" {
   description = "Path to an SSH public key"
-  default     = "id_rsa.pub"
+  default     = "isptoolbox.pub"
 }
 
 
@@ -78,7 +78,7 @@ variable "ssh_pubkey_file" {
 
 variable "autoscale_min" {
   description = "Minimum autoscale (number of EC2)"
-  default     = "2"
+  default     = "1"
 }
 variable "autoscale_max" {
   description = "Maximum autoscale (number of EC2)"
@@ -86,5 +86,5 @@ variable "autoscale_max" {
 }
 variable "autoscale_desired" {
   description = "Desired autoscale (number of EC2)"
-  default     = "4"
+  default     = "2"
 }

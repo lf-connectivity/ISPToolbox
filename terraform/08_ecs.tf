@@ -71,6 +71,9 @@ data "template_file" "app" {
     docker_image_url_nginx  = "${aws_ecr_repository.nginx.repository_url}:latest"
     region                  = var.region
     rds_hostname            = data.aws_db_instance.database.address
+    rds_db_name             = var.POSTGRES_DB_NAME
+    rds_db_username         = var.POSTGRES_DB_USERNAME
+    rds_db_password         = var.POSTGRES_DB_PASSWORD
     redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
     allowed_hosts           = var.allowed_hosts
   }
@@ -113,6 +116,9 @@ data "template_file" "celery_app" {
     docker_image_url_celery = "${aws_ecr_repository.django.repository_url}:latest"
     region                  = var.region
     rds_hostname            = data.aws_db_instance.database.address
+    rds_db_name             = var.POSTGRES_DB_NAME
+    rds_db_username         = var.POSTGRES_DB_USERNAME
+    rds_db_password         = var.POSTGRES_DB_PASSWORD
     redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
   }
 }

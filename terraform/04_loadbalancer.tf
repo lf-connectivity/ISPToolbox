@@ -27,6 +27,7 @@ resource "aws_alb_target_group" "default-target-group" {
 
 resource "aws_acm_certificate" "cert" {
   domain_name       = "*.fbctower.com"
+  subject_alternative_names  = ["fbctower.com"]
   validation_method = "DNS"
 
   tags = {

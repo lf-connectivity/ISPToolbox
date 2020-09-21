@@ -20,6 +20,18 @@
         "value": "${rds_hostname}"
       },
       {
+        "name": "DB_NAME",
+        "value": "${rds_db_name}"
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": "${rds_db_username}"
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": "${rds_db_password}"
+      },
+      {
         "name" : "REDIS_BACKEND",
         "value" : "${redis}"
       }

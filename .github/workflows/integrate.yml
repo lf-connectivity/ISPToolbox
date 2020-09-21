@@ -53,6 +53,10 @@ jobs:
     - name: Run Django Test Suite
       run: |
         python webserver/manage.py test webserver
+      env: 
+        DB_NAME: django_test
+        DB_USERNAME: postgres
+        DB_PASSWORD: password
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:

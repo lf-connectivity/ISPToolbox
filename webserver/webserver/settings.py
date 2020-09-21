@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 if "DEBUG" in os.environ and os.environ.get("DEBUG").lower() == 'true':
-    DEBUG= True
+    DEBUG = True
 
 if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -190,9 +190,10 @@ WSGI_APPLICATION = 'webserver.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'django_db',
-        'USER': 'fbcmasteruser',
+        'NAME': os.environ.get('DB_NAME', 'django_db'),
+        'USER': os.environ.get('DB_USERNAME', 'fbcmasteruser'),
         'HOST': os.environ.get('POSTGRES_DB', 'localhost'),
+        # for migrations : POSTGRES_DB=isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com
         'PORT': '5432',
     },
     'gis_data': {

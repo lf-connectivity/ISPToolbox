@@ -4,7 +4,7 @@
     "image": "${docker_image_url_celery}",
     "essential": true,
     "cpu": 2048,
-    "memory": 1024,
+    "memory": 6144,
     "command": ["celery","-A","webserver","worker","-l","info"],
     "environment": [
       {

@@ -3,7 +3,7 @@
     "name": "django-app",
     "image": "${docker_image_url_django}",
     "essential": true,
-    "cpu": 2048,
+    "cpu": 1536,
     "memory": 4096,
     "links": [],
     "portMappings": [
@@ -13,7 +13,7 @@
         "protocol": "tcp"
       }
     ],
-    "command": ["gunicorn", "webserver.wsgi","-b", "0.0.0.0", "-w","4"],
+    "command": ["gunicorn", "webserver.wsgi","-b", "0.0.0.0", "-w","2"],
     "environment": [
       {
         "name": "DEBUG",
@@ -52,7 +52,7 @@
     "image": "${docker_image_url_nginx}",
     "essential": true,
     "cpu": 512,
-    "memory": 1024,
+    "memory": 2048,
     "links": ["django-app"],
     "portMappings": [
       {

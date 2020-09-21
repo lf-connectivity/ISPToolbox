@@ -196,11 +196,13 @@ DATABASES = {
         # for migrations : POSTGRES_DB=isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com
         'PORT': '5432',
     },
+    # This DB is not managed by Django ORM, therefore we hardcode parameters
+    # Contains static GIS data: microsoft buildings dataset, income data, fcc broadband availablility
     'gis_data': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'postgres',
         'USER': 'fbcmasteruser',
-        'HOST': os.environ.get('POSTGRES_DB', 'microsoft-building-footprints.cedcz50bv5p9.us-east-2.rds.amazonaws.com'),
+        'HOST': os.environ.get('POSTGRES_DB', 'isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com'),
         'PORT': '5432',
     }
 }

@@ -1,3 +1,4 @@
+# aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin 623762516657.dkr.ecr.us-west-1.amazonaws.com
 docker-compose build
 docker tag isptoolbox-django:latest 623762516657.dkr.ecr.us-west-1.amazonaws.com/isptoolbox-django:latest
 docker push 623762516657.dkr.ecr.us-west-1.amazonaws.com/isptoolbox-django:latest

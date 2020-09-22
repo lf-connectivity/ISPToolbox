@@ -190,8 +190,9 @@ WSGI_APPLICATION = 'webserver.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DB_NAME', 'django_db'),
-        'USER': os.environ.get('DB_USERNAME', 'fbcmasteruser'),
+        'NAME': os.environ.get('DB_NAME', 'django_test'),
+        'USER': os.environ.get('DB_USERNAME', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'password'),
         'HOST': os.environ.get('POSTGRES_DB', 'localhost'),
         # for migrations : POSTGRES_DB=isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com
         'PORT': '5432',

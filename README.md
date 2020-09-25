@@ -8,19 +8,32 @@ ISP Toolbox Backend Server Code
 
 ## Locally run Django Webserver (Ubuntu)
 Configure system environment (once):
+
 `make setup`
+
 Make sure to follow steps printed to console in order to set up a test postgres db. Find them here as well for convenience:
+
 `sudo -i -u postgres`
+
 `createdb django_test`
+
 `psql`
+
 ` \password postgres`
+
 Set the password to "password"
 
+
 Install required packages:
+
 `make update`
+
 Perform django migrations:
+
 `make migrate`
+
 Run:
+
 `make run`
 
 ## Database Migrations (Standard Django Process)

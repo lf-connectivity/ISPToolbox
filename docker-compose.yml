@@ -1,27 +1,34 @@
 version: '3'
 
 services:
+    redis:
+        image: "redis:6.0.8"
+        command: redis-server
+
+    postgres:
+        image: postgis/postgis:11-3.0
+        environment:
+          - "POSTGRES_USER=postgres"
+          - "POSTGRES_PASSWORD=password"
+          - "POSTGRES_DB=django_test"
+
     django-app:
         image: isptoolbox-django
         build: ./webserver
-        volumes:
-            - ./webserver:/usr/src/app
-        ports:
-            - 80:80
-        command: gunicorn webserver.wsgi -b 0.0.0.0 -w 6
-        environment:
-            - DJANGO_SETTINGS_MODULE=webserver.settings_prod
+        command: gunicorn webserver.wsgi -b 0.0.0.0 -w 2
+        depends_on:
+            - redis
+            - postgres
     nginx:
         image: isptoolbox-nginx
         build: ./nginx
-        network_mode: 'service:django-app'
         depends_on:
             - django-app
+        ports:
+            - 80:80
     celery:
         image: isptoolbox-celery
         build: ./webserver
-        command: celery -A webserver worker -l info
-        volumes:
-            - ./webserver/:/usr/src/app/
-        environment:
-            - DJANGO_SETTINGS_MODULE=webserver.settings_prod
+        command: celery worker -A webserver -l info
+        depends_on:
+            - redis

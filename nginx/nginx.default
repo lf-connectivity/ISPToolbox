@@ -9,7 +9,7 @@ server {
         return 301 https://$host$request_uri;
     }
 
-    location /static/ {
+    location /test-static/ {
         root /var/www/html;
     }
 

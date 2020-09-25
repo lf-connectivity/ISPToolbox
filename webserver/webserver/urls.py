@@ -41,6 +41,7 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Health Check Endpoint
+    path('elb-status/', views.HealthCheckView.as_view()),
     path('', views.HealthCheckView.as_view(), name='healthcheck'),
     path('login/', views.SocialLoginView.as_view(), name='login'),
     path(r'accounts/', include('allauth.urls')),

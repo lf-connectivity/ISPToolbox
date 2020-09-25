@@ -24,6 +24,7 @@ from IspToolboxApp.Views.MarketEvaluatorView import MarketEvaluatorPipelineBroad
     MarketEvaluatorPipelineKMZ, MarketEvaluatorPipelineView, MarketEvaluatorPipelineBuildings
 from IspToolboxApp.Views.RetargetingPixelView import MarketingAccountView, \
     MarketingAudienceView, MarketingAudienceGeoPixelCheck
+from IspToolboxApp.Views.MarketingViews import MarketingConvertPolygons
 from IspToolboxApp.Views.mmWavePlannerViews import MMWavePlannerView, MMWaveHelpCenterView
 from IspToolboxApp.Views.market_evaluator_views.GrantViews import SelectCensusGroupView
 from rest_framework import routers
@@ -75,6 +76,8 @@ urlpatterns = [
     path('marketing/audience/', MarketingAudienceView.as_view(), name="marketing_audience"),
     path('marketing/account/', MarketingAccountView.as_view(), name="marketing_account"),
     path('marketing/geocheck/', MarketingAudienceGeoPixelCheck.as_view(), name="marketing_geocheck"),
+    # Marketing Pin Conversion Endpoints
+    path('marketing/convert/', MarketingConvertPolygons.as_view()),
     # Path mmWave Planner
     path('mmwave-planner/', MMWavePlannerView.as_view(), name='mmwaveplanner'),
     path('help-center/', MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),

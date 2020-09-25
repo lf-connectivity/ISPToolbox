@@ -1,4 +1,7 @@
 ## DO NOT USE FOR PRODUCTION - only for local dev testing
+echo "Creating database migrations"
+python3 manage.py makemigrations
+
 # Apply database migrations
 echo "Apply database migrations"
 python3 manage.py migrate

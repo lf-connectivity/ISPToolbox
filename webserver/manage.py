@@ -7,7 +7,7 @@ import sys
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webserver.settings')
 
-    # start Debugging 
+    # start Debugging
     from django.conf import settings
     if settings.DEBUG:
         #  These environment variables enable hot reloading
@@ -16,7 +16,7 @@ def main():
             ptvsd.enable_attach(address=('0.0.0.0', 3000))
             print('Attached VS Code Python Debugger!')
     # end Debugging
-    
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

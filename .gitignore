@@ -22,6 +22,6 @@ static_collect
 
 # Terraform
 .terraform
-terraform.tfstate
+.terraform.tfstate.lock.info
 terraform.tfstate.backup
 terraform.tfstate.d

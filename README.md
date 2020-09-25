@@ -36,7 +36,7 @@ Test changes locally and unit test if applicable.
 
 Once you're ready to push database schema changes to production:
 
-`DJANGO_SETTINGS_MODULE=webserver.settings_prod python manage.py migrate`
+The latest environment variables are in the `terraform/variables.tf` file
 
 ## Make command list
 `make setup`

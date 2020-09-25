@@ -54,6 +54,41 @@ resource "aws_security_group" "ecs" {
   }
 }
 
+# ECS Security group (traffic ALB -> ECS, ssh -> ECS)
+resource "aws_security_group" "dev_ecs" {
+  name        = "dev_ecs_security_group"
+  description = "Allows 80, 443, 22 public access"
+  vpc_id      = aws_vpc.production-vpc.id
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "http"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port       = 443
+    to_port         = 443
+    protocol        = "https"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 # RDS Security Group (traffic ECS -> RDS)
 resource "aws_security_group" "rds" {
   name        = "rds-security-group"

@@ -60,6 +60,6 @@ Creates django migrations for model changes.
 `make migrate`
 Performs django migrations for model changes.
 
-`run`
+`make run`
 Starts the webserver.
 

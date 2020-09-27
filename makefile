@@ -35,3 +35,9 @@ makemigrations:
 run:
 	@echo ----------------------------------------------RUNNING WEBSERVER----------------------------------------
 	python3 ./webserver/manage.py runserver
+
+debug:
+	@echo ----------------------------------------------STARTING DEBUG----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+

@@ -36,6 +36,7 @@ opencv-python==4.2.0.34
 Pillow==7.2.0
 prometheus-client==0.8.0
 psycopg2-binary==2.8.5
+ptvsd==4.3.2
 pygeoif==0.7
 python-dateutil==2.8.1
 pytz==2020.1

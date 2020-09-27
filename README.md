@@ -54,6 +54,9 @@ The latest environment variables are in the `terraform/variables.tf` file
 `make run`
 - Starts the webserver.
 
+`make debug`
+- runs backend in debug configuration. attach to django using vscode
+
 ## Pushing New Images to Production
 
 Option 1: Github action

@@ -6,6 +6,11 @@ services:
     environment:
       DEBUG: 'TRUE'
       POSTGRES_DB: 'postgres'
+    volumes:
+      - ./webserver:/usr/src/app
+    ports:
+      - 3000:3000
+      - 8000:8000
   celery:
     environment:
       POSTGRES_DB: 'postgres'

@@ -54,3 +54,31 @@ The latest environment variables are in the `terraform/variables.tf` file
 `make run`
 - Starts the webserver.
 
+## Pushing New Images to Production
+
+Option 1: Github action
+1. push latest code change to github master branch, wait for workflow to complete successfully. Make sure aws cli is configured locally -
+
+    ``` git push origin master```
+
+    ```aws configure```
+
+2. deploy images to ecs
+
+    ```./scripts/deploy_latest_image_to_prod.sh```
+
+Option 2: Scripts for manual push (something broke)
+
+1. login to AWS and ECR repository
+
+    ```aws configure```
+
+    ```aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin 623762516657.dkr.ecr.us-west-1.amazonaws.com```
+
+2. build docker images locally and change tags, push to ecr
+
+    ```./scripts/buildnpush.sh```
+
+3. deploy images to ecs
+
+    ```./scripts/deploy_latest_image_to_prod.sh```

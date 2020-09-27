@@ -203,7 +203,7 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'postgres',
         'USER': 'fbcmasteruser',
-        'HOST': os.environ.get('POSTGRES_DB', 'isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com'),
+        'HOST': 'isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com',
         'PORT': '5432',
     }
 }

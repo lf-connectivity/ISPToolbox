@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  django-app:
+    command: /bin/sh -c "/usr/src/app/dev_entrypoint_django.sh"
+    environment:
+      DEBUG: 'TRUE'
+      POSTGRES_DB: 'postgres'
+  celery:
+    environment:
+      POSTGRES_DB: 'postgres'

@@ -41,3 +41,7 @@ debug:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
+test: 
+	@echo ----------------------------------------------STARTING TESTS----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python manage.py test

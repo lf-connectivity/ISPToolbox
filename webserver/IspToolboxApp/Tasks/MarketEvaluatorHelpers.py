@@ -11,15 +11,9 @@ import rasterio.features
 import rasterio.warp
 from defusedxml import ElementTree
 
-
 def getUniqueBuildingNodes(nodes):
-    buildings = {
-        k: v for (
-            k,
-            v) in nodes.items() if (
-            ('tags' in v) and (
-                'building' in v['tags']) and (
-                    'nodes' in v))}
+    buildings = {k: v for (k, v) in nodes.items() if (
+        ('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
     return buildings
 
 
@@ -79,10 +73,10 @@ def checkIfIncomeProvidersAvailable(include, exclude):
         '69': False,
         '78': False,
     }
-    return checkIfAvailable(include, exclude, switcher)
+    return checkIfAvailable(include, exclude, switcher, "tl_2017_us_state")
 
 
-def checkIfPrecomputedAvailable(include, exclude):
+def checkIfPrecomputedIncomeAvailable(include, exclude):
     switcher = {
         '60': False,
         '66': False,
@@ -90,14 +84,25 @@ def checkIfPrecomputedAvailable(include, exclude):
         '78': False,
         '72': False,
     }
-    return checkIfAvailable(include, exclude, switcher)
+    return checkIfAvailable(include, exclude, switcher, "tl_2017_us_state")
 
 
-def checkIfAvailable(include, exclude, switcher):
+def checkIfPrecomputedBuildingsAvailable(include, exclude):
+    switcher = {
+        '60': False,
+        '66': False,
+        '69': False,
+        '78': False,
+        '72': False,
+    }
+    return checkIfAvailable(include, exclude, switcher, "standardized_prov_state")
+
+
+def checkIfAvailable(include, exclude, switcher, table):
     resp = False
 
     with connections['gis_data'].cursor() as cursor:
-        query_skeleton = "SELECT geoid FROM tl_2017_us_state WHERE {}"
+        query_skeleton = "SELECT geoid FROM {tab} WHERE {}".format(tab=table)
         query_skeleton = getQueryTemplate(
             query_skeleton, exclude is not None, True)
         cursor.execute(query_skeleton, [
@@ -107,7 +112,6 @@ def checkIfAvailable(include, exclude, switcher):
                 resp = True
                 break
     return resp
-
 
 def queryBuildingOutlines(include, exclude, callback=None):
     '''
@@ -120,9 +124,9 @@ def queryBuildingOutlines(include, exclude, callback=None):
         exclude = exclude.geojson
     except BaseException:
         logging.info("No Exclude Defined")
-    # Check if Query is in US
-    query_in_us = checkIfPrecomputedAvailable(include, exclude)
-    if query_in_us:
+    # Check if Query is in US or Canada
+    buildings_available = checkIfPrecomputedBuildingsAvailable(include, exclude)
+    if buildings_available:
         response = getMicrosoftBuildings(include, exclude, callback=callback)
     else:
         response = getOSMBuildings(include, exclude, callback=callback)

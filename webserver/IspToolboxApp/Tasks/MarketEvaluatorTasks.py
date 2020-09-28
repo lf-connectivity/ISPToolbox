@@ -1,6 +1,6 @@
 from celery import shared_task
 from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedAvailable, \
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, \
     checkIfIncomeProvidersAvailable, queryBuildingOutlines
 from django.contrib.gis.geos import GEOSGeometry
 import json
@@ -30,7 +30,7 @@ def genMarketEvaluatorData(uuid):
 @shared_task
 def genPrecomputedBuilingsAvailable(uuid):
     pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
-    pipelineStatus.buildingPrecomputed = checkIfPrecomputedAvailable(
+    pipelineStatus.buildingPrecomputed = checkIfPrecomputedBuildingsAvailable(
         pipelineStatus.include_geojson.json,
         pipelineStatus.exclude_geojson.json if pipelineStatus.exclude_geojson else pipelineStatus.exclude_geojson)
     pipelineStatus.incomeServiceProvidersAvailable = checkIfIncomeProvidersAvailable(

@@ -1,6 +1,8 @@
 
 from django.views import View
 from IspToolboxApp.Tasks.mmWaveTasks.mmwave import getOSMNodes
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import (checkIfPrecomputedIncomeAvailable, checkIfAvailable, getQueryTemplate, checkIfPrecomputedBuildingsAvailable,
+                                                        getUniqueBuildingNodes, getAllNodes, filterIncludeExclude, checkIfIncomeProvidersAvailable)
 from shapely.geometry import shape
 import json
 import logging
@@ -8,19 +10,6 @@ from django.http import JsonResponse
 from django.db import connections
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-
-
-def getQueryTemplate(skeleton, addExclude, includeExclude):
-    if addExclude:
-        if includeExclude:
-            return skeleton.format(
-                "St_intersects(geog, St_geomfromgeojson(%s)) AND St_intersects(geog, St_geomfromgeojson(%s))")
-        else:
-            return skeleton.format(
-                "St_intersects(geog, St_geomfromgeojson(%s)) AND NOT St_intersects(geog, St_geomfromgeojson(%s))")
-    else:
-        return skeleton.format("St_intersects(geog, St_geomfromgeojson(%s))")
-
 
 def getQueryParams(request):
     # Check Body First:
@@ -39,33 +28,6 @@ def getQueryParams(request):
         exclude = request.GET.get('exclude', '{}')
         offset = request.GET.get('offset', 0)
     return geojson, exclude, offset
-
-
-def getUniqueBuildingNodes(nodes):
-    buildings = {k: v for (k, v) in nodes.items() if (
-        ('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
-    return buildings
-
-
-def getAllNodes(nodes_list):
-    nodes = {}
-    for d in nodes_list:
-        nodes.update(d)
-    return nodes
-
-
-def filterIncludeExclude(building_shape, include, exclude):
-    overlaps_include = False
-    for polygon in include:
-        if polygon.intersects(building_shape):
-            overlaps_include = True
-            break
-    if overlaps_include and exclude is not None:
-        for polygon in exclude:
-            if polygon.intersects(building_shape):
-                overlaps_include = False
-                break
-    return overlaps_include
 
 
 def filterBuildingNodes(buildings, nodes, include, exclude):
@@ -90,42 +52,6 @@ def filterByPolygon(nodes, polygon):
                                                                                                  b) in buildings.items()}
     return {k: v for (k, v) in nodes.items(
     ) if k not in building_shapes or building_shapes[k].intersects(polygon)}
-
-
-def checkIfIncomeProvidersAvailable(include, exclude):
-    switcher = {
-        '60': False,
-        '66': False,
-        '69': False,
-        '78': False,
-    }
-    return checkIfAvailable(include, exclude, switcher)
-
-
-def checkIfPrecomputedAvailable(include, exclude):
-    switcher = {
-        '60': False,
-        '66': False,
-        '69': False,
-        '78': False,
-        '72': False,
-    }
-    return checkIfAvailable(include, exclude, switcher)
-
-
-def checkIfAvailable(include, exclude, switcher):
-    resp = False
-    with connections['gis_data'].cursor() as cursor:
-        query_skeleton = "SELECT geoid FROM tl_2017_us_state WHERE {}"
-        query_skeleton = getQueryTemplate(
-            query_skeleton, exclude != '{}', True)
-        cursor.execute(query_skeleton, [
-                       include, exclude] if exclude != '{}' else [include])
-        for row in cursor.fetchall():
-            if(switcher.get(row[0], True)):
-                resp = True
-                break
-    return resp
 
 
 def getMicrosoftBuildings(include, exclude, offset):
@@ -219,9 +145,9 @@ class BuildingsView(View):
             exclude = shape(json.loads(geojson_exclude))
         except BaseException:
             logging.info("No Exclude Defined")
-        # Check if Query is in US
-        query_in_us = checkIfPrecomputedAvailable(geojson, geojson_exclude)
-        if query_in_us:
+        # Check if Query is in US or Canada
+        buildings_available = checkIfPrecomputedBuildingsAvailable(geojson, geojson_exclude)
+        if buildings_available:
             response = getMicrosoftBuildings(geojson, geojson_exclude, offset)
         else:
             if int(offset) > 0:
@@ -315,9 +241,9 @@ class CountBuildingsView(View):
             exclude = shape(json.loads(geojson_exclude))
         except BaseException:
             logging.info("No Exclude Defined")
-        # Check if Query is in US
-        query_in_us = checkIfPrecomputedAvailable(geojson, geojson_exclude)
-        if query_in_us:
+        # Check if Query is in US or Canada
+        buildings_available = checkIfPrecomputedBuildingsAvailable(geojson, geojson_exclude)
+        if buildings_available:
             response = getMicrosoftBuildingsCount(
                 geojson, geojson_exclude, offset)
         else:
@@ -414,7 +340,7 @@ class IncomeView(View):
         geojson, exclude, offset = getQueryParams(request)
 
         resp = {'error': -1}
-        precomputedAvailable = checkIfPrecomputedAvailable(geojson, exclude)
+        precomputedAvailable = checkIfPrecomputedIncomeAvailable(geojson, exclude)
         query_skeleton = income_skeleton_simple
         if precomputedAvailable:
             query_skeleton = income_skeleton

@@ -57,6 +57,26 @@ The latest environment variables are in the `terraform/variables.tf` file
 `make debug`
 - runs backend in debug configuration. attach to django using vscode
 
+## Running fbctower locally with WWW OnDemand
+
+1. On your EC2 instance
+
+    `make debug`
+
+this will startup the whole backend stack on your machine
+
+in VSCode forward port 8000 to your localhost (macbook)
+
+![Alt text](images/port_forwarding.png?raw=true "Title")
+
+2. On your WWW OnDemand
+
+Update the CSP policy in XIspToolboxControllerConfig.php
+![Alt text](images/csp_update.png?raw=true "Title")
+
+Change the domain name in WispMarketSizingUtils.js
+![Alt text](images/new_domain.png?raw=true "Title")
+
 ## Pushing New Images to Production
 
 Option 1: Github action

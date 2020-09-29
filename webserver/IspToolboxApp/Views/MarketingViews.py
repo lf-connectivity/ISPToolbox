@@ -1,11 +1,14 @@
 from django.views import View
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.gis.geos import GEOSGeometry, WKBWriter
+
 from IspToolboxApp.Models.MarketingConvertModels import MarketingPinConversion
 from IspToolboxApp.Tasks.MarketingPinConversionTasks import ConvertPins
-from django.contrib.gis.geos import GEOSGeometry, WKBWriter
+
+from celery import current_app
 
 import math
 
@@ -13,7 +16,7 @@ import math
 @method_decorator(csrf_exempt, name='dispatch')
 class MarketingConvertPolygons(View):
     def post(self, request):
-        resp = {'error': None, 'msg': None}
+        resp = {'error': None, 'uuid': None, 'token': None}
         try:
             include = request.POST.get('include', {})
             exclude = request.POST.get('exclude', {})
@@ -31,15 +34,32 @@ class MarketingConvertPolygons(View):
                 num_pins=num_pins
             )
             conversion.save()
-            ConvertPins(conversion.uuid)
-            conversion.refresh_from_db()
-            resp['msg'] = conversion.error
-            output_pins = []
-            for p in conversion.include_output:
-                center = p.centroid
-                output_pins += [(center.y, center.x, round(math.sqrt(p.area / math.pi) * 100))]
-            resp['pins'] = output_pins
-
+            task = ConvertPins.delay(conversion.uuid)
+            conversion.task = task.id
+            conversion.save(update_fields=['task'])
+            resp['uuid'] = conversion.uuid
+            resp['token'] = conversion.token
         except Exception as e:
             resp['error'] = str(e)
+        return JsonResponse(resp)
+
+    def get(self, request):
+        resp = {'error': None, 'status': None, 'pins': None}
+        try:
+            uuid = request.GET.get('uuid', None)
+            conversion = MarketingPinConversion.objects.get(uuid=uuid)
+            if not conversion.isAccessAuthorized(request):
+                return HttpResponseForbidden()
+
+            if conversion.include_output is not None:
+                output_pins = []
+                for p in conversion.include_output:
+                    center = p.centroid
+                    output_pins += [(center.y, center.x, round(math.sqrt(p.area / math.pi) * 100))]
+                resp['pins'] = output_pins
+            else:
+                resp['status'] = current_app.AsyncResult(conversion.task).status
+        except Exception as e:
+            resp['error'] = str(e)
+
         return JsonResponse(resp)

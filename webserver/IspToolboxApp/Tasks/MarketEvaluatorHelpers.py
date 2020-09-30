@@ -102,7 +102,7 @@ def checkIfAvailable(include, exclude, switcher, table):
     resp = False
 
     with connections['gis_data'].cursor() as cursor:
-        query_skeleton = "SELECT geoid FROM {tab} WHERE {}".format(tab=table)
+        query_skeleton = "SELECT geoid FROM " + table + " WHERE {}"
         query_skeleton = getQueryTemplate(
             query_skeleton, exclude is not None, True)
         cursor.execute(query_skeleton, [

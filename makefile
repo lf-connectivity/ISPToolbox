@@ -25,13 +25,14 @@ update:
 	pip3 install -r ./webserver/requirements.txt
 
 migrate:
-	@echo ----------------------------------------------RUNNING DJANGO MIGRATIONS----------------------------------------
-	python3 ./webserver/manage.py migrate
+	@echo ----------------------------------------------RUNNING DJANGO MIGRATIONS PROD----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python manage.py migrate
 
 makemigrations:
-	@echo ----------------------------------------------CREATING DJANGO MIGRATIONS----------------------------------------
-	python3 ./webserver/manage.py makemigrations
-
+	@echo ----------------------------------------------CREATING DJANGO MIGRATIONS PROD----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python manage.py makemigrations
 run:
 	@echo ----------------------------------------------RUNNING WEBSERVER----------------------------------------
 	python3 ./webserver/manage.py runserver

@@ -4,7 +4,7 @@ import secrets
 import datetime
 import pytz
 from django.contrib.gis.db import models as gis_models
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate, checkIfPrecomputedIncomeAvailable
 from django.db import connections
 
 
@@ -73,7 +73,7 @@ class MarketEvaluatorPipeline(models.Model):
         exclude = self.exclude_geojson
         offset = 0
 
-        precomputedAvailable = self.buildingPrecomputed
+        precomputedAvailable = checkIfPrecomputedIncomeAvailable(include.json, exclude.json if exclude is not None else None)
         query_skeleton = income_skeleton_simple
         if precomputedAvailable:
             query_skeleton = income_skeleton
@@ -83,6 +83,7 @@ class MarketEvaluatorPipeline(models.Model):
         try:
             query_skeleton = getQueryTemplate(
                 query_skeleton, exclude is not None, False)
+            print(query_skeleton)
             while True:
                 with connections['gis_data'].cursor() as cursor:
                     query_arguments = [
@@ -185,8 +186,8 @@ FROM   (SELECT unnested_intersecting_footprints.gid,
 
 income_skeleton_simple = """
 SELECT AVG(median_household_income) AS avgincome2018
-FROM acs2018_median_income
-JOIN tl_2019_tract ON acs2018_median_income.geoid = tl_2019_tract.geoid WHERE {};
+FROM standardized_median_income
+JOIN standardized_subdivisions ON standardized_median_income.geoid = standardized_subdivisions.geoid WHERE {};
 """
 
 provider_skeleton = """

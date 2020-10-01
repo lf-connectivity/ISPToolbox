@@ -314,9 +314,10 @@ FROM   (SELECT unnested_intersecting_footprints.gid,
                    ON tract.gid = unnested_intersecting_footprints.tractgid
      GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues;"""
 
-income_skeleton_simple = """SELECT AVG(median_household_income) AS avgincome2018
-FROM acs2018_median_income
-JOIN tl_2019_tract ON acs2018_median_income.geoid = tl_2019_tract.geoid WHERE {};
+income_skeleton_simple = """
+SELECT AVG(median_household_income) AS avgincome2018
+FROM standardized_median_income
+JOIN standardized_subdivisions ON standardized_median_income.geoid = standardized_subdivisions.geoid WHERE {};
 """
 
 provider_skeleton = """SELECT providername,

@@ -67,16 +67,22 @@ def getQueryTemplate(skeleton, addExclude, includeExclude):
 
 
 def checkIfIncomeProvidersAvailable(include, exclude):
+    '''
+        Checks if income data is available.  This could also use the standardized_subdivisions table if more granular exclusion is required.
+    '''
     switcher = {
         '60': False,
         '66': False,
         '69': False,
         '78': False,
     }
-    return checkIfAvailable(include, exclude, switcher, "tl_2017_us_state")
+    return checkIfAvailable(include, exclude, switcher, "standardized_prov_state")
 
 
 def checkIfPrecomputedIncomeAvailable(include, exclude):
+    '''
+        Checks if we have more granular income data available for a more accurate computation (US Only)
+    '''
     switcher = {
         '60': False,
         '66': False,
@@ -88,6 +94,9 @@ def checkIfPrecomputedIncomeAvailable(include, exclude):
 
 
 def checkIfPrecomputedBuildingsAvailable(include, exclude):
+    '''
+        Checks if we have Microsoft rooftop data available as opposed to openstreetmaps which is lacking in some rural areas.
+    '''
     switcher = {
         '60': False,
         '66': False,

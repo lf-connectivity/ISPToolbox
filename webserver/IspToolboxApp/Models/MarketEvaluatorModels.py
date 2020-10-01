@@ -83,7 +83,6 @@ class MarketEvaluatorPipeline(models.Model):
         try:
             query_skeleton = getQueryTemplate(
                 query_skeleton, exclude is not None, False)
-            print(query_skeleton)
             while True:
                 with connections['gis_data'].cursor() as cursor:
                     query_arguments = [

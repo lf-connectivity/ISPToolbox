@@ -10,6 +10,7 @@ import rasterio
 import rasterio.features
 import rasterio.warp
 from defusedxml import ElementTree
+from IspToolboxApp.templates.errorMsg import kmz_err_msg
 
 def getUniqueBuildingNodes(nodes):
     buildings = {k: v for (k, v) in nodes.items() if (
@@ -290,11 +291,13 @@ def createPipelineFromKMZ(file):
             # get polygons from KMZ
             geometries_polygon = createGeoJsonsFromKML(kmlfile)
             geometries += geometries_raster + geometries_polygon
+        if not geometries:
+            raise Exception(kmz_err_msg['no_geomtry'])
         geometry_collection = {
             'type': 'GeometryCollection',
             'geometries': geometries}
         return geometry_collection
-    return None
+    raise Exception(kmz_err_msg['parse_err'])
 
 
 def findChildrenContains(element, subtag):

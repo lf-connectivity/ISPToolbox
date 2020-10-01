@@ -9,6 +9,8 @@ from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getMicrosoftBuildingsOffs
 from django.http import JsonResponse
 import json
 import logging
+from rasterio.errors import RasterioIOError
+from IspToolboxApp.templates.errorMsg import kmz_err_msg
 
 
 class MarketEvaluatorPipelineBuildings(View):
@@ -117,6 +119,9 @@ class MarketEvaluatorPipelineKMZ(View):
                 pipeline.uuid)
             pipeline.task = task.id
             pipeline.save(update_fields=['task'])
+
+        except RasterioIOError as e:
+            resp['error'] = kmz_err_msg['not_found_img']
 
         except Exception as e:
             resp['error'] = str(e)

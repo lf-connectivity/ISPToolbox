@@ -120,7 +120,7 @@ class MarketEvaluatorPipelineKMZ(View):
             pipeline.task = task.id
             pipeline.save(update_fields=['task'])
 
-        except RasterioIOError as e:
+        except RasterioIOError:
             resp['error'] = kmz_err_msg['not_found_img']
 
         except Exception as e:

@@ -2,7 +2,8 @@ from celery import shared_task
 from IspToolboxApp.Models.MarketingConvertModels import MarketingPinConversion
 import datetime
 import heapq
-from django.contrib.gis.geos import Point, GeometryCollection
+from django.contrib.gis.geos import Point, \
+    GeometryCollection, LinearRing, Polygon, MultiPolygon
 from shapely.ops import polylabel
 from shapely import wkt
 
@@ -40,17 +41,52 @@ def findNextPinAdd(polygon):
     return pin, radius_km
 
 
+
+def removeOrConvertGeometry(geom):
+    """
+    Helper function to filter out GEOSGeometry.difference results
+    """
+    if geom.__class__ == GeometryCollection and geom.area > 0:
+        return [g for g in geom]
+    elif geom.__class__ == LinearRing:
+        return [Polygon(geom)]
+    elif geom.__class__ == Polygon:
+        return [geom]
+    elif geom.__class__ == MultiPolygon:
+        return [g for g in geom]
+    else:
+        return []
+
+def filterDifference(geometry_list):
+    """
+    Helper function to filter out GEOSGeometry.difference results
+    """
+    filtered = []
+    for g in geometry_list:
+        filtered += removeOrConvertGeometry(g)
+    return filtered
+
+
 def convertPolygonToPins(include, exclude, num_pins):
     """
-    include - geojson or None
-    exclude - geojson or None
+    include - GeometryCollection
+    exclude - GeometryCollection
     num_pins - maximum number of pins allowed to add
     """
-    coverage_area = include.difference(exclude)
+    coverage_area_polygons = []
+    for include_p in include:
+        coverage_area_polygon = include_p
+        for exclude_p in exclude:
+            coverage_area_polygon = coverage_area_polygon.difference(exclude_p)
+        coverage_area_polygons.append(coverage_area_polygon)
+    coverage_area = GeometryCollection(filterDifference(coverage_area_polygons))
+    
     # algorithm
     # create queue of polygons
     polygon_heap = []
     for polygon in coverage_area:
+        if polygon.__class__ == LinearRing:
+            polygon = Polygon(polygon)
         polygon_heap.append((-polygon.area, polygon))
     heapq.heapify(polygon_heap)
     # create output queue of pins

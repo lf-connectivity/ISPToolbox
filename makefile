@@ -33,6 +33,13 @@ makemigrations:
 	@echo ----------------------------------------------CREATING DJANGO MIGRATIONS PROD----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python manage.py makemigrations
+
+shell:
+	@echo ----------------------------------------------DJANGO SHELL PROD----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python manage.py shell
+	
+
 run:
 	@echo ----------------------------------------------RUNNING WEBSERVER----------------------------------------
 	python3 ./webserver/manage.py runserver

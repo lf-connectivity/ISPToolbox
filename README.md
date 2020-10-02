@@ -105,3 +105,20 @@ Option 2: Scripts for manual push (something broke)
 3. deploy images to ecs
 
     ```./scripts/deploy_latest_image_to_prod.sh```
+
+## Debugging Django Tests with VSCode
+add the following to your test:
+
+```
+import ptvsd # @nocommit - vscode python debugger
+ptvsd.enable_attach(address=('0.0.0.0', 3000))
+ptvsd.wait_for_attach()
+```
+then run the following command:
+```
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --service-ports django-app python manage.py test IspToolboxApp.<TestPath>
+```
+
+`--service-ports` makes port 3000 available for debugging
+
+vscode debugger must attach before the test is run

@@ -363,8 +363,8 @@ class GeoJSON:
             self.coords = list(self._flatten([geojson['coordinates']]))
             self.features_count = 1
 
-    def _flatten(self, l):
-        for val in l:
+    def _flatten(self, list_to_flatten):
+        for val in list_to_flatten:
             if isinstance(val, list):
                 for subval in self._flatten(val):
                     yield subval

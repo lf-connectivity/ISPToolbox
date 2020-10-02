@@ -12,6 +12,7 @@ import rasterio.warp
 from defusedxml import ElementTree
 from IspToolboxApp.templates.errorMsg import kmz_err_msg
 
+
 def getUniqueBuildingNodes(nodes):
     buildings = {k: v for (k, v) in nodes.items() if (
         ('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
@@ -69,7 +70,8 @@ def getQueryTemplate(skeleton, addExclude, includeExclude):
 
 def checkIfIncomeProvidersAvailable(include, exclude):
     '''
-        Checks if income data is available.  This could also use the standardized_subdivisions table if more granular exclusion is required.
+        Checks if income data is available.  This could also use the standardized_subdivisions table
+        if more granular exclusion is required.
     '''
     switcher = {
         '60': False,
@@ -122,6 +124,7 @@ def checkIfAvailable(include, exclude, switcher, table):
                 resp = True
                 break
     return resp
+
 
 def queryBuildingOutlines(include, exclude, callback=None):
     '''

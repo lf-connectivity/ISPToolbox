@@ -41,7 +41,6 @@ def findNextPinAdd(polygon):
     return pin, radius_km
 
 
-
 def removeOrConvertGeometry(geom):
     """
     Helper function to filter out GEOSGeometry.difference results
@@ -56,6 +55,7 @@ def removeOrConvertGeometry(geom):
         return [g for g in geom]
     else:
         return []
+
 
 def filterDifference(geometry_list):
     """
@@ -80,7 +80,7 @@ def convertPolygonToPins(include, exclude, num_pins):
             coverage_area_polygon = coverage_area_polygon.difference(exclude_p)
         coverage_area_polygons.append(coverage_area_polygon)
     coverage_area = GeometryCollection(filterDifference(coverage_area_polygons))
-    
+
     # algorithm
     # create queue of polygons
     polygon_heap = []

@@ -1,8 +1,9 @@
 
 from django.views import View
 from IspToolboxApp.Tasks.mmWaveTasks.mmwave import getOSMNodes
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import (checkIfPrecomputedIncomeAvailable, checkIfAvailable, getQueryTemplate, checkIfPrecomputedBuildingsAvailable,
-                                                        getUniqueBuildingNodes, getAllNodes, filterIncludeExclude, checkIfIncomeProvidersAvailable)
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import (
+    checkIfPrecomputedIncomeAvailable, getQueryTemplate, checkIfPrecomputedBuildingsAvailable,
+    getUniqueBuildingNodes, getAllNodes, filterIncludeExclude, checkIfIncomeProvidersAvailable)
 from shapely.geometry import shape
 import json
 import logging
@@ -10,6 +11,7 @@ from django.http import JsonResponse
 from django.db import connections
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+
 
 def getQueryParams(request):
     # Check Body First:

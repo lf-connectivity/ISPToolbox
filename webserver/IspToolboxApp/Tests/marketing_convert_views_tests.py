@@ -4,8 +4,9 @@ from IspToolboxApp.Tasks.MarketingPinConversionTasks import ConvertPins
 from django.contrib.gis.geos import GEOSGeometry
 
 from .static_test_data import exclude_polygon_collection, \
-    include_geometry_collection, include_complex_1, exclude_simple_1, \
+    include_geometry_collection, exclude_simple_1, \
     include_simple, exclude_simple
+import os
 
 
 class TestMarketingConversionModels(TestCase):
@@ -22,9 +23,11 @@ class TestMarketingConversionModels(TestCase):
         self.assertTrue(conversion.include_output is not None)
 
     def test_models_complex(self):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'rf_coverage_test.json'), 'r') as f:
+            include_complex_1 = f.read()
         conversion = MarketingPinConversion(
             include=GEOSGeometry(include_complex_1),
-            exclude=GEOSGeometry( exclude_simple_1),
+            exclude=GEOSGeometry(exclude_simple_1),
             num_pins=100
         )
         conversion.save()

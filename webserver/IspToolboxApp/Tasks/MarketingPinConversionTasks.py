@@ -67,19 +67,23 @@ def filterDifference(geometry_list):
     return filtered
 
 
-def convertPolygonToPins(include, exclude, num_pins):
-    """
-    include - GeometryCollection
-    exclude - GeometryCollection
-    num_pins - maximum number of pins allowed to add
-    """
+def differenceIncludeExclude(include, exclude):
     coverage_area_polygons = []
     for include_p in include:
         coverage_area_polygon = include_p
         for exclude_p in exclude:
             coverage_area_polygon = coverage_area_polygon.difference(exclude_p)
         coverage_area_polygons.append(coverage_area_polygon)
-    coverage_area = GeometryCollection(filterDifference(coverage_area_polygons))
+    return GeometryCollection(filterDifference(coverage_area_polygons))
+
+
+def convertPolygonToPins(include, exclude, num_pins):
+    """
+    include - GeometryCollection
+    exclude - GeometryCollection
+    num_pins - maximum number of pins allowed to add
+    """
+    coverage_area = differenceIncludeExclude(include, exclude)
 
     # algorithm
     # create queue of polygons

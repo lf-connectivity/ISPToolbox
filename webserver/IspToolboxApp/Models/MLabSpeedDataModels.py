@@ -8,6 +8,7 @@
 
 # GENERATED USING: python manage.py inspectdb --database gis_data  tl_2019_us_zcta510 mlab_uszip_10_5_2020
 from django.contrib.gis.db import models
+from django.db import connections
 
 
 class Tl2019UsZcta510(models.Model):
@@ -29,11 +30,50 @@ class Tl2019UsZcta510(models.Model):
 
 
 class MlabUszip1052020(models.Model):
-    state = models.CharField(db_column='State', max_length=-1)  # Field name made lowercase.
-    zipcode = models.DecimalField(db_column='Zipcode', max_digits=65535, decimal_places=65535)  # Field name made lowercase.
-    download_mbit_s_field = models.DecimalField(db_column='Download (Mbit/s)', max_digits=65535, decimal_places=65535)  # Field name made lowercase. Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
-    upload_mbit_s_field = models.DecimalField(db_column='Upload (Mbit/s)', max_digits=65535, decimal_places=65535)  # Field name made lowercase. Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
+    # Field name made lowercase.
+    state = models.CharField(db_column='State', max_length=5)
+    # Field name made lowercase.
+    zipcode = models.DecimalField(db_column='Zipcode', max_digits=65535, decimal_places=65535)
+    # Field name made lowercase. Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
+    download_mbit_s_field = models.DecimalField(db_column='Download (Mbit/s)', max_digits=65535, decimal_places=65535)
+    # Field name made lowercase. Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
+    upload_mbit_s_field = models.DecimalField(db_column='Upload (Mbit/s)', max_digits=65535, decimal_places=65535)
 
     class Meta:
         managed = False
         db_table = 'mlab_uszip_10_5_2020'
+
+    @staticmethod
+    def columnNames():
+        return {kv[0]: kv[1] for kv in
+                [field.get_attname_column()for field in MlabUszip1052020._meta.fields]
+                }
+
+    @staticmethod
+    def genMLabResults(area_of_interest):
+        field2column = MlabUszip1052020.columnNames()
+        mlab_query = f"""
+WITH intersecting_geom AS
+(
+    SELECT * FROM {Tl2019UsZcta510._meta.db_table}
+    WHERE ST_Intersects(
+        geom,
+        ST_GeomFromEWKT(%s)
+    )
+)
+SELECT  "{field2column['zipcode']}",
+        "{field2column['download_mbit_s_field']}",
+        "{field2column['upload_mbit_s_field']}"
+FROM {MlabUszip1052020._meta.db_table}
+    RIGHT JOIN intersecting_geom
+    ON
+    CAST("{field2column['zipcode']}" AS varchar) =
+    intersecting_geom.zcta5ce10"""
+
+        with connections['gis_data'].cursor() as cursor:
+            cursor.execute(mlab_query, [area_of_interest.ewkt])
+            columns = [col[0] for col in cursor.description]
+            return [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+            ]

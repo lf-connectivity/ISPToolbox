@@ -27,6 +27,8 @@ from IspToolboxApp.Views.RetargetingPixelView import MarketingAccountView, \
 from IspToolboxApp.Views.MarketingViews import MarketingConvertPolygons
 from IspToolboxApp.Views.mmWavePlannerViews import MMWavePlannerView, MMWaveHelpCenterView
 from IspToolboxApp.Views.market_evaluator_views.GrantViews import SelectCensusGroupView
+from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
+
 from rest_framework import routers
 from django.conf.urls.static import static
 from django.conf import settings
@@ -71,6 +73,7 @@ urlpatterns = [
         MarketEvaluatorPipelineServiceProviders.as_view(),
         name='marketEvalAsyncServiceProviders'
     ),
+    path('market-evaluator/speeds/', MLabSpeedView.as_view()),
     path('market-evaluator/broadbandnow/', MarketEvaluatorPipelineBroadbandNow.as_view(), name='bbnow'),
     # GeoTargeting Views
     path('marketing/audience/', MarketingAudienceView.as_view(), name="marketing_audience"),

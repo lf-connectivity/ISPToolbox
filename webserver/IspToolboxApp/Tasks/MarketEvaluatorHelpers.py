@@ -13,6 +13,19 @@ from defusedxml import ElementTree
 from IspToolboxApp.templates.errorMsg import kmz_err_msg
 
 
+# Mapping for Canadian broadband tech to US tech codes used on FE (WispCompetitorModal.react.js)
+CA_TECHCODES = {
+    'No Local Access': -1,
+    'Mobile Wireless': 0,
+    'High Capacity Transport Services': 0,
+    'DSL': 10,
+    'Coaxial Cable': 40,
+    'Fibre to the home': 50,
+    'Satellite': 60,
+    'Fixed Wireless': 70,
+}
+
+
 def getUniqueBuildingNodes(nodes):
     buildings = {k: v for (k, v) in nodes.items() if (
         ('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
@@ -66,6 +79,13 @@ def getQueryTemplate(skeleton, addExclude, includeExclude):
                 "St_intersects(geog, St_geomfromgeojson(%s)) AND NOT St_intersects(geog, St_geomfromgeojson(%s))")
     else:
         return skeleton.format("St_intersects(geog, St_geomfromgeojson(%s))")
+
+
+def checkIfPolyInCanada(include, exclude):
+    '''
+        Returns True if polygons overlap with Canada and False otherwise.
+    '''
+    return checkIfAvailable(include, exclude, {}, "ca_hex")
 
 
 def checkIfIncomeProvidersAvailable(include, exclude):
@@ -271,6 +291,13 @@ def getMicrosoftBuildingsOffset(include, exclude, offset):
     except BaseException:
         resp = {"type": "GeometryCollection", "geometries": []}
     return resp
+
+
+def caTechToTechCode(techArr):
+    '''
+        Converts Canadian tech descriptions (ex. Fixed Wireless, DSL, Fibre to home) to codes used on FE.
+    '''
+    return [CA_TECHCODES.get(tech, -1) for tech in techArr]
 
 
 ############################

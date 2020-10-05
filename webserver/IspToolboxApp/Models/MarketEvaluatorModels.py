@@ -4,7 +4,8 @@ import secrets
 import datetime
 import pytz
 from django.contrib.gis.db import models as gis_models
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate, checkIfPrecomputedIncomeAvailable
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import (getQueryTemplate, checkIfPrecomputedIncomeAvailable,
+                                                        caTechToTechCode, checkIfPolyInCanada)
 from django.db import connections
 
 
@@ -113,6 +114,14 @@ class MarketEvaluatorPipeline(models.Model):
             self.save(update_fields=['averageMedianIncome'])
 
     def genServiceProviders(self, offset):
+        if checkIfPolyInCanada(self.include_geojson.json, self.exclude_geojson.json if self.exclude_geojson else None):
+            return self.genServiceProvidersCanada(offset)
+        return self.genServiceProvidersUS(offset)
+
+    def genServiceProvidersUS(self, offset):
+        '''
+            Grabs service provider data for US queries.
+        '''
         include = self.include_geojson
         exclude = self.exclude_geojson
 
@@ -134,6 +143,30 @@ class MarketEvaluatorPipeline(models.Model):
                 "down_ad_speed": maxdown,
                 "up_ad_speed": maxup,
                 "tech_used": tech}
+            return resp
+
+    def genServiceProvidersCanada(self, offset):
+        '''
+            Grabs service provider data for Canadian queries.
+        '''
+        include = self.include_geojson
+        exclude = self.exclude_geojson
+
+        query_skeleton = getQueryTemplate(
+            provider_skeleton_ca, exclude is not None, False)
+        with connections['gis_data'].cursor() as cursor:
+            cursor.execute(
+                query_skeleton, [
+                    include.json, exclude.json, offset] if exclude is not None else [
+                    include.json, offset])
+            rows = [row for row in cursor.fetchall()]
+            competitors = [row[0] for row in rows]
+            tech = [caTechToTechCode(row[1]) for row in rows]
+            resp = {
+                'error': 0,
+                'competitors': competitors,
+                'tech_used': tech
+            }
             return resp
 
     def genBroadbandNow(self):
@@ -202,4 +235,15 @@ WHERE  {}
 GROUP  BY providername
 ORDER  BY maxdown DESC
 LIMIT  3 OFFSET %s;
+"""
+
+provider_skeleton_ca = """
+SELECT providername,
+    Array_agg(DISTINCT tech) as techarr
+FROM ca_hex_broadband
+    JOIN ca_hex
+    ON ca_hex.geoid = ca_hex_broadband.hex
+WHERE {} AND tech != 'Mobile Wireless'
+GROUP BY providername
+LIMIT 3 OFFSET %s;
 """

@@ -1,10 +1,10 @@
-from celery import shared_task
+# from celery import shared_task
 # from IspToolboxApp.Tasks.building_outline_task.building_outline_task import getBoundingBox, \
 #     getTiles, getTileImages, loopInference, stitchMasks, threshold_buildings, \
 #     polygonize_buildings, convert_polygons_to_latlon, convertToGeoJsons
 # from IspToolboxApp.models import BuildingDetection
-from django.contrib.gis.geos import GEOSGeometry
-from datetime import datetime
+# from django.contrib.gis.geos import GEOSGeometry
+# from datetime import datetime
 
 
 # @shared_task

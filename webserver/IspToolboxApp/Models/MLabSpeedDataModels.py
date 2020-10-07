@@ -65,7 +65,7 @@ SELECT  "{field2column['zipcode']}",
         "{field2column['download_mbit_s_field']}",
         "{field2column['upload_mbit_s_field']}"
 FROM {MlabUszip1052020._meta.db_table}
-    RIGHT JOIN intersecting_geom
+    INNER JOIN intersecting_geom
     ON
     CAST("{field2column['zipcode']}" AS varchar) =
     intersecting_geom.zcta5ce10"""

@@ -53,25 +53,25 @@ class MlabUszip1052020(models.Model):
     def genMLabResults(area_of_interest):
         field2column = MlabUszip1052020.columnNames()
         mlab_query = f"""
-WITH intersecting_geom AS
+WITH intersecting_geog AS
 (
     SELECT * FROM {Tl2019UsZcta510._meta.db_table}
     WHERE ST_Intersects(
-        geom,
-        ST_GeomFromEWKT(%s)
+        geog,
+        ST_GeomFromGeoJSON(%s)
     )
 )
 SELECT  "{field2column['zipcode']}",
         "{field2column['download_mbit_s_field']}",
         "{field2column['upload_mbit_s_field']}"
 FROM {MlabUszip1052020._meta.db_table}
-    INNER JOIN intersecting_geom
+    INNER JOIN intersecting_geog
     ON
     CAST("{field2column['zipcode']}" AS varchar) =
-    intersecting_geom.zcta5ce10"""
+    intersecting_geog.zcta5ce10"""
 
         with connections['gis_data'].cursor() as cursor:
-            cursor.execute(mlab_query, [area_of_interest.ewkt])
+            cursor.execute(mlab_query, [area_of_interest.json])
             columns = [col[0] for col in cursor.description]
             return [
                 dict(zip(columns, row))

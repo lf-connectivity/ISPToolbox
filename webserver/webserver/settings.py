@@ -37,9 +37,6 @@ if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
     }
     AWS_LOCATION = 'static'
 
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'IspToolboxApp/static'),
-    ]
     STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
@@ -57,7 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'corsheaders',
+    # ISP Toolbox Apps
     'IspToolboxApp',
+    'mmwave',
     # S3 Static File Storage
     'storages',
     # Social Auth
@@ -168,7 +167,10 @@ ROOT_URLCONF = 'webserver.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'IspToolboxApp', 'templates'), ],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'IspToolboxApp', 'templates'),
+            os.path.join(BASE_DIR, 'mmwave', 'templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

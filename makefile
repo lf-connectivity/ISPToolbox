@@ -27,18 +27,22 @@ update:
 migrate:
 	@echo ----------------------------------------------RUNNING DJANGO MIGRATIONS PROD----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python manage.py migrate
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py migrate
 
 makemigrations:
 	@echo ----------------------------------------------CREATING DJANGO MIGRATIONS PROD----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python manage.py makemigrations
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py makemigrations
 
 shell:
 	@echo ----------------------------------------------DJANGO SHELL PROD----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python manage.py shell
-	
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py shell
+
+debug_shell:
+	@echo ----------------------------------------------STARTING DEBUG----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py shell
 
 run:
 	@echo ----------------------------------------------RUNNING WEBSERVER----------------------------------------
@@ -52,4 +56,4 @@ debug:
 test: 
 	@echo ----------------------------------------------STARTING TESTS----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python manage.py test
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py test

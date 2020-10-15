@@ -19,12 +19,13 @@
       "justMyCode": false
     },
     {
-      "name": "Python: Django - Local",
+      "name": "Python: Django Tests - Local",
       "type": "python",
       "request": "launch",
+      "cwd": "${workspaceFolder}/webserver/",
       "program": "${workspaceFolder}/webserver/manage.py",
       "args": [
-        "runserver"
+        "test"
       ],
       "django": true
     }

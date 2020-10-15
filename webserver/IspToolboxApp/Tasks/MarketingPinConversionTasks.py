@@ -24,7 +24,11 @@ def shouldKeepMakingPins(heap, output, num_pins):
 
 def calcPinCost(coverage_area, center, radius_km):
     pin = createPin(radius_km, center)
-    cost = coverage_area.sym_difference(pin).area
+    try:
+        cost = coverage_area.sym_difference(pin).area
+    except Exception as e:
+        print(str(e))
+        cost = float('inf')
     return (cost, pin, radius_km)
 
 
@@ -72,7 +76,14 @@ def differenceIncludeExclude(include, exclude):
     for include_p in include:
         coverage_area_polygon = include_p
         for exclude_p in exclude:
-            coverage_area_polygon = coverage_area_polygon.difference(exclude_p)
+            if not coverage_area_polygon.valid:
+                coverage_area_polygon = coverage_area_polygon.buffer(0)
+            if not exclude_p.valid:
+                exclude_p = exclude_p.buffer(0)
+            try:
+                coverage_area_polygon = coverage_area_polygon.difference(exclude_p)
+            except Exception as e:
+                print(str(e))
         coverage_area_polygons.append(coverage_area_polygon)
     return GeometryCollection(filterDifference(coverage_area_polygons))
 
@@ -84,6 +95,8 @@ def convertPolygonToPins(include, exclude, num_pins):
     num_pins - maximum number of pins allowed to add
     """
     coverage_area = differenceIncludeExclude(include, exclude)
+    if not coverage_area.valid:
+        coverage_area = coverage_area.buffer(0)
 
     # algorithm
     # create queue of polygons
@@ -106,7 +119,10 @@ def convertPolygonToPins(include, exclude, num_pins):
             break
         output_pins.append((pin, radius))
         # subtract differnce and add to priority queue
-        diff = largest_polygon.difference(pin)
+        try:
+            diff = largest_polygon.difference(pin)
+        except Exception as e:
+            print(str(e))
         if len(diff) > 1:
             for polygon in diff:
                 heapq.heappush(polygon_heap, (-polygon.area, polygon))

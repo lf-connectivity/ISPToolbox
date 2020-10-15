@@ -16,7 +16,10 @@ Including another URLconf
 from django.contrib import admin
 
 from django.urls import path, include
+from django.contrib.admin.views.decorators import staff_member_required
+
 from IspToolboxApp import views
+
 from IspToolboxApp.Views.market_evaluator_views.MarketEvaluator import BuildingsView, \
     IncomeView, Form477View, ServiceProviders, CountBuildingsView, RDOFView, DataAvailableView
 from IspToolboxApp.Views.MarketEvaluatorView import MarketEvaluatorPipelineBroadbandNow, \
@@ -32,6 +35,8 @@ from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
 from rest_framework import routers
 from django.conf.urls.static import static
 from django.conf import settings
+
+from mmwave.views import TGLinkView, LinkGISDataView, UpdateLidarBoundariesView, TestGeocoderView
 
 # Wagtails CMS
 from wagtail.admin import urls as wagtailadmin_urls
@@ -84,6 +89,11 @@ urlpatterns = [
     # Path mmWave Planner
     path('mmwave-planner/', MMWavePlannerView.as_view(), name='mmwaveplanner'),
     path('help-center/', MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),
+    # Path TG Planning
+    path('mmwave/test-geocoder/',  TestGeocoderView.as_view()),
+    path('mmwave/add-boundary/', staff_member_required(UpdateLidarBoundariesView.as_view())),
+    path('mmwave/link-check/', TGLinkView.as_view()),
+    path('mmwave/link-check/gis/', LinkGISDataView.as_view()),
     # REST API Endpoints
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),

@@ -1,0 +1,25 @@
+<div class="col-lg-3">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ radio.name }}</h5>
+            <div class="form-group row">
+                <label for="example-number-input" class="col-sm col-form-label">Latitude [&deg;]</label>
+                <div class="col-sm">
+                    <input class="form-control" type="number" value="{{ radio.lat }}" id="lat-{{radio.id}}">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="example-number-input" class="col-sm col-form-label">Longitude [&deg;]</label>
+                <div class="col-sm">
+                    <input class="form-control" type="number" value="{{ radio.lng }}" id="lng-{{radio.id}}">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="example-number-input" class="col-sm col-form-label">Height [m]</label>
+                <div class="col-sm">
+                    <input class="form-control" type="number" value="{{radio.hgt}}" id="hgt-{{radio.id}}">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

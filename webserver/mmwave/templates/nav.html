@@ -15,7 +15,7 @@
         <div class="my-2 my-lg-0">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                  <a class="nav-link" href="#">Take a Tour</a>
+                    <a class="nav-link" data-toggle="modal" data-target="#tourModal" href="#">Take a Tour</a>
                 </li>
             </ul>
         </div>
@@ -32,10 +32,6 @@
                 Logout
             </button>
         </a>
-        {% else %}
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-            Login
-        </button>
         {% endif %}
     </div>
 </nav>

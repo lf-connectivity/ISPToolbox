@@ -122,3 +122,27 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --service-por
 `--service-ports` makes port 3000 available for debugging
 
 vscode debugger must attach before the test is run
+
+## Troubleshooting:
+
+### My code works on my dev server but not on the prod image!
+
+1. pull the docker image from AWS ECR
+
+`docker pull 623762516657.dkr.ecr.us-west-1.amazonaws.com/isptoolbox-django`
+
+2. set the environment to point to the production database (create a .env file)
+
+`.env`
+```
+DB_NAME=
+DB_PASSWORD=
+DB_USERNAME=
+DEBUG=True
+POSTGRES_DB=
+REDIS_BACKEND=
+```
+
+3. run the following command:
+
+`docker run --env-file .env -p 0.0.0.0:8000:8000 -p 127.0.0.1:3000:3000 623762516657.dkr.ecr.us-west-1.amazonaws.com/isptoolbox-django:latest python manage.py runserver 0.0.0.0:8000`

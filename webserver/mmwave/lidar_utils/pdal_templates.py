@@ -26,7 +26,7 @@ def averageHeightAtDistance(distance, heights):
     return unique_increasing_distances, output
 
 
-def getLidarPointsAroundLink(ept_path, link, tempfile_path, ept_transform, resolution, link_buffer=3):
+def getLidarPointsAroundLink(ept_path, link, ept_transform, resolution, link_buffer=3):
     link_length = geopy_distance(lonlat(link[0][0], link[0][1]), lonlat(link[1][0], link[1][1])).meters
     # TODO achong: - create link buffer based on LIDAR cloud reference frame units
     # link_buffer = 3 -> 3 meters for EPSG:3857

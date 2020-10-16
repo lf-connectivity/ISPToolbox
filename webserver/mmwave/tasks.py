@@ -1,5 +1,5 @@
 import requests
-import tempfile
+import re
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
@@ -78,6 +78,17 @@ def getTreeCanopyProfile(tx, rx):
     return [TreeCanopy.getPointValue(pt) for pt in link_profile]
 
 
+def selectLatestProfile(clouds):
+    pattern_year = re.compile(r'2[0-9][0-9][0-9]')
+    """
+    Returns the most recent lidar dataset
+    """
+    # Search for year in URL data
+    years = [[int(yr) for yr in pattern_year.findall(cloud.url)] for cloud in clouds]
+    max_years = [max(year) if len(year) > 0 else 0 for year in years]
+    return clouds[max_years.index(max(max_years))]
+
+
 def getLidarProfile(tx, rx, resolution=5):
     """
     Returns a list of lidar points between tx and rx and number of points between the two
@@ -89,14 +100,17 @@ def getLidarProfile(tx, rx, resolution=5):
     pt_clouds = EPTLidarPointCloud.objects.filter(boundary__contains=link).all()
     if len(pt_clouds) == 0:
         raise Exception('Lidar data not available')
-    ept_path = pt_clouds[0].url
-    with tempfile.NamedTemporaryFile() as fp:
-        link.srid = 4326
-        # TODO achong: all entwine are in EPSG:3857 coordinate system, but future EPT's could
-        # be in a different coordinate system
-        lidar_profile, count = getLidarPointsAroundLink(ept_path, link, fp.name, 3857, resolution=resolution)
-        return lidar_profile, count
-    return [], 0
+
+    # Select the most relevant dataset
+    cloud = selectLatestProfile(pt_clouds)
+
+    # Get URL of point cloud
+    ept_path = cloud.url
+    link.srid = 4326
+    # TODO achong: all entwine are in EPSG:3857 coordinate system, but future EPT's could
+    # be in a different coordinate system
+    lidar_profile, count = getLidarPointsAroundLink(ept_path, link, 3857, resolution=resolution)
+    return lidar_profile, count
 
 
 def getBuildingProfile(tx, rx):

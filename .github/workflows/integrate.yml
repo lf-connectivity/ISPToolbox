@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
     steps:
     - uses: actions/checkout@v2      
     - name: Setup Python 3.8

@@ -8,7 +8,7 @@ from django.db import connections
 class TGLink(models.Model):
     # metadata
     uuid = models.CharField(
-        max_length=30,
+        max_length=50,
         primary_key=True,
         default=uuid.uuid4,
         editable=False)

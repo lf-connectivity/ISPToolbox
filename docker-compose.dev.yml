@@ -6,6 +6,9 @@ services:
     environment:
       DEBUG: 'TRUE'
       POSTGRES_DB: 'postgres'
+      DB_NAME: "django_test"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: "password"
     volumes:
       - ./webserver:/usr/src/app
     ports:

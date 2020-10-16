@@ -29,22 +29,14 @@ $(document).ready( function () {
                 }
             }
         },
-        series: [{
-            name: 'Buildings',
-            data: [],
-            zIndex: -1,
-            color : '#000000'
-        }, {
+        series: [
+        {
             name: 'Terain',
             data: [],
             zIndex: 0,
             color: '#874280'
-        }, {
-            name: 'Trees',
-            data: [],
-            zIndex: -2,
-            color: '#51713c'
-        }, {
+        },
+        {
             name: 'LIDAR',
             data: [],
             zIndex: 1,

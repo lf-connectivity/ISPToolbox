@@ -2,7 +2,7 @@ name: Pull Request Development Integration Test
 
 on:
   pull_request:
-    types: [review_requested, edited]
+    types: [review_requested, edited, synchronize, opened]
     branches:
       - master
 jobs:

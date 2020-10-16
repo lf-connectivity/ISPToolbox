@@ -80,12 +80,15 @@ def getTreeCanopyProfile(tx, rx):
 
 def getLidarProfile(tx, rx, resolution=5):
     """
+    Returns a list of lidar points between tx and rx and number of points between the two
+
+    Tuple: (List, Int, String)
 
     """
     link = LineString([tx, rx])
     pt_clouds = EPTLidarPointCloud.objects.filter(boundary__contains=link).all()
     if len(pt_clouds) == 0:
-        return []
+        raise Exception('Lidar data not available')
     ept_path = pt_clouds[0].url
     with tempfile.NamedTemporaryFile() as fp:
         link.srid = 4326

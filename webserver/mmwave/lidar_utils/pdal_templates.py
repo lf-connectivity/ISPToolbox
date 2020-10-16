@@ -4,8 +4,26 @@ from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from scipy.interpolate import interp1d
 from numpy import arange
+import numpy as np
 
 interpolation_step = 10. / 100.  # cm
+
+
+def averageHeightAtDistance(distance, heights):
+    """
+    Remove duplicate distances along profile and replace with average heights
+    """
+    unique_increasing_distances, duplicate_indices, num_duplicates = np.unique(
+        distance,
+        return_inverse=True,
+        return_counts=True
+    )
+
+    output = np.zeros(len(unique_increasing_distances))
+    np.add.at(output, duplicate_indices, heights)
+    output /= num_duplicates
+
+    return unique_increasing_distances, output
 
 
 def getLidarPointsAroundLink(ept_path, link, tempfile_path, ept_transform, resolution, link_buffer=3):
@@ -44,16 +62,17 @@ def getLidarPointsAroundLink(ept_path, link, tempfile_path, ept_transform, resol
     z_idx = pipeline.arrays[0].dtype.names.index('Z')
 
     pts = [[link_T.project_normalized(Point(pt[x_idx], pt[y_idx]))*link_length, pt[z_idx]] for pt in arr]
-    pts.sort(key=lambda x: x[0])
-    # interpolate output to reduce size
+    # Average Duplicate Points
+    dsts, hgts = averageHeightAtDistance([pt[0] for pt in pts], [pt[1] for pt in pts])
+    # Interpolate Output
     interpfunc = interp1d(
-        [pt[0] for pt in pts],
-        [pt[1] for pt in pts],
-        assume_sorted=True,
+        dsts,
+        hgts,
+        assume_sorted=False,
         bounds_error=False,
-        fill_value=(pts[0][1], pts[-1][1])
+        fill_value=(hgts[0], hgts[-1])
     )
     dists = arange(0, link_length, interpolation_step)
-    hgts = interpfunc(dists)
-    pts = [[d, float(h)] for d, h in zip(dists, hgts)]
+    heights = interpfunc(dists)
+    pts = [[d, float(h)] for d, h in zip(dists, heights)]
     return pts, count

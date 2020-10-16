@@ -56,4 +56,9 @@ debug:
 test: 
 	@echo ----------------------------------------------STARTING TESTS----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py test
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app ./wait-for-postgres.sh python3 manage.py test
+
+static_prod:
+	@echo ----------------------------------------------BUIDLING STATIC FILES \& PUSHING TO PROD \(S3\)----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py collectstatic --noinput

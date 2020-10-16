@@ -213,7 +213,7 @@ const createFresnelZonePlot = () => {
             }
         );
         
-        link_chart.series[4].setData(fresnel_zone_hgt);
+        link_chart.series[2].setData(fresnel_zone_hgt);
     }
 };
 
@@ -237,26 +237,41 @@ const updateLinkProfile = () =>
     }
     link_chart.showLoading();
     $("#loading_spinner").removeClass('d-none');
+    $('#loading_failed_spinner').addClass('d-none');
+    $('#lidar_not_found_msg').addClass('d-none');
+
     $("#link_chart").addClass('d-none');
     if(linkProfileRequestInProgress !== null ) {
         linkProfileRequestInProgress.cancel();
     }
+    
     linkProfileRequestInProgress = axios.get('/mmwave/link-check/gis/?' + query)
     .then(function (response) {
+        if(response.data.error !== null)
+        {
+            $("#link-request-error-description").text(response.data.error);
+            if(response.data.lidar_profile === null && response.data.error === "Lidar data not available")
+            {
+                $('#lidar_not_found_msg').removeClass('d-none');
+            }
+        }
         renderNewLinkProfile(response);
         createFresnelZonePlot();
         link_chart.redraw();
+        $("#link_chart").removeClass('d-none');
       })
       .catch(function (error) {
         // handle error
+        console.log(error);
         selected_feature = null;
-        
+        $('#loading_failed_spinner').removeClass('d-none');
+        $("#link-request-error-description").text();
+        $("#link_chart").addClass('d-none');
       })
       .then(function () {
         // always executed
         link_chart.hideLoading();
         $("#loading_spinner").addClass('d-none');
-        $("#link_chart").removeClass('d-none');
         linkProfileRequestInProgress = null;
     });
 }
@@ -275,27 +290,18 @@ const renderNewLinkProfile = (response) => {
     if (link_chart != null)
     {
         _elevation = response.data.terrain_profile.map(pt => {return pt.elevation;});
-        _buildings = response.data.building_profile.map(
-            (pt, idx) => {return (pt !== "-1" ? std_building_hgt : 0.0) + _elevation[idx]}
-        );
         _coords = response.data.terrain_profile.map(
             pt => {return {lat: pt.lat, lng: pt.lng}}
         );
-        _trees = response.data.tree_profile.map(
-            (pt, idx) => {return (std_tree_hgt * pt / 100.0 + _elevation[idx])}
-        );
         _lidar = response.data.lidar_profile;
-        console.log(response.data.points);
 
         if(_lidar == null)
         {
-            link_chart.series[0].setData(_buildings);
-            link_chart.series[1].setData(_elevation);
-            link_chart.series[2].setData(_trees);
+            link_chart.series[0].setData(_elevation);
             link_chart.yAxis[0].update({min: Math.min(..._elevation)});
         } else {
-            link_chart.series[1].setData(_elevation);
-            link_chart.series[3].setData(_lidar);
+            link_chart.series[0].setData(_elevation);
+            link_chart.series[1].setData(_lidar);
             link_chart.yAxis[0].update({
                 min: Math.min(..._lidar.map(x => x[1])),
                 max: Math.max(..._lidar.map(x => x[1]))

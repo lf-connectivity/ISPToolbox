@@ -28,6 +28,19 @@ class Tl2019UsZcta510(models.Model):
         managed = False
         db_table = 'tl_2019_us_zcta510'
 
+    @staticmethod
+    def getZipGeog(zipcode):
+        '''
+            Returns geojson for provided zipcode.
+        '''
+        query_skeleton = \
+            f"""SELECT ST_asgeojson(geog)
+            FROM {Tl2019UsZcta510._meta.db_table} WHERE zcta5ce10 = %s"""
+        with connections['gis_data'].cursor() as cursor:
+            cursor.execute(query_skeleton, [zipcode])
+            result = cursor.fetchone()
+            return result[0]
+
 
 class MlabUszip1052020(models.Model):
     # Field name made lowercase.

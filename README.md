@@ -6,38 +6,6 @@ ISP Toolbox Backend Server Code
 - KV store: Elasticache
 - domain: https://fbctower.com
 
-## Locally run Django Webserver (Ubuntu)
-### Configure system environment (once):
-- `make setup`
-
-Make sure to follow steps printed to console in order to set up a test postgres db. Find them here as well for convenience:
-- `sudo -i -u postgres`
-- `createdb django_test`
-- `psql`
-- ` \password postgres`
-
-Set the password to "password"
-
-### Install required packages:
-- `make update`
-
-### Perform django migrations:
-- `make migrate`
-
-### Run the Webserver:
-- `make run`
-
-## Database Migrations (Standard Django Process)
-Run when you have made changes to or added to Django Models.
-- `make makemigrations`
-- `make migrate`
-
-Test changes locally and unit test if applicable.
-
-Once you're ready to push database schema changes to production:
-
-The latest environment variables are in the `terraform/variables.tf` file
-
 ## Make command list
 `make setup`
 - Installs required packages on system. Should only need to be ran once during first-time setup.
@@ -122,6 +90,38 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --service-por
 `--service-ports` makes port 3000 available for debugging
 
 vscode debugger must attach before the test is run
+
+## Locally run Django Webserver (Ubuntu) (Old steps, follow "Running fbctower locally with WWW OnDemand" unless you really need to run without docker)
+### Configure system environment (once):
+- `make setup`
+
+Make sure to follow steps printed to console in order to set up a test postgres db. Find them here as well for convenience:
+- `sudo -i -u postgres`
+- `createdb django_test`
+- `psql`
+- ` \password postgres`
+
+Set the password to "password"
+
+### Install required packages:
+- `make update`
+
+### Perform django migrations:
+- `make migrate`
+
+### Run the Webserver:
+- `make run`
+
+### Database Migrations (Standard Django Process)
+Run when you have made changes to or added to Django Models.
+- `make makemigrations`
+- `make migrate`
+
+Test changes locally and unit test if applicable.
+
+Once you're ready to push database schema changes to production:
+
+The latest environment variables are in the `terraform/variables.tf` file
 
 ## Troubleshooting:
 

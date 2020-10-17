@@ -29,7 +29,7 @@ from IspToolboxApp.Views.RetargetingPixelView import MarketingAccountView, \
     MarketingAudienceView, MarketingAudienceGeoPixelCheck
 from IspToolboxApp.Views.MarketingViews import MarketingConvertPolygons
 from IspToolboxApp.Views.mmWavePlannerViews import MMWavePlannerView, MMWaveHelpCenterView
-from IspToolboxApp.Views.market_evaluator_views.GrantViews import SelectCensusGroupView
+from IspToolboxApp.Views.market_evaluator_views.GrantViews import SelectCensusGroupView, SelectZipView
 from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
 
 from rest_framework import routers
@@ -61,6 +61,7 @@ urlpatterns = [
     path('gis/osmBuildings/', BuildingsView.as_view(), name='osmBuildings'),
     # Market Evaluator
     path('market-evaluator/grants/', SelectCensusGroupView.as_view(), name='select_cbg'),
+    path('market-evaluator/zip-geo/', SelectZipView.as_view(), name='select_zip'),
     path('market-evaluator/market-income/', IncomeView.as_view(), name='PRIncome'),
     path('market-evaluator/market-competition/',  Form477View.as_view(), name='PRIncome'),
     path('market-evaluator/market-providers/', ServiceProviders.as_view(), name='Providers'),

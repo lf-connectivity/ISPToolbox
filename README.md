@@ -123,6 +123,7 @@ Once you're ready to push database schema changes to production:
 
 The latest environment variables are in the `terraform/variables.tf` file
 
+
 ## Troubleshooting:
 
 ### My code works on my dev server but not on the prod image!

@@ -38,7 +38,7 @@ class ElevationProfileTestCase(TestCase):
         )
         link = LineString([tx, rx])
         link.srid = 4326
-        pts, count = getLidarPointsAroundLink(path, link, 3857, 5)
+        pts, count, bounds, link = getLidarPointsAroundLink(path, link, 3857, 5)
         self.assertEqual(count, 484)
 
     def test_selectLatestLidarRegex(self):

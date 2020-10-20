@@ -86,6 +86,12 @@ INSTALLED_APPS = [
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_collect')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static/potree/build/'),
+    os.path.join(BASE_DIR, 'static/potree/libs/'),
+    os.path.join(BASE_DIR, 'static/potree/pointclouds/'),
+]
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 

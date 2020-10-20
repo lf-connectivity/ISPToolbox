@@ -256,6 +256,17 @@ const updateLinkProfile = () =>
             }
         }
         renderNewLinkProfile(response);
+        const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
+        const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
+        updateLidarRender(
+            response.data.name,
+            response.data.url,
+            response.data.bb,
+            response.data.tx,
+            response.data.rx,
+            tx_hgt,
+            rx_hgt
+        );
         createFresnelZonePlot();
         link_chart.redraw();
         $("#link_chart").removeClass('d-none');
@@ -317,3 +328,61 @@ $(document).ready(
         );
     }
 );
+
+
+// LiDAR Functions 
+
+const generateClippingVolume = function(bb) {
+    const position = [(bb[0] + bb [2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
+    const scale = [Math.abs(bb[0] - bb[2]), Math.abs(bb[1] - bb[3]), Math.abs(bb[4] - bb[5]) * 4.0];
+
+    const camera_height = Math.max(scale[0], scale[1]) / (2.0 * Math.tan(Math.PI / 12)) + bb[4];
+    const camera = [position[0], position[1], camera_height];
+
+    return {position, scale, camera};
+}
+
+const updateLidarRender = function(name, url, bb, tx, rx, tx_h, rx_h) {
+    console.log({name, url, bb});
+    Potree.loadPointCloud(url, name, function(e){
+        let scene = viewer.scene;
+        scene.addPointCloud(e.pointcloud);
+    
+        let material = e.pointcloud.material;
+        material.size = 2;
+        material.pointSizeType = Potree.PointSizeType.FIXED;
+        material.shape = Potree.PointShape.CIRCLE;
+        material.activeAttributeName = "elevation";
+        material.elevationRange = [bb[4], bb[5]];
+    
+        let {position, scale, camera} = generateClippingVolume(bb);
+        console.log({position, scale, camera});
+        { // VOLUME visible
+          let volume  = new Potree.BoxVolume();
+          volume.name = "Visible Clipping Volume";
+          volume.scale.set(scale[0], scale[1], scale[2]);
+          volume.position.set(position[0], position[1], position[2]);
+          volume.clip = true;
+          scene.addVolume(volume);
+          volume.visible = false;
+        }
+        scene.view.position.set(camera[0], camera[1], camera[2]);
+        scene.view.lookAt(new THREE.Vector3(position[0], position[1], 0));
+
+        // Add LOS Link Line
+        var lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x0000ff
+        });
+        
+        var points = [];
+        points.push( new THREE.Vector3(tx[0], tx[1], tx_h ) );
+        points.push( new THREE.Vector3(rx[0], rx[1], rx_h ) );
+        
+        var geometry = new THREE.BufferGeometry().setFromPoints( points );
+        
+        var line = new THREE.Line( geometry, lineMaterial );
+        scene.scene.add( line );
+    
+        viewer.setClipTask(Potree.ClipTask.SHOW_INSIDE)
+      });
+}

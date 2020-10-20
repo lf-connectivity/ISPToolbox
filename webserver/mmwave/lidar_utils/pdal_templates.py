@@ -74,5 +74,6 @@ def getLidarPointsAroundLink(ept_path, link, ept_transform, resolution, link_buf
     )
     dists = arange(0, link_length, interpolation_step)
     heights = interpfunc(dists)
+    height_bounds = (min(heights), max(heights))
     pts = [[d, float(h)] for d, h in zip(dists, heights)]
-    return pts, count
+    return pts, count, link_T.extent + height_bounds, link_T

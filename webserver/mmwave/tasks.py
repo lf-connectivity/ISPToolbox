@@ -109,8 +109,8 @@ def getLidarProfile(tx, rx, resolution=5):
     link.srid = 4326
     # TODO achong: all entwine are in EPSG:3857 coordinate system, but future EPT's could
     # be in a different coordinate system
-    lidar_profile, count = getLidarPointsAroundLink(ept_path, link, 3857, resolution=resolution)
-    return lidar_profile, count
+    lidar_profile, count, bb, link_T = getLidarPointsAroundLink(ept_path, link, 3857, resolution=resolution)
+    return lidar_profile, count, ept_path, bb, cloud.name, link_T[0], link_T[1]
 
 
 def getBuildingProfile(tx, rx):

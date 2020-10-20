@@ -1,0 +1,3 @@
+[submodule "webserver/static/potree"]
+	path = webserver/static/potree
+	url = https://github.com/ISPToolbox/potree

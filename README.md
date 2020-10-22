@@ -147,3 +147,11 @@ REDIS_BACKEND=
 3. run the following command:
 
 `docker run --env-file .env -p 0.0.0.0:8000:8000 -p 127.0.0.1:3000:3000 623762516657.dkr.ecr.us-west-1.amazonaws.com/isptoolbox-django:latest python manage.py runserver 0.0.0.0:8000`
+
+## Administrative
+### M-Lab
+- Make BigQueries on M-Lab data [here](https://www.measurementlab.net/data/docs/bq/quickstart/#subscribe-your-google-account-to-the-m-lab-discuss-group)
+- M-Lab BigQueries require a google account in M-Lab's discuss group
+- FB Google accounts don't allow access to google groups
+- Use this account to access instead:
+    - Username: isptoolboxmlab@gmail.com

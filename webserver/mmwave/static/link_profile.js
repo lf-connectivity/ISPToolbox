@@ -21,7 +21,17 @@ $(document).ready( function () {
         },
         yAxis: {
             title: {
-                text: 'Above Earth Contour'
+                text: 'Above Mean Sea Level'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value  + '[m]';
+                }
+            }
+        },
+        xAxis: {
+            title: {
+                text: 'Distance'
             },
             labels: {
                 formatter: function () {

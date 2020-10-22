@@ -1,9 +1,47 @@
 {% load static %}
 <div id="link_chart" style="width:100%; height:300px;"></div>
+<style>
+@keyframes triangleBreathing {
+  from {
+    opacity: 100%;
+  }
+  to {
+    opacity: 0%;
+  }
+}
 
-<div id="loading_spinner" class="d-none container">
-    <div class="row">
-        <img src="{% static 'loading_image.gif' %}" class="mx-auto" alt="loading spinner"height="200px">
+.WispLoadingIcon_animatingRectangle {
+  animation-direction: alternate;
+  animation-duration: 0.6s;
+  animation-iteration-count: infinite;
+  animation-name: triangleBreathing;
+}
+</style>
+<div id="loading_spinner" class="container d-none">
+    <div class="row d-flex align-items-center" style="height: 150px;">
+        <svg
+        viewBox="0 0 157 120"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        class="WispLoadingIcon mx-auto mb-3"
+        style="height: 100px;">
+        <rect
+          width="23.9455"
+          height="119.727"
+          transform="matrix(-1 0 0 1 90.5199 0)"
+          fill="#A8B0B7"
+        />
+        <path
+          class="WispLoadingIcon_animatingRectangle"
+          d="M0.124794 0H46.7554V35.288L0.124794 0Z"
+          fill="#687B8B"
+        />
+        <path
+          class="WispLoadingIcon_animatingRectangle"
+          d="M156.97 0H110.339V35.288L156.97 0Z"
+          fill="#687B8B"
+        />
+      </svg>
     </div>
     <div class="text-center position-relative">
         <h3>Loading Lidar Point Cloud...</h3>

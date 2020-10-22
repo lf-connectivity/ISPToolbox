@@ -36,8 +36,9 @@ if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
         'CacheControl': 'max-age=86400',
     }
     AWS_LOCATION = 'static'
+    AWS_CLOUDFRONT_DOMAIN = 'static.fbctower.com'
 
-    STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+    STATIC_URL = 'https://%s/%s/' % (AWS_CLOUDFRONT_DOMAIN, AWS_LOCATION)
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 ALLOWED_HOSTS = ['*']  # ['*.fbctower.com']

@@ -22,6 +22,12 @@ class TGLinkView(View):
         # Puerto Rico Link
         tx = {'name': 'radio_0', 'lng': -66.10318337316896, 'lat': 18.415034033743083, 'id': 0, 'hgt': 20}
         rx = {'name': 'radio_1', 'lng': -66.09988844919782, 'lat': 18.411423676674275, 'id': 1, 'hgt': 10}
+        # # Puerto Rico Link
+        # tx = {'name': 'radio_0', 'lng': -66.09455208440198, 'lat': 18.413009468818956, 'id': 0, 'hgt': 40}
+        # rx = {'name': 'radio_1', 'lng': -66.09625993172662, 'lat': 18.41382434446693, 'id': 1, 'hgt': 35}
+        # # Puerto Rico Link - Issues with Lidar, outlier points
+        # tx = {'name': 'radio_0', 'lng': -66.10318337316896, 'lat': 18.415034033743083, 'id': 0, 'hgt': 20}
+        # rx = {'name': 'radio_1', 'lng': -66.10258857962704, 'lat': 18.411482741088264, 'id': 1, 'hgt': 60}
         # # South Lake Tahoe (no data available)
         # tx = {'name': 'radio_0', 'lng': -119.98405485393732, 'lat': 38.9332644376359, 'id': 0, 'hgt': 35}
         # rx = {'name': 'radio_1', 'lng': -119.98803300700314, 'lat': 38.933988683584545, 'id': 1, 'hgt': 4}
@@ -46,6 +52,7 @@ class LinkGISDataView(View):
         try:
             tx = Point([float(f) for f in request.GET.get('tx', '').split(',')])
             rx = Point([float(f) for f in request.GET.get('rx', '').split(',')])
+            resolution = request.GET.get('resolution', 'low')
             # Create Object to Log User Interaction
             TGLink(tx=tx, rx=rx).save()
             if geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters > link_distance_limit:
@@ -54,7 +61,11 @@ class LinkGISDataView(View):
 
             terrain_profile = getElevationProfile(tx, rx)
             try:
-                lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(tx, rx)
+                lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
+                    tx,
+                    rx,
+                    resolution=(5.0 if resolution == 'low' else 0.1)
+                )
                 resp['lidar_profile'] = lidar_profile
                 resp['points'] = pt_count
                 resp['url'] = ept_path

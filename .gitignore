@@ -24,3 +24,6 @@ static_collect
 .terraform.tfstate.lock.info
 terraform.tfstate.backup
 terraform.tfstate.d
+
+# vscode
+.vscode/

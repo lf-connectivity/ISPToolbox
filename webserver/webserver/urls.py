@@ -31,6 +31,7 @@ from IspToolboxApp.Views.MarketingViews import MarketingConvertPolygons
 from IspToolboxApp.Views.mmWavePlannerViews import MMWavePlannerView, MMWaveHelpCenterView
 from IspToolboxApp.Views.market_evaluator_views.GrantViews import SelectCensusGroupView, SelectZipView
 from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
+from Overlay.views import OverlaySource
 
 from rest_framework import routers
 from django.conf.urls.static import static
@@ -94,6 +95,8 @@ urlpatterns = [
     path('mmwave/add-boundary/', staff_member_required(UpdateLidarBoundariesView.as_view())),
     path('mmwave/link-check/', TGLinkView.as_view()),
     path('mmwave/link-check/gis/', LinkGISDataView.as_view()),
+    # Path Overlay
+    path('overlay/', OverlaySource.as_view(), name='overlay_source'),
     # REST API Endpoints
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),

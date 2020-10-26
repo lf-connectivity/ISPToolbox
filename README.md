@@ -155,3 +155,22 @@ REDIS_BACKEND=
 - FB Google accounts don't allow access to google groups
 - Use this account to access instead:
     - Username: isptoolboxmlab@gmail.com
+
+## Overlay Update
+### Update Mapbox source on public."Overlay_overlay" Table
+
+*Below are example of SQL Commands*
+
+Example of rdof, tower, and communityConnect
+```
+INSERT INTO public."Overlay_overlay"(type, source_url, source_layer, created)
+VALUES ('rdof', 'mapbox://alexychong.9r5cne0h', 'auction_904_final_simplified-1qpgm7', NOW())
+
+
+INSERT INTO public."Overlay_overlay"(type, source_url, source_layer, created)
+VALUES ('tower', 'mapbox://victorleefb.9l1ok6po', 'towerLocator-3rfxut', NOW())
+
+
+INSERT INTO public."Overlay_overlay"(type, source_url, source_layer, created)
+VALUES ('communityConnect', 'mapbox://alexychong.bp1lmhp5', 'calculated-cc-speeds-shp-casfao', NOW())
+```

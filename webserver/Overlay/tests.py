@@ -15,5 +15,7 @@ class TestOverlayModels(TestCase):
             )
             test.save()
 
+        test_overlay = Overlay.objects.filter(type="test").order_by(
+            "created").first()
         self.assertEqual(test_overlay.source_url, "mapbox://test.fbce0d34")
         self.assertTrue(test_overlay.source_url, "test_layer")

@@ -56,33 +56,33 @@ class MlabUszip1052020(models.Model):
         managed = False
         db_table = 'mlab_uszip_10_5_2020'
 
-    @staticmethod
-    def columnNames():
-        return {kv[0]: kv[1] for kv in
-                [field.get_attname_column()for field in MlabUszip1052020._meta.fields]
-                }
+
+class StandardizedMlab(models.Model):
+    down = models.DecimalField(db_column='down', max_digits=65535, decimal_places=65535, blank=True, null=True)
+    up = models.DecimalField(db_column='up', max_digits=65535, decimal_places=65535, blank=True, null=True)
+    postalcode = models.CharField(db_column='postalcode', max_length=10, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'standardized_mlab'
 
     @staticmethod
     def genMLabResults(area_of_interest):
-        field2column = MlabUszip1052020.columnNames()
         mlab_query = f"""
-WITH intersecting_geog AS
-(
-    SELECT * FROM {Tl2019UsZcta510._meta.db_table}
-    WHERE ST_Intersects(
-        geog,
-        ST_GeomFromGeoJSON(%s)
-    )
-)
-SELECT  "{field2column['zipcode']}",
-        "{field2column['download_mbit_s_field']}",
-        "{field2column['upload_mbit_s_field']}"
-FROM {MlabUszip1052020._meta.db_table}
-    INNER JOIN intersecting_geog
-    ON
-    CAST("{field2column['zipcode']}" AS varchar) =
-    intersecting_geog.zcta5ce10"""
-
+            WITH intersecting_geog AS
+            (
+                SELECT * FROM {StandardizedPostal._meta.db_table}
+                WHERE ST_Intersects(
+                    geog,
+                    ST_GeomFromGeoJSON(%s)
+                )
+            )
+            SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)"
+            FROM {StandardizedMlab._meta.db_table}
+                INNER JOIN intersecting_geog
+                ON
+                postalcode =
+                intersecting_geog.code"""
         with connections['gis_data'].cursor() as cursor:
             cursor.execute(mlab_query, [area_of_interest.json])
             columns = [col[0] for col in cursor.description]
@@ -90,3 +90,14 @@ FROM {MlabUszip1052020._meta.db_table}
                 dict(zip(columns, row))
                 for row in cursor.fetchall()
             ]
+
+
+class StandardizedPostal(models.Model):
+    gid = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    code = models.CharField(max_length=10, blank=True, null=True)
+    geog = models.MultiPolygonField(geography=True, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'standardized_postal'

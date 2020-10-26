@@ -1,6 +1,6 @@
 from django.views import View
 from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
-from IspToolboxApp.Models.MLabSpeedDataModels import MlabUszip1052020
+from IspToolboxApp.Models.MLabSpeedDataModels import StandardizedMlab
 from django.http import JsonResponse
 
 
@@ -13,7 +13,7 @@ class MLabSpeedView(View):
             if not results.isAccessAuthorized(request):
                 return JsonResponse(resp)
             area_of_interest = results.include_geojson
-            resp['zip_speeds'] = MlabUszip1052020.genMLabResults(area_of_interest)
+            resp['zip_speeds'] = StandardizedMlab.genMLabResults(area_of_interest)
             resp['error'] = None
         except Exception as e:
             resp['error'] = str(e)

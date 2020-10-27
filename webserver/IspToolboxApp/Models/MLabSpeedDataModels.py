@@ -67,24 +67,27 @@ class StandardizedMlab(models.Model):
         db_table = 'standardized_mlab'
 
     @staticmethod
+    # flake8: noqa
     def genMLabResults(area_of_interest):
         mlab_query = f"""
             WITH intersecting_geog AS
             (
-                SELECT * FROM {StandardizedPostal._meta.db_table}
+                SELECT *, ST_Area(ST_Intersection(geog, ST_GeomFromGeoJSON(%s)))/ST_Area(ST_GeomFromGeoJSON(%s)::geography) as pct_area
+                FROM {StandardizedPostal._meta.db_table}
                 WHERE ST_Intersects(
                     geog,
                     ST_GeomFromGeoJSON(%s)
                 )
             )
-            SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)"
+            SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)", pct_area
             FROM {StandardizedMlab._meta.db_table}
                 INNER JOIN intersecting_geog
                 ON
                 postalcode =
                 intersecting_geog.code"""
         with connections['gis_data'].cursor() as cursor:
-            cursor.execute(mlab_query, [area_of_interest.json])
+            areaJson = area_of_interest.json
+            cursor.execute(mlab_query, [areaJson, areaJson, areaJson])
             columns = [col[0] for col in cursor.description]
             return [
                 dict(zip(columns, row))

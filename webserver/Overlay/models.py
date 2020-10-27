@@ -10,6 +10,6 @@ class Overlay(models.Model):
     @classmethod
     def getLatestOverlay(cls, type):
         try:
-            return cls.objects.filter(type=type).order_by("created").first()
+            return cls.objects.filter(type=type).order_by("created").last()
         except:  # noqa: E722
             return None

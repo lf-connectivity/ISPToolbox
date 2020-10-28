@@ -44,6 +44,11 @@ debug_shell:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py shell
 
+default_objects:
+	@echo ----------------------------------------------CREATING SAMPLE OBJECTS----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+	sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app bash -c "cat Overlay/scripts/initialize_overlays.py | python3 manage.py shell"
+
 run:
 	@echo ----------------------------------------------RUNNING WEBSERVER----------------------------------------
 	python3 ./webserver/manage.py runserver

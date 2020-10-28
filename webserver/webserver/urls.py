@@ -70,6 +70,7 @@ urlpatterns = [
     path('market-evaluator/market-size/', BuildingsView.as_view(), name='BuildingOutlines'),
     path('market-evaluator/market-rdof/', RDOFView.as_view(), name='PRIncome'),
     path('market-evaluator/market-data-available/',  DataAvailableView.as_view(), name='PRIncome'),
+    path('towerlocator/', include('towerlocator.urls')),
     # Pipeline Functions for MarketEvaluator
     path('market-evaluator/', MarketEvaluatorPipelineView.as_view(), name='marketEvalAsync'),
     path('market-evaluator/kmz/', MarketEvaluatorPipelineKMZ.as_view(), name='marketEvalKMZAsync'),
@@ -103,7 +104,7 @@ urlpatterns = [
     # CMS
     path('cms/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),
-    path('pages/', include(wagtail_urls)),
+    path('isptoolbox/', include(wagtail_urls)),
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

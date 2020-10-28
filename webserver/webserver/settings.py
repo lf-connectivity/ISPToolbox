@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'IspToolboxApp',
     'mmwave',
     'Overlay',
+    'towerlocator',
     # S3 Static File Storage
     'storages',
     # Social Auth

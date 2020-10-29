@@ -22,12 +22,13 @@ services:
     celery:
         image: isptoolbox-celery
         build: ./webserver
-        command: celery worker -A webserver -l info
+        command: celery worker --beat -A webserver -l info
         depends_on:
             - redis
             - postgres
         environment:
             - REDIS_BACKEND=redis://redis:6379
+            - GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/dataUpdate/config/gcp-service-key.json
 
     django-app:
         image: isptoolbox-django

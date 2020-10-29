@@ -5,7 +5,7 @@
     "essential": true,
     "cpu": 2048,
     "memory": 6144,
-    "command": ["celery","-A","webserver","worker","-l","info"],
+    "command": ["celery","--beat","-A","webserver","worker","-l","info"],
     "environment": [
       {
         "name": "DEBUG",
@@ -34,6 +34,10 @@
       {
         "name" : "REDIS_BACKEND",
         "value" : "${redis}"
+      },
+      {
+        "name" : "GOOGLE_APPLICATION_CREDENTIALS",
+        "value" : "/usr/src/app/dataUpdate/config/gcp-service-key.json"
       }
     ],
     "logConfiguration": {

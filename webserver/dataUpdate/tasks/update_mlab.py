@@ -5,10 +5,10 @@ from dataUpdate.util.mail import sendNotifyEmail
 def updateMlab():
     try:
         bqQuery = """
-                    #standardSQL
+                   #standardSQL
                     with dl as (
                     SELECT
-                        AVG(downloads.a.MeanThroughputMbps) AS avg_down,
+                        fhoffa.x.median(ARRAY_AGG(downloads.a.MeanThroughputMbps)) AS med_down,
                         downloads.client.Geo.postal_code as postal
                     FROM
                         measurement-lab.ndt.unified_downloads as downloads
@@ -23,7 +23,7 @@ def updateMlab():
                     ),
                     ul as (
                     SELECT
-                        AVG(a.MeanThroughputMbps) AS avg_up,
+                        fhoffa.x.median(ARRAY_AGG(uploads.a.MeanThroughputMbps)) AS med_up,
                         client.Geo.postal_code as postal
                     FROM
                         measurement-lab.ndt.unified_uploads as uploads
@@ -36,7 +36,7 @@ def updateMlab():
                         AND client.Geo.region != ""
                     GROUP BY postal
                     )
-                    SELECT avg_up, avg_down, dl.postal from dl, ul
+                    SELECT med_up, med_down, dl.postal from dl, ul
                     WHERE dl.postal = ul.postal;
                 """
 
@@ -61,7 +61,7 @@ def updateMlab():
         bqclient = bqClient()
         query_job = bqclient.query(bqQuery)
         for row in query_job:
-            cursor.execute(dbQuery.format(row['avg_up'], row['avg_down'], row['postal'], row['avg_up'], row['avg_down']))
+            cursor.execute(dbQuery.format(row['med_up'], row['med_down'], row['postal'], row['med_up'], row['med_down']))
         try:
             sendNotifyEmail(successSubject, successMessage)
         except Exception as e:

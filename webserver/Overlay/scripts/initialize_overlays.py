@@ -19,6 +19,12 @@ def create_sample_overlays():
         source_layer="calculated-cc-speeds-shp-casfao"
     )
     communityConnect[0].save()
+    cbrs = Overlay.objects.get_or_create(
+        type='cbrs',
+        source_url='mapbox://alexychong.19jj5ryk',
+        source_layer='cbrs_shp-6wi1gs'
+    )
+    cbrs[0].save()
     print('Created sample overlay objects, done!')
 
 

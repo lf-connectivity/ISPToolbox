@@ -1,7 +1,6 @@
 from django.views import View
 from django.db import connections
 from django.http import JsonResponse
-from IspToolboxApp.Models.MLabSpeedDataModels import Tl2019UsZcta510
 
 
 class SelectCensusGroupView(View):
@@ -23,21 +22,6 @@ class SelectCensusGroupView(View):
                     'locations': result[3],
                     'reserve_price': result[4],
                     'geojson': result[5]}
-        except BaseException:
-            resp = {'error': -2}
-        return JsonResponse(resp)
-
-
-class SelectZipView(View):
-    def get(self, request):
-        '''
-            Returns geojson for provided zipcode.
-        '''
-        zipcode = request.GET.get('zip', '-1')
-        resp = {'error': -1}
-        try:
-            resp['geojson'] = Tl2019UsZcta510.getZipGeog(zipcode)
-            resp['zip'] = zipcode
         except BaseException:
             resp = {'error': -2}
         return JsonResponse(resp)

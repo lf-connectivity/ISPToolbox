@@ -16,7 +16,7 @@ celery_app.conf.update(
 @celery_app.on_after_finalize.connect
 def setup_periodic(sender, **kwargs):
     # Execute once on the first day of every month
-    sender.add_periodic_task(crontab(minute=0, hour=0, day_of_month=[4]), updateGISData.s())
+    sender.add_periodic_task(crontab(minute=0, hour=0, day_of_month=[5]), updateGISData.s())
 
 
 @celery_app.task

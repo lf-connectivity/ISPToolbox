@@ -31,15 +31,17 @@ if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
     # Static Files S3
     AWS_DEFAULT_ACL = 'public-read'
     AWS_STORAGE_BUCKET_NAME = 'isptoolbox-static'
-    AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }
     AWS_LOCATION = 'static'
     AWS_CLOUDFRONT_DOMAIN = 'static.fbctower.com'
-
-    STATIC_URL = 'https://%s/%s/' % (AWS_CLOUDFRONT_DOMAIN, AWS_LOCATION)
+    AWS_S3_CUSTOM_DOMAIN = AWS_CLOUDFRONT_DOMAIN
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.0/howto/static-files/
+STATIC_URL = '/static/'
 
 ALLOWED_HOSTS = ['*']  # ['*.fbctower.com']
 
@@ -88,7 +90,6 @@ INSTALLED_APPS = [
     'taggit',
 ]
 
-STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_collect')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static/potree/build/'),
@@ -254,11 +255,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.0/howto/static-files/
-
-STATIC_URL = '/static/'
 
 CELERY_BROKER_URL = os.environ.get('REDIS_BACKEND', 'redis://localhost:6379')
 CELERY_RESULT_BACKEND = os.environ.get('REDIS_BACKEND', 'redis://localhost:6379')

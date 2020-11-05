@@ -11,6 +11,8 @@ import rasterio.features
 import rasterio.warp
 from defusedxml import ElementTree
 from IspToolboxApp.templates.errorMsg import kmz_err_msg
+from fastkml import kml as fastkml, styles
+from fastkml.geometry import Geometry
 
 
 # Mapping for Canadian broadband tech to US tech codes used on FE (WispCompetitorModal.react.js)
@@ -402,3 +404,47 @@ def createGeoJsonsFromCoverageOverlays(overlays, root_directory):
                     geometries.append(geom)
 
     return geometries
+
+
+############################
+# KML PROCESSING FUNCTIONS #
+############################
+
+
+def getAllStyles():
+    tag_styles = []
+    for layer in ('shape', 'buildings'):
+        s = styles.Style(id=f'{layer}-style-id')
+        if layer == 'shape':
+            s.append_style(styles.BalloonStyle())
+            s.append_style(styles.LineStyle(color='50FF7800', width=5))
+            s.append_style(styles.PolyStyle(color='50FF7800', fill=1))
+        elif layer == 'buildings':
+            s.append_style(styles.BalloonStyle())
+            s.append_style(styles.PolyStyle(color='ff06ff22', fill=1))
+        tag_styles.append(s)
+    return tag_styles
+
+
+def convertKml(geoList):
+    tag_kml = fastkml.KML()
+    ns = '{http://www.opengis.net/kml/2.2}'
+
+    tag_styles = getAllStyles()
+
+    tag_document = fastkml.Document(ns, styles=tag_styles)
+    tag_kml.append(tag_document)
+
+    tag_folder = fastkml.Folder(ns)
+    tag_document.append(tag_folder)
+
+    for layerGeoJson in geoList:
+        layer = layerGeoJson['layer']
+        geoData = layerGeoJson['geometries'] if 'geometries' in layerGeoJson else [layerGeoJson]
+        for geo in geoData:
+            tag_placemark = fastkml.Placemark(ns, name=layer, styleUrl=styles.StyleUrl(url=f'#{layer}-style-id'))
+            tag_placemark.geometry = Geometry(ns, geometry=shape(geo))
+            tag_folder.append(tag_placemark)
+
+    return f'<?xml version="1.0" encoding="UTF-8"?>\n\
+{tag_kml.to_string(prettyprint=True)}'

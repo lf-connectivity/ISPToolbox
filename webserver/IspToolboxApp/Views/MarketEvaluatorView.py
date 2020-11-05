@@ -5,12 +5,15 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
 import IspToolboxApp.Tasks.MarketEvaluatorTasks
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getMicrosoftBuildingsOffset, createPipelineFromKMZ
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import\
+    getMicrosoftBuildingsOffset, createPipelineFromKMZ, convertKml
 from django.http import JsonResponse
 import json
 import logging
 from rasterio.errors import RasterioIOError
 from IspToolboxApp.templates.errorMsg import kmz_err_msg
+import uuid as uuidv4
+from IspToolboxApp.util.s3 import writeToS3, createPresignedUrl
 
 
 class MarketEvaluatorPipelineBuildings(View):
@@ -218,3 +221,44 @@ class MarketEvaluatorPipelineView(View):
         run.save(update_fields=['task'])
 
         return JsonResponse({'uuid': run.uuid, 'token': run.token})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MarketEvaluatorExport(View):
+    def post(self, request):
+        uuid = request.GET.get('uuid', '')
+        body = json.loads(request.body.decode('utf-8'))
+        isShape = body.get('shapes', False)
+        isBuildings = body.get('buildings', False)
+        object_name = f'kml/{uuidv4.uuid4()}.kml'
+        resp = {'error': None}
+        geoList = []
+        try:
+            results = MarketEvaluatorPipeline.objects.get(pk=uuid)
+
+            if not results.isAccessAuthorized(request):
+                return JsonResponse({'error', 'the token is not access'})
+
+            if not results.buildingPrecomputed:
+                return JsonResponse({'error': 'building didn\'t computed yet'})
+
+            if isShape:
+                shapes = json.loads(results.include_geojson.json)
+                shapes['layer'] = 'shape'
+                geoList.append(shapes)
+            if isBuildings:
+                buildingOutlines = getMicrosoftBuildingsOffset(
+                    results.include_geojson.json, None, 0)
+                buildingOutlines['layer'] = 'buildings'
+                geoList.append(buildingOutlines)
+            kml = convertKml(geoList)
+            succee = writeToS3(kml, object_name)
+            if not succee:
+                return JsonResponse({'error': 'fail to upload to S3'})
+            url = createPresignedUrl(object_name)
+            resp = {'url': url}
+
+        except Exception as e:
+            resp['error'] = str(e)
+
+        return JsonResponse(resp)

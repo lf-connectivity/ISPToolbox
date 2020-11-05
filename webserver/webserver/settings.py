@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'mmwave',
     'Overlay',
     'towerlocator',
+    'cms',
     # S3 Static File Storage
     'storages',
     # Social Auth

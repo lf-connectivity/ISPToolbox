@@ -33,7 +33,6 @@ class TestMarketingConversionModels(TestCase):
         conversion.save()
         ConvertPins(conversion.uuid)
         conversion.refresh_from_db()
-        print(conversion.error)
         self.assertTrue(len(conversion.include_output) > 0)
         self.assertTrue(conversion.include_output is not None)
 

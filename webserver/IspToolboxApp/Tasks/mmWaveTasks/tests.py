@@ -6,5 +6,3 @@ bb = [-0.3999924659729004, 49.15775509179997, -
 # print(aoi)
 
 bbs = mmwave.splitBB(bb)
-print(bb)
-print(bbs)

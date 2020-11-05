@@ -40,10 +40,6 @@ from django.conf import settings
 
 from mmwave.views import TGLinkView, LinkGISDataView, UpdateLidarBoundariesView
 
-# Wagtails CMS
-from wagtail.admin import urls as wagtailadmin_urls
-from wagtail.core import urls as wagtail_urls
-from wagtail.documents import urls as wagtaildocs_urls
 
 # REST API Router
 router = routers.DefaultRouter()
@@ -52,7 +48,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Health Check Endpoint
     path('elb-status/', views.HealthCheckView.as_view()),
-    path('', views.HealthCheckView.as_view(), name='healthcheck'),
     path('login/', views.SocialLoginView.as_view(), name='login'),
     path(r'accounts/', include('allauth.urls')),
     # Async Jobs
@@ -104,9 +99,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),
     # CMS
-    path('cms/', include(wagtailadmin_urls)),
-    path('documents/', include(wagtaildocs_urls)),
-    path('isptoolbox/', include(wagtail_urls)),
+    path('', include('cms.urls'))
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

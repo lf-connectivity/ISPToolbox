@@ -40,7 +40,6 @@ from django.conf import settings
 
 from mmwave.views import TGLinkView, LinkGISDataView, UpdateLidarBoundariesView
 
-
 # REST API Router
 router = routers.DefaultRouter()
 

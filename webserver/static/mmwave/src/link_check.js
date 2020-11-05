@@ -240,7 +240,7 @@ const updateLinkProfile = () =>
     const tx_lng = $('#lng-0').val();
     const rx_lat = $('#lat-1').val();
     const rx_lng = $('#lng-1').val();
-    const query_params = {tx: [tx_lng, tx_lat], rx: [rx_lng, rx_lat]};
+    const query_params = {tx: [tx_lng, tx_lat], rx: [rx_lng, rx_lat], id: userRequestIdentity};
     
     const query = new URLSearchParams(query_params).toString();
     if (selected_feature === query)

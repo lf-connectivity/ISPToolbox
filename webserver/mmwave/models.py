@@ -16,6 +16,7 @@ class TGLink(models.Model):
 
     tx = gis_models.PointField()
     rx = gis_models.PointField()
+    fbid = models.BigIntegerField(null=True, blank=True, db_index=True)
     building_start = models.BigIntegerField(null=True, blank=True)
     building_end = models.BigIntegerField(null=True, blank=True)
 

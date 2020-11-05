@@ -1,6 +1,11 @@
-version: '3'
+version: '3.2'
 
 services:
+  static:
+    command: /bin/sh -c "/usr/src/app/build_static_prod.sh"
+    build: ./webserver/static
+    volumes:
+      - ./webserver/static:/usr/src/app
   django-app:
     environment:
       DEBUG: 'False'

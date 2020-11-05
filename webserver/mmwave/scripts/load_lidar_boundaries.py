@@ -21,7 +21,6 @@ def getLidarResource():
         pt_cloud.save()
         if created:
             new_point_clouds.append(pt_cloud)
-        print(props['name'])
     return new_point_clouds
 
 

@@ -1,12 +1,15 @@
-// Create new mapbox Map
 
+import {createLinkChart} from './link_profile.js';
+// Create new mapbox Map
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
 
 var map = null;
 var Draw = null;
 var selected_feature = null;
+var link_chart = null;
 
 $(document).ready( function () {
+    link_chart = createLinkChart(link_chart, highLightPointOnGround);
     var initial_map_center = [(parseFloat($('#lng-0').val()) + parseFloat($('#lng-1').val())) / 2.0, (parseFloat($('#lat-0').val()) +  parseFloat($('#lat-1').val())) / 2.0];
     
     map = new mapboxgl.Map({
@@ -229,7 +232,7 @@ const createFresnelZonePlot = () => {
     }
 };
 
-var linkProfileRequestInProgress = null;
+var axiosCancelToken = null;
 // Overlay
 const updateLinkProfile = () => 
 {
@@ -252,12 +255,16 @@ const updateLinkProfile = () =>
     $('#lidar_not_found_msg').addClass('d-none');
 
     $("#link_chart").addClass('d-none');
-    if(linkProfileRequestInProgress !== null ) {
-        linkProfileRequestInProgress.cancel();
+    if(axiosCancelToken !== null ) {
+        axiosCancelToken.cancel();
     }
-    
-    linkProfileRequestInProgress = axios.get('/mmwave/link-check/gis/?' + query)
+    axiosCancelToken = axios.CancelToken.source();
+    axios.get('/mmwave/link-check/gis/?' + query, {
+        cancelToken: axiosCancelToken.token
+    })
     .then(function (response) {
+        link_chart.hideLoading();
+        $("#loading_spinner").addClass('d-none');
         if(response.data.error !== null)
         {
             $("#link-request-error-description").text(response.data.error);
@@ -284,24 +291,29 @@ const updateLinkProfile = () =>
         // Done Loading Low Resolution, now load high resolution Lidar
         query_params['resolution'] = 'high';
         const high_res_query = new URLSearchParams(query_params).toString();
-        linkProfileRequestInProgress = axios.get('/mmwave/link-check/gis/?' + high_res_query).then(function (response)
+        axiosCancelToken = axios.CancelToken.source();
+        axios.get('/mmwave/link-check/gis/?' + high_res_query, {
+            cancelToken: axiosCancelToken.token
+        }).then(function (response)
         {
             renderNewLinkProfile(response);
+        }).catch(function(error) {
+        })
+        .then(function() {
         })
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
-        selected_feature = null;
-        $('#loading_failed_spinner').removeClass('d-none');
-        $("#link-request-error-description").text();
-        $("#link_chart").addClass('d-none');
+        if(!axios.isCancel(error))
+        {
+            selected_feature = null;
+            $('#loading_failed_spinner').removeClass('d-none');
+            $("#link-request-error-description").text();
+            $("#link_chart").addClass('d-none');
+        }
       })
       .then(function () {
         // always executed
-        link_chart.hideLoading();
-        $("#loading_spinner").addClass('d-none');
-        linkProfileRequestInProgress = null;
     });
 }
 
@@ -338,14 +350,6 @@ const renderNewLinkProfile = (response) => {
         }
     }
 };
-
-$(document).ready(
-    function() {
-        $('#refresh-link-btn').click(
-            updateLinkProfile
-        );
-    }
-);
 
 // LiDAR Functions 
 const generateClippingVolume = function(bb, buffer = 10) {

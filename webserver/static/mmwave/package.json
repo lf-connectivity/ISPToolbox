@@ -1,0 +1,19 @@
+{
+  "name": "isptoolbox-mmwave",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.prod.js",
+    "watch": "webpack --watch --config webpack.dev.js"
+  },
+  "author": "ISP Toolbox Team",
+  "license": "Facebook Copyright 2020",
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "^5.4.0",
+    "webpack-cli": "^4.1.0",
+    "webpack-merge": "^5.3.0"
+  }
+}

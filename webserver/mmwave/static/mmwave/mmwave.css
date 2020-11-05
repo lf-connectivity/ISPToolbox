@@ -1,0 +1,30 @@
+.planner-map {
+    width: 100%;
+    top: 0px;
+    height: 50vh;
+}
+
+@media (min-width: 768px) {
+    .planner-map {
+        top: 56px;
+        position: fixed !important;
+        height: calc(100vh - 56px);
+    }
+}
+
+@media (max-width: 767px) {
+    .bottom-bar-wisp {
+        position: relative !important;
+    }
+    .top-bar-wisp {
+        position: relative !important;
+        top: -60px;
+        height: 0;
+    }
+}
+
+#map-available {
+    width:100%;
+    height:80vh;
+    min-height: 400px;
+}

@@ -93,6 +93,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static/potree/build/'),
     os.path.join(BASE_DIR, 'static/potree/libs/'),
     os.path.join(BASE_DIR, 'static/potree/pointclouds/'),
+    os.path.join(BASE_DIR, 'static/mmwave/build/')
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

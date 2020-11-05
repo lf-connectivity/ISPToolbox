@@ -1,6 +1,11 @@
-version: '3'
+version: '3.2'
 
 services:
+  static:
+    command: /bin/sh -c "/usr/src/app/watch_static_dev.sh"
+    build: ./webserver/static
+    volumes:
+      - ./webserver/static:/usr/src/app
   django-app:
     command: /bin/sh -c "/usr/src/app/dev_entrypoint_django.sh"
     environment:
@@ -14,6 +19,8 @@ services:
     ports:
       - 3000:3000
       - 8000:8000
+    depends_on:
+      - static
   celery:
     environment:
       POSTGRES_DB: 'postgres'

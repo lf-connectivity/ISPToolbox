@@ -1,7 +1,5 @@
-var link_chart = null;
-
-$(document).ready( function () {
-    link_chart = Highcharts.chart('link_chart', {
+export function createLinkChart(link_chart, highLightPointOnGround) {
+   return Highcharts.chart('link_chart', {
         chart: {
             type: 'line'
         },
@@ -78,4 +76,4 @@ $(document).ready( function () {
         },
         tooltip: { enabled: false },
     });
-});
+};

@@ -66,4 +66,5 @@ test:
 static_prod:
 	@echo ----------------------------------------------BUIDLING STATIC FILES \& PUSHING TO PROD \(S3\)----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run static
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py collectstatic --noinput

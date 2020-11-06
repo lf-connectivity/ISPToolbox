@@ -24,8 +24,8 @@ future==0.18.2
 geographiclib==1.50 
 geojson==2.5.0
 geopy==2.0.0
-gunicorn==20.0.4
 google-cloud-bigquery==2.2.0
+gunicorn==20.0.4
 humanize==2.6.0
 idna==2.10
 importlib-metadata==1.7.0
@@ -33,6 +33,7 @@ jmespath==0.10.0
 joblib==0.16.0
 kombu==4.6.11
 l18n==2018.5
+lxml==4.6.1
 markdown==3.2.2
 numpy==1.19.0
 prometheus-client==0.8.0

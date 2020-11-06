@@ -39,7 +39,7 @@ export function createLinkChart(link_chart, highLightPointOnGround) {
         },
         series: [
         {
-            name: 'Terain',
+            name: 'Terrain',
             data: [],
             zIndex: 0,
             color: '#874280'

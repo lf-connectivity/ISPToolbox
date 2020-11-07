@@ -26,7 +26,7 @@ data "aws_ami" "ecs" {
 }
 
 resource "aws_launch_configuration" "ecs-webserver" {
-  name                        = aws_ecs_cluster.webserver-production.name
+  name_prefix                 = aws_ecs_cluster.webserver-production.name
   image_id                    = data.aws_ami.ecs.id
   instance_type               = var.instance_type
   security_groups             = [aws_security_group.ecs.id]
@@ -34,10 +34,13 @@ resource "aws_launch_configuration" "ecs-webserver" {
   key_name                    = aws_key_pair.production.key_name
   associate_public_ip_address = true
   user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${aws_ecs_cluster.webserver-production.name}' > /etc/ecs/ecs.config"
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_launch_configuration" "ecs-async" {
-  name                        = aws_ecs_cluster.async-production.name
+  name_prefix                 = aws_ecs_cluster.async-production.name
   image_id                    = data.aws_ami.ecs.id
   instance_type               = var.instance_type
   security_groups             = [aws_security_group.ecs.id]
@@ -45,6 +48,9 @@ resource "aws_launch_configuration" "ecs-async" {
   key_name                    = aws_key_pair.production.key_name
   associate_public_ip_address = true
   user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${aws_ecs_cluster.async-production.name}' > /etc/ecs/ecs.config"
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_ecr_repository" "django" {

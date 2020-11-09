@@ -10,13 +10,17 @@ from datetime import datetime
 
 @shared_task
 def genMarketEvaluatorData(uuid):
-    isOSM = genPrecomputedBuilingsAvailable(uuid)
-    if not isOSM:
-        genBuildingOutlines(uuid)
-    else:
+    msftBuildingsAvailable = genPrecomputedBuilingsAvailable(uuid)
+    if msftBuildingsAvailable:
+        '''
+            Don't need to async compute building overlays since we can synchronously load them
+            with pagination for a more responsive FE.
+        '''
         pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
         pipelineStatus.buildingCompleted = datetime.now()
         pipelineStatus.save(update_fields=['buildingCompleted'])
+    else:
+        genBuildingOutlines(uuid)
 
     genServiceProviders.delay(uuid)
     genMedianIncome.delay(uuid)

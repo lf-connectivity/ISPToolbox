@@ -34,6 +34,7 @@ from IspToolboxApp.Views.market_evaluator_views.GrantViews import SelectCensusGr
 from IspToolboxApp.Views.market_evaluator_views.GeographicViews import SelectZipView, SelectCountyView
 from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
 from Overlay.views import OverlaySource
+from dataUpdate.views import CountrySourceUpdatedView
 
 from rest_framework import routers
 from django.conf.urls.static import static
@@ -96,6 +97,8 @@ urlpatterns = [
     path('mmwave/link-check/gis/', LinkGISDataView.as_view()),
     # Path Overlay
     path('overlay/', OverlaySource.as_view(), name='overlay_source'),
+    # Sources Last Updated Dates
+    path('sources/last-update/', CountrySourceUpdatedView.as_view(), name='source_updated_dates'),
     # REST API Endpoints
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),

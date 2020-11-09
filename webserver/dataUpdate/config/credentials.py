@@ -17,4 +17,4 @@ CLIENT_EMAIL = {
     'EMAIL': 'isptoolboxmlab@gmail.com',
 }
 
-NOTIFY_EMAIL = 'derwee@fb.com'
+NOTIFY_EMAIL = 'isptoolbox@fb.com'

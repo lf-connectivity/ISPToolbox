@@ -1,8 +1,10 @@
 from dataUpdate.util.clients import dbClient, bqClient
 from dataUpdate.util.mail import sendNotifyEmail
+from datetime import datetime
 
 
 def updateMlab():
+    from dataUpdate.models import Source
     try:
         bqQuery = """
                    #standardSQL
@@ -62,6 +64,14 @@ def updateMlab():
         query_job = bqclient.query(bqQuery)
         for row in query_job:
             cursor.execute(dbQuery.format(row['med_up'], row['med_down'], row['postal'], row['med_up'], row['med_down']))
+        # Update source last updated objects
+        complete = datetime.now()
+        s_ca = Source.objects.get_or_create(source_id='MLAB', source_country='CA')
+        s_us = Source.objects.get_or_create(source_id='MLAB', source_country='US')
+        s_ca[0].last_updated = complete
+        s_us[0].last_updated = complete
+        s_ca[0].save()
+        s_us[0].save()
         try:
             sendNotifyEmail(successSubject, successMessage)
         except Exception as e:

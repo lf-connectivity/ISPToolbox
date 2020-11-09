@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'Overlay',
     'towerlocator',
     'cms',
+    'dataUpdate',
     # S3 Static File Storage
     'storages',
     # Social Auth

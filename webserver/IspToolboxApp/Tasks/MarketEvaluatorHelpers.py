@@ -261,9 +261,10 @@ def getMicrosoftBuildings(include, exclude, callback=None):
                 polygons = [json.loads(row[0]) for row in cursor.fetchall()]
                 buildings += polygons
                 offset += len(polygons)
-                callback(
-                    offset, {
-                        "type": "GeometryCollection", "geometries": buildings})
+                if callback:
+                    callback(
+                        offset, {
+                            "type": "GeometryCollection", "geometries": buildings})
                 if len(polygons) == 0:
                     break
             response['buildings'] = {

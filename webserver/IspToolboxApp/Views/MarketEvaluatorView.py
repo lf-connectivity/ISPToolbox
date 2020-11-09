@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
 import IspToolboxApp.Tasks.MarketEvaluatorTasks
 from IspToolboxApp.Tasks.MarketEvaluatorHelpers import\
-    getMicrosoftBuildingsOffset, createPipelineFromKMZ, convertKml
+    getMicrosoftBuildingsOffset, createPipelineFromKMZ, convertKml, getMicrosoftBuildings
 from django.http import JsonResponse
 import json
 import logging
@@ -247,10 +247,10 @@ class MarketEvaluatorExport(View):
                 shapes['layer'] = 'shape'
                 geoList.append(shapes)
             if isBuildings:
-                buildingOutlines = getMicrosoftBuildingsOffset(
-                    results.include_geojson.json, None, 0)
-                buildingOutlines['layer'] = 'buildings'
-                geoList.append(buildingOutlines)
+                buildingOutlines = getMicrosoftBuildings(
+                    results.include_geojson.json, None)
+                buildingOutlines['buildings']['layer'] = 'buildings'
+                geoList.append(buildingOutlines['buildings'])
             kml = convertKml(geoList)
             succee = writeToS3(kml, object_name)
             if not succee:
@@ -260,5 +260,4 @@ class MarketEvaluatorExport(View):
 
         except Exception as e:
             resp['error'] = str(e)
-
         return JsonResponse(resp)

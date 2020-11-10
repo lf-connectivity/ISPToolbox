@@ -230,7 +230,8 @@ class MarketEvaluatorExport(View):
         body = json.loads(request.body.decode('utf-8'))
         isShape = body.get('shapes', False)
         isBuildings = body.get('buildings', False)
-        object_name = f'kml/{uuidv4.uuid4()}.kml'
+        unique_id = str(uuidv4.uuid4()).replace('-', '')[-10:]
+        object_name = f'kml/ISPTOOLBOX_{unique_id}.kml'
         resp = {'error': None}
         geoList = []
         try:

@@ -422,6 +422,7 @@ def getAllStyles():
             s.append_style(styles.PolyStyle(color='50FF7800', fill=1))
         elif layer == 'buildings':
             s.append_style(styles.BalloonStyle())
+            s.append_style(styles.LineStyle(color='ff06ff22', width=1))
             s.append_style(styles.PolyStyle(color='ff06ff22', fill=1))
         tag_styles.append(s)
     return tag_styles

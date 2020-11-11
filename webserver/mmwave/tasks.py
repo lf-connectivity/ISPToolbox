@@ -3,15 +3,19 @@ import re
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
+from celery import shared_task
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 from mmwave.models import Msftcombined, TreeCanopy
 from shapely.geometry import LineString as shapely_LineString
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
-from mmwave.models import EPTLidarPointCloud
+from mmwave.models import EPTLidarPointCloud, TGLink
 
 
 google_maps_samples_limit = 512
 num_samples_per_m = 1
+link_distance_limit = 5000
 
 
 def getElevationProfile(tx, rx):
@@ -134,3 +138,56 @@ def getBuildingProfile(tx, rx):
         if not buildingFound:
             building_profile.append("-1")
     return building_profile
+
+
+@shared_task
+def getLOSProfile(network_id, data):
+    resp = {
+        'error': None,
+        'tree_profile': None,
+        'building_profile': None,
+        'terrain_profile': None,
+        'lidar_profile': None,
+        'points': 0,
+        'url': None,
+        'name': None,
+        'bb': [],
+        'tx': {},
+        'rx': {},
+        "type": 'standard.message'
+    }
+    channel_layer = get_channel_layer()
+    channel_name = 'los_check_%s' % network_id
+    try:
+        tx = Point([float(f) for f in data.get('tx', [])])
+        rx = Point([float(f) for f in data.get('rx', [])])
+        fbid = int(data.get('fbid', 0))
+        resolution = data.get('resolution', 'low')
+        # Create Object to Log User Interaction
+        TGLink(tx=tx, rx=rx, fbid=fbid).save()
+        if geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters > link_distance_limit:
+            resp['error'] = f'Link too long: limit {link_distance_limit} meters'
+            async_to_sync(channel_layer.group_send)(channel_name, resp)
+
+        terrain_profile = getElevationProfile(tx, rx)
+        try:
+            lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
+                tx,
+                rx,
+                resolution=(5.0 if resolution == 'low' else 0.1)
+            )
+            resp['lidar_profile'] = lidar_profile
+            resp['points'] = pt_count
+            resp['url'] = ept_path
+            resp['name'] = name
+            resp['bb'] = bb
+            resp['tx'] = tx_T
+            resp['rx'] = rx_T
+        except Exception as e:
+            resp['error'] = str(e)
+        resp['terrain_profile'] = terrain_profile
+        async_to_sync(channel_layer.group_send)(channel_name, resp)
+
+    except Exception as e:
+        resp["error"] = "An unexpected error occured: " + str(e)
+        async_to_sync(channel_layer.group_send)(channel_name, resp)

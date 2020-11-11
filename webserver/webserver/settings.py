@@ -47,8 +47,10 @@ STATIC_URL = '/static/'
 
 
 # Application definition
-
 INSTALLED_APPS = [
+    # Async / Websockets
+    'channels',
+    # Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -198,6 +200,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'webserver.wsgi.application'
+# Channels
+ASGI_APPLICATION = 'webserver.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [os.environ.get('REDIS_BACKEND', 'redis://localhost:6379')],
+        },
+    },
+}
 
 
 # Database

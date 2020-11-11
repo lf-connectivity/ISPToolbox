@@ -25,7 +25,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEBUG = False
 if "DEBUG" in os.environ and os.environ.get("DEBUG").lower() == 'true':
     DEBUG = True
-    ALLOWED_HOSTS = ['*']
 
 if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -39,18 +38,17 @@ if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
     AWS_CLOUDFRONT_DOMAIN = 'static.fbctower.com'
     AWS_S3_CUSTOM_DOMAIN = AWS_CLOUDFRONT_DOMAIN
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    ALLOWED_HOSTS = ['.isptoolbox.io', '.fbctower.com']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 STATIC_URL = '/static/'
 
+ALLOWED_HOSTS = ['*']  # ['*.fbctower.com']
+
 
 # Application definition
+
 INSTALLED_APPS = [
-    # Async / Websockets
-    'channels',
-    # Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -88,7 +86,7 @@ INSTALLED_APPS = [
     'wagtail.search',
     'wagtail.admin',
     'wagtail.core',
-    'django.contrib.humanize',
+
     'modelcluster',
     'taggit',
 ]
@@ -199,16 +197,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'webserver.wsgi.application'
-# Channels
-ASGI_APPLICATION = 'webserver.asgi.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [os.environ.get('REDIS_BACKEND', 'redis://localhost:6379')],
-        },
-    },
-}
 
 
 # Database

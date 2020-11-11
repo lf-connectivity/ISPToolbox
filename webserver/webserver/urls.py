@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 
 from django.urls import path, include
+from django.contrib.admin.views.decorators import staff_member_required
 
 from IspToolboxApp import views
 
@@ -38,6 +39,8 @@ from dataUpdate.views import CountrySourceUpdatedView
 from rest_framework import routers
 from django.conf.urls.static import static
 from django.conf import settings
+
+from mmwave.views import TGLinkView, LinkGISDataView, UpdateLidarBoundariesView
 
 # REST API Router
 router = routers.DefaultRouter()
@@ -89,7 +92,9 @@ urlpatterns = [
     path('mmwave-planner/', MMWavePlannerView.as_view(), name='mmwaveplanner'),
     path('help-center/', MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),
     # Path TG Planning
-    path('mmwave/', include('mmwave.urls')),
+    path('mmwave/add-boundary/', staff_member_required(UpdateLidarBoundariesView.as_view())),
+    path('mmwave/link-check/', TGLinkView.as_view()),
+    path('mmwave/link-check/gis/', LinkGISDataView.as_view()),
     # Path Overlay
     path('overlay/', OverlaySource.as_view(), name='overlay_source'),
     # Sources Last Updated Dates

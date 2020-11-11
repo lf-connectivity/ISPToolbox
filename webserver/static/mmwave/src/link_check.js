@@ -1,6 +1,5 @@
 
 import {createLinkChart} from './link_profile.js';
-import LOSCheckWS from './LOSCheckWS.ts';
 // Create new mapbox Map
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
 
@@ -9,11 +8,8 @@ var Draw = null;
 var selected_feature = null;
 var link_chart = null;
 
-var profileWS = null;
-
 $(document).ready( function () {
     link_chart = createLinkChart(link_chart, highLightPointOnGround);
-    profileWS = new LOSCheckWS(networkID);
     var initial_map_center = [(parseFloat($('#lng-0').val()) + parseFloat($('#lng-1').val())) / 2.0, (parseFloat($('#lat-0').val()) +  parseFloat($('#lat-1').val())) / 2.0];
     
     map = new mapboxgl.Map({
@@ -259,8 +255,6 @@ const updateLinkProfile = () =>
     $('#lidar_not_found_msg').addClass('d-none');
 
     $("#link_chart").addClass('d-none');
-    // Use Websocket for request:
-    profileWS.sendRequest(query_params.tx, query_params.rx, 'low', userRequestIdentity);
     if(axiosCancelToken !== null ) {
         axiosCancelToken.cancel();
     }

@@ -15,6 +15,13 @@ class TestHealthCheckEndpoint(TestCase):
         self.assertIs(response.status_code, 200)
 
 
+class TestHealthELBHealthCheck(TestCase):
+    def test_healthcheck(self):
+        client = Client()
+        response = client.get('/elb-status/')
+        self.assertIs(response.status_code, 200)
+
+
 class TestKMZEndpoints(TestCase):
     def test_kmz_endpoint(self):
         client = Client()

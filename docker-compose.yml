@@ -16,6 +16,7 @@ services:
         build: ./nginx
         depends_on:
             - django-app
+            - websocket-app
         ports:
             - 80:80
 
@@ -34,6 +35,16 @@ services:
         image: isptoolbox-django
         build: ./webserver
         command: gunicorn webserver.wsgi -b 0.0.0.0 -w 2
+        depends_on:
+            - redis
+            - postgres
+        environment:
+            - REDIS_BACKEND=redis://redis:6379
+    
+    websocket-app:
+        image: isptoolbox-django-ws
+        build: ./webserver
+        command: daphne webserver.asgi:application -b 0.0.0.0 -p 8010 --access-log -
         depends_on:
             - redis
             - postgres

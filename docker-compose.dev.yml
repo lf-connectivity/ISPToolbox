@@ -22,5 +22,8 @@ services:
     depends_on:
       - static
   celery:
+    command: /bin/sh -c "/usr/src/app/dev_entrypoint_celery.sh"
     environment:
       POSTGRES_DB: 'postgres'
+    volumes:
+      - ./webserver:/usr/src/app

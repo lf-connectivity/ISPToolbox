@@ -66,3 +66,10 @@ class TreeCanopy(models.Model):
             ST_transform(ST_GeomFromEWKT(%s), 42303))
     FROM "tree_canopy" WHERE
         ST_Intersects("tree_canopy"."rast", ST_transform(ST_GeomFromEWKT(%s), 42303));"""
+
+
+class LOSSummary(TGLink):
+    class Meta:
+        proxy = True
+        verbose_name = 'LOS Summary'
+        verbose_name_plural = 'LOS Summary'

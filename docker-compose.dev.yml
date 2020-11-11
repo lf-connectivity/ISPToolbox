@@ -22,5 +22,21 @@ services:
     depends_on:
       - static
   celery:
+    command: /bin/sh -c "/usr/src/app/dev_entrypoint_celery.sh"
     environment:
       POSTGRES_DB: 'postgres'
+    volumes:
+      - ./webserver:/usr/src/app
+  websocket-app:
+      environment:
+        DEBUG: 'TRUE'
+        POSTGRES_DB: 'postgres'
+        DB_NAME: "django_test"
+        DB_USERNAME: "postgres"
+        DB_PASSWORD: "password"
+      volumes:
+        - ./webserver:/usr/src/app
+      ports:
+        - 8010:8010
+      depends_on:
+        - static

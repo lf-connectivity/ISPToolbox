@@ -39,3 +39,13 @@ services:
             - postgres
         environment:
             - REDIS_BACKEND=redis://redis:6379
+    
+    websocket-app:
+        image: isptoolbox-django-ws
+        build: ./webserver
+        command: daphne webserver.asgi:application -b 0.0.0.0 -p 8010 --access-log -
+        depends_on:
+            - redis
+            - postgres
+        environment:
+            - REDIS_BACKEND=redis://redis:6379

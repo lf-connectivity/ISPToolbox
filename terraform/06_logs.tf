@@ -8,6 +8,16 @@ resource "aws_cloudwatch_log_stream" "django-log-stream" {
   log_group_name = aws_cloudwatch_log_group.django-log-group.name
 }
 
+resource "aws_cloudwatch_log_group" "websocket-log-group" {
+  name              = "/ecs/websocket-app"
+  retention_in_days = var.log_retention_in_days
+}
+
+resource "aws_cloudwatch_log_stream" "websocket-log-stream" {
+  name           = "websocket-app-log-stream"
+  log_group_name = aws_cloudwatch_log_group.websocket-log-group.name
+}
+
 resource "aws_cloudwatch_log_group" "nginx-log-group" {
   name              = "/ecs/nginx"
   retention_in_days = var.log_retention_in_days

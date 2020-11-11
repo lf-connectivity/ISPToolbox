@@ -46,7 +46,7 @@ variable "ecs_cluster_name" {
 }
 
 variable "instance_type" {
-  default = "t3.xlarge"
+  default = "t3.2xlarge"
 }
 
 variable "app_count" {

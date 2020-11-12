@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'mmwave',
     'Overlay',
     'towerlocator',
+    'NetworkComparison',
     'cms',
     'dataUpdate',
     # S3 Static File Storage

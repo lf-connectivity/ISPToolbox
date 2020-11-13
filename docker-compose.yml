@@ -17,6 +17,7 @@ services:
         depends_on:
             - django-app
             - websocket-app
+            - flower
         ports:
             - 80:80
 
@@ -50,3 +51,10 @@ services:
             - postgres
         environment:
             - REDIS_BACKEND=redis://redis:6379
+    
+    flower:
+        image: isptoolbox-flower
+        build: ./webserver
+        command: celery flower -A webserver -l info --broker=redis://redis:6379
+        depends_on:
+            - redis

@@ -6,9 +6,10 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
 
-def sync_send(channelName, consumer, value):
+def sync_send(channelName, consumer, value, uuid):
     channel_layer = get_channel_layer()
     resp = {
+        "uuid": uuid,
         "type": consumer,
         "value": value,
     }
@@ -16,7 +17,7 @@ def sync_send(channelName, consumer, value):
 
 
 @shared_task
-def genBuildingCount(include, exclude, channelName):
+def genBuildingCount(include, exclude, channelName, uuid):
     query_skeleton = building_count_skeleton
     query_skeleton = getQueryTemplate(query_skeleton, exclude is not None, False)
     with connections['gis_data'].cursor() as cursor:
@@ -26,12 +27,11 @@ def genBuildingCount(include, exclude, channelName):
         cursor.execute(query_skeleton, query_arguments)
         results = cursor.fetchone()
         buildingCount = results[0]
-        sync_send(channelName, "building.count", str(buildingCount))
-        print("successfully completed genBuildingCount")
+        sync_send(channelName, "building.count", str(buildingCount), uuid)
 
 
 @shared_task
-def genPolySize(include, exclude, channelName):
+def genPolySize(include, exclude, channelName, uuid):
     query_skeleton = poly_size_skeleton
     if exclude is not None:
         query_skeleton = poly_size_skeleton_exclude
@@ -43,8 +43,7 @@ def genPolySize(include, exclude, channelName):
         cursor.execute(query_skeleton, query_arguments)
         results = cursor.fetchone()
         polygonArea = squaredMetersToMiles(results[0])
-        sync_send(channelName, "polygon.area", str(polygonArea))
-        print("successfully completed genPolySize")
+        sync_send(channelName, "polygon.area", str(polygonArea), uuid)
 
 
 building_count_skeleton = "SELECT COUNT(*) FROM msftcombined WHERE {};"

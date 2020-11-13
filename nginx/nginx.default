@@ -13,10 +13,6 @@ server {
         return 301 https://$host$request_uri;
     }
 
-    location /test-static/ {
-        root /var/www/html;
-    }
-
     location / {
         proxy_redirect off;
         proxy_set_header Host $http_host;
@@ -34,6 +30,17 @@ server {
         proxy_set_header X-Forwarded-Proto 'https';
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_pass http://websockets;
+    }
+
+    location /async {
+        proxy_pass http://flower:5555;
+        proxy_set_header Host $host;
+        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/conf.d/nginx.htpasswd;
     }
 }
 

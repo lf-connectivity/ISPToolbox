@@ -125,7 +125,7 @@
     "essential": true,
     "cpu": 512,
     "memory": 2048,
-    "links": ["django-app", "websocket-app"],
+    "links": ["django-app", "websocket-app", "flower"],
     "portMappings": [
       {
         "containerPort": 80,
@@ -145,6 +145,60 @@
         "awslogs-group": "/ecs/nginx",
         "awslogs-region": "${region}",
         "awslogs-stream-prefix": "nginx-log-stream"
+      }
+    }
+  },
+  {
+    "name": "flower",
+    "image": "${docker_image_url_django}",
+    "essential": true,
+    "cpu": 512,
+    "memory": 512,
+    "links": [],
+    "portMappings": [
+      {
+        "containerPort": 5555,
+        "hostPort": 0,
+        "protocol": "tcp"
+      }
+    ],
+    "command": ["celery", "flower","-A", "webserver","--address=0.0.0.0","--port=5555", "--broker=${redis}"],
+    "environment": [
+      {
+        "name": "DEBUG",
+        "value": "false"
+      },
+      {
+        "name": "PROD",
+        "value": "TRUE"
+      },
+      {
+        "name": "POSTGRES_DB",
+        "value": "${rds_hostname}"
+      },
+      {
+        "name": "DB_NAME",
+        "value": "${rds_db_name}"
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": "${rds_db_username}"
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": "${rds_db_password}"
+      },
+      {
+        "name" : "REDIS_BACKEND",
+        "value" : "${redis}"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/flower",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "flower-log-stream"
       }
     }
   }

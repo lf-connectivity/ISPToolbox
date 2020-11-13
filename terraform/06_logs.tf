@@ -37,3 +37,13 @@ resource "aws_cloudwatch_log_stream" "celery-log-stream" {
   name           = "celery-log-stream"
   log_group_name = aws_cloudwatch_log_group.celery-log-group.name
 }
+
+resource "aws_cloudwatch_log_group" "flower-log-group" {
+  name              = "/ecs/flower"
+  retention_in_days = var.log_retention_in_days
+}
+
+resource "aws_cloudwatch_log_stream" "flower-log-stream" {
+  name           = "flower-log-stream"
+  log_group_name = aws_cloudwatch_log_group.flower-log-group.name
+}

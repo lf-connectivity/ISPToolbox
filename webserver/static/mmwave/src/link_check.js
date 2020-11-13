@@ -355,9 +355,10 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
         cp.target.set(...targets[i]);
     }
     const link_len = calcLinkLength(tx,rx,tx_h, rx_h);
-    const desired_animation_speed = 20; // meters per second 
+    const desired_animation_speed = 50; // meters per second 
     const min_animation_duration = 20;
-    const animationDuration = Math.min([desired_animation_speed / link_len, min_animation_duration]);
+    const max_animation_duration = 60;
+    const animationDuration = Math.min(max_animation_duration, Math.max((link_len * 2 / desired_animation_speed), min_animation_duration));
     viewer.scene.addCameraAnimation(globalLinkAnimation);
     globalLinkAnimation.setDuration(animationDuration);
     globalLinkAnimation.setVisible(false);

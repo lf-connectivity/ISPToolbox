@@ -33,7 +33,7 @@ server {
     }
 
     location /async/ {
-        proxy_pass http://flower:5555/;
+        proxy_pass http://flower:5555;
         proxy_set_header Host $host;
         proxy_redirect off;
         proxy_http_version 1.1;

@@ -162,7 +162,7 @@
         "protocol": "tcp"
       }
     ],
-    "command": ["celery", "flower","-A", "webserver","--address=0.0.0.0","--port=5555", "--broker=${redis}"],
+    "command": ["celery", "flower","-A", "webserver","--address=0.0.0.0","--port=5555", "--broker=${redis}", "--url_prefix=async"],
     "environment": [
       {
         "name": "DEBUG",

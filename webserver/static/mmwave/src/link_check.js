@@ -1,6 +1,7 @@
 
-import {createLinkChart} from './link_profile.js';
+import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS.ts';
+import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength } from './LinkOrbitAnimation.ts';
 // Create new mapbox Map
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
 
@@ -11,11 +12,46 @@ var link_chart = null;
 
 var profileWS = null;
 
-$(document).ready( function () {
+$(document).ready(function () {
     link_chart = createLinkChart(link_chart, highLightPointOnGround);
-    profileWS = new LOSCheckWS(networkID);
-    var initial_map_center = [(parseFloat($('#lng-0').val()) + parseFloat($('#lng-1').val())) / 2.0, (parseFloat($('#lat-0').val()) +  parseFloat($('#lat-1').val())) / 2.0];
-    
+    const ws_low_res_callback = (msg_event) => {
+        try {
+            const response = {
+                data: JSON.parse(msg_event.data)
+            };
+            link_chart.hideLoading();
+            $("#loading_spinner").addClass('d-none');
+            if (response.data.error !== null) {
+                $("#link-request-error-description").text(response.data.error);
+                if (response.data.lidar_profile === null && response.data.error === "Lidar data not available") {
+                    $('#lidar_not_found_msg').removeClass('d-none');
+                }
+            }
+            renderNewLinkProfile(response);
+            const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
+            const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
+            updateLidarRender(
+                response.data.name,
+                response.data.url,
+                response.data.bb,
+                response.data.tx,
+                response.data.rx,
+                tx_hgt,
+                rx_hgt
+            );
+            createFresnelZonePlot();
+            link_chart.redraw();
+            $("#link_chart").removeClass('d-none');
+        } catch {
+            selected_feature = null;
+            $('#loading_failed_spinner').removeClass('d-none');
+            $("#link-request-error-description").text();
+            $("#link_chart").addClass('d-none');
+        }
+    }
+    profileWS = new LOSCheckWS(networkID, ws_low_res_callback);
+    var initial_map_center = [(parseFloat($('#lng-0').val()) + parseFloat($('#lng-1').val())) / 2.0, (parseFloat($('#lat-0').val()) + parseFloat($('#lat-1').val())) / 2.0];
+
     map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
@@ -23,10 +59,10 @@ $(document).ready( function () {
         zoom: 17 // starting zoom
     });
 
-    map.on('load', function() {
+    map.on('load', function () {
         // Add a modified drawing control
         const LinkMode = MapboxDraw.modes.draw_line_string;
-        LinkMode.clickAnywhere = function(state, e) {
+        LinkMode.clickAnywhere = function (state, e) {
             if (state.currentVertexPosition === 1) {
                 state.line.addCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
                 return this.changeMode('simple_select', { featureIds: [state.line.id] });
@@ -51,7 +87,7 @@ $(document).ready( function () {
 
         Draw = new MapboxDraw({
             modes: Object.assign({
-            draw_link: LinkMode,
+                draw_link: LinkMode,
             }, MapboxDraw.modes),
             displayControlsDefault: false,
             controls: {
@@ -135,7 +171,7 @@ $(document).ready( function () {
         const rx_lng = parseFloat($('#lng-1').val());
         Draw.add({
             "type": "LineString",
-            "coordinates": [[tx_lng, tx_lat], [rx_lng,rx_lat]]
+            "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
         });
         map.on('draw.update', updateRadioLocation);
         map.on('draw.create', updateRadioLocation);
@@ -147,14 +183,14 @@ $(document).ready( function () {
                 'coordinates': [0, 0]
             }
         });
-             
+
         map.addLayer({
             'id': 'point',
             'type': 'circle',
             'source': 'point',
             'paint': {
-            'circle-radius': 10,
-            'circle-color': '#3887be'
+                'circle-radius': 10,
+                'circle-color': '#3887be'
             }
         });
         updateLinkProfile();
@@ -162,16 +198,15 @@ $(document).ready( function () {
 
 
         $('#add-link-btn').click(
-            () => {Draw.changeMode('draw_line_string');}
+            () => { Draw.changeMode('draw_line_string'); }
         )
 
         // Update Callbacks for Radio Heights
         $('#hgt-0').change(
-            ()=> {
+            () => {
                 createFresnelZonePlot();
                 link_chart.redraw();
-                if(_elevation != null && updateLinkHeight != null)
-                {
+                if (_elevation != null && updateLinkHeight != null) {
                     const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
                     const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
                     updateLinkHeight(tx_hgt, rx_hgt);
@@ -179,11 +214,10 @@ $(document).ready( function () {
             }
         );
         $('#hgt-1').change(
-            ()=> {
+            () => {
                 createFresnelZonePlot();
                 link_chart.redraw();
-                if(_elevation != null && updateLinkHeight != null)
-                {
+                if (_elevation != null && updateLinkHeight != null) {
                     const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
                     const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
                     updateLinkHeight(tx_hgt, rx_hgt);
@@ -195,8 +229,7 @@ $(document).ready( function () {
 });
 
 const updateRadioLocation = (update) => {
-    if(update.features.length) 
-    {
+    if (update.features.length) {
         const feat = update.features[0];
         $('#lng-0').val(feat.geometry.coordinates[0][0]);
         $('#lat-0').val(feat.geometry.coordinates[0][1]);
@@ -206,8 +239,7 @@ const updateRadioLocation = (update) => {
     }
 };
 
-const highLightPointOnGround = ({x, y}) =>
-{
+const highLightPointOnGround = ({ x, y }) => {
     const new_data = {
         'type': 'Point',
         'coordinates': [_coords[Math.round(x)].lng, _coords[Math.round(x)].lat]
@@ -216,8 +248,7 @@ const highLightPointOnGround = ({x, y}) =>
 }
 
 const createFresnelZonePlot = () => {
-    if(_elevation != null)
-    {
+    if (_elevation != null) {
         const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
         const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
         const freq = 60.0 * (10 ** 9); // GHz to Hz
@@ -231,24 +262,22 @@ const createFresnelZonePlot = () => {
                 return los - fresnel;
             }
         );
-        
+
         link_chart.series[2].setData(fresnel_zone_hgt);
     }
 };
 
 var axiosCancelToken = null;
 // Overlay
-const updateLinkProfile = () => 
-{
+const updateLinkProfile = () => {
     const tx_lat = $('#lat-0').val();
     const tx_lng = $('#lng-0').val();
     const rx_lat = $('#lat-1').val();
     const rx_lng = $('#lng-1').val();
-    const query_params = {tx: [tx_lng, tx_lat], rx: [rx_lng, rx_lat], id: userRequestIdentity};
-    
+    const query_params = { tx: [tx_lng, tx_lat], rx: [rx_lng, rx_lat], id: userRequestIdentity };
+
     const query = new URLSearchParams(query_params).toString();
-    if (selected_feature === query)
-    {
+    if (selected_feature === query) {
         return;
     } else {
         selected_feature = query;
@@ -259,68 +288,12 @@ const updateLinkProfile = () =>
     $('#lidar_not_found_msg').addClass('d-none');
 
     $("#link_chart").addClass('d-none');
+
+    // Create Callback Function for WebSocket
     // Use Websocket for request:
+
     profileWS.sendRequest(query_params.tx, query_params.rx, 'low', userRequestIdentity);
-    if(axiosCancelToken !== null ) {
-        axiosCancelToken.cancel();
-    }
-    axiosCancelToken = axios.CancelToken.source();
-    axios.get('/mmwave/link-check/gis/?' + query, {
-        cancelToken: axiosCancelToken.token
-    })
-    .then(function (response) {
-        link_chart.hideLoading();
-        $("#loading_spinner").addClass('d-none');
-        if(response.data.error !== null)
-        {
-            $("#link-request-error-description").text(response.data.error);
-            if(response.data.lidar_profile === null && response.data.error === "Lidar data not available")
-            {
-                $('#lidar_not_found_msg').removeClass('d-none');
-            }
-        }
-        renderNewLinkProfile(response);
-        const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
-        const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
-        updateLidarRender(
-            response.data.name,
-            response.data.url,
-            response.data.bb,
-            response.data.tx,
-            response.data.rx,
-            tx_hgt,
-            rx_hgt
-        );
-        createFresnelZonePlot();
-        link_chart.redraw();
-        $("#link_chart").removeClass('d-none');
-        // Done Loading Low Resolution, now load high resolution Lidar
-        query_params['resolution'] = 'high';
-        const high_res_query = new URLSearchParams(query_params).toString();
-        axiosCancelToken = axios.CancelToken.source();
-        axios.get('/mmwave/link-check/gis/?' + high_res_query, {
-            cancelToken: axiosCancelToken.token
-        }).then(function (response)
-        {
-            renderNewLinkProfile(response);
-        }).catch(function(error) {
-        })
-        .then(function() {
-        })
-      })
-      .catch(function (error) {
-        // handle error
-        if(!axios.isCancel(error))
-        {
-            selected_feature = null;
-            $('#loading_failed_spinner').removeClass('d-none');
-            $("#link-request-error-description").text();
-            $("#link_chart").addClass('d-none');
-        }
-      })
-      .then(function () {
-        // always executed
-    });
+    profileWS.sendRequest(query_params.tx, query_params.rx, 'high', userRequestIdentity);
 }
 
 const std_building_hgt = 3.0;
@@ -334,18 +307,16 @@ var _lidar = null;
 
 const renderNewLinkProfile = (response) => {
     // Check if we can update the chart
-    if (link_chart != null)
-    {
-        _elevation = response.data.terrain_profile.map(pt => {return pt.elevation;});
+    if (link_chart != null) {
+        _elevation = response.data.terrain_profile.map(pt => { return pt.elevation; });
         _coords = response.data.terrain_profile.map(
-            pt => {return {lat: pt.lat, lng: pt.lng}}
+            pt => { return { lat: pt.lat, lng: pt.lng } }
         );
         _lidar = response.data.lidar_profile;
 
-        if(_lidar == null)
-        {
+        if (_lidar == null) {
             link_chart.series[0].setData(_elevation);
-            link_chart.yAxis[0].update({min: Math.min(..._elevation)});
+            link_chart.yAxis[0].update({ min: Math.min(..._elevation) });
         } else {
             link_chart.series[0].setData(_elevation);
             link_chart.series[1].setData(_lidar);
@@ -358,121 +329,78 @@ const renderNewLinkProfile = (response) => {
 };
 
 // LiDAR Functions 
-const generateClippingVolume = function(bb, buffer = 10) {
-    const position = [(bb[0] + bb [2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
+const generateClippingVolume = function (bb, buffer = 10) {
+    const position = [(bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
     const scale = [Math.abs(bb[0] - bb[2]) + buffer, Math.abs(bb[1] - bb[3]) + buffer, Math.abs(bb[4] - bb[5]) * 4.0];
 
     const camera_height = Math.max(scale[0], scale[1]) / (2.0 * Math.tan(Math.PI / 12)) + bb[4];
     const camera = [position[0], position[1], camera_height];
 
-    return {position, scale, camera};
+    return { position, scale, camera };
 }
 
-/* Generate a Gerono lemniscate curve for the camera position, and target along the link path */
-const createOrbitAnimationPath = function(tx, tx_h, rx, rx_h, radius, height, num_pts=50)
-{
-    const positions = [];
-    const targets = [];
-    const xScaling = Math.sqrt((tx[0] - rx[0])*(tx[0] - rx[0]) + (tx[1] - rx[1])*( tx[1] - rx[1])) / Math.sqrt(2.0);
-    const yScaling = radius;
-    const offset = [(tx[0] + rx[0]) / 2.0, (tx[1] + rx[1]) / 2.0];
-    const angle = Math.atan2((tx[1] - rx[1]), (tx[0] - rx[0]))
 
-    for(let i = 0; i <= num_pts; i++)
-    {
-        const t = 2.0 * Math.PI * i / num_pts;
-        const x_8 =  Math.sin(t) * xScaling;
-        const y_8 =  Math.sin(t) * Math.cos(t) * yScaling;
-
-        positions.push([
-            offset[0] + x_8 * Math.cos(angle) + Math.sin(angle) * y_8,
-            offset[1] + x_8 * Math.sin(angle) + Math.cos(angle) * y_8,
-            Math.max(tx_h + height, rx_h + height)
-        ]
-        );
-        let look = []
-        look = [tx[0], tx[1], tx_h];
-
-        if (t <  Math.PI)
-        {
-        } else if (t < 2.0 * Math.PI)
-        {
-            look = [rx[0], rx[1], rx_h];
-        } else {
-            look = [tx[0], tx[1], tx_h];
-        }
-        targets.push(look);
-    }
-    return {targets, positions};
-}
 
 var globalLinkAnimation = null;
-const createAnimationForLink = function(tx, rx, tx_h, rx_h)
-{
-    if (globalLinkAnimation !== null)
-    {
+const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
+    if (globalLinkAnimation !== null) {
         clearInterval(globalLinkAnimation.interval);
     }
-    globalLinkAnimation  = new Potree.CameraAnimation(viewer);
-    const {targets, positions} = createOrbitAnimationPath(tx, tx_h, rx, rx_h, 100.0, 20.0);
-    
-    for(let i = 0; i < positions.length; i++){
+    globalLinkAnimation = new Potree.CameraAnimation(viewer);
+    const { targets, positions } = createOrbitAnimationPath(tx, tx_h, rx, rx_h, 100.0, 20.0);
+
+    for (let i = 0; i < positions.length; i++) {
         const cp = globalLinkAnimation.createControlPoint();
         cp.position.set(...positions[i]);
         cp.target.set(...targets[i]);
     }
-
-    const animationDuration = 20;
+    const link_len = calcLinkLength(tx,rx,tx_h, rx_h);
+    const desired_animation_speed = 20; // meters per second 
+    const min_animation_duration = 20;
+    const animationDuration = Math.min([desired_animation_speed / link_len, min_animation_duration]);
     viewer.scene.addCameraAnimation(globalLinkAnimation);
     globalLinkAnimation.setDuration(animationDuration);
     globalLinkAnimation.setVisible(false);
     globalLinkAnimation.play();
-    globalLinkAnimation.interval = setInterval(function() {
+    globalLinkAnimation.interval = setInterval(function () {
         globalLinkAnimation.setVisible(false);
         globalLinkAnimation.play();
-      }, animationDuration*1000);
+    }, animationDuration * 1000);
 }
 
 var clippingVolume = null;
 var linkLine = null;
 var updateLinkHeight = null;
-const addLink = function(tx, rx, tx_h, rx_h){
-    updateLinkHeight = function(tx_h, rx_h) {
+const addLink = function (tx, rx, tx_h, rx_h) {
+    updateLinkHeight = function (tx_h, rx_h) {
         let scene = viewer.scene;
         // Add LOS Link Line
-        if(linkLine !== null)
-        {
+        if (linkLine !== null) {
             scene.scene.remove(linkLine);
         }
-        var linkSize = Math.sqrt(Math.pow(tx[0] - rx[0], 2.0) + Math.pow(tx[1] - rx[1], 2.0) + Math.pow(tx_h - rx_h, 2.0));
-        var geometry = new THREE.BoxGeometry(0.5 , 0.5, linkSize);
-        var material = new THREE.MeshBasicMaterial( {color: 0x3bb2d0} );
-        linkLine = new THREE.Mesh( geometry, material );
-        linkLine.position.set((tx[0] + rx[0] )/ 2.0, (tx[1] + rx[1] )/ 2.0, (tx_h + rx_h)/ 2.0);
-        linkLine.lookAt(tx[0], tx[1], tx_h);
 
-        scene.scene.add( linkLine );
-        createAnimationForLink(tx, rx,tx_h, rx_h);
+        linkLine = createLinkGeometry(tx, rx, tx_h, rx_h);
+        scene.scene.add(linkLine);
+        createAnimationForLink(tx, rx, tx_h, rx_h);
     }
     updateLinkHeight(tx_h, rx_h);
 }
 
-const updateLidarRender = function(name, url, bb, tx, rx, tx_h, rx_h) {
-    const setClippingVolume = function(bb) {
+const updateLidarRender = function (name, url, bb, tx, rx, tx_h, rx_h) {
+    const setClippingVolume = function (bb) {
         let scene = viewer.scene;
-        let {position, scale, camera} = generateClippingVolume(bb);
+        let { position, scale, camera } = generateClippingVolume(bb);
         { // VOLUME visible
-          if(clippingVolume !== null)
-          {
-              scene.removeVolume(clippingVolume);
-          }
-          clippingVolume  = new Potree.BoxVolume();
-          clippingVolume.name = "Visible Clipping Volume";
-          clippingVolume.scale.set(scale[0], scale[1], scale[2]);
-          clippingVolume.position.set(position[0], position[1], position[2]);
-          clippingVolume.clip = true;
-          scene.addVolume(clippingVolume);
-          clippingVolume.visible = false;
+            if (clippingVolume !== null) {
+                scene.removeVolume(clippingVolume);
+            }
+            clippingVolume = new Potree.BoxVolume();
+            clippingVolume.name = "Visible Clipping Volume";
+            clippingVolume.scale.set(scale[0], scale[1], scale[2]);
+            clippingVolume.position.set(position[0], position[1], position[2]);
+            clippingVolume.clip = true;
+            scene.addVolume(clippingVolume);
+            clippingVolume.visible = false;
         }
         scene.view.position.set(camera[0], camera[1], camera[2]);
         scene.view.lookAt(new THREE.Vector3(position[0], position[1], 0));
@@ -480,17 +408,16 @@ const updateLidarRender = function(name, url, bb, tx, rx, tx_h, rx_h) {
     }
 
     // Check if we already added point cloud
-    const existing_match_ptcloud = viewer.scene.pointclouds.find(x=>{return x.name === name});
-    if (existing_match_ptcloud)
-    {
+    const existing_match_ptcloud = viewer.scene.pointclouds.find(x => { return x.name === name });
+    if (existing_match_ptcloud) {
         existing_match_ptcloud.material.elevationRange = [bb[4], bb[5]];
         setClippingVolume(bb);
         addLink(tx, rx, tx_h, rx_h);
     } else {
-        Potree.loadPointCloud(url, name, function(e){
+        Potree.loadPointCloud(url, name, function (e) {
             let scene = viewer.scene;
             scene.addPointCloud(e.pointcloud);
-        
+
             let material = e.pointcloud.material;
             material.size = 4;
             material.pointSizeType = Potree.PointSizeType.FIXED;
@@ -501,6 +428,6 @@ const updateLidarRender = function(name, url, bb, tx, rx, tx_h, rx_h) {
             addLink(tx, rx, tx_h, rx_h);
         });
     }
-    
-    
+
+
 }

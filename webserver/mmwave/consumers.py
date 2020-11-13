@@ -2,7 +2,8 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from .tasks import getLOSProfile
 
 msg_handlers = {
-    'ptp': getLOSProfile.delay
+    'ptp': getLOSProfile.delay,
+    'error': None,
 }
 
 
@@ -27,10 +28,13 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
 
     # Receive message from WebSocket
     async def receive_json(self, text_data_json):
-        message = text_data_json['msg']
+        message = text_data_json.get('msg', 'error')
         # Switch Case Message Type on Different Handlers
-        handler = msg_handlers.get(message, self.default_msg_handler)
-        handler(self.network_id, text_data_json)
+        handler = msg_handlers.get(message, None)
+        if handler is None:
+            await self.default_msg_handler()
+        else:
+            handler(self.network_id, text_data_json)
 
     # Receive message from room group
     async def standard_message(self, event):
@@ -38,5 +42,5 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
         # Send message to WebSocket
         await self.send_json(event)
 
-    async def default_msg_handler(self, data):
+    async def default_msg_handler(self):
         await self.send_json({'error': 'Invalid request'})

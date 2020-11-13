@@ -4,17 +4,34 @@
  *
  **/
 
+type LOSCheckResponse =  {
+
+}
+interface LOSCallback {
+    (response : LOSCheckResponse) : void
+};
+
+type LOSCheckWSCallbacks = {
+    'ptp' : LOSCallback
+}
 class LOSCheckWS {
     ws : WebSocket;
     networkName : string;
-    constructor(networkName : string){
+    pendingRequests : Array<string> = [];
+    callbacks: LOSCheckWSCallbacks = {
+        'ptp' : () => null,
+    };
+    hash : string = '';
+    resolution : string = 'low';
+    constructor(networkName : string, callback : LOSCallback){
         this.networkName = networkName;
         this.connect();
+        this.callbacks['ptp'] = callback;
     }
 
     connect(){
         const protocol = location.protocol !== 'https:' ? 'ws://' : 'wss://';
-        const domain = location.protocol !== 'https:' ? 'localhost:59264' : 'isptoolbox.io';
+        const domain = location.protocol !== 'https:' ? location.host : 'isptoolbox.io';
         this.ws = new WebSocket(protocol + domain + '/ws/los/' + this.networkName + '/');
 
         this.ws.onmessage = function(e) {
@@ -26,16 +43,46 @@ class LOSCheckWS {
                 this.connect();
             }, 1000)
         }
+
+        this.ws.onopen = (e) => {
+            this.pendingRequests.map(req => {
+                this.ws.send(req);
+            })
+            this.pendingRequests = [];
+        }
+
+        this.ws.onmessage = (e) => {
+            const resp = JSON.parse(e.data);
+
+            if(resp.hash === this.hash && this.resolution === 'low')
+            {
+                this.callbacks['ptp'](e);
+                if(resp.res ==='high')
+                {
+                    this.resolution = 'high';
+                }
+            }
+        }
     }
 
     sendRequest(tx: [number, number], rx: [number, number], resolution: string, fbid: string) {
-        this.ws.send(JSON.stringify({
+        const hash = [String(tx), String(rx), fbid].join(',');
+        this.hash = hash;
+        this.resolution = 'low';
+        const request = JSON.stringify({
             msg : 'ptp',
             tx : tx,
             rx : rx,
             resolution : resolution,
             fbid: fbid,
-        }));
+            hash: hash
+        });
+        if(this.ws.readyState !== WebSocket.OPEN)
+        {
+            this.pendingRequests.push(request);
+        } else {
+            this.ws.send(request);
+        }
     }
 }
 

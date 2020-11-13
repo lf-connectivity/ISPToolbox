@@ -15,7 +15,7 @@ from mmwave.models import EPTLidarPointCloud, TGLink
 
 google_maps_samples_limit = 512
 num_samples_per_m = 1
-link_distance_limit = 5000
+link_distance_limit = 10000
 
 
 def getElevationProfile(tx, rx):
@@ -154,6 +154,8 @@ def getLOSProfile(network_id, data):
         'bb': [],
         'tx': {},
         'rx': {},
+        'hash': None,
+        'res': 'low',
         "type": 'standard.message'
     }
     channel_layer = get_channel_layer()
@@ -161,8 +163,10 @@ def getLOSProfile(network_id, data):
     try:
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
+        resp['hash'] = data.get('hash', None)
         fbid = int(data.get('fbid', 0))
         resolution = data.get('resolution', 'low')
+        resp['res'] = resolution
         # Create Object to Log User Interaction
         TGLink(tx=tx, rx=rx, fbid=fbid).save()
         if geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters > link_distance_limit:

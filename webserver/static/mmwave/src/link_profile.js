@@ -45,7 +45,7 @@ export function createLinkChart(link_chart, highLightPointOnGround) {
             color: '#874280'
         },
         {
-            name: 'LIDAR',
+            name: 'LiDAR',
             data: [],
             zIndex: 1,
             color: '#675b45'

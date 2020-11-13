@@ -54,8 +54,9 @@ poly_size_skeleton = """
 
 poly_size_skeleton_exclude = """
     WITH ie AS(
-        ST_GeomFromGeoJSON(%s)::geography AS include
+        SELECT
+        ST_GeomFromGeoJSON(%s)::geography AS include,
         ST_GeomFromGeoJSON(%s)::geography AS exclude
     )
-    SELECT ST_Area(ie.include) - ST_Area(ST_Intersection(ie.include, ie.exclude)) AS area
+    SELECT ST_Area(ie.include) - ST_Area(ST_Intersection(ie.include, ie.exclude)) AS area FROM ie
 """

@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
-from .tasks import genPolySize, genBuildingCount
+from .tasks import genPolySize, genBuildingCount, genClusteredBuildings
 from celery.task.control import revoke
 
 
@@ -39,6 +39,11 @@ class NetworkCompConsumer(AsyncJsonWebsocketConsumer):
             exclude = exclude.json
         if 'uuid' in content:
             feUUID = content['uuid']
+        if 'cluster' in content:
+            minpoints = content['cluster']['minpoints']
+            distance = content['cluster']['distance']
+            clusterId = genClusteredBuildings.delay(include, exclude, distance, minpoints, self.channel_name, feUUID).id
+            self.taskList.append(clusterId)
 
         # Call async tasks and get their task IDs
         self.taskList.append(genPolySize.delay(include, exclude, self.channel_name, feUUID).id)
@@ -48,4 +53,7 @@ class NetworkCompConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(event)
 
     async def building_count(self, event):
+        await self.send_json(event)
+
+    async def building_clusters(self, event):
         await self.send_json(event)

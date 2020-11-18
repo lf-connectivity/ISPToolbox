@@ -54,14 +54,42 @@ class StandardizedMlab(models.Model):
                 ON
                 postalcode =
                 intersecting_geog.code"""
-        with connections['gis_data'].cursor() as cursor:
-            areaJson = area_of_interest.json
-            cursor.execute(mlab_query, [areaJson, areaJson, areaJson])
-            columns = [col[0] for col in cursor.description]
-            return [
-                dict(zip(columns, row))
-                for row in cursor.fetchall()
-            ]
+        mlab_query_fallback = f"""
+            WITH intersecting_geog AS
+            (
+                SELECT * FROM {StandardizedPostal._meta.db_table}
+                WHERE ST_Intersects(
+                    geog,
+                    ST_GeomFromGeoJSON(%s)
+                )
+            )
+            SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)"
+            FROM {StandardizedMlab._meta.db_table}
+                INNER JOIN intersecting_geog
+                ON
+                postalcode =
+                intersecting_geog.code
+        """
+        try:
+            with connections['gis_data'].cursor() as cursor:
+                areaJson = area_of_interest.json
+                cursor.execute(mlab_query, [areaJson, areaJson, areaJson])
+                columns = [col[0] for col in cursor.description]
+                return [
+                    dict(zip(columns, row))
+                    for row in cursor.fetchall()
+                ]
+        # Above query can fail due to self-intersecting polygons in complex multipolygon geometry cases.  In this case fallback to a simple average.
+        except Exception:
+            with connections['gis_data'].cursor() as cursor:
+                areaJson = area_of_interest.json
+                cursor.execute(mlab_query_fallback, [areaJson])
+                columns = [col[0] for col in cursor.description]
+                return [
+                    dict(zip(columns, row))
+                    for row in cursor.fetchall()
+                ]
+
 
 
 class StandardizedPostal(models.Model):

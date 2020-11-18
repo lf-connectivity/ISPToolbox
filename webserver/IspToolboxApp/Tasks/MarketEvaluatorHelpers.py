@@ -248,9 +248,6 @@ def getMicrosoftBuildings(include, exclude, callback=None):
             offset = 0
             buildings = []
             while True:
-                print('executing_sql_query')
-                print(offset)
-
                 query_skeleton = "SELECT St_asgeojson(geog) FROM msftcombined WHERE {} LIMIT 10000 OFFSET %s;"
                 query_skeleton = getQueryTemplate(
                     query_skeleton, exclude is not None, False)
@@ -278,21 +275,32 @@ def getMicrosoftBuildings(include, exclude, callback=None):
     return response
 
 
-def getMicrosoftBuildingsOffset(include, exclude, offset):
-    resp = {"type": "GeometryCollection", "geometries": []}
+def getMicrosoftBuildingsOffset(include, offset):
+    resp = {"gc": {"type": "GeometryCollection", "geometries": []}, "offset": 0}
     try:
         with connections['gis_data'].cursor() as cursor:
-            query_skeleton = "SELECT St_asgeojson(geog) FROM msftcombined WHERE {} LIMIT 10000 OFFSET %s;"
-            query_skeleton = getQueryTemplate(
-                query_skeleton, exclude is not None, False)
-            cursor.execute(
-                query_skeleton, [
-                    include, exclude, offset] if exclude is not None else [
-                    include, offset])
-            polygons = [json.loads(row[0]) for row in cursor.fetchall()]
-            resp = {"type": "GeometryCollection", "geometries": polygons}
+            query_skeleton = """
+            WITH subdivided_request AS
+            (SELECT ST_Subdivide(
+                ST_GeomFromGeoJSON(%s), 32) as include_subdivide
+            ),
+            intersected_buildings AS
+            (SELECT geog::geometry as geom, gid FROM msftcombined JOIN subdivided_request
+            ON ST_intersects(subdivided_request.include_subdivide, geog)
+                WHERE ST_intersects(subdivided_request.include_subdivide, geog) AND
+                gid > %s
+                ORDER BY gid ASC
+                LIMIT 10000
+            )
+            SELECT MAX(gid) as gid, ST_asgeojson(ST_ForceCollection(ST_Collect(geom))) FROM intersected_buildings;
+            """
+            # query_skeleton = getQueryTemplate(
+            #     query_skeleton, exclude is not None, False)
+            cursor.execute(query_skeleton, [include, offset])
+            db_resp = cursor.fetchone()
+            resp = {"gc": json.loads(db_resp[1]), "offset": db_resp[0]}
     except BaseException:
-        resp = {"type": "GeometryCollection", "geometries": []}
+        resp = {"gc": {"type": "GeometryCollection", "geometries": []}, "offset": 0}
     return resp
 
 

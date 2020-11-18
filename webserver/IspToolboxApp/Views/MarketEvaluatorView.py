@@ -28,12 +28,14 @@ class MarketEvaluatorPipelineBuildings(View):
             buildingOutlines = json.dumps(
                 {'type': 'GeometryCollection', 'geometries': []})
             buildingCount = 0
+            gid_offset = None
             if results.buildingPrecomputed:
                 # Perform a direct Query of Building Outlines if Available
-                buildingOutlines = getMicrosoftBuildingsOffset(
+                precomputedBuildings = getMicrosoftBuildingsOffset(
                     results.include_geojson.json,
-                    results.exclude_geojson.json if results.exclude_geojson else results.exclude_geojson,
                     buildingoffset)
+                buildingOutlines = precomputedBuildings["gc"]
+                gid_offset = precomputedBuildings["offset"]
                 buildingCount = len(buildingOutlines['geometries'])
                 buildingOutlines = json.dumps(buildingOutlines)
             else:
@@ -47,6 +49,7 @@ class MarketEvaluatorPipelineBuildings(View):
                 'building_num': buildingCount,
                 'building_done': results.buildingCompleted,
                 'building_error': results.buildingError,
+                'gid_offset': gid_offset
             }
         except Exception as e:
             resp['error'] = str(e)

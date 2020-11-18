@@ -16,14 +16,8 @@ def chunk(lst, n):
 
 
 def crawl(keys):
-    if not keys:
-        return
     global counter_key
     global total_keys
-    counter_key += 1
-    x = total_keys // 20 + 1
-    if (counter_key % x == 0):
-        print(f'        current process: {counter_key}/{total_keys}')
     driver_path = config.DRIVER_PATH
     options = ChromeOptions()
     options.add_argument('--headless')
@@ -31,32 +25,35 @@ def crawl(keys):
     options.add_argument("disable-gpu")
     key = keys[0]
     with Chrome(executable_path=driver_path, options=options) as driver:
-        try:
-            driver.get(ASR_SEARCH_URL)
-            driver.find_element(By.NAME, 'fiSearchByValue').send_keys(key + Keys.ENTER)
-            elements = driver.find_elements_by_class_name('cell-pri-medium')
-            fcc_url = driver.find_element_by_link_text(key).get_attribute('href')
-            if len(elements) > 5:
-                owner_name = elements[5].text.strip()
-                shared_memory_map[key] = {
-                        **co_map[key],
-                        'fcc_url': fcc_url,
-                        'owner_name': owner_name
-                        }
-            else:
+        for key in keys:
+            counter_key += 1
+            print('On key: ' + str(counter_key))
+            print('key: ' + str(key))
+            try:
+                driver.get(ASR_SEARCH_URL)
+                driver.find_element(By.NAME, 'fiSearchByValue').send_keys(key + Keys.ENTER)
+                elements = driver.find_elements_by_class_name('cell-pri-medium')
+                fcc_url = driver.find_element_by_link_text(key).get_attribute('href')
+                if len(elements) > 5:
+                    print('fcc url and owner name found')
+                    owner_name = elements[5].text.strip()
+                    shared_memory_map[key] = {
+                            **co_map[key],
+                            'fcc_url': fcc_url,
+                            'owner_name': owner_name
+                            }
+                else:
+                    shared_memory_map[key] = {
+                            **co_map[key],
+                            'fcc_url': '',
+                            'owner_name': ''
+                            }
+            except Exception:
                 shared_memory_map[key] = {
                         **co_map[key],
                         'fcc_url': '',
                         'owner_name': ''
                         }
-            return crawl(keys[1:])
-        except Exception:
-            shared_memory_map[key] = {
-                    **co_map[key],
-                    'fcc_url': '',
-                    'owner_name': ''
-                    }
-            return crawl(keys[1:])
 
 
 def crawlAll(keys):
@@ -65,7 +62,7 @@ def crawlAll(keys):
     total_keys = len(keys)
     counter_key = 0
     print(f'        total number to crawl: {total_keys}')
-    thread_num = 5
+    thread_num = 8
     chunk_size = len(keys) // thread_num + 1
     lst = chunk(keys, chunk_size)
     pool = ThreadPool(thread_num)

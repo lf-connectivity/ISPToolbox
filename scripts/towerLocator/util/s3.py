@@ -14,9 +14,11 @@ def writeToS3(data):
 
 def readFromS3():
     client = boto3.client('s3')
-    response = client.list_objects(Bucket='isptoolbox-towerlocator')
+    response = client.list_objects(Bucket='isptoolbox-towerlocator', Prefix='geojson/')
     all_keys = [obj['Key'] for obj in response['Contents']]
+    print(all_keys)
     newest = max(all_keys)
+    print(newest)
     body = client.get_object(
             Bucket='isptoolbox-towerlocator',
             Key=newest

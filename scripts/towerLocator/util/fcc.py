@@ -58,13 +58,16 @@ def retrieveDataMaps():
                     continue
                 registration_number = lst[3].strip()
                 status_code = lst[8].strip()
-                structure_type = '' if len(lst) <= 32 else lst[32].strip()
-                overall_height_above_ground = '' if len(lst) <= 30 else lst[30].strip()
+                n = len(lst)
+                structure_type = '' if n <= 32 else lst[32].strip()
+                overall_height_above_ground = '' if n <= 30 else lst[30].strip()
+                height_without_appurtenaces = '' if n <= 28 else lst[28].strip()
                 if registration_number and status_code in ('C', 'G'):
                     ra_map[registration_number] = {
                         'status_code': status_code,
                         'structure_type': structure_type,
-                        'overall_height_above_ground': overall_height_above_ground
+                        'overall_height_above_ground': overall_height_above_ground,
+                        'height_without_appurtenaces': height_without_appurtenaces
                         }
         print('    DONE: Mapping CO.dat & RA.dat\n')
     return {'co_map': co_map, 'ra_map': ra_map}

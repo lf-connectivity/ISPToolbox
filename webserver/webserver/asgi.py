@@ -18,6 +18,7 @@ django_asgi_app = get_asgi_application()
 
 from channels.auth import AuthMiddlewareStack # noqa
 from channels.routing import ProtocolTypeRouter, URLRouter # noqa
+import IspToolboxApp.routing # noqa
 import mmwave.routing # noqa
 import NetworkComparison.routing # noqa
 
@@ -26,7 +27,8 @@ application = ProtocolTypeRouter({
     "websocket": AuthMiddlewareStack(
         URLRouter(
             mmwave.routing.websocket_urlpatterns +
-            NetworkComparison.routing.websocket_urlpatterns
+            NetworkComparison.routing.websocket_urlpatterns +
+            IspToolboxApp.routing.websocket_urlpatterns
             # add additional urlpatterns to this array with ' + \'
         )
     ),

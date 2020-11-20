@@ -5,7 +5,9 @@ from dataUpdate.scripts.update_mlab import updateMlab
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webserver.settings')
 
-celery_app = Celery('webserver')
+# Sometimes autodiscover_tasks doesn't pick up all tasks.
+# In this case add the path to the include param.
+celery_app = Celery('webserver', include=['IspToolboxApp.Tasks.MarketEvaluatorWebsocketTasks'])
 celery_app.config_from_object('django.conf:settings', namespace='CELERY')
 celery_app.autodiscover_tasks()
 celery_app.conf.update(

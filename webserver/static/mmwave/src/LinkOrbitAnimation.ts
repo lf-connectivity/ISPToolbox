@@ -1,12 +1,12 @@
-/* Generate a Gerono lemniscate curve for the camera position, and target along the link path */
 // @ts-ignore
 const THREE = window.THREE; 
+/* Generate a Gerono lemniscate curve for the camera position, and target along the link path */
 export function createOrbitAnimationPath (tx: [number,number], tx_h: number, rx: [number,number], rx_h: number, radius: number, height: number, num_pts=50)
 : {targets: Array<[number,number, number]>, positions: Array<[number,number,number]>}
 {
     const positions: Array<[number,number,number]> = [];
     const targets: Array<[number,number,number]>  = [];
-    const xScaling = Math.sqrt((tx[0] - rx[0])*(tx[0] - rx[0]) + (tx[1] - rx[1])*( tx[1] - rx[1])) / Math.sqrt(2.0);
+    const xScaling = Math.sqrt((tx[0] - rx[0])*(tx[0] - rx[0]) + (tx[1] - rx[1])*( tx[1] - rx[1])) / (2.0) + radius;
     const yScaling = radius;
     const offset = [(tx[0] + rx[0]) / 2.0, (tx[1] + rx[1]) / 2.0];
     const angle = Math.atan2((tx[1] - rx[1]), (tx[0] - rx[0]))
@@ -42,7 +42,7 @@ export function createOrbitAnimationPath (tx: [number,number], tx_h: number, rx:
 export function createLinkGeometry(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number)
 {
     var linkSize = calcLinkLength(tx, rx, tx_h, rx_h);
-    var geometry = new THREE.BoxGeometry(0.5 , 0.5, linkSize);
+    var geometry = new THREE.BoxGeometry(1 , 1, linkSize);
     var material = new THREE.MeshBasicMaterial( {color: 0x3bb2d0} );
     var linkLine = new THREE.Mesh( geometry, material );
     linkLine.position.set((tx[0] + rx[0] )/ 2.0, (tx[1] + rx[1] )/ 2.0, (tx_h + rx_h)/ 2.0);

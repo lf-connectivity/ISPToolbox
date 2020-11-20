@@ -1,2 +1,2 @@
 ## DO NOT USE FOR PRODUCTION - only for local dev testing
-python3 manage.py celery
+watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery worker --beat -A webserver --loglevel=info

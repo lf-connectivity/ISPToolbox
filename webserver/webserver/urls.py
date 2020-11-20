@@ -34,6 +34,7 @@ from IspToolboxApp.Views.market_evaluator_views.GeographicViews import SelectZip
 from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
 from Overlay.views import OverlaySource
 from dataUpdate.views import CountrySourceUpdatedView
+from mmwave.views import TGLinkView
 
 from rest_framework import routers
 from django.conf.urls.static import static
@@ -90,6 +91,7 @@ urlpatterns = [
     path('help-center/', MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),
     # Path TG Planning
     path('mmwave/', include('mmwave.urls')),
+    path('los-check/', TGLinkView.as_view()),
     # Path Overlay
     path('overlay/', OverlaySource.as_view(), name='overlay_source'),
     # Sources Last Updated Dates

@@ -1,7 +1,9 @@
 
 import { createLinkChart } from './link_profile.js';
-import LOSCheckWS from './LOSCheckWS.ts';
-import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength } from './LinkOrbitAnimation.ts';
+import LOSCheckWS from './LOSCheckWS';
+import {createLinkProfile} from './LinkCalcUtils';
+import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength } from './LinkOrbitAnimation';
+import {LinkMode} from './DrawingModes.js';
 // Create new mapbox Map
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
 
@@ -11,6 +13,7 @@ var selected_feature = null;
 var link_chart = null;
 
 var profileWS = null;
+var currentLinkHash = null;
 
 $(document).ready(function () {
     link_chart = createLinkChart(link_chart, highLightPointOnGround);
@@ -23,23 +26,43 @@ $(document).ready(function () {
             $("#loading_spinner").addClass('d-none');
             if (response.data.error !== null) {
                 $("#link-request-error-description").text(response.data.error);
-                if (response.data.lidar_profile === null && response.data.error === "Lidar data not available") {
-                    $('#lidar_not_found_msg').removeClass('d-none');
-                }
             }
+            if (response.data.lidar_profile === null && response.data.error === "Lidar data not available") {
+                $('#lidar_not_found_msg').removeClass('d-none');
+            } else {
+                $("#3D-view-btn").removeClass('d-none');
+            }
+
             renderNewLinkProfile(response);
             const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
-            const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
-            updateLidarRender(
-                response.data.name,
-                response.data.url,
-                response.data.bb,
-                response.data.tx,
-                response.data.rx,
-                tx_hgt,
-                rx_hgt
-            );
-            createFresnelZonePlot();
+            const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1]; 
+            if(currentLinkHash !== response.data.hash)
+            {
+                updateLidarRender(
+                    response.data.name,
+                    response.data.url,
+                    response.data.bb,
+                    response.data.tx,
+                    response.data.rx,
+                    tx_hgt,
+                    rx_hgt
+                );
+                currentLinkHash = response.data.hash;
+            }
+            
+            if(_elevation !== null)
+            {
+                const link_profile_data = createLinkProfile(
+                    _elevation,
+                    parseFloat($('#hgt-0').val()),
+                    parseFloat($('#hgt-1').val()),
+                );
+                link_chart.series[2].setData(link_profile_data);
+            }
+            
+            link_chart.xAxis[0].update({title:{
+                text: `Distance : Resolution ${response.data.res}<br/>Source: ${response.data.datasets}`
+            }});
             link_chart.redraw();
             $("#link_chart").removeClass('d-none');
         } catch {
@@ -60,24 +83,7 @@ $(document).ready(function () {
     });
 
     map.on('load', function () {
-        // Add a modified drawing control
-        const LinkMode = MapboxDraw.modes.draw_line_string;
-        LinkMode.clickAnywhere = function (state, e) {
-            if (state.currentVertexPosition === 1) {
-                state.line.addCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
-                return this.changeMode('simple_select', { featureIds: [state.line.id] });
-            }
-            this.updateUIClasses({ mouse: 'add' });
-            state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
-            if (state.direction === 'forward') {
-                state.currentVertexPosition += 1; // eslint-disable-line
-                state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
-            } else {
-                state.line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
-            }
-            return null;
-        }
-
+        // Add a modified drawing control       
 
         var geocoder = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
@@ -87,7 +93,7 @@ $(document).ready(function () {
 
         Draw = new MapboxDraw({
             modes: Object.assign({
-                draw_link: LinkMode,
+                draw_link: LinkMode(),
             }, MapboxDraw.modes),
             displayControlsDefault: false,
             controls: {
@@ -164,17 +170,28 @@ $(document).ready(function () {
         });
 
         map.addControl(Draw, 'top-right');
+        map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
 
         const tx_lat = parseFloat($('#lat-0').val());
         const tx_lng = parseFloat($('#lng-0').val());
         const rx_lat = parseFloat($('#lat-1').val());
         const rx_lng = parseFloat($('#lng-1').val());
-        Draw.add({
-            "type": "LineString",
-            "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
-        });
+        
         map.on('draw.update', updateRadioLocation);
         map.on('draw.create', updateRadioLocation);
+        Draw.add({
+            "type": 'Feature',
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
+            },
+            "properties" :{
+                "meta": "radio_link",
+                'radio_label_0':'radio_0',
+                'radio_label_1': 'radio_1'
+            }
+        });
         map.on('draw.selectionchange', updateRadioLocation);
         map.addSource('point', {
             'type': 'geojson',
@@ -204,7 +221,11 @@ $(document).ready(function () {
         // Update Callbacks for Radio Heights
         $('#hgt-0').change(
             () => {
-                createFresnelZonePlot();
+                if(_elevation !== null)
+                {
+                    const link_profile_data = createLinkProfile(_elevation, parseFloat($('#hgt-0').val()), parseFloat($('#hgt-1').val()))
+                    link_chart.series[2].setData(link_profile_data);
+                }
                 link_chart.redraw();
                 if (_elevation != null && updateLinkHeight != null) {
                     const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
@@ -215,7 +236,11 @@ $(document).ready(function () {
         );
         $('#hgt-1').change(
             () => {
-                createFresnelZonePlot();
+                if(_elevation !== null)
+                {
+                    const link_profile_data = createLinkProfile(_elevation, parseFloat($('#hgt-0').val()), parseFloat($('#hgt-1').val()))
+                    link_chart.series[2].setData(link_profile_data);
+                }
                 link_chart.redraw();
                 if (_elevation != null && updateLinkHeight != null) {
                     const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
@@ -247,27 +272,6 @@ const highLightPointOnGround = ({ x, y }) => {
     map.getSource('point').setData(new_data);
 }
 
-const createFresnelZonePlot = () => {
-    if (_elevation != null) {
-        const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
-        const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
-        const freq = 60.0 * (10 ** 9); // GHz to Hz
-        const wavelength = 299792458 / freq; // m/s
-        const fresnel_zone_number = 1.0;
-        const link_len = _elevation.length;
-        const fresnel_zone_hgt = _elevation.map(
-            (pt, idx) => {
-                const los = tx_hgt - idx * ((tx_hgt - rx_hgt) / link_len);
-                const fresnel = Math.sqrt(fresnel_zone_number * idx * (link_len - idx) * wavelength / (link_len));
-                return los - fresnel;
-            }
-        );
-
-        link_chart.series[2].setData(fresnel_zone_hgt);
-    }
-};
-
-var axiosCancelToken = null;
 // Overlay
 const updateLinkProfile = () => {
     const tx_lat = $('#lat-0').val();
@@ -291,16 +295,12 @@ const updateLinkProfile = () => {
 
     // Create Callback Function for WebSocket
     // Use Websocket for request:
-
-    profileWS.sendRequest(query_params.tx, query_params.rx, 'low', userRequestIdentity);
-    profileWS.sendRequest(query_params.tx, query_params.rx, 'high', userRequestIdentity);
+    $("#3D-view-btn").addClass('d-none');
+    profileWS.sendRequest(query_params.tx, query_params.rx, userRequestIdentity);
 }
 
-const std_building_hgt = 3.0;
-const std_tree_hgt = 10.0;
+
 var _elevation = null;
-var _buildings = null;
-var _trees = null;
 var _coords = null;
 var _lidar = null;
 
@@ -342,10 +342,37 @@ const generateClippingVolume = function (bb, buffer = 10) {
 
 
 var globalLinkAnimation = null;
+var aAbout1 = null; 
+var aAbout2 = null;
 const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
-    if (globalLinkAnimation !== null) {
-        clearInterval(globalLinkAnimation.interval);
+    $('#3d-pause').off('click');
+    $('#3d-play').off('click');
+    if(globalLinkAnimation !== null)
+    {
+        globalLinkAnimation.stop();
+        globalLinkAnimation = null;
     }
+
+    if(aAbout1 == null){
+        aAbout1 = new Potree.Annotation({
+            position: [tx[0], tx[1], tx_h + 5],
+            title: 'Radio 0',
+        });
+        viewer.scene.annotations.add(aAbout1);
+    } else {
+        aAbout1.position.set(tx[0], tx[1], tx_h + 5);
+    }
+    if(aAbout2 == null){
+        aAbout2 = new Potree.Annotation({
+            position: [rx[0], rx[1], rx_h + 5],
+            title: 'Radio 1',
+        });
+        viewer.scene.annotations.add(aAbout2);
+    } else {
+        aAbout2.position.set(rx[0], rx[1], rx_h + 5);
+    }
+
+
     globalLinkAnimation = new Potree.CameraAnimation(viewer);
     const { targets, positions } = createOrbitAnimationPath(tx, tx_h, rx, rx_h, 100.0, 20.0);
 
@@ -362,11 +389,9 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
     viewer.scene.addCameraAnimation(globalLinkAnimation);
     globalLinkAnimation.setDuration(animationDuration);
     globalLinkAnimation.setVisible(false);
-    globalLinkAnimation.play();
-    globalLinkAnimation.interval = setInterval(function () {
-        globalLinkAnimation.setVisible(false);
-        globalLinkAnimation.play();
-    }, animationDuration * 1000);
+    globalLinkAnimation.play(true);
+    $('#3d-pause').click(()=>{globalLinkAnimation.stop();});
+    $('#3d-play').click(()=>{globalLinkAnimation.resume();});
 }
 
 var clippingVolume = null;

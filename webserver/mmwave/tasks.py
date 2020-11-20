@@ -1,5 +1,6 @@
 import requests
 import re
+from enum import IntEnum
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
@@ -16,6 +17,21 @@ from mmwave.models import EPTLidarPointCloud, TGLink
 google_maps_samples_limit = 512
 num_samples_per_m = 1
 link_distance_limit = 10000
+
+
+class LidarResolution(IntEnum):
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+    ULTRA = 4
+
+
+LIDAR_RESOLUTION_DEFAULTS = {
+    LidarResolution.LOW: 10,
+    LidarResolution.MEDIUM: 5,
+    LidarResolution.HIGH: 1,
+    LidarResolution.ULTRA: 0.5
+}
 
 
 def getElevationProfile(tx, rx):
@@ -141,7 +157,7 @@ def getBuildingProfile(tx, rx):
 
 
 @shared_task
-def getLOSProfile(network_id, data):
+def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
     resp = {
         'error': None,
         'tree_profile': None,
@@ -155,6 +171,7 @@ def getLOSProfile(network_id, data):
         'tx': {},
         'rx': {},
         'hash': None,
+        'datasets': '',
         'res': 'low',
         "type": 'standard.message'
     }
@@ -165,8 +182,7 @@ def getLOSProfile(network_id, data):
         rx = Point([float(f) for f in data.get('rx', [])])
         resp['hash'] = data.get('hash', None)
         fbid = int(data.get('fbid', 0))
-        resolution = data.get('resolution', 'low')
-        resp['res'] = resolution
+        resp['res'] = f'{LIDAR_RESOLUTION_DEFAULTS[resolution]} m'
         # Create Object to Log User Interaction
         TGLink(tx=tx, rx=rx, fbid=fbid).save()
         if geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters > link_distance_limit:
@@ -174,11 +190,12 @@ def getLOSProfile(network_id, data):
             async_to_sync(channel_layer.group_send)(channel_name, resp)
 
         terrain_profile = getElevationProfile(tx, rx)
+        resp['terrain_profile'] = terrain_profile
         try:
             lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
                 tx,
                 rx,
-                resolution=(5.0 if resolution == 'low' else 0.1)
+                LIDAR_RESOLUTION_DEFAULTS[resolution]
             )
             resp['lidar_profile'] = lidar_profile
             resp['points'] = pt_count
@@ -187,10 +204,12 @@ def getLOSProfile(network_id, data):
             resp['bb'] = bb
             resp['tx'] = tx_T
             resp['rx'] = rx_T
+            resp['datasets'] = f'USGS 3DEP LiDAR {name}, Google Elevation API'
         except Exception as e:
             resp['error'] = str(e)
-        resp['terrain_profile'] = terrain_profile
         async_to_sync(channel_layer.group_send)(channel_name, resp)
+        if resp['error'] is None and resolution != LidarResolution.ULTRA:
+            getLOSProfile.delay(network_id, data, resolution + 1)
 
     except Exception as e:
         resp["error"] = "An unexpected error occured: " + str(e)

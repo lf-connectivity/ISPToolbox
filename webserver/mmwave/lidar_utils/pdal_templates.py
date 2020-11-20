@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 from numpy import arange
 import numpy as np
 
-interpolation_step = 10. / 100.  # cm
+interpolation_step = 50. / 100.  # cm
 
 
 def averageHeightAtDistance(distance, heights):

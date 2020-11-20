@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    entry: '/src/link_check.js',
+    entry: '/src/index.js',
     module : {
         rules : [
             {

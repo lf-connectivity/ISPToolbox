@@ -22,7 +22,6 @@ class LOSCheckWS {
         'ptp' : () => null,
     };
     hash : string = '';
-    resolution : string = 'low';
     constructor(networkName : string, callback : LOSCallback){
         this.networkName = networkName;
         this.connect();
@@ -53,27 +52,20 @@ class LOSCheckWS {
 
         this.ws.onmessage = (e) => {
             const resp = JSON.parse(e.data);
-
-            if(resp.hash === this.hash && this.resolution === 'low')
+            if(resp.hash === this.hash)
             {
                 this.callbacks['ptp'](e);
-                if(resp.res ==='high')
-                {
-                    this.resolution = 'high';
-                }
             }
         }
     }
 
-    sendRequest(tx: [number, number], rx: [number, number], resolution: string, fbid: string) {
+    sendRequest(tx: [number, number], rx: [number, number], fbid: string) {
         const hash = [String(tx), String(rx), fbid].join(',');
         this.hash = hash;
-        this.resolution = 'low';
         const request = JSON.stringify({
             msg : 'ptp',
             tx : tx,
             rx : rx,
-            resolution : resolution,
             fbid: fbid,
             hash: hash
         });

@@ -50,7 +50,7 @@ export function createLinkChart(link_chart, highLightPointOnGround) {
             zIndex: 1,
             color: '#675b45'
         }, {
-            name: 'fresnel',
+            name: 'LOS',
             data: [],
             zIndex: 2,
             color: '#00f7ca'

@@ -14,6 +14,7 @@
 <script src="{% static "jstree/jstree.js" %}"></script>
 <script src="{% static "potree/potree.js" %}"></script>
 <script src="{% static "plasio/js/laslaz.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "potree/potree.css" %}">
 
 <div class="modal fade" id="Modal3d" tabindex="-1" role="dialog" aria-labelledby="Modal3dLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
@@ -26,11 +27,22 @@
       </div>
       <div class="modal-body">
         <div class="potree_container" >
-          <div id="potree_render_area" style="width:100%;height:80vh;min-height: 400px;"></div>
+          <div id="potree_render_area" style="width:100%;height:80vh;min-height: 400px; position: relative;"></div>
           <div id="potree_sidebar_container" class="d-none"> </div>
         </div>      
       </div>
       <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="3d-pause">
+            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pause-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn-primary" id="3d-play">
+            <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-play-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+            </svg>
+          </button>
+
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
@@ -42,21 +54,13 @@
 .potree_container img{
   display:none !important;
 }
-
 </style>
 <script>
-
-  let clipSpheres = [
-    {position: [0.032, -2.382, 4.279], scale: 3},
-    {position: [-1.787, 6.011, 1.711], scale: 1},
-    {position: [0.095, 7.636, 10.997], scale: 2},
-  ];
-
   window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
 
   viewer.setEDLEnabled(true);
   viewer.setFOV(60);
-  viewer.setPointBudget(2*1000*1000);
+  viewer.setPointBudget(1*1000*1000);
   viewer.loadSettingsFromURL();
 
   viewer.setDescription('');

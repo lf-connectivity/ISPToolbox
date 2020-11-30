@@ -186,8 +186,9 @@ def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
         # Create Object to Log User Interaction
         TGLink(tx=tx, rx=rx, fbid=fbid).save()
         if geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters > link_distance_limit:
-            resp['error'] = f'Link too long: limit {link_distance_limit} meters'
+            resp['error'] = f'Link too long: limit {link_distance_limit/1000} km'
             async_to_sync(channel_layer.group_send)(channel_name, resp)
+            return None
 
         terrain_profile = getElevationProfile(tx, rx)
         resp['terrain_profile'] = terrain_profile

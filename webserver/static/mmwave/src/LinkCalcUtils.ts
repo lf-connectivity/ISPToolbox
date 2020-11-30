@@ -1,4 +1,5 @@
-
+// @ts-ignore
+import everpolate from './everpolate.js';
 const speed_of_light = 299792458; // m/s
 const earth_radius_km = 6371; // km
 const earth_radius_m = earth_radius_km * 1000; // m
@@ -81,4 +82,36 @@ export function createLinkProfile(
         return profile;
     }
 
+}
+
+export function findOverlaps(link : Array<number>, lidar: Array<[number, number]>, resolution : number = 1.0) : Array<[number, number]> {
+    const overlaps: Array<[number, number]> = [];
+    const link_distances = link.map((_, idx)=> {return idx * resolution;})
+    const lidar_distances = lidar.map((x)=>{return x[0];});
+    const lidar_values = lidar.map((x) => {return x[1];});
+    const lidar_val_interp = everpolate.linear(link_distances, lidar_distances, lidar_values);
+
+    const difference_link_lidar = [];
+    for (let i = 0; i < link.length; i++){
+        difference_link_lidar.push(link[i] - lidar_val_interp[i]);
+    }
+    let start_interval = -1;
+    for(let i = 0; i < difference_link_lidar.length; i++)
+    {
+        if(difference_link_lidar[i] < 0) {
+            if(start_interval === -1) {
+                start_interval = i;
+            }
+        } else {
+            if(start_interval !== -1) {
+                overlaps.push([start_interval, i])
+                start_interval = -1;
+            }
+        }
+        if((i === difference_link_lidar.length - 1) && (start_interval !== -1))
+        {
+            overlaps.push([start_interval, i]);
+        }
+    }
+    return overlaps;
 }

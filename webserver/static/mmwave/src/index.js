@@ -1,7 +1,7 @@
 
 import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
-import {createLinkProfile} from './LinkCalcUtils';
+import {createLinkProfile, findOverlaps} from './LinkCalcUtils';
 import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength } from './LinkOrbitAnimation';
 import {LinkMode} from './DrawingModes.js';
 // Create new mapbox Map
@@ -50,22 +50,14 @@ $(document).ready(function () {
                 currentLinkHash = response.data.hash;
             }
             
-            if(_elevation !== null)
-            {
-                const link_profile_data = createLinkProfile(
-                    _elevation,
-                    parseFloat($('#hgt-0').val()),
-                    parseFloat($('#hgt-1').val()),
-                );
-                link_chart.series[2].setData(link_profile_data);
-            }
+            updateLinkChart();
             
             link_chart.xAxis[0].update({title:{
                 text: `Distance : Resolution ${response.data.res}<br/>Source: ${response.data.datasets}`
             }});
             link_chart.redraw();
             $("#link_chart").removeClass('d-none');
-        } catch {
+        } catch(err) {
             selected_feature = null;
             $('#loading_failed_spinner').removeClass('d-none');
             $("#link-request-error-description").text();
@@ -221,32 +213,12 @@ $(document).ready(function () {
         // Update Callbacks for Radio Heights
         $('#hgt-0').change(
             () => {
-                if(_elevation !== null)
-                {
-                    const link_profile_data = createLinkProfile(_elevation, parseFloat($('#hgt-0').val()), parseFloat($('#hgt-1').val()))
-                    link_chart.series[2].setData(link_profile_data);
-                }
-                link_chart.redraw();
-                if (_elevation != null && updateLinkHeight != null) {
-                    const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
-                    const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
-                    updateLinkHeight(tx_hgt, rx_hgt);
-                }
+                updateLinkChart(true);
             }
         );
         $('#hgt-1').change(
             () => {
-                if(_elevation !== null)
-                {
-                    const link_profile_data = createLinkProfile(_elevation, parseFloat($('#hgt-0').val()), parseFloat($('#hgt-1').val()))
-                    link_chart.series[2].setData(link_profile_data);
-                }
-                link_chart.redraw();
-                if (_elevation != null && updateLinkHeight != null) {
-                    const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
-                    const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
-                    updateLinkHeight(tx_hgt, rx_hgt);
-                }
+                updateLinkChart(true);
             }
         );
 
@@ -339,6 +311,37 @@ const generateClippingVolume = function (bb, buffer = 10) {
     return { position, scale, camera };
 }
 
+/**
+ * Updates link chart for LOS based on new elevation profile and tx/rx height
+ */
+function updateLinkChart(update3DView = false) {
+    if(_elevation !== null)
+    {
+        const link_profile_data = createLinkProfile(
+            _elevation,
+            parseFloat($('#hgt-0').val()),
+            parseFloat($('#hgt-1').val()),
+        );
+        link_chart.series[2].setData(link_profile_data);
+        if(_lidar != null)
+        {
+            const overlaps = findOverlaps(link_profile_data, _lidar);
+            link_chart.xAxis[0].removePlotBand();
+            overlaps.forEach((x) => {
+                link_chart.xAxis[0].addPlotBand({
+                    from: x[0],
+                    to: x[1],
+                    color: 'rgba(255, 0, 0)'
+                });
+            })
+        }
+    }
+    if (_elevation != null && updateLinkHeight != null && update3DView) {
+        const tx_hgt = parseFloat($('#hgt-0').val()) + _elevation[0];
+        const rx_hgt = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
+        updateLinkHeight(tx_hgt, rx_hgt);
+    }
+}
 
 
 var globalLinkAnimation = null;

@@ -24,7 +24,7 @@ class TGLinkView(View):
         # tx = {'name': 'radio_0', 'lng': -90.53716599941286, 'lat': 33.5451235458682, 'id': 0, 'hgt': 35}
         # rx = {'name': 'radio_1', 'lng': -90.53423166275023, 'lat': 33.545454397676316, 'id': 1, 'hgt': 4}
         # Puerto Rico Link
-        tx = {'name': 'radio_0', 'lng': -66.10318337316896, 'lat': 18.415034033743083, 'id': 0, 'hgt': 18}
+        tx = {'name': 'radio_0', 'lng': -66.10318337316896, 'lat': 18.415034033743083, 'id': 0, 'hgt': 20}
         rx = {'name': 'radio_1', 'lng': -66.09988844919782, 'lat': 18.411423676674275, 'id': 1, 'hgt': 9}
         # # Puerto Rico Link
         # tx = {'name': 'radio_0', 'lng': -66.09455208440198, 'lat': 18.413009468818956, 'id': 0, 'hgt': 40}

@@ -1,5 +1,6 @@
 // @ts-ignore
-const THREE = window.THREE; 
+const THREE = window.THREE;
+
 /* Generate a Gerono lemniscate curve for the camera position, and target along the link path */
 export function createOrbitAnimationPath (tx: [number,number], tx_h: number, rx: [number,number], rx_h: number, radius: number, height: number, num_pts=50)
 : {targets: Array<[number,number, number]>, positions: Array<[number,number,number]>}

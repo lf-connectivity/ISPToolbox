@@ -34,7 +34,7 @@ class MarketEvaluatorPipelineBuildings(View):
             if results.buildingPrecomputed:
                 # Perform a direct Query of Building Outlines if Available
                 precomputedBuildings = getMicrosoftBuildingsOffset(
-                    results.include_geojson.json,
+                    results.include_geojson,
                     buildingoffset)
                 buildingOutlines = precomputedBuildings["gc"]
                 gid_offset = precomputedBuildings["offset"]

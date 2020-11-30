@@ -283,7 +283,7 @@ def getMicrosoftBuildingsOffset(include, offset):
             query_skeleton = """
             WITH subdivided_request AS
             (SELECT ST_Subdivide(
-                ST_GeomFromGeoJSON(%s), 32) as include_subdivide
+                ST_MakeValid(ST_GeomFromWKB(%s)), 32) as include_subdivide
             ),
             intersected_buildings AS
             (SELECT geog::geometry as geom, gid FROM msftcombined JOIN subdivided_request
@@ -297,7 +297,7 @@ def getMicrosoftBuildingsOffset(include, offset):
             """
             # query_skeleton = getQueryTemplate(
             #     query_skeleton, exclude is not None, False)
-            cursor.execute(query_skeleton, [include, offset])
+            cursor.execute(query_skeleton, [include.ewkb, offset])
             db_resp = cursor.fetchone()
             resp = {"gc": json.loads(db_resp[1]), "offset": str(db_resp[0])}
     except BaseException:

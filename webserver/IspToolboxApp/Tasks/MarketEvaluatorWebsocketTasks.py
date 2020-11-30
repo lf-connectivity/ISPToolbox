@@ -2,7 +2,7 @@ from celery import shared_task
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, broadbandNow, mlabSpeed, \
-    grantGeog, zipGeog, countyGeog
+    grantGeog, zipGeog, countyGeog, medianIncome
 from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
     getOSMBuildings
 
@@ -21,17 +21,33 @@ def sync_send(channelName, consumer, value, uuid):
 def genBuildings(include, channelName, uuid):
     buildings_available = checkIfPrecomputedBuildingsAvailable(include, None)
     if buildings_available:
-        # We can query microsoft buildings with an offset and send results as we generate them
+        # We can query microsoft buildings with an offset and send results as we generate them.
         offset = 0
-        while True:
+        done = False
+        while not done:
             resp = getMicrosoftBuildingsOffset(include, offset)
+            resp['done'] = False
+            # Once we hit an offset with no more geometries, we are finished.
+            # But we still send response to indicate to FE that buildings are complete.
             if len(resp['gc']['geometries']) == 0:
-                break
-            offset = resp['offset']
+                done = True
+                resp['done'] = True
+            newOffset = resp['offset']
+            # Set the response offset to the original offset for FE
+            resp['offset'] = str(offset)
             sync_send(channelName, 'building.overlays', resp, uuid)
+            offset = newOffset
     else:
         resp = getOSMBuildings(include, None)
+        resp['gc'] = resp['buildings']
+        resp['done'] = True
         sync_send(channelName, 'building.overlays', resp, uuid)
+
+
+@shared_task
+def genMedianIncome(include, channelName, uuid):
+    result = medianIncome(include)
+    sync_send(channelName, 'median.income', result, uuid)
 
 
 @shared_task

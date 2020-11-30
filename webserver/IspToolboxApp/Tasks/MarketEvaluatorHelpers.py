@@ -204,12 +204,13 @@ def getOSMBuildings(include, exclude, callback=None):
                                               allNodes[n]['lat']] for n in b['nodes']]]} for (k,
                                                                                               b) in buildingNodes.items()}
 
-        # Update Pipeline with Progress
-        callback(
-            len(buildingDict), {
-                "type": "GeometryCollection", "geometries": [
-                    b for (
-                        k, b) in buildingDict.items()]})
+        if callback:
+            # Update Pipeline with Progress
+            callback(
+                len(buildingDict), {
+                    "type": "GeometryCollection", "geometries": [
+                        b for (
+                            k, b) in buildingDict.items()]})
 
         # Filter Buildings
         filteredBuildingsKeys, building_geojson_dict = filterBuildingNodes(

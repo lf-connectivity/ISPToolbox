@@ -9,6 +9,8 @@ from IspToolboxApp.Tasks.MarketEvaluatorHelpers import\
 from django.http import JsonResponse
 import json
 import logging
+import time
+import random
 from rasterio.errors import RasterioIOError
 from IspToolboxApp.templates.errorMsg import kmz_err_msg
 import uuid as uuidv4
@@ -223,6 +225,39 @@ class MarketEvaluatorPipelineView(View):
         run.save(update_fields=['task'])
 
         return JsonResponse({'uuid': run.uuid, 'token': run.token})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MarketEvaluatorExportNoPipeline(View):
+    def post(self, request):
+        body = json.loads(request.body.decode('utf-8'))
+        isShape = body.get('shapes', False)
+        isBuildings = body.get('buildings', False)
+        include = body.get('include')['geometry']
+        unique_id = str(int(time.time())) + str(random.randint(0, 100000))
+        object_name = f'kml/ISPTOOLBOX_{unique_id}.kml'
+        resp = {'error': None}
+        geoList = []
+        try:
+            if isShape:
+                shapes = include
+                shapes['layer'] = 'shape'
+                geoList.append(shapes)
+            if isBuildings:
+                buildingOutlines = getMicrosoftBuildings(
+                    json.dumps(include), None
+                )
+                buildingOutlines['buildings']['layer'] = 'buildings'
+                geoList.append(buildingOutlines['buildings'])
+            kml = convertKml(geoList)
+            succee = writeToS3(kml, object_name)
+            if not succee:
+                return JsonResponse({'error': 'fail to upload to S3'})
+            url = createPresignedUrl(object_name)
+            resp = {'url': url}
+        except Exception as e:
+            resp['error'] = str(e)
+        return JsonResponse(resp)
 
 
 @method_decorator(csrf_exempt, name='dispatch')

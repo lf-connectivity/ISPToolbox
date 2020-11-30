@@ -1,4 +1,5 @@
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode, \
+    checkIfPrecomputedIncomeAvailable
 from IspToolboxApp.Models.MLabSpeedDataModels import StandardizedMlab, StandardizedPostal
 from IspToolboxApp.Models.GeographicModels import Tl2019UsZcta510, Tl2019UsCounty
 from django.db import connections
@@ -49,6 +50,41 @@ def genServiceProvidersCanada(include):
             'tech_used': tech
         }
         return resp
+
+
+def medianIncome(include):
+        offset = 0
+        precomputedAvailable = checkIfPrecomputedIncomeAvailable(include, None)
+        query_skeleton = income_skeleton_simple
+        if precomputedAvailable:
+            query_skeleton = income_skeleton
+
+        try:
+            query_skeleton = getQueryTemplate(query_skeleton, False, False)
+            averageMedianIncome = 0
+            while True:
+                with connections['gis_data'].cursor() as cursor:
+                    query_arguments = [include]
+                    if precomputedAvailable:
+                        query_arguments.append(offset)
+                    cursor.execute(query_skeleton, query_arguments)
+                    results = cursor.fetchone()
+                    if precomputedAvailable:
+                        num_buildings = float(results[2])
+                        if num_buildings > 0:
+                            averageMedianIncomeSelection = float(results[0])
+                            averageMedianIncome = (
+                                averageMedianIncome * offset + averageMedianIncomeSelection * num_buildings) / (
+                                offset + num_buildings)
+                            offset += num_buildings
+                        else:
+                            break
+                    else:
+                        averageMedianIncome = results[0]
+                        break
+            return {'averageMedianIncome': averageMedianIncome}
+        except BaseException as e:
+            return {'averageMedianIncome': 0, 'error': str(e)}
 
 
 def broadbandNow(include):
@@ -117,7 +153,7 @@ def mlabSpeed(include):
 def grantGeog(cbgid):
     try:
         query_skeleton = \
-            """SELECT cbg_id, state_abbr, county, locations, reserve,St_asgeojson(geog)
+            """SELECT cbg_id, St_asgeojson(geog)
             FROM auction_904_shp WHERE cbg_id = %s"""
         with connections['gis_data'].cursor() as cursor:
             cursor.execute(query_skeleton, [cbgid])
@@ -125,11 +161,8 @@ def grantGeog(cbgid):
             resp = {
                 'error': 0,
                 'cbgid': result[0],
-                'state': result[1],
-                'county': result[2],
-                'locations': result[3],
-                'reserve_price': result[4],
-                'geojson': result[5]}
+                'geojson': result[1]
+                }
     except BaseException:
         resp = {'error': -2}
     return resp
@@ -155,6 +188,8 @@ def countyGeog(statecode, countycode):
     resp = {'error': -1}
     try:
         resp['geojson'] = Tl2019UsCounty.getCountyGeog(countycode, statecode)
+        resp['statecode'] = statecode
+        resp['countycode'] = countycode
     except BaseException:
         resp = {'error': -2}
     return resp
@@ -193,4 +228,31 @@ FROM ca_hex_broadband
     ON ca_hex.geoid = ca_hex_broadband.hex
 WHERE {} AND tech != 'Mobile Wireless'
 GROUP BY providername;
+"""
+
+income_skeleton = """
+SELECT Avg(avgbuildingvalues.avgincome2018building) AS avgincome2018,
+    Avg(avgbuildingvalues.avgerror2018building)  AS avgerror2018, COUNT(*) as numbuildings
+FROM   (SELECT unnested_intersecting_footprints.gid,
+            Avg(tract.income2018) AS avgincome2018building,
+            Avg(tract.error2018)  AS avgerror2018building
+     FROM   (SELECT intersecting_footprints.*,
+                    Unnest(microsoftfootprint2tracts.tractgids) AS tractgid
+             FROM   (SELECT *
+                     FROM   microsoftfootprints
+                     WHERE  {}
+                     LIMIT  10001 OFFSET %s) AS intersecting_footprints
+                    LEFT JOIN microsoftfootprint2tracts
+                           ON intersecting_footprints.gid =
+                              microsoftfootprint2tracts.footprintgid) AS
+            unnested_intersecting_footprints
+            LEFT JOIN tract
+                   ON tract.gid = unnested_intersecting_footprints.tractgid
+     GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues;
+"""
+
+income_skeleton_simple = """
+SELECT AVG(median_household_income) AS avgincome2018
+FROM standardized_median_income
+JOIN standardized_subdivisions ON standardized_median_income.geoid = standardized_subdivisions.geoid WHERE {};
 """

@@ -24,7 +24,7 @@ from IspToolboxApp.Views.market_evaluator_views.MarketEvaluator import Buildings
 from IspToolboxApp.Views.MarketEvaluatorView import MarketEvaluatorPipelineBroadbandNow, \
     MarketEvaluatorPipelineServiceProviders, MarketEvaluatorPipelineIncome, \
     MarketEvaluatorPipelineKMZ, MarketEvaluatorPipelineView, MarketEvaluatorPipelineBuildings, \
-    MarketEvaluatorExport
+    MarketEvaluatorExport, MarketEvaluatorExportNoPipeline
 from IspToolboxApp.Views.RetargetingPixelView import MarketingAccountView, \
     MarketingAudienceView, MarketingAudienceGeoPixelCheck
 from IspToolboxApp.Views.MarketingViews import MarketingConvertPolygons
@@ -80,6 +80,7 @@ urlpatterns = [
     path('market-evaluator/speeds/', MLabSpeedView.as_view()),
     path('market-evaluator/broadbandnow/', MarketEvaluatorPipelineBroadbandNow.as_view(), name='bbnow'),
     path('market-evaluator/export/', MarketEvaluatorExport.as_view(), name='export'),
+    path('market-evaluator/export-np/', MarketEvaluatorExportNoPipeline.as_view(), name='exportnp'),
     # GeoTargeting Views
     path('marketing/audience/', MarketingAudienceView.as_view(), name="marketing_audience"),
     path('marketing/account/', MarketingAccountView.as_view(), name="marketing_account"),

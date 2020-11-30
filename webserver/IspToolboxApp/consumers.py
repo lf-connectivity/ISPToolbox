@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
-from .Tasks.MarketEvaluatorWebsocketTasks import genBuildings, genServiceProviders, genBroadbandNow, \
+from .Tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
     genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog
 from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from celery.task.control import revoke
@@ -31,7 +31,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
 
     async def standard_polygon_request(self, content, uuid):
         # Cancel all old Market Evaluator celery tasks and reset tasklist.
-        revoke(self.taskList)
+        revoke(self.taskList, terminate=True)
         self.taskList = []
         include = None
         # Reduce Dimensions of Inputs to 2, Just in Case User uploads 3D
@@ -48,6 +48,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
 
         # Call async tasks and get their task IDs
         self.taskList.append(genBuildings.delay(include, self.channel_name, uuid).id)
+        self.taskList.append(genMedianIncome.delay(include, self.channel_name, uuid).id)
         self.taskList.append(genServiceProviders.delay(include, self.channel_name, uuid).id)
         self.taskList.append(genMedianSpeeds.delay(include, self.channel_name, uuid).id)
         self.taskList.append(genBroadbandNow.delay(include, self.channel_name, uuid).id)
@@ -66,6 +67,9 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         getCountyGeog.delay(statecode, countycode, self.channel_name, uuid)
 
     async def building_overlays(self, event):
+        await self.send_json(event)
+
+    async def median_income(self, event):
         await self.send_json(event)
 
     async def service_providers(self, event):

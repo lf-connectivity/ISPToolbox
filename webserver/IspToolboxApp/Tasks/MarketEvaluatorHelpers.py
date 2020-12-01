@@ -283,7 +283,7 @@ def getMicrosoftBuildingsOffset(include, offset):
             query_skeleton = """
             WITH subdivided_request AS
             (SELECT ST_Subdivide(
-                ST_GeomFromGeoJSON(%s), 32) as include_subdivide
+                ST_MakeValid(ST_GeomFromGeoJSON(%s)), 32) as include_subdivide
             ),
             intersected_buildings AS
             (SELECT geog::geometry as geom, gid FROM msftcombined JOIN subdivided_request

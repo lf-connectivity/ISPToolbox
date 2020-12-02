@@ -101,8 +101,8 @@ def outputTowerGeo(properties):
     for prop in properties:
         longitude = prop['longitude']
         latitude = prop['latitude']
-        owner_name = prop['owner_name']
-        structure_type = prop['structure_type']
+        owner_name = prop.get('owner_name', '')
+        structure_type = prop.get('structure_type', 'UNKN')
         x = {
                 'type': 'Feature',
                 'geometry': {

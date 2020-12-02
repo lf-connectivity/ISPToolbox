@@ -43,7 +43,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         include = GEOSGeometry(wkb_w.write_hex(include))
         # Instantiate a pipeline to track geojson being processed in orm
         pipeline = MarketEvaluatorPipeline(include_geojson=include)
-        sync_to_async(pipeline.save)()
+        await sync_to_async(pipeline.save)()
         include = include.json
 
         # Call async tasks and get their task IDs

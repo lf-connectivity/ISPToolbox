@@ -61,6 +61,7 @@ debug:
 test: 
 	@echo ----------------------------------------------STARTING TESTS----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app ./wait-for-postgres.sh python3 manage.py test
 
 static_prod:

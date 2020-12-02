@@ -146,5 +146,6 @@ TYPE_MAP = {
         'STACK': 'Smoke Stack',
         'TANK': 'Any type of Tank (Water, Gas, etc)',
         'TREE': 'When used as a support for an ant',
-        'UPOLE': 'Utility Pole/Tower used to provide'
+        'UPOLE': 'Utility Pole/Tower used to provide',
+        'UNKN': 'Unknown',
         }

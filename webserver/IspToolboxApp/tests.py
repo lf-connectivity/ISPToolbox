@@ -6,6 +6,7 @@ import json
 from IspToolboxApp.Tests.marketing_model_tests import TestMarketingModels  # noqa: F401
 from IspToolboxApp.Tests.marketing_views_tests import TestMarketingViews  # noqa: F401
 from IspToolboxApp.Tests.marketing_convert_views_tests import TestMarketingConversionModels  # noqa: F401
+from IspToolboxApp.Tests.websocket_tests import TestMarketEvalWebsocket  # noqa: F401
 
 
 class TestHealthCheckEndpoint(TestCase):

@@ -5,6 +5,8 @@ from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json
+from django.contrib.gis.geos import GEOSGeometry
+from NetworkComparison.NCTasks.osm_anchor_institution_task import fetchAnchorInstitutions
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -105,6 +107,13 @@ def genClusteredBuildings(include, exclude, distance, minpoints, channelName, uu
             else:
                 geometries[clusterNum] = [geojson]
         sync_send(channelName, "building.clusters", geometries, uuid)
+
+
+@shared_task
+def genAnchorInstitutions(include, channelName, uuid):
+    aoi = GEOSGeometry(include)
+    anchor_inst = fetchAnchorInstitutions(aoi)
+    sync_send(channelName, "anchor.institutions", anchor_inst, uuid)
 
 
 cluster_skeleton_include = """

@@ -7,6 +7,10 @@
 ```
 sh gen_non_urban.sh
 ```
-
 - Runtime is around 1 hour
-- Zip and upload cc-shpfile folder to mapbox as a shapefile
+- Outputs /cc-shpfile and cc-shpfile.zip
+
+## Upload to Mapbox
+- On mapbox tiles, click "calculated-cc-speeds-shp-casfao" and click replace.
+- Upload cc-shpfile.zip in order to replace the older one
+

@@ -6,6 +6,15 @@ ISP Toolbox Backend Server Code
 - KV store: Elasticache
 - domain: https://fbctower.com
 
+## Getting Dev Environment Setup
+- get AWS account `fbc-tower-design` - bunnylol aws
+- create EC2 instance from template
+- chmod 400 on .pem file
+- ssh using the isptoolbox.pem in the /terraform folder
+- install docker and docker compose
+- ensure docker daemon is running (dockerd)
+- clone git repository
+- `make debug` to run locally on localhost:8000
 ## Make command list
 `make setup`
 - Installs required packages on system. Should only need to be ran once during first-time setup.
@@ -39,11 +48,13 @@ in VSCode forward port 8000 to your localhost (macbook)
 
 2. On your WWW OnDemand
 
-Update the CSP policy in XIspToolboxControllerConfig.php
-![Alt text](images/csp_update.png?raw=true "Title")
+Update the domain and protocols in `XIspToolboxControllerConfig.php`
 
-Change the domain name in WispMarketSizingUtils.js
-![Alt text](images/new_domain.png?raw=true "Title")
+```
+const ISPTOOLBOX_BACKEND_DOMAIN = 'localhost:8000'; //@nocommit 'isptoolbox.io';
+const ISPTOOLBOX_BACKEND_PROTOCOL = 'http://'; //@nocommit 'https://';
+const ISPTOOLBOX_BACKEND_WS_PROTOCOL = 'ws://'; //@nocommit 'wss://';
+```
 
 ## Pushing New Images to Production
 

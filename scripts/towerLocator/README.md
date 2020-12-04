@@ -3,8 +3,11 @@
 * chrome driver for selenium
 
 ## Run
+The script takes 8 hours+ to run.
+
+I recommend using nohup especially over ssh so the script doesn't stop upon disconnect:
 ```
-pipenv run python generateTowerSource.py
+nohup pipenv run python generateTowerSource.py &
 ```
 
 Output:

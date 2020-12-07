@@ -13,6 +13,20 @@ def createTokenDefault():
     return secrets.token_urlsafe(32)
 
 
+def createDateExpiryDefault():
+    return datetime.datetime.now() + datetime.timedelta(days=7)
+
+
+class WebsocketToken(models.Model):
+    token = models.CharField(
+        max_length=50,
+        default=createTokenDefault,
+        editable=False,
+        primary_key=True
+        )
+    expiry = models.DateTimeField(default=createDateExpiryDefault, editable=False)
+
+
 class ServiceProvider(models.Model):
     logrecno = models.IntegerField(primary_key=True)
     techcode = models.IntegerField(blank=True, null=True)

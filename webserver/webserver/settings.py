@@ -20,6 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+ALLOWED_HOSTS = ['.facebook.com', '.isptoolbox.io', '.fbctower.com']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -39,7 +40,6 @@ if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
     AWS_CLOUDFRONT_DOMAIN = 'static.fbctower.com'
     AWS_S3_CUSTOM_DOMAIN = AWS_CLOUDFRONT_DOMAIN
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    ALLOWED_HOSTS = ['.isptoolbox.io', '.fbctower.com']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

@@ -33,47 +33,27 @@ sample_request = {
 
 
 class TestMarketEvalWebsocket(TestCase):
-    '''
-        Tests basic functionality of market-evaluator websocket, auth, and requests.
-    '''
     async def setup_websocket(self):
-        '''
-            Helper method to connect to the websocket.
-            Returns: WebsocketCommunicator
-        '''
         communicator = WebsocketCommunicator(MarketEvaluatorConsumer.as_asgi(), "testws/market-evaluator/")
         connected, subprotocol = await communicator.connect()
         self.assertTrue(connected)
         return communicator
 
-    async def get_standard_polygon_response(self, request, expectedResponseCount):
+    async def get_standard_polygon_response(self, request):
         '''
             Helper method to get a single standard polygon response from websocket for given request.
         '''
         communicator = await self.setup_websocket()
-
-        # Authenticate with the websocket
-        await communicator.send_json_to({
-            'credentials': 'default',
-        })
-        gotNothing = await communicator.receive_nothing(timeout=1)
-        self.assertFalse(gotNothing)
-        auth = await communicator.receive_json_from()
-        self.assertTrue(auth['type'] == 'auth.token')
-        self.assertTrue(len(auth['value']['token']) > 0)
-
-        # Send the request
-        await communicator.send_json_to(request)
+        await communicator.send_json_to(sample_request)
         # Assert that we get some response within 5 seconds
-        gotNothing = await communicator.receive_nothing(timeout=1)
+        gotNothing = await communicator.receive_nothing(timeout=5)
         self.assertFalse(gotNothing)
         resps = []
-        # Gather all responses
-        while (len(resps) < expectedResponseCount):
+        while (len(resps) < 6):
             response = await communicator.receive_json_from()
             resps.append(response)
         # Assert that we get no other responses other than the 6 expected
-        gotNothing = await communicator.receive_nothing(timeout=1)
+        gotNothing = await communicator.receive_nothing(timeout=5)
         self.assertTrue(gotNothing)
         await communicator.disconnect()
         return resps
@@ -95,7 +75,7 @@ class TestMarketEvalWebsocket(TestCase):
             'median.income': 1,
             'building.overlays': 2,
         }
-        resps = await self.get_standard_polygon_response(sample_request, 6)
+        resps = await self.get_standard_polygon_response(sample_request)
         actualResponseTypes = Counter([i['type'] for i in resps])
         self.assertTrue(actualResponseTypes == expectedResponseTypes)
 
@@ -105,6 +85,6 @@ class TestMarketEvalWebsocket(TestCase):
             Expects to see same uuid for each response.
         '''
         expectedUUID = sample_request['uuid']
-        resps = await self.get_standard_polygon_response(sample_request, 6)
+        resps = await self.get_standard_polygon_response(sample_request)
         for resp in resps:
             self.assertTrue(resp['uuid'] == expectedUUID)

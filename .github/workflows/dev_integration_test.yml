@@ -27,4 +27,7 @@ jobs:
         flake8 . --count --max-complexity=11 --max-line-length=127 --statistics --exclude *migrations*
     - name: Run Django Test Suite
       run: |
+        # Test then cleanup containers
         make test
+        docker stop $(docker ps -a -f "name=isptoolbox_" -q)
+        docker rm $(docker ps -a -f "name=isptoolbox_" -q)

@@ -172,7 +172,7 @@ def zipGeog(zipcode):
     '''
         Returns geojson for provided zipcode.
     '''
-    resp = {'error': -1}
+    resp = {'error': 0}
     try:
         resp['geojson'] = Tl2019UsZcta510.getZipGeog(zipcode)
         resp['zip'] = zipcode
@@ -185,7 +185,7 @@ def countyGeog(statecode, countycode):
     '''
         Returns geojson for provided statecode and countycode.
     '''
-    resp = {'error': -1}
+    resp = {'error': 0}
     try:
         resp['geojson'] = Tl2019UsCounty.getCountyGeog(countycode, statecode)
         resp['statecode'] = statecode

@@ -4,7 +4,7 @@ from datetime import datetime
 import pytz
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from .Tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
-    genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog
+    genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getTowerViewShed
 from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline, WebsocketToken
 from celery.task.control import revoke
 from asgiref.sync import sync_to_async
@@ -19,6 +19,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
             'grant': self.grant_geography_request,
             'zip': self.zip_geography_request,
             'county': self.county_geography_request,
+            'viewshed': self.viewshed_request,
         }
         await self.accept()
 
@@ -32,7 +33,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
             Params:
                 content: {
                     token?<String>: A pre-existing token that the client is providing (they are probably reconnecting)
-                    credentials?: Authentication credentials (will be implemented with Workspace
+                    credentials?<String>: Authentication credentials (will be implemented with Workspace
                         as we currently don't require user authentication)
                 }
         '''
@@ -120,6 +121,13 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         statecode = content['statecode']
         getCountyGeog.delay(statecode, countycode, self.channel_name, uuid)
 
+    async def viewshed_request(self, content, uuid):
+        lat = content['lat']
+        lon = content['lon']
+        height = content['height']
+        radius = content['radius']
+        getTowerViewShed.delay(lat, lon, height, radius, self.channel_name, uuid)
+
     async def building_overlays(self, event):
         await self.send_json(event)
 
@@ -144,5 +152,5 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
     async def county_geog(self, event):
         await self.send_json(event)
 
-    async def send_auth(self, event):
+    async def tower_viewshed(self, event):
         await self.send_json(event)

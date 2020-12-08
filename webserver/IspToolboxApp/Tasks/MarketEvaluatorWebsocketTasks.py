@@ -5,6 +5,7 @@ from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, bro
     grantGeog, zipGeog, countyGeog, medianIncome
 from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
     getOSMBuildings
+from towerlocator.helpers import getViewShed
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -84,3 +85,9 @@ def getZipGeog(zipcode, channelName, uuid):
 def getCountyGeog(statecode, countycode, channelName, uuid):
     result = countyGeog(statecode, countycode)
     sync_send(channelName, 'county.geog', result, uuid)
+
+
+@shared_task
+def getTowerViewShed(lat, lon, height, radius, channelName, uuid):
+    result = getViewShed(lat, lon, height, radius)
+    sync_send(channelName, 'tower.viewshed', result, uuid)

@@ -63,7 +63,6 @@ INSTALLED_APPS = [
     'IspToolboxApp',
     'mmwave',
     'Overlay',
-    'towerlocator',
     'NetworkComparison',
     'cms',
     'dataUpdate',

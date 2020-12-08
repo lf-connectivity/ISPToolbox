@@ -1,10 +1,8 @@
-from celery import shared_task
 import requests
 import json
 import io
 from IspToolboxApp.Tasks.MarketEvaluatorHelpers import createPipelineFromKMZ
 from bots.github_issues import make_github_issue
-from .models import TowerLocatorMarket
 
 # This UID and key are used for the cloudrf API, currently using the 10,000 requests/month plan
 cloud_rf_uid = '27141'
@@ -14,7 +12,7 @@ cloud_rf_key = '71492256a3cd1e54e14f6413842f1ab41c907664'
 headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
 
-def createCloudRFRequest(lat, lon, txh):
+def createCloudRFRequest(lat, lon, txh, rad):
     return {
         "uid": cloud_rf_uid,
         "key": cloud_rf_key,
@@ -30,7 +28,7 @@ def createCloudRFRequest(lat, lon, txh):
         "pm": 2,
         "pe": 1,
         "res": 90,
-        "rad": 6,
+        "rad": rad,
         "out": 2,
         "rxs": -95,
         "ant": 38,
@@ -62,10 +60,19 @@ def createCloudRFRequest(lat, lon, txh):
     }
 
 
-@shared_task
-def getViewShed(tower_id):
-    tower = TowerLocatorMarket.objects.get(uuid=tower_id)
-    request_body = createCloudRFRequest(tower.location[0], tower.location[1], tower.height)
+def getViewShed(lat, lon, height, radius):
+    '''
+        Gets a viewshed (json polygon coverage) from an access point:
+
+        Params:
+        lat<Number>: Latitude
+        lon<Number>: Longitude
+        height<Number>: Height of transmitter in meters
+        radius<Number>: Radius of coverage in km
+
+        Returns geojson for viewshed
+    '''
+    request_body = createCloudRFRequest(lat, lon, height, radius)
     resp = {}
     retries = 3
     try:
@@ -76,14 +83,19 @@ def getViewShed(tower_id):
         # else request KMZ file, add geometry collection to pipeline and run market evaluator pipeline
         kmz_response = requests.get(resp['kmz'])
         kmz_file = io.BytesIO(kmz_response.content)
-        tower.coverage = json.dumps(createPipelineFromKMZ(kmz_file))
-        tower.save(update_fields=['coverage'])
+        resp = {
+            'error': 0,
+            'coverage': createPipelineFromKMZ(kmz_file)
+        }
+        return resp
 
     except Exception as e:
         # if something goes wrong, create a github issue
         # TODO: check if a viewshed issue already exists
         make_github_issue(
             title='Could not create viewshed',
-            body=f"{tower.location},{tower.height},{tower.uuid},{json.dumps(resp)} error: {str(e)}",
+            body=f"{lat},{lon},{json.dumps(resp)} error: {str(e)}",
             labels=['viewshed', 'cloudrf']
         )
+        resp = {'error': -1}
+        return resp

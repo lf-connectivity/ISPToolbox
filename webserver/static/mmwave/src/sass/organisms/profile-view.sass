@@ -1,0 +1,21 @@
+@import ../theme
+.profile-view
+    background-color: $isptoolbox-theme-color !important
+    .card 
+        background-color: $isptoolbox-theme-color !important
+        border: none
+        border-radius: none
+    .card-title
+        border-bottom: 2px solid $isptoolbox-theme-secondary-color
+        padding-bottom: 5px
+    input
+        border-radius: 0 !important
+        font-family: 'Basis Grotesque Pro Mono', 'SFMono-Regular', 'Liberation Mono', Courier, monospace
+        border: none
+        border-bottom: 2px solid $isptoolbox-theme-secondary-color
+
+body
+    @media screen and (max-width: 767px)
+        .fixed-bottom
+            top: -16px
+            position: relative

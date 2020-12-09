@@ -1,14 +1,25 @@
 .planner-map {
     width: 100%;
     top: 0px;
-    height: 50vh;
+}
+.bottom-bar-wisp {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+}
+
+.top-bar-wisp {
+    position: absolute !important;
+    top: 20px;
+}
+
+.geocoder {
+    padding-bottom: 10px;
 }
 
 @media (min-width: 768px) {
     .planner-map {
-        top: 56px;
         position: fixed !important;
-        height: calc(100vh - 56px);
     }
 }
 
@@ -17,9 +28,8 @@
         position: relative !important;
     }
     .top-bar-wisp {
-        position: relative !important;
-        top: -60px;
-        height: 0;
+        position: absolute !important;
+        top: 15px;
     }
 }
 

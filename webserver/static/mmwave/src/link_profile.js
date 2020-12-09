@@ -1,7 +1,13 @@
-export function createLinkChart(link_chart, highLightPointOnGround) {
+export function createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView) {
    return Highcharts.chart('link_chart', {
         chart: {
-            type: 'line'
+            backgroundColor: "#C2D8EC",
+            plotBackgroundColor: "#FFFFFF",
+            type: 'line',
+            style: {"fontFamily": "'Basis Grotesque Pro Mono', 'SFMono-Regular', 'Liberation Mono', Courier, monospace","fontSize":"12px"}
+        },
+        legend: {
+            enabled: false
         },
         title: {
             text: undefined
@@ -19,7 +25,7 @@ export function createLinkChart(link_chart, highLightPointOnGround) {
         },
         yAxis: {
             title: {
-                text: 'Above Mean Sea Level'
+                text: 'Elevation [m]'
             },
             labels: {
                 formatter: function () {
@@ -41,19 +47,22 @@ export function createLinkChart(link_chart, highLightPointOnGround) {
         {
             name: 'Terrain',
             data: [],
-            zIndex: 0,
-            color: '#874280'
+            zIndex: 1,
+            color: '#687A8A',
+            type: 'area'
         },
         {
             name: 'LiDAR',
             data: [],
-            zIndex: 1,
-            color: '#675b45'
+            zIndex: 0,
+            color: '#C4CCD2',
+            type: 'area'
+
         }, {
             name: 'LOS',
             data: [],
             zIndex: 2,
-            color: '#00f7ca'
+            color: '#5692D1'
         }
         ],
         plotOptions: {
@@ -62,7 +71,8 @@ export function createLinkChart(link_chart, highLightPointOnGround) {
                   events: {
                     mouseOver: _.debounce( (e) => {
                       const point = { x: e.target.x, y: e.target.y };
-                      highLightPointOnGround(point)
+                      highLightPointOnGround(point);
+                      moveLocation3DView(point);
                     }, 100, {
                         'leading': true,
                         'trailing': true,
@@ -74,6 +84,6 @@ export function createLinkChart(link_chart, highLightPointOnGround) {
         credits: {
             enabled: false
         },
-        tooltip: { enabled: false },
+        tooltip: { enabled: false }
     });
 };

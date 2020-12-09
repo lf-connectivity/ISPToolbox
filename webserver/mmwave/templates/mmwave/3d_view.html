@@ -1,0 +1,33 @@
+<!-- Modal -->
+{% load static %}
+
+<div id="3d-view-container" class="d-none">
+  <div>
+    <div class="potree_container" >
+      <div id="potree_render_area" style="width:100%;position: absolute; min-height: 400px;"></div>
+      <div id="potree_sidebar_container" class="d-none"> </div>
+    </div>      
+  </div>
+</div>
+
+<style>
+
+.potree_container img{
+  display:none !important;
+}
+</style>
+<script>
+  window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
+
+  viewer.setEDLEnabled(true);
+  viewer.setFOV(60);
+  viewer.setPointBudget(1*1000*1000);
+  viewer.loadSettingsFromURL();
+
+  viewer.setDescription('');
+
+  viewer.loadGUI(() => {
+    viewer.setLanguage('en');
+  });
+
+</script>

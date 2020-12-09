@@ -2,12 +2,14 @@
 <html lang="en">
   {% include "./header.html" %}
 <body>
-    {% include "./3d_modal.html" %}
     {% include "./data_availability_modal.html" %}
-    {% include "./tour_modal.html" %}
-    {% include "./open_source_licenses.html" %}
-    {% include "./nav.html" %}
+    {% comment %}
+      {% include "./tour_modal.html" %}
+      {% include "./open_source_licenses.html" %}
+      {% include "./nav.html" %}
+    {% endcomment %}
     {% include "./map_view.html" %}
+    {% include "./3d_view.html" %}
     {% include "./additional_js.html" %}
     {% include "./link_view.html" %}
     <script type="text/javascript"> 

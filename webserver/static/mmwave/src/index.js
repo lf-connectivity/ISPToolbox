@@ -4,6 +4,7 @@ import LOSCheckWS from './LOSCheckWS';
 import {createLinkProfile, findOverlaps} from './LinkCalcUtils';
 import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength } from './LinkOrbitAnimation';
 import {LinkMode} from './DrawingModes.js';
+import {calculateLookVector} from './HoverMoveLocation3DView';
 // Create new mapbox Map
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
 
@@ -15,8 +16,39 @@ var link_chart = null;
 var profileWS = null;
 var currentLinkHash = null;
 
+var currentView = 'map';
+
 $(document).ready(function () {
-    link_chart = createLinkChart(link_chart, highLightPointOnGround);
+    // Add resizing callback
+    const resize_window = () => {
+        let height = $(window).height() - $('#bottom-row-link-view-container').height();
+        height = Math.max(height, 400);
+        $('#map').height(height);
+        if(map != null) {
+            map.resize();
+        }
+        $('#3d-view-container').height(height);
+        $('#potree_render_area').height(height);
+    }
+    resize_window();
+    $(window).resize( 
+        resize_window
+    );
+    const resizeObserver = new ResizeObserver(() => {
+        resize_window();
+    });
+    // Initialize Bootstrap Tooltips
+    $('[data-toggle="tooltip"]').tooltip({
+        template : `<div class="tooltip isptoolbox-tooltip" role="tooltip">
+                        <div class="arrow"> 
+                        </div>
+                        <div class="tooltip-inner isptoolbox-tooltip-inner">
+                        </div>
+                    </div>`
+    });
+    
+    resizeObserver.observe(document.querySelector('#bottom-row-link-view-container'));
+    link_chart = createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView);
     const ws_low_res_callback = (msg_event) => {
         try {
             const response = {
@@ -53,8 +85,20 @@ $(document).ready(function () {
             updateLinkChart();
             
             link_chart.xAxis[0].update({title:{
-                text: `Distance : Resolution ${response.data.res}<br/>Source: ${response.data.datasets}`
+                text: `Distance - resolution ${response.data.res}`
             }});
+            $('#los-chart-tooltip-button').attr(
+                "title",
+                `<div class="los-chart-legend">
+                    <h5>Link Profile</h5>
+                        <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-los' ></span><p class='list-item'>LOS</p></div>
+                        <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-lidar' ></span><p class='list-item'>LiDAR</p></div>
+                        <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-terrain'></span><p class='list-item'>Terrain</p></div>
+                        <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-obstruction'></span><p class='list-item'>LOS Obstructions</p></div>
+                    <p>Data Sources:</p>
+                    <p class='isptoolbox-data-source'>${response.data.datasets}</p>
+                </div>`
+            ).tooltip('_fixTitle');
             link_chart.redraw();
             $("#link_chart").removeClass('d-none');
         } catch(err) {
@@ -81,7 +125,7 @@ $(document).ready(function () {
             accessToken: mapboxgl.accessToken,
             mapboxgl: mapboxgl
         });
-        map.addControl(geocoder, 'top-right');
+        document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
         Draw = new MapboxDraw({
             modes: Object.assign({
@@ -161,8 +205,8 @@ $(document).ready(function () {
             },]
         });
 
-        map.addControl(Draw, 'top-right');
-        map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        map.addControl(Draw, 'bottom-right');
+        map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
 
         const tx_lat = parseFloat($('#lat-0').val());
@@ -222,6 +266,35 @@ $(document).ready(function () {
             }
         );
 
+        $('#3D-view-btn').click(()=>{
+            if(currentView === 'map')
+            {
+                $('#3D-view-btn').addClass('btn-primary');
+                $('#3D-view-btn').removeClass('btn-secondary');
+                $('#map-view-btn').addClass('btn-secondary');
+                $('#map-view-btn').removeClass('btn-primary');
+                $('#3d-view-container').removeClass('d-none');
+                $('#map').addClass('d-none');
+                $('#3d-controls').removeClass('d-none');
+                currentView = '3d';
+            }
+        });
+        $('#map-view-btn').click(()=>{
+            if(currentView === '3d')
+            {
+                $('#3D-view-btn').addClass('btn-secondary');
+                $('#3D-view-btn').removeClass('btn-primary');
+                $('#map-view-btn').addClass('btn-primary');
+                $('#map-view-btn').removeClass('btn-secondary');
+                $('#3d-view-container').addClass('d-none');
+                $('#map').removeClass('d-none');
+                if(map != null) {
+                    map.resize();
+                }
+                $('#3d-controls').addClass('d-none');
+                currentView = 'map';
+            }
+        });
     });
 });
 
@@ -242,7 +315,27 @@ const highLightPointOnGround = ({ x, y }) => {
         'coordinates': [_coords[Math.round(x)].lng, _coords[Math.round(x)].lat]
     };
     map.getSource('point').setData(new_data);
-}
+};
+
+const moveLocation3DView = ({x, y}) => {
+    // Stop Current Animation
+    if(globalLinkAnimation != null)
+    {
+        globalLinkAnimation.stop();
+    }
+    try {
+        const tx_h = parseFloat($('#hgt-0').val()) + _elevation[0];
+        const rx_h = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
+        const pos = x / _elevation.length;
+        const {location, lookAt} = calculateLookVector(tx_loc_lidar, tx_h, rx_loc_lidar, rx_h, pos);
+        const scene = viewer.scene;
+        // Move Camera to Location
+        scene.view.position.set(location[0], location[1], location[2]);
+        // Point Camera at Link
+        scene.view.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
+    } catch(err) {
+    }
+};
 
 // Overlay
 const updateLinkProfile = () => {
@@ -331,7 +424,7 @@ function updateLinkChart(update3DView = false) {
                 link_chart.xAxis[0].addPlotBand({
                     from: x[0],
                     to: x[1],
-                    color: 'rgba(255, 0, 0)'
+                    color: 'rgba(242, 62, 62, 0.2)'
                 });
             })
         }
@@ -393,8 +486,16 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
     globalLinkAnimation.setDuration(animationDuration);
     globalLinkAnimation.setVisible(false);
     globalLinkAnimation.play(true);
-    $('#3d-pause').click(()=>{globalLinkAnimation.stop();});
-    $('#3d-play').click(()=>{globalLinkAnimation.resume();});
+    $('#3d-pause').click(
+        ()=>{
+            globalLinkAnimation.stop();
+        }
+    );
+    $('#3d-play').click(
+        ()=>{
+            globalLinkAnimation.resume();
+        }
+    );
 }
 
 var clippingVolume = null;
@@ -415,7 +516,12 @@ const addLink = function (tx, rx, tx_h, rx_h) {
     updateLinkHeight(tx_h, rx_h);
 }
 
+var tx_loc_lidar = null;
+var rx_loc_lidar = null;
+
 const updateLidarRender = function (name, url, bb, tx, rx, tx_h, rx_h) {
+    tx_loc_lidar = tx;
+    rx_loc_lidar = rx;
     const setClippingVolume = function (bb) {
         let scene = viewer.scene;
         let { position, scale, camera } = generateClippingVolume(bb);

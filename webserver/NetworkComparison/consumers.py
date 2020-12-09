@@ -18,10 +18,9 @@ class NetworkCompConsumer(AsyncJsonWebsocketConsumer):
             Handles incoming json on the websocket
         '''
         # Cancel all old Network Comparison celery tasks and reset tasklist.
-        revoke(self.taskList)
+        revoke(self.taskList, terminate=True)
         self.taskList = []
         include = None
-        exclude = None
         feUUID = None
         # Reduce Dimensions of Inputs to 2, Just in Case User uploads 3D
         # Geojson
@@ -32,22 +31,17 @@ class NetworkCompConsumer(AsyncJsonWebsocketConsumer):
             include = GEOSGeometry(json.dumps(include))
             include = GEOSGeometry(wkb_w.write_hex(include))
             include = include.json
-        if 'exclude' in content:
-            exclude = content['exclude']
-            exclude = GEOSGeometry(json.dumps(exclude))
-            exclude = GEOSGeometry(wkb_w.write_hex(exclude))
-            exclude = exclude.json
         if 'uuid' in content:
             feUUID = content['uuid']
         if 'cluster' in content:
             minpoints = content['cluster']['minpoints']
             distance = content['cluster']['distance']
-            clusterId = genClusteredBuildings.delay(include, exclude, distance, minpoints, self.channel_name, feUUID).id
+            clusterId = genClusteredBuildings.delay(include, distance, minpoints, self.channel_name, feUUID).id
             self.taskList.append(clusterId)
 
         # Call async tasks and get their task IDs
-        self.taskList.append(genPolySize.delay(include, exclude, self.channel_name, feUUID).id)
-        self.taskList.append(genBuildingCount.delay(include, exclude, self.channel_name, feUUID).id)
+        self.taskList.append(genPolySize.delay(include, self.channel_name, feUUID).id)
+        self.taskList.append(genBuildingCount.delay(include, self.channel_name, feUUID).id)
         self.taskList.append(genAnchorInstitutions.delay(include, self.channel_name, feUUID).id)
 
     async def polygon_area(self, event):

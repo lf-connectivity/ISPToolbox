@@ -94,8 +94,9 @@ class TestMarketEvalWebsocket(TestCase):
             'broadband.now': 1,
             'median.income': 1,
             'building.overlays': 2,
+            'polygon.area': 1,
         }
-        resps = await self.get_standard_polygon_response(sample_request, 6)
+        resps = await self.get_standard_polygon_response(sample_request, 7)
         actualResponseTypes = Counter([i['type'] for i in resps])
         self.assertTrue(actualResponseTypes == expectedResponseTypes)
 
@@ -105,6 +106,6 @@ class TestMarketEvalWebsocket(TestCase):
             Expects to see same uuid for each response.
         '''
         expectedUUID = sample_request['uuid']
-        resps = await self.get_standard_polygon_response(sample_request, 6)
+        resps = await self.get_standard_polygon_response(sample_request, 7)
         for resp in resps:
             self.assertTrue(resp['uuid'] == expectedUUID)

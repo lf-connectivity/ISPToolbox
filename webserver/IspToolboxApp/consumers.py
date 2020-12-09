@@ -5,6 +5,7 @@ import pytz
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from .Tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
     genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getTowerViewShed
+from NetworkComparison.tasks import genPolySize
 from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline, WebsocketToken
 from celery.task.control import revoke
 from asgiref.sync import sync_to_async
@@ -107,6 +108,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         self.taskList.append(genServiceProviders.delay(include, self.channel_name, uuid).id)
         self.taskList.append(genMedianSpeeds.delay(include, self.channel_name, uuid).id)
         self.taskList.append(genBroadbandNow.delay(include, self.channel_name, uuid).id)
+        self.taskList.append(genPolySize.delay(include, self.channel_name, uuid).id)
 
     async def grant_geography_request(self, content, uuid):
         grantId = content['cbgid']
@@ -153,4 +155,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(event)
 
     async def tower_viewshed(self, event):
+        await self.send_json(event)
+
+    async def polygon_area(self, event):
         await self.send_json(event)

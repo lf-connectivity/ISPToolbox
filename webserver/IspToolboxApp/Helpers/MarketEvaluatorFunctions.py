@@ -52,39 +52,39 @@ def genServiceProvidersCanada(include):
         return resp
 
 
-def medianIncome(include):
-        offset = 0
-        precomputedAvailable = checkIfPrecomputedIncomeAvailable(include, None)
-        query_skeleton = income_skeleton_simple
-        if precomputedAvailable:
-            query_skeleton = income_skeleton
+def medianIncome(include, result = {}):
+    precomputedAvailable = checkIfPrecomputedIncomeAvailable(include, None)
+    done = False
+    if precomputedAvailable:
+        try:
+            with connections['gis_data'].cursor() as cursor:
+                max_gid = result.get('max_gid', 0)
+                query_arguments = [include, max_gid]
+                cursor.execute(income_skeleton, query_arguments)
+                row = cursor.fetchone()
+                columns = [col[0] for col in cursor.description]
+                row_dict = dict(zip(columns, row))
+                if row_dict.get('numbuildings', 0) == 0:
+                    done = True
 
+                averageMedianIncome = float(row_dict['avgincome2018']) if row_dict['avgincome2018'] is not None else 0
+                return {'averageMedianIncome': averageMedianIncome, 'max_gid' : row_dict['max_gid'], 'numbuildings': row_dict['numbuildings'], 'done' : done}
+        except BaseException as e:
+            return {'averageMedianIncome': 0, 'error': str(e), 'done' : done}
+    else:
+        done = True
+        query_skeleton = income_skeleton_simple
         try:
             query_skeleton = getQueryTemplate(query_skeleton, False, False)
             averageMedianIncome = 0
-            while True:
-                with connections['gis_data'].cursor() as cursor:
-                    query_arguments = [include]
-                    if precomputedAvailable:
-                        query_arguments.append(offset)
-                    cursor.execute(query_skeleton, query_arguments)
-                    results = cursor.fetchone()
-                    if precomputedAvailable:
-                        num_buildings = float(results[2])
-                        if num_buildings > 0:
-                            averageMedianIncomeSelection = float(results[0])
-                            averageMedianIncome = (
-                                averageMedianIncome * offset + averageMedianIncomeSelection * num_buildings) / (
-                                offset + num_buildings)
-                            offset += num_buildings
-                        else:
-                            break
-                    else:
-                        averageMedianIncome = results[0]
-                        break
-            return {'averageMedianIncome': averageMedianIncome}
+            with connections['gis_data'].cursor() as cursor:
+                query_arguments = [include]
+                cursor.execute(query_skeleton, query_arguments)
+                results = cursor.fetchone()
+                averageMedianIncome = results[0]
+            return {'averageMedianIncome': averageMedianIncome, 'done' : done}
         except BaseException as e:
-            return {'averageMedianIncome': 0, 'error': str(e)}
+            return {'averageMedianIncome': 0, 'error': str(e), 'done' : done}
 
 
 def broadbandNow(include):
@@ -230,26 +230,38 @@ WHERE {} AND tech != 'Mobile Wireless'
 GROUP BY providername;
 """
 
+
 income_skeleton = """
-SELECT Avg(avgbuildingvalues.avgincome2018building) AS avgincome2018,
-    Avg(avgbuildingvalues.avgerror2018building)  AS avgerror2018, COUNT(*) as numbuildings
-FROM   (SELECT unnested_intersecting_footprints.gid,
-            Avg(tract.income2018) AS avgincome2018building,
-            Avg(tract.error2018)  AS avgerror2018building
-     FROM   (SELECT intersecting_footprints.*,
-                    Unnest(microsoftfootprint2tracts.tractgids) AS tractgid
-             FROM   (SELECT *
-                     FROM   microsoftfootprints
-                     WHERE  {}
-                     LIMIT  10001 OFFSET %s) AS intersecting_footprints
-                    LEFT JOIN microsoftfootprint2tracts
-                           ON intersecting_footprints.gid =
-                              microsoftfootprint2tracts.footprintgid) AS
-            unnested_intersecting_footprints
-            LEFT JOIN tract
-                   ON tract.gid = unnested_intersecting_footprints.tractgid
-     GROUP  BY unnested_intersecting_footprints.gid) AS avgbuildingvalues;
+WITH subdivided_request AS
+(SELECT ST_Subdivide(
+    ST_MakeValid(ST_GeomFromGeoJSON(%s)), 32) as include_subdivide
+),
+intersected_buildings AS
+(SELECT geog::geometry as geom, gid FROM msftcombined JOIN subdivided_request
+ON ST_intersects(subdivided_request.include_subdivide, geog)
+    WHERE ST_intersects(subdivided_request.include_subdivide, geog) AND
+    gid > %s
+    ORDER BY gid ASC
+    LIMIT 10000
+),
+unnested_intersecting_footprints AS 
+(
+    SELECT intersected_buildings.*, UNNEST(microsoftfootprint2tracts.tractgids) AS tractgid
+    FROM intersected_buildings LEFT JOIN
+        microsoftfootprint2tracts ON
+        intersected_buildings.gid = microsoftfootprint2tracts.footprintgid
+),
+building_median_income AS
+(
+    SELECT unnested_intersecting_footprints.gid, AVG(tract.income2018) AS avgincome2018building
+    FROM unnested_intersecting_footprints LEFT JOIN tract
+        ON tract.gid = unnested_intersecting_footprints.tractgid
+    GROUP BY unnested_intersecting_footprints.gid
+)
+SELECT AVG(building_median_income.avgincome2018building) AS avgincome2018, COUNT(*) as numbuildings, MAX(gid) as max_gid
+FROM building_median_income
 """
+
 
 income_skeleton_simple = """
 SELECT AVG(median_household_income) AS avgincome2018

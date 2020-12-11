@@ -47,8 +47,20 @@ def genBuildings(include, channelName, uuid):
 
 @shared_task
 def genMedianIncome(include, channelName, uuid):
-    result = medianIncome(include)
-    sync_send(channelName, 'median.income', result, uuid)
+    result = {}
+    averageMedianIncome = 0
+    num_buildings = 0
+    while not result.get('done', False):
+        result = medianIncome(include, result)
+        averageMedianIncome = (
+            num_buildings * averageMedianIncome +
+            result.get('averageMedianIncome', 0) * result.get('numbuildings', 1)
+        ) / (num_buildings + result.get('numbuildings', 1))
+        num_buildings += result.get('numbuildings', 1)
+        resp = {'averageMedianIncome': averageMedianIncome, 'done': result['done']}
+        if 'error' in result:
+            resp['error'] = result['error']
+        sync_send(channelName, 'median.income', resp, uuid)
 
 
 @shared_task

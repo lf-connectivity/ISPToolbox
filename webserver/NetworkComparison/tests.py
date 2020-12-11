@@ -2,7 +2,9 @@ from django.test import TestCase
 from .util import squaredMetersToMiles
 import sys
 import math
+import json
 from NetworkComparison.NCTasks.osm_anchor_institution_task import fetchAnchorInstitutions
+from NetworkComparison.NCTasks.buildings_mst import multiLinePrims
 from django.contrib.gis.geos import GEOSGeometry
 
 sampleAreaMeters = 684291.294401
@@ -33,3 +35,26 @@ class UtilTests(TestCase):
         geometry = GEOSGeometry(test_polygon_geojson)
         anchor_instituitions = fetchAnchorInstitutions(geometry)
         self.assertGreaterEqual(len(anchor_instituitions), 2)
+
+    def test_min_span(self):
+        """
+            Checks that minimum spanning tree for a simple graph is correct
+        """
+        test_multi_line_json = """ {
+            "coordinates": [
+                [[0,0],[1,1]],
+                [[0,0],[0,-1]],
+                [[1,1],[2,2]],
+                [[2,2],[0,1]],
+                [[0,1],[1,1]],
+                [[-1,0],[0,0]],
+                [[2,2],[-1,0]]
+            ]
+        }
+        """
+        geoJson = json.loads(test_multi_line_json)
+        ans = multiLinePrims(geoJson)
+        expectedLength = 2*math.sqrt(2) + 3
+        expectedNumEdges = 5
+        self.assertEqual(expectedLength, ans['length'])
+        self.assertEqual(expectedNumEdges, len(ans['mst']))

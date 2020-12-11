@@ -7,6 +7,7 @@ from asgiref.sync import async_to_sync
 import json
 from django.contrib.gis.geos import GEOSGeometry
 from NetworkComparison.NCTasks.osm_anchor_institution_task import fetchAnchorInstitutions
+from NetworkComparison.NCTasks.buildings_mst import getBuildingsMST
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -90,6 +91,12 @@ def genClusteredBuildings(include, distance, minpoints, channelName, uuid):
             else:
                 geometries[clusterNum] = [geojson]
         sync_send(channelName, "building.clusters", geometries, uuid)
+
+
+@shared_task
+def genBuildingsMST(include, channelName, uuid):
+    graph = getBuildingsMST(include)
+    sync_send(channelName, "building.min.span", graph, uuid)
 
 
 @shared_task

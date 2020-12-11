@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
-from .tasks import genPolySize, genBuildingCount, genClusteredBuildings, genAnchorInstitutions
+from .tasks import genPolySize, genBuildingCount, genClusteredBuildings, genAnchorInstitutions, genBuildingsMST
 from celery.task.control import revoke
 
 
@@ -42,6 +42,7 @@ class NetworkCompConsumer(AsyncJsonWebsocketConsumer):
         # Call async tasks and get their task IDs
         self.taskList.append(genPolySize.delay(include, self.channel_name, feUUID).id)
         self.taskList.append(genBuildingCount.delay(include, self.channel_name, feUUID).id)
+        self.taskList.append(genBuildingsMST.delay(include, self.channel_name, feUUID).id)
         self.taskList.append(genAnchorInstitutions.delay(include, self.channel_name, feUUID).id)
 
     async def polygon_area(self, event):
@@ -54,4 +55,7 @@ class NetworkCompConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(event)
 
     async def anchor_institutions(self, event):
+        await self.send_json(event)
+
+    async def building_min_span(self, event):
         await self.send_json(event)

@@ -15,8 +15,48 @@ export function LinkMode(){
         }
         return null;
     };
+    const originalToDisplayFeatures = link_mode.toDisplayFeatures;
+    link_mode.toDisplayFeatures = function(state, geojson, display) {
+        originalToDisplayFeatures(state, geojson, display);
+        renderLinkEnds(geojson, display);
+    };
     return link_mode;
 };
+
+function renderLinkEnds(geojson, display){
+    if(geojson.geometry.coordinates.length > 0) {
+        const radio0 = {
+            type: 'Feature',
+            properties: {
+                meta: 'radio_point',
+                parent: geojson.properties.id,
+                name: 'radio_0',
+                color: '#E29842'
+            },
+            geometry: {
+                type: 'Point',
+                coordinates: geojson.geometry.coordinates[0],
+            },
+        };
+        display(radio0);
+    }
+    if(geojson.geometry.coordinates.length > 1) {
+        const radio1 = {
+            type: 'Feature',
+            properties: {
+                meta: 'radio_point',
+                parent: geojson.properties.id,
+                name: 'radio_1',
+                color: '#42B72A'
+            },
+            geometry: {
+                type: 'Point',
+                coordinates: geojson.geometry.coordinates[1],
+            },
+        };
+        display(radio1);
+    }
+}
 
 export function OverrideSimple(){
     const simple_select = MapboxDraw.modes.simple_select;
@@ -25,6 +65,9 @@ export function OverrideSimple(){
           ? 'true'
           : 'false';
         display(geojson);
+        
+        renderLinkEnds(geojson, display);
+
         this.fireActionable();
       
         if (

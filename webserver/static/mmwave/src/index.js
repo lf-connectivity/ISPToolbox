@@ -3,7 +3,7 @@ import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
 import {createLinkProfile, findOverlaps} from './LinkCalcUtils';
 import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength } from './LinkOrbitAnimation';
-import {LinkMode} from './DrawingModes.js';
+import {LinkMode, OverrideSimple} from './DrawingModes.js';
 import {calculateLookVector} from './HoverMoveLocation3DView';
 // Create new mapbox Map
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
@@ -128,14 +128,18 @@ $(document).ready(function () {
         document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
         Draw = new MapboxDraw({
+            userProperties: true,
             modes: Object.assign({
                 draw_link: LinkMode(),
+                simple_select: OverrideSimple()
             }, MapboxDraw.modes),
             displayControlsDefault: false,
             controls: {
                 trash: true
             },
-            styles: [{
+            styles: [
+            // Standard Link Styling - unselected
+            {
                 'id': 'gl-draw-line-inactive',
                 'type': 'line',
                 'filter': ['all', ['==', 'active', 'false'],
@@ -147,10 +151,11 @@ $(document).ready(function () {
                     'line-join': 'round'
                 },
                 'paint': {
-                    'line-color': '#3bb2d0',
+                    'line-color': '#5692D1',
                     'line-width': 5
                 }
             },
+            // Styling Selected Links
             {
                 'id': 'gl-draw-line-active',
                 'type': 'line',
@@ -167,6 +172,29 @@ $(document).ready(function () {
                     'line-width': 5
                 }
             },
+            // Halos around radios - unselected
+            {
+                "id": "gl-draw-polygon-and-line-vertex-halo-active",
+                "type": "circle",
+                "filter": ["all", ["==", "$type", "LineString"]],
+                "paint": {
+                    "circle-radius": 10,
+                    "circle-color": "#5692D1"
+                }
+            },
+            // Radio styling 
+            {
+                'id': 'selected_radio_render',
+                'type': 'circle',
+                'filter': [
+                  'all',
+                  ['==', 'meta', 'radio_point']
+                ],
+                'paint': {
+                  'circle-radius': 7,
+                  'circle-color': ['get', "color"],
+                },
+            },
             {
                 'id': 'gl-draw-point-inactive',
                 'type': 'circle',
@@ -178,32 +206,10 @@ $(document).ready(function () {
                     'circle-radius': 10,
                     'circle-color': '#3bb2d0'
                 }
-            },
-            {
-                'id': 'gl-draw-point-stroke-active',
-                'type': 'circle',
-                'filter': ['all', ['==', '$type', 'Point'],
-                    ['==', 'active', 'true'],
-                    ['!=', 'meta', 'midpoint']
-                ],
-                'paint': {
-                    'circle-radius': 10,
-                    'circle-color': '#fff'
-                }
-            },
-            {
-                'id': 'gl-draw-point-active',
-                'type': 'circle',
-                'filter': ['all', ['==', '$type', 'Point'],
-                    ['!=', 'meta', 'midpoint'],
-                    ['==', 'active', 'true']
-                ],
-                'paint': {
-                    'circle-radius': 10,
-                    'circle-color': '#fbb03b'
-                }
             },]
         });
+        window.mapbox = map;
+        window.draw = Draw;
 
         map.addControl(Draw, 'bottom-right');
         map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
@@ -224,11 +230,22 @@ $(document).ready(function () {
             },
             "properties" :{
                 "meta": "radio_link",
-                'radio_label_0':'radio_0',
-                'radio_label_1': 'radio_1'
+                'radio_label_0': 'radio_0',
+                'radio_label_1': 'radio_1',
+                'radio_color': '#00FF00'
             }
         });
+        const prioritizeDirectSelect = function({features})
+        {
+            if (features.length == 1)
+            {
+                Draw.changeMode('direct_select', {
+                    featureId: features[0].id
+                });
+            }
+        }
         map.on('draw.selectionchange', updateRadioLocation);
+        map.on('draw.selectionchange', prioritizeDirectSelect);
         map.addSource('point', {
             'type': 'geojson',
             'data': {
@@ -277,6 +294,10 @@ $(document).ready(function () {
                 $('#map').addClass('d-none');
                 $('#3d-controls').removeClass('d-none');
                 currentView = '3d';
+                if (globalLinkAnimation != null)
+                {
+                    globalLinkAnimation.resume();
+                }
             }
         });
         $('#map-view-btn').click(()=>{
@@ -378,6 +399,8 @@ const renderNewLinkProfile = (response) => {
             pt => { return { lat: pt.lat, lng: pt.lng } }
         );
         _lidar = response.data.lidar_profile;
+        const tx_h = parseFloat($('#hgt-0').val()) + _elevation[0];
+        const rx_h = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
 
         if (_lidar == null) {
             link_chart.series[0].setData(_elevation);
@@ -386,8 +409,8 @@ const renderNewLinkProfile = (response) => {
             link_chart.series[0].setData(_elevation);
             link_chart.series[1].setData(_lidar);
             link_chart.yAxis[0].update({
-                min: Math.min(..._lidar.map(x => x[1])),
-                max: Math.max(..._lidar.map(x => x[1]))
+                min: Math.min(...[..._lidar.map(x => x[1]), tx_h, rx_h]),
+                max: Math.max(...[..._lidar.map(x => x[1]), tx_h, rx_h])
             });
         }
     }
@@ -452,7 +475,7 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
     if(aAbout1 == null){
         aAbout1 = new Potree.Annotation({
             position: [tx[0], tx[1], tx_h + 5],
-            title: 'Radio 0',
+            title: radio_names[0],
         });
         viewer.scene.annotations.add(aAbout1);
     } else {
@@ -461,7 +484,7 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
     if(aAbout2 == null){
         aAbout2 = new Potree.Annotation({
             position: [rx[0], rx[1], rx_h + 5],
-            title: 'Radio 1',
+            title: radio_names[1]
         });
         viewer.scene.annotations.add(aAbout2);
     } else {

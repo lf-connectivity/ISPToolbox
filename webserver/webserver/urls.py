@@ -32,6 +32,7 @@ from IspToolboxApp.Views.mmWavePlannerViews import MMWavePlannerView, MMWaveHelp
 from IspToolboxApp.Views.market_evaluator_views.GrantViews import SelectCensusGroupView
 from IspToolboxApp.Views.market_evaluator_views.GeographicViews import SelectZipView, SelectCountyView
 from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
+from IspToolboxApp.Views.redirect_view import HomepageRedirect
 from Overlay.views import OverlaySource
 from dataUpdate.views import CountrySourceUpdatedView
 from mmwave.views import TGLinkView
@@ -100,6 +101,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),
     # CMS
+    path('', HomepageRedirect.as_view()),
     path('', include('cms.urls'))
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \

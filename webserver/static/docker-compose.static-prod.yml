@@ -1,6 +1,11 @@
 version: '3.2'
 
 services:
+  static:
+    command: /bin/sh -c "/usr/src/app/build_static_prod.sh"
+    build: ./webserver/static
+    volumes:
+      - ./webserver/static:/usr/src/app
   django-app:
     environment:
       DEBUG: 'False'
@@ -8,3 +13,5 @@ services:
       POSTGRES_DB: 'isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com'
       DB_NAME: "django_db"
       DB_USERNAME: "fbcmasteruser"
+    volumes:
+      - ./webserver:/usr/src/app

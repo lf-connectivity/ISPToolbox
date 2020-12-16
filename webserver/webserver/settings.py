@@ -39,7 +39,7 @@ if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
     AWS_LOCATION = 'static'
     AWS_CLOUDFRONT_DOMAIN = 'static.fbctower.com'
     AWS_S3_CUSTOM_DOMAIN = AWS_CLOUDFRONT_DOMAIN
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'isptoolbox_storage.storage.S3ManifestStorage'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'NetworkComparison',
     'cms',
     'dataUpdate',
+    'isptoolbox_storage',
     # S3 Static File Storage
     'storages',
     # Social Auth

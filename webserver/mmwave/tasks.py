@@ -9,6 +9,8 @@ from celery import shared_task
 from celery.decorators import periodic_task
 from celery.schedules import crontab
 
+from django.conf import settings
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -222,11 +224,12 @@ def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
         async_to_sync(channel_layer.group_send)(channel_name, resp)
 
 
-@periodic_task(run_every=(crontab(minute=0, hour=0)), name="refresh_lidar_point_cloud")
-def updatePointCloudData():
-    """
-    This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database
-    by default: sends an email notification to isptoolbox@fb.com on error, otherwise stays silent
+if settings.PROD:
+    @periodic_task(run_every=(crontab(minute=0, hour=0)), name="refresh_lidar_point_cloud")
+    def updatePointCloudData():
+        """
+        This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database
+        by default: sends an email notification to isptoolbox@fb.com on error, otherwise stays silent
 
-    """
-    loadBoundariesFromEntWine()
+        """
+        loadBoundariesFromEntWine()

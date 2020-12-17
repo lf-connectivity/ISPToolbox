@@ -47,7 +47,9 @@ debug_shell:
 default_objects:
 	@echo ----------------------------------------------CREATING SAMPLE OBJECTS----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
-	sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app bash -c "cat Overlay/scripts/initialize_overlays.py | python3 manage.py shell"
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py create_default_overlays
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py get_latest_usgs
+
 
 run:
 	@echo ----------------------------------------------RUNNING WEBSERVER----------------------------------------

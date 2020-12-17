@@ -1,8 +1,9 @@
 from django.contrib import admin
-from mmwave.models import TGLink, LOSSummary
+from mmwave.models import TGLink, LOSSummary, EPTLidarPointCloud
 from django.db.models import Count
 
 admin.site.register(TGLink)
+admin.site.register(EPTLidarPointCloud)
 
 
 @admin.register(LOSSummary)

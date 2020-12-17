@@ -23,7 +23,7 @@ class TGLink(models.Model):
 
 class EPTLidarPointCloud(models.Model):
     name = models.CharField(max_length=8192)
-    id_num = models.IntegerField()
+    id_num = models.IntegerField(null=True, blank=True)
     count = models.BigIntegerField()
     url = models.URLField()
     boundary = gis_models.GeometryField()

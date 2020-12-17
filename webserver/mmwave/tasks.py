@@ -4,7 +4,11 @@ from enum import IntEnum
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
+
 from celery import shared_task
+from celery.decorators import periodic_task
+from celery.schedules import crontab
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -12,6 +16,7 @@ from mmwave.models import Msftcombined, TreeCanopy
 from shapely.geometry import LineString as shapely_LineString
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
 from mmwave.models import EPTLidarPointCloud, TGLink
+from mmwave.management.commands.get_latest_usgs import loadBoundariesFromEntWine
 
 
 google_maps_samples_limit = 512
@@ -215,3 +220,13 @@ def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
     except Exception as e:
         resp["error"] = "An unexpected error occured: " + str(e)
         async_to_sync(channel_layer.group_send)(channel_name, resp)
+
+
+@periodic_task(run_every=(crontab(minute=0, hour=0)), name="refresh_lidar_point_cloud")
+def updatePointCloudData():
+    """
+    This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database
+    by default: sends an email notification to isptoolbox@fb.com on error, otherwise stays silent
+
+    """
+    loadBoundariesFromEntWine()

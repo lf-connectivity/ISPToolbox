@@ -123,6 +123,10 @@ Set the password to "password"
 ### Run the Webserver:
 - `make run`
 
+### Building + Pushing new static Files
+Make sure you commit the new staticfiles.json manifest file
+- `make static_prod`
+
 ### Database Migrations (Standard Django Process)
 Run when you have made changes to or added to Django Models.
 - `make makemigrations`

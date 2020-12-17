@@ -63,8 +63,19 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
             data: [],
             zIndex: 2,
             color: '#5692D1'
-        }
-        ],
+        }, {
+            name: 'Fresnel',
+            data: [],
+            type: 'arearange',
+            lineWidth: 0,
+            linkedTo: ':previous',
+            color: "#28F4C6",
+            fillOpacity: 0.3,
+            zIndex: -1,
+            marker: {
+                enabled: false
+            }
+        }],
         plotOptions: {
             series: {
                 point: {

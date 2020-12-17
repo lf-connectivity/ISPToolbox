@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views import View
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.contrib.gis.geos import Point
 from mmwave.tasks import getElevationProfile, getLidarProfile
 from mmwave.models import TGLink, EPTLidarPointCloud
@@ -9,7 +9,6 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
-from mmwave.scripts.load_lidar_boundaries import getLidarResource
 import json
 import uuid
 link_distance_limit = 2000
@@ -92,13 +91,3 @@ class PointCloudBoundariesView(View):
         point_clouds = EPTLidarPointCloud.objects.all()
         gc = {"type": "GeometryCollection", "geometries": [json.loads(pc.boundary.json) for pc in point_clouds]}
         return JsonResponse(gc)
-
-
-# Admin Views:
-class UpdateLidarBoundariesView(View):
-    def get(self, request):
-        try:
-            new_pt_clouds = getLidarResource()
-            return HttpResponse('Success: Added ' + str(len(new_pt_clouds)) + ' pt clouds')
-        except Exception as e:
-            return HttpResponse('Failed:' + str(e))

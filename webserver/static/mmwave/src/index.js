@@ -17,6 +17,13 @@ var profileWS = null;
 var currentLinkHash = null;
 
 var currentView = 'map';
+const center_freq_values = {
+    '2.4ghz': 2.437,
+    '5ghz': 5.4925,
+    '60ghz': 64.790,
+};
+var centerFreq = center_freq_values['5ghz'];
+
 
 $(document).ready(function () {
     // Add resizing callback
@@ -37,6 +44,7 @@ $(document).ready(function () {
     const resizeObserver = new ResizeObserver(() => {
         resize_window();
     });
+    resizeObserver.observe(document.querySelector('#bottom-row-link-view-container'));
     // Initialize Bootstrap Tooltips
     $('[data-toggle="tooltip"]').tooltip({
         template : `<div class="tooltip isptoolbox-tooltip" role="tooltip">
@@ -46,8 +54,12 @@ $(document).ready(function () {
                         </div>
                     </div>`
     });
-    
-    resizeObserver.observe(document.querySelector('#bottom-row-link-view-container'));
+    // Add Freq Toggle Callback
+    $("#freq-toggle :input").change(function() {
+        centerFreq = center_freq_values[this.id];
+        updateLinkChart();
+    });
+
     link_chart = createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView);
     const ws_low_res_callback = (msg_event) => {
         try {
@@ -92,6 +104,7 @@ $(document).ready(function () {
                 `<div class="los-chart-legend">
                     <h5>Link Profile</h5>
                         <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-los' ></span><p class='list-item'>LOS</p></div>
+                        <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-fresnel' ></span><p class='list-item'>Fresnel</p></div>
                         <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-lidar' ></span><p class='list-item'>LiDAR</p></div>
                         <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-terrain'></span><p class='list-item'>Terrain</p></div>
                         <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-obstruction'></span><p class='list-item'>LOS Obstructions</p></div>
@@ -294,10 +307,6 @@ $(document).ready(function () {
                 $('#map').addClass('d-none');
                 $('#3d-controls').removeClass('d-none');
                 currentView = '3d';
-                if (globalLinkAnimation != null)
-                {
-                    globalLinkAnimation.resume();
-                }
             }
         });
         $('#map-view-btn').click(()=>{
@@ -343,6 +352,9 @@ const moveLocation3DView = ({x, y}) => {
     if(globalLinkAnimation != null)
     {
         globalLinkAnimation.stop();
+        $('#pause-button-3d').addClass('d-none');
+        $('#play-button-3d').removeClass('d-none');
+        animationPlaying = false;
     }
     try {
         const tx_h = parseFloat($('#hgt-0').val()) + _elevation[0];
@@ -433,15 +445,18 @@ const generateClippingVolume = function (bb, buffer = 10) {
 function updateLinkChart(update3DView = false) {
     if(_elevation !== null)
     {
-        const link_profile_data = createLinkProfile(
+        const {los, fresnel} = createLinkProfile(
             _elevation,
             parseFloat($('#hgt-0').val()),
             parseFloat($('#hgt-1').val()),
+            1.0,
+            centerFreq
         );
-        link_chart.series[2].setData(link_profile_data);
+        link_chart.series[2].setData(los);
+        link_chart.series[3].setData(fresnel);
         if(_lidar != null)
         {
-            const overlaps = findOverlaps(link_profile_data, _lidar);
+            const overlaps = findOverlaps(los, _lidar);
             link_chart.xAxis[0].removePlotBand();
             overlaps.forEach((x) => {
                 link_chart.xAxis[0].addPlotBand({
@@ -461,14 +476,17 @@ function updateLinkChart(update3DView = false) {
 
 
 var globalLinkAnimation = null;
+var animationPlaying = true;
 var aAbout1 = null; 
 var aAbout2 = null;
 const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
-    $('#3d-pause').off('click');
-    $('#3d-play').off('click');
+    $('#3d-pause-play').off('click');
     if(globalLinkAnimation !== null)
     {
         globalLinkAnimation.stop();
+        $('#pause-button-3d').addClass('d-none');
+        $('#play-button-3d').removeClass('d-none');
+        animationPlaying = false;
         globalLinkAnimation = null;
     }
 
@@ -509,14 +527,18 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
     globalLinkAnimation.setDuration(animationDuration);
     globalLinkAnimation.setVisible(false);
     globalLinkAnimation.play(true);
-    $('#3d-pause').click(
+    $('#3d-pause-play').click(
         ()=>{
-            globalLinkAnimation.stop();
-        }
-    );
-    $('#3d-play').click(
-        ()=>{
-            globalLinkAnimation.resume();
+            if(animationPlaying){
+                globalLinkAnimation.stop();
+                $('#pause-button-3d').addClass('d-none');
+                $('#play-button-3d').removeClass('d-none');
+            } else {
+                globalLinkAnimation.resume();
+                $('#pause-button-3d').removeClass('d-none');
+                $('#play-button-3d').addClass('d-none');
+            }
+            animationPlaying = !animationPlaying;
         }
     );
 }

@@ -69,18 +69,14 @@ export function createLinkProfile(
     elevation : Array<number>,
     tx_h_m : number, rx_h_m : number,
     resolution_m: number = 1.0,
-    frequency_ghz : number = 0.0): Array<number>
+    frequency_ghz : number = 0.0): {los: Array<number>, fresnel: Array<[number, number]>}
 {
     const tx_hgt_m = tx_h_m + elevation[0];
     const rx_hgt_m = rx_h_m + elevation[elevation.length - 1];
     const profile = adjustProfileCurvatureEarth(tx_hgt_m, rx_hgt_m, elevation.length, resolution_m);
-    if(frequency_ghz !== 0.0)
-    {
-        const fresnel_zone = createFresnelZone(elevation.length, resolution_m, frequency_ghz);
-        return fresnel_zone.map((v, idx) => {return profile[idx] - v});
-    } else {
-        return profile;
-    }
+
+    const fresnel_zone = createFresnelZone(elevation.length, resolution_m, frequency_ghz);
+    return {los: profile, fresnel: fresnel_zone.map((v, idx) => {return [profile[idx] - v, profile[idx] + v]})};
 
 }
 

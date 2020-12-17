@@ -69,4 +69,5 @@ static_prod:
 	@echo ----------------------------------------------BUIDLING STATIC FILES \& PUSHING TO PROD \(S3\)----------------------------------------
 	docker-compose -f docker-compose.yml -f webserver/static/docker-compose.static-prod.yml build
 	docker-compose -f docker-compose.yml -f webserver/static/docker-compose.static-prod.yml run static
+	@echo This next step may take 5-10 minutes, hashing static files and pushing to S3, commit the new staticfiles.json to git, feel free to try to improve this push step
 	docker-compose -f docker-compose.yml -f webserver/static/docker-compose.static-prod.yml run django-app python3 manage.py collectstatic --noinput

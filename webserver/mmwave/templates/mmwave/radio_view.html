@@ -8,21 +8,27 @@
                 background: {{ radio.color }};"></span>
                 <h5 style="padding-left: 10px;">{{ radio.name }}</h5>
             </div>
-            <div class="row">
-                <label for="example-number-input" class="col-md col-form-label">Latitude [&deg;]</label>
-                <div class="col-md-10">
-                    <input style="font-size: 0.9em;" class="form-control" type="number" value="{{ radio.lat }}" id="lat-{{radio.id}}">
+            <div class="row py-1">
+                <div class="col-xl-4 px-2">
+                    <label for="example-number-input" class="col-form-label">Latitude [&deg;]</label>
+                </div>
+                <div class="col-xl-8 px-2 my-auto">
+                    <input style="font-size: 0.9em;" class="form-control my-auto" type="number" value="{{ radio.lat }}" id="lat-{{radio.id}}">
                 </div>
             </div>
-            <div class="row">
-                <label for="example-number-input" class="col-md col-form-label">Longitude [&deg;]</label>
-                <div class="col-md-10">
-                    <input style="font-size: 0.9em;" class="form-control" type="number" value="{{ radio.lng }}" id="lng-{{radio.id}}">
+            <div class="row py-1">
+                <div class="col-xl-4 px-2">
+                    <label for="example-number-input" class="col-form-label">Longitude [&deg;]</label>
+                </div>
+                <div class="col-xl-8 px-2 my-auto">
+                    <input style="font-size: 0.9em;" class="form-control my-auto" type="number" value="{{ radio.lng }}" id="lng-{{radio.id}}">
                 </div>
             </div>
-            <div class="row">
-                <label for="example-number-input" class="col-md col-form-label">Installation Height [m]</label>
-                <div class="col-md-10">
+            <div class="row py-1">
+                <div class="col-xl-8 px-2">
+                    <label for="example-number-input" class="col-form-label">Installation Height [m]</label>
+                </div>
+                <div class="col-xl-4 px-2 my-auto">
                     <input style="font-size: 0.9em;" class="form-control" type="number" value="{{radio.hgt}}" id="hgt-{{radio.id}}">
                 </div>
             </div>

@@ -89,6 +89,11 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
                         'trailing': true,
                       })
                   }
+                },
+                states: {
+                    inactive: {
+                      opacity: 1
+                    }
                 }
             }
         },

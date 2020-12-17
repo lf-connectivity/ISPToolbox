@@ -2,7 +2,7 @@
 import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
 import {createLinkProfile, findOverlaps} from './LinkCalcUtils';
-import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength } from './LinkOrbitAnimation';
+import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength, generateClippingVolume} from './LinkOrbitAnimation';
 import {LinkMode, OverrideSimple} from './DrawingModes.js';
 import {calculateLookVector} from './HoverMoveLocation3DView';
 // Create new mapbox Map
@@ -428,17 +428,6 @@ const renderNewLinkProfile = (response) => {
     }
 };
 
-// LiDAR Functions 
-const generateClippingVolume = function (bb, buffer = 10) {
-    const position = [(bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
-    const scale = [Math.abs(bb[0] - bb[2]) + buffer, Math.abs(bb[1] - bb[3]) + buffer, Math.abs(bb[4] - bb[5]) * 4.0];
-
-    const camera_height = Math.max(scale[0], scale[1]) / (2.0 * Math.tan(Math.PI / 12)) + bb[4];
-    const camera = [position[0], position[1], camera_height];
-
-    return { position, scale, camera };
-}
-
 /**
  * Updates link chart for LOS based on new elevation profile and tx/rx height
  */
@@ -492,21 +481,21 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
 
     if(aAbout1 == null){
         aAbout1 = new Potree.Annotation({
-            position: [tx[0], tx[1], tx_h + 5],
+            position: [tx[0], tx[1], tx_h + 10],
             title: radio_names[0],
         });
         viewer.scene.annotations.add(aAbout1);
     } else {
-        aAbout1.position.set(tx[0], tx[1], tx_h + 5);
+        aAbout1.position.set(tx[0], tx[1], tx_h + 10);
     }
     if(aAbout2 == null){
         aAbout2 = new Potree.Annotation({
-            position: [rx[0], rx[1], rx_h + 5],
+            position: [rx[0], rx[1], rx_h + 10],
             title: radio_names[1]
         });
         viewer.scene.annotations.add(aAbout2);
     } else {
-        aAbout2.position.set(rx[0], rx[1], rx_h + 5);
+        aAbout2.position.set(rx[0], rx[1], rx_h + 10);
     }
 
 
@@ -578,6 +567,7 @@ const updateLidarRender = function (name, url, bb, tx, rx, tx_h, rx_h) {
             clippingVolume.name = "Visible Clipping Volume";
             clippingVolume.scale.set(scale[0], scale[1], scale[2]);
             clippingVolume.position.set(position[0], position[1], position[2]);
+            clippingVolume.lookAt(new THREE.Vector3(tx[0], tx[1], position[2]));
             clippingVolume.clip = true;
             scene.addVolume(clippingVolume);
             clippingVolume.visible = false;

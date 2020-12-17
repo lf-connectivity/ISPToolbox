@@ -54,3 +54,17 @@ export function createLinkGeometry(tx: [number, number], rx: [number, number], t
 export function calcLinkLength(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number) : number {
     return Math.sqrt(Math.pow(tx[0] - rx[0], 2.0) + Math.pow(tx[1] - rx[1], 2.0) + Math.pow(tx_h - rx_h, 2.0));
 }
+
+export function generateClippingVolume(bb : [number, number, number, number, number, number], buffer : number  = 25.) :
+{position: Array<number>, scale : Array<number>, camera : Array<number>} 
+{
+    const position = [(bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
+    const scaleY = Math.sqrt(Math.pow(bb[0]- bb[2], 2.0) + Math.pow(bb[1] - bb[3], 2.0));
+    const scale = [ Math.abs(bb[4] - bb[5]) * 4.0, buffer,scaleY + buffer];
+
+    const camera_height = Math.max(scale[0], scale[1]) / (2.0 * Math.tan(Math.PI / 12)) + bb[4];
+    const camera = [position[0], position[1], camera_height];
+
+    return { position, scale, camera };
+}
+

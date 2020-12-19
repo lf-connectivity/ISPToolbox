@@ -60,7 +60,7 @@ export function generateClippingVolume(bb : [number, number, number, number, num
 {
     const position = [(bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
     const scaleY = Math.sqrt(Math.pow(bb[0]- bb[2], 2.0) + Math.pow(bb[1] - bb[3], 2.0));
-    const scale = [ Math.abs(bb[4] - bb[5]) * 4.0, buffer,scaleY + buffer];
+    const scale = [ Math.abs(bb[4] - bb[5]) * 4.0, buffer * 3.0,scaleY + buffer];
 
     const camera_height = Math.max(scale[0], scale[1]) / (2.0 * Math.tan(Math.PI / 12)) + bb[4];
     const camera = [position[0], position[1], camera_height];

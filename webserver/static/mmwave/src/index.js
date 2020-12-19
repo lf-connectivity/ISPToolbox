@@ -55,9 +55,31 @@ $(document).ready(function () {
                     </div>`
     });
     // Add Freq Toggle Callback
-    $("#freq-toggle :input").change(function() {
+    $(".freq-dropdown-item").click(function() {
+        $('#freq-dropdown').text($(this).text());
         centerFreq = center_freq_values[this.id];
+        $(".freq-dropdown-item").removeClass('active');
+        $(this).addClass('active');
         updateLinkChart();
+    });
+
+    const numNodesLoadingChangedCallback = (num_nodes)=> {
+        if(num_nodes > 0 && currentView === '3d') {
+            $('#point-cloud-loading-status').removeClass('d-none');
+            $('#number-loading-nodes').text(`loading point cloud: ${num_nodes} nodes`);
+        } else {
+            $('#point-cloud-loading-status').addClass('d-none');
+        }
+    }
+    Potree.numNodesLoadingValue = 0;
+    Object.defineProperty(Potree, 'numNodesLoading', {
+        set: function(x) { 
+            numNodesLoadingChangedCallback(x);
+            this.numNodesLoadingValue = x;
+        },
+        get: function() {
+            return this.numNodesLoadingValue;
+        }
     });
 
     link_chart = createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView);
@@ -136,7 +158,8 @@ $(document).ready(function () {
 
         var geocoder = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
-            mapboxgl: mapboxgl
+            mapboxgl: mapboxgl,
+            placeholder: 'Search for an address'
         });
         document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
@@ -468,10 +491,12 @@ var globalLinkAnimation = null;
 var animationPlaying = true;
 var aAbout1 = null; 
 var aAbout2 = null;
+var spacebarCallback = null;
 const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
     $('#3d-pause-play').off('click');
     if(globalLinkAnimation !== null)
     {
+        window.removeEventListener('keydown', spacebarCallback);
         globalLinkAnimation.stop();
         $('#pause-button-3d').addClass('d-none');
         $('#play-button-3d').removeClass('d-none');
@@ -516,20 +541,27 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
     globalLinkAnimation.setDuration(animationDuration);
     globalLinkAnimation.setVisible(false);
     globalLinkAnimation.play(true);
-    $('#3d-pause-play').click(
-        ()=>{
-            if(animationPlaying){
-                globalLinkAnimation.stop();
-                $('#pause-button-3d').addClass('d-none');
-                $('#play-button-3d').removeClass('d-none');
-            } else {
-                globalLinkAnimation.resume();
-                $('#pause-button-3d').removeClass('d-none');
-                $('#play-button-3d').addClass('d-none');
-            }
-            animationPlaying = !animationPlaying;
+    const animationClickCallback = () => {
+        if(animationPlaying) {
+            globalLinkAnimation.stop();
+            $('#pause-button-3d').addClass('d-none');
+            $('#play-button-3d').removeClass('d-none');
+        } else {
+            globalLinkAnimation.resume();
+            $('#pause-button-3d').removeClass('d-none');
+            $('#play-button-3d').addClass('d-none');
         }
-    );
+        animationPlaying = !animationPlaying;
+    };
+    spacebarCallback = (event) => {
+        var key = event.which || event.keyCode;
+        if (key === 32) {
+          event.preventDefault();
+          animationClickCallback();
+        }
+    };
+    window.addEventListener('keydown', spacebarCallback);
+    $('#3d-pause-play').click(animationClickCallback);
 }
 
 var clippingVolume = null;

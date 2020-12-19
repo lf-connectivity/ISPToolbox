@@ -8,15 +8,11 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between card-title">
-                        <h5 class="">
-                            Link Profile
-                        </h5>
-                        <div>
-                            {% include "mmwave/molecules/frequency_toggle.html" %}
-                            {% include "mmwave/atoms/tooltip.html" %}
-                        </div>
+                        {% include "mmwave/molecules/link_status.html" %}
+                        {% include "mmwave/molecules/frequency_toggle.html" %}
                     </div>
                     {% include "./link_profile.html" %}
+                    {% include "mmwave/atoms/tooltip.html" %}
                 </div>
             </div>
         </div>

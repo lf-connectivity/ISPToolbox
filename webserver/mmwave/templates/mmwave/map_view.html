@@ -1,5 +1,6 @@
 <div id='map' class='planner-map'></div>
-<div id="isp-draw-controls" class="col top-bar-wisp" style="max-width: 50%;">
+<div class="top-bar-wisp">
+<div id="isp-draw-controls" class="col">
     <div id="geocoder" class="geocoder"></div>
     <button type="button" class="btn isptoolbox-btn btn-primary btn-large" id="add-link-btn">
         <svg style="font-size: 1.5em;" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-plus" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -7,6 +8,7 @@
         </svg>
         Add PtP Link
     </button>
+</div>
 </div>
 {% load static %}
 <script src="{% static "linkcheck.min.js" %}"> </script>

@@ -1,11 +1,15 @@
-<div id="freq-toggle" class="btn-group btn-group-toggle freq-toggle" data-toggle="buttons">
-    <label class="btn btn-secondary">
-      <input type="radio" name="options" id="2.4ghz" autocomplete="off"> 2.4 GHz
-    </label>
-    <label class="btn btn-secondary active">
-      <input type="radio" name="options" id="5ghz" autocomplete="off" checked> 5 GHz
-    </label>
-    <label class="btn btn-secondary">
-      <input type="radio" name="options" id="60ghz" autocomplete="off"> 60 GHz
-    </label>
+<div>
+  <div class="d-flex">
+    <h5 class="mb-0" >Frequency&nbsp;</h5>
+    <div class="dropdown freq-toggle">
+      <button class="btn dropdown-toggle" type="button" id="freq-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        5GHz
+      </button>
+      <div class="dropdown-menu" aria-labelledby="freq-dropdown">
+        <button id="2.4ghz" class="dropdown-item freq-dropdown-item" type="button">2.4 GHz</button>
+        <button id="5ghz" class="dropdown-item freq-dropdown-item active" type="button">5 GHz</button>
+        <button id="60ghz" class="dropdown-item freq-dropdown-item" type="button">60 GHz</button>
+      </div>
+    </div>
+  </div>
 </div>

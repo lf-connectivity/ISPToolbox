@@ -5,7 +5,7 @@
 @use '../molecules/_frequency_toggle'
 @use '../organisms/profile-view'
 @use '../fonts'
-@use '../theme'
+@import ../theme
 
 body
     overflow: auto !important
@@ -22,3 +22,7 @@ body
             border-radius: 0px
             .annotation-label
                 font-family: "Basis Grotesque Pro", Helvetica, Arial, sans-serif
+
+.mapboxgl-ctrl-geocoder
+    border-radius: 0
+    border-top: 2px solid $isptoolbox-theme-secondary-color

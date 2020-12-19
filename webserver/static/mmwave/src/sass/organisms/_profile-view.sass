@@ -8,12 +8,26 @@
     .card-title
         border-bottom: 2px solid $isptoolbox-theme-secondary-color
         padding-bottom: 5px
+    .input-label
+        font-size: 14px
+        color: $isptoolbox-dark-gray-color
+        letter-spacing: .04em
     input
         border-radius: 0 !important
-        font-family: 'Basis Grotesque Pro Mono', 'SFMono-Regular', 'Liberation Mono', Courier, monospace
+        color: $isptoolbox-dark-gray-color
+        font-family: $isptoolbox-font-family-mono
+        font-size: 14px
         border: none
+        padding: .375rem 0
+        text-align: right
+    .input-with-unit
+        align-items: baseline
+        background-color: #ffffff
         border-bottom: 2px solid $isptoolbox-theme-secondary-color
-
+    .input-unit
+        color: $isptoolbox-dark-gray-color
+        font-family: $isptoolbox-font-family-mono
+        padding: .375rem 0 0.375rem 0.15rem
 body
     @media screen and (max-width: 767px)
         .fixed-bottom

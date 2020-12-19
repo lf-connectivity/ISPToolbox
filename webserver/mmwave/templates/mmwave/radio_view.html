@@ -1,6 +1,6 @@
 <div class="col-md-2">
     <div class="card">
-        <div class="card-body" style="font-size: 0.75em;">
+        <div class="card-body">
             <div class="card-title d-flex" style="align-items: center;">
                 <span style="display: block;
                 width: 14px;
@@ -10,26 +10,29 @@
             </div>
             <div class="row py-1">
                 <div class="col-xl-4 px-2">
-                    <label for="example-number-input" class="col-form-label">Latitude [&deg;]</label>
+                    <label for="example-number-input" class="col-form-label input-label">Latitude</label>
                 </div>
-                <div class="col-xl-8 px-2 my-auto">
-                    <input style="font-size: 0.9em;" class="form-control my-auto" type="number" value="{{ radio.lat }}" id="lat-{{radio.id}}">
+                <div class="col-xl-8 px-2 my-auto d-flex input-with-unit">
+                    <input class="form-control my-auto" type="number" value="{{ radio.lat }}" id="lat-{{radio.id}}">
+                    <span class="input-unit">&deg;</span>
                 </div>
             </div>
             <div class="row py-1">
                 <div class="col-xl-4 px-2">
-                    <label for="example-number-input" class="col-form-label">Longitude [&deg;]</label>
+                    <label for="example-number-input" class="col-form-label input-label">Longitude</label>
                 </div>
-                <div class="col-xl-8 px-2 my-auto">
-                    <input style="font-size: 0.9em;" class="form-control my-auto" type="number" value="{{ radio.lng }}" id="lng-{{radio.id}}">
+                <div class="col-xl-8 px-2 my-auto d-flex input-with-unit">
+                    <input class="form-control my-auto" type="number" value="{{ radio.lng }}" id="lng-{{radio.id}}">
+                    <span class="input-unit">&deg;</span>
                 </div>
             </div>
             <div class="row py-1">
                 <div class="col-xl-8 px-2">
-                    <label for="example-number-input" class="col-form-label">Installation Height [m]</label>
+                    <label for="example-number-input" class="col-form-label input-label">Installation Height</label>
                 </div>
-                <div class="col-xl-4 px-2 my-auto">
-                    <input style="font-size: 0.9em;" class="form-control" type="number" value="{{radio.hgt}}" id="hgt-{{radio.id}}">
+                <div class="col-xl-4 px-2 my-auto d-flex input-with-unit">
+                    <input class="form-control" type="number" value="{{radio.hgt}}" id="hgt-{{radio.id}}">
+                    <span class="input-unit">m</span>
                 </div>
             </div>
         </div>

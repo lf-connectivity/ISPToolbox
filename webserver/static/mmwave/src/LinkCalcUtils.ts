@@ -80,6 +80,38 @@ export function createLinkProfile(
 
 }
 
+export function findLidarObstructions(fresnel : Array<[number, number]>, lidar: Array<[number, number]>, resolution: number = 1.0): Array<[number, number]> {
+    const fresnel_bottom = fresnel.map((x)=>{return x[0];});
+    const overlaps: Array<[number, number]> = [];
+    const fresnel_distances = fresnel.map((_, idx)=> {return idx * resolution;});
+    const lidar_distances = lidar.map((x)=>{return x[0];});
+    const lidar_values = lidar.map((x) => {return x[1];});
+    const fresnel_val_interp = everpolate.linear(lidar_distances, fresnel_distances, fresnel_bottom);
+    const difference_link_lidar = [];
+    for (let i = 0; i < fresnel_val_interp.length; i++){
+        difference_link_lidar.push(fresnel_val_interp[i] - lidar_values[i]);
+    }
+    let start_interval = -1;
+    for(let i = 0; i < difference_link_lidar.length; i++)
+    {
+        if(difference_link_lidar[i] < 0) {
+            if(start_interval === -1) {
+                start_interval = lidar_distances[i];
+            }
+        } else {
+            if(start_interval !== -1) {
+                overlaps.push([start_interval, lidar_distances[i]])
+                start_interval = -1;
+            }
+        }
+        if((i === difference_link_lidar.length - 1) && (start_interval !== -1))
+        {
+            overlaps.push([start_interval, lidar_distances[i]]);
+        }
+    }
+    return overlaps;
+}
+
 export function findOverlaps(link : Array<number>, lidar: Array<[number, number]>, resolution : number = 1.0) : Array<[number, number]> {
     const overlaps: Array<[number, number]> = [];
     const link_distances = link.map((_, idx)=> {return idx * resolution;})

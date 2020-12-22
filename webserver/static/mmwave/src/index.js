@@ -1,10 +1,12 @@
 
-import { createLinkChart } from './link_profile.js';
+import { createLinkChart} from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
-import {createLinkProfile, findOverlaps} from './LinkCalcUtils';
+import {createLinkProfile, findOverlaps, findLidarObstructions} from './LinkCalcUtils';
+import {updateObstructionsData} from './LinkObstructions';
 import { createOrbitAnimationPath, createLinkGeometry, calcLinkLength, generateClippingVolume} from './LinkOrbitAnimation';
 import {LinkMode, OverrideSimple} from './DrawingModes.js';
 import {calculateLookVector} from './HoverMoveLocation3DView';
+import {getAvailabilityOverlay} from './availabilityOverlay';
 // Create new mapbox Map
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
 
@@ -90,11 +92,11 @@ $(document).ready(function () {
             };
             link_chart.hideLoading();
             $("#loading_spinner").addClass('d-none');
+            $("#los-chart-tooltip-button").removeClass('d-none');
             if (response.data.error !== null) {
                 $("#link-request-error-description").text(response.data.error);
             }
             if (response.data.lidar_profile === null && response.data.error === "Lidar data not available") {
-                $('#lidar_not_found_msg').removeClass('d-none');
             } else {
                 $("#3D-view-btn").removeClass('d-none');
             }
@@ -244,8 +246,6 @@ $(document).ready(function () {
                 }
             },]
         });
-        window.mapbox = map;
-        window.draw = Draw;
 
         map.addControl(Draw, 'bottom-right');
         map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
@@ -289,6 +289,49 @@ $(document).ready(function () {
                 'coordinates': [0, 0]
             }
         });
+
+        getAvailabilityOverlay(
+            (data)=>{
+                map.setMaxBounds(data['bb']);
+                map.addSource('lidar_availability', {
+                    'type': 'geojson',
+                    'data': data['overlay']
+                });
+                map.addLayer({
+                    'id': 'lidar_availability_layer',
+                    'type': 'fill',
+                    'source': 'lidar_availability',
+                    'paint': {
+                        'fill-color': '#EE9B7C',
+                        'fill-opacity': 0.9
+                    }
+                });
+                var popup = new mapboxgl.Popup({
+                    closeButton: false,
+                    closeOnClick: false
+                });
+                     
+                map.on('mouseenter', 'lidar_availability_layer', function (e) {
+                    // Change the cursor style as a UI indicator.
+                    map.getCanvas().style.cursor = 'pointer';
+                    var description = 'LiDAR Data Not Available Here'
+
+                     
+                    // Populate the popup and set its coordinates
+                    // based on the feature found.
+                    popup.setLngLat(e.lngLat).setHTML(description).addTo(map);
+                });
+
+                map.on('mousemove', 'lidar_availability_layer', function (e) {
+                    popup.setLngLat(e.lngLat);
+                });
+                     
+                map.on('mouseleave', 'lidar_availability_layer', function () {
+                    map.getCanvas().style.cursor = '';
+                    popup.remove();
+                });
+            }
+        );
 
         map.addLayer({
             'id': 'point',
@@ -363,33 +406,40 @@ const updateRadioLocation = (update) => {
 };
 
 const highLightPointOnGround = ({ x, y }) => {
-    const new_data = {
-        'type': 'Point',
-        'coordinates': [_coords[Math.round(x)].lng, _coords[Math.round(x)].lat]
-    };
-    map.getSource('point').setData(new_data);
+    const integer_X = Math.round(x);
+    if(_coords !== null && integer_X < _coords.length && integer_X >= 0)
+    {
+        const new_data = {
+            'type': 'Point',
+            'coordinates': [_coords[integer_X].lng, _coords[integer_X].lat]
+        };
+        map.getSource('point').setData(new_data);
+    }
 };
 
 const moveLocation3DView = ({x, y}) => {
     // Stop Current Animation
-    if(globalLinkAnimation != null)
-    {
-        globalLinkAnimation.stop();
-        $('#pause-button-3d').addClass('d-none');
-        $('#play-button-3d').removeClass('d-none');
-        animationPlaying = false;
-    }
-    try {
-        const tx_h = parseFloat($('#hgt-0').val()) + _elevation[0];
-        const rx_h = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
-        const pos = x / _elevation.length;
-        const {location, lookAt} = calculateLookVector(tx_loc_lidar, tx_h, rx_loc_lidar, rx_h, pos);
-        const scene = viewer.scene;
-        // Move Camera to Location
-        scene.view.position.set(location[0], location[1], location[2]);
-        // Point Camera at Link
-        scene.view.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
-    } catch(err) {
+    if(currentView === '3d') {
+        if(globalLinkAnimation != null)
+        {
+            globalLinkAnimation.stop();
+            $('#pause-button-3d').addClass('d-none');
+            $('#play-button-3d').removeClass('d-none');
+            animationPlaying = false;
+        }
+        try {
+            
+            const tx_h = parseFloat($('#hgt-0').val()) + _elevation[0];
+            const rx_h = parseFloat($('#hgt-1').val()) + _elevation[_elevation.length - 1];
+            const pos = x / _elevation.length;
+            const {location, lookAt} = calculateLookVector(tx_loc_lidar, tx_h, rx_loc_lidar, rx_h, pos);
+            const scene = viewer.scene;
+            // Move Camera to Location
+            scene.view.position.set(location[0], location[1], location[2]);
+            // Point Camera at Link
+            scene.view.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
+        } catch(err) {
+        }
     }
 };
 
@@ -409,8 +459,8 @@ const updateLinkProfile = () => {
     }
     link_chart.showLoading();
     $("#loading_spinner").removeClass('d-none');
+    $('#los-chart-tooltip-button').addClass('d-none');
     $('#loading_failed_spinner').addClass('d-none');
-    $('#lidar_not_found_msg').addClass('d-none');
 
     $("#link_chart").addClass('d-none');
 
@@ -439,6 +489,7 @@ const renderNewLinkProfile = (response) => {
 
         if (_lidar == null) {
             link_chart.series[0].setData(_elevation);
+            link_chart.series[1].setData([]);
             link_chart.yAxis[0].update({ min: Math.min(..._elevation) });
         } else {
             link_chart.series[0].setData(_elevation);
@@ -468,7 +519,8 @@ function updateLinkChart(update3DView = false) {
         link_chart.series[3].setData(fresnel);
         if(_lidar != null)
         {
-            const overlaps = findOverlaps(los, _lidar);
+            const overlaps = findLidarObstructions(fresnel, _lidar);
+            updateObstructionsData(overlaps);
             link_chart.xAxis[0].removePlotBand();
             overlaps.forEach((x) => {
                 link_chart.xAxis[0].addPlotBand({
@@ -555,7 +607,7 @@ const createAnimationForLink = function (tx, rx, tx_h, rx_h) {
     };
     spacebarCallback = (event) => {
         var key = event.which || event.keyCode;
-        if (key === 32) {
+        if (key === 32 && currentView === '3d') {
           event.preventDefault();
           animationClickCallback();
         }

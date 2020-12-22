@@ -1,13 +1,13 @@
 {% load static %}
 <div id="link_chart" style="width:100%; height:300px;"></div>
 <div id="loading_spinner" class="container d-none">
-    <div class="row d-flex align-items-center" style="height: 150px;">
+    <div class="align-items-center text-center" style="height: 300px;">
         <svg
         viewBox="0 0 157 120"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        class="WispLoadingIcon mx-auto mb-3"
-        style="height: 100px;">
+        class="mx-auto mb-3"
+        style="height: 50px; margin-top: 100px;">
         <rect
           width="23.9455"
           height="119.727"
@@ -25,9 +25,7 @@
           fill="#687B8B"
         />
       </svg>
-    </div>
-    <div class="text-center position-relative">
-        <h3>Loading Lidar Point Cloud...</h3>
+      <p>Loading LiDAR Point Cloud...</p>
     </div>
 </div>
 <div id="loading_failed_spinner" class="d-none container">

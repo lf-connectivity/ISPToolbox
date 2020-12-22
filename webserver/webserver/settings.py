@@ -39,7 +39,7 @@ if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
         'CacheControl': 'max-age=86400',
     }
     AWS_LOCATION = 'static'
-    AWS_CLOUDFRONT_DOMAIN = 'static.fbctower.com'
+    AWS_CLOUDFRONT_DOMAIN = 'static.isptoolbox.io'
     AWS_S3_CUSTOM_DOMAIN = AWS_CLOUDFRONT_DOMAIN
     STATICFILES_STORAGE = 'isptoolbox_storage.storage.S3ManifestStorage'
 

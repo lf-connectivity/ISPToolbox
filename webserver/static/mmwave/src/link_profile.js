@@ -68,7 +68,6 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
             data: [],
             type: 'arearange',
             lineWidth: 0,
-            linkedTo: ':previous',
             color: "#28F4C6",
             fillOpacity: 0.3,
             zIndex: -1,

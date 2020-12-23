@@ -25,7 +25,10 @@
             3D View
         </button>
     </div>
-    <div id="point-cloud-loading-status" class="pt-cloud-loading d-none" style="position: absolute; top: -80px;">
-        <h5 id="number-loading-nodes" style='color: white;'></h5>
+    <div id="point-cloud-loading-status" class="pt-cloud-loading row d-none" style="position: absolute; right: 25px; top: -20px;">
+        {% with spinner_style="height: 25px;" %}  
+            {% include "../atoms/loading_spinner.html" %}
+        {% endwith %}  
+        <h5 id="number-loading-nodes" style='color: white;'>Loading...</h5>
     </div>
 </div>

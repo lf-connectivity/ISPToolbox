@@ -1,5 +1,7 @@
 // @ts-ignore
 const THREE = window.THREE;
+import {calculateLookVector} from './HoverMoveLocation3DView';
+
 
 /* Generate a Gerono lemniscate curve for the camera position, and target along the link path */
 export function createOrbitAnimationPath (tx: [number,number], tx_h: number, rx: [number,number], rx_h: number, radius: number, height: number, num_pts=50)
@@ -40,6 +42,90 @@ export function createOrbitAnimationPath (tx: [number,number], tx_h: number, rx:
     return {targets, positions};
 }
 
+/**
+ * @param tx - coordinates of tx radio in 3d view
+ * @param tx_h - height of radio in 3d view
+ * @param rx - coordinates of rx radio in 3d view
+ * @param rx_h - height of radio in 3d view
+ * @param radius - distance path should be from link
+ * @param height - height above link camera should be
+ * @param num_pts - number of points in the animation path
+ *  
+ * @returns {Array<number>} profile adjusted for Earth's curvature
+ */
+export function createTrackShappedOrbitPath(tx: [number,number], tx_h: number, rx: [number,number], rx_h: number, radius: number, height: number, num_pts=50)
+: {targets: Array<[number,number, number]>, positions: Array<[number,number,number]>}
+{
+    const positions: Array<[number,number,number]> = [];
+    const targets: Array<[number,number,number]>  = [];
+    const angle = Math.atan2((tx[1] - rx[1]), (tx[0] - rx[0]))
+
+    function calculateTransitionArea(t: number): [number,number,number] {
+        if(t < Math.PI) {
+            const norm_t = (t - Math.PI * 3. / 4.) / (Math.PI / 4) * Math.PI + Math.PI / 2.;
+            const x_8 = radius * Math.cos(norm_t);
+            const y_8 = radius * Math.sin(norm_t);
+            return [
+                rx[0] + x_8 * Math.cos(angle) - y_8 * Math.sin(angle),
+                rx[1] + x_8 * Math.sin(angle) + y_8 * Math.cos(angle),
+                rx_h + height
+            ];
+        } else {
+            const norm_t = (t - Math.PI * 7. / 4.) / (Math.PI / 4) * Math.PI +  3. * Math.PI / 2.;
+            const x_8 = radius * Math.cos(norm_t);
+            const y_8 = radius * Math.sin(norm_t);
+            return [
+                tx[0] + x_8 * Math.cos(angle) - y_8 * Math.sin(angle),
+                tx[1] + x_8 * Math.sin(angle) + y_8 * Math.cos(angle),
+                tx_h + height
+            ];
+        }
+    }
+
+    function getNormalizedPos(t: number): number{
+        if(t < Math.PI * 3.0 / 4.0){
+            return t * 4.0 / (3.0 * Math.PI);
+        } else if (t < Math.PI) {
+            return 1;
+        } else if (t < Math.PI * 7. / 4.) {
+            return -1 + (t - Math.PI) * 4.0 / (3.0 * Math.PI);
+        } else if (t < Math.PI * 2.0) {
+            return -0;
+        } else {
+            return  getNormalizedPos( t % (2*Math.PI));
+        }
+    }
+
+    function inTransitionArea(t: number): boolean{
+        if(t < Math.PI * 3.0 / 4.0){
+            return false;
+        } else if (t < Math.PI) {
+            return true;
+        } else if (t < Math.PI * 7. / 4.) {
+            return false;
+        } else if (t < Math.PI * 2.0){
+            return true;
+        } else {
+            return inTransitionArea(t % (2. * Math.PI));
+        }
+    }
+
+    for(let i = 0; i <= num_pts; i++) {
+        const t =  2 * Math.PI * i / num_pts;
+        
+        const norm_pos = getNormalizedPos(t);
+        const {location, lookAt} = calculateLookVector(tx, tx_h, rx, rx_h, norm_pos);
+        if (inTransitionArea(t)) {
+            positions.push(calculateTransitionArea(t));
+        } else {
+            positions.push(location);
+        }
+        targets.push(lookAt);
+    }
+
+    return {targets, positions};
+}
+
 export function createLinkGeometry(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number)
 {
     var linkSize = calcLinkLength(tx, rx, tx_h, rx_h);
@@ -49,6 +135,15 @@ export function createLinkGeometry(tx: [number, number], rx: [number, number], t
     linkLine.position.set((tx[0] + rx[0] )/ 2.0, (tx[1] + rx[1] )/ 2.0, (tx_h + rx_h)/ 2.0);
     linkLine.lookAt(tx[0], tx[1], tx_h);
     return linkLine;
+}
+
+export function createHoverPoint(location : [number, number, number]) 
+{
+    var geometry = new THREE.BoxGeometry(3 , 3, 3);
+    var material = new THREE.MeshBasicMaterial( {color: 0x3bb2d0} );
+    var pt = new THREE.Mesh(geometry, material);
+    pt.position.set(location[0], location[1], location[2]);
+    return pt;
 }
 
 export function calcLinkLength(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number) : number {

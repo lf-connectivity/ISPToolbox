@@ -1,5 +1,13 @@
-export function createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView) {
-   return Highcharts.chart('link_chart', {
+export function createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView, mouseLeave) {
+    const mouseOverDebounceFunction = _.debounce( (e) => {
+        const point = { x: e.target.x, y: e.target.y };
+        highLightPointOnGround(point);
+        moveLocation3DView(point);
+      }, 100, {
+          'leading': true,
+          'trailing': true,
+      });
+    return Highcharts.chart('link_chart', {
         chart: {
             backgroundColor: "#C2D8EC",
             plotBackgroundColor: "#FFFFFF",
@@ -77,16 +85,15 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
         }],
         plotOptions: {
             series: {
+                events: {
+                    mouseOut: ()=>{
+                        mouseOverDebounceFunction.cancel();
+                        mouseLeave();
+                    },
+                },
                 point: {
                   events: {
-                    mouseOver: _.debounce( (e) => {
-                      const point = { x: e.target.x, y: e.target.y };
-                      highLightPointOnGround(point);
-                      moveLocation3DView(point);
-                    }, 100, {
-                        'leading': true,
-                        'trailing': true,
-                      })
+                    mouseOver: mouseOverDebounceFunction,
                   }
                 },
                 states: {

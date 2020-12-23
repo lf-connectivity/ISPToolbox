@@ -69,21 +69,21 @@ export function createLinkProfile(
     elevation : Array<number>,
     tx_h_m : number, rx_h_m : number,
     resolution_m: number = 1.0,
-    frequency_ghz : number = 0.0): {los: Array<number>, fresnel: Array<[number, number]>}
+    frequency_ghz : number = 0.0): {los: Array<number>, fresnel: Array<[number, number, number]>}
 {
     const tx_hgt_m = tx_h_m + elevation[0];
     const rx_hgt_m = rx_h_m + elevation[elevation.length - 1];
     const profile = adjustProfileCurvatureEarth(tx_hgt_m, rx_hgt_m, elevation.length, resolution_m);
 
     const fresnel_zone = createFresnelZone(elevation.length, resolution_m, frequency_ghz);
-    return {los: profile, fresnel: fresnel_zone.map((v, idx) => {return [profile[idx] - v, profile[idx] + v]})};
+    return {los: profile, fresnel: fresnel_zone.map((v, idx) => {return [idx * resolution_m, profile[idx] - v, profile[idx] + v]})};
 
 }
 
-export function findLidarObstructions(fresnel : Array<[number, number]>, lidar: Array<[number, number]>, resolution: number = 1.0): Array<[number, number]> {
-    const fresnel_bottom = fresnel.map((x)=>{return x[0];});
+export function findLidarObstructions(fresnel : Array<[number, number, number]>, lidar: Array<[number, number]>, resolution: number = 1.0): Array<[number, number]> {
+    const fresnel_bottom = fresnel.map((x)=>{return x[1];});
     const overlaps: Array<[number, number]> = [];
-    const fresnel_distances = fresnel.map((_, idx)=> {return idx * resolution;});
+    const fresnel_distances = fresnel.map((x)=> {return x[0];});
     const lidar_distances = lidar.map((x)=>{return x[0];});
     const lidar_values = lidar.map((x) => {return x[1];});
     const fresnel_val_interp = everpolate.linear(lidar_distances, fresnel_distances, fresnel_bottom);

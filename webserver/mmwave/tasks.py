@@ -227,7 +227,7 @@ def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
 
 
 if settings.PROD:
-    @periodic_task(run_every=(crontab(minute=0, hour=0)), name="refresh_lidar_point_cloud")
+    @periodic_task(run_every=(crontab(minute=0, hour=8)), name="refresh_lidar_point_cloud")
     def updatePointCloudData():
         """
         This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database

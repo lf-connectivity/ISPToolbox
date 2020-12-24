@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'cms',
     'dataUpdate',
     'isptoolbox_storage',
+    'workspace',
     # S3 Static File Storage
     'storages',
     # Social Auth
@@ -186,10 +187,6 @@ ROOT_URLCONF = 'webserver.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            os.path.join(BASE_DIR, 'IspToolboxApp', 'templates'),
-            os.path.join(BASE_DIR, 'mmwave', 'templates')
-        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

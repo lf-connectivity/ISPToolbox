@@ -1,0 +1,9 @@
+<div class="workspace-nav">
+    {% include "workspace/atoms/isptoolbox_logo.html" %}
+    {% include "workspace/atoms/account_dropdown.html" %}
+</div>
+
+{% if user.is_authenticated %}
+{% else %}
+  {% include "workspace/molecules/login_modal.html" %}
+{% endif %}

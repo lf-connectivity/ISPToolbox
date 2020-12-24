@@ -1500,6 +1500,8 @@
         "stylesheets/fonts.css.map": "stylesheets/fonts.css.4891cc5415b9.map",
         "stylesheets/molecules/card.css.map": "stylesheets/molecules/card.css.9c906a19f924.map",
         "stylesheets/organisms/profile-view.css.map": "stylesheets/organisms/profile-view.css.6a5b8f21448e.map",
+        "stylesheets/organisms/workspace-nav.css": "stylesheets/organisms/workspace-nav.861583c02119.css",
+        "stylesheets/organisms/workspace-nav.css.map": "stylesheets/organisms/workspace-nav.css.051c111dd952.map",
         "stylesheets/pages/los-check.css": "stylesheets/pages/los-check.422bee91e93e.css",
         "stylesheets/pages/los-check.css.map": "stylesheets/pages/los-check.css.973c55f8009d.map",
         "stylesheets/theme.css.map": "stylesheets/theme.css.72416e2e43fc.map",

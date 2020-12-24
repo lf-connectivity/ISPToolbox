@@ -100,6 +100,8 @@ urlpatterns = [
     # REST API Endpoints
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),
+    # Workspace
+    path('pro/', include('workspace.urls')),
     # CMS
     path('', HomepageRedirect.as_view()),
     path('', include('cms.urls'))

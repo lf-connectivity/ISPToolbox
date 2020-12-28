@@ -44,6 +44,7 @@ export class LinkCheckPage {
     _elevation : any;
     _coords : any;
     _lidar : any;
+    fresnel_width: number;
     globalLinkAnimation : any;
     animationPlaying : boolean;
     aAbout1: any; 
@@ -74,6 +75,9 @@ export class LinkCheckPage {
         this.currentView = 'map';
         this.hover3dDot = null;
         this.currentMaterial = null;
+        this.fresnel_width = 1.;
+
+        // Add Resize-Window Callback
         const resize_window = () => {
             let height = $(window).height() - $('#bottom-row-link-view-container').height();
             height = Math.max(height, 400);
@@ -109,7 +113,7 @@ export class LinkCheckPage {
             this.centerFreq = center_freq_values[event.target.id];
             $(".freq-dropdown-item").removeClass('active');
             $(this).addClass('active');
-            this.updateLinkChart();
+            this.updateLinkChart(true);
         });
     
         const numNodesLoadingChangedCallback = (num_nodes : number)=> {
@@ -569,6 +573,7 @@ export class LinkCheckPage {
             );
             this.link_chart.series[2].setData(los);
             this.link_chart.series[3].setData(fresnel);
+            this.fresnel_width = Math.max(...fresnel.map((x)=>x[2] - x[1]));
             if(this._lidar != null)
             {
                 const overlaps = findLidarObstructions(fresnel, this._lidar);
@@ -687,7 +692,7 @@ export class LinkCheckPage {
                 scene.scene.remove(this.linkLine);
             }
     
-            this.linkLine = createLinkGeometry(tx, rx, tx_h, rx_h);
+            this.linkLine = createLinkGeometry(tx, rx, tx_h, rx_h, this.fresnel_width);
             scene.scene.add(this.linkLine);
             this.createAnimationForLink(tx, rx, tx_h, rx_h, start_animation);
         }

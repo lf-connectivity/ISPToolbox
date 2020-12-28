@@ -126,10 +126,11 @@ export function createTrackShappedOrbitPath(tx: [number,number], tx_h: number, r
     return {targets, positions};
 }
 
-export function createLinkGeometry(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number)
+export function createLinkGeometry(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number, max_fresnel_width: number = 1.0)
 {
     var linkSize = calcLinkLength(tx, rx, tx_h, rx_h);
-    var geometry = new THREE.BoxGeometry(1 , 1, linkSize);
+    var geometry = new THREE.SphereGeometry(1.0, 32, 32);
+    geometry.scale(max_fresnel_width / 2.0 , max_fresnel_width  / 2.0, linkSize / 2.0);
     var material = new THREE.MeshBasicMaterial( {color: 0x3bb2d0} );
     var linkLine = new THREE.Mesh( geometry, material );
     linkLine.position.set((tx[0] + rx[0] )/ 2.0, (tx[1] + rx[1] )/ 2.0, (tx_h + rx_h)/ 2.0);

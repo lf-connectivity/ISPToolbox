@@ -1,16 +1,10 @@
-<div class="pr-5">
-    {% if user.is_authenticated %}
-    <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-        Welcome {{user.get_full_name}}!
-        </li>
-        <a href="/accounts/logout">
-            <button type="button" class="btn btn-primary" data-toggle="modal" >
-                Logout
-            </button>
-        </a>
-    </ul>
-    {% else %}
+<div class="account-dropdown pr-5">
+{% if user.is_authenticated %}
+    <img class="profile-picture mr-3" src="{{ user.socialaccount_set.all.0.get_avatar_url }}" />
+    <h5 class="nav-item mr-3 my-auto">
+        {{user.first_name}}
+    </h5>
+{% else %}
     <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="15.5" cy="15.5" r="15.5" fill="#C2D8EC"/>
         <path d="M9.73682 21.0482C9.73682 17.9575 12.2422 15.4521 15.3329 15.4521H16.4521C19.5428 15.4521 22.0482 17.9575 22.0482 21.0482" stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
@@ -19,5 +13,5 @@
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
         Login
     </button>
-    {% endif %}
+{% endif %}
 </div>

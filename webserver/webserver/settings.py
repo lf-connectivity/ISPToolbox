@@ -129,7 +129,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-LOGIN_REDIRECT_URL = "/mmwave-planner"
+LOGIN_REDIRECT_URL = "/pro"
 
 # facebook
 SOCIALACCOUNT_PROVIDERS = {

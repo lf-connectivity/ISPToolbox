@@ -65,6 +65,7 @@ export class LinkCheckPage {
 
     hover3dDot: any;
     currentMaterial : any;
+    selectedFeatureID : string | null;
 
     constructor(networkID : string, userRequestIdentity: string, radio_names : [string, string]){
         this.networkID = networkID;
@@ -76,6 +77,7 @@ export class LinkCheckPage {
         this.hover3dDot = null;
         this.currentMaterial = null;
         this.fresnel_width = 1.;
+        this.selectedFeatureID = null;
 
         // Add Resize-Window Callback
         const resize_window = () => {
@@ -256,7 +258,7 @@ export class LinkCheckPage {
             
             this.map.on('draw.update', this.updateRadioLocation.bind(this));
             this.map.on('draw.create', this.updateRadioLocation.bind(this));
-            this.Draw.add({
+            const features = this.Draw.add({
                 "type": 'Feature',
                 "geometry": {
                     "type": "LineString",
@@ -266,9 +268,12 @@ export class LinkCheckPage {
                     "meta": "radio_link",
                     'radio_label_0': 'radio_0',
                     'radio_label_1': 'radio_1',
-                    'radio_color': '#00FF00'
+                    'radio_color': '#00FF00',
+                    'radio0hgt': parseFloat(String($('#hgt-0').val())),
+                    'radio1hgt': parseFloat(String($('#hgt-1').val())),
                 }
             });
+            this.selectedFeatureID = features.length ? features[0].id : null;
             const prioritizeDirectSelect = function({features} : any)
             {
                 if (features.length == 1)
@@ -382,11 +387,17 @@ export class LinkCheckPage {
             $('#hgt-0').change(
                 () => {
                     this.updateLinkChart(true);
+                    if(this.selectedFeatureID != null){
+                        this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', parseFloat(String($('#hgt-0').val())))
+                    }
                 }
             );
             $('#hgt-1').change(
                 () => {
                     this.updateLinkChart(true);
+                    if(this.selectedFeatureID != null){
+                        this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', parseFloat(String($('#hgt-1').val())))
+                    }
                 }
             );
     
@@ -424,10 +435,21 @@ export class LinkCheckPage {
     updateRadioLocation(update : any) {
         if (update.features.length) {
             const feat = update.features[0];
+            this.selectedFeatureID = feat.id;
             $('#lng-0').val(feat.geometry.coordinates[0][0]);
             $('#lat-0').val(feat.geometry.coordinates[0][1]);
             $('#lng-1').val(feat.geometry.coordinates[1][0]);
             $('#lat-1').val(feat.geometry.coordinates[1][1]);
+            if(feat.properties.radio0hgt == undefined)
+            {
+                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', 20);
+            }
+            $('#hgt-0').val(feat.properties.radio0hgt);
+            if(feat.properties.radio1hgt == undefined)
+            {
+                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', 10);
+            }
+            $('#hgt-1').val(feat.properties.radio1hgt);
             this.updateLinkProfile();
         }
     };

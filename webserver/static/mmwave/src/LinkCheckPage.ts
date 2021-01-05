@@ -26,6 +26,8 @@ const mapboxgl = window.mapboxgl;
 
 const HOVER_POINT_SOURCE = 'hover-point-link-source';
 const HOVER_POINT_LAYER = 'hover-point-link-layer';
+const SELECTED_LINK_SOURCE = 'selected-link-source';
+const SELECTED_LINK_LAYER = 'selected-link-layer';
 const center_freq_values : {[key: string]: number} = {
     '2.4ghz': 2.437,
     '5ghz': 5.4925,
@@ -225,6 +227,12 @@ export class LinkCheckPage {
                 placeholder: 'Search for an address'
             });
             document.getElementById('geocoder').appendChild(geocoder.onAdd(this.map));
+
+            const tx_lat = parseFloat(String($('#lat-0').val()));
+            const tx_lng = parseFloat(String($('#lng-0').val()));
+            const rx_lat = parseFloat(String($('#lat-1').val()));
+            const rx_lng = parseFloat(String($('#lng-1').val()));
+
             // Add a modified drawing control       
             this.Draw = new MapboxDraw({
                 userProperties: true,
@@ -248,13 +256,7 @@ export class LinkCheckPage {
         
             this.map.addControl(deleteControl, 'bottom-right');
             this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
-            
-    
-    
-            const tx_lat = parseFloat(String($('#lat-0').val()));
-            const tx_lng = parseFloat(String($('#lng-0').val()));
-            const rx_lat = parseFloat(String($('#lat-1').val()));
-            const rx_lng = parseFloat(String($('#lng-1').val()));
+
             
             this.map.on('draw.update', this.updateRadioLocation.bind(this));
             this.map.on('draw.create', this.updateRadioLocation.bind(this));
@@ -295,24 +297,7 @@ export class LinkCheckPage {
                     featureCollection.features.forEach((feat : any) => {this.Draw.delete(feat.id)})
                 }
             });
-            this.map.addSource(HOVER_POINT_SOURCE, {
-                'type': 'geojson',
-                'data': {
-                    
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type' : 'Feature',
-                                'properties' : {},
-                                'geometry': {'type': 'Point',
-                                'coordinates': [0, 0]}
-                            }
-                        ]
-                    
-                    
-                }
-            });
-    
+
             getAvailabilityOverlay(
                 (data)=>{
                     this.map.setMaxBounds(data['bb']);
@@ -355,6 +340,50 @@ export class LinkCheckPage {
                     });
                 }
             );
+            // Add Data Sources to Help User Understand Map
+            this.map.addSource(SELECTED_LINK_SOURCE, {
+                'type': 'geojson',
+                'data': {
+                    
+                        'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                'type' : 'Feature',
+                                'properties' : {},
+                                'geometry': {
+                                    "type": "LineString",
+                                    "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
+                                },
+                            }
+                        ]
+                    
+                    
+                }
+            });
+            // Selected Link Layer
+            this.map.addLayer({
+                'id': SELECTED_LINK_LAYER,
+                'type': 'line',
+                'source': SELECTED_LINK_SOURCE,
+                'paint': {
+                    'line-color': '#FFFFFF',
+                    'line-width': 7,
+                }
+            }, this.Draw.options.styles[0].id);
+            this.map.addSource(HOVER_POINT_SOURCE, {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type' : 'Feature',
+                            'properties' : {},
+                            'geometry': {'type': 'Point',
+                            'coordinates': [0, 0]}
+                        }
+                    ]
+                }
+            });
     
             // HOVER POINT MAP LAYERS
             this.map.addLayer({
@@ -365,7 +394,8 @@ export class LinkCheckPage {
                     'circle-radius': 7,
                     'circle-color': '#FFFFFF'
                 }
-            });
+            }, this.Draw.options.styles[this.Draw.options.styles.length - 1].id);
+            
             this.map.addLayer({
                 'id': HOVER_POINT_LAYER,
                 'type': 'circle',
@@ -374,7 +404,9 @@ export class LinkCheckPage {
                     'circle-radius': 5,
                     'circle-color': '#3887be'
                 }
-            });
+            }, this.Draw.options.styles[this.Draw.options.styles.length - 1].id);
+
+            
             this.updateLinkProfile();
             this.link_chart.redraw();
     
@@ -450,6 +482,10 @@ export class LinkCheckPage {
                 this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', 10);
             }
             $('#hgt-1').val(feat.properties.radio1hgt);
+            const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+            if(selected_link_source.type === 'geojson'){
+                selected_link_source.setData(feat.geometry);
+            }
             this.updateLinkProfile();
         }
     };

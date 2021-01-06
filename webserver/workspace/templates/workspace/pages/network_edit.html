@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% include "mmwave/header.html" %}
+<body>
+    {% include "mmwave/map_view.html" %}
+    {% include "mmwave/3d_view.html" %}
+    {% include "mmwave/additional_js.html" %}
+    {% include "mmwave/link_view.html" %}
+    <script type="text/javascript"> 
+      var networkID = "{{ network.uuid }}";
+      var ISPTOOLBOX_SESSION_INFO = {
+          initialMapCenter : {{ network.map_center.json|safe}},
+          initialMapZoom : {{ network.zoom_level }}
+      };
+    </script>
+    <p>{{geojson|safe}}</p>
+</body>
+</html>

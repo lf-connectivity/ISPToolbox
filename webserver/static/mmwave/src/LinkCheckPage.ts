@@ -208,16 +208,24 @@ export class LinkCheckPage {
             }
         }
         this.profileWS = new LOSCheckWS(this.networkID, ws_low_res_callback);
-        const initial_map_center = {
+        
+        let initial_map_center = {
             'lon': (parseFloat(String($('#lng-0').val())) + parseFloat(String($('#lng-1').val()))) / 2.0,
             'lat': (parseFloat(String($('#lat-0').val())) + parseFloat(String($('#lat-1').val()))) / 2.0
         };
+        let initial_zoom = 17;
+        try {
+            // @ts-ignore
+            initial_map_center = window.ISPTOOLBOX_SESSION_INFO.initialMapCenter.coordinates;
+            // @ts-ignore
+            initial_zoom = window.ISPTOOLBOX_SESSION_INFO.initialMapZoom;
+        } catch(err){}
     
         this.map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
             center: initial_map_center, // starting position [lng, lat]
-            zoom: 17 // starting zoom
+            zoom: initial_zoom // starting zoom
         });
     
         this.map.on('load', () => {

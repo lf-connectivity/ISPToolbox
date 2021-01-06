@@ -38,7 +38,7 @@ def loadBoundariesFromEntWine(send_email_success=False, send_email_failure=True)
                 pt_cloud.save()
                 if created:
                     new_point_clouds.append(pt_cloud)
-        if send_email_success or len(new_point_clouds) > 0:
+        if (send_email_success or len(new_point_clouds) > 0) and settings.PROD:
             point_cloud_names = '\n'.join([cloud.name for cloud in new_point_clouds])
             sendNotifyEmail(
                 SUCCESSFUL_UPDATE_SUBJECT,

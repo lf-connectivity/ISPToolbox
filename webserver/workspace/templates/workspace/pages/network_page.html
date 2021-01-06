@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    {% include "workspace/organisms/default_header.html" %}
+</head>
+<body>
+    {% include "workspace/organisms/nav.html" %}
+    <div style="margin-top: 70px;"></div>
+    <div class="container">
+        <div class="row d-flex justify-content-between mx-3 mb-3">
+            <h3>Networks </h3>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createNetworkModal">
+            Add New Network
+        </button>
+        </div>
+        {% include "workspace/organisms/create_network_modal.html" %}
+        {% include "workspace/organisms/delete_network_modal.html" %}
+        {% include "workspace/organisms/networks.html" %}
+    </div>
+</body>
+</html>

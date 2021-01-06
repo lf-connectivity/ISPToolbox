@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   {% include "./header.html" %}
+  {% include "./additional_js.html" %}
 <body>
     {% comment %}
       {% include "./tour_modal.html" %}
@@ -9,7 +10,6 @@
     {% endcomment %}
     {% include "./map_view.html" %}
     {% include "./3d_view.html" %}
-    {% include "./additional_js.html" %}
     {% include "./link_view.html" %}
     <script type="text/javascript"> 
       var userRequestIdentity = "{{ fbid }}";

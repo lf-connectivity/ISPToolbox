@@ -33,6 +33,8 @@ const center_freq_values : {[key: string]: number} = {
     '5ghz': 5.4925,
     '60ghz': 64.790,
 };
+const DEFAULT_LINK_FREQ = center_freq_values['5ghz'];
+
 export class LinkCheckPage {
     map : MapboxGL.Map;
     Draw : any;
@@ -74,7 +76,7 @@ export class LinkCheckPage {
         this.userRequestIdentity = userRequestIdentity;
         this.radio_names = radio_names;
         this.animationPlaying = true;
-        this.centerFreq  = center_freq_values['5ghz'];
+        this.centerFreq  = DEFAULT_LINK_FREQ;
         this.currentView = 'map';
         this.hover3dDot = null;
         this.currentMaterial = null;
@@ -117,6 +119,7 @@ export class LinkCheckPage {
             this.centerFreq = center_freq_values[event.target.id];
             $(".freq-dropdown-item").removeClass('active');
             $(this).addClass('active');
+            this.Draw.setFeatureProperty(this.selectedFeatureID, 'freq', this.centerFreq);
             this.updateLinkChart(true);
         });
     
@@ -281,6 +284,7 @@ export class LinkCheckPage {
                     'radio_color': '#00FF00',
                     'radio0hgt': parseFloat(String($('#hgt-0').val())),
                     'radio1hgt': parseFloat(String($('#hgt-1').val())),
+                    'freq': DEFAULT_LINK_FREQ,
                 }
             });
             this.selectedFeatureID = features.length ? features[0] : null;
@@ -498,6 +502,15 @@ export class LinkCheckPage {
         if (update.features.length) {
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
+            if(feat.properties.freq == undefined)
+            {
+                this.Draw.setFeatureProperty(this.selectedFeatureID, 'freq', DEFAULT_LINK_FREQ);
+            }
+            const current_freq = Object.entries(center_freq_values).filter((v)=> v[1] === feat.properties.freq);
+            if (current_freq.length !== 0)
+            {
+                $('#freq-dropdown').text(current_freq[0][0]);
+            }
             $('#lng-0').val(feat.geometry.coordinates[0][0].toFixed(5));
             $('#lat-0').val(feat.geometry.coordinates[0][1].toFixed(5));
             $('#lng-1').val(feat.geometry.coordinates[1][0].toFixed(5));

@@ -30,6 +30,14 @@ jobs:
         make test
         docker stop $(docker ps -a -f "name=isptoolbox_" -q)
         docker rm $(docker ps -a -f "name=isptoolbox_" -q)
+    - name: Build Static File Manifest
+      run: |
+        rm -r webserver/static/mmwave/build/
+        make static_prod
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        file_pattern: webserver/staticfiles.json
+        commit_message: [static files bot] build staticfiles.json manifest
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:

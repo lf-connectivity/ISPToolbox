@@ -356,20 +356,17 @@ export class LinkCheckPage {
             this.map.addSource(SELECTED_LINK_SOURCE, {
                 'type': 'geojson',
                 'data': {
-                    
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type' : 'Feature',
-                                'properties' : {},
-                                'geometry': {
-                                    "type": "LineString",
-                                    "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
-                                },
-                            }
-                        ]
-                    
-                    
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type' : 'Feature',
+                            'properties' : {},
+                            'geometry': {
+                                "type": "LineString",
+                                "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
+                            },
+                        }
+                    ]
                 }
             });
             // Selected Link Layer
@@ -663,8 +660,7 @@ export class LinkCheckPage {
      * Updates link chart for LOS based on new elevation profile and tx/rx height
      */
     updateLinkChart(update3DView = false){
-        if(this._elevation !== null)
-        {
+        if(this._elevation !== null) {
             const {los, fresnel} = createLinkProfile(
                 this._elevation,
                 parseFloat(String($('#hgt-0').val())),
@@ -701,8 +697,6 @@ export class LinkCheckPage {
             }
         }
     }
-    
-    
     
     createAnimationForLink(tx : any, rx : any, tx_h : any, rx_h : any, start_animation : boolean) {
         $('#3d-pause-play').off('click');
@@ -853,7 +847,5 @@ export class LinkCheckPage {
                 this.addLink(tx, rx, tx_h, rx_h);
             });
         }
-    
-    
     }
 }

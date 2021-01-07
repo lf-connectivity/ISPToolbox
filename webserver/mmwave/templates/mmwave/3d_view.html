@@ -19,7 +19,12 @@
 <script>
   window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
 
-  viewer.setEDLEnabled(true);
+  if (window.viewer.renderer.getContext().getSupportedExtensions().includes("EXT_frag_depth"))
+  {
+    console.log('EyeDomeLighting Rendering Enabled');
+    viewer.setEDLEnabled(true);
+  }
+  
   viewer.setFOV(60);
   viewer.setPointBudget(3*1000*1000);
   viewer.loadSettingsFromURL();

@@ -1,8 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   {% include "mmwave/header.html" %}
 <body>
     {% include "mmwave/map_view.html" %}
+    <script src="{% static "wireless_network.min.js" %}"> </script>
     {% include "mmwave/3d_view.html" %}
     {% include "mmwave/additional_js.html" %}
     {% include "mmwave/link_view.html" %}

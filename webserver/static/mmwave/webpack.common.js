@@ -1,7 +1,9 @@
 const path = require('path');
 
 module.exports = {
-    entry: '/src/index.js',
+    entry: {
+        wireless_network: '/src/wireless_network.app.js',
+    },
     module : {
         rules : [
             {
@@ -15,7 +17,7 @@ module.exports = {
         extensions : ['.tsx', '.ts', 'js'],
     },
     output : {
-        filename: 'linkcheck.min.js',
+        filename: '[name].min.js',
         path: path.resolve(__dirname, 'build'),
         library: 'isptoolboxLinkCheck',
         libraryExport: 'default'

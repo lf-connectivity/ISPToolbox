@@ -283,7 +283,7 @@ export class LinkCheckPage {
                     'radio1hgt': parseFloat(String($('#hgt-1').val())),
                 }
             });
-            this.selectedFeatureID = features.length ? features[0].id : null;
+            this.selectedFeatureID = features.length ? features[0] : null;
             const prioritizeDirectSelect = function({features} : any)
             {
                 if (features.length == 1)
@@ -440,6 +440,28 @@ export class LinkCheckPage {
                     }
                 }
             );
+            const createRadioCoordinateChangeCallback = (id: string, coord1: number, coord2: number) => {
+                $(id).change(
+                    () => {
+                        if(this.selectedFeatureID != null)
+                        {
+                            const feat = this.Draw.get(this.selectedFeatureID);
+                            feat.geometry.coordinates[coord1][coord2] = parseFloat(String($(id).val()))
+                            this.Draw.add(feat);
+                            const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+                            if(selected_link_source.type === 'geojson'){
+                                selected_link_source.setData(feat.geometry);
+                            }
+                            this.updateLinkProfile();
+                        }
+                    }
+                );
+            }
+            createRadioCoordinateChangeCallback('#lng-0', 0, 0);
+            createRadioCoordinateChangeCallback('#lat-0', 0, 1);
+            createRadioCoordinateChangeCallback('#lng-1', 1, 0);
+            createRadioCoordinateChangeCallback('#lat-1', 1, 1);
+        
     
             $('#3D-view-btn').click(()=>{
                 if(this.currentView === 'map')
@@ -476,10 +498,10 @@ export class LinkCheckPage {
         if (update.features.length) {
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
-            $('#lng-0').val(feat.geometry.coordinates[0][0]);
-            $('#lat-0').val(feat.geometry.coordinates[0][1]);
-            $('#lng-1').val(feat.geometry.coordinates[1][0]);
-            $('#lat-1').val(feat.geometry.coordinates[1][1]);
+            $('#lng-0').val(feat.geometry.coordinates[0][0].toFixed(5));
+            $('#lat-0').val(feat.geometry.coordinates[0][1].toFixed(5));
+            $('#lng-1').val(feat.geometry.coordinates[1][0].toFixed(5));
+            $('#lat-1').val(feat.geometry.coordinates[1][1].toFixed(5));
             if(feat.properties.radio0hgt == undefined)
             {
                 this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', 20);

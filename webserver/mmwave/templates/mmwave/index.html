@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   {% include "./header.html" %}
@@ -8,6 +9,7 @@
       {% include "./nav.html" %}
     {% endcomment %}
     {% include "./map_view.html" %}
+    <script src="{% static "wireless_network.min.js" %}"> </script>
     {% include "./3d_view.html" %}
     {% include "./link_view.html" %}
     <script type="text/javascript"> 

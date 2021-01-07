@@ -13,7 +13,7 @@
                     <label for="example-number-input" class="col-form-label input-label">Latitude</label>
                 </div>
                 <div class="col-xl-8 px-2 my-auto d-flex input-with-unit">
-                    <input class="form-control my-auto" type="number" value="{{ radio.lat }}" id="lat-{{radio.id}}">
+                    <input class="form-control my-auto" type="number" value="{{ radio.lat|stringformat:".5f" }}" id="lat-{{radio.id}}" min="-90" max="90" step=".00001">
                     <span class="input-unit">&deg;</span>
                 </div>
             </div>
@@ -22,7 +22,7 @@
                     <label for="example-number-input" class="col-form-label input-label">Longitude</label>
                 </div>
                 <div class="col-xl-8 px-2 my-auto d-flex input-with-unit">
-                    <input class="form-control my-auto" type="number" value="{{ radio.lng }}" id="lng-{{radio.id}}">
+                    <input class="form-control my-auto" type="number" value="{{ radio.lng|stringformat:".5f" }}" id="lng-{{radio.id}}" min="-180" max="180" step=".00001">
                     <span class="input-unit">&deg;</span>
                 </div>
             </div>

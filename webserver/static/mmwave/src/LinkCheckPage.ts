@@ -375,9 +375,12 @@ export class LinkCheckPage {
                 'id': SELECTED_LINK_LAYER,
                 'type': 'line',
                 'source': SELECTED_LINK_SOURCE,
+                'layout': {
+                    'line-cap': 'round'
+                },
                 'paint': {
                     'line-color': '#FFFFFF',
-                    'line-width': 7,
+                    'line-width': 7
                 }
             }, this.Draw.options.styles[0].id);
             this.map.addSource(HOVER_POINT_SOURCE, {

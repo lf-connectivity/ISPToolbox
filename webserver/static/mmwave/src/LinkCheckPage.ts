@@ -12,6 +12,7 @@ import {getAvailabilityOverlay} from './availabilityOverlay';
 import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
 import {LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
 
+
 // @ts-ignore
 const Potree = window.Potree;
 // @ts-ignore
@@ -262,7 +263,9 @@ export class LinkCheckPage {
             const deleteControl = new MapboxCustomDeleteControl({
                 map: this.map,
                 draw: this.Draw,
-                deleteCallback: (e:any)=>{},
+                deleteCallback: (features)=>{
+                    this.removeLinkHalo(features);
+                },
             });
         
             this.map.addControl(deleteControl, 'bottom-right');
@@ -307,6 +310,7 @@ export class LinkCheckPage {
                 if (event.target === this.map.getCanvas() && (event.key === "Backspace" || event.key === "Delete"))
                 {
                     featureCollection.features.forEach((feat : any) => {this.Draw.delete(feat.id)})
+                    this.removeLinkHalo(featureCollection.features);
                 }
             });
 
@@ -499,6 +503,18 @@ export class LinkCheckPage {
             });
         });
     };
+
+    removeLinkHalo : (features: Array<MapboxGL.MapboxGeoJSONFeature>) => void = (features) => {
+        const contains_selected = features.filter((feat) => { return feat.id === this.selectedFeatureID}).length > 0;
+        if(contains_selected)
+        {
+            const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+            if(selected_link_source.type === 'geojson'){
+                selected_link_source.setData({type: 'FeatureCollection', 'features' : []});
+            }
+        }
+    }
+    
     updateRadioLocation(update : any) {
         if (update.features.length) {
             const feat = update.features[0];

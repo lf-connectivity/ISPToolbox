@@ -39,11 +39,11 @@ export default class MapboxCustomDeleteControl {
             this._draw.delete(`${featureId}`);
           }
         });
+        this._deleteCallback(selectedFeature);
       } else {
         this._draw.deleteAll();
+        this._deleteCallback(features);
       }
-      //@ts-ignore
-      this._deleteCallback({features});
     };
   
     onAdd(map: MapboxGL.Map): HTMLDivElement {

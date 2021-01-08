@@ -33,9 +33,16 @@ body
     border-bottom: 2px solid $brand-primary-color
     &--input
         font-family: $brand-font-family-mono
-        padding-right: 15px
+        padding-right: 14px
+    &--suggestion-title
+        font-weight: bold
+        letter-spacing: 0.02em !important
     &--suggestion-title, &--suggestion-address 
         font-family: $brand-font-family-sans-serif
+        letter-spacing: 0.01em
+        color: $brand-dark-gray-color
+    &--suggestion-address
+        color: lighten($brand-dark-gray-color, 20%)
     .suggestions
         border-radius: 0
 

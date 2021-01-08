@@ -322,8 +322,8 @@ export class LinkCheckPage {
                         'type': 'fill',
                         'source': 'lidar_availability',
                         'paint': {
-                            'fill-color': '#EE9B7C',
-                            'fill-opacity': 0.9
+                            'fill-color': '#687B8B',
+                            'fill-opacity': 0.75
                         }
                     });
                     var popup = new mapboxgl.Popup({

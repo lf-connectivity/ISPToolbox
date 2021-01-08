@@ -39,8 +39,12 @@
     .card-title
         border-bottom: solid 2px $brand-primary-color
         margin-bottom: .75rem
-    #isptoolbox-link-status-obstructions, #frequency-label
+    #link-status--obstructions, #frequency-label
         font-size: 14px
+    .link-status
+        flex-flow: row wrap
+        h5
+            margin-bottom: 0
 body
     @media screen and (max-width: 767px)
         .fixed-bottom
@@ -50,8 +54,10 @@ body
         .profile-view
             flex-flow: row
         .link-profile-card
+            .card-body
+                padding-bottom: 0.5rem
             .card-title
                 border-bottom: 0
                 margin-bottom: 0
-            #isptoolbox-link-status-obstructions, #frequency-label
+            #link-status--obstructions, #frequency-label
                 font-size: 16px

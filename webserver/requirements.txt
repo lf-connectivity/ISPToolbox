@@ -43,7 +43,7 @@ jmespath==0.10.0
 joblib==0.16.0
 kombu==4.6.11
 l18n==2018.5
-lxml==4.6.1
+lxml==4.6.2
 markdown==3.2.2
 msgpack==1.0.0
 numpy==1.19.0

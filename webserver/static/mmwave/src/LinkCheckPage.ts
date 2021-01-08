@@ -323,12 +323,13 @@ export class LinkCheckPage {
                         'source': 'lidar_availability',
                         'paint': {
                             'fill-color': '#687B8B',
-                            'fill-opacity': 0.75
+                            'fill-opacity': 0.77
                         }
                     });
                     var popup = new mapboxgl.Popup({
                         closeButton: false,
-                        closeOnClick: false
+                        closeOnClick: false,
+                        className: "lidar-availability-popup"
                     });
                          
                     this.map.on('mouseenter', 'lidar_availability_layer', (e: any) => {

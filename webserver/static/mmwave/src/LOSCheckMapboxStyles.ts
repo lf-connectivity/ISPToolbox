@@ -28,7 +28,7 @@ export const LOSCheckMapboxStyles = [
             'line-join': 'round'
         },
         'paint': {
-            'line-color': '#fbb03b',
+            'line-color': '#5692D1',
             'line-dasharray': [0.2, 2],
             'line-width': 5
         }
@@ -39,8 +39,8 @@ export const LOSCheckMapboxStyles = [
         "type": "circle",
         "filter": ["all", ["==", "$type", "LineString"]],
         "paint": {
-            "circle-radius": 10,
-            "circle-color": "#5692D1"
+            "circle-radius": 8,
+            "circle-color": "#ffffff"
         }
     },
     // Default Circle Appearance

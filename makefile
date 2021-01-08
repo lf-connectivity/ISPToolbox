@@ -65,7 +65,7 @@ test:
 	@echo -e "\e[46mWant to debug a single test? - don't want to rebuild docker container?\nSee the readme: https://github.com/ISPToolbox/ISPToolbox#debugging-django-tests-with-vscode \e[0m"
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app ./wait-for-postgres.sh python3 manage.py test --noinput
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app ./wait-for-postgres.sh python3 manage.py test
 
 static_prod:
 	@echo ----------------------------------------------BUIDLING STATIC FILES \& PUSHING TO PROD \(S3\)----------------------------------------

@@ -1,0 +1,11 @@
+// Add all element states
+@mixin hover 
+  &:hover,
+  &:focus,
+  &:active
+    @content
+
+
+// Simple Transition
+@mixin transition($time, $type: ease-in-out) 
+  transition: all $time $type

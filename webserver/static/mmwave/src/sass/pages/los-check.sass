@@ -2,10 +2,13 @@
 @use '../atoms/loading-icon'
 @use '../atoms/tooltip'
 @use '../molecules/card'
-@use '../molecules/_frequency_toggle'
+@use '../molecules/frequency_toggle'
+@use '../molecules/error-container'
 @use '../organisms/profile-view'
+@use '../organisms/radio-view'
+@use '../mixins'
 @use '../fonts'
-@import ../theme
+@import '../theme'
 
 body
     overflow: auto !important
@@ -21,12 +24,28 @@ body
         .annotation-titlebar
             border-radius: 0px
             .annotation-label
-                font-family: "Basis Grotesque Pro", Helvetica, Arial, sans-serif
-
+                font-family: $brand-font-family-sans-serif
     .potree_failpage
         text-align: center
 
 .mapboxgl-ctrl-geocoder
     border-radius: 0
-    border-top: 2px sol
+    border-bottom: 2px solid $brand-primary-color
+    &--input
+        font-family: $brand-font-family-mono
+        padding-right: 15px
+    &--suggestion-title, &--suggestion-address 
+        font-family: $brand-font-family-sans-serif
+    .suggestions
+        border-radius: 0
+
+.nodes-loading-message
+    display: none
+    font-family: $brand-font-family-mono
+    margin-right: 5px
+    color: $white-color
+
+@media (min-width: 992px)
+    .nodes-loading-message
+        display: inline-block
     

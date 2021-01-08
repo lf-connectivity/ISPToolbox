@@ -28,15 +28,7 @@
       <p>Loading LiDAR Point Cloud...</p>
     </div>
 </div>
-<div id="loading_failed_spinner" class="d-none container">
-    <div class="row">
-        <img src="{% static 'mmwave/loading_failed.gif' %}" class="mx-auto" alt="loading failed" height="200px">
-    </div>
-    <div class="text-center position-relative">
-        <h3>An error occured:</h3>
-        <p id="link-request-error-description"></p>
-    </div>
-</div>
+{% include "./molecules/error_container.html" %}
 <div id="lidar_not_found_msg" class="d-none row align-items-center">
     <div class="col text-center">
     <p>LiDAR Data not available at this location. <a class="nav-link" data-toggle="modal" data-target="#LidarDataAvailable" href="#">Click here to see a map of availablity</a></p>

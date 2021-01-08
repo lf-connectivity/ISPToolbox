@@ -37,17 +37,17 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
             },
             labels: {
                 formatter: function () {
-                    return this.value  + '[m]';
+                    return this.value;
                 }
             }
         },
         xAxis: {
             title: {
-                text: 'Distance'
+                text: 'Distance [m]'
             },
             labels: {
                 formatter: function () {
-                    return this.value  + '[m]';
+                    return this.value;
                 }
             }
         },
@@ -56,6 +56,7 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
             name: 'Terrain',
             data: [],
             zIndex: 1,
+            lineWidth: 0,
             color: '#687A8A',
             type: 'area'
         },

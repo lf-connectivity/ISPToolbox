@@ -1,17 +1,29 @@
 @import ../theme
 
 .freq-toggle
+    margin-left: 5px
     .btn   
         border-radius: 0 !important
-        padding-top: 3px
-        padding-bottom: 3px
+        padding: 5px 10px
     .active
-        background-color: #5692d1 !important
+        background-color: $brand-primary-color !important
         color: white !important
     .dropdown-menu
         min-width: 0
         border-radius: 0
+        padding: 0
+        border: none
+    .dropdown-item
+        padding: 0.35rem 0.5rem
+        font-family: $brand-font-family-mono
+        font-size: 14px
+        &:active, &:hover, &:focus
+            color: $brand-dark-gray-color
+            background-color: #f8f9fa
+            outline: none
     .dropdown-toggle
         border: none
         background: white
-        border-bottom: 2px solid $isptoolbox-theme-secondary-color
+        border-bottom: 2px solid $brand-primary-color
+        font-family: $brand-font-family-mono
+        font-size: 14px

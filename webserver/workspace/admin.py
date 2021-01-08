@@ -1,6 +1,3 @@
-from django.contrib import admin
-from workspace import models
+# from django.contrib import admin
 
-admin.site.register(models.Network)
-admin.site.register(models.Radio)
-admin.site.register(models.PTPLink)
+# Register your models here.

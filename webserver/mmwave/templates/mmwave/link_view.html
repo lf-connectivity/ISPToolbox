@@ -1,23 +1,32 @@
 <div class="fixed-bottom">
     {% include "mmwave/organisms/mapcontrols.html" %}
     <div class="row no-gutters profile-view" id="bottom-row-link-view-container">
-        {% with tx as radio %}
-            {% include "./radio_view.html" %}
-        {% endwith %}
-        <div class="col-md-8">
-            <div class="card">
+        <div class="col-12 col-lg-6 col-xl-8 profile-view-card">
+            <div class="card link-profile-card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between card-title">
                         {% include "mmwave/molecules/link_status.html" %}
                         {% include "mmwave/molecules/frequency_toggle.html" %}
                     </div>
-                    {% include "./link_profile.html" %}
-                    {% include "mmwave/atoms/tooltip.html" %}
+                    <div class="card-text">
+                        {% include "./link_profile.html" %}
+                        {% include "mmwave/atoms/tooltip.html" %}
+                    </div>
                 </div>
             </div>
         </div>
-        {% with rx as radio %}
-            {% include "./radio_view.html" %}
-        {% endwith %}
+        <div class="col-12 radio-spec-label-card">
+            <h5 class="radio-toggle-label mx-3 py-2">Radio Specs</h5>
+        </div>
+        <div class="col-lg-3 col-xl-2 radio-0-card">
+            {% with tx as radio %}
+                {% include "./radio_view.html" %}
+            {% endwith %}
+        </div>
+        <div class="col-lg-3 col-xl-2 radio-1-card">
+            {% with rx as radio %}
+                {% include "./radio_view.html" %}
+            {% endwith %}
+        </div>
     </div>
 </div>

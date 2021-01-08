@@ -1,5 +1,5 @@
 <div id="switch-view-buttons" class="col d-flex justify-content-center mb-3" style="position: relative;">
-    <div id="3d-controls" class="d-none" style="position: absolute; top:-80px;">
+    <div id="3d-controls" class="d-none" style="position: absolute; bottom: -8px; left: 10px">
         <button type="button" class="btn isptoolbox-btn btn-primary" id="3d-pause-play">
           <div id="pause-button-3d">
             <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-pause-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -29,6 +29,6 @@
         {% with spinner_style="height: 25px;" %}  
             {% include "../atoms/loading_spinner.html" %}
         {% endwith %}  
-        <h5 id="number-loading-nodes" style='color: white;'>Loading...</h5>
+        <h5 class="nodes-loading-message">Loading Landscape...</h5>
     </div>
 </div>

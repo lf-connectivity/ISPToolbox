@@ -1,0 +1,56 @@
+@import ../theme
+
+.radio-card
+    .row
+        margin-left: 0
+        margin-right: 0
+        display: flex
+        flex-flow: row wrap
+        justify-content: space-between
+    .input-label
+        padding-right: 3px
+    .card-title
+        border-bottom: solid 1px #A2A2A2
+    .card-body
+        padding: 0.5rem 1.25rem
+.profile-view
+    .profile-view-card
+        order: 1
+    .radio-spec-label-card
+        order: 2
+        display: block
+    .radio-0-card
+        order: 3
+    .radio-1-card
+        order: 4
+    .radio-toggle-label
+        color: $brand-dark-gray-color
+        border-bottom: solid 2px $brand-primary-color
+    
+
+@media screen and (min-width: 992px)
+    .profile-view
+        .profile-view-card
+            order: 2
+        .radio-spec-label-card
+            display: none
+        .radio-0-card
+            order: 1
+        .radio-1-card
+            order: 3
+        .radio-card
+            .card-title
+                border-bottom: solid 2px $brand-primary-color
+        .radio-0-card .card-body
+            padding: 1.25rem 0 1.25rem 1.25rem
+        .radio-1-card .card-body
+            padding: 1.25rem 1.25rem 1.25rem 0
+
+@media (min-width: 1150px) and (max-width: 1550px)
+    .radio-card .card-text .col
+        max-width: 100%
+        flex: 0 0 100%
+        .input-with-unit
+            min-width: 100%
+
+    

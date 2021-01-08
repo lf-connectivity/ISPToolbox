@@ -1,13 +1,13 @@
 @import ../theme
 .isptoolbox-tooltip-inner
     text-align: left
-    background: $isptoolbox-dark-gray-color
+    background: $brand-dark-gray-color
     border-radius: 0
-    padding-left: 30px
-    padding-right: 30px
+    padding-left: 20px
+    padding-right: 20px
     padding-top: 10px
     font-family: "Basis Grotesque Pro", Helvetica, Arial, sans-serif
-    max-width: 400px
+    max-width: 200px
 
     .los-chart-legend
         margin-bottom: 10px
@@ -29,20 +29,25 @@
         background: #E18D8D
     .list-item
         margin-top: auto
-        margin-bottom: auto
         padding-left: 10px
     .isptoolbox-bullet-line
         display: flex
         align-items: center
+        margin-bottom: 5px
     .isptoolbox-data-source
-        font-size: 8px
+        font-size: 10px
+        color: #F5F4F4
     p
         margin-bottom: 0px
     .arrow::before
-        border-top-color: $isptoolbox-dark-gray-color
+        border-top-color: $brand-dark-gray-color
 
 .legend-button
     position: absolute
     bottom: 5px
     right: 0px
-        border-top-color: $isptoolbox-dark-gray-color
+    &--label
+        font-weight: 300
+        font-size: 14px
+        letter-spacing: 0.04em
+        color: $brand-dark-gray-color

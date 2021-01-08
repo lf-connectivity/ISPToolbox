@@ -112,8 +112,11 @@ WAGTAIL_SITE_NAME = 'Help Center'
 CSP_EXCLUDE_URL_PREFIXES = ('cms/', 'pages/',)
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.DjangoModelPermissions',),
-    'PAGINATE_BY': 10
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
 }
 
 SITE_ID = 2
@@ -126,7 +129,6 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_REDIRECT_URL = "/pro"
-ACCOUNT_LOGOUT_REDIRECT_URL = "/pro"
 
 # facebook
 SOCIALACCOUNT_PROVIDERS = {

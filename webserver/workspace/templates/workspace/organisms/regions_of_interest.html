@@ -1,0 +1,23 @@
+<h3>Regions of Interest</h3>
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Region Name</th>
+        <th scope="col">Region ID</th>
+        <th scope="col">Last Modified</th>
+        <th scope="col">Edit</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for region in regions %}
+<tr>
+    <th scope="row">{{ forloop.counter }}</th>
+    <td>{{ region.name }}</td>
+    <td>{{ region.id }}</td>
+    <td> {{region.last_modified}} </td>
+    <td> {{region.edit_link}}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>

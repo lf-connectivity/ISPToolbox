@@ -18,7 +18,7 @@ link_distance_limit = 2000
 
 @method_decorator(xframe_options_exempt, name='dispatch')
 class TGLinkView(View):
-    def get(self, request):
+    def get(self, request, network_id=None):
         fbid = int(request.GET.get('id', 0))
         networkID = uuid.uuid4()
         lat = request.GET.get('lat', None)

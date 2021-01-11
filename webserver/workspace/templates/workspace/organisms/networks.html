@@ -1,0 +1,82 @@
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Network Name
+          {% if order == "name"%}
+          <a href="?order=-name&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_down_icon.html' %}
+          </a>
+          {% else %}
+          <a href="?order=name&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_up_icon.html' %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Number of Links
+          {% if order == "num_links"%}
+          <a href="?order=-num_links&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_down_icon.html' %}
+          </a>
+          {% else %}
+          <a href="?order=num_links&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_up_icon.html' %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Created
+          {% if order == "created_date"%}
+          <a href="?order=-created_date&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_down_icon.html' %}
+          </a>
+          {% else %}
+          <a href="?order=created_date&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_up_icon.html' %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Last Modified
+          {% if order == "last_edited"%}
+          <a href="?order=-last_edited&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_down_icon.html' %}
+          </a>
+          {% else %}
+          <a href="?order=last_edited&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_up_icon.html' %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Delete</th>
+        <th scope="col">Share</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for network in networks %}
+      {% include 'workspace/molecules/network_row.html' %}
+{% endfor %}
+</tbody>
+</table>
+
+{% if networks.has_other_pages %}
+<nav aria-label="Page navigation networks" style="display: flex; flex-direction: row-reverse;">
+  <ul class="pagination">
+    {% if networks.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ networks.previous_page_number }}&order={{order}}">&laquo;</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link" >&laquo;</span></li>
+    {% endif %}
+    {% for i in networks.paginator.page_range %}
+      {% if networks.number == i %}
+        <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}&order={{order}}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if networks.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ networks.next_page_number }}&order={{order}}">&raquo;</a></li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link" >&raquo;</span></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}

@@ -6,8 +6,23 @@ upstream websockets {
     server websocket-app:8010;
 }
 
+# pro.isptoolbox.io
 server {
     listen 80;
+    server_name pro.isptoolbox.io;
+
+    if ($http_x_forwarded_proto = 'http'){
+        return 301 https://$host$request_uri;
+    }
+
+    location / {
+        proxy_pass http://django/pro$request_uri;
+        proxy_set_header Host isptoolbox.io;
+    }
+}
+
+server {
+    listen 80 default_server;
 
     if ($http_x_forwarded_proto = 'http'){
         return 301 https://$host$request_uri;

@@ -4,7 +4,9 @@
 <div id="3d-view-container" class="d-none">
   <div>
     <div class="potree_container" >
-      <div id="potree_render_area" style="width:100%;position: absolute; min-height: 400px;"></div>
+      <div id="potree_render_area" style="width:100%;position: absolute; min-height: 400px;">
+      </div>
+      {% include "mmwave/molecules/webgl2_error.html" %}
       <div id="potree_sidebar_container" class="d-none"> </div>
     </div>      
   </div>
@@ -17,22 +19,30 @@
 }
 </style>
 <script>
-  window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
-
-  if (window.viewer.renderer.getContext().getSupportedExtensions().includes("EXT_frag_depth"))
-  {
-    console.log('EyeDomeLighting Rendering Enabled');
-    viewer.setEDLEnabled(true);
+  if(typeof window.WebGL2RenderingContext !== 'undefined'){
+    console.log('WebGL2 Enabled')
+  } else {
+    console.log('WebGL2 Not supported');
+    document.getElementById("webgl-error-msg").classList.remove('d-none');
+    document.getElementById("potree_render_area").classList.add('d-none');
   }
-  
-  viewer.setFOV(60);
-  viewer.setPointBudget(3*1000*1000);
-  viewer.loadSettingsFromURL();
+    window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
 
-  viewer.setDescription('');
+    if (window.viewer.renderer.getContext().getSupportedExtensions().includes("EXT_frag_depth"))
+    {
+      console.log('EyeDomeLighting Rendering Enabled');
+      viewer.setEDLEnabled(true);
+    }
+    
+    viewer.setFOV(60);
+    viewer.setPointBudget(3*1000*1000);
+    viewer.loadSettingsFromURL();
 
-  viewer.loadGUI(() => {
-    viewer.setLanguage('en');
-  });
+    viewer.setDescription('');
+
+    viewer.loadGUI(() => {
+      viewer.setLanguage('en');
+    });
+
 
 </script>

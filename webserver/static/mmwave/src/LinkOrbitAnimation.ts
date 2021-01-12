@@ -1,5 +1,7 @@
 // @ts-ignore
 const THREE = window.THREE;
+// @ts-ignore
+const Potree = window.Potree;
 import {calculateLookVector} from './HoverMoveLocation3DView';
 
 
@@ -131,20 +133,32 @@ export function createLinkGeometry(tx: [number, number], rx: [number, number], t
     var linkSize = calcLinkLength(tx, rx, tx_h, rx_h);
     var geometry = new THREE.SphereGeometry(1.0, 32, 32);
     geometry.scale(max_fresnel_width / 2.0 , max_fresnel_width  / 2.0, linkSize / 2.0);
-    var material = new THREE.MeshBasicMaterial( {color: 0x3bb2d0} );
+    var material = new THREE.MeshBasicMaterial( {color: 0x4ADEFF, opacity: 0.8, transparent: true} );
     var linkLine = new THREE.Mesh( geometry, material );
     linkLine.position.set((tx[0] + rx[0] )/ 2.0, (tx[1] + rx[1] )/ 2.0, (tx_h + rx_h)/ 2.0);
     linkLine.lookAt(tx[0], tx[1], tx_h);
     return linkLine;
 }
 
-export function createHoverPoint(location : [number, number, number]) 
+export function createHoverPoint(location : [number, number, number], lookAt: [number, number, number]) 
 {
     var geometry = new THREE.BoxGeometry(3 , 3, 3);
-    var material = new THREE.MeshBasicMaterial( {color: 0x3bb2d0} );
+    var material = new THREE.MeshBasicMaterial( {color: 0x4e95cf} );
     var pt = new THREE.Mesh(geometry, material);
     pt.position.set(location[0], location[1], location[2]);
+    pt.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
     return pt;
+}
+
+export function createHoverVoume(location: [number, number, number], scale: [number, number, number], lookAt: [number, number, number])
+{
+    const hoverVolume = new Potree.BoxVolume();
+    hoverVolume.name = "Visible Clipping Volume";
+    hoverVolume.scale.set(scale[0], scale[1], scale[2]);
+    hoverVolume.position.set(location[0], location[1], location[2]);
+    hoverVolume.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
+    hoverVolume.clip = true;
+    return hoverVolume;
 }
 
 export function calcLinkLength(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number) : number {

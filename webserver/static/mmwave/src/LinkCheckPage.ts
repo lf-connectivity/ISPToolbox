@@ -5,7 +5,11 @@ import {createLinkChart} from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
 import {createLinkProfile, findOverlaps, findLidarObstructions} from './LinkCalcUtils';
 import {updateObstructionsData} from './LinkObstructions';
-import {createHoverPoint, createOrbitAnimationPath, createLinkGeometry, calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath} from './LinkOrbitAnimation';
+import {
+    createHoverPoint, createOrbitAnimationPath, createLinkGeometry,
+    calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,
+    createHoverVoume
+} from './LinkOrbitAnimation';
 import {LinkMode, OverrideSimple, OverrideDirect} from './DrawingModes.js';
 import {calculateLookVector} from './HoverMoveLocation3DView';
 import {getAvailabilityOverlay} from './availabilityOverlay';
@@ -596,7 +600,7 @@ export class LinkCheckPage {
                 scene.scene.remove(this.hover3dDot);
             }
     
-            this.hover3dDot = createHoverPoint(lookAt);
+            this.hover3dDot = createHoverPoint(lookAt, [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h]);
             scene.scene.add(this.hover3dDot);
         } catch(err) {
         }

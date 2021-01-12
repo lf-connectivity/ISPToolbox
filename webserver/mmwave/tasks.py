@@ -214,7 +214,7 @@ def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
             resp['bb'] = bb
             resp['tx'] = tx_T
             resp['rx'] = rx_T
-            resp['datasets'] = f'USGS 3DEP LiDAR {name}, Google Elevation API'
+            resp['datasets'] = f'{name} & Google Elevation API'
         except Exception as e:
             resp['error'] = str(e)
         async_to_sync(channel_layer.group_send)(channel_name, resp)

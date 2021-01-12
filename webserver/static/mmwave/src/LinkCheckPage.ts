@@ -197,8 +197,8 @@ export class LinkCheckPage {
                             <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-lidar' ></span><p class='list-item'>LiDAR</p></div>
                             <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-terrain'></span><p class='list-item'>Terrain</p></div>
                             <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-obstruction'></span><p class='list-item'>LOS Obstructions</p></div>
-                        <p>Data Sources:</p>
-                        <p class='isptoolbox-data-source'>${response.data.datasets}</p>
+                            ${response.data.datasets ? `
+                            <p class='isptoolbox-data-source'>Data Sources: ${response.data.datasets}</p>`: '' }
                     </div>`
                 // @ts-ignore
                 ).tooltip('_fixTitle');

@@ -17,7 +17,7 @@ if settings.DEBUG:
 
 def createInfoCommand(url, ept_res=800.0, hexbin_edge_size=1000, hexbin_threshold=1):
     return shlex.split(
-        f'pdal info --all --driver readers.ept ' +
+        'pdal info --all --driver readers.ept ' +
         f'--readers.ept.resolution={ept_res} ' +
         '--readers.ept.threads=6 ' +
         f'--filters.hexbin.edge_size={hexbin_edge_size} ' +

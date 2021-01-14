@@ -28,6 +28,7 @@ class EPTLidarPointCloud(models.Model):
     url = models.URLField()
     boundary = gis_models.GeometryField()
     srs = models.IntegerField()
+    high_resolution_boundary = gis_models.GeometryField(null=True, blank=True, default=None)
 
 
 # unmanaged models

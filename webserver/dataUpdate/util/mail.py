@@ -6,11 +6,11 @@ from dataUpdate.config.credentials import CLIENT_EMAIL, NOTIFY_EMAIL
 
 
 # Sends notification email
-def sendNotifyEmail(subject, text):
+def sendNotifyEmail(subject, text, send_to=NOTIFY_EMAIL):
     contents = MIMEMultipart("alternative")
     contents["Subject"] = subject
     contents["From"] = CLIENT_EMAIL['EMAIL']
-    contents["To"] = NOTIFY_EMAIL
+    contents["To"] = send_to
     message = MIMEText(text, "plain")
     port = 465
     context = ssl.create_default_context()

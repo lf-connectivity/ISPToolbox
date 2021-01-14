@@ -19,6 +19,7 @@ from shapely.geometry import LineString as shapely_LineString
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
 from mmwave.models import EPTLidarPointCloud, TGLink
 from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine, createInvertedOverlay
+from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
 
 
 google_maps_samples_limit = 512
@@ -236,3 +237,11 @@ if settings.PROD:
         """
         loadBoundariesFromEntWine()
         createInvertedOverlay()
+
+    @periodic_task(run_every=(crontab(minute=0, hour=1)), name="add_high_resolution_boundary")
+    def addHighResolutionBoundaries():
+        """
+        This task automatically adds high resolution
+
+        """
+        updatePointCloudBoundariesTask()

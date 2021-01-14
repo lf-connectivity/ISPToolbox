@@ -57,7 +57,7 @@ def loadBoundariesFromEntWine(send_email_success=False, send_email_failure=True)
             s3storage = S3ManifestStorage()
             s3storage.save(PT_CLOUD_GEOJSON_S3_PATH, ContentFile(contents))
     except Exception as e:
-        if send_email_failure:
+        if send_email_failure and settings.PROD:
             sendNotifyEmail(UNSUCCESSFUL_UPDATE_SUBJECT, f'Error: {str(e)}')
 
     return new_point_clouds

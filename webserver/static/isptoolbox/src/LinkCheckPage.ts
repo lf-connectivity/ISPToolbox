@@ -15,6 +15,8 @@ import {calculateLookVector} from './HoverMoveLocation3DView';
 import {getAvailabilityOverlay} from './availabilityOverlay';
 import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
 import {LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
+import {LOSWSHandlers} from './LOSCheckWS';
+import type {LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse} from './LOSCheckWS';
 
 
 // @ts-ignore
@@ -50,9 +52,9 @@ export class LinkCheckPage {
     currentLinkHash : any;
 
     currentView: 'map' | '3d';
-    _elevation : any;
+    _elevation : Array<number>;
     _coords : any;
-    _lidar : any;
+    _lidar : Array<[number, number]>;
     fresnel_width: number;
     globalLinkAnimation : any;
     animationPlaying : boolean;
@@ -76,6 +78,8 @@ export class LinkCheckPage {
     currentMaterial : any;
     selectedFeatureID : string | null;
 
+    datasets : Map<LOSWSHandlers, string>;
+
     constructor(networkID : string, userRequestIdentity: string, radio_names : [string, string]){
         this.networkID = networkID;
         this.userRequestIdentity = userRequestIdentity;
@@ -87,6 +91,11 @@ export class LinkCheckPage {
         this.currentMaterial = null;
         this.fresnel_width = 1.;
         this.selectedFeatureID = null;
+
+        this._elevation = [];
+        this._lidar= [];
+
+        this.datasets = new Map();
 
         // Add Resize-Window Callback
         const resize_window = () => {
@@ -152,70 +161,8 @@ export class LinkCheckPage {
             this.moveLocation3DView.bind(this),
             this.mouseLeave.bind(this)
         );
-        const ws_low_res_callback = (msg_event : any) => {
-            try {
-                const response = {
-                    data: JSON.parse(msg_event.data)
-                };
-                this.link_chart.hideLoading();
-                $("#loading_spinner").addClass('d-none');
-                $("#los-chart-tooltip-button").removeClass('d-none');
-                if (response.data.error !== null) {
-                    $("#link-request-error-description").text(response.data.error);
-                }
-                if (response.data.lidar_profile === null && response.data.error === "Lidar data not available") {
-                } else {
-                    $("#3D-view-btn").removeClass('d-none');
-                }
-    
-                this.renderNewLinkProfile(response);
-                const tx_hgt = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
-                const rx_hgt = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1]; 
-                if(this.currentLinkHash !== response.data.hash)
-                {
-                    this.updateLidarRender(
-                        response.data.name,
-                        response.data.url,
-                        response.data.bb,
-                        response.data.tx,
-                        response.data.rx,
-                        tx_hgt,
-                        rx_hgt
-                    );
-                    this.currentLinkHash = response.data.hash;
-                } else {
-                    this.currentMaterial.elevationRange = [response.data.bb[4], response.data.bb[5]];
-                }
-                
-                this.updateLinkChart();
-                
-                this.link_chart.xAxis[0].update({title:{
-                    text: `Distance - resolution ${response.data.res}`
-                }});
-                $('#los-chart-tooltip-button').attr(
-                    "title",
-                    `<div class="los-chart-legend">
-                        <h5>Link Profile</h5>
-                            <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-los' ></span><p class='list-item'>LOS</p></div>
-                            <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-fresnel' ></span><p class='list-item'>Fresnel</p></div>
-                            <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-lidar' ></span><p class='list-item'>LiDAR</p></div>
-                            <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-terrain'></span><p class='list-item'>Terrain</p></div>
-                            <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-obstruction'></span><p class='list-item'>LOS Obstructions</p></div>
-                            ${response.data.datasets ? `
-                            <p class='isptoolbox-data-source'>Data Sources: ${response.data.datasets}</p>`: '' }
-                    </div>`
-                // @ts-ignore
-                ).tooltip('_fixTitle');
-                this.link_chart.redraw();
-                $("#link_chart").removeClass('d-none');
-            } catch(err) {
-                this.selected_feature = null;
-                $('#loading_failed_spinner').removeClass('d-none');
-                $("#link-request-error-description").text();
-                $("#link_chart").addClass('d-none');
-            }
-        }
-        this.profileWS = new LOSCheckWS(this.networkID, ws_low_res_callback);
+
+        this.profileWS = new LOSCheckWS(this.networkID, [this.ws_message_handler.bind(this)]);
         
         let initial_map_center = {
             'lon': (parseFloat(String($('#lng-0').val())) + parseFloat(String($('#lng-1').val()))) / 2.0,
@@ -654,28 +601,18 @@ export class LinkCheckPage {
         this.hover3dDot = null;
     }
     
-    renderNewLinkProfile(response : any){
+    renderNewLinkProfile(){
         // Check if we can update the chart
         if (this.link_chart != null) {
-            this._elevation = response.data.terrain_profile.map((pt: any) => { return pt.elevation; });
-            this._coords = response.data.terrain_profile.map(
-                (pt : any) => { return { lat: pt.lat, lng: pt.lng } }
-            );
-            this._lidar = response.data.lidar_profile;
-            const tx_h = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
-            const rx_h = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1];
-    
-            if (this._lidar == null) {
-                this.link_chart.series[0].setData(this._elevation);
-                this.link_chart.series[1].setData([]);
-                this.link_chart.yAxis[0].update({ min: Math.min(...this._elevation) });
-            } else {
-                this.link_chart.series[0].setData(this._elevation);
-                this.link_chart.series[1].setData(this._lidar);
+            if(this._elevation.length > 1 && this._lidar.length > 1) {
+                const tx_h = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
+                const rx_h = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1];
                 this.link_chart.yAxis[0].update({
                     min: Math.min(...[...this._lidar.map((x : any) => x[1]), tx_h, rx_h]),
                     max: Math.max(...[...this._lidar.map((x : any) => x[1]), tx_h, rx_h])
                 });
+            } else if (this._elevation.length > 1) {
+                this.link_chart.yAxis[0].update({ min: Math.min(...this._elevation) });
             }
         }
     };
@@ -870,6 +807,114 @@ export class LinkCheckPage {
                 setClippingVolume(bb);
                 this.addLink(tx, rx, tx_h, rx_h);
             });
+        }
+    }
+
+    updateLegend(){
+        const sources : Array<string>= [];
+        this.datasets.forEach((v, k)=>{ sources.push(v);})
+        $('#los-chart-tooltip-button').attr(
+            "title",
+            `<div class="los-chart-legend">
+                <h5>Link Profile</h5>
+                    <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-los' ></span><p class='list-item'>LOS</p></div>
+                    <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-fresnel' ></span><p class='list-item'>Fresnel</p></div>
+                    <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-lidar' ></span><p class='list-item'>LiDAR</p></div>
+                    <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-terrain'></span><p class='list-item'>Terrain</p></div>
+                    <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-obstruction'></span><p class='list-item'>LOS Obstructions</p></div>
+                    ${this.datasets.size ? `
+                    <p class='isptoolbox-data-source'>Data Sources: ${sources.join(', ')}</p>`: '' }
+            </div>`
+        // @ts-ignore
+        ).tooltip('_fixTitle');
+    }
+
+    // Websocket Message Callback Handlers
+    ws_message_handler(response : LOSCheckResponse) : void {
+        switch(response.handler) {
+            case LOSWSHandlers.LIDAR:
+                this.ws_lidar_callback(response);
+                break;
+            case LOSWSHandlers.TERRAIN:
+                this.ws_terrain_callback(response);
+                break;
+            case LOSWSHandlers.LINK:
+                this.ws_link_callback(response);
+                break;
+            default:
+                break;
+        }
+    }
+    ws_terrain_callback(response: TerrainResponse) : void{
+        this._elevation = response.terrain_profile.map((pt: any) => { return pt.elevation; });
+        this.link_chart.series[0].setData(this._elevation);
+        this._coords = response.terrain_profile.map(
+            (pt : any) => { return { lat: pt.lat, lng: pt.lng } }
+        );
+        this.renderNewLinkProfile();
+        this.updateLinkChart();
+
+        this.link_chart.redraw();        
+        this.datasets.set(response.handler, response.source);
+        this.updateLegend();
+    }
+
+    ws_lidar_callback(response : LidarResponse) : void {
+        this._lidar = response.lidar_profile;
+
+        if (response.error !== null) {
+            $("#3D-view-btn").addClass('d-none');
+        } else {
+            $("#3D-view-btn").removeClass('d-none');
+            if(this.currentLinkHash !== response.hash && this._elevation.length > 1) {
+                const tx_hgt = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
+                const rx_hgt = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1]; 
+                this.updateLidarRender(
+                    response.name,
+                    response.url,
+                    response.bb,
+                    response.tx,
+                    response.rx,
+                    tx_hgt,
+                    rx_hgt
+                );
+                this.currentLinkHash = response.hash;
+            } else {
+                this.currentMaterial.elevationRange = [response.bb[4], response.bb[5]];
+            }
+        }
+        this.link_chart.series[1].setData(this._lidar);
+        this.link_chart.xAxis[0].update({title:{
+            text: `Distance - resolution ${response.res} m`
+        }});
+        this.renderNewLinkProfile();
+        this.updateLinkChart();
+
+        this.link_chart.redraw();
+
+        this.datasets.set(response.handler, response.source);
+        this.updateLegend();
+    }
+
+    ws_link_callback(response: LinkResponse) : void{
+        this.link_chart.hideLoading();
+        $("#loading_spinner").addClass('d-none');
+        $("#los-chart-tooltip-button").removeClass('d-none');
+        if (response.error !== null) {
+            $("#link-request-error-description").text(response.error);
+        }
+        this.link_chart.redraw();
+        $("#link_chart").removeClass('d-none');
+        this.updateLegend();
+    }
+
+    ws_low_res_callback(msg_event : any){
+        try {
+        } catch(err) {
+            this.selected_feature = null;
+            $('#loading_failed_spinner').removeClass('d-none');
+            $("#link-request-error-description").text();
+            $("#link_chart").addClass('d-none');
         }
     }
 }

@@ -32,8 +32,8 @@ RUN mkdir -p /usr/src/app
 
 WORKDIR /usr/src/app
 
-# Install pdal from conda-forge in the base conda image
-RUN conda install -c conda-forge -y pdal=2.2.0 python-pdal=2.3.5 gdal
+# Install pdal from conda-forge in the base conda image (note: python-pdal=2.3.6 was causing issues with los profile lidar)
+RUN conda install -c conda-forge -y pdal=2.2.0 python-pdal=2.3.5 gdal 
 
 ADD requirements.txt  /usr/src/app
 # Build PDAL for point cloud operations

@@ -4,28 +4,55 @@
  *
  **/
 
-type LOSCheckResponse =  {
-
+export enum LOSWSHandlers {
+    LIDAR = 'lidar',
+    TERRAIN = 'terrain',
+    LINK = 'link'
 }
-interface LOSCallback {
-    (response : LOSCheckResponse) : void
-};
 
-type LOSCheckWSCallbacks = {
-    'ptp' : LOSCallback
+export type LinkResponse = {
+    handler: LOSWSHandlers.LINK,
+    error : string | null,
+    hash: string
+}
+
+export type TerrainResponse = {
+    handler: LOSWSHandlers.TERRAIN,
+    error: string | null,
+    hash: string,
+    source: string | null,
+    terrain_profile: Array<{elevation: number, lat : number, lng: number}>,
+}
+
+export type LidarResponse = {
+    handler: LOSWSHandlers.LIDAR,
+    error: string | null,
+    hash: string,
+    source : string| null,
+    lidar_profile: Array<[number, number]>,
+    res: string,
+    name: string,
+    url: string,
+    bb : Array<number>,
+    rx : [number, number],
+    tx : [number, number],
+}
+
+export type LOSCheckResponse =  LinkResponse | TerrainResponse | LidarResponse;
+
+interface LOSCheckWSCallbacks {
+    (message : LOSCheckResponse) : void
 }
 class LOSCheckWS {
     ws : WebSocket;
     networkName : string;
     pendingRequests : Array<string> = [];
-    callbacks: LOSCheckWSCallbacks = {
-        'ptp' : () => null,
-    };
+    message_handlers: Array<LOSCheckWSCallbacks>;
     hash : string = '';
-    constructor(networkName : string, callback : LOSCallback){
+    constructor(networkName : string, message_handlers : Array<LOSCheckWSCallbacks>){
         this.networkName = networkName;
+        this.message_handlers = message_handlers;
         this.connect();
-        this.callbacks['ptp'] = callback;
     }
 
     connect(){
@@ -33,9 +60,6 @@ class LOSCheckWS {
         const domain = location.protocol !== 'https:' ? location.host : 'isptoolbox.io';
         this.ws = new WebSocket(protocol + domain + '/ws/los/' + this.networkName + '/');
 
-        this.ws.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-        };
 
         this.ws.onclose = (e) => {
             setTimeout(()=> {
@@ -44,17 +68,17 @@ class LOSCheckWS {
         }
 
         this.ws.onopen = (e) => {
-            this.pendingRequests.map(req => {
-                this.ws.send(req);
-            })
-            this.pendingRequests = [];
+            while(this.pendingRequests.length > 0) {
+                this.ws.send(this.pendingRequests.pop());
+            }
         }
 
         this.ws.onmessage = (e) => {
-            const resp = JSON.parse(e.data);
-            if(resp.hash === this.hash)
-            {
-                this.callbacks['ptp'](e);
+            const resp = JSON.parse(e.data) as LOSCheckResponse;
+            if(resp.hash === this.hash){
+                this.message_handlers.forEach((handler)=>{
+                    handler(resp);
+                })
             }
         }
     }
@@ -63,14 +87,13 @@ class LOSCheckWS {
         const hash = [String(tx), String(rx), fbid].join(',');
         this.hash = hash;
         const request = JSON.stringify({
-            msg : 'ptp',
+            msg : 'link',
             tx : tx,
             rx : rx,
             fbid: fbid,
             hash: hash
         });
-        if(this.ws.readyState !== WebSocket.OPEN)
-        {
+        if(this.ws.readyState !== WebSocket.OPEN) {
             this.pendingRequests.push(request);
         } else {
             this.ws.send(request);

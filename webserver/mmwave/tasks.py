@@ -24,7 +24,7 @@ from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudB
 
 google_maps_samples_limit = 512
 num_samples_per_m = 1
-link_distance_limit = 10000
+LINK_DISTANCE_LIMIT = 10000
 
 
 class LidarResolution(IntEnum):
@@ -164,6 +164,116 @@ def getBuildingProfile(tx, rx):
     return building_profile
 
 
+def genLinkDistance(tx, rx):
+    requested_link_dist = geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters
+    return requested_link_dist
+
+
+@shared_task
+def getLinkInfo(network_id, data):
+    """
+        Validates the link the client sends
+
+        if link is valid - start up async tasks to send terrain / profile
+        else - send error message
+    """
+    resp = {
+        'hash': data.get('hash', ''),
+        'error': None,
+        'type': 'standard.message',
+        'handler': 'link',
+    }
+    channel_layer = get_channel_layer()
+    channel_name = 'los_check_%s' % network_id
+
+    try:
+        tx = Point([float(f) for f in data.get('tx', [])])
+        rx = Point([float(f) for f in data.get('rx', [])])
+        link_dist_m = genLinkDistance(tx, rx)
+        if link_dist_m > LINK_DISTANCE_LIMIT:
+            raise Exception(
+                f'''Link too long: limit {LINK_DISTANCE_LIMIT/1000 } km - link {round(link_dist_m / 1000, 3)} km'''
+            )
+        else:
+            getTerrainProfile.delay(network_id, data)
+            getLiDARProfile.delay(network_id, data)
+    except Exception as e:
+        resp['error'] = str(e)
+
+    async_to_sync(channel_layer.group_send)(channel_name, resp)
+
+
+@shared_task
+def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
+    """
+        Async Task to load LiDAR data profile and send to client,
+        calls progressively higher resolution lidar data
+    """
+    resp = {
+        'hash': data.get('hash', ''),
+        'error': None,
+        'lidar_profile': [],
+        'points': 0,
+        'url': None,
+        'source': 'No LiDAR Available',
+        'bb': [],
+        'tx': {},
+        'rx': {},
+        'datasets': '',
+        'res': LIDAR_RESOLUTION_DEFAULTS[resolution],
+        "type": 'standard.message',
+        'handler': 'lidar'
+    }
+    channel_layer = get_channel_layer()
+    channel_name = 'los_check_%s' % network_id
+    try:
+        tx = Point([float(f) for f in data.get('tx', [])])
+        rx = Point([float(f) for f in data.get('rx', [])])
+        lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
+            tx,
+            rx,
+            LIDAR_RESOLUTION_DEFAULTS[resolution]
+        )
+        resp['lidar_profile'] = lidar_profile
+        resp['url'] = ept_path
+        resp['source'] = name
+        resp['bb'] = bb
+        resp['tx'] = tx_T
+        resp['rx'] = rx_T
+    except Exception as e:
+        resp['error'] = str(e)
+    if resp['error'] is None and resolution != LidarResolution.ULTRA:
+        getLiDARProfile.delay(network_id, data, resolution + 1)
+    async_to_sync(channel_layer.group_send)(channel_name, resp)
+
+
+@shared_task
+def getTerrainProfile(network_id, data):
+    """
+        This async task gets the elevation profile between point A and B from Google's
+        Elevation API
+    """
+    resp = {
+        'hash': data.get('hash', ''),
+        'error': None,
+        'source': 'Google Elevation API',
+        'terrain_profile': [],
+        'type': 'standard.message',
+        'handler': 'terrain'
+    }
+    channel_layer = get_channel_layer()
+    channel_name = 'los_check_%s' % network_id
+
+    try:
+        tx = Point([float(f) for f in data.get('tx', [])])
+        rx = Point([float(f) for f in data.get('rx', [])])
+        resp['terrain_profile'] = getElevationProfile(tx, rx)
+    except Exception as e:
+        resp['error'] = str(e)
+
+    async_to_sync(channel_layer.group_send)(channel_name, resp)
+
+
 @shared_task
 def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
     resp = {
@@ -193,10 +303,10 @@ def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
         resp['res'] = f'{LIDAR_RESOLUTION_DEFAULTS[resolution]} m'
         # Create Object to Log User Interaction
         TGLink(tx=tx, rx=rx, fbid=fbid).save()
-        requested_link_dist = geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters
-        if requested_link_dist > link_distance_limit:
+        link_dist_m = genLinkDistance(tx, rx)
+        if link_dist_m > LINK_DISTANCE_LIMIT:
             resp['error'] = f'''Link too long: limit {
-                link_distance_limit/1000 } km - link {round(requested_link_dist / 1000, 3)} km'''
+                LINK_DISTANCE_LIMIT/1000 } km - link {round(link_dist_m / 1000, 3)} km'''
             async_to_sync(channel_layer.group_send)(channel_name, resp)
             return None
 

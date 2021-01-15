@@ -1,0 +1,24 @@
+@import ../theme
+
+.collapse-button
+    position: absolute
+    z-index: 1
+    left: 10px
+    top: -22px
+    a
+        background-color: $brand-theme-color
+        padding: 10px  14px 8px 14px
+        display: flex
+        align-items: center
+    &--icon
+        display: flex
+    &--empty-bar
+        background-color: $brand-theme-color
+        height: 20px
+        display: flex
+    [data-toggle="collapse"]
+        &.collapsed .if-not-collapsed
+            display: none
+        &:not(.collapsed) .if-collapsed
+            display: none
+    

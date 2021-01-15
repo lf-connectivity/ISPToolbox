@@ -10,8 +10,12 @@ from django.conf import settings
 
 PT_CLOUD_GEOJSON_S3_PATH = 'pt_clouds.geojson'
 PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH = 'pt_clouds_overlay.geojson'
+HIGH_RES_PT_CLOUD_GEOJSON_S3_PATH = 'high_res_pt_clouds.geojson'
+HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH = 'high_res_pt_clouds_overlay.geojson'
 SUCCESSFUL_UPDATE_SUBJECT = "[Automated Message][Success] Automated Point Cloud Update Successful"
 UNSUCCESSFUL_UPDATE_SUBJECT = "[Automated Message][Failure] Automated Point Cloud Update Failed"
+
+GLOBAL_BOUNDING_BOX = [-180, -90, 180, 90]
 
 
 def loadBoundariesFromEntWine(send_email_success=False, send_email_failure=True):
@@ -63,17 +67,36 @@ def loadBoundariesFromEntWine(send_email_success=False, send_email_failure=True)
     return new_point_clouds
 
 
-def createInvertedOverlay():
+def createInvertedOverlay(
+            use_high_resolution_boundaries=False,
+            invert=True
+        ):
+    """
+        Gets all the point cloud boundaries from the database, creates an inverted overlay
+        uploads to S3
+    """
     clouds = EPTLidarPointCloud.objects.all()
-    gc = GeometryCollection([cld.boundary for cld in clouds])
-    bounding_box = gc.extent
-    extent = Polygon.from_bbox(bounding_box)
-    inverted_overlay = extent.difference(gc)
-    data = {'bb': bounding_box, 'overlay': json.loads(inverted_overlay.json)}
+    gc = GeometryCollection(
+        [
+            cld.high_resolution_boundary if (
+                    use_high_resolution_boundaries and cld.high_resolution_boundary is not None
+                ) else cld.boundary
+            for cld in clouds
+        ]
+    )
+    overlay = gc
+    if invert:
+        extent = Polygon.from_bbox(GLOBAL_BOUNDING_BOX)
+        overlay = extent.difference(gc)
+
+    data = json.loads(overlay.json)
     contents = json.dumps(data).encode()
     if settings.PROD:
+        output_path = PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
+        if use_high_resolution_boundaries:
+            output_path = HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
         s3storage = S3ManifestStorage()
-        s3storage.save(PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH, ContentFile(contents))
+        s3storage.save(output_path, ContentFile(contents))
 
 
 if __name__ == "__main__":

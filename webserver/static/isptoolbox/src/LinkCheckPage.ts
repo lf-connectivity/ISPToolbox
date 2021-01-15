@@ -12,7 +12,7 @@ import {
 } from './LinkOrbitAnimation';
 import {LinkMode, OverrideSimple, OverrideDirect} from './DrawingModes.js';
 import {calculateLookVector} from './HoverMoveLocation3DView';
-import {getAvailabilityOverlay} from './availabilityOverlay';
+import LidarAvailabilityLayer from './availabilityOverlay';
 import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
 import {LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
 import {LOSWSHandlers} from './LOSCheckWS';
@@ -47,6 +47,8 @@ export class LinkCheckPage {
     Draw : any;
     selected_feature : any;
     link_chart : any;
+
+    lidarAvailabilityLayer : LidarAvailabilityLayer;
 
     profileWS : LOSCheckWS;
     currentLinkHash : any;
@@ -265,49 +267,8 @@ export class LinkCheckPage {
                 }
             });
 
-            getAvailabilityOverlay(
-                (data)=>{
-                    this.map.setMaxBounds(data['bb']);
-                    this.map.addSource('lidar_availability', {
-                        'type': 'geojson',
-                        'data': data['overlay']
-                    });
-                    this.map.addLayer({
-                        'id': 'lidar_availability_layer',
-                        'type': 'fill',
-                        'source': 'lidar_availability',
-                        'paint': {
-                            'fill-color': '#687B8B',
-                            'fill-opacity': 0.77
-                        }
-                    });
-                    var popup = new mapboxgl.Popup({
-                        closeButton: false,
-                        closeOnClick: false,
-                        className: "lidar-availability-popup"
-                    });
-                         
-                    this.map.on('mouseenter', 'lidar_availability_layer', (e: any) => {
-                        // Change the cursor style as a UI indicator.
-                        this.map.getCanvas().style.cursor = 'pointer';
-                        var description = 'LiDAR Data Not Available Here'
-    
-                         
-                        // Populate the popup and set its coordinates
-                        // based on the feature found.
-                        popup.setLngLat(e.lngLat).setHTML(description).addTo(this.map);
-                    });
-    
-                    this.map.on('mousemove', 'lidar_availability_layer', (e : any) => {
-                        popup.setLngLat(e.lngLat);
-                    });
-                         
-                    this.map.on('mouseleave', 'lidar_availability_layer', (e : any)=> {
-                        this.map.getCanvas().style.cursor = '';
-                        popup.remove();
-                    });
-                }
-            );
+            this.lidarAvailabilityLayer = new LidarAvailabilityLayer(this.map);
+
             // Add Data Sources to Help User Understand Map
             this.map.addSource(SELECTED_LINK_SOURCE, {
                 'type': 'geojson',
@@ -899,22 +860,20 @@ export class LinkCheckPage {
     ws_link_callback(response: LinkResponse) : void{
         this.link_chart.hideLoading();
         $("#loading_spinner").addClass('d-none');
-        $("#los-chart-tooltip-button").removeClass('d-none');
+
+
         if (response.error !== null) {
             $("#link-request-error-description").text(response.error);
-        }
-        this.link_chart.redraw();
-        $("#link_chart").removeClass('d-none');
-        this.updateLegend();
-    }
-
-    ws_low_res_callback(msg_event : any){
-        try {
-        } catch(err) {
             this.selected_feature = null;
             $('#loading_failed_spinner').removeClass('d-none');
             $("#link-request-error-description").text();
             $("#link_chart").addClass('d-none');
+        } else {
+            $("#los-chart-tooltip-button").removeClass('d-none');
+            this.link_chart.redraw();
+            $("#link_chart").removeClass('d-none');
+            this.updateLegend();
         }
+
     }
 }

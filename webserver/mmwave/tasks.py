@@ -348,10 +348,16 @@ if settings.PROD:
         loadBoundariesFromEntWine()
         createInvertedOverlay()
 
-    @periodic_task(run_every=(crontab(minute=0, hour=1)), name="add_high_resolution_boundary")
+    @periodic_task(run_every=(crontab(minute=0, hour=16)), name="add_high_resolution_boundary")
     def addHighResolutionBoundaries():
         """
-        This task automatically adds high resolution
+        This task updates the lidar boundaries and availability overlay
+
+        1. computes the high resolution boundaries for PointClouds that do not have it and stores to database
+        2. calculates the lidar availability overlay
+        3. uploads the availability overlay to mapbox as a tileset
 
         """
         updatePointCloudBoundariesTask()
+        createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
+        # TODO (achong) - upload new overlay to mapbox tileset, store in database as overlay object

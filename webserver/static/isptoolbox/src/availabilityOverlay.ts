@@ -1,12 +1,62 @@
-export function getAvailabilityOverlay(callback : (arg0: any) => void) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-        // Typical action to be performed when the document is ready:
-            var geojson = JSON.parse(xhttp.response);
-            callback(geojson);
-        }
-    };
-    xhttp.open("GET","https://static.isptoolbox.io/static/pt_clouds_overlay.geojson", true);
-    xhttp.send();
+import * as MapboxGL from "mapbox-gl";
+
+//@ts-ignore
+const mapboxgl = window.mapboxgl;
+
+const LOW_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'low-res-lidar-boundary-source';
+const LOW_RESOLUTION_LIDAR_AVAILABILITY_LAYER = 'low-res-lidar-boundary-layer';
+const HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'high-res-lidar-boundary-source';
+const HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER =  'high-res-lidar-boundary-layer';
+const AVAILABILITY_PAINT_FILL_STYLE = {
+    'fill-color': '#687B8B',
+    'fill-opacity': 0.77
+};
+
+export default class LidarAvailabilityLayer{
+    map: MapboxGL.Map;
+    popup: MapboxGL.Popup;
+    constructor(map: MapboxGL.Map,){
+        this.map = map;
+        this.popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            className: "lidar-availability-popup"
+        });
+        this.getHighResolutionTileSet();
+    }
+
+    getHighResolutionTileSet(){
+        this.map.addSource(HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE, {
+            type: 'vector',
+            url: 'mapbox://alexychong.cmj0deim' //TODO: replace with overlay url object from server
+        });
+        this.map.addLayer({
+            'id': HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER,
+            'type': 'fill',
+            'source': HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE,
+            'source-layer': 'test_geojson_upload_mapbox-ajehdb', // TODO: replace with source-layer from overlay object django
+            'layout' : {},
+            'paint': AVAILABILITY_PAINT_FILL_STYLE
+        });
+        this.map.on('mouseenter', HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER, (e: any) => {
+            // Change the cursor style as a UI indicator.
+            this.map.getCanvas().style.cursor = 'pointer';
+            var description = 'LiDAR Data Not Available Here'
+
+             
+            // Populate the popup and set its coordinates
+            // based on the feature found.
+            this.popup.setLngLat(e.lngLat).setHTML(description).addTo(this.map);
+        });
+
+        this.map.on('mousemove', HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER, (e : any) => {
+            this.popup.setLngLat(e.lngLat);
+        });
+             
+        this.map.on('mouseleave', HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER, (e : any)=> {
+            this.map.getCanvas().style.cursor = '';
+            this.popup.remove();
+        });
+    }
+
 }

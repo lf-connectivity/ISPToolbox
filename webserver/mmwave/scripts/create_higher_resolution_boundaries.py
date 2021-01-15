@@ -8,12 +8,6 @@ import subprocess
 import json
 import shlex
 
-if settings.DEBUG:
-    logging.basicConfig(
-        format='%(levelname)s:%(message)s',
-        level=logging.DEBUG
-    )
-
 
 def createInfoCommand(url, ept_res=800.0, hexbin_edge_size=1000, hexbin_threshold=1):
     return shlex.split(
@@ -84,5 +78,3 @@ def updatePointCloudBoundariesTask():
             '[Automated Message][Update LiDAR Boundaries]',
             result_msg
         )
-    else:
-        print(result_msg)

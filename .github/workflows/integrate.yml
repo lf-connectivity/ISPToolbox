@@ -34,7 +34,7 @@ jobs:
         docker rm $(docker ps -a -f "name=isptoolbox_" -q)
     - name: Build Static File Manifest
       run: |
-        rm -r webserver/static/mmwave/build/
+        rm -r webserver/static/isptoolbox/build/
         make static_prod
     - name: Auto Commit staticfiles.json Manifest
       uses: stefanzweifel/git-auto-commit-action@v4

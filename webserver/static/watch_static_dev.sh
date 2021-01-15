@@ -1,8 +1,8 @@
 npm install -g sass
-cd /usr/src/app/mmwave
+cd /usr/src/app/isptoolbox
 npm install
 cd /usr/src/app/potree
 npm install
 (cd /usr/src/app/potree; npm run start) &
-(cd /usr/src/app/mmwave; npm run watch) & 
-(cd /usr/src/app/mmwave; sass --watch src/sass:build/stylesheets)
+(cd /usr/src/app/isptoolbox; npm run watch) & 
+(cd /usr/src/app/isptoolbox; sass --watch src/sass:build/stylesheets)

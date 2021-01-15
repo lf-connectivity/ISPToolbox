@@ -1,0 +1,62 @@
+
+ @font-face {
+    font-family: 'Basis Grotesque Pro Mono';
+    src: url('/static/isptoolbox/fonts/BasisGrotesquePro-Mono.eot');
+    src: local('Basis Grotesque Pro Mono'), local('BasisGrotesquePro-Mono'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Mono.woff2') format('woff2'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Mono.woff') format('woff'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Mono.ttf') format('truetype'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Mono.eot') format('embedded-opentype');
+    font-weight: 100;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Basis Grotesque Pro';
+    src: url('/static/isptoolbox/fonts/BasisGrotesquePro-Light.eot');
+    src: local('Basis Grotesque Pro Light'), local('BasisGrotesquePro-Light'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Light.woff2') format('woff2'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Light.woff') format('woff'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Light.ttf') format('truetype'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Light.eot');
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Basis Grotesque Pro';
+    src: url('/static/isptoolbox/fonts/BasisGrotesquePro-Regular.eot');
+    src: local('Basis Grotesque Pro'), local('BasisGrotesquePro-Regular'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Regular.woff2') format('woff2'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Regular.woff') format('woff'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Regular.ttf') format('truetype'),
+      url('/static/isptoolbox/fonts/BasisGrotesquePro-Regular.eot')
+        format('embedded-opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  body {
+      font-family: 'Basis Grotesque Pro', Helvetica, Arial, sans-serif ;
+  }
+  
+  .basisGrotesqueLight {
+    font-family: 'Basis Grotesque Pro', Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  .basisGrotesqueRegular {
+    font-family: 'Basis Grotesque Pro', Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  .basisGrotesqueMono {
+    font-family: 'Basis Grotesque Pro Mono', 'SFMono-Regular', 'Liberation Mono',
+      Courier, monospace;
+    font-weight: 100;
+    font-style: normal;
+    letter-spacing: 0.4px;
+  }
+  

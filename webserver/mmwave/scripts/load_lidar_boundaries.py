@@ -91,12 +91,14 @@ def createInvertedOverlay(
 
     data = json.loads(overlay.json)
     contents = json.dumps(data).encode()
+    file_obj = ContentFile(contents)
     if settings.PROD:
         output_path = PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
         if use_high_resolution_boundaries:
             output_path = HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
         s3storage = S3ManifestStorage()
-        s3storage.save(output_path, ContentFile(contents))
+        s3storage.save(output_path, file_obj)
+    return file_obj
 
 
 if __name__ == "__main__":

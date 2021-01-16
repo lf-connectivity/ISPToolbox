@@ -155,6 +155,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+MAPBOX_ACCESS_TOKEN_PUBLIC = 'pk.eyJ1IjoiaXNwdG9vbGJveCIsImEiOiJja2p5eHd1aGcwMjhoMm5wcGkxdnl4N2htIn0.cLO8vp0k2kXclp4CNzwWhQ'
+
 MIDDLEWARE = [
     'IspToolboxApp.middleware.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',

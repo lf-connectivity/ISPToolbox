@@ -20,6 +20,7 @@ from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
 from mmwave.models import EPTLidarPointCloud, TGLink
 from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine, createInvertedOverlay
 from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
+from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
 
 
 google_maps_samples_limit = 512
@@ -346,9 +347,10 @@ if settings.PROD:
 
         """
         loadBoundariesFromEntWine()
-        createInvertedOverlay()
+        overlay = createInvertedOverlay()
+        uploadNewTileset(overlay, 'lowreslidarboundary')
 
-    @periodic_task(run_every=(crontab(minute=0, hour=16)), name="add_high_resolution_boundary")
+    @periodic_task(run_every=(crontab(minute=0, hour=20)), name="add_high_resolution_boundary")
     def addHighResolutionBoundaries():
         """
         This task updates the lidar boundaries and availability overlay
@@ -359,5 +361,6 @@ if settings.PROD:
 
         """
         updatePointCloudBoundariesTask()
-        createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
+        overlay = createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
+        uploadNewTileset(overlay, 'highreslidarboundary')
         # TODO (achong) - upload new overlay to mapbox tileset, store in database as overlay object

@@ -1,5 +1,7 @@
 import requests
 import json
+
+from isptoolbox_storage.mapbox.upload_tileset import convertGeometryToGeojsonMapbox
 from mmwave.models import EPTLidarPointCloud
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Polygon
 from dataUpdate.util.mail import sendNotifyEmail
@@ -90,7 +92,8 @@ def createInvertedOverlay(
         overlay = extent.difference(gc)
 
     data = json.loads(overlay.json)
-    contents = json.dumps(data).encode()
+    fc = convertGeometryToGeojsonMapbox(data)
+    contents = json.dumps(fc).encode()
     file_obj = ContentFile(contents)
     if settings.PROD:
         output_path = PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH

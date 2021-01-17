@@ -303,14 +303,7 @@ export class LinkCheckPage {
                 'type': 'geojson',
                 'data': {
                     'type': 'FeatureCollection',
-                    'features': [
-                        {
-                            'type' : 'Feature',
-                            'properties' : {},
-                            'geometry': {'type': 'Point',
-                            'coordinates': [0, 0]}
-                        }
-                    ]
+                    'features': []
                 }
             });
     

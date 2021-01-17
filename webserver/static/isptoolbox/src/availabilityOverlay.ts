@@ -7,6 +7,8 @@ const LOW_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'low-res-lidar-boundary-source'
 const LOW_RESOLUTION_LIDAR_AVAILABILITY_LAYER = 'low-res-lidar-boundary-layer';
 const HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'high-res-lidar-boundary-source';
 const HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER =  'high-res-lidar-boundary-layer';
+const MAPBOX_OVERLAY_URL = 'isptoolbox.lowreslidar';
+const MAPBOX_OVERLAY_LAYER = 'original';
 const AVAILABILITY_PAINT_FILL_STYLE = {
     'fill-color': '#687B8B',
     'fill-opacity': 0.77
@@ -28,13 +30,13 @@ export default class LidarAvailabilityLayer{
     getHighResolutionTileSet(){
         this.map.addSource(HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE, {
             type: 'vector',
-            url: 'mapbox://alexychong.cmj0deim' //TODO: replace with overlay url object from server
+            url: `mapbox://${MAPBOX_OVERLAY_URL}` //TODO: replace with overlay url object from server
         });
         this.map.addLayer({
             'id': HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER,
             'type': 'fill',
             'source': HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE,
-            'source-layer': 'test_geojson_upload_mapbox-ajehdb', // TODO: replace with source-layer from overlay object django
+            'source-layer': MAPBOX_OVERLAY_LAYER, // TODO: replace with source-layer from overlay object django
             'layout' : {},
             'paint': AVAILABILITY_PAINT_FILL_STYLE
         });

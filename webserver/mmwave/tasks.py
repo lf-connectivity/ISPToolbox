@@ -363,4 +363,3 @@ if settings.PROD:
         updatePointCloudBoundariesTask()
         overlay = createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
         uploadNewTileset(overlay, 'highreslidarboundary')
-        # TODO (achong) - upload new overlay to mapbox tileset, store in database as overlay object

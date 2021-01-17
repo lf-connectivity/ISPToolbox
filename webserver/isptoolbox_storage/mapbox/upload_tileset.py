@@ -3,6 +3,25 @@ import boto3
 from django.conf import settings
 
 
+def convertGeometryToGeojsonMapbox(geometry):
+    """
+        Converts geometry into a format mapbox upload will accept
+
+        Alternatively you can use the serializer in geojson mode
+        `https://docs.djangoproject.com/en/3.1/ref/contrib/gis/serializers/`
+    """
+    return {
+        'type': 'FeatureCollection',
+        'features': [
+            {
+                'type': 'Feature',
+                'geometry': geometry,
+                'properties': {}
+            }
+        ]
+    }
+
+
 def uploadNewTileset(geojson_data, tileset_name):
     """
         https://docs.mapbox.com/api/maps/uploads/

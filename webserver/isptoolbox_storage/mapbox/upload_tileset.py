@@ -1,6 +1,10 @@
 import requests
 import boto3
 from django.conf import settings
+from functools import reduce
+from shapely.geometry import box, Polygon, MultiPolygon, GeometryCollection
+from shapely.geometry import shape
+from shapely.geometry import mapping
 
 
 def convertGeometryToGeojsonMapbox(geometry):
@@ -65,3 +69,109 @@ def uploadNewTileset(geojson_data, tileset_name):
         # Update Overlay to Point to new endpoint
     except Exception as e:
         return str(e)
+
+
+def prepareGeoJSONUploadMapbox(geojson):
+    """
+        Splits large geojson into smaller features to make tiling process faster
+
+        flattens into feature collection with properties member
+    """
+    shapely_geom = shape(geojson)
+    res = katana(shapely_geom, 3)  # 3degrees (lat, lon) is used as the threshold
+    gc = GeometryCollection(res)
+    data_out = mapping(gc)
+    feats = flatten(data_out)
+    return {
+        'type': 'FeatureCollection',
+        'features': [
+            {
+                'type': 'Feature',
+                'geometry': feat,
+                'properties': {}
+            } for feat in feats
+        ]
+    }
+
+
+def katana(geometry, threshold, count=0):
+    """Split a Polygon into two parts across it's shortest dimension"""
+    bounds = geometry.bounds
+    width = bounds[2] - bounds[0]
+    height = bounds[3] - bounds[1]
+    if max(width, height) <= threshold or count == 250:
+        # either the polygon is smaller than the threshold, or the maximum
+        # number of recursions has been reached
+        return [geometry]
+    if height >= width:
+        # split left to right
+        a = box(bounds[0], bounds[1], bounds[2], bounds[1]+height/2)
+        b = box(bounds[0], bounds[1]+height/2, bounds[2], bounds[3])
+    else:
+        # split top to bottom
+        a = box(bounds[0], bounds[1], bounds[0]+width/2, bounds[3])
+        b = box(bounds[0]+width/2, bounds[1], bounds[2], bounds[3])
+    result = []
+    for d in (a, b,):
+        c = geometry.intersection(d)
+        if not isinstance(c, GeometryCollection):
+            c = [c]
+        for e in c:
+            if isinstance(e, (Polygon, MultiPolygon)):
+                result.extend(katana(e, threshold, count+1))
+    if count > 0:
+        return result
+    # convert multipart into singlepart
+    final_result = []
+    for g in result:
+        if isinstance(g, MultiPolygon):
+            final_result.extend(g)
+        else:
+            final_result.append(g)
+    return final_result
+
+
+def flatten(geojson):
+    """
+        Function to flatten geojson
+
+            Parameters:
+                geojson (dict): geojson dictionary
+    """
+    obj_type = geojson.get('type', None)
+    print(obj_type)
+
+    if(obj_type == 'FeatureCollection'):
+        geojson['features'] = reduce(lambda mem, feature: mem + feature, map(flatten, geojson['features']))
+        return geojson
+    elif(obj_type == 'Feature'):
+        if (not geojson['geometry']):
+            return [geojson]
+        return map(flatten_helper(geojson), flatten(geojson['geometry']))
+    elif(obj_type == 'MultiPoint'):
+        return map(lambda x: {'type': "Point", 'coordinates': x}, geojson['coordinates'])
+    elif(obj_type == 'MultiPolygon'):
+        print(obj_type)
+        return map(lambda x: {'type': "Polygon", 'coordinates': x}, geojson['coordinates'])
+    elif(obj_type == "MultiLineString"):
+        return map(lambda x: {'type': "LineString", 'coordinates': x}, geojson['coordinates'])
+    elif(obj_type == "GeometryCollection"):
+        return reduce(lambda l, geoms: l + geoms, map(flatten, geojson['geometries']))
+    else:
+        return [geojson]
+
+
+def flatten_helper(geojson):
+    """
+        Helper function for flatten
+    """
+    def helper_func(geom):
+        data = {
+                'type': "Feature",
+                'properties': geojson['properties'],
+                'geometry': geom
+            }
+        if (geojson.get('id', None)):
+            data['id'] = geojson['id']
+        return data
+    return helper_func

@@ -1,10 +1,10 @@
 import requests
 import json
 
-from isptoolbox_storage.mapbox.upload_tileset import convertGeometryToGeojsonMapbox
+from isptoolbox_storage.mapbox.upload_tileset import prepareGeoJSONUploadMapbox
 from mmwave.models import EPTLidarPointCloud
 from django.contrib.gis.geos import GEOSGeometry, GeometryCollection, Polygon
-from dataUpdate.util.mail import sendNotifyEmail
+from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from isptoolbox_storage.storage import S3ManifestStorage
 from django.core.files.base import ContentFile
 from django.conf import settings
@@ -46,7 +46,7 @@ def loadBoundariesFromEntWine(send_email_success=False, send_email_failure=True)
                     new_point_clouds.append(pt_cloud)
         if (send_email_success or len(new_point_clouds) > 0) and settings.PROD:
             point_cloud_names = '\n'.join([cloud.name for cloud in new_point_clouds])
-            sendNotifyEmail(
+            sendEmailToISPToolboxOncall(
                 SUCCESSFUL_UPDATE_SUBJECT,
                 f'Successfully loaded {len(new_point_clouds)} new point clouds into the database\n' + point_cloud_names
             )
@@ -64,7 +64,7 @@ def loadBoundariesFromEntWine(send_email_success=False, send_email_failure=True)
             s3storage.save(PT_CLOUD_GEOJSON_S3_PATH, ContentFile(contents))
     except Exception as e:
         if send_email_failure and settings.PROD:
-            sendNotifyEmail(UNSUCCESSFUL_UPDATE_SUBJECT, f'Error: {str(e)}')
+            sendEmailToISPToolboxOncall(UNSUCCESSFUL_UPDATE_SUBJECT, f'Error: {str(e)}')
 
     return new_point_clouds
 
@@ -92,7 +92,7 @@ def createInvertedOverlay(
         overlay = extent.difference(gc)
 
     data = json.loads(overlay.json)
-    fc = convertGeometryToGeojsonMapbox(data)
+    fc = prepareGeoJSONUploadMapbox(data)
     contents = json.dumps(fc).encode()
     file_obj = ContentFile(contents)
     if settings.PROD:

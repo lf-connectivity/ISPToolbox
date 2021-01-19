@@ -736,7 +736,6 @@ export class LinkCheckPage {
             // @ts-ignore
             window.viewer.setClipTask(Potree.ClipTask.SHOW_INSIDE);
         }
-    
         // Check if we already added point cloud
         // @ts-ignore
         const existing_match_ptcloud = window.viewer.scene.pointclouds.find(
@@ -824,7 +823,7 @@ export class LinkCheckPage {
                 const tx_hgt = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
                 const rx_hgt = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1]; 
                 this.updateLidarRender(
-                    response.name,
+                    response.source,
                     response.url,
                     response.bb,
                     response.tx,

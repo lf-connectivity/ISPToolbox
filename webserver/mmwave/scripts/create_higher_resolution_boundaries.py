@@ -1,7 +1,7 @@
 from mmwave.models import EPTLidarPointCloud
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.gdal import SpatialReference, CoordTransform
-from dataUpdate.util.mail import sendNotifyEmail
+from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from django.conf import settings
 import logging
 import subprocess
@@ -74,7 +74,7 @@ def updatePointCloudBoundariesTask():
     result_msg = f'New Boundaries:\n {len(successes)}\n Failed to Update Boundaries:\n {len(failures)}' + \
                  f'Point Clouds:\n{new_boundaries}\nFailed To Create Boundaries:\n{failed_high_resolution_boundaries}'
     if settings.PROD:
-        sendNotifyEmail(
-            '[Automated Message][Update LiDAR Boundaries]',
+        sendEmailToISPToolboxOncall(
+            '[Automated Message 🤖 ][Updated LiDAR Boundaries]',
             result_msg
         )

@@ -7,8 +7,8 @@ const LOW_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'low-res-lidar-boundary-source'
 const LOW_RESOLUTION_LIDAR_AVAILABILITY_LAYER = 'low-res-lidar-boundary-layer';
 const HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'high-res-lidar-boundary-source';
 const HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER =  'high-res-lidar-boundary-layer';
-const MAPBOX_OVERLAY_URL = 'isptoolbox.lowreslidar';
-const MAPBOX_OVERLAY_LAYER = 'original';
+const MAPBOX_OVERLAY_URL = 'isptoolbox.6fbqc4a2';
+const MAPBOX_OVERLAY_LAYER = 'high_res_overlay_2-axcfl1';
 const AVAILABILITY_PAINT_FILL_STYLE = {
     'fill-color': '#687B8B',
     'fill-opacity': 0.77

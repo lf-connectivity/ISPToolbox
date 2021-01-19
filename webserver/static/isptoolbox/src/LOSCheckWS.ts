@@ -31,7 +31,6 @@ export type LidarResponse = {
     source : string| null,
     lidar_profile: Array<[number, number]>,
     res: string,
-    name: string,
     url: string,
     bb : Array<number>,
     rx : [number, number],

@@ -3,7 +3,7 @@ import * as MapboxGL from "mapbox-gl";
 
 import {createLinkChart} from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
-import {createLinkProfile, findOverlaps, findLidarObstructions} from './LinkCalcUtils';
+import {createLinkProfile, findOverlaps, findLidarObstructions, km2miles, m2ft, ft2m} from './LinkCalcUtils';
 import {updateObstructionsData} from './LinkObstructions';
 import {
     createHoverPoint, createOrbitAnimationPath, createLinkGeometry,
@@ -54,6 +54,7 @@ export class LinkCheckPage {
     currentLinkHash : any;
 
     currentView: 'map' | '3d';
+    units : 'SI' | 'US' = 'US'; 
     _elevation : Array<number>;
     _coords : any;
     _lidar : Array<[number, number]>;
@@ -96,12 +97,16 @@ export class LinkCheckPage {
 
         this._elevation = [];
         this._lidar= [];
+        //@ts-ignore
+        this.units = window.tool_units;
 
         this.datasets = new Map();
 
         // Add Resize-Window Callback
         const resize_window = () => {
-            let height = $(window).height() - $('#bottom-row-link-view-container').height();
+            const window_height = $(window).height();
+            const bottom_row_height = $('#bottom-row-link-view-container').height()
+            let height = window_height != null && bottom_row_height != null ? window_height - bottom_row_height : 0;
             height = Math.max(height, 400);
             $('#map').height(height);
             if(this.map != null) {
@@ -191,7 +196,7 @@ export class LinkCheckPage {
                 mapboxgl: mapboxgl,
                 placeholder: 'Search for an address'
             });
-            document.getElementById('geocoder').appendChild(geocoder.onAdd(this.map));
+            document.getElementById('geocoder')?.appendChild(geocoder.onAdd(this.map));
 
             const tx_lat = parseFloat(String($('#lat-0').val()));
             const tx_lng = parseFloat(String($('#lng-0').val()));
@@ -474,8 +479,8 @@ export class LinkCheckPage {
     
     moveLocation3DView({ x, y} : {x:number, y: number}){
         try {
-            const tx_h = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
-            const rx_h = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1];
+            const tx_h = this.getRadioHeightFromUI('0') + this._elevation[0];
+            const rx_h = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
             const pos = x / this._elevation.length;
             const {location, lookAt} = calculateLookVector(this.tx_loc_lidar, tx_h, this.rx_loc_lidar, rx_h, pos);
             // Stop Current Animation
@@ -559,8 +564,8 @@ export class LinkCheckPage {
         // Check if we can update the chart
         if (this.link_chart != null) {
             if(this._elevation.length > 1 && this._lidar.length > 1) {
-                const tx_h = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
-                const rx_h = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1];
+                const tx_h = this.getRadioHeightFromUI('0') + this._elevation[0];
+                const rx_h = this.getRadioHeightFromUI('1')  + this._elevation[this._elevation.length - 1];
                 this.link_chart.yAxis[0].update({
                     min: Math.min(...[...this._lidar.map((x : any) => x[1]), tx_h, rx_h]),
                     max: Math.max(...[...this._lidar.map((x : any) => x[1]), tx_h, rx_h])
@@ -578,8 +583,8 @@ export class LinkCheckPage {
         if(this._elevation !== null) {
             const {los, fresnel} = createLinkProfile(
                 this._elevation,
-                parseFloat(String($('#hgt-0').val())),
-                parseFloat(String($('#hgt-1').val())),
+                this.getRadioHeightFromUI('0'),
+                this.getRadioHeightFromUI('1'),
                 1.0,
                 this.centerFreq
             );
@@ -601,8 +606,8 @@ export class LinkCheckPage {
             }
         }
         if (this._elevation != null && this.updateLinkHeight != null && update3DView) {
-            const tx_hgt = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
-            const rx_hgt = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1];
+            const tx_hgt = this.getRadioHeightFromUI('0')  + this._elevation[0];
+            const rx_hgt = this.getRadioHeightFromUI('1')  + this._elevation[this._elevation.length - 1];
             this.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);
             if( this._lidar != null){
                 this.link_chart.yAxis[0].update({
@@ -807,8 +812,10 @@ export class LinkCheckPage {
         this.renderNewLinkProfile();
         this.updateLinkChart();
 
-        this.link_chart.redraw();        
-        this.datasets.set(response.handler, response.source);
+        this.showPlotIfValidState();       
+        if(response.source != null){
+            this.datasets.set(response.handler, response.source);
+        }      
         this.updateLegend();
     }
 
@@ -820,8 +827,8 @@ export class LinkCheckPage {
         } else {
             $("#3D-view-btn").removeClass('d-none');
             if(this.currentLinkHash !== response.hash && this._elevation.length > 1) {
-                const tx_hgt = parseFloat(String($('#hgt-0').val())) + this._elevation[0];
-                const rx_hgt = parseFloat(String($('#hgt-1').val())) + this._elevation[this._elevation.length - 1]; 
+                const tx_hgt = this.getRadioHeightFromUI('0')  + this._elevation[0];
+                const rx_hgt = this.getRadioHeightFromUI('1')  + this._elevation[this._elevation.length - 1]; 
                 this.updateLidarRender(
                     response.source,
                     response.url,
@@ -837,35 +844,65 @@ export class LinkCheckPage {
             }
         }
         this.link_chart.series[1].setData(this._lidar);
-        this.link_chart.xAxis[0].update({title:{
-            text: `Distance - resolution ${response.res} m`
-        }});
+        this.link_chart.xAxis[0].update({labels: {
+            formatter: this.units === 'US' ? function() {
+                return `${km2miles(this.value * 1 / 1000).toFixed(2)} mi` }
+                : function(){
+                return `${(this.value * 1 / 1000).toFixed(1)} km`;
+            }
+        },
+        title:{
+            text: `Distance ${this.units === 'US' ? '[mi]' : '[km]'} - resolution ${response.res} m`
+        }
+        });
+        this.link_chart.yAxis[0].update({labels: {
+            formatter: this.units === 'US' ? function() {
+                return `${m2ft(this.value ).toFixed(0)} ft` }
+                : function(){
+                return `${(this.value ).toFixed(0)} m`;
+            }
+        }, title : { text: 
+            this.units === 'US' ? 'Elevation [ft]' : 'Elevation [m]'}
+        });
+
         this.renderNewLinkProfile();
         this.updateLinkChart();
 
-        this.link_chart.redraw();
+        this.showPlotIfValidState();
 
-        this.datasets.set(response.handler, response.source);
+        if(response.source != null){
+            this.datasets.set(response.handler, response.source);
+        }
         this.updateLegend();
     }
 
     ws_link_callback(response: LinkResponse) : void{
-        this.link_chart.hideLoading();
-        $("#loading_spinner").addClass('d-none');
-
 
         if (response.error !== null) {
             $("#link-request-error-description").text(response.error);
             this.selected_feature = null;
             $('#loading_failed_spinner').removeClass('d-none');
             $("#link-request-error-description").text();
+            $("#loading_spinner").addClass('d-none');
             $("#link_chart").addClass('d-none');
         } else {
+            this.showPlotIfValidState();
+        }
+    }
+
+    getRadioHeightFromUI(radio : '0' | '1') {
+        const hgt = parseFloat(String($(radio === '0' ? '#hgt-0' : '#hgt-1').val()));
+        return this.units === 'US' ? ft2m(hgt) : hgt;
+    }
+
+    showPlotIfValidState(){
+        if(this._lidar.length && this._elevation.length) {
+            this.link_chart.hideLoading();
+            $("#loading_spinner").addClass('d-none');
             $("#los-chart-tooltip-button").removeClass('d-none');
             this.link_chart.redraw();
             $("#link_chart").removeClass('d-none');
             this.updateLegend();
         }
-
     }
 }

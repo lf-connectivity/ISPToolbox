@@ -68,7 +68,10 @@ class LOSCheckWS {
 
         this.ws.onopen = (e) => {
             while(this.pendingRequests.length > 0) {
-                this.ws.send(this.pendingRequests.pop());
+                const request = this.pendingRequests.pop();
+                if(typeof request === 'string'){
+                    this.ws.send(request);
+                }
             }
         }
 

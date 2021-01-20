@@ -143,3 +143,15 @@ export function findOverlaps(link : Array<number>, lidar: Array<[number, number]
     }
     return overlaps;
 }
+
+export function km2miles(km : number) : number {
+    return km * 0.621371;
+}
+
+export function m2ft(m : number) : number {
+    return m * 3.28084;
+}
+
+export function ft2m(ft : number) : number {
+    return ft / 3.28084;
+}

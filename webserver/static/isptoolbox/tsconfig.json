@@ -3,8 +3,9 @@
       "outDir": "./build/",
       "noImplicitAny": true,
       "module": "es6",
-      "target": "es5",
+      "target": "es2018",
       "jsx": "react",
+      "strictNullChecks": true,
       "allowJs": true
     },
     "exclude" : [

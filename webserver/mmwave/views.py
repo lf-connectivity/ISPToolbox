@@ -23,9 +23,12 @@ class TGLinkView(View):
         networkID = uuid.uuid4()
         lat = request.GET.get('lat', None)
         lon = request.GET.get('lon', None)
+        units = 'US'
 
         tx_coords = {'lng': -66.10318337316896, 'lat': 18.415034033743083}
         rx_coords = {'lng': -66.09988844919782, 'lat': 18.411423676674275}
+        # tx_coords = {'lat':29.47631, 'lng': -90.39631}
+        # rx_coords =  {'lat':29.46686, 'lng': -90.29486}
 
         # TODO: move this logic to the network model
         if lat is not None and lon is not None:
@@ -40,8 +43,22 @@ class TGLinkView(View):
         # tx = {'name': 'radio_0', 'lng': -90.53716599941286, 'lat': 33.5451235458682, 'id': 0, 'hgt': 35}
         # rx = {'name': 'radio_1', 'lng': -90.53423166275023, 'lat': 33.545454397676316, 'id': 1, 'hgt': 4}
         # Puerto Rico Link
-        tx = {'name': 'radio_0', 'color': '#E29842', 'lng': tx_coords['lng'], 'lat': tx_coords['lat'], 'id': 0, 'hgt': 21}
-        rx = {'name': 'radio_1', 'color': '#42B72A', 'lng': rx_coords['lng'], 'lat': rx_coords['lat'], 'id': 1, 'hgt': 10}
+        tx = {
+            'name': 'radio_0',
+            'color': '#E29842',
+            'lng': tx_coords['lng'],
+            'lat': tx_coords['lat'],
+            'id': 0,
+            'hgt': 69
+        }
+        rx = {
+            'name': 'radio_1',
+            'color': '#42B72A',
+            'lng': rx_coords['lng'],
+            'lat': rx_coords['lat'],
+            'id': 1,
+            'hgt': 33
+        }
         # # Puerto Rico Link
         # tx = {'name': 'radio_0', 'lng': -66.09455208440198, 'lat': 18.413009468818956, 'id': 0, 'hgt': 40}
         # rx = {'name': 'radio_1', 'lng': -66.09625993172662, 'lat': 18.41382434446693, 'id': 1, 'hgt': 35}
@@ -51,7 +68,7 @@ class TGLinkView(View):
         # # South Lake Tahoe (no data available)
         # tx = {'name': 'radio_0', 'lng': -119.98405485393732, 'lat': 38.9332644376359, 'id': 0, 'hgt': 35}
         # rx = {'name': 'radio_1', 'lng': -119.98803300700314, 'lat': 38.933988683584545, 'id': 1, 'hgt': 4}
-        return render(request, 'mmwave/index.html', {'tx': tx, 'rx': rx, 'fbid': fbid, 'networkID': networkID})
+        return render(request, 'mmwave/index.html', {'tx': tx, 'rx': rx, 'fbid': fbid, 'networkID': networkID, 'units': units})
 
 
 class LinkGISDataView(View):

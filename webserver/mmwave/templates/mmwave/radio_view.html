@@ -37,7 +37,13 @@
                 <div class="col col-sm-4 col-md-6 col-lg-7 px-0 d-flex justify-content-end">
                     <div class="input-with-unit d-flex px-2">
                         <input class="form-control" type="number" value="{{radio.hgt}}" id="hgt-{{radio.id}}" min="0" max="10000">
-                        <span class="input-unit">m</span>
+                        <span class="input-unit">
+                            {% if units == 'US' %}
+                            ft
+                            {% else %}
+                            m
+                            {% endif %}
+                        </span>
                     </div>
                 </div>
             </div>

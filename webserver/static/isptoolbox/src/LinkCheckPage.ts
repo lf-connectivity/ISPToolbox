@@ -57,7 +57,8 @@ export class LinkCheckPage {
     units : 'SI' | 'US' = 'US'; 
     _elevation : Array<number>;
     _coords : any;
-    _lidar : Array<[number, number]>;
+    _lidar : Array<number>;
+    _link_distance : number;
     fresnel_width: number;
     globalLinkAnimation : any;
     animationPlaying : boolean;
@@ -97,6 +98,7 @@ export class LinkCheckPage {
 
         this._elevation = [];
         this._lidar= [];
+        this._link_distance = 0;
         //@ts-ignore
         this.units = window.tool_units;
 
@@ -168,6 +170,8 @@ export class LinkCheckPage {
             this.moveLocation3DView.bind(this),
             this.mouseLeave.bind(this)
         );
+        //@ts-ignore
+        window.chart = this.link_chart;
 
         this.profileWS = new LOSCheckWS(this.networkID, [this.ws_message_handler.bind(this)]);
         
@@ -228,6 +232,14 @@ export class LinkCheckPage {
         
             this.map.addControl(deleteControl, 'bottom-right');
             this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+
+            // Doesn't play nicely with mapbox draw yet mapboxjs v2.0.1
+            // this.map.addSource('mapbox-dem', {
+            //     "type": "raster-dem",
+            //     "url": "mapbox://mapbox.mapbox-terrain-dem-v1",
+            // });
+            // this.map.setTerrain({"source": "mapbox-dem"});
 
             
             this.map.on('draw.update', this.updateRadioLocation.bind(this));
@@ -542,6 +554,9 @@ export class LinkCheckPage {
         // Use Websocket for request:
         $("#3D-view-btn").addClass('d-none');
         this.profileWS.sendRequest(query_params.tx, query_params.rx, this.userRequestIdentity);
+        this._elevation = [];
+        this._lidar = [];
+        this._link_distance = 0;
     }
 
     mouseLeave() {
@@ -567,8 +582,8 @@ export class LinkCheckPage {
                 const tx_h = this.getRadioHeightFromUI('0') + this._elevation[0];
                 const rx_h = this.getRadioHeightFromUI('1')  + this._elevation[this._elevation.length - 1];
                 this.link_chart.yAxis[0].update({
-                    min: Math.min(...[...this._lidar.map((x : any) => x[1]), tx_h, rx_h]),
-                    max: Math.max(...[...this._lidar.map((x : any) => x[1]), tx_h, rx_h])
+                    min: Math.min(...[...this._lidar, tx_h, rx_h]),
+                    max: Math.max(...[...this._lidar, tx_h, rx_h])
                 });
             } else if (this._elevation.length > 1) {
                 this.link_chart.yAxis[0].update({ min: Math.min(...this._elevation) });
@@ -580,12 +595,12 @@ export class LinkCheckPage {
      * Updates link chart for LOS based on new elevation profile and tx/rx height
      */
     updateLinkChart(update3DView = false){
-        if(this._elevation !== null) {
+        if(this._elevation !== null && this._link_distance) {
             const {los, fresnel} = createLinkProfile(
                 this._elevation,
                 this.getRadioHeightFromUI('0'),
                 this.getRadioHeightFromUI('1'),
-                1.0,
+                this._link_distance / this._elevation.length,
                 this.centerFreq
             );
             this.link_chart.series[2].setData(los);
@@ -611,8 +626,8 @@ export class LinkCheckPage {
             this.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);
             if( this._lidar != null){
                 this.link_chart.yAxis[0].update({
-                    min: Math.min(...[...this._lidar.map((x : any) => x[1]), tx_hgt, rx_hgt]),
-                    max: Math.max(...[...this._lidar.map((x : any) => x[1]), tx_hgt, rx_hgt])
+                    min: Math.min(...[...this._lidar, tx_hgt, rx_hgt]),
+                    max: Math.max(...[...this._lidar, tx_hgt, rx_hgt])
                 });
             }
         }
@@ -812,7 +827,7 @@ export class LinkCheckPage {
         this.renderNewLinkProfile();
         this.updateLinkChart();
 
-        this.showPlotIfValidState();       
+        this.showPlotIfValidState();
         if(response.source != null){
             this.datasets.set(response.handler, response.source);
         }      
@@ -821,6 +836,8 @@ export class LinkCheckPage {
 
     ws_lidar_callback(response : LidarResponse) : void {
         this._lidar = response.lidar_profile;
+        this._link_distance = response.dist;
+
 
         if (response.error !== null) {
             $("#3D-view-btn").addClass('d-none');
@@ -843,12 +860,15 @@ export class LinkCheckPage {
                 this.currentMaterial.elevationRange = [response.bb[4], response.bb[5]];
             }
         }
+
         this.link_chart.series[1].setData(this._lidar);
+
+        const scaling_factor = this._link_distance / this._lidar.length;
         this.link_chart.xAxis[0].update({labels: {
             formatter: this.units === 'US' ? function() {
-                return `${km2miles(this.value * 1 / 1000).toFixed(2)} mi` }
+                return `${km2miles(this.value * scaling_factor / 1000).toFixed(2)} mi` }
                 : function(){
-                return `${(this.value * 1 / 1000).toFixed(1)} km`;
+                return `${(this.value * scaling_factor / 1000).toFixed(1)} km`;
             }
         },
         title:{
@@ -869,7 +889,6 @@ export class LinkCheckPage {
         this.updateLinkChart();
 
         this.showPlotIfValidState();
-
         if(response.source != null){
             this.datasets.set(response.handler, response.source);
         }

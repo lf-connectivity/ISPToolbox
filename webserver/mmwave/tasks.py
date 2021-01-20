@@ -16,16 +16,17 @@ from channels.layers import get_channel_layer
 
 from mmwave.models import Msftcombined, TreeCanopy
 from shapely.geometry import LineString as shapely_LineString
-from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
+from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink, interpAndDownSampleLidarLink
 from mmwave.models import EPTLidarPointCloud, TGLink
 from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine, createInvertedOverlay
 from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
 
 
-google_maps_samples_limit = 512
-num_samples_per_m = 1
-LINK_DISTANCE_LIMIT = 10000
+GOOGLE_MAPS_SAMPLE_LIMIT = 512
+MAXIMUM_NUM_POINTS_RETURNED = 1024
+DEFAULT_NUM_SAMPLES_PER_M = 1
+LINK_DISTANCE_LIMIT = 100000
 
 
 class LidarResolution(IntEnum):
@@ -43,7 +44,7 @@ LIDAR_RESOLUTION_DEFAULTS = {
 }
 
 
-def getElevationProfile(tx, rx):
+def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
     """
     tx - Point - GEOS object
     rx - Point - GEOS object
@@ -51,11 +52,11 @@ def getElevationProfile(tx, rx):
     profile - None | List of objects {'elevation' : float - meters, 'lat' : float, 'lng' : float}
     """
     link_profile, _link = createLinkProfile(tx, rx)
-    samples = len(link_profile)
     # If the request is too large, split it into two and add the resulting requests
-    if samples > google_maps_samples_limit:
+    if samples > GOOGLE_MAPS_SAMPLE_LIMIT:
         mid_pt = int(samples/2)
-        return getElevationProfile(tx, link_profile[mid_pt - 1]) + getElevationProfile(link_profile[mid_pt], rx)
+        return getElevationProfile(tx, link_profile[mid_pt - 1], mid_pt) + \
+            getElevationProfile(link_profile[mid_pt], rx, mid_pt)
 
     path = str(tx.y) + ',' + str(tx.x) + '|' + str(rx.y) + ',' + str(rx.x)
     params = {'key': google_maps_api_key, 'path': path, 'samples': samples}
@@ -77,7 +78,7 @@ def getElevationProfile(tx, rx):
     return []
 
 
-def createLinkProfile(tx, rx):
+def createLinkProfile(tx, rx, num_samples=MAXIMUM_NUM_POINTS_RETURNED):
     """
     tx - Point - GEOS object
     rx - Point - GEOS object
@@ -86,8 +87,7 @@ def createLinkProfile(tx, rx):
     """
     link = LineString([tx, rx])
     shapely_link = shapely_LineString(link)
-    samples = round(geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters * num_samples_per_m)
-    samples_points = [shapely_link.interpolate(i/float(samples - 1), normalized=True) for i in range(samples)]
+    samples_points = [shapely_link.interpolate(i/float(num_samples - 1), normalized=True) for i in range(num_samples)]
     return [Point(pt.x, pt.y) for pt in samples_points], link
 
 
@@ -126,7 +126,7 @@ def getLidarProfile(tx, rx, resolution=5):
 
     """
     link = LineString([tx, rx])
-    pt_clouds = EPTLidarPointCloud.objects.filter(boundary__contains=link).all()
+    pt_clouds = EPTLidarPointCloud.objects.filter(boundary__intersects=link).all()
     if len(pt_clouds) == 0:
         raise Exception('Lidar data not available')
 
@@ -139,6 +139,7 @@ def getLidarProfile(tx, rx, resolution=5):
     # TODO achong: all entwine are in EPSG:3857 coordinate system, but future EPT's could
     # be in a different coordinate system
     lidar_profile, count, bb, link_T = getLidarPointsAroundLink(ept_path, link, 3857, resolution=resolution)
+    lidar_profile = interpAndDownSampleLidarLink(lidar_profile, link, MAXIMUM_NUM_POINTS_RETURNED)
     return lidar_profile, count, ept_path, bb, cloud.name, link_T[0], link_T[1]
 
 
@@ -183,6 +184,7 @@ def getLinkInfo(network_id, data):
         'error': None,
         'type': 'standard.message',
         'handler': 'link',
+        'dist': 0,
     }
     channel_layer = get_channel_layer()
     channel_name = 'los_check_%s' % network_id
@@ -191,6 +193,7 @@ def getLinkInfo(network_id, data):
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
         link_dist_m = genLinkDistance(tx, rx)
+        resp['dist'] = link_dist_m
         if link_dist_m > LINK_DISTANCE_LIMIT:
             raise Exception(
                 f'''Link too long: limit {LINK_DISTANCE_LIMIT/1000 } km - link {round(link_dist_m / 1000, 3)} km'''
@@ -222,6 +225,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
         'rx': {},
         'datasets': '',
         'res': LIDAR_RESOLUTION_DEFAULTS[resolution],
+        'dist': 0,
         "type": 'standard.message',
         'handler': 'lidar'
     }
@@ -230,6 +234,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
     try:
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
+        resp['dist'] = genLinkDistance(tx, rx)
         lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
             tx,
             rx,
@@ -260,7 +265,8 @@ def getTerrainProfile(network_id, data):
         'source': 'Google Elevation API',
         'terrain_profile': [],
         'type': 'standard.message',
-        'handler': 'terrain'
+        'handler': 'terrain',
+        'dist': 0,
     }
     channel_layer = get_channel_layer()
     channel_name = 'los_check_%s' % network_id
@@ -268,6 +274,7 @@ def getTerrainProfile(network_id, data):
     try:
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
+        resp['dist'] = genLinkDistance(tx, rx)
         resp['terrain_profile'] = getElevationProfile(tx, rx)
     except Exception as e:
         resp['error'] = str(e)

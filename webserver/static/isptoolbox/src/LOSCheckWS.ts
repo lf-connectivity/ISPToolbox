@@ -13,7 +13,8 @@ export enum LOSWSHandlers {
 export type LinkResponse = {
     handler: LOSWSHandlers.LINK,
     error : string | null,
-    hash: string
+    hash: string,
+    dist: number
 }
 
 export type TerrainResponse = {
@@ -21,6 +22,7 @@ export type TerrainResponse = {
     error: string | null,
     hash: string,
     source: string | null,
+    dist: number,
     terrain_profile: Array<{elevation: number, lat : number, lng: number}>,
 }
 
@@ -29,7 +31,8 @@ export type LidarResponse = {
     error: string | null,
     hash: string,
     source : string| null,
-    lidar_profile: Array<[number, number]>,
+    lidar_profile: Array<number>
+    dist : number,
     res: string,
     url: string,
     bb : Array<number>,
@@ -68,9 +71,10 @@ class LOSCheckWS {
 
         this.ws.onopen = (e) => {
             while(this.pendingRequests.length > 0) {
-                const request = this.pendingRequests.pop();
-                if(typeof request === 'string'){
-                    this.ws.send(request);
+                const msg = this.pendingRequests.pop();
+                if (typeof msg === 'string')
+                {
+                    this.ws.send(msg);
                 }
             }
         }

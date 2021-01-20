@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     # REST API
     'rest_framework',
     # Wagtail CMS
+    "wagtail.contrib.search_promotions",
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
     'wagtail.embeds',
@@ -221,6 +222,9 @@ DATABASES = {
         'USER': os.environ.get('DB_USERNAME', 'postgres'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'password'),
         'HOST': os.environ.get('POSTGRES_DB', 'localhost'),
+        'TEST': {
+            'NAME': 'testing_database_isptoolbox',
+        },
         # for migrations : POSTGRES_DB=isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com
         'PORT': '5432',
     },

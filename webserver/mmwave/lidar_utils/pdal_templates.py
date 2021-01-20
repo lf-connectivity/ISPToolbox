@@ -3,10 +3,9 @@ from django.contrib.gis.geos import Point
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from scipy.interpolate import interp1d
-from numpy import arange
 import numpy as np
 
-interpolation_step = 50. / 100.  # cm
+DEFAULT_INTERPOLATION_STEP = 50. / 100.  # cm
 
 
 def averageHeightAtDistance(distance, heights):
@@ -26,7 +25,9 @@ def averageHeightAtDistance(distance, heights):
     return unique_increasing_distances, output
 
 
-def getLidarPointsAroundLink(ept_path, link, ept_transform, resolution, link_buffer=3):
+def getLidarPointsAroundLink(
+            ept_path, link, ept_transform, resolution, interpolation_step=DEFAULT_INTERPOLATION_STEP, link_buffer=3
+        ):
     link_length = geopy_distance(lonlat(link[0][0], link[0][1]), lonlat(link[1][0], link[1][1])).meters
     # TODO achong: - create link buffer based on LIDAR cloud reference frame units
     # link_buffer = 3 -> 3 meters for EPSG:3857
@@ -64,16 +65,22 @@ def getLidarPointsAroundLink(ept_path, link, ept_transform, resolution, link_buf
     pts = [[link_T.project_normalized(Point(pt[x_idx], pt[y_idx]))*link_length, pt[z_idx]] for pt in arr]
     # Average Duplicate Points
     dsts, hgts = averageHeightAtDistance([pt[0] for pt in pts], [pt[1] for pt in pts])
-    # Interpolate Output
+
+    height_bounds = (min(hgts), max(hgts))
+    pts = [[d, float(h)] for d, h in zip(dsts, hgts)]
+    return pts, count, link_T.extent + height_bounds, link_T
+
+
+def interpAndDownSampleLidarLink(link_data, link, num_samples):
+    link_length = geopy_distance(lonlat(link[0][0], link[0][1]), lonlat(link[1][0], link[1][1])).meters
+    new_samples = np.linspace(0, link_length, num_samples)
     interpfunc = interp1d(
-        dsts,
-        hgts,
+        [pt[0] for pt in link_data],
+        [pt[1] for pt in link_data],
         assume_sorted=False,
         bounds_error=False,
-        fill_value=(hgts[0], hgts[-1])
+        fill_value=(link_data[0][1], link_data[-1][1])
     )
-    dists = arange(0, link_length, interpolation_step)
-    heights = interpfunc(dists)
-    height_bounds = (min(heights), max(heights))
-    pts = [[d, float(h)] for d, h in zip(dists, heights)]
-    return pts, count, link_T.extent + height_bounds, link_T
+    link_data = interpfunc(new_samples)
+    link_data = [float(v) for v in link_data]
+    return link_data

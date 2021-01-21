@@ -16,7 +16,7 @@ from channels.layers import get_channel_layer
 
 from mmwave.models import Msftcombined, TreeCanopy
 from shapely.geometry import LineString as shapely_LineString
-from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink, interpAndDownSampleLidarLink
+from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
 from mmwave.models import EPTLidarPointCloud, TGLink
 from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine, createInvertedOverlay
 from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
@@ -41,6 +41,13 @@ LIDAR_RESOLUTION_DEFAULTS = {
     LidarResolution.MEDIUM: 5,
     LidarResolution.HIGH: 1,
     LidarResolution.ULTRA: 0.5
+}
+
+LIDAR_RESOLUTION_MAX_LINK_LENGTH = {
+    LidarResolution.LOW: LINK_DISTANCE_LIMIT,
+    LidarResolution.MEDIUM: 50000,
+    LidarResolution.HIGH: 2000,
+    LidarResolution.ULTRA: 1000,
 }
 
 
@@ -138,8 +145,8 @@ def getLidarProfile(tx, rx, resolution=5):
     link.srid = 4326
     # TODO achong: all entwine are in EPSG:3857 coordinate system, but future EPT's could
     # be in a different coordinate system
-    lidar_profile, count, bb, link_T = getLidarPointsAroundLink(ept_path, link, 3857, resolution=resolution)
-    lidar_profile = interpAndDownSampleLidarLink(lidar_profile, link, MAXIMUM_NUM_POINTS_RETURNED)
+    lidar_profile, count, bb, link_T = getLidarPointsAroundLink(
+        ept_path, link, 3857, resolution=resolution, num_samples=MAXIMUM_NUM_POINTS_RETURNED)
     return lidar_profile, count, ept_path, bb, cloud.name, link_T[0], link_T[1]
 
 
@@ -234,7 +241,8 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
     try:
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
-        resp['dist'] = genLinkDistance(tx, rx)
+        link_dist_m = genLinkDistance(tx, rx)
+        resp['dist'] = link_dist_m
         lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
             tx,
             rx,
@@ -246,10 +254,15 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
         resp['bb'] = bb
         resp['tx'] = tx_T
         resp['rx'] = rx_T
+        if (
+                resp['error'] is None and
+                resolution != LidarResolution.ULTRA and
+                link_dist_m < LIDAR_RESOLUTION_MAX_LINK_LENGTH[resolution + 1]
+        ):
+            getLiDARProfile.delay(network_id, data, resolution + 1)
     except Exception as e:
         resp['error'] = str(e)
-    if resp['error'] is None and resolution != LidarResolution.ULTRA:
-        getLiDARProfile.delay(network_id, data, resolution + 1)
+
     async_to_sync(channel_layer.group_send)(channel_name, resp)
 
 

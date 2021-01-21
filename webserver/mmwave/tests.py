@@ -1,6 +1,6 @@
 from django.test import TestCase
 from .tasks import getElevationProfile, \
-    selectLatestProfile
+    selectLatestProfile, MAXIMUM_NUM_POINTS_RETURNED
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
 from django.contrib.gis.geos import Point, LineString
 
@@ -38,7 +38,7 @@ class ElevationProfileTestCase(TestCase):
         )
         link = LineString([tx, rx])
         link.srid = 4326
-        pts, count, bounds, link = getLidarPointsAroundLink(path, link, 3857, 5)
+        pts, count, bounds, link = getLidarPointsAroundLink(path, link, 3857, 5, num_samples=MAXIMUM_NUM_POINTS_RETURNED)
         self.assertTrue(count > 10)
 
     def test_selectLatestLidarRegex(self):

@@ -199,6 +199,9 @@ def getLinkInfo(network_id, data):
     try:
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
+        fbid = int(data.get('id', 0))
+        # Create Object to Log User Interaction
+        TGLink(tx=tx, rx=rx, fbid=fbid).save()
         link_dist_m = genLinkDistance(tx, rx)
         resp['dist'] = link_dist_m
         if link_dist_m > LINK_DISTANCE_LIMIT:

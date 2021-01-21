@@ -51,6 +51,27 @@ LIDAR_RESOLUTION_MAX_LINK_LENGTH = {
 }
 
 
+def createSubLinkFromAoi(tx, rx, aoi=[0, 1]):
+    '''
+    Returns a shorter tx, rx based on the aoi
+    if the aoi = [0, 1] - just returns tx, rx
+
+        Parameters:
+                tx (Point): first point in link
+                rx (Point): second point in link
+                aoi (List): area of interest, two numbers between 0 - 1 where the first number is less than the second
+
+        Returns:
+                tx (Point): first point scaled by the first number of aoi
+                rx (Point): second point scaled by the second number of aoi
+    '''
+    link = LineString([tx, rx])
+    shapely_link = shapely_LineString(link)
+    new_tx = shapely_link.interpolate(aoi[0], normalized=True)
+    new_rx = shapely_link.interpolate(aoi[1], normalized=True)
+    return Point(new_tx.x, new_tx.y), Point(new_rx.x, new_rx.y)
+
+
 def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
     """
     tx - Point - GEOS object
@@ -237,13 +258,16 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
         'res': LIDAR_RESOLUTION_DEFAULTS[resolution],
         'dist': 0,
         "type": 'standard.message',
-        'handler': 'lidar'
+        'handler': 'lidar',
+        'aoi': [0, 1]
     }
     channel_layer = get_channel_layer()
     channel_name = 'los_check_%s' % network_id
     try:
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
+        aoi = data.get('aoi', [0, 1])
+        tx, rx = createSubLinkFromAoi(tx, rx, aoi)
         link_dist_m = genLinkDistance(tx, rx)
         resp['dist'] = link_dist_m
         lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
@@ -257,6 +281,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
         resp['bb'] = bb
         resp['tx'] = tx_T
         resp['rx'] = rx_T
+        resp['aoi'] = aoi
         if (
                 resp['error'] is None and
                 resolution != LidarResolution.ULTRA and
@@ -283,6 +308,7 @@ def getTerrainProfile(network_id, data):
         'type': 'standard.message',
         'handler': 'terrain',
         'dist': 0,
+        'aoi': [0, 1]
     }
     channel_layer = get_channel_layer()
     channel_name = 'los_check_%s' % network_id
@@ -290,8 +316,11 @@ def getTerrainProfile(network_id, data):
     try:
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
+        aoi = data.get('aoi', [0, 1])
+        tx, rx = createSubLinkFromAoi(tx, rx, aoi)
         resp['dist'] = genLinkDistance(tx, rx)
         resp['terrain_profile'] = getElevationProfile(tx, rx)
+        resp['aoi'] = aoi
     except Exception as e:
         resp['error'] = str(e)
 

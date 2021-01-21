@@ -23,6 +23,7 @@ export type TerrainResponse = {
     hash: string,
     source: string | null,
     dist: number,
+    aoi: [number, number],
     terrain_profile: Array<{elevation: number, lat : number, lng: number}>,
 }
 
@@ -33,9 +34,10 @@ export type LidarResponse = {
     source : string| null,
     lidar_profile: Array<number>
     dist : number,
-    res: string,
+    res: number,
     url: string,
     bb : Array<number>,
+    aoi: [number, number],
     rx : [number, number],
     tx : [number, number],
 }
@@ -89,15 +91,16 @@ class LOSCheckWS {
         }
     }
 
-    sendRequest(tx: [number, number], rx: [number, number], fbid: string) {
-        const hash = [String(tx), String(rx), fbid].join(',');
+    sendRequest(tx: [number, number], rx: [number, number], fbid: string, aoi : [number ,number] = [0, 1]) {
+        const hash = [String(tx), String(rx), fbid, aoi].join(',');
         this.hash = hash;
         const request = JSON.stringify({
             msg : 'link',
             tx : tx,
             rx : rx,
             fbid: fbid,
-            hash: hash
+            aoi: aoi,
+            hash: hash,
         });
         if(this.ws.readyState !== WebSocket.OPEN) {
             this.pendingRequests.push(request);

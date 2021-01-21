@@ -1,4 +1,4 @@
-export function createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView, mouseLeave) {
+export function createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView, mouseLeave, setExtremes) {
     const mouseOverDebounceFunction = _.debounce( (e) => {
         const point = { x: e.target.x, y: e.target.y };
         highLightPointOnGround(point);
@@ -12,6 +12,7 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
             backgroundColor: "#C2D8EC",
             plotBackgroundColor: "#FFFFFF",
             type: 'line',
+            zoomType: 'x',
             style: {"fontFamily": "'Basis Grotesque Pro Mono', 'SFMono-Regular', 'Liberation Mono', Courier, monospace","fontSize":"12px"}
         },
         legend: {
@@ -49,6 +50,9 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
                 formatter: function () {
                     return this.value;
                 }
+            },
+            events: {
+                setExtremes: setExtremes,
             }
         },
         series: [

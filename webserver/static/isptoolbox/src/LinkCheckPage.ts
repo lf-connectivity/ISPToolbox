@@ -866,9 +866,9 @@ export class LinkCheckPage {
         const scaling_factor = this._link_distance / this._lidar.length;
         this.link_chart.xAxis[0].update({labels: {
             formatter: this.units === 'US' ? function() {
-                return `${km2miles(this.value * scaling_factor / 1000).toFixed(2)} mi` }
+                return `${km2miles(this.value * scaling_factor / 1000).toFixed(2)}` }
                 : function(){
-                return `${(this.value * scaling_factor / 1000).toFixed(1)} km`;
+                return `${(this.value * scaling_factor / 1000).toFixed(1)}`;
             }
         },
         title:{
@@ -877,9 +877,9 @@ export class LinkCheckPage {
         });
         this.link_chart.yAxis[0].update({labels: {
             formatter: this.units === 'US' ? function() {
-                return `${m2ft(this.value ).toFixed(0)} ft` }
+                return `${m2ft(this.value ).toFixed(0)}` }
                 : function(){
-                return `${(this.value ).toFixed(0)} m`;
+                return `${(this.value ).toFixed(0)}`;
             }
         }, title : { text: 
             this.units === 'US' ? 'Elevation [ft]' : 'Elevation [m]'}

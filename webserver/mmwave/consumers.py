@@ -2,7 +2,6 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from mmwave import tasks
 
 msg_handlers = {
-    'ptp': tasks.getLOSProfile.delay,
     'link': tasks.getLinkInfo.delay,
     'error': None,
 }

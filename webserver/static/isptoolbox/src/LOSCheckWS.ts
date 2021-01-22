@@ -31,11 +31,11 @@ export type LidarResponse = {
     handler: LOSWSHandlers.LIDAR,
     error: string | null,
     hash: string,
-    source : string| null,
+    source : Array<string>,
     lidar_profile: Array<number>
     dist : number,
     res: number,
-    url: string,
+    url: Array<string>,
     bb : Array<number>,
     aoi: [number, number],
     rx : [number, number],

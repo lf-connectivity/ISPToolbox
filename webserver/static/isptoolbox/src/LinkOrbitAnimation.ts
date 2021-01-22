@@ -128,11 +128,11 @@ export function createTrackShappedOrbitPath(tx: [number,number], tx_h: number, r
     return {targets, positions};
 }
 
-export function createLinkGeometry(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number, max_fresnel_width: number = 1.0)
+export function createLinkGeometry(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number, max_fresnel_radius: number = 1.0)
 {
     var linkSize = calcLinkLength(tx, rx, tx_h, rx_h);
     var geometry = new THREE.SphereGeometry(1.0, 32, 32);
-    geometry.scale(max_fresnel_width / 2.0 , max_fresnel_width  / 2.0, linkSize / 2.0);
+    geometry.scale(max_fresnel_radius, max_fresnel_radius, linkSize / 2.0);
     var material = new THREE.MeshBasicMaterial( {color: 0x4ADEFF, opacity: 0.8, transparent: true} );
     var linkLine = new THREE.Mesh( geometry, material );
     linkLine.position.set((tx[0] + rx[0] )/ 2.0, (tx[1] + rx[1] )/ 2.0, (tx_h + rx_h)/ 2.0);
@@ -165,7 +165,7 @@ export function calcLinkLength(tx: [number, number], rx: [number, number], tx_h 
     return Math.sqrt(Math.pow(tx[0] - rx[0], 2.0) + Math.pow(tx[1] - rx[1], 2.0) + Math.pow(tx_h - rx_h, 2.0));
 }
 
-export function generateClippingVolume(bb : [number, number, number, number, number, number], buffer : number  = 25.) :
+export function generateClippingVolume(bb : Array<number>, buffer : number  = 25.) :
 {position: Array<number>, scale : Array<number>, camera : Array<number>} 
 {
     const position = [(bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];

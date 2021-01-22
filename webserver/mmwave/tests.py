@@ -1,14 +1,87 @@
-from django.test import TestCase
-from .tasks import getElevationProfile, \
-    selectLatestProfile, MAXIMUM_NUM_POINTS_RETURNED
+from django.test import TestCase, TransactionTestCase
+from .tasks import getElevationProfile, MAXIMUM_NUM_POINTS_RETURNED
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
-from django.contrib.gis.geos import Point, LineString
+from mmwave.lidar_utils.LidarEngine import (
+    LidarEngine, LIDAR_RESOLUTION_DEFAULTS, LidarResolution
+)
+from django.contrib.gis.geos import Point, LineString, GEOSGeometry
+from mmwave.models import EPTLidarPointCloud
 
 tx_point = [-75.5376148223877, 39.16653673334675]
 rx_point = [-75.5691146850586, 39.159016668347725]
 
 test_rx_pt_PuertoRico = [-66.10818070326883, 18.416250557878442]
 test_tx_pt_PuertoRico = [-66.10326724720488, 18.415117149683724]
+
+
+class LiDARTestCase(TransactionTestCase):
+
+    geojson1 = """{
+        "type": "Polygon",
+        "coordinates":[[
+        [-121.8218994140625,38.009959746807006],
+        [-121.82910919189453,37.984798440032684],
+        [-121.7673110961914,37.97640941966381],
+        [-121.77074432373047,38.00157360367438],
+        [-121.8218994140625,38.009959746807006]
+        ]]
+      }"""
+    geojson2 = """{
+        "type": "Polygon",
+        "coordinates": [[
+              [-121.7717742919922,38.002385207833235],
+              [-121.77864074707031,37.97857441995155],
+              [-121.75151824951172,37.975056262053606],
+              [-121.74705505371094,38.00103252924477],
+              [-121.7717742919922,38.002385207833235]
+            ]]
+    }"""
+    geojson3 = """{
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-121.74808502197267,38.00049145082287],
+            [-121.75872802734375,37.972349871995256],
+            [-121.73091888427733,37.972620515491336],
+            [-121.72782897949219,37.99940928200236],
+            [-121.74808502197267,38.00049145082287]
+          ]
+        ]
+      }
+    """
+    pt1 = [-121.79786682128905, 37.99291593373803]
+    pt2 = [-121.74293518066406, 37.9807393563754]
+
+    def test_get_segments(self):
+        """
+        This test verifies that we can properly return line segments using year as a priority
+        """
+        cloud1 = EPTLidarPointCloud(
+            name="cloud1", count=1,
+            url="https://isptoolbox.com/ptcloud_2002_2019.json",
+            srs=3857,
+            boundary=GEOSGeometry(LiDARTestCase.geojson1)
+        )
+        cloud2 = EPTLidarPointCloud(
+            name="cloud2", count=2,
+            url="https://isptoolbox.com/ptcloud_2012.json",
+            srs=3857,
+            boundary=GEOSGeometry(LiDARTestCase.geojson2)
+        )
+        cloud3 = EPTLidarPointCloud(
+            name="cloud3", count=3,
+            url="https://isptoolbox.com/ptcloud_2010.json",
+            srs=3857,
+            boundary=GEOSGeometry(LiDARTestCase.geojson3)
+        )
+        cloud1.save(), cloud2.save(), cloud3.save()
+        tx = Point(LiDARTestCase.pt1)
+        rx = Point(LiDARTestCase.pt2)
+        link = LineString((tx, rx))
+        # TODO: write better test case
+        # le = LidarEngine(link, LIDAR_RESOLUTION_DEFAULTS[LidarResolution.LOW], MAXIMUM_NUM_POINTS_RETURNED)
+
+        self.assertTrue(link.dims > 0)
 
 
 class ElevationProfileTestCase(TestCase):
@@ -40,17 +113,3 @@ class ElevationProfileTestCase(TestCase):
         link.srid = 4326
         pts, count, bounds, link = getLidarPointsAroundLink(path, link, 3857, 5, num_samples=MAXIMUM_NUM_POINTS_RETURNED)
         self.assertTrue(count > 10)
-
-    def test_selectLatestLidarRegex(self):
-        class cloud:
-            def __init__(self, url):
-                self.url = url
-
-        urls = [
-            'USGS_LPC_PR_PuertoRico_2015_LAS_2018',
-            'USGS_LPC_PR_PuertoRico_2016_LAS_2017',
-            'PR_PuertoRico_2016_LAS_2017',
-            'test_no_year'
-        ]
-        latest_cloud = selectLatestProfile([cloud(url) for url in urls])
-        self.assertEqual(latest_cloud.url, urls[0])

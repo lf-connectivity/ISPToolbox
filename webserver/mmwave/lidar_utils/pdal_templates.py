@@ -58,6 +58,8 @@ def getLidarPointsAroundLink(
     }}"""
     pipeline = pdal.Pipeline(query_json)
     count = pipeline.execute()
+    if count < 2:
+        raise Exception('No LiDAR Points Found')
     arr = pipeline.arrays[0]
     x_idx = pipeline.arrays[0].dtype.names.index('X')
     y_idx = pipeline.arrays[0].dtype.names.index('Y')
@@ -66,6 +68,7 @@ def getLidarPointsAroundLink(
     pts = [[link_T.project_normalized(Point(pt[x_idx], pt[y_idx]))*link_length, pt[z_idx]] for pt in arr]
     # Average Duplicate Points
     dsts, hgts = averageHeightAtDistance([pt[0] for pt in pts], [pt[1] for pt in pts])
+
     # Resample Output Profile
     new_samples = np.linspace(0, link_length, num_samples)
     interpfunc = interp1d(
@@ -77,5 +80,4 @@ def getLidarPointsAroundLink(
     )
     link_data = interpfunc(new_samples)
     height_bounds = (min(link_data), max(link_data))
-    link_data = [float(v) for v in link_data]
-    return link_data, count, link_T.extent + height_bounds, link_T
+    return link_data.tolist(), count, link_T.extent + height_bounds, link_T

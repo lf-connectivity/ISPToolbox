@@ -3,7 +3,7 @@ import * as MapboxGL from "mapbox-gl";
 
 import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
-import { createLinkProfile, findOverlaps, findLidarObstructions, km2miles, m2ft, ft2m } from './LinkCalcUtils';
+import { createLinkProfile, findOverlaps, findLidarObstructions, km2miles, m2ft, ft2m, calculateMaximumFresnelRadius } from './LinkCalcUtils';
 import { updateObstructionsData } from './LinkObstructions';
 import {
     createHoverPoint, createOrbitAnimationPath, createLinkGeometry,
@@ -41,11 +41,11 @@ const HOVER_POINT_LAYER = 'hover-point-link-layer';
 const SELECTED_LINK_SOURCE = 'selected-link-source';
 const SELECTED_LINK_LAYER = 'selected-link-layer';
 const center_freq_values: { [key: string]: number } = {
-    '2.4ghz': 2.437,
-    '5ghz': 5.4925,
-    '60ghz': 64.790,
+    '2.4 GHz': 2.437,
+    '5 GHz': 5.4925,
+    '60 GHz': 64.790,
 };
-const DEFAULT_LINK_FREQ = center_freq_values['5ghz'];
+const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];
 
 export enum UnitSystems {
     US = 'US',
@@ -93,7 +93,7 @@ export class LinkCheckPage {
     currentMaterial: any;
     selectedFeatureID: string | null;
 
-    datasets: Map<LOSWSHandlers, string>;
+    datasets: Map<LOSWSHandlers, Array<string>>;
 
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
         this.networkID = networkID;
@@ -188,8 +188,8 @@ export class LinkCheckPage {
         this.profileWS = new LOSCheckWS(this.networkID, [this.ws_message_handler.bind(this)]);
 
         let initial_map_center = {
-            'lon': (parseFloat(String($('#lng-0').val())) + parseFloat(String($('#lng-1').val()))) / 2.0,
-            'lat': (parseFloat(String($('#lat-0').val())) + parseFloat(String($('#lat-1').val()))) / 2.0
+            'lon': (this.getCoordinateFromUI('0','lng') + this.getCoordinateFromUI('1','lng')) / 2.0,
+            'lat': (this.getCoordinateFromUI('0','lat') + this.getCoordinateFromUI('1','lat')) / 2.0
         };
         let initial_zoom = 17;
         try {
@@ -202,8 +202,18 @@ export class LinkCheckPage {
         this.map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
-            center: initial_map_center, // starting position [lng, lat]
-            zoom: initial_zoom // starting zoom
+            // center: initial_map_center, // starting position [lng, lat]
+            zoom: initial_zoom, // starting zoom
+            bounds: [
+                [
+                    Math.min(this.getCoordinateFromUI('0','lng'), this.getCoordinateFromUI('1','lng')),
+                    Math.min(this.getCoordinateFromUI('0','lat'), this.getCoordinateFromUI('1','lat'))
+                ],
+                [
+                    Math.max(this.getCoordinateFromUI('0','lng'), this.getCoordinateFromUI('1','lng')),
+                    Math.max(this.getCoordinateFromUI('0','lat'), this.getCoordinateFromUI('1','lat'))
+                ]
+            ]
         });
 
         this.map.on('load', () => {
@@ -741,7 +751,8 @@ export class LinkCheckPage {
                 scene.scene.remove(this.linkLine);
             }
 
-            this.linkLine = createLinkGeometry(tx, rx, tx_h, rx_h, this.fresnel_width);
+            const fresnel_width_m = calculateMaximumFresnelRadius(this._link_distance, this.centerFreq);
+            this.linkLine = createLinkGeometry(tx, rx, tx_h, rx_h, fresnel_width_m);
             scene.scene.add(this.linkLine);
             this.createAnimationForLink(tx, rx, tx_h, rx_h, start_animation);
         }
@@ -750,10 +761,10 @@ export class LinkCheckPage {
 
 
 
-    updateLidarRender(name: any, url: any, bb: any, tx: any, rx: any, tx_h: any, rx_h: any) {
+    updateLidarRender(name: Array<string>, urls: Array<string>, bb: Array<number>, tx: any, rx: any, tx_h: any, rx_h: any) {
         this.tx_loc_lidar = tx;
         this.rx_loc_lidar = rx;
-        const setClippingVolume = (bb: any) => {
+        const setClippingVolume = (bb: Array<number>) => {
             // @ts-ignore
             let scene = window.viewer.scene;
             let { position, scale, camera } = generateClippingVolume(bb);
@@ -776,35 +787,32 @@ export class LinkCheckPage {
             window.viewer.setClipTask(Potree.ClipTask.SHOW_INSIDE);
         }
         // Check if we already added point cloud
-        // @ts-ignore
-        const existing_match_ptcloud = window.viewer.scene.pointclouds.find(
-            (x: any) => { return x.name === name }
-        );
-        if (existing_match_ptcloud) {
-            existing_match_ptcloud.material.elevationRange = [bb[4], bb[5]];
-            setClippingVolume(bb);
-            this.addLink(tx, rx, tx_h, rx_h);
-        } else {
-            Potree.loadPointCloud(url, name, (e: any) => {
-                // @ts-ignore
-                let scene = window.viewer.scene;
-                scene.addPointCloud(e.pointcloud);
+        urls.forEach((url : string, idx: number) => {
+            //@ts-ignore
+            const existing_pc_names : Array<string> = window.viewer.scene.pointclouds.map((cld) => {return cld.name});
+            if(!existing_pc_names.includes(name[idx])){
+                Potree.loadPointCloud(url, name[idx], (e: any) => {
+                    // @ts-ignore
+                    let scene = window.viewer.scene;
+                    scene.addPointCloud(e.pointcloud);
 
-                this.currentMaterial = e.pointcloud.material;
-                this.currentMaterial.size = 4;
-                this.currentMaterial.pointSizeType = Potree.PointSizeType.FIXED;
-                this.currentMaterial.shape = Potree.PointShape.CIRCLE;
-                this.currentMaterial.activeAttributeName = "elevation";
-                this.currentMaterial.elevationRange = [bb[4], bb[5]];
-                setClippingVolume(bb);
-                this.addLink(tx, rx, tx_h, rx_h);
-            });
-        }
+                    this.currentMaterial = e.pointcloud.material;
+                    this.currentMaterial.size = 4;
+                    this.currentMaterial.pointSizeType = Potree.PointSizeType.FIXED;
+                    this.currentMaterial.shape = Potree.PointShape.CIRCLE;
+                    this.currentMaterial.activeAttributeName = "elevation";
+                    this.currentMaterial.elevationRange = [bb[4], bb[5]];
+                });
+            }
+         });
+        setClippingVolume(bb);
+        this.addLink(tx, rx, tx_h, rx_h);
+        
     }
 
     updateLegend() {
         const sources: Array<string> = [];
-        this.datasets.forEach((v, k) => { sources.push(v); })
+        this.datasets.forEach((l, k) => {if( l instanceof Array) { l.forEach( v=>{sources.push(v);}) }})
         $('#los-chart-tooltip-button').attr(
             "title",
             `<div class="los-chart-legend">
@@ -856,7 +864,7 @@ export class LinkCheckPage {
 
         this.showPlotIfValidState();
         if (response.source != null) {
-            this.datasets.set(response.handler, response.source);
+            this.datasets.set(response.handler, [response.source]);
         }
         this.updateLegend();
     }
@@ -884,7 +892,9 @@ export class LinkCheckPage {
                     );
                     this.currentLinkHash = response.hash;
                 } else {
-                    this.currentMaterial.elevationRange = [response.bb[4], response.bb[5]];
+                    // @ts-ignore
+                    const scene = window.viewer.scene;
+                    scene.pointclouds.forEach((cld: any) => {cld.material.elevationRange = [response.bb[4], response.bb[5]]});
                 }
             }
         } else {
@@ -919,6 +929,10 @@ export class LinkCheckPage {
     getRadioHeightFromUI(radio: '0' | '1') {
         const hgt = parseFloat(String($(radio === '0' ? '#hgt-0' : '#hgt-1').val()));
         return this.units === UnitSystems.US ? ft2m(hgt) : hgt;
+    }
+
+    getCoordinateFromUI(radio: '0' | '1', coord : 'lat' | 'lng') : number{
+        return parseFloat(String($(`#${coord}-${radio}`).val()));
     }
 
     showPlotIfValidState() {

@@ -25,6 +25,11 @@ export function createFresnelZone(num_samples : number, resolution : number = 1.
     return fresnel_zone_hgt;
 };
 
+export function calculateMaximumFresnelRadius(distance_m : number, frequency_ghz: number, fresnel_number : number = 1.0): number{
+    const freq = frequency_ghz * (10 ** 9);
+    return Math.sqrt(fresnel_number *  distance_m * speed_of_light / freq) / 2.0;
+}
+
 /**
  * @param tx_hgt_m - transmitting radio height above mean sea level in meters
  * @param rx_hgt_m - receiving radio height above mean sea level in meters

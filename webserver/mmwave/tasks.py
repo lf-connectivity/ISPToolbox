@@ -1,6 +1,4 @@
 import requests
-import re
-from enum import IntEnum
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
@@ -13,42 +11,22 @@ from django.conf import settings
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+import traceback
 
-from mmwave.models import Msftcombined, TreeCanopy
+from mmwave.models import Msftcombined
+from mmwave.lidar_utils.LidarEngine import LidarEngine, \
+    LidarResolution, LIDAR_RESOLUTION_DEFAULTS, LIDAR_RESOLUTION_MAX_LINK_LENGTH
 from shapely.geometry import LineString as shapely_LineString
-from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
-from mmwave.models import EPTLidarPointCloud, TGLink
+from mmwave.models import TGLink
 from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine, createInvertedOverlay
 from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
 
 
 GOOGLE_MAPS_SAMPLE_LIMIT = 512
-MAXIMUM_NUM_POINTS_RETURNED = 1024
 DEFAULT_NUM_SAMPLES_PER_M = 1
 LINK_DISTANCE_LIMIT = 100000
-
-
-class LidarResolution(IntEnum):
-    LOW = 1
-    MEDIUM = 2
-    HIGH = 3
-    ULTRA = 4
-
-
-LIDAR_RESOLUTION_DEFAULTS = {
-    LidarResolution.LOW: 10,
-    LidarResolution.MEDIUM: 5,
-    LidarResolution.HIGH: 1,
-    LidarResolution.ULTRA: 0.5
-}
-
-LIDAR_RESOLUTION_MAX_LINK_LENGTH = {
-    LidarResolution.LOW: LINK_DISTANCE_LIMIT,
-    LidarResolution.MEDIUM: 50000,
-    LidarResolution.HIGH: 2000,
-    LidarResolution.ULTRA: 1000,
-}
+MAXIMUM_NUM_POINTS_RETURNED = 1024
 
 
 def createSubLinkFromAoi(tx, rx, aoi=[0, 1]):
@@ -117,58 +95,6 @@ def createLinkProfile(tx, rx, num_samples=MAXIMUM_NUM_POINTS_RETURNED):
     shapely_link = shapely_LineString(link)
     samples_points = [shapely_link.interpolate(i/float(num_samples - 1), normalized=True) for i in range(num_samples)]
     return [Point(pt.x, pt.y) for pt in samples_points], link
-
-
-def getClutterProfile(tx, rx):
-    """
-    """
-
-    return []
-
-
-def getTreeCanopyProfile(tx, rx):
-    """
-    tx - Point - GEOS object
-    rx - Point - GEOS object
-    """
-    link_profile, link = createLinkProfile(tx, rx)
-    return [TreeCanopy.getPointValue(pt) for pt in link_profile]
-
-
-def selectLatestProfile(clouds):
-    pattern_year = re.compile(r'2[0-9][0-9][0-9]')
-    """
-    Returns the most recent lidar dataset
-    """
-    # Search for year in URL data
-    years = [[int(yr) for yr in pattern_year.findall(cloud.url)] for cloud in clouds]
-    max_years = [max(year) if len(year) > 0 else 0 for year in years]
-    return clouds[max_years.index(max(max_years))]
-
-
-def getLidarProfile(tx, rx, resolution=5):
-    """
-    Returns a list of lidar points between tx and rx and number of points between the two
-
-    Tuple: (List, Int, String)
-
-    """
-    link = LineString([tx, rx])
-    pt_clouds = EPTLidarPointCloud.objects.filter(boundary__intersects=link).all()
-    if len(pt_clouds) == 0:
-        raise Exception('Lidar data not available')
-
-    # Select the most relevant dataset
-    cloud = selectLatestProfile(pt_clouds)
-
-    # Get URL of point cloud
-    ept_path = cloud.url
-    link.srid = 4326
-    # TODO achong: all entwine are in EPSG:3857 coordinate system, but future EPT's could
-    # be in a different coordinate system
-    lidar_profile, count, bb, link_T = getLidarPointsAroundLink(
-        ept_path, link, 3857, resolution=resolution, num_samples=MAXIMUM_NUM_POINTS_RETURNED)
-    return lidar_profile, count, ept_path, bb, cloud.name, link_T[0], link_T[1]
 
 
 def getBuildingProfile(tx, rx):
@@ -270,17 +196,17 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
         tx, rx = createSubLinkFromAoi(tx, rx, aoi)
         link_dist_m = genLinkDistance(tx, rx)
         resp['dist'] = link_dist_m
-        lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
-            tx,
-            rx,
-            LIDAR_RESOLUTION_DEFAULTS[resolution]
+        le = LidarEngine(
+            link=LineString([tx, rx]),
+            resolution=LIDAR_RESOLUTION_DEFAULTS[resolution],
+            num_samples=MAXIMUM_NUM_POINTS_RETURNED
         )
-        resp['lidar_profile'] = lidar_profile
-        resp['url'] = ept_path
-        resp['source'] = name
-        resp['bb'] = bb
-        resp['tx'] = tx_T
-        resp['rx'] = rx_T
+        resp['lidar_profile'] = le.getProfile()
+        resp['url'] = le.getUrls()
+        resp['bb'] = le.getBoundingBox()
+        resp['source'] = le.getSources()
+        resp['tx'] = le.getTxLidarCoord()
+        resp['rx'] = le.getRxLidarCoord()
         resp['aoi'] = aoi
         if (
                 resp['error'] is None and
@@ -290,6 +216,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
             getLiDARProfile.delay(network_id, data, resolution + 1)
     except Exception as e:
         resp['error'] = str(e)
+        traceback.print_exc()
 
     async_to_sync(channel_layer.group_send)(channel_name, resp)
 
@@ -325,69 +252,6 @@ def getTerrainProfile(network_id, data):
         resp['error'] = str(e)
 
     async_to_sync(channel_layer.group_send)(channel_name, resp)
-
-
-@shared_task
-def getLOSProfile(network_id, data, resolution=LidarResolution.LOW):
-    resp = {
-        'error': None,
-        'tree_profile': None,
-        'building_profile': None,
-        'terrain_profile': None,
-        'lidar_profile': None,
-        'points': 0,
-        'url': None,
-        'name': None,
-        'bb': [],
-        'tx': {},
-        'rx': {},
-        'hash': None,
-        'datasets': '',
-        'res': 'low',
-        "type": 'standard.message'
-    }
-    channel_layer = get_channel_layer()
-    channel_name = 'los_check_%s' % network_id
-    try:
-        tx = Point([float(f) for f in data.get('tx', [])])
-        rx = Point([float(f) for f in data.get('rx', [])])
-        resp['hash'] = data.get('hash', None)
-        fbid = int(data.get('fbid', 0))
-        resp['res'] = f'{LIDAR_RESOLUTION_DEFAULTS[resolution]} m'
-        # Create Object to Log User Interaction
-        TGLink(tx=tx, rx=rx, fbid=fbid).save()
-        link_dist_m = genLinkDistance(tx, rx)
-        if link_dist_m > LINK_DISTANCE_LIMIT:
-            resp['error'] = f'''Link too long: limit {
-                LINK_DISTANCE_LIMIT/1000 } km - link {round(link_dist_m / 1000, 3)} km'''
-            async_to_sync(channel_layer.group_send)(channel_name, resp)
-            return None
-
-        terrain_profile = getElevationProfile(tx, rx)
-        resp['terrain_profile'] = terrain_profile
-        try:
-            lidar_profile, pt_count, ept_path, bb, name, tx_T, rx_T = getLidarProfile(
-                tx,
-                rx,
-                LIDAR_RESOLUTION_DEFAULTS[resolution]
-            )
-            resp['lidar_profile'] = lidar_profile
-            resp['points'] = pt_count
-            resp['url'] = ept_path
-            resp['name'] = name
-            resp['bb'] = bb
-            resp['tx'] = tx_T
-            resp['rx'] = rx_T
-            resp['datasets'] = f'{name} & Google Elevation API'
-        except Exception as e:
-            resp['error'] = str(e)
-        async_to_sync(channel_layer.group_send)(channel_name, resp)
-        if resp['error'] is None and resolution != LidarResolution.ULTRA:
-            getLOSProfile.delay(network_id, data, resolution + 1)
-
-    except Exception as e:
-        resp["error"] = "An unexpected error occured: " + str(e)
-        async_to_sync(channel_layer.group_send)(channel_name, resp)
 
 
 if settings.PROD:

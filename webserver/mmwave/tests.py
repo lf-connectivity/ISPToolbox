@@ -1,9 +1,9 @@
 from django.test import TestCase, TransactionTestCase
 from .tasks import getElevationProfile, MAXIMUM_NUM_POINTS_RETURNED
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
-from mmwave.lidar_utils.LidarEngine import (
-    LidarEngine, LIDAR_RESOLUTION_DEFAULTS, LidarResolution
-)
+# from mmwave.lidar_utils.LidarEngine import (
+#     LidarEngine, LIDAR_RESOLUTION_DEFAULTS, LidarResolution
+# )
 from django.contrib.gis.geos import Point, LineString, GEOSGeometry
 from mmwave.models import EPTLidarPointCloud
 

@@ -115,8 +115,9 @@ class LidarEngine:
                 try:
                     profile = self.__getProfileForLinkCloud(geometry, cloud, num_samples)
                     profiles.append((geometry, profile))
-                except Exception:
-                    logging.info(f'failed to get profile for link {geometry.json}')
+                except Exception as e:
+                    logging.error(f'failed to get profile for link {geometry.json}')
+                    logging.error(str(e))
                     profile = [float('nan')] * num_samples
                     profiles.append((geometry, profile))
 
@@ -126,8 +127,9 @@ class LidarEngine:
                     try:
                         profile = self.__getProfileForLinkCloud(line, cloud, num_samples)
                         profiles.append((line, profile))
-                    except Exception:
-                        logging.info(f'failed to get profile for link {geometry.json}')
+                    except Exception as e:
+                        logging.error(f'failed to get profile for link {geometry.json}')
+                        logging.error(str(e))
                         profile = [float('nan')] * num_samples
                         profiles.append((line, profile))
 
@@ -139,8 +141,11 @@ class LidarEngine:
         # Convert NaN to closest value
         data = np.asarray(combined_profile)
         mask = np.isnan(data)
-        data[mask] = np.interp(np.flatnonzero(mask), np.flatnonzero(~mask), data[~mask])
-        return data.tolist()
+        if np.all(mask):
+            return [0] * self.num_samples
+        else:
+            data[mask] = np.interp(np.flatnonzero(mask), np.flatnonzero(~mask), data[~mask])
+            return data.tolist()
 
     def __getProfileForLinkCloud(self, link, cloud, num_samples=None):
         if num_samples is None:

@@ -202,18 +202,18 @@ export class LinkCheckPage {
         this.map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
-            // center: initial_map_center, // starting position [lng, lat]
+            center: initial_map_center, // starting position [lng, lat]
             zoom: initial_zoom, // starting zoom
-            bounds: [
-                [
-                    Math.min(this.getCoordinateFromUI('0','lng'), this.getCoordinateFromUI('1','lng')),
-                    Math.min(this.getCoordinateFromUI('0','lat'), this.getCoordinateFromUI('1','lat'))
-                ],
-                [
-                    Math.max(this.getCoordinateFromUI('0','lng'), this.getCoordinateFromUI('1','lng')),
-                    Math.max(this.getCoordinateFromUI('0','lat'), this.getCoordinateFromUI('1','lat'))
-                ]
-            ]
+            // bounds: [
+            //     [
+            //         Math.min(this.getCoordinateFromUI('0','lng'), this.getCoordinateFromUI('1','lng')),
+            //         Math.min(this.getCoordinateFromUI('0','lat'), this.getCoordinateFromUI('1','lat'))
+            //     ],
+            //     [
+            //         Math.max(this.getCoordinateFromUI('0','lng'), this.getCoordinateFromUI('1','lng')),
+            //         Math.max(this.getCoordinateFromUI('0','lat'), this.getCoordinateFromUI('1','lat'))
+            //     ]
+            // ]
         });
 
         this.map.on('load', () => {

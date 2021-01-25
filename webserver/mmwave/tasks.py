@@ -14,8 +14,10 @@ from channels.layers import get_channel_layer
 import traceback
 
 from mmwave.models import Msftcombined
-from mmwave.lidar_utils.LidarEngine import LidarEngine, \
-    LidarResolution, LIDAR_RESOLUTION_DEFAULTS, LIDAR_RESOLUTION_MAX_LINK_LENGTH
+from mmwave.lidar_utils.LidarEngine import (
+        LidarEngine, LidarResolution, LIDAR_RESOLUTION_DEFAULTS,
+        LIDAR_RESOLUTION_MAX_LINK_LENGTH, LidarEngineException
+)
 from shapely.geometry import LineString as shapely_LineString
 from mmwave.models import TGLink
 from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine, createInvertedOverlay
@@ -215,9 +217,10 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
                 link_dist_m < LIDAR_RESOLUTION_MAX_LINK_LENGTH[resolution + 1]
         ):
             getLiDARProfile.delay(network_id, data, resolution + 1)
-    except Exception as e:
+    except LidarEngineException as e:
         resp['error'] = str(e)
-        traceback.print_exc()
+    except Exception:
+        resp['error'] = 'An unexpected error occurred'
 
     async_to_sync(channel_layer.group_send)(channel_name, resp)
 

@@ -9,6 +9,13 @@ import logging
 import numpy as np
 
 
+class LidarEngineException(Exception):
+    """
+    Use this exception to filter out errors that the user is meant to see
+    """
+    pass
+
+
 class LidarResolution(IntEnum):
     LOW = 1
     MEDIUM = 2
@@ -142,7 +149,8 @@ class LidarEngine:
         data = np.asarray(combined_profile)
         mask = np.isnan(data)
         if np.all(mask):
-            return [0] * self.num_samples
+            raise LidarEngineException("""LiDAR data not available
+        Please try at a later date. Data routinely gets updated.""")
         else:
             data[mask] = np.interp(np.flatnonzero(mask), np.flatnonzero(~mask), data[~mask])
             return data.tolist()

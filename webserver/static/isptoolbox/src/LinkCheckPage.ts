@@ -46,6 +46,7 @@ const center_freq_values: { [key: string]: number } = {
     '60 GHz': 64.790,
 };
 const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];
+const DEFAULT_RADIO_HEIGHT = 60;
 
 export enum UnitSystems {
     US = 'US',
@@ -185,7 +186,10 @@ export class LinkCheckPage {
         //@ts-ignore
         window.chart = this.link_chart;
 
-        this.profileWS = new LOSCheckWS(this.networkID, [this.ws_message_handler.bind(this)]);
+        this.profileWS = new LOSCheckWS(
+            this.networkID,
+            [this.ws_message_handler.bind(this)]
+        );
 
         let initial_map_center = {
             'lon': (this.getCoordinateFromUI('0','lng') + this.getCoordinateFromUI('1','lng')) / 2.0,
@@ -468,11 +472,11 @@ export class LinkCheckPage {
             $('#lng-1').val(feat.geometry.coordinates[1][0].toFixed(5));
             $('#lat-1').val(feat.geometry.coordinates[1][1].toFixed(5));
             if (feat.properties.radio0hgt == undefined) {
-                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', 20);
+                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', DEFAULT_RADIO_HEIGHT);
             }
             $('#hgt-0').val(feat.properties.radio0hgt);
             if (feat.properties.radio1hgt == undefined) {
-                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', 10);
+                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', DEFAULT_RADIO_HEIGHT);
             }
             $('#hgt-1').val(feat.properties.radio1hgt);
             const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
@@ -614,7 +618,7 @@ export class LinkCheckPage {
      * Updates link chart for LOS based on new elevation profile and tx/rx height
      */
     updateLinkChart(update3DView = false) {
-        if (this._elevation !== null && this._link_distance) {
+        if (this._elevation.length > 0 && this._link_distance) {
             const { los, fresnel } = createLinkProfile(
                 this._elevation,
                 this.getRadioHeightFromUI('0'),
@@ -829,6 +833,13 @@ export class LinkCheckPage {
         ).tooltip('_fixTitle');
     }
 
+    setErrorMessage(error_message : string) : void {
+        $("#link-request-error-description").text(error_message);
+        $('#loading_failed_spinner').removeClass('d-none');
+        $("#loading_spinner").addClass('d-none');
+        $("#link_chart").addClass('d-none');
+    }
+
     // Websocket Message Callback Handlers
     ws_message_handler(response: LOSCheckResponse): void {
         switch (response.handler) {
@@ -870,6 +881,11 @@ export class LinkCheckPage {
     }
 
     ws_lidar_callback(response: LidarResponse): void {
+        if(response.error !== null) {
+            this.setErrorMessage(response.error);
+            return;
+        }
+
         if (response.aoi[0] === 0 && response.aoi[1] === 1) {
             this._lidar = response.lidar_profile;
             this._link_distance = response.dist;
@@ -914,15 +930,11 @@ export class LinkCheckPage {
         }
         this.updateLegend();
     }
-
+    
     ws_link_callback(response: LinkResponse): void {
         if (response.error !== null) {
-            $("#link-request-error-description").text(response.error);
             this.selected_feature = null;
-            $('#loading_failed_spinner').removeClass('d-none');
-            $("#link-request-error-description").text();
-            $("#loading_spinner").addClass('d-none');
-            $("#link_chart").addClass('d-none');
+            this.setErrorMessage(response.error);
         }
     }
 

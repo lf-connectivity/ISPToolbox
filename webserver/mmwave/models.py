@@ -19,11 +19,11 @@ class TGLink(models.Model):
     tx = gis_models.PointField()
     rx = gis_models.PointField()
     fbid = models.BigIntegerField(null=True, blank=True, db_index=True)
-    building_start = models.BigIntegerField(null=True, blank=True)
-    building_end = models.BigIntegerField(null=True, blank=True)
 
-    def linklength_m(self, obj):
-        return str(geopy_distance(lonlat(obj.tx.x, obj.tx.y), lonlat(obj.rx.x, obj.rx.y)).meters)
+    freq = models.FloatField(default=0)
+
+    def linklength_m(self):
+        return str(geopy_distance(lonlat(self.tx.x, self.tx.y), lonlat(self.rx.x, self.rx.y)).meters)
 
 
 class EPTLidarPointCloud(models.Model):

@@ -91,7 +91,7 @@ class LOSCheckWS {
         }
     }
 
-    sendRequest(tx: [number, number], rx: [number, number], fbid: string, aoi : [number ,number] = [0, 1]) {
+    sendRequest(tx: [number, number], rx: [number, number], fbid: string, freq: number = 0, aoi : [number ,number] = [0, 1]) {
         const hash = [String(tx), String(rx), fbid, aoi].join(',');
         this.hash = hash;
         const request = JSON.stringify({
@@ -101,6 +101,7 @@ class LOSCheckWS {
             fbid: fbid,
             aoi: aoi,
             hash: hash,
+            freq: freq,
         });
         if(this.ws.readyState !== WebSocket.OPEN) {
             this.pendingRequests.push(request);

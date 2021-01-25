@@ -572,7 +572,12 @@ export class LinkCheckPage {
         // Create Callback Function for WebSocket
         // Use Websocket for request:
         $("#3D-view-btn").addClass('d-none');
-        this.profileWS.sendRequest(query_params.tx, query_params.rx, this.userRequestIdentity);
+        this.profileWS.sendRequest(
+            query_params.tx,
+            query_params.rx,
+            this.userRequestIdentity,
+            this.centerFreq
+        );
         this._elevation = [];
         this._lidar = [];
         this._link_distance = 0;
@@ -580,7 +585,13 @@ export class LinkCheckPage {
 
     zoomUpdateLinkProfile(aoi: [number, number]) {
         const query_params = this.getRadioLocations();
-        this.profileWS.sendRequest(query_params.tx, query_params.rx, this.userRequestIdentity, aoi);
+        this.profileWS.sendRequest(
+            query_params.tx,
+            query_params.rx,
+            this.userRequestIdentity,
+            this.centerFreq,
+            aoi
+        );
     }
 
     mouseLeave() {

@@ -2,7 +2,12 @@ from django.contrib import admin
 from mmwave.models import TGLink, LOSSummary, EPTLidarPointCloud
 from django.db.models import Count
 
-admin.site.register(TGLink)
+
+@admin.register(TGLink)
+class TGLinkAdmin(admin.ModelAdmin):
+    list_display = ("uuid", "created", "linklength_m", "fbid")
+
+
 admin.site.register(EPTLidarPointCloud)
 
 

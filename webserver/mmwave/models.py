@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.gis.db import models as gis_models
 import uuid
 from django.db import connections
+from geopy.distance import distance as geopy_distance
+from geopy.distance import lonlat
 
 
 # Create your models here.
@@ -19,6 +21,9 @@ class TGLink(models.Model):
     fbid = models.BigIntegerField(null=True, blank=True, db_index=True)
     building_start = models.BigIntegerField(null=True, blank=True)
     building_end = models.BigIntegerField(null=True, blank=True)
+
+    def linklength_m(self, obj):
+        return str(geopy_distance(lonlat(obj.tx.x, obj.tx.y), lonlat(obj.rx.x, obj.rx.y)).meters)
 
 
 class EPTLidarPointCloud(models.Model):

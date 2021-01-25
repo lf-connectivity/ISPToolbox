@@ -21,6 +21,7 @@ from mmwave.models import TGLink
 from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine, createInvertedOverlay
 from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
+from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 
 
 GOOGLE_MAPS_SAMPLE_LIMIT = 512
@@ -255,18 +256,34 @@ def getTerrainProfile(network_id, data):
 
 
 if settings.PROD:
-    @periodic_task(run_every=(crontab(minute=0, hour=8)), name="refresh_lidar_point_cloud")
+    @periodic_task(run_every=(crontab(minute=0, hour=14)), name="refresh_lidar_point_cloud")
     def updatePointCloudData():
         """
         This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database
         by default: sends an email notification to isptoolbox@fb.com on error, otherwise stays silent
 
         """
-        loadBoundariesFromEntWine()
-        overlay = createInvertedOverlay()
-        uploadNewTileset(overlay, 'lowreslidarboundary')
+        try:
+            overlay_name = 'lowreslidarboundary'
+            loadBoundariesFromEntWine()
+            overlay = createInvertedOverlay()
+            resp = uploadNewTileset(overlay, overlay_name)
+            if resp.status_code == 201:
+                sendEmailToISPToolboxOncall(
+                    f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
+                    f'Updated overlay in mapbox {overlay_name}')
+            else:
+                sendEmailToISPToolboxOncall(
+                    f'[Automated Message] Failed to update Overlay: {overlay_name}',
+                    f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}')
+        except Exception as e:
+            sendEmailToISPToolboxOncall(
+                f'[Automated Message] Failed to update Overlay {overlay_name}',
+                f"""Failed to update overlay: {overlay_name}\n
+                exception: {str(e)}\n
+                traceback:\n{traceback.format_exc()}""")
 
-    @periodic_task(run_every=(crontab(minute=0, hour=20)), name="add_high_resolution_boundary")
+    @periodic_task(run_every=(crontab(minute=0, hour=14)), name="add_high_resolution_boundary")
     def addHighResolutionBoundaries():
         """
         This task updates the lidar boundaries and availability overlay
@@ -276,6 +293,22 @@ if settings.PROD:
         3. uploads the availability overlay to mapbox as a tileset
 
         """
-        updatePointCloudBoundariesTask()
-        overlay = createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
-        uploadNewTileset(overlay, 'highreslidarboundary')
+        try:
+            overlay_name = 'highreslidarboundary'
+            updatePointCloudBoundariesTask()
+            overlay = createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
+            resp = uploadNewTileset(overlay, overlay_name)
+            if resp.status_code == 201:
+                sendEmailToISPToolboxOncall(
+                    f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
+                    f'Updated overlay in mapbox {overlay_name}')
+            else:
+                sendEmailToISPToolboxOncall(
+                    f'[Automated Message] Failed to update Overlay: {overlay_name}',
+                    f'Failed to update overlay: {overlay_name}')
+        except Exception as e:
+            sendEmailToISPToolboxOncall(
+                f'[Automated Message] Failed to update Overlay {overlay_name}',
+                f"""Failed to update overlay: {overlay_name}\n
+                exception: {str(e)}\n
+                traceback:\n{traceback.format_exc()}""")

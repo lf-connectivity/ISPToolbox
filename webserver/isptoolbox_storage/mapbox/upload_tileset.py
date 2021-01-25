@@ -32,43 +32,35 @@ def uploadNewTileset(geojson_data, tileset_name):
 
         tileset_name has limitations, see link above for restrictions
     """
-    try:
-        # Get Upload Information
-        params = [
-            ('access_token', settings.MAPBOX_ACCESS_TOKEN_BACKEND),
-        ]
-        response = requests.post('https://api.mapbox.com/uploads/v1/isptoolbox/credentials', params=params)
+    # Get Upload Information
+    params = [
+        ('access_token', settings.MAPBOX_ACCESS_TOKEN_BACKEND),
+    ]
+    response = requests.post('https://api.mapbox.com/uploads/v1/isptoolbox/credentials', params=params)
 
-        # Use Upload information to Write to S3
-        upload_information = response.json()
-        s3_client = boto3.client(
-            's3',
-            aws_access_key_id=upload_information['accessKeyId'],
-            aws_secret_access_key=upload_information['secretAccessKey'],
-            aws_session_token=upload_information['sessionToken']
-        )
-        s3_client.upload_fileobj(geojson_data, upload_information['bucket'], upload_information['key'])
+    # Use Upload information to Write to S3
+    upload_information = response.json()
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=upload_information['accessKeyId'],
+        aws_secret_access_key=upload_information['secretAccessKey'],
+        aws_session_token=upload_information['sessionToken']
+    )
+    s3_client.upload_fileobj(geojson_data, upload_information['bucket'], upload_information['key'])
+    # Start the upload processing pipeline on mapbox's side
+    headers = {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+    }
 
-        # Start the upload processing pipeline on mapbox's side
-        headers = {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-        }
+    params = (
+        ('access_token', settings.MAPBOX_ACCESS_TOKEN_BACKEND),
+    )
 
-        params = (
-            ('access_token', settings.MAPBOX_ACCESS_TOKEN_BACKEND),
-        )
+    data = {"url": upload_information['url'], "tileset": f"{settings.MAPBOX_ACCOUNT}.{tileset_name}"}
+    response = requests.post('https://api.mapbox.com/uploads/v1/isptoolbox', headers=headers, params=params, json=data)
 
-        data = {"url": upload_information['url'], "tileset": f"{settings.MAPBOX_ACCOUNT}.{tileset_name}"}
-        response = requests.post('https://api.mapbox.com/uploads/v1/isptoolbox', headers=headers, params=params, json=data)
-
-        return response.json()
-
-        # Check if processing is complete
-
-        # Update Overlay to Point to new endpoint
-    except Exception as e:
-        return str(e)
+    return response
 
 
 def prepareGeoJSONUploadMapbox(geojson):
@@ -139,7 +131,6 @@ def flatten(geojson):
                 geojson (dict): geojson dictionary
     """
     obj_type = geojson.get('type', None)
-    print(obj_type)
 
     if(obj_type == 'FeatureCollection'):
         geojson['features'] = reduce(lambda mem, feature: mem + feature, map(flatten, geojson['features']))
@@ -151,7 +142,6 @@ def flatten(geojson):
     elif(obj_type == 'MultiPoint'):
         return map(lambda x: {'type': "Point", 'coordinates': x}, geojson['coordinates'])
     elif(obj_type == 'MultiPolygon'):
-        print(obj_type)
         return map(lambda x: {'type': "Polygon", 'coordinates': x}, geojson['coordinates'])
     elif(obj_type == "MultiLineString"):
         return map(lambda x: {'type': "LineString", 'coordinates': x}, geojson['coordinates'])

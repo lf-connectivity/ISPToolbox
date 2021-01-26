@@ -158,23 +158,26 @@ export class LinkCheckPage {
             this.updateLinkChart(true);
         });
 
-        const numNodesLoadingChangedCallback = (num_nodes: number) => {
-            if (num_nodes > 0 && this.currentView === '3d') {
-                $('#point-cloud-loading-status').removeClass('d-none');
-            } else {
-                $('#point-cloud-loading-status').addClass('d-none');
+        if(Potree) {
+            const numNodesLoadingChangedCallback = (num_nodes: number) => {
+                if (num_nodes > 0 && this.currentView === '3d') {
+                    $('#point-cloud-loading-status').removeClass('d-none');
+                } else {
+                    $('#point-cloud-loading-status').addClass('d-none');
+                }
             }
+            Potree.numNodesLoadingValue = 0;
+            Object.defineProperty(Potree, 'numNodesLoading', {
+                set: function (x) {
+                    numNodesLoadingChangedCallback(x);
+                    this.numNodesLoadingValue = x;
+                },
+                get: function () {
+                    return this.numNodesLoadingValue;
+                }
+            });
         }
-        Potree.numNodesLoadingValue = 0;
-        Object.defineProperty(Potree, 'numNodesLoading', {
-            set: function (x) {
-                numNodesLoadingChangedCallback(x);
-                this.numNodesLoadingValue = x;
-            },
-            get: function () {
-                return this.numNodesLoadingValue;
-            }
-        });
+
 
         this.link_chart = createLinkChart(
             this.link_chart,

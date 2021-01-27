@@ -27,3 +27,6 @@ terraform.tfstate.d
 
 # vscode
 .vscode/
+
+# node
+node_modules/

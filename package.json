@@ -1,0 +1,24 @@
+{
+  "name": "isptoolbox",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ISP Toolbox Backend Server Code - powers market evaluator, network cost comparison - hosted: AWS, EC2 - database: AWS Postgres - KV store: Elasticache - domain: https://fbctower.com",
+  "main": "index.js",
+  "dependencies": {
+    "cypress": "^6.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ISPToolbox/ISPToolbox.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ISPToolbox/ISPToolbox/issues"
+  },
+  "homepage": "https://github.com/ISPToolbox/ISPToolbox#readme"
+}

@@ -7,23 +7,23 @@ from scipy.interpolate import interp1d
 import numpy as np
 
 DEFAULT_INTERPOLATION_STEP = 50. / 100.  # cm
-
-filters = {
-    'outlier' : {
+DEFAULT_FILTERS = {
+    'outlier': {
         "class": 7,
-        "type":"filters.outlier",
-        "method":"statistical",
+        "type": "filters.outlier",
+        "method": "statistical",
         "mean_k": 12,
         "multiplier": 1.5
     },
-    'circle' : {
+    'circle': {
         "class": 7,
-        "type":"filters.outlier",
-        "method":"radius",
+        "type": "filters.outlier",
+        "method": "radius",
         "radius": 50.0,
         "min_k": 10
     }
 }
+
 
 def averageHeightAtDistance(distance, heights):
     """
@@ -76,7 +76,7 @@ def getLidarPointsAroundLink(
                 "resolution" : {resolution},
                 "polygon": ["{link_T.buffer(link_buffer).wkt}/ EPSG: 3857"]
             }},
-            {json.dumps(filters['outlier'])},
+            {json.dumps(DEFAULT_FILTERS['outlier'])},
             {{
                 "type": "filters.range",
                 "limits": "Classification![7:7]"

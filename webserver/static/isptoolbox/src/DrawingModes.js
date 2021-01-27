@@ -1,6 +1,14 @@
 export function LinkMode(){
     const link_mode = MapboxDraw.modes.draw_line_string;
     link_mode.clickAnywhere = function (state, e) {
+        if (e.originalEvent.type.includes('touch')) {
+            state.line.addCoordinate(
+              state.currentVertexPosition,
+              e.lngLat.lng,
+              e.lngLat.lat,
+            );
+          }
+        
         if (state.currentVertexPosition === 1) {
             state.line.addCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
             return this.changeMode('simple_select', { featureIds: [state.line.id] });
@@ -8,12 +16,11 @@ export function LinkMode(){
         this.updateUIClasses({ mouse: 'add' });
         state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         if (state.direction === 'forward') {
-            state.currentVertexPosition += 1; // eslint-disable-line
+            state.currentVertexPosition++;
             state.line.updateCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
         } else {
             state.line.addCoordinate(0, e.lngLat.lng, e.lngLat.lat);
         }
-        return null;
     };
     const originalToDisplayFeatures = link_mode.toDisplayFeatures;
     link_mode.toDisplayFeatures = function(state, geojson, display) {

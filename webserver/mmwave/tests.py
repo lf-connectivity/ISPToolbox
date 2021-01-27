@@ -1,6 +1,8 @@
 from django.test import TestCase, TransactionTestCase
 from .tasks import getElevationProfile, MAXIMUM_NUM_POINTS_RETURNED
-from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
+from mmwave.lidar_utils.pdal_templates import (
+    getLidarPointsAroundLink, takeMaxHeightAtDistance
+)
 # from mmwave.lidar_utils.LidarEngine import (
 #     LidarEngine, LIDAR_RESOLUTION_DEFAULTS, LidarResolution
 # )
@@ -82,6 +84,17 @@ class LiDARTestCase(TransactionTestCase):
         # le = LidarEngine(link, LIDAR_RESOLUTION_DEFAULTS[LidarResolution.LOW], MAXIMUM_NUM_POINTS_RETURNED)
 
         self.assertTrue(link.dims > 0)
+
+    def test_dedup_lidar_profile(self):
+        """
+        Check that lidar profile deduplication works as intended
+        """
+        heights = [0, 1, 3, 10, 5]
+        distances = [0, 1, 1, 1, 2]
+        d, h = takeMaxHeightAtDistance(distances, heights)
+        self.assertEqual(len(d), 3)
+        self.assertEqual(len(h), 3)
+        self.assertEqual(h[1], 10)
 
 
 class ElevationProfileTestCase(TestCase):

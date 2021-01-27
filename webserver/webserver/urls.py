@@ -35,7 +35,7 @@ from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
 from IspToolboxApp.Views.redirect_view import HomepageRedirect
 from Overlay.views import OverlaySource
 from dataUpdate.views import CountrySourceUpdatedView
-from mmwave.views import TGLinkView
+from mmwave.views import TGLinkView, LOSCheckDemo
 
 from rest_framework import routers
 from django.conf.urls.static import static
@@ -102,6 +102,8 @@ urlpatterns = [
     path('api/', include(router.urls)),
     # Workspace
     path('pro/', include('workspace.urls')),
+    # Demo Views
+    path('demo/los-check/', LOSCheckDemo.as_view(), name='demo-los-check'),
     # CMS
     path('', HomepageRedirect.as_view()),
     path('', include('cms.urls'))

@@ -25,6 +25,21 @@ def averageHeightAtDistance(distance, heights):
     return unique_increasing_distances, output
 
 
+def takeMaxHeightAtDistance(distance, heights):
+    """
+        Remove duplicate distances along profile and replace with max heights
+    """
+    unique_increasing_distances, duplicate_indices, _ = np.unique(
+        distance,
+        return_inverse=True,
+        return_counts=True
+    )
+    output = np.zeros(len(unique_increasing_distances))
+    np.maximum.at(output, duplicate_indices, heights)
+
+    return unique_increasing_distances, output
+
+
 def getLidarPointsAroundLink(
             ept_path, link, ept_transform, resolution,
             num_samples, interpolation_step=DEFAULT_INTERPOLATION_STEP, link_buffer=3
@@ -67,7 +82,7 @@ def getLidarPointsAroundLink(
 
     pts = [[link_T.project_normalized(Point(pt[x_idx], pt[y_idx]))*link_length, pt[z_idx]] for pt in arr]
     # Average Duplicate Points
-    dsts, hgts = averageHeightAtDistance([pt[0] for pt in pts], [pt[1] for pt in pts])
+    dsts, hgts = takeMaxHeightAtDistance([pt[0] for pt in pts], [pt[1] for pt in pts])
 
     # Resample Output Profile
     new_samples = np.linspace(0, link_length, num_samples)

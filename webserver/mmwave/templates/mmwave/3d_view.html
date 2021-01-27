@@ -20,9 +20,11 @@
 </style>
 <script>
   if(typeof window.WebGL2RenderingContext !== 'undefined'){
-    console.log('WebGL2 Enabled')
+    console.log('WebGL2 Enabled');
+    window.webgl2support = true;
   } else {
     console.log('WebGL2 Not supported');
+    window.webgl2support = false;
     document.getElementById("webgl-error-msg").classList.remove('d-none');
     document.getElementById("potree_render_area").classList.add('d-none');
   }
@@ -30,7 +32,6 @@
 
     if (window.viewer.renderer.getContext().getSupportedExtensions().includes("EXT_frag_depth"))
     {
-      console.log('EyeDomeLighting Rendering Enabled');
       viewer.setEDLEnabled(false);
     }
     

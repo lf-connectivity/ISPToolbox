@@ -17,15 +17,14 @@ import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
 import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
+import { Potree } from "./Potree.js";
 
 type HighChartsExtremesEvent = {
     min: number | undefined,
     max: number | undefined,
 }
 
-
-// @ts-ignore
-const Potree = window.Potree;
+let potree = (window as any).Potree as null | typeof Potree;
 // @ts-ignore
 const THREE = window.THREE;
 
@@ -97,6 +96,9 @@ export class LinkCheckPage {
     datasets: Map<LOSWSHandlers, Array<string>>;
 
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
+        if (!(window as any).webgl2support) {
+            potree = null;
+        }        
         this.networkID = networkID;
         this.userRequestIdentity = userRequestIdentity;
         this.radio_names = radio_names;
@@ -158,7 +160,7 @@ export class LinkCheckPage {
             this.updateLinkChart(true);
         });
 
-        if(Potree) {
+        if(potree) {
             const numNodesLoadingChangedCallback = (num_nodes: number) => {
                 if (num_nodes > 0 && this.currentView === '3d') {
                     $('#point-cloud-loading-status').removeClass('d-none');
@@ -166,8 +168,8 @@ export class LinkCheckPage {
                     $('#point-cloud-loading-status').addClass('d-none');
                 }
             }
-            Potree.numNodesLoadingValue = 0;
-            Object.defineProperty(Potree, 'numNodesLoading', {
+            potree.numNodesLoadingValue = 0;
+            Object.defineProperty(potree, 'numNodesLoading', {
                 set: function (x) {
                     numNodesLoadingChangedCallback(x);
                     this.numNodesLoadingValue = x;
@@ -691,72 +693,75 @@ export class LinkCheckPage {
             this.animationPlaying = false;
             this.globalLinkAnimation = null;
         }
-
-        if (this.aAbout1 == null) {
-            this.aAbout1 = new Potree.Annotation({
-                position: [tx[0], tx[1], tx_h + 10],
-                title: this.radio_names[0],
-            });
-            // @ts-ignore
-            window.viewer.scene.annotations.add(this.aAbout1);
-        } else {
-            this.aAbout1.position.set(tx[0], tx[1], tx_h + 10);
-        }
-        if (this.aAbout2 == null) {
-            this.aAbout2 = new Potree.Annotation({
-                position: [rx[0], rx[1], rx_h + 10],
-                title: this.radio_names[1]
-            });
-            // @ts-ignore
-            window.viewer.scene.annotations.add(this.aAbout2);
-        } else {
-            this.aAbout2.position.set(rx[0], rx[1], rx_h + 10);
-        }
-
-        // @ts-ignore
-        this.globalLinkAnimation = new Potree.CameraAnimation(window.viewer);
-        const { targets, positions } = createTrackShappedOrbitPath(tx, tx_h, rx, rx_h, 50.0, 50.0);
-
-        for (let i = 0; i < positions.length; i++) {
-            const cp = this.globalLinkAnimation.createControlPoint();
-            cp.position.set(...positions[i]);
-            cp.target.set(...targets[i]);
-        }
-        const link_len = calcLinkLength(tx, rx, tx_h, rx_h);
-        const desired_animation_speed = 50; // meters per second 
-        const min_animation_duration = 20;
-        const animationDuration = Math.max((link_len * 2 / desired_animation_speed), min_animation_duration);
-        // @ts-ignore
-        window.viewer.scene.addCameraAnimation(this.globalLinkAnimation);
-        this.globalLinkAnimation.setDuration(animationDuration);
-        this.globalLinkAnimation.setVisible(false);
-        if (start_animation) {
-            this.animationPlaying = true;
-            this.globalLinkAnimation.play(true);
-        } else {
-            this.animationPlaying = false;
-        }
-        const animationClickCallback = () => {
-            if (this.animationPlaying) {
-                this.globalLinkAnimation.pause();
-                $('#pause-button-3d').addClass('d-none');
-                $('#play-button-3d').removeClass('d-none');
+        if(potree){
+            if (this.aAbout1 == null) {
+                this.aAbout1 = new potree.Annotation({
+                    position: [tx[0], tx[1], tx_h + 10],
+                    title: this.radio_names[0],
+                });
+                // @ts-ignore
+                window.viewer.scene.annotations.add(this.aAbout1);
             } else {
+                this.aAbout1.position.set(tx[0], tx[1], tx_h + 10);
+            }
+            if (this.aAbout2 == null) {
+                this.aAbout2 = new potree.Annotation({
+                    position: [rx[0], rx[1], rx_h + 10],
+                    title: this.radio_names[1]
+                });
+                // @ts-ignore
+                window.viewer.scene.annotations.add(this.aAbout2);
+            } else {
+                this.aAbout2.position.set(rx[0], rx[1], rx_h + 10);
+            }
+            
+            this.globalLinkAnimation = new potree.CameraAnimation(
+                (window as any).viewer
+            );
+            
+            const { targets, positions } = createTrackShappedOrbitPath(tx, tx_h, rx, rx_h, 50.0, 50.0);
+
+            for (let i = 0; i < positions.length; i++) {
+                const cp = this.globalLinkAnimation.createControlPoint();
+                cp.position.set(...positions[i]);
+                cp.target.set(...targets[i]);
+            }
+            const link_len = calcLinkLength(tx, rx, tx_h, rx_h);
+            const desired_animation_speed = 50; // meters per second 
+            const min_animation_duration = 20;
+            const animationDuration = Math.max((link_len * 2 / desired_animation_speed), min_animation_duration);
+            // @ts-ignore
+            window.viewer.scene.addCameraAnimation(this.globalLinkAnimation);
+            this.globalLinkAnimation.setDuration(animationDuration);
+            this.globalLinkAnimation.setVisible(false);
+            if (start_animation) {
+                this.animationPlaying = true;
                 this.globalLinkAnimation.play(true);
-                $('#pause-button-3d').removeClass('d-none');
-                $('#play-button-3d').addClass('d-none');
+            } else {
+                this.animationPlaying = false;
             }
-            this.animationPlaying = !this.animationPlaying;
-        };
-        this.spacebarCallback = (event: any) => {
-            var key = event.which || event.keyCode;
-            if (key === 32 && this.currentView === '3d') {
-                event.preventDefault();
-                animationClickCallback();
-            }
-        };
-        window.addEventListener('keydown', this.spacebarCallback);
-        $('#3d-pause-play').click(animationClickCallback);
+            const animationClickCallback = () => {
+                if (this.animationPlaying) {
+                    this.globalLinkAnimation.pause();
+                    $('#pause-button-3d').addClass('d-none');
+                    $('#play-button-3d').removeClass('d-none');
+                } else {
+                    this.globalLinkAnimation.play(true);
+                    $('#pause-button-3d').removeClass('d-none');
+                    $('#play-button-3d').addClass('d-none');
+                }
+                this.animationPlaying = !this.animationPlaying;
+            };
+            this.spacebarCallback = (event: any) => {
+                var key = event.which || event.keyCode;
+                if (key === 32 && this.currentView === '3d') {
+                    event.preventDefault();
+                    animationClickCallback();
+                }
+            };
+            window.addEventListener('keydown', this.spacebarCallback);
+            $('#3d-pause-play').click(animationClickCallback);
+        }
     }
 
 
@@ -783,41 +788,46 @@ export class LinkCheckPage {
         this.tx_loc_lidar = tx;
         this.rx_loc_lidar = rx;
         const setClippingVolume = (bb: Array<number>) => {
-            // @ts-ignore
-            let scene = window.viewer.scene;
-            let { position, scale, camera } = generateClippingVolume(bb);
-            { // VOLUME visible
-                if (this.clippingVolume !== null) {
-                    scene.removeVolume(this.clippingVolume);
+            if(potree){
+                // @ts-ignore
+                let scene = window.viewer.scene;
+                let { position, scale, camera } = generateClippingVolume(bb);
+                { // VOLUME visible
+                    if (this.clippingVolume !== null) {
+                        scene.removeVolume(this.clippingVolume);
+                    }
+                    this.clippingVolume = new potree.BoxVolume();
+                    this.clippingVolume.name = "Visible Clipping Volume";
+                    this.clippingVolume.scale.set(scale[0], scale[1], scale[2]);
+                    this.clippingVolume.position.set(position[0], position[1], position[2]);
+                    this.clippingVolume.lookAt(new THREE.Vector3(tx[0], tx[1], position[2]));
+                    this.clippingVolume.clip = true;
+                    scene.addVolume(this.clippingVolume);
+                    this.clippingVolume.visible = false;
+                    
                 }
-                this.clippingVolume = new Potree.BoxVolume();
-                this.clippingVolume.name = "Visible Clipping Volume";
-                this.clippingVolume.scale.set(scale[0], scale[1], scale[2]);
-                this.clippingVolume.position.set(position[0], position[1], position[2]);
-                this.clippingVolume.lookAt(new THREE.Vector3(tx[0], tx[1], position[2]));
-                this.clippingVolume.clip = true;
-                scene.addVolume(this.clippingVolume);
-                this.clippingVolume.visible = false;
+                scene.view.position.set(camera[0], camera[1], camera[2]);
+                scene.view.lookAt(new THREE.Vector3(position[0], position[1], 0));
+                // @ts-ignore
+                window.viewer.setClipTask(potree.ClipTask.SHOW_INSIDE);
             }
-            scene.view.position.set(camera[0], camera[1], camera[2]);
-            scene.view.lookAt(new THREE.Vector3(position[0], position[1], 0));
-            // @ts-ignore
-            window.viewer.setClipTask(Potree.ClipTask.SHOW_INSIDE);
         }
         // Check if we already added point cloud
         urls.forEach((url : string, idx: number) => {
             //@ts-ignore
             const existing_pc_names : Array<string> = window.viewer.scene.pointclouds.map((cld) => {return cld.name});
-            if(!existing_pc_names.includes(name[idx])){
-                Potree.loadPointCloud(url, name[idx], (e: any) => {
+            if(!existing_pc_names.includes(name[idx]) && potree){
+                potree.loadPointCloud(url, name[idx], (e: any) => {
                     // @ts-ignore
                     let scene = window.viewer.scene;
                     scene.addPointCloud(e.pointcloud);
 
                     this.currentMaterial = e.pointcloud.material;
                     this.currentMaterial.size = 4;
-                    this.currentMaterial.pointSizeType = Potree.PointSizeType.FIXED;
-                    this.currentMaterial.shape = Potree.PointShape.CIRCLE;
+                    if(potree){
+                        this.currentMaterial.pointSizeType = potree.PointSizeType.FIXED;
+                        this.currentMaterial.shape = potree.PointShape.CIRCLE;
+                    }
                     this.currentMaterial.activeAttributeName = "elevation";
                     this.currentMaterial.elevationRange = [bb[4], bb[5]];
                 });

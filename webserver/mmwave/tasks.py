@@ -150,7 +150,7 @@ def getLinkInfo(network_id, data):
     try:
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
-        fbid = int(data.get('id', 0))
+        fbid = int(data.get('fbid', 0))
         # Create Object to Log User Interaction
         TGLink(tx=tx, rx=rx, fbid=fbid, freq=data.get('freq', 0)).save()
         link_dist_m = genLinkDistance(tx, rx)

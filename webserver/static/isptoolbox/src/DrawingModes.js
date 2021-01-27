@@ -2,12 +2,12 @@ export function LinkMode(){
     const link_mode = MapboxDraw.modes.draw_line_string;
     link_mode.clickAnywhere = function (state, e) {
         if (e.originalEvent.type.includes('touch')) {
-            state.line.addCoordinate(
+            state.line.updateCoordinate(
               state.currentVertexPosition,
               e.lngLat.lng,
               e.lngLat.lat,
             );
-          }
+        }
         
         if (state.currentVertexPosition === 1) {
             state.line.addCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);

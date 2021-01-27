@@ -44,7 +44,8 @@ def uploadNewTileset(geojson_data, tileset_name):
         's3',
         aws_access_key_id=upload_information['accessKeyId'],
         aws_secret_access_key=upload_information['secretAccessKey'],
-        aws_session_token=upload_information['sessionToken']
+        aws_session_token=upload_information['sessionToken'],
+        region_name='us-east-1'
     )
     s3_client.upload_fileobj(geojson_data, upload_information['bucket'], upload_information['key'])
     # Start the upload processing pipeline on mapbox's side

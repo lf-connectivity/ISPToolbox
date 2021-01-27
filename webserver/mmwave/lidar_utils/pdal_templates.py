@@ -1,4 +1,5 @@
 import pdal
+import json
 from django.contrib.gis.geos import Point
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
@@ -7,6 +8,22 @@ import numpy as np
 
 DEFAULT_INTERPOLATION_STEP = 50. / 100.  # cm
 
+filters = {
+    'outlier' : {
+        "class": 7,
+        "type":"filters.outlier",
+        "method":"statistical",
+        "mean_k": 12,
+        "multiplier": 1.5
+    },
+    'circle' : {
+        "class": 7,
+        "type":"filters.outlier",
+        "method":"radius",
+        "radius": 50.0,
+        "min_k": 10
+    }
+}
 
 def averageHeightAtDistance(distance, heights):
     """
@@ -59,11 +76,10 @@ def getLidarPointsAroundLink(
                 "resolution" : {resolution},
                 "polygon": ["{link_T.buffer(link_buffer).wkt}/ EPSG: 3857"]
             }},
+            {json.dumps(filters['outlier'])},
             {{
-                "type":"filters.outlier",
-                "method":"statistical",
-                "mean_k":12,
-                "multiplier":2.2
+                "type": "filters.range",
+                "limits": "Classification![7:7]"
             }},
             {{
                 "type":"filters.crop",

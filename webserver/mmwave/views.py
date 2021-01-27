@@ -31,23 +31,6 @@ class TGLinkView(View):
             tx_coords = {'lng': tx[1], 'lat': tx[0]}
             rx_coords = {'lng': rx[1], 'lat': rx[0]}
 
-        # Sunflower MS link Water Tower
-        # tx = {
-        #     'name': 'radio_0',
-        #     'color': '#E29842',
-        #     'lng': -90.53716599941286,
-        #     'lat': 33.5451235458682,
-        #     'id': 0,
-        #     'hgt': 100
-        # }
-        # rx = {
-        #     'name': 'radio_1',
-        #     'color': '#42B72A',
-        #     'lng': -90.53423166275023,
-        #     'lat': 33.545454397676316,
-        #     'id': 1,
-        #     'hgt': 15
-        # }
         # Puerto Rico Link
         tx = {
             'name': 'radio_0',

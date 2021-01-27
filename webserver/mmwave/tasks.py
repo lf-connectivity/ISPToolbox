@@ -1,4 +1,5 @@
 import requests
+import json
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
@@ -259,7 +260,7 @@ def getTerrainProfile(network_id, data):
 
 
 if settings.PROD:
-    @periodic_task(run_every=(crontab(minute=0, hour=14)), name="refresh_lidar_point_cloud")
+    @periodic_task(run_every=(crontab(minute=0, hour=20)), name="refresh_lidar_point_cloud")
     def updatePointCloudData():
         """
         This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database
@@ -270,7 +271,7 @@ if settings.PROD:
             overlay_name = 'lowreslidarboundary'
             loadBoundariesFromEntWine()
             overlay = createInvertedOverlay()
-            resp = uploadNewTileset(overlay, overlay_name)
+            resp, data = uploadNewTileset(overlay, overlay_name)
             if resp.status_code == 201:
                 sendEmailToISPToolboxOncall(
                     f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
@@ -278,7 +279,8 @@ if settings.PROD:
             else:
                 sendEmailToISPToolboxOncall(
                     f'[Automated Message] Failed to update Overlay: {overlay_name}',
-                    f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}')
+                    f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}\n' +
+                    f'data:\n {json.dumps(data)}')
         except Exception as e:
             sendEmailToISPToolboxOncall(
                 f'[Automated Message] Failed to update Overlay {overlay_name}',
@@ -286,7 +288,7 @@ if settings.PROD:
                 exception: {str(e)}\n
                 traceback:\n{traceback.format_exc()}""")
 
-    @periodic_task(run_every=(crontab(minute=0, hour=14)), name="add_high_resolution_boundary")
+    @periodic_task(run_every=(crontab(minute=0, hour=20)), name="add_high_resolution_boundary")
     def addHighResolutionBoundaries():
         """
         This task updates the lidar boundaries and availability overlay
@@ -300,7 +302,7 @@ if settings.PROD:
             overlay_name = 'highreslidarboundary'
             updatePointCloudBoundariesTask()
             overlay = createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
-            resp = uploadNewTileset(overlay, overlay_name)
+            resp, data = uploadNewTileset(overlay, overlay_name)
             if resp.status_code == 201:
                 sendEmailToISPToolboxOncall(
                     f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
@@ -308,7 +310,8 @@ if settings.PROD:
             else:
                 sendEmailToISPToolboxOncall(
                     f'[Automated Message] Failed to update Overlay: {overlay_name}',
-                    f'Failed to update overlay: {overlay_name}')
+                    f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}\n' +
+                    f'data:\n {json.dumps(data)}')
         except Exception as e:
             sendEmailToISPToolboxOncall(
                 f'[Automated Message] Failed to update Overlay {overlay_name}',

@@ -14,7 +14,8 @@ class Command(BaseCommand):
         self.stdout.write('Creating tileset from json file')
         try:
             self.stdout.write(f"opening file {options['input_geojson'].name}...")
-            uploadNewTileset(options['input_geojson'], options['tileset'])
+            resp, _ = uploadNewTileset(options['input_geojson'], options['tileset'])
+            self.stdout.write(f"Status Code : {resp.status_code}")
             self.stdout.write(f"Uploaded new tileset {options['tileset']}")
         except Exception as e:
             self.stderr.write(str(e))

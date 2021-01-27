@@ -60,7 +60,7 @@ def uploadNewTileset(geojson_data, tileset_name):
     data = {"url": upload_information['url'], "tileset": f"{settings.MAPBOX_ACCOUNT}.{tileset_name}"}
     response = requests.post('https://api.mapbox.com/uploads/v1/isptoolbox', headers=headers, params=params, json=data)
 
-    return response
+    return response, data
 
 
 def prepareGeoJSONUploadMapbox(geojson):

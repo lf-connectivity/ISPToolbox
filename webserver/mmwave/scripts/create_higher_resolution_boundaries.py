@@ -71,7 +71,7 @@ def updatePointCloudBoundariesTask():
     successes, failures = processPointCloudBoundaries()
     new_boundaries = "\n".join(successes)
     failed_high_resolution_boundaries = "\n".join(failures)
-    result_msg = f'New Boundaries:\n {len(successes)}\n Failed to Update Boundaries:\n {len(failures)}' + \
+    result_msg = f'New Boundaries:\n {len(successes)}\n Failed to Update Boundaries:\n {len(failures)}\n' + \
                  f'Point Clouds:\n{new_boundaries}\nFailed To Create Boundaries:\n{failed_high_resolution_boundaries}'
     if settings.PROD:
         sendEmailToISPToolboxOncall(

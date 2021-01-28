@@ -5,10 +5,9 @@ context('Create a new link', () => {
       cy.visit('/demo/los-check/')
     })
   
-    it('.children() - get child DOM elements', () => {
+    it('Check if Link Status contains "Link Status"', () => {
       // https://on.cypress.io/children
-      cy.get('.traversal-breadcrumb')
-        .children('.active')
-        .should('contain', 'Data')
+      cy.get('.link-status')
+        .should('contain', 'Link Status')
     });
 })

@@ -4,8 +4,9 @@ jobs:
   cypress-run:
     runs-on: ubuntu-16.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v2      
+        with:
+          submodules: true
       - name: Install make
         run: |
           sudo apt-get update && sudo apt-get install -y make

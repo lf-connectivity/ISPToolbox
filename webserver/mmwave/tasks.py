@@ -21,7 +21,10 @@ from mmwave.lidar_utils.LidarEngine import (
 )
 from shapely.geometry import LineString as shapely_LineString
 from mmwave.models import TGLink
-from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine, createInvertedOverlay
+from mmwave.scripts.load_lidar_boundaries import (
+    loadBoundariesFromEntWine, createInvertedOverlay, getOverlayFromS3,
+    HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH, PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
+)
 from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
 from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
@@ -261,32 +264,14 @@ def getTerrainProfile(network_id, data):
 
 if settings.PROD:
     @periodic_task(run_every=(crontab(minute=0, hour=20)), name="refresh_lidar_point_cloud")
-    def updatePointCloudData():
+    def pullLatestPointCloudsEntwine():
         """
         This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database
         by default: sends an email notification to isptoolbox@fb.com on error, otherwise stays silent
 
         """
-        try:
-            overlay_name = 'lowreslidarboundary'
-            loadBoundariesFromEntWine()
-            overlay = createInvertedOverlay()
-            resp, data = uploadNewTileset(overlay, overlay_name)
-            if resp.status_code == 201:
-                sendEmailToISPToolboxOncall(
-                    f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
-                    f'Updated overlay in mapbox {overlay_name}')
-            else:
-                sendEmailToISPToolboxOncall(
-                    f'[Automated Message] Failed to update Overlay: {overlay_name}',
-                    f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}\n' +
-                    f'data:\n {json.dumps(data)}')
-        except Exception as e:
-            sendEmailToISPToolboxOncall(
-                f'[Automated Message] Failed to update Overlay {overlay_name}',
-                f"""Failed to update overlay: {overlay_name}\n
-                exception: {str(e)}\n
-                traceback:\n{traceback.format_exc()}""")
+        loadBoundariesFromEntWine()
+        createInvertedOverlay()
 
     @periodic_task(run_every=(crontab(minute=0, hour=20)), name="add_high_resolution_boundary")
     def addHighResolutionBoundaries():
@@ -298,23 +283,43 @@ if settings.PROD:
         3. uploads the availability overlay to mapbox as a tileset
 
         """
-        try:
-            overlay_name = 'highreslidarboundary'
-            updatePointCloudBoundariesTask()
-            overlay = createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
-            resp, data = uploadNewTileset(overlay, overlay_name)
-            if resp.status_code == 201:
+        updatePointCloudBoundariesTask()
+        createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
+
+    @periodic_task(run_every=(crontab(minute=0, hour=20)), name="upload_boundary_tileset_mapbox")
+    def uploadBoundaryTilesetMapbox():
+        """
+        This task takes the boundaries stored as geojsons in S3 and uploads them to mapbox
+        to create tilesets
+
+        """
+        overlays = [
+            {
+                'tileset_name': 'lowreslidarboundary',
+                's3': PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
+            },
+            {
+                'tileset_name': 'highreslidarboundary',
+                's3': HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
+            }
+        ]
+        for overlay in overlays:
+            overlay_geojson = getOverlayFromS3(overlay['s3'])
+            overlay_name = overlay['tileset_name']
+            try:
+                resp, data = uploadNewTileset(overlay_geojson, overlay_name)
+                if resp.status_code == 201:
+                    sendEmailToISPToolboxOncall(
+                        f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
+                        f'Updated overlay in mapbox {overlay_name}')
+                else:
+                    sendEmailToISPToolboxOncall(
+                        f'[Automated Message] Failed to update Overlay: {overlay_name}',
+                        f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}\n' +
+                        f'data:\n {json.dumps(data)}')
+            except Exception as e:
                 sendEmailToISPToolboxOncall(
-                    f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
-                    f'Updated overlay in mapbox {overlay_name}')
-            else:
-                sendEmailToISPToolboxOncall(
-                    f'[Automated Message] Failed to update Overlay: {overlay_name}',
-                    f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}\n' +
-                    f'data:\n {json.dumps(data)}')
-        except Exception as e:
-            sendEmailToISPToolboxOncall(
-                f'[Automated Message] Failed to update Overlay {overlay_name}',
-                f"""Failed to update overlay: {overlay_name}\n
-                exception: {str(e)}\n
-                traceback:\n{traceback.format_exc()}""")
+                    f'[Automated Message] Failed to update Overlay {overlay_name}',
+                    f"""Failed to update overlay: {overlay_name}\n
+                    exception: {str(e)}\n
+                    traceback:\n{traceback.format_exc()}""")

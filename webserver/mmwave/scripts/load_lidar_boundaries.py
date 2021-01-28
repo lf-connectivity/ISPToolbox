@@ -104,5 +104,9 @@ def createInvertedOverlay(
     return file_obj
 
 
-if __name__ == "__main__":
-    loadBoundariesFromEntWine()
+def getOverlayFromS3(overlay):
+    file = None
+    if settings.PROD:
+        s3storage = S3ManifestStorage()
+        file = s3storage.open(overlay)
+    return file

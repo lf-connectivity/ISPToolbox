@@ -149,7 +149,7 @@ class LidarEngine:
         data = np.asarray(combined_profile)
         mask = np.isnan(data)
         if np.all(mask):
-            raise LidarEngineException("""LiDAR data not available in this region. 
+            raise LidarEngineException("""LiDAR data not available in this region.
         Please try at a later date as our data routinely gets updated.""")
         else:
             data[mask] = np.interp(np.flatnonzero(mask), np.flatnonzero(~mask), data[~mask])

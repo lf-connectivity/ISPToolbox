@@ -52,6 +52,8 @@ STATIC_URL = '/static/'
 INSTALLED_APPS = [
     # Async / Websockets
     'channels',
+    # ISP Toolbox App
+    'IspToolboxApp',
     # Django
     'django.contrib.admin',
     'django.contrib.auth',
@@ -61,8 +63,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'corsheaders',
-    # ISP Toolbox Apps
-    'IspToolboxApp',
+    # Other ISP Toolbox Apps
     'mmwave',
     'Overlay',
     'NetworkComparison',

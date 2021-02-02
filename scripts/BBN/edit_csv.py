@@ -58,12 +58,12 @@ def main():
                         rows_written += 1
 
                 rows += 1
-    
+
     print('%d key collisions found' % (key_collisions,))
     print('%d block_ids padded' % (padded_block_ids))
     print('%d rows processed' % (rows,))
     print('%d rows written' % (rows_written,))
 
+
 if __name__ == '__main__':
     main() 
-    

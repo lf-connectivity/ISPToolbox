@@ -4,7 +4,6 @@ from IspToolboxApp.Models.MLabSpeedDataModels import StandardizedMlab, Standardi
 from IspToolboxApp.Models.GeographicModels import Tl2019UsZcta510, Tl2019UsCounty
 from django.db import connections
 
-import logging
 
 def serviceProviders(include):
     if checkIfPolyInCanada(include, None):
@@ -91,15 +90,12 @@ def medianIncome(include, result = {}):
 def broadbandNow(include):
     with connections['gis_data'].cursor() as cursor:
         cursor.execute(broadbandnow_skeleton, [include])
+        row = cursor.fetchone()
 
-        logger = logging.getLogger('ISPToolbox')
-        logger.info('Query: %s', broadbandnow_skeleton % include)
+        # NULL = no information
+        min_price = str(row[0]) if row[0] else None
 
-        column_names = cursor.description
-        rows = [row for row in cursor.fetchall()]
-        return {col.name: [str(row[idx]) for row in rows]
-                for idx, col in enumerate(column_names)}
-
+        return {'minimumBroadbandPrice': min_price}
 
 # flake8: noqa
 def mlabSpeed(include):

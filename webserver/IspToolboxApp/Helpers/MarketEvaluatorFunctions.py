@@ -4,6 +4,7 @@ from IspToolboxApp.Models.MLabSpeedDataModels import StandardizedMlab, Standardi
 from IspToolboxApp.Models.GeographicModels import Tl2019UsZcta510, Tl2019UsCounty
 from django.db import connections
 
+import logging
 
 def serviceProviders(include):
     if checkIfPolyInCanada(include, None):
@@ -90,6 +91,10 @@ def medianIncome(include, result = {}):
 def broadbandNow(include):
     with connections['gis_data'].cursor() as cursor:
         cursor.execute(broadbandnow_skeleton, [include])
+
+        logger = logging.getLogger('ISPToolbox')
+        logger.info('Query: %s', broadbandnow_skeleton % include)
+
         column_names = cursor.description
         rows = [row for row in cursor.fetchall()]
         return {col.name: [str(row[idx]) for row in rows]
@@ -195,14 +200,16 @@ def countyGeog(statecode, countycode):
     return resp
 
 
+# Some of the census block IDs from the broadbandnow table are not padded with
+# zeros, making this join fail on some data.
 broadbandnow_skeleton = """
-SELECT * FROM
-    (
-        SELECT geoid FROM tl_2019_us_county  WHERE St_intersects(geog, St_geomfromgeojson(%s))
-    ) as intersect_county
-    JOIN broadband_data_bbn
-        ON "COUNTY ID" = CAST(geoid AS numeric)
-;
+SELECT bbn.minprice_broadband_plan_terrestrial
+FROM broadbandnow as bbn
+    JOIN tl_2019_blocks_census as cen
+    ON cen.geoid10 = bbn.block_id
+WHERE ST_Intersects(cen.geog, ST_GeomFromGeoJSON(%s))
+ORDER BY minprice_broadband_plan_terrestrial ASC
+LIMIT 1;
 """
 
 provider_skeleton = """

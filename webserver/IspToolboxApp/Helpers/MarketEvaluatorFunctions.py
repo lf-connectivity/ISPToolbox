@@ -195,17 +195,12 @@ def countyGeog(statecode, countycode):
         resp = {'error': -2}
     return resp
 
-
-# Some of the census block IDs from the broadbandnow table are not padded with
-# zeros, making this join fail on some data.
 broadbandnow_skeleton = """
-SELECT bbn.minprice_broadband_plan_terrestrial
+SELECT MIN(bbn.minprice_broadband_plan_terrestrial)
 FROM broadbandnow as bbn
     JOIN tl_2019_blocks_census as cen
     ON cen.geoid10 = bbn.block_id
 WHERE ST_Intersects(cen.geog, ST_GeomFromGeoJSON(%s))
-ORDER BY minprice_broadband_plan_terrestrial ASC
-LIMIT 1;
 """
 
 provider_skeleton = """

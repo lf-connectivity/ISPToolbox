@@ -26,6 +26,11 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         echo "if you're seeing this, your code is ugly ( ͡ಥ ͜ʖ ͡ಥ)"
         flake8 . --count --max-complexity=11 --max-line-length=127 --statistics --exclude *migrations*
+    - name: Log into Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Run Django Test Suite
       run: |
         # Test then cleanup containers

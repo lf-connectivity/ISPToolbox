@@ -2,8 +2,7 @@
   "name": "isptoolbox",
   "version": "1.0.0",
   "private": true,
-  "description": "ISP Toolbox Backend Server Code - powers market evaluator, network cost comparison - hosted: AWS, EC2 - database: AWS Postgres - KV store: Elasticache - domain: https://fbctower.com",
-  "main": "index.js",
+  "description": "E2E Testing using Cypress of ISP Toolbox",
   "dependencies": {
     "cypress": "^6.3.0"
   },

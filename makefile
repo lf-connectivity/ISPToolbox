@@ -2,6 +2,7 @@ SHELL := /bin/bash
 setup_dev:
 	@echo ----------------------------------------------Create Dev Containers------------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app ./wait-for-postgres.sh python3 manage.py migrate
 
 run_dev:
 	@echo ----------------------------------------------Start Development Server------------------------------------------
@@ -29,7 +30,6 @@ debug_shell:
 
 default_objects:
 	@echo ----------------------------------------------CREATING SAMPLE OBJECTS----------------------------------------
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py create_default_overlays
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py get_latest_usgs
 

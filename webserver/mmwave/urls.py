@@ -1,6 +1,3 @@
-from django.urls import path
-from mmwave.views import TGLinkView
+# from django.urls import path
 
-urlpatterns = [
-    path('link-check/', TGLinkView.as_view()),
-]
+urlpatterns = []

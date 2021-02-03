@@ -10,13 +10,30 @@ jobs:
       - name: Install make
         run: |
           sudo apt-get update && sudo apt-get install -y make
+      - name: Log into Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build Docker Containers
         run: |
           make setup_dev
+          make default_objects
       - name: Cypress run
         uses: cypress-io/github-action@v2
+        id: cypress
         with:
           start: make run_dev
           wait-on: 'http://localhost:8000'
           # wait for 3 minutes for the server to respond
           wait-on-timeout: 180
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-videos
+          path: cypress/videos

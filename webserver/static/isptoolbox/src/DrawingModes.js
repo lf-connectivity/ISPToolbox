@@ -87,7 +87,7 @@ export function OverrideSimple(){
         else {
             this.map.handlers._handlersById.tapDragZoom.enable();
         }
-      
+
         if (
           geojson.properties.active !== 'active' ||
           geojson.geometry.type === 'Point'
@@ -95,7 +95,6 @@ export function OverrideSimple(){
           return;
         }
     };
-
     return simple_select;
 }
 

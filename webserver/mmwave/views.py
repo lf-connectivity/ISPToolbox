@@ -29,10 +29,10 @@ class LOSCheckDemo(View):
         if lat is not None and lon is not None:
             middle = geopy_pt.Point(float(lat), float(lon))
             d = geopy_distance(kilometers=0.100)
-            rx = d.destination(point=middle, bearing=90)
-            tx = d.destination(point=middle, bearing=270)
-            tx['lng'], tx['lat'] = tx[1], tx[0]
-            rx['lng'], rx['lat'] = rx[1], rx[0]
+            rx_pt = d.destination(point=middle, bearing=90)
+            tx_pt = d.destination(point=middle, bearing=270)
+            tx['lng'], tx['lat'] = tx_pt[1], tx_pt[0]
+            rx['lng'], rx['lat'] = rx_pt[1], rx_pt[0]
 
         context = {
             'tx': tx,

@@ -76,6 +76,17 @@ export function OverrideSimple(){
         renderLinkEnds(geojson, display);
 
         this.fireActionable();
+
+        // Turn off tap drag zoom if there are any elements selected
+        if (this.getSelectedIds().length > 0) {
+
+            // Horrible hack; no documented way of doing this :)
+            this.map.handlers._handlersById.tapDragZoom.disable();
+        }
+        // Re-enable if nothing is selected
+        else {
+            this.map.handlers._handlersById.tapDragZoom.enable();
+        }
       
         if (
           geojson.properties.active !== 'active' ||
@@ -84,6 +95,7 @@ export function OverrideSimple(){
           return;
         }
     };
+
     return simple_select;
 }
 

@@ -6,7 +6,7 @@ setup_dev:
 
 run_dev:
 	@echo ----------------------------------------------Start Development Server------------------------------------------
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
 migrate:
 	@echo ----------------------------------------------RUNNING DJANGO MIGRATIONS PROD----------------------------------------

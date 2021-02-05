@@ -63,10 +63,6 @@ jobs:
         docker-compose build
         echo $ECR_REGISTRY
         echo $ECR_REPOSITORY
-        MANIFEST_DJANGO=$(aws ecr batch-get-image --repository-name isptoolbox-django --image-ids imageTag=latest --query 'images[].imageManifest' --output text)
-        aws ecr put-image --repository-name isptoolbox-django --image-tag prevStable --image-manifest "$MANIFEST_DJANGO"
-        MANIFEST_NGINX=$(aws ecr batch-get-image --repository-name isptoolbox-nginx --image-ids imageTag=latest --query 'images[].imageManifest' --output text)
-        aws ecr put-image --repository-name isptoolbox-nginx --image-tag prevStable --image-manifest "$MANIFEST_NGINX"
         docker tag isptoolbox-nginx:latest $ECR_REGISTRY/isptoolbox-nginx:latest
         docker tag isptoolbox-django:latest $ECR_REGISTRY/isptoolbox-django:latest
         docker push $ECR_REGISTRY/isptoolbox-django:latest

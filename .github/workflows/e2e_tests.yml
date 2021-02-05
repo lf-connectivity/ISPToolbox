@@ -37,3 +37,8 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
+      - name: Stop All Containers
+        if: always()
+        run: |
+          docker stop $(docker ps -a -f "name=isptoolbox_" -q)
+          docker rm $(docker ps -a -f "name=isptoolbox_" -q)

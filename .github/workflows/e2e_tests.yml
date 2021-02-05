@@ -11,9 +11,12 @@ jobs:
       - uses: actions/checkout@v2      
         with:
           submodules: true
-      - name: Install make
+      - name: Install make + cypress
         run: |
           sudo apt-get update && sudo apt-get install -y make
+          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+          sudo apt install -y nodejs npm
+          npm install cypress --save-dev
       - name: Log into Docker Hub
         uses: docker/login-action@v1
         with:
@@ -41,8 +44,3 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-      - name: Stop All Containers
-        if: always()
-        run: |
-          docker stop $(docker ps -a -f "name=isptoolbox_" -q)
-          docker rm $(docker ps -a -f "name=isptoolbox_" -q)

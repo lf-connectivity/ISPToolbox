@@ -1,50 +1,25 @@
 {% extends "admin/change_list.html" %}
 {% block content_title %}
-    <h1> LOS Check Summary </h1>
+    <h1> Market Evaluator Usage Summary </h1>
 {% endblock %}
-{% load humanize %}
 {% block result_list %}
-<div class=”results”>
-  <div class="results">
-    <h1>LOS Check Usage<h1>
+<table>
+    <tr style=”font-weight:bold; border-top:2px solid #DDDDDD;”>
+        <td> Number of AOI's Queried </td>
+        <td> {{ summary_total.count | default:0 }} </td>
+    </tr>
+</table>
+
+{{ time_series_usage|json_script:"points" }}
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
+<div class="results">
+    <h1>Market Evaluator Usage<h1>
     <figure class="highcharts-figure">
         <div id="usage" style="width: 100%; height: 500px;">
         </div>
     </figure>
-  </div>
-    <table>
-    <thead>
-      <tr>
-        <th>
-          <div class=”text”>
-            <a href=”#”>FBID</a>
-          </div>
-        </th>
-        <th>
-          <div class=”text”>
-            <a href=”#”>Number of Links</a>
-          </div>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in summary %}
-      <tr class=”{% cycle 'row1' 'row2' %}”>
-        <td> {{ row.fbid }} </td>
-        <td> {{ row.count }} </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-    <tr style=”font-weight:bold; border-top:2px solid #DDDDDD;”>
-        <td> All Users </td>
-        <td> {{ summary_total.count | default:0 }} </td>
-    </tr>
-  </table>
 </div>
-{{ time_series_usage|json_script:"points" }}
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
-
 <script>
     const data_usage = JSON.parse(document.getElementById('points').textContent);
     Highcharts.chart('usage', {
@@ -52,7 +27,7 @@
         zoomType: 'x'
       },
       title: {
-        text: 'TimeSeries Usage of LOS Check'
+        text: 'TimeSeries Usage of Market Evaluator'
       },
       subtitle: {
         text: document.ontouchstart === undefined ?
@@ -63,7 +38,7 @@
       },
       yAxis: {
         title: {
-          text: 'Links Requested'
+          text: 'AOI Requested'
         }
       },
       legend: {

@@ -199,6 +199,13 @@ class MarketEvaluatorPipeline(models.Model):
                 tzinfo=pytz.utc) - self.created).total_seconds() < 604800)
 
 
+class MarketEvaluatorSummary(MarketEvaluatorPipeline):
+    class Meta:
+        proxy = True
+        verbose_name = 'Market Evaluator Summary'
+        verbose_name_plural = 'Market Evaluator Summary'
+
+
 broadbandnow_skeleton = """
 SELECT * FROM
     (

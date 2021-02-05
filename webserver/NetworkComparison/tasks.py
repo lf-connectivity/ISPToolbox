@@ -1,4 +1,5 @@
 from celery import shared_task
+from area import area
 from django.db import connections
 from NetworkComparison.util import squaredMetersToMiles
 from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate
@@ -54,13 +55,8 @@ def genPolySize(include, channelName, uuid):
         Result sent:
         <String>: Area of applicable area in miles squared
     '''
-    query_skeleton = poly_size_skeleton
-    with connections['gis_data'].cursor() as cursor:
-        query_arguments = [include]
-        cursor.execute(query_skeleton, query_arguments)
-        results = cursor.fetchone()
-        polygonArea = squaredMetersToMiles(results[0])
-        sync_send(channelName, "polygon.area", str(polygonArea), uuid)
+    polygonArea = squaredMetersToMiles(area(include))
+    sync_send(channelName, "polygon.area", str(polygonArea), uuid)
 
 
 @shared_task

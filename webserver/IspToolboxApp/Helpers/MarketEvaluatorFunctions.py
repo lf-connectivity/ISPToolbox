@@ -16,7 +16,7 @@ def genServiceProvidersUS(include):
         Grabs service provider data for US queries.
     '''
     query_skeleton = getQueryTemplate(provider_skeleton, None, False)
-    with connections['gis_data'].cursor() as cursor:
+    with connections['gis_data_read_replica'].cursor() as cursor:
         cursor.execute(
             query_skeleton, [include])
         rows = [row for row in cursor.fetchall()]
@@ -38,7 +38,7 @@ def genServiceProvidersCanada(include):
         Grabs service provider data for Canadian queries.
     '''
     query_skeleton = getQueryTemplate(provider_skeleton_ca, None, False)
-    with connections['gis_data'].cursor() as cursor:
+    with connections['gis_data_read_replica'].cursor() as cursor:
         cursor.execute(
             query_skeleton, [include])
         rows = [row for row in cursor.fetchall()]
@@ -57,7 +57,7 @@ def medianIncome(include, result = {}):
     done = False
     if precomputedAvailable:
         try:
-            with connections['gis_data'].cursor() as cursor:
+            with connections['gis_data_read_replica'].cursor() as cursor:
                 max_gid = result.get('max_gid', 0)
                 query_arguments = [include, max_gid]
                 cursor.execute(income_skeleton, query_arguments)
@@ -77,7 +77,7 @@ def medianIncome(include, result = {}):
         try:
             query_skeleton = getQueryTemplate(query_skeleton, False, False)
             averageMedianIncome = 0
-            with connections['gis_data'].cursor() as cursor:
+            with connections['gis_data_read_replica'].cursor() as cursor:
                 query_arguments = [include]
                 cursor.execute(query_skeleton, query_arguments)
                 results = cursor.fetchone()
@@ -88,7 +88,7 @@ def medianIncome(include, result = {}):
 
 
 def broadbandNow(include):
-    with connections['gis_data'].cursor() as cursor:
+    with connections['gis_data_read_replica'].cursor() as cursor:
         cursor.execute(broadbandnow_skeleton, [include])
         row = cursor.fetchone()
 
@@ -132,7 +132,7 @@ def mlabSpeed(include):
             intersecting_geog.code
     """
     try:
-        with connections['gis_data'].cursor() as cursor:
+        with connections['gis_data_read_replica'].cursor() as cursor:
             cursor.execute(mlab_query, [include, include, include])
             columns = [col[0] for col in cursor.description]
             return [
@@ -142,7 +142,7 @@ def mlabSpeed(include):
     # Above query can fail due to self-intersecting polygons in complex multipolygon geometry cases.
     # In this case fallback to a simple average.
     except Exception:
-        with connections['gis_data'].cursor() as cursor:
+        with connections['gis_data_read_replica'].cursor() as cursor:
             cursor.execute(mlab_query_fallback, [include])
             columns = [col[0] for col in cursor.description]
             return [
@@ -156,7 +156,7 @@ def grantGeog(cbgid):
         query_skeleton = \
             """SELECT cbg_id, St_asgeojson(geog)
             FROM auction_904_shp WHERE cbg_id = %s"""
-        with connections['gis_data'].cursor() as cursor:
+        with connections['gis_data_read_replica'].cursor() as cursor:
             cursor.execute(query_skeleton, [cbgid])
             result = cursor.fetchone()
             resp = {

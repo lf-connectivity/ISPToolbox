@@ -237,6 +237,13 @@ DATABASES = {
         'USER': 'fbcmasteruser',
         'HOST': 'isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com',
         'PORT': '5432',
+    },
+    'gis_data_read_replica': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'postgres',
+        'USER': 'fbcmasteruser',
+        'HOST': 'isptoolbox-db-prod-read-replica1.cahmkzzberpf.us-west-1.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 

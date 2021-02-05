@@ -2,6 +2,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from datetime import datetime
 import pytz
+import logging
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from .Tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
     genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getTowerViewShed
@@ -9,6 +10,9 @@ from NetworkComparison.tasks import genPolySize
 from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline, WebsocketToken
 from celery.task.control import revoke
 from asgiref.sync import sync_to_async
+from IspToolboxApp.util.validate_user_input import (
+    validateUserInputMarketEvaluator, InvalidMarketEvaluatorRequest
+)
 
 
 class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
@@ -97,6 +101,19 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         include = content['include']
         include = GEOSGeometry(json.dumps(include))
         include = GEOSGeometry(wkb_w.write_hex(include))
+        # Validate User Input
+        try:
+            validateUserInputMarketEvaluator(include.json)
+        except InvalidMarketEvaluatorRequest as e:
+            logging.info('Large Request')
+        except Exception:
+            await self.send_json({
+                'value': 'Couldn\'t process request',
+                'type': 'error',
+                'uuid': uuid
+            })
+            return
+
         # Instantiate a pipeline to track geojson being processed in orm
         pipeline = MarketEvaluatorPipeline(include_geojson=include)
         await sync_to_async(pipeline.save)()

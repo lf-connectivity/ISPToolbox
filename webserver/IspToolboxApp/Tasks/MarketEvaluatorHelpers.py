@@ -135,7 +135,7 @@ def checkIfPrecomputedBuildingsAvailable(include, exclude):
 def checkIfAvailable(include, exclude, switcher, table):
     resp = False
 
-    with connections['gis_data'].cursor() as cursor:
+    with connections['gis_data_read_replica'].cursor() as cursor:
         query_skeleton = "SELECT geoid FROM " + table + " WHERE {}"
         query_skeleton = getQueryTemplate(
             query_skeleton, exclude is not None, True)
@@ -245,7 +245,7 @@ def getMicrosoftBuildings(include, exclude, callback=None):
             "type": "GeometryCollection",
             "geometries": []}}
     try:
-        with connections['gis_data'].cursor() as cursor:
+        with connections['gis_data_read_replica'].cursor() as cursor:
             offset = 0
             buildings = []
             while True:
@@ -279,7 +279,7 @@ def getMicrosoftBuildings(include, exclude, callback=None):
 def getMicrosoftBuildingsOffset(include, offset):
     resp = {"gc": {"type": "GeometryCollection", "geometries": []}, "offset": "0"}
     try:
-        with connections['gis_data'].cursor() as cursor:
+        with connections['gis_data_read_replica'].cursor() as cursor:
             query_skeleton = """
             WITH subdivided_request AS
             (SELECT ST_Subdivide(

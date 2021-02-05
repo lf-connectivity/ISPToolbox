@@ -1,4 +1,4 @@
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase, TransactionTestCase, Client
 from .tasks import getElevationProfile, MAXIMUM_NUM_POINTS_RETURNED
 from mmwave.lidar_utils.pdal_templates import (
     getLidarPointsAroundLink, takeMaxHeightAtDistance
@@ -14,6 +14,26 @@ rx_point = [-75.5691146850586, 39.159016668347725]
 
 test_rx_pt_PuertoRico = [-66.10818070326883, 18.416250557878442]
 test_tx_pt_PuertoRico = [-66.10326724720488, 18.415117149683724]
+
+
+class SimplePageLoadTest(TestCase):
+    def test_los_check_simple(self):
+        """
+        Verifies that the stand alone los check view will load successfully
+        """
+        client = Client()
+        response = client.get('/demo/los-check/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_los_check_iframe(self):
+        """
+        Verifies that the iframed view will respond successfully and allow
+        itself to be iframed into facebook.com
+        """
+        client = Client()
+        response = client.get('/demo/los-check/?id=1791316560&lat=37.4553&lon=-122.179')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.has_header('x-frame-options'))
 
 
 class LiDARTestCase(TransactionTestCase):

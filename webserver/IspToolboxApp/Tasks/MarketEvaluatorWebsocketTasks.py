@@ -6,6 +6,7 @@ from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, bro
 from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
     getOSMBuildings
 from towerlocator.helpers import getViewShed
+from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -19,14 +20,15 @@ def sync_send(channelName, consumer, value, uuid):
 
 
 @shared_task
-def genBuildings(include, channelName, uuid):
+def genBuildings(pipeline_uuid, channelName, uuid, read_only=False):
+    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
     buildings_available = checkIfPrecomputedBuildingsAvailable(include, None)
     if buildings_available:
         # We can query microsoft buildings with an offset and send results as we generate them.
         offset = 0
         done = False
         while not done:
-            resp = getMicrosoftBuildingsOffset(include, offset)
+            resp = getMicrosoftBuildingsOffset(include, offset, read_only)
             resp['done'] = False
             # Once we hit an offset with no more geometries, we are finished.
             # But we still send response to indicate to FE that buildings are complete.
@@ -46,12 +48,13 @@ def genBuildings(include, channelName, uuid):
 
 
 @shared_task
-def genMedianIncome(include, channelName, uuid):
+def genMedianIncome(pipeline_uuid, channelName, uuid, read_only=False):
+    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
     result = {}
     averageMedianIncome = 0
     num_buildings = 0
     while not result.get('done', False):
-        result = medianIncome(include, result)
+        result = medianIncome(include, result, read_only=False)
         averageMedianIncome = (
             num_buildings * averageMedianIncome +
             result.get('averageMedianIncome', 0) * result.get('numbuildings', 1)
@@ -64,20 +67,23 @@ def genMedianIncome(include, channelName, uuid):
 
 
 @shared_task
-def genServiceProviders(include, channelName, uuid):
-    result = serviceProviders(include)
+def genServiceProviders(pipeline_uuid, channelName, uuid, read_only=False):
+    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    result = serviceProviders(include, read_only)
     sync_send(channelName, 'service.providers', result, uuid)
 
 
 @shared_task
-def genBroadbandNow(include, channelName, uuid):
-    result = broadbandNow(include)
+def genBroadbandNow(pipeline_uuid, channelName, uuid, read_only=False):
+    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    result = broadbandNow(include, read_only)
     sync_send(channelName, 'broadband.now', result, uuid)
 
 
 @shared_task
-def genMedianSpeeds(include, channelName, uuid):
-    result = mlabSpeed(include)
+def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
+    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    result = mlabSpeed(include, read_only)
     sync_send(channelName, 'median.speeds', result, uuid)
 
 

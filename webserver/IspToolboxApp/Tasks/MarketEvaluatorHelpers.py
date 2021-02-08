@@ -28,6 +28,13 @@ CA_TECHCODES = {
 }
 
 
+def select_gis_database(read_replica):
+    if read_replica:
+        return 'gis_data_read_replica'
+    else:
+        return 'gis_data'
+
+
 def getUniqueBuildingNodes(nodes):
     buildings = {k: v for (k, v) in nodes.items() if (
         ('tags' in v) and ('building' in v['tags']) and ('nodes' in v))}
@@ -276,10 +283,10 @@ def getMicrosoftBuildings(include, exclude, callback=None):
     return response
 
 
-def getMicrosoftBuildingsOffset(include, offset):
+def getMicrosoftBuildingsOffset(include, offset, read_only):
     resp = {"gc": {"type": "GeometryCollection", "geometries": []}, "offset": "0"}
     try:
-        with connections['gis_data_read_replica'].cursor() as cursor:
+        with connections[select_gis_database(read_only)].cursor() as cursor:
             query_skeleton = """
             WITH subdivided_request AS
             (SELECT ST_Subdivide(

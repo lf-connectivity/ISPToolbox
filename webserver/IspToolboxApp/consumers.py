@@ -2,7 +2,6 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from datetime import datetime
 import pytz
-import logging
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from .Tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
     genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getTowerViewShed
@@ -101,11 +100,13 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         include = content['include']
         include = GEOSGeometry(json.dumps(include))
         include = GEOSGeometry(wkb_w.write_hex(include))
+
+        run_query_read_only = False
         # Validate User Input
         try:
             validateUserInputMarketEvaluator(include.json)
-        except InvalidMarketEvaluatorRequest as e:
-            logging.info('Large Request')
+        except InvalidMarketEvaluatorRequest:
+            run_query_read_only = True
         except Exception:
             await self.send_json({
                 'value': 'Couldn\'t process request',
@@ -117,15 +118,13 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         # Instantiate a pipeline to track geojson being processed in orm
         pipeline = MarketEvaluatorPipeline(include_geojson=include)
         await sync_to_async(pipeline.save)()
-        include = include.json
 
-        # Call async tasks and get their task IDs
-        self.taskList.append(genBuildings.delay(include, self.channel_name, uuid).id)
-        self.taskList.append(genMedianIncome.delay(include, self.channel_name, uuid).id)
-        self.taskList.append(genServiceProviders.delay(include, self.channel_name, uuid).id)
-        self.taskList.append(genMedianSpeeds.delay(include, self.channel_name, uuid).id)
-        self.taskList.append(genBroadbandNow.delay(include, self.channel_name, uuid).id)
-        self.taskList.append(genPolySize.delay(include, self.channel_name, uuid).id)
+        self.taskList.append(genBuildings.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genMedianIncome.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genServiceProviders.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genMedianSpeeds.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genBroadbandNow.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genPolySize.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
 
     async def grant_geography_request(self, content, uuid):
         grantId = content['cbgid']

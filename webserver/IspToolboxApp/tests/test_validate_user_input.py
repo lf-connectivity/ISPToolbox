@@ -51,10 +51,11 @@ class TestValidateMarketEvaluatorUserInput(TestCase):
         # generate many random points
         random.seed(2)
         coords = [
-            [random.randrange(-123, -122), random.randrange(37, 38)]
+            [random.uniform(-123, -122), random.uniform(37, 38)]
             for _ in range(int(MAXIMUM_NUM_COORDS))
         ]
-        geojson = {"coordinates": coords, "type": "Polygon"}
+        coords.append(coords[0])
+        geojson = {"coordinates": [coords], "type": "Polygon"}
         geojson_str = json.dumps(geojson)
         try:
             validateUserInputMarketEvaluator(geojson_str)

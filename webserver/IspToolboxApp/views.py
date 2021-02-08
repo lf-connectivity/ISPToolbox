@@ -75,3 +75,8 @@ class ResultView(View):
             return JsonResponse({'result': json.loads(
                 pipeline.output_geometryCollection.geojson)})
         return JsonResponse({'result': None})
+
+
+class MarketEvaluatorTest(View):
+    def get(self, request):
+        return render(request, 'market_evaluator/sample_market_evaluator.html')

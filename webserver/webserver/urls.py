@@ -81,6 +81,7 @@ urlpatterns = [
     path('market-evaluator/broadbandnow/', MarketEvaluatorPipelineBroadbandNow.as_view(), name='bbnow'),
     path('market-evaluator/export/', MarketEvaluatorExport.as_view(), name='export'),
     path('market-evaluator/export-np/', MarketEvaluatorExportNoPipeline.as_view(), name='exportnp'),
+    path('market-evaluator/test/', views.MarketEvaluatorTest.as_view(), name='market-eval-test'),
     # GeoTargeting Views
     path('marketing/audience/', MarketingAudienceView.as_view(), name="marketing_audience"),
     path('marketing/account/', MarketingAccountView.as_view(), name="marketing_account"),

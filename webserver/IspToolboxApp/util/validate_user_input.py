@@ -1,10 +1,9 @@
-from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from area import area
 from django.contrib.gis.geos import GEOSGeometry
 import logging
 
 MAXIMUM_NUM_COORDS = 1e6
-MAXIMUM_SQ_MILES = 1000
+MAXIMUM_SQ_MILES = 500
 
 
 class InvalidMarketEvaluatorRequest(Exception):
@@ -41,6 +40,7 @@ def validateUserInputMarketEvaluator(geometry):
             'Try requesting a smaller area or splitting up your request.'
         )
 
+
 def computeAreaofInterestDistribution(qs):
     """
     Find out what the usage pattern of market evaluator looks like relative to this invalid request
@@ -55,7 +55,7 @@ def computeAreaofInterestDistribution(qs):
         points.append(me_request.include_geojson.num_coords)
         try:
             validateUserInputMarketEvaluator(me_request.include_geojson.json)
-        except InvalidMarketEvaluatorRequest as e:
+        except InvalidMarketEvaluatorRequest:
             exceptions.append(me_request)
         except Exception as e:
             logging.info(str(e))

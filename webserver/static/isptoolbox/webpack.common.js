@@ -3,6 +3,7 @@ const path = require('path');
 module.exports = {
     entry: {
         wireless_network: '/src/wireless_network.app.js',
+        market_evaluator: '/src/marketEvalTest.ts',
     },
     module : {
         rules : [

@@ -9,6 +9,7 @@ import json
 from django.contrib.gis.geos import GEOSGeometry
 from NetworkComparison.NCTasks.osm_anchor_institution_task import fetchAnchorInstitutions
 from NetworkComparison.NCTasks.buildings_mst import getBuildingsMST
+from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -44,7 +45,7 @@ def genBuildingCount(include, channelName, uuid):
 
 
 @shared_task
-def genPolySize(include, channelName, uuid):
+def genPolySize(pipeline_uuid, channelName, uuid, read_only=False):
     '''
         Computes the area in applicable include geometry in miles squared.
         Sends response via channels layer.
@@ -55,6 +56,7 @@ def genPolySize(include, channelName, uuid):
         Result sent:
         <String>: Area of applicable area in miles squared
     '''
+    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
     polygonArea = squaredMetersToMiles(area(include))
     sync_send(channelName, "polygon.area", str(polygonArea), uuid)
 

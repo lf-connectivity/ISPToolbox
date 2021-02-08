@@ -3,20 +3,22 @@ from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate, checkIf
 from IspToolboxApp.Models.MLabSpeedDataModels import StandardizedMlab, StandardizedPostal
 from IspToolboxApp.Models.GeographicModels import Tl2019UsZcta510, Tl2019UsCounty
 from django.db import connections
+from IspToolboxApp.Tasks.MarketEvaluatorHelpers import select_gis_database
 
 
-def serviceProviders(include):
+
+def serviceProviders(include, read_only):
     if checkIfPolyInCanada(include, None):
-        return genServiceProvidersCanada(include)
-    return genServiceProvidersUS(include)
+        return genServiceProvidersCanada(include, read_only)
+    return genServiceProvidersUS(include, read_only)
 
 
-def genServiceProvidersUS(include):
+def genServiceProvidersUS(include, read_only):
     '''
         Grabs service provider data for US queries.
     '''
     query_skeleton = getQueryTemplate(provider_skeleton, None, False)
-    with connections['gis_data_read_replica'].cursor() as cursor:
+    with connections[select_gis_database(read_only)].cursor() as cursor:
         cursor.execute(
             query_skeleton, [include])
         rows = [row for row in cursor.fetchall()]
@@ -33,12 +35,12 @@ def genServiceProvidersUS(include):
         return resp
 
 
-def genServiceProvidersCanada(include):
+def genServiceProvidersCanada(include, read_only=False):
     '''
         Grabs service provider data for Canadian queries.
     '''
     query_skeleton = getQueryTemplate(provider_skeleton_ca, None, False)
-    with connections['gis_data_read_replica'].cursor() as cursor:
+    with connections[select_gis_database(read_only)].cursor() as cursor:
         cursor.execute(
             query_skeleton, [include])
         rows = [row for row in cursor.fetchall()]
@@ -52,12 +54,12 @@ def genServiceProvidersCanada(include):
         return resp
 
 
-def medianIncome(include, result = {}):
+def medianIncome(include, result = {}, read_only=False):
     precomputedAvailable = checkIfPrecomputedIncomeAvailable(include, None)
     done = False
     if precomputedAvailable:
         try:
-            with connections['gis_data_read_replica'].cursor() as cursor:
+            with connections[select_gis_database(read_only)].cursor() as cursor:
                 max_gid = result.get('max_gid', 0)
                 query_arguments = [include, max_gid]
                 cursor.execute(income_skeleton, query_arguments)
@@ -77,7 +79,7 @@ def medianIncome(include, result = {}):
         try:
             query_skeleton = getQueryTemplate(query_skeleton, False, False)
             averageMedianIncome = 0
-            with connections['gis_data_read_replica'].cursor() as cursor:
+            with connections[select_gis_database(read_only)].cursor() as cursor:
                 query_arguments = [include]
                 cursor.execute(query_skeleton, query_arguments)
                 results = cursor.fetchone()
@@ -87,8 +89,8 @@ def medianIncome(include, result = {}):
             return {'averageMedianIncome': 0, 'error': str(e), 'done' : done}
 
 
-def broadbandNow(include):
-    with connections['gis_data_read_replica'].cursor() as cursor:
+def broadbandNow(include, read_only):
+    with connections[select_gis_database(read_only)].cursor() as cursor:
         cursor.execute(broadbandnow_skeleton, [include])
         row = cursor.fetchone()
 
@@ -98,7 +100,7 @@ def broadbandNow(include):
         return {'minimumBroadbandPrice': min_price}
 
 # flake8: noqa
-def mlabSpeed(include):
+def mlabSpeed(include, read_only):
     mlab_query = f"""
         WITH intersecting_geog AS
         (
@@ -132,7 +134,7 @@ def mlabSpeed(include):
             intersecting_geog.code
     """
     try:
-        with connections['gis_data_read_replica'].cursor() as cursor:
+        with connections[select_gis_database(read_only)].cursor() as cursor:
             cursor.execute(mlab_query, [include, include, include])
             columns = [col[0] for col in cursor.description]
             return [
@@ -142,7 +144,7 @@ def mlabSpeed(include):
     # Above query can fail due to self-intersecting polygons in complex multipolygon geometry cases.
     # In this case fallback to a simple average.
     except Exception:
-        with connections['gis_data_read_replica'].cursor() as cursor:
+        with connections[select_gis_database(read_only)].cursor() as cursor:
             cursor.execute(mlab_query_fallback, [include])
             columns = [col[0] for col in cursor.description]
             return [
@@ -156,7 +158,7 @@ def grantGeog(cbgid):
         query_skeleton = \
             """SELECT cbg_id, St_asgeojson(geog)
             FROM auction_904_shp WHERE cbg_id = %s"""
-        with connections['gis_data_read_replica'].cursor() as cursor:
+        with connections['gis_data'].cursor() as cursor:
             cursor.execute(query_skeleton, [cbgid])
             result = cursor.fetchone()
             resp = {

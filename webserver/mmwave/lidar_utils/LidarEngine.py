@@ -44,12 +44,12 @@ DEFAULT_BB_BUFFER = 3
 _DOUBLE_YEAR_REGEX = re.compile(r'^(.+)_(\d+)_LAS_(\d+)$')
 _SINGLE_YEAR_REGEX = re.compile(r'^(.+)_\d+$')
 
-# Case insensitive 
 _FESM_LPC_PROJ_QUERY = """
 SELECT s_date, e_date
 FROM fesm_lpc_proj
 WHERE LOWER(project_id)=LOWER(%s)
 """
+
 
 class LidarEngine:
     """
@@ -124,7 +124,6 @@ class LidarEngine:
                 # Fallback if row not found
                 if not row:
                     return source_name
-
 
                 s_date, e_date = row
                 source_name_no_year = re.match(_SINGLE_YEAR_REGEX, source_name).group(1)

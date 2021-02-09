@@ -102,7 +102,7 @@ class LidarEngine:
         """
         """
         return []
-    
+
     @staticmethod
     def _renameSource(source_name):
         """Renames source name from its technical name.
@@ -116,7 +116,7 @@ class LidarEngine:
         print('Testing 1 2 3 ')
         if match:
             return f'{match.group(1)}, Collected: {match.group(2)}-{match.group(3)}'
-        
+
         else:
             with connections['gis_data'].cursor() as cursor:
                 cursor.execute(_FESM_LPC_PROJ_QUERY, [source_name])
@@ -125,7 +125,8 @@ class LidarEngine:
                 # Fallback if row not found
                 if not row:
                     return source_name
-                
+
+
                 s_date, e_date = row
                 source_name_no_year = re.match(_SINGLE_YEAR_REGEX, source_name).group(1)
 

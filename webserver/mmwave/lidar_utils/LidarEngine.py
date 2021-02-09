@@ -2,11 +2,14 @@ import re
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
 from enum import IntEnum
+from django.db import connections
 from django.contrib.gis.geos import MultiLineString, LineString, Point
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
+
 import logging
 import numpy as np
+import re
 
 
 class LidarEngineException(Exception):
@@ -39,6 +42,15 @@ LIDAR_RESOLUTION_MAX_LINK_LENGTH = {
 
 DEFAULT_BB_BUFFER = 3
 
+_DOUBLE_YEAR_REGEX = re.compile(r'^(.+)_(\d+)_LAS_(\d+)$')
+_SINGLE_YEAR_REGEX = re.compile(r'^(.+)_\d+$')
+
+# Case insensitive 
+_FESM_LPC_PROJ_QUERY = """
+SELECT s_date, e_date
+FROM fesm_lpc_proj
+WHERE LOWER(project_id)=LOWER(%s)
+"""
 
 class LidarEngine:
     """
@@ -68,7 +80,7 @@ class LidarEngine:
         return [cloud.url for gc, cloud in self.segments]
 
     def getSources(self):
-        return [cloud.name for gc, cloud in self.segments]
+        return [LidarEngine._renameSource(cloud.name) for gc, cloud in self.segments]
 
     def getProfile(self):
         return self.lidar_profile
@@ -90,6 +102,38 @@ class LidarEngine:
         """
         """
         return []
+    
+    @staticmethod
+    def _renameSource(source_name):
+        """Renames source name from its technical name.
+
+        If the source name has two years in its name, it will be renamed as
+        <stuff>, Collected: <YYYY>-<YYYY>. Otherwise, a query will be done to determine
+        when the start/end collection years are.
+        """
+
+        match = re.match(_DOUBLE_YEAR_REGEX, source_name)
+        print('Testing 1 2 3 ')
+        if match:
+            return f'{match.group(1)}, Collected: {match.group(2)}-{match.group(3)}'
+        
+        else:
+            with connections['gis_data'].cursor() as cursor:
+                cursor.execute(_FESM_LPC_PROJ_QUERY, [source_name])
+                row = cursor.fetchone()
+
+                # Fallback if row not found
+                if not row:
+                    return source_name
+                
+                s_date, e_date = row
+                source_name_no_year = re.match(_SINGLE_YEAR_REGEX, source_name).group(1)
+
+                s_year, e_year = s_date.year, e_date.year
+                if s_year == e_year:
+                    return f'{source_name_no_year}, Collected: {s_year}'
+                else:
+                    return f'{source_name_no_year}, Collected: {s_year}-{e_year}'
 
     def __selectLatestProfile(self, clouds):
         pattern_year = re.compile(r'2[0-9][0-9][0-9]')

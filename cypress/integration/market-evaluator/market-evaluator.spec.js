@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-context('Test E2E LOS Check', () => {
+context('Test Market Evaluator Functionality', () => {
     beforeEach(() => {
       cy.visit('/market-evaluator/test/')
     })

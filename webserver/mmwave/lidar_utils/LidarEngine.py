@@ -42,7 +42,7 @@ LIDAR_RESOLUTION_MAX_LINK_LENGTH = {
 DEFAULT_BB_BUFFER = 3
 
 _DOUBLE_YEAR_REGEX = re.compile(r'^(.+)_(\d+)_LAS_(\d+)$')
-_SINGLE_YEAR_REGEX = re.compile(r'^(.+)_\d+$')
+_SINGLE_YEAR_REGEX = re.compile(r'^(.+)_(\d+)$')
 
 _FESM_LPC_PROJ_QUERY = """
 SELECT s_date, e_date
@@ -131,9 +131,9 @@ class LidarEngine:
                     s_year, e_year = s_date.year, e_date.year
 
                 if s_year == e_year:
-                    return f'{name} (Collected: {s_year})'
+                    return f'{name} (Collected {s_year})'
                 else:
-                    return f'{name} (Collected: {s_year}-{e_year})'
+                    return f'{name} (Collected {s_year}-{e_year})'
 
     def __selectLatestProfile(self, clouds):
         pattern_year = re.compile(r'2[0-9][0-9][0-9]')

@@ -111,28 +111,29 @@ class LidarEngine:
         when the start/end collection years are.
         """
 
-        match = re.match(_DOUBLE_YEAR_REGEX, source_name)
-        print('Testing 1 2 3 ')
-        if match:
-            return f'{match.group(1)}, Collected: {match.group(2)}-{match.group(3)}'
+        dy_match = re.match(_DOUBLE_YEAR_REGEX, source_name)
+        if dy_match:
+            return f'{dy_match.group(1)} (Collected {dy_match.group(2)}-{dy_match.group(3)})'
 
         else:
+            sy_match = re.match(_SINGLE_YEAR_REGEX, source_name)
+
+            name = sy_match.group(1)
             with connections['gis_data'].cursor() as cursor:
                 cursor.execute(_FESM_LPC_PROJ_QUERY, [source_name])
                 row = cursor.fetchone()
 
                 # Fallback if row not found
                 if not row:
-                    return source_name
-
-                s_date, e_date = row
-                source_name_no_year = re.match(_SINGLE_YEAR_REGEX, source_name).group(1)
-
-                s_year, e_year = s_date.year, e_date.year
-                if s_year == e_year:
-                    return f'{source_name_no_year}, Collected: {s_year}'
+                    s_year, e_year = sy_match.group(2), sy_match.group(2)
                 else:
-                    return f'{source_name_no_year}, Collected: {s_year}-{e_year}'
+                    s_date, e_date = row
+                    s_year, e_year = s_date.year, e_date.year
+
+                if s_year == e_year:
+                    return f'{name} (Collected: {s_year})'
+                else:
+                    return f'{name} (Collected: {s_year}-{e_year})'
 
     def __selectLatestProfile(self, clouds):
         pattern_year = re.compile(r'2[0-9][0-9][0-9]')

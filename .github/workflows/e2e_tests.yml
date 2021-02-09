@@ -26,14 +26,13 @@ jobs:
         run: |
           make setup_dev
           make default_objects
+          docker stop $(docker ps -a -f "name=isptoolbox_" -q)
       - name: Cypress run
         uses: cypress-io/github-action@v2
         id: cypress
         with:
           start: make run_dev
           wait-on: 'http://localhost:8000'
-          # wait for 3 minutes for the server to respond
-          wait-on-timeout: 180
       - uses: actions/upload-artifact@v1
         if: failure()
         with:

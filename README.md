@@ -14,6 +14,7 @@ ISP Toolbox Backend Server Code
 - install docker and docker compose
 - ensure docker daemon is running (dockerd)
 - clone git repository
+    - make sure you clone all submodules `git submodule update --init --recursive`
 - `make debug` to run locally on localhost:8000
 ## Make command list
 `make setup`
@@ -207,3 +208,10 @@ create sample overlay objects in your sandbox:
  ### Inspect Running / Queued / Failed Jobs
 
 ![Alt text](images/flower_sample.png "Title")
+
+## Why isn't my LiDAR / 3D view loading?
+
+- Check that potree static files are being pulled and are not 404ing
+    - if they are you need to recursively clone submodules (potree is a submodule)
+- Check that you have the lidar boundaries loaded in your database
+    - `make default_objects`

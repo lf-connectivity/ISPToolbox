@@ -143,7 +143,7 @@ export function createLinkGeometry(tx: [number, number], rx: [number, number], t
 export function createHoverPoint(location : [number, number, number], lookAt: [number, number, number]) 
 {
     var geometry = new THREE.BoxGeometry(3 , 3, 3);
-    var material = new THREE.MeshBasicMaterial( {color: 0x4e95cf} );
+    var material = new THREE.MeshBasicMaterial( {color: 0x4e95cf, polygonOffset: true, polygonOffsetFactor: -1000, polygonOffsetUnits: -1000} );
     var pt = new THREE.Mesh(geometry, material);
     pt.position.set(location[0], location[1], location[2]);
     pt.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));

@@ -45,6 +45,9 @@
         flex-flow: row wrap
         h5
             margin-bottom: 0
+    #link_chart
+        width:100%
+        height:300px
 body
     @media screen and (max-width: 991px)
         .fixed-bottom
@@ -61,3 +64,6 @@ body
                 margin-bottom: 0
             #link-status--obstructions, #frequency-label
                 font-size: 16px
+        @media screen and (max-height: 800px)
+            .link-profile-card #link_chart
+                height:250px

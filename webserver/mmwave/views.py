@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views import View
+from django.views.decorators.cache import cache_control
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -9,13 +10,13 @@ import mmwave.lidar_utils.sample_links as samples
 
 import uuid
 
-
 @method_decorator(xframe_options_exempt, name='dispatch')
 class LOSCheckDemo(View):
     """
     Demo view for LOS check, allows iframing, limited functionality, renders suggestion
     to sign up and unlock full version
     """
+    @cache_control(private=True)
     def get(self, request, network_id=None):
         fbid = int(request.GET.get('id', 0))
         networkID = uuid.uuid4()

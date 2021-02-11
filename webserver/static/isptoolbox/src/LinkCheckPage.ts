@@ -258,6 +258,7 @@ export class LinkCheckPage {
                 draw: this.Draw,
                 deleteCallback: (features) => {
                     this.removeLinkHalo(features);
+                    this.clearInputs();
                 },
             });
 
@@ -571,7 +572,7 @@ export class LinkCheckPage {
         $("#loading_spinner").removeClass('d-none');
         $('#los-chart-tooltip-button').addClass('d-none');
         $('#loading_failed_spinner').addClass('d-none');
-
+        $("#drawing_instructions").addClass('d-none');
         $("#link_chart").addClass('d-none');
 
         // Create Callback Function for WebSocket
@@ -839,6 +840,7 @@ export class LinkCheckPage {
     }
 
     updateLegend() {
+        $("#los-chart-tooltip-button").removeClass('d-none')
         const sources: Array<string> = [];
         this.datasets.forEach((l, k) => {if( l instanceof Array) { l.forEach( v=>{sources.push(v);}) }})
         $('#los-chart-tooltip-button').attr(
@@ -971,11 +973,26 @@ export class LinkCheckPage {
         return parseFloat(String($(`#${coord}-${radio}`).val()));
     }
 
+    clearInputs() : void{
+        // Clear All Inputs
+        $('#hgt-0').val('');
+        $('#hgt-1').val('');
+        $('#lat-0').val('');
+        $('#lat-1').val('');
+        $('#lng-0').val('');
+        $('#lng-1').val('');
+        // Instruct User to Select or Draw a Link
+        this.selected_feature = null;
+        $('#link_chart').addClass('d-none');
+        $('#los-chart-tooltip-button').hide();
+        $("#drawing_instructions").removeClass('d-none');
+    }
+
     showPlotIfValidState() {
-        if (this._lidar.length && this._elevation.length) {
+        if (this._lidar.length && this._elevation.length && this.selected_feature) {
             this.link_chart.hideLoading();
             $("#loading_spinner").addClass('d-none');
-            $("#los-chart-tooltip-button").removeClass('d-none');
+            $("#los-chart-tooltip-button").addClass('d-none');
             this.link_chart.redraw();
             $("#link_chart").removeClass('d-none');
             this.updateLegend();

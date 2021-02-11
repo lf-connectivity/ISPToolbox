@@ -98,7 +98,7 @@ export class LinkCheckPage {
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
         if (!(window as any).webgl2support) {
             potree = null;
-        }        
+        }
         this.networkID = networkID;
         this.userRequestIdentity = userRequestIdentity;
         this.radio_names = radio_names;
@@ -160,7 +160,7 @@ export class LinkCheckPage {
             this.updateLinkChart(true);
         });
 
-        if(potree) {
+        if (potree) {
             const numNodesLoadingChangedCallback = (num_nodes: number) => {
                 if (num_nodes > 0 && this.currentView === '3d') {
                     $('#point-cloud-loading-status').removeClass('d-none');
@@ -197,8 +197,8 @@ export class LinkCheckPage {
         );
 
         let initial_map_center = {
-            'lon': (this.getCoordinateFromUI('0','lng') + this.getCoordinateFromUI('1','lng')) / 2.0,
-            'lat': (this.getCoordinateFromUI('0','lat') + this.getCoordinateFromUI('1','lat')) / 2.0
+            'lon': (this.getCoordinateFromUI('0', 'lng') + this.getCoordinateFromUI('1', 'lng')) / 2.0,
+            'lat': (this.getCoordinateFromUI('0', 'lat') + this.getCoordinateFromUI('1', 'lat')) / 2.0
         };
         let initial_zoom = 17;
         try {
@@ -387,7 +387,7 @@ export class LinkCheckPage {
             $('#hgt-0').change(
                 () => {
                     this.updateLinkChart(true);
-                    if (this.selectedFeatureID != null) {
+                    if (this.selectedFeatureID != null && this.Draw.get(this.selectedFeatureID)) {
                         this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', parseFloat(String($('#hgt-0').val())))
                     }
                 }
@@ -395,7 +395,7 @@ export class LinkCheckPage {
             $('#hgt-1').change(
                 () => {
                     this.updateLinkChart(true);
-                    if (this.selectedFeatureID != null) {
+                    if (this.selectedFeatureID != null && this.Draw.get(this.selectedFeatureID)) {
                         this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', parseFloat(String($('#hgt-1').val())))
                     }
                 }
@@ -569,6 +569,7 @@ export class LinkCheckPage {
             this.selected_feature = query;
         }
         this.link_chart.showLoading();
+        console.trace();
         $("#loading_spinner").removeClass('d-none');
         $('#los-chart-tooltip-button').addClass('d-none');
         $('#loading_failed_spinner').addClass('d-none');
@@ -694,7 +695,7 @@ export class LinkCheckPage {
             this.animationPlaying = false;
             this.globalLinkAnimation = null;
         }
-        if(potree){
+        if (potree) {
             if (this.aAbout1 == null) {
                 this.aAbout1 = new potree.Annotation({
                     position: [tx[0], tx[1], tx_h + 10],
@@ -715,11 +716,11 @@ export class LinkCheckPage {
             } else {
                 this.aAbout2.position.set(rx[0], rx[1], rx_h + 10);
             }
-            
+
             this.globalLinkAnimation = new potree.CameraAnimation(
                 (window as any).viewer
             );
-            
+
             const { targets, positions } = createTrackShappedOrbitPath(tx, tx_h, rx, rx_h, 50.0, 50.0);
 
             for (let i = 0; i < positions.length; i++) {
@@ -789,7 +790,7 @@ export class LinkCheckPage {
         this.tx_loc_lidar = tx;
         this.rx_loc_lidar = rx;
         const setClippingVolume = (bb: Array<number>) => {
-            if(potree){
+            if (potree) {
                 // @ts-ignore
                 let scene = window.viewer.scene;
                 let { position, scale, camera } = generateClippingVolume(bb);
@@ -805,7 +806,7 @@ export class LinkCheckPage {
                     this.clippingVolume.clip = true;
                     scene.addVolume(this.clippingVolume);
                     this.clippingVolume.visible = false;
-                    
+
                 }
                 scene.view.position.set(camera[0], camera[1], camera[2]);
                 scene.view.lookAt(new THREE.Vector3(position[0], position[1], 0));
@@ -814,10 +815,10 @@ export class LinkCheckPage {
             }
         }
         // Check if we already added point cloud
-        urls.forEach((url : string, idx: number) => {
+        urls.forEach((url: string, idx: number) => {
             //@ts-ignore
-            const existing_pc_names : Array<string> = window.viewer.scene.pointclouds.map((cld) => {return cld.name});
-            if(!existing_pc_names.includes(name[idx]) && potree){
+            const existing_pc_names: Array<string> = window.viewer.scene.pointclouds.map((cld) => { return cld.name });
+            if (!existing_pc_names.includes(name[idx]) && potree) {
                 potree.loadPointCloud(url, name[idx], (e: any) => {
                     // @ts-ignore
                     let scene = window.viewer.scene;
@@ -825,7 +826,7 @@ export class LinkCheckPage {
 
                     this.currentMaterial = e.pointcloud.material;
                     this.currentMaterial.size = 4;
-                    if(potree){
+                    if (potree) {
                         this.currentMaterial.pointSizeType = potree.PointSizeType.FIXED;
                         this.currentMaterial.shape = potree.PointShape.CIRCLE;
                     }
@@ -833,16 +834,16 @@ export class LinkCheckPage {
                     this.currentMaterial.elevationRange = [bb[4], bb[5]];
                 });
             }
-         });
+        });
         setClippingVolume(bb);
         this.addLink(tx, rx, tx_h, rx_h);
-        
+
     }
 
     updateLegend() {
         $("#los-chart-tooltip-button").removeClass('d-none')
         const sources: Array<string> = [];
-        this.datasets.forEach((l, k) => {if( l instanceof Array) { l.forEach( v=>{sources.push(v);}) }})
+        this.datasets.forEach((l, k) => { if (l instanceof Array) { l.forEach(v => { sources.push(v); }) } })
         $('#los-chart-tooltip-button').attr(
             "title",
             `<div class="los-chart-legend">
@@ -859,7 +860,7 @@ export class LinkCheckPage {
         ).tooltip('_fixTitle');
     }
 
-    setErrorMessage(error_message : string) : void {
+    setErrorMessage(error_message: string): void {
         $("#link-request-error-description").text(error_message);
         $('#loading_failed_spinner').removeClass('d-none');
         $("#loading_spinner").addClass('d-none');
@@ -884,15 +885,15 @@ export class LinkCheckPage {
     }
     ws_terrain_callback(response: TerrainResponse): void {
         if (response.aoi[0] === 0 && response.aoi[1] === 1) {
-            this._elevation = response.terrain_profile.map(pt => { return  pt.elevation; });
+            this._elevation = response.terrain_profile.map(pt => { return pt.elevation; });
             this._coords = response.terrain_profile.map(
                 (pt: any) => { return { lat: pt.lat, lng: pt.lng } }
             );
-            this.link_chart.series[0].setData(this._elevation.map((v, idx) => { return [idx, v];}));
+            this.link_chart.series[0].setData(this._elevation.map((v, idx) => { return [idx, v]; }));
 
         } else {
             this.link_chart.series[0].setData(response.terrain_profile.map((pt, idx) => {
-                return [idx * (response.aoi[1] - response.aoi[0]) + (response.aoi[0] * response.terrain_profile.length), pt.elevation ];
+                return [idx * (response.aoi[1] - response.aoi[0]) + (response.aoi[0] * response.terrain_profile.length), pt.elevation];
             }));
         }
 
@@ -907,7 +908,7 @@ export class LinkCheckPage {
     }
 
     ws_lidar_callback(response: LidarResponse): void {
-        if(response.error !== null) {
+        if (response.error !== null) {
             this.setErrorMessage(response.error);
             return;
         }
@@ -915,33 +916,36 @@ export class LinkCheckPage {
         if (response.aoi[0] === 0 && response.aoi[1] === 1) {
             this._lidar = response.lidar_profile;
             this._link_distance = response.dist;
-            this.link_chart.series[1].setData(this._lidar.map((v, idx) => {return [idx, v];}));
+            this.link_chart.series[1].setData(this._lidar.map((v, idx) => { return [idx, v]; }));
             if (response.error !== null) {
                 $("#3D-view-btn").addClass('d-none');
             } else {
-                $("#3D-view-btn").removeClass('d-none');
-                if (this.currentLinkHash !== response.hash && this._elevation.length > 1) {
-                    const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
-                    const rx_hgt = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
-                    this.updateLidarRender(
-                        response.source,
-                        response.url,
-                        response.bb,
-                        response.tx,
-                        response.rx,
-                        tx_hgt,
-                        rx_hgt
-                    );
-                    this.currentLinkHash = response.hash;
-                } else {
-                    // @ts-ignore
-                    const scene = window.viewer.scene;
-                    scene.pointclouds.forEach((cld: any) => {cld.material.elevationRange = [response.bb[4], response.bb[5]]});
+                if (this.Draw.get(this.selectedFeatureID)) {
+                    $("#3D-view-btn").removeClass('d-none');
+
+                    if (this.currentLinkHash !== response.hash && this._elevation.length > 1) {
+                        const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
+                        const rx_hgt = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
+                        this.updateLidarRender(
+                            response.source,
+                            response.url,
+                            response.bb,
+                            response.tx,
+                            response.rx,
+                            tx_hgt,
+                            rx_hgt
+                        );
+                        this.currentLinkHash = response.hash;
+                    } else {
+                        // @ts-ignore
+                        const scene = window.viewer.scene;
+                        scene.pointclouds.forEach((cld: any) => { cld.material.elevationRange = [response.bb[4], response.bb[5]] });
+                    }
                 }
             }
         } else {
             this.link_chart.series[1].setData(response.lidar_profile.map((v, idx) => {
-                return [idx * (response.aoi[1] - response.aoi[0]) + (response.aoi[0] * response.lidar_profile.length), v ];
+                return [idx * (response.aoi[1] - response.aoi[0]) + (response.aoi[0] * response.lidar_profile.length), v];
             }));
         }
         this.data_resolution = response.res;
@@ -956,7 +960,7 @@ export class LinkCheckPage {
         }
         this.updateLegend();
     }
-    
+
     ws_link_callback(response: LinkResponse): void {
         if (response.error !== null) {
             this.selected_feature = null;
@@ -969,30 +973,30 @@ export class LinkCheckPage {
         return this.units === UnitSystems.US ? ft2m(hgt) : hgt;
     }
 
-    getCoordinateFromUI(radio: '0' | '1', coord : 'lat' | 'lng') : number{
+    getCoordinateFromUI(radio: '0' | '1', coord: 'lat' | 'lng'): number {
         return parseFloat(String($(`#${coord}-${radio}`).val()));
     }
 
-    clearInputs() : void{
+    clearInputs(): void {
         // Clear All Inputs
-        $('#hgt-0').val('');
-        $('#hgt-1').val('');
-        $('#lat-0').val('');
-        $('#lat-1').val('');
-        $('#lng-0').val('');
-        $('#lng-1').val('');
+        $('.radio-card-body').addClass('d-none');
+        $('#link-title').addClass('d-none');
+        $("#3D-view-btn").addClass('d-none');
         // Instruct User to Select or Draw a Link
         this.selected_feature = null;
         $('#link_chart').addClass('d-none');
-        $('#los-chart-tooltip-button').hide();
+        $('#los-chart-tooltip-button').addClass('d-none');
         $("#drawing_instructions").removeClass('d-none');
+        $("#loading_spinner").addClass('d-none');
     }
 
     showPlotIfValidState() {
         if (this._lidar.length && this._elevation.length && this.selected_feature) {
             this.link_chart.hideLoading();
             $("#loading_spinner").addClass('d-none');
-            $("#los-chart-tooltip-button").addClass('d-none');
+            $('.radio-card-body').removeClass('d-none');
+            $('#link-title').removeClass('d-none');
+            $("#los-chart-tooltip-button").removeClass('d-none');
             this.link_chart.redraw();
             $("#link_chart").removeClass('d-none');
             this.updateLegend();

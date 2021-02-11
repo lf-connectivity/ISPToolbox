@@ -10,6 +10,7 @@ import mmwave.lidar_utils.sample_links as samples
 
 import uuid
 
+
 @method_decorator(xframe_options_exempt, name='dispatch')
 class LOSCheckDemo(View):
     """

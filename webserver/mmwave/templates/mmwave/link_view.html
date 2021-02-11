@@ -1,4 +1,4 @@
-<div class="fixed-bottom">
+<div class="fixed-bottom link-view-bar">
     {% include "mmwave/organisms/mapcontrols.html" %}
     {% include "mmwave/atoms/collapse_button.html" %}
     <div id="data-container" class="collapse show">
@@ -6,9 +6,11 @@
             <div class="col-12 col-lg-6 col-xl-8 profile-view-card">
                 <div class="card link-profile-card">
                     <div class="card-body">
+                        <div id='link-title'>
                         <div class="d-flex justify-content-between card-title">
                             {% include "mmwave/molecules/link_status.html" %}
                             {% include "mmwave/molecules/frequency_toggle.html" %}
+                        </div>
                         </div>
                         <div class="card-text">
                             {% include "./link_profile.html" %}

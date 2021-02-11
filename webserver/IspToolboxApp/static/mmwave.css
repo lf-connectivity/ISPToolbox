@@ -1,7 +1,0 @@
-.planner-map {
-    width: 100%;
-    height: calc(100vh - 56px);
-    position: fixed !important;
-    top: 56px;
-}
-

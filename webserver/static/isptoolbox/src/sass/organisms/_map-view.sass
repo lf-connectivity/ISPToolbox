@@ -1,0 +1,43 @@
+.planner-map
+    width: 100%
+    top: 0px
+
+.bottom-bar-wisp
+    position: fixed
+    bottom: 0px
+    width: 100%
+
+
+.top-bar-wisp
+    position: absolute !important
+    top: 20px
+
+
+.geocoder
+    padding-bottom: 10px
+
+
+@media screen and (min-width: 991px) and ( min-height: 800px)
+    .planner-map
+        position: fixed !important
+
+@media screen and ( max-height: 800px)
+    .planner-map
+        position: relative !important
+        
+
+
+@media (max-width: 767px)
+    .bottom-bar-wisp
+        position: relative !important
+    
+    .top-bar-wisp
+        position: absolute !important
+        top: 15px
+    
+
+
+#map-available
+    width:100%
+    height:80vh
+    min-height: 400px

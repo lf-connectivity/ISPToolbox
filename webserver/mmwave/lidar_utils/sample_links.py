@@ -55,3 +55,23 @@ puerto_rico = {
         'hgt': 33
     }
 }
+# This link should pass, however there are many outliers in the point cloud that read as false positives
+
+texas_tall_tower_clouds = {
+    'tx': {
+        'name': 'radio_0',
+        'color': '#E29842',
+        'lng': -98.60241,
+        'lat':  33.88130,
+        'id': 0,
+        'hgt': 430
+    },
+    'rx': {
+        'name': 'radio_1',
+        'color': '#42B72A',
+        'lng': -98.52612,
+        'lat':  33.84437,
+        'id': 1,
+        'hgt': 60
+    }
+}

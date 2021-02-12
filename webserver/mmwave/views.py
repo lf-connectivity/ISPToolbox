@@ -25,8 +25,8 @@ class LOSCheckDemo(View):
         beta = True if isinstance(beta, str) and beta.lower() == 'true' else False
 
         # Make a deep copy of the sample points to avoid changing the samples for other requests
-        tx = copy.deepcopy(samples.sunflower['tx'])
-        rx = copy.deepcopy(samples.sunflower['rx'])
+        tx = copy.deepcopy(samples.texas_tall_tower_clouds['tx'])
+        rx = copy.deepcopy(samples.texas_tall_tower_clouds['rx'])
 
         if lat is not None and lon is not None:
             middle = geopy_pt.Point(float(lat), float(lon))

@@ -863,6 +863,7 @@ export class LinkCheckPage {
     setErrorMessage(error_message: string): void {
         $("#link-request-error-description").text(error_message);
         $('#loading_failed_spinner').removeClass('d-none');
+        $('#los-chart-tooltip-button').addClass('d-none');
         $("#loading_spinner").addClass('d-none');
         $("#link_chart").addClass('d-none');
     }
@@ -985,6 +986,7 @@ export class LinkCheckPage {
         // Instruct User to Select or Draw a Link
         this.selected_feature = null;
         $('#link_chart').addClass('d-none');
+        $('#loading_failed_spinner').addClass('d-none');
         $('#los-chart-tooltip-button').addClass('d-none');
         $("#drawing_instructions").removeClass('d-none');
         $("#loading_spinner").addClass('d-none');

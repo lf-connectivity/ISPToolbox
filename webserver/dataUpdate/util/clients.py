@@ -1,9 +1,8 @@
-import psycopg2
-from google.cloud import bigquery
 from dataUpdate.config.credentials import PROD_GIS_DB, TEST_GIS_DB
 
 
 def dbClient(prod=False):
+    import psycopg2
     connectionDict = TEST_GIS_DB
     if prod:
         connectionDict = PROD_GIS_DB
@@ -17,4 +16,5 @@ def dbClient(prod=False):
 
 
 def bqClient():
+    from google.cloud import bigquery
     return bigquery.Client()

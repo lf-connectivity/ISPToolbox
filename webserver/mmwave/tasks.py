@@ -286,7 +286,7 @@ if settings.PROD:
         updatePointCloudBoundariesTask()
         createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
 
-    @periodic_task(run_every=(crontab(minute=0, hour=20)), name="upload_boundary_tileset_mapbox")
+    @periodic_task(run_every=(crontab(minute=0, hour=0, month=0)), name="upload_boundary_tileset_mapbox")
     def uploadBoundaryTilesetMapbox():
         """
         This task takes the boundaries stored as geojsons in S3 and uploads them to mapbox

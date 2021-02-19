@@ -162,7 +162,15 @@ export function createHoverVoume(location: [number, number, number], scale: [num
 }
 
 export function calcLinkLength(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number) : number {
-    return Math.sqrt(Math.pow(tx[0] - rx[0], 2.0) + Math.pow(tx[1] - rx[1], 2.0) + Math.pow(tx_h - rx_h, 2.0));
+    return distance([tx[0], tx[1], tx_h], [rx[0], rx[1], rx_h]);
+}
+
+export function distance(pointOne: [number, number, number], pointTwo: [number, number, number]) {
+    return Math.sqrt(
+        Math.pow(pointOne[0] - pointTwo[0], 2.0) +
+        Math.pow(pointOne[1] - pointTwo[1], 2.0) +
+        Math.pow(pointOne[2] - pointTwo[2], 2.0)
+    );
 }
 
 export function generateClippingVolume(bb : Array<number>, buffer : number  = 25.) :
@@ -177,4 +185,3 @@ export function generateClippingVolume(bb : Array<number>, buffer : number  = 25
 
     return { position, scale, camera };
 }
-

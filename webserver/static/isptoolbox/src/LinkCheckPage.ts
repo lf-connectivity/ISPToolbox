@@ -8,7 +8,8 @@ import { updateObstructionsData } from './LinkObstructions';
 import {
     createHoverPoint, createOrbitAnimationPath, createLinkGeometry,
     calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,
-    createHoverVoume
+    createHoverVoume,
+    updateControlPoints
 } from './LinkOrbitAnimation';
 import { LinkMode, OverrideSimple, OverrideDirect } from './DrawingModes.js';
 import { calculateLookVector } from './HoverMoveLocation3DView';
@@ -46,6 +47,8 @@ const center_freq_values: { [key: string]: number } = {
 };
 const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];
 const DEFAULT_RADIO_HEIGHT = 60;
+
+const SMALLEST_UPDATE = 1e-5;
 
 export enum UnitSystems {
     US = 'US',
@@ -95,6 +98,12 @@ export class LinkCheckPage {
 
     datasets: Map<LOSWSHandlers, Array<string>>;
 
+    // variables for handling offsets for hover point volume
+    oldCamera: any;
+    cameraOffset: any;
+    animationWasPlaying: boolean;
+    hoverUpdated: boolean;
+
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
         if (!(window as any).webgl2support) {
             potree = null;
@@ -103,6 +112,7 @@ export class LinkCheckPage {
         this.userRequestIdentity = userRequestIdentity;
         this.radio_names = radio_names;
         this.animationPlaying = true;
+        this.animationWasPlaying = true;
         this.centerFreq = DEFAULT_LINK_FREQ;
         this.currentView = 'map';
         this.hover3dDot = null;
@@ -117,6 +127,10 @@ export class LinkCheckPage {
         this.units = window.tool_units;
 
         this.datasets = new Map();
+
+        this.oldCamera = null;
+        this.animationWasPlaying = false;
+        this.cameraOffset = new THREE.Vector3();
 
         // Add Resize-Window Callback
         const resize_window = () => {
@@ -201,6 +215,7 @@ export class LinkCheckPage {
             'lat': (this.getCoordinateFromUI('0', 'lat') + this.getCoordinateFromUI('1', 'lat')) / 2.0
         };
         let initial_zoom = 17;
+
         try {
             // @ts-ignore
             initial_map_center = window.ISPTOOLBOX_SESSION_INFO.initialMapCenter.coordinates;
@@ -450,6 +465,40 @@ export class LinkCheckPage {
                 }
             });
         });
+
+        // Add an event listener to handle camera updates.
+        window.viewer.addEventListener('update', () => {
+            // @ts-ignore
+            let camera = window.viewer.scene.getActiveCamera();
+
+            // @ts-ignore
+            let target = window.viewer.scene.view.getPivot();
+
+            let newCamera = new THREE.Vector3(
+                camera.position.x,
+                camera.position.y,
+                camera.position.z
+            );
+
+            if (!this.animationPlaying && !this.animationWasPlaying && !this.hoverUpdated) {
+                // Only update offsets if greater than smallest update, and
+                // if animation wasn't playing during the previous update.
+                // This to not cause bugs with pausing animation updating the camera.
+                if (Math.abs(newCamera.x - this.oldCamera.x) >= SMALLEST_UPDATE) {
+                    this.cameraOffset.x += newCamera.x - this.oldCamera.x;
+                }
+                if (Math.abs(newCamera.y - this.oldCamera.y) >= SMALLEST_UPDATE) {
+                    this.cameraOffset.y += newCamera.y - this.oldCamera.y;
+                }
+                if (Math.abs(newCamera.z - this.oldCamera.z) >= SMALLEST_UPDATE) {
+                    this.cameraOffset.z += newCamera.z - this.oldCamera.z;
+                }
+            }
+
+            this.oldCamera = newCamera;
+            this.animationWasPlaying = this.animationPlaying;
+            this.hoverUpdated = false;
+        });
     };
 
     removeLinkHalo: (features: Array<MapboxGL.MapboxGeoJSONFeature>) => void = (features) => {
@@ -514,6 +563,12 @@ export class LinkCheckPage {
             const rx_h = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
             const pos = x / this._elevation.length;
             const { location, lookAt } = calculateLookVector(this.tx_loc_lidar, tx_h, this.rx_loc_lidar, rx_h, pos);
+
+            // Factor in camera offset
+            location[0] += this.cameraOffset.x;
+            location[1] += this.cameraOffset.y;
+            location[2] += this.cameraOffset.z;
+
             // Stop Current Animation
             if (this.currentView === '3d') {
                 if (this.globalLinkAnimation != null) {
@@ -524,11 +579,15 @@ export class LinkCheckPage {
                 }
                 // @ts-ignore
                 const scene = window.viewer.scene;
+
+                // Update to scene is caused by location3d view update.
+                this.hoverUpdated = true;
+
                 // Move Camera to Location
                 scene.view.position.set(location[0], location[1], location[2]);
-                // Point Camera at Link
+                // Point Camera at Link plus target offset
                 //@ts-ignore
-                scene.view.lookAt(new window.THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
+                scene.view.lookAt(new THREE.Vector3(lookAt[0], lookAt[1],lookAt[2]));
             }
             // @ts-ignore
             let scene = window.viewer.scene;
@@ -782,6 +841,8 @@ export class LinkCheckPage {
             this.createAnimationForLink(tx, rx, tx_h, rx_h, start_animation);
         }
         this.updateLinkHeight(tx_h, rx_h, true);
+
+        console.dir(this.globalLinkAnimation.controlPoints);
     }
 
 
@@ -837,7 +898,6 @@ export class LinkCheckPage {
         });
         setClippingVolume(bb);
         this.addLink(tx, rx, tx_h, rx_h);
-
     }
 
     updateLegend() {

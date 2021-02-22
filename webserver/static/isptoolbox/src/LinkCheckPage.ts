@@ -466,6 +466,7 @@ export class LinkCheckPage {
         });
 
         // Add an event listener to handle camera updates.
+        // @ts-ignore
         window.viewer.addEventListener('update', () => {
             // @ts-ignore
             let camera = window.viewer.scene.getActiveCamera();
@@ -840,8 +841,6 @@ export class LinkCheckPage {
             this.createAnimationForLink(tx, rx, tx_h, rx_h, start_animation);
         }
         this.updateLinkHeight(tx_h, rx_h, true);
-
-        console.dir(this.globalLinkAnimation.controlPoints);
     }
 
 

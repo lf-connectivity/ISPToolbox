@@ -8,8 +8,7 @@ import { updateObstructionsData } from './LinkObstructions';
 import {
     createHoverPoint, createOrbitAnimationPath, createLinkGeometry,
     calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,
-    createHoverVoume,
-    updateControlPoints
+    createHoverVoume
 } from './LinkOrbitAnimation';
 import { LinkMode, OverrideSimple, OverrideDirect } from './DrawingModes.js';
 import { calculateLookVector } from './HoverMoveLocation3DView';

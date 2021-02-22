@@ -34,6 +34,7 @@ class EPTLidarPointCloud(models.Model):
     boundary = gis_models.GeometryField()
     srs = models.IntegerField()
     high_resolution_boundary = gis_models.GeometryField(null=True, blank=True, default=None)
+    date_time_added_to_isptoolbox = models.DateTimeField(auto_now_add=True, null=True)
 
 
 # unmanaged models

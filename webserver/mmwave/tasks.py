@@ -23,7 +23,7 @@ from shapely.geometry import LineString as shapely_LineString
 from mmwave.models import TGLink
 from mmwave.scripts.load_lidar_boundaries import (
     loadBoundariesFromEntWine, createInvertedOverlay, getOverlayFromS3,
-    HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH, PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
+    HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
 )
 from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
@@ -294,10 +294,6 @@ if settings.PROD:
 
         """
         overlays = [
-            {
-                'tileset_name': 'lowreslidarboundary',
-                's3': PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
-            },
             {
                 'tileset_name': 'highreslidarboundary',
                 's3': HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH

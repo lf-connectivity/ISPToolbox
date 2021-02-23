@@ -19,6 +19,7 @@ from mmwave.lidar_utils.LidarEngine import (
         LidarEngine, LidarResolution, LIDAR_RESOLUTION_DEFAULTS,
         LIDAR_RESOLUTION_MAX_LINK_LENGTH, LidarEngineException
 )
+from mmwave.lidar_utils.show_latest_pt_clouds import createNewPointCloudAvailability
 from shapely.geometry import LineString as shapely_LineString
 from mmwave.models import TGLink
 from mmwave.scripts.load_lidar_boundaries import (
@@ -273,6 +274,7 @@ if settings.PROD:
         loadBoundariesFromEntWine()
         createInvertedOverlay()
 
+if settings.PROD:
     @periodic_task(run_every=(crontab(minute=0, hour=20)), name="add_high_resolution_boundary")
     def addHighResolutionBoundaries():
         """
@@ -286,6 +288,7 @@ if settings.PROD:
         updatePointCloudBoundariesTask()
         createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
 
+if settings.PROD:
     @periodic_task(run_every=(crontab(minute=0, hour=0, day_of_month=1)), name="upload_boundary_tileset_mapbox")
     def uploadBoundaryTilesetMapbox():
         """
@@ -319,3 +322,23 @@ if settings.PROD:
                     f"""Failed to update overlay: {overlay_name}\n
                     exception: {str(e)}\n
                     traceback:\n{traceback.format_exc()}""")
+
+if settings.PROD:
+    @periodic_task(run_every=(crontab(minute=0, hour=3, day_of_month=1)), name="create_overlay_new_clouds")
+    def createNewlyAddedCloudOverlay():
+        """
+        This task creates an overlay of the newly added point clouds, so we can show new users
+        (last 30 days)
+
+        """
+        try:
+            path = createNewPointCloudAvailability()
+            sendEmailToISPToolboxOncall(
+                '[Automated Message] Updated Latest Added Point Clouds Overlay',
+                f'Updated S3 {path}')
+        except Exception as e:
+            sendEmailToISPToolboxOncall(
+                '[Automated Message] Failed to update Latest Added Point Clouds Overlay',
+                f"""Failed to update overlay: \n
+                exception: {str(e)}\n
+                traceback:\n{traceback.format_exc()}""")

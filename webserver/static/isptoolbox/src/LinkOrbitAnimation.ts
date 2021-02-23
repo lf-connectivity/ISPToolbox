@@ -156,7 +156,7 @@ export function createHoverVoume(location: [number, number, number], scale: [num
     hoverVolume.name = "Visible Clipping Volume";
     hoverVolume.scale.set(scale[0], scale[1], scale[2]);
     hoverVolume.position.set(location[0], location[1], location[2]);
-    hoverVolume.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
+    hoverVolume.flookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
     hoverVolume.clip = true;
     return hoverVolume;
 }
@@ -184,4 +184,49 @@ export function generateClippingVolume(bb : Array<number>, buffer : number  = 25
     const camera = [position[0], position[1], camera_height];
 
     return { position, scale, camera };
+}
+
+/**
+ * Calculates the camera offset from the animation playing so that we can smoothly
+ * transition from camera animation to hover link view.
+ */
+export function calculateCameraOffsetFromAnimation(
+    camera: any,
+    target: any,
+    tx: [number, number],
+    rx: [number, number],
+    tx_h: number,
+    rx_h: number,
+    cameraDistance: number = 50) : any {
+
+    // Calculate what the camera would be like from current target
+    const lidarXDist = rx[0] - tx[0];
+    const targetXDist = target.x - tx[0];
+    const pos = targetXDist / lidarXDist;
+    const {location, lookAt} = calculateLookVector(tx, tx_h, rx, rx_h, pos);
+
+    const offset = new THREE.Vector3(
+        camera.position.x - location[0],
+        camera.position.y - location[1],
+        camera.position.z - location[2]
+    );
+
+    return offset;
+}
+
+export function updateControlPoints(controlPoints: Array<any>, cameraDelta: any, targetDelta: any) {
+    for (let i = 0; i < controlPoints.length; i++) {
+        let newLocation = [
+            controlPoints[i].position.x + cameraDelta.x,
+            controlPoints[i].position.y + cameraDelta.y,
+            controlPoints[i].position.z + cameraDelta.z
+        ]
+        let newTarget = [
+            controlPoints[i].target.x + targetDelta.x,
+            controlPoints[i].target.y + targetDelta.y,
+            controlPoints[i].target.z + targetDelta.z
+        ]
+        controlPoints[i].position.set(...newLocation);
+        controlPoints[i].target.set(...newTarget);
+    }
 }

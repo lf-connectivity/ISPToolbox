@@ -8,7 +8,7 @@ import { updateObstructionsData } from './LinkObstructions';
 import {
     createHoverPoint, createOrbitAnimationPath, createLinkGeometry,
     calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,
-    createHoverVoume
+    createHoverVoume, calculateCameraOffsetFromAnimation, updateControlPoints
 } from './LinkOrbitAnimation';
 import { LinkMode, OverrideSimple, OverrideDirect } from './DrawingModes.js';
 import { calculateLookVector } from './HoverMoveLocation3DView';
@@ -99,6 +99,7 @@ export class LinkCheckPage {
 
     // variables for handling offsets for hover point volume
     oldCamera: any;
+    oldTarget: any;
     cameraOffset: any;
     animationWasPlaying: boolean;
     hoverUpdated: boolean;
@@ -475,27 +476,82 @@ export class LinkCheckPage {
             let target = window.viewer.scene.view.getPivot();
 
             let newCamera = new THREE.Vector3(
-                camera.position.x,
-                camera.position.y,
-                camera.position.z
+                camera.position.x - target.x,
+                camera.position.y - target.y,
+                camera.position.z - target.z
             );
 
             if (!this.animationPlaying && !this.animationWasPlaying && !this.hoverUpdated) {
                 // Only update offsets if greater than smallest update, and
                 // if animation wasn't playing during the previous update.
                 // This to not cause bugs with pausing animation updating the camera.
-                if (Math.abs(newCamera.x - this.oldCamera.x) >= SMALLEST_UPDATE) {
-                    this.cameraOffset.x += newCamera.x - this.oldCamera.x;
+                let changed = false;
+                let targetDelta = new THREE.Vector3();
+
+                // Updating camera offset when user mouses over link status creates
+                // an infinite loop.
+                if (!this.hoverUpdated) {
+                    if (Math.abs(newCamera.x - this.oldCamera.x) >= SMALLEST_UPDATE) {
+                        changed = true;
+                        this.cameraOffset.x += newCamera.x - this.oldCamera.x;
+                    }
+                    if (Math.abs(newCamera.y - this.oldCamera.y) >= SMALLEST_UPDATE) {
+                        changed = true;
+                        this.cameraOffset.y += newCamera.y - this.oldCamera.y;
+                    }
+                    if (Math.abs(newCamera.z - this.oldCamera.z) >= SMALLEST_UPDATE) {
+                        changed = true;
+                        this.cameraOffset.z += newCamera.z - this.oldCamera.z;
+                    }
                 }
-                if (Math.abs(newCamera.y - this.oldCamera.y) >= SMALLEST_UPDATE) {
-                    this.cameraOffset.y += newCamera.y - this.oldCamera.y;
+                else {
+                    // Only update target if it was updated via the hover tool.
+                    // Otherwise, things get finnicky.
+                    if (Math.abs(target.x - this.oldTarget.x) >= SMALLEST_UPDATE) {
+                        changed = true;
+                        targetDelta.x = target.x - this.oldTarget.x;
+                    }
+                    if (Math.abs(target.y - this.oldTarget.y) >= SMALLEST_UPDATE) {
+                        changed = true;
+                        targetDelta.y = target.y - this.oldTarget.y;
+                    }
+                    if (Math.abs(target.z - this.oldTarget.z) >= SMALLEST_UPDATE) {
+                        changed = true;
+                        targetDelta.z = target.z - this.oldTarget.z;
+                    }
                 }
-                if (Math.abs(newCamera.z - this.oldCamera.z) >= SMALLEST_UPDATE) {
-                    this.cameraOffset.z += newCamera.z - this.oldCamera.z;
+
+                if (changed) {
+                    const cameraDelta = new THREE.Vector3(
+                        newCamera.x - this.oldCamera.x,
+                        newCamera.y - this.oldCamera.y,
+                        newCamera.z - this.oldCamera.z
+                    );
+
+                    updateControlPoints(this.globalLinkAnimation.controlPoints, cameraDelta, targetDelta);
+                    this.globalLinkAnimation.updatePath();
+                }
+            }
+
+            if (this.animationPlaying) {
+                // Set camera offset to actual camera angle - look vector normal.
+                // This is a hack to provide for a smooth transition from animation
+                // to hover view.
+
+                if (this.tx_loc_lidar != null && this.rx_loc_lidar != null) {
+                    this.cameraOffset = calculateCameraOffsetFromAnimation(
+                        camera,
+                        target,
+                        this.tx_loc_lidar,
+                        this.rx_loc_lidar,
+                        this.getRadioHeightFromUI('0') + this._elevation[0], //tx_h
+                        this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1] //rx_h
+                    );    
                 }
             }
 
             this.oldCamera = newCamera;
+            this.oldTarget = target;
             this.animationWasPlaying = this.animationPlaying;
             this.hoverUpdated = false;
         });

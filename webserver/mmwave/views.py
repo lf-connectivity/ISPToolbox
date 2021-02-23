@@ -42,6 +42,8 @@ class LOSCheckDemo(View):
             'fbid': fbid,
             'networkID': networkID,
             'units': units,
+            'lat': lat,
+            'lon': lon,
             'demo': True
         }
         return render(request, 'mmwave/index.html', context)

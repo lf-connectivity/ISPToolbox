@@ -19,7 +19,7 @@ context('Test Delete Control', () => {
       cy.get('#drawing_instructions').should('not.be.visible');
 
       // Verify that link is plotted
-      cy.get('.radio-card-body').should('be.visible');
+      cy.get('.radio-card-body', {timeout: 10000}).should('be.visible');
       cy.contains('Legend').click();
       cy.get('.isptoolbox-tooltip').should('contain', 'Google Elevation API');
     });

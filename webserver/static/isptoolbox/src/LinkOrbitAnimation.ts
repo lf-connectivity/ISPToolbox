@@ -156,7 +156,7 @@ export function createHoverVoume(location: [number, number, number], scale: [num
     hoverVolume.name = "Visible Clipping Volume";
     hoverVolume.scale.set(scale[0], scale[1], scale[2]);
     hoverVolume.position.set(location[0], location[1], location[2]);
-    hoverVolume.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
+    hoverVolume.flookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
     hoverVolume.clip = true;
     return hoverVolume;
 }

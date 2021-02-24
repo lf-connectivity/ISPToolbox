@@ -21,6 +21,8 @@ class LOSCheckDemo(View):
         lat = request.GET.get('lat', None)
         lon = request.GET.get('lon', None)
         units = request.GET.get('units', 'US')
+        beta = request.GET.get('beta', False)
+        beta = True if isinstance(beta, str) and beta.lower() == 'true' else False
 
         # Make a deep copy of the sample points to avoid changing the samples for other requests
         tx = copy.deepcopy(samples.sunflower['tx'])
@@ -40,6 +42,7 @@ class LOSCheckDemo(View):
             'fbid': fbid,
             'networkID': networkID,
             'units': units,
-            'demo': True
+            'demo': True,
+            'beta': beta
         }
         return render(request, 'mmwave/index.html', context)

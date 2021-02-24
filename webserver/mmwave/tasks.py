@@ -193,7 +193,8 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
         'dist': 0,
         "type": 'standard.message',
         'handler': 'lidar',
-        'aoi': [0, 1]
+        'aoi': [0, 1],
+        'still_loading': False
     }
     channel_layer = get_channel_layer()
     channel_name = 'los_check_%s' % network_id
@@ -222,6 +223,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
                 link_dist_m < LIDAR_RESOLUTION_MAX_LINK_LENGTH[resolution + 1]
         ):
             getLiDARProfile.delay(network_id, data, resolution + 1)
+            resp['still_loading'] = True
     except LidarEngineException as e:
         resp['error'] = str(e)
     except Exception:

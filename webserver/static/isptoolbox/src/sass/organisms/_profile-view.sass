@@ -39,7 +39,7 @@
     .card-title
         border-bottom: solid 2px $brand-primary-color
         margin-bottom: .75rem
-    #link-status--obstructions, #frequency-label
+    #link-status--obstructions, #frequency-label, #link-status--loading
         font-size: 14px
     .link-status
         flex-flow: row wrap
@@ -48,6 +48,24 @@
     #link_chart
         width:100%
         height:300px
+    #link-status--loading:after
+        overflow: hidden
+        display: inline-block
+        vertical-align: bottom
+        -webkit-animation: ellipsis steps(4,end) 900ms infinite      
+        animation: ellipsis steps(4,end) 900ms infinite
+        content: "\2026"
+        width: 0px
+        
+
+    @keyframes ellipsis 
+        to
+            width: 1.25em
+
+    @-webkit-keyframes ellipsis 
+        to
+            width: 1.25e  
+
 body
     @media screen and (max-width: 991px)
         .link-view-bar
@@ -62,7 +80,7 @@ body
             .card-title
                 border-bottom: 0
                 margin-bottom: 0
-            #link-status--obstructions, #frequency-label
+            #link-status--obstructions, #frequency-label, #link-status--loading
                 font-size: 16px
         @media screen and (max-height: 800px)
             .link-profile-card #link_chart

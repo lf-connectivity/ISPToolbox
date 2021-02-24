@@ -35,7 +35,7 @@ LIDAR_RESOLUTION_DEFAULTS = {
 LIDAR_RESOLUTION_MAX_LINK_LENGTH = {
     LidarResolution.LOW: 100000,
     LidarResolution.MEDIUM: 50000,
-    LidarResolution.HIGH: 2000,
+    LidarResolution.HIGH: 30000,
     LidarResolution.ULTRA: 1000,
 }
 

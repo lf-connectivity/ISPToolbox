@@ -40,6 +40,7 @@ export type LidarResponse = {
     aoi: [number, number],
     rx : [number, number],
     tx : [number, number],
+    still_loading: boolean,
 }
 
 export type LOSCheckResponse =  LinkResponse | TerrainResponse | LidarResponse;

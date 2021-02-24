@@ -3,7 +3,7 @@ export function createLinkChart(link_chart, highLightPointOnGround, moveLocation
         const point = { x: e.target.x, y: e.target.y };
         highLightPointOnGround(point);
         moveLocation3DView(point);
-      }, 100, {
+      }, 50, {
           'leading': true,
           'trailing': true,
       });

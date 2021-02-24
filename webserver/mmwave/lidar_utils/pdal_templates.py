@@ -13,7 +13,7 @@ DEFAULT_FILTERS = {
         "type": "filters.outlier",
         "method": "statistical",
         "mean_k": 12,
-        "multiplier": 1.5
+        "multiplier": 2.2
     },
     'circle': {
         "class": 7,

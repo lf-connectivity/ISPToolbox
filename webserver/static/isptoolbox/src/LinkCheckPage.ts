@@ -1066,6 +1066,11 @@ export class LinkCheckPage {
             }));
         }
         this.data_resolution = response.res;
+        if(response.still_loading){
+            $('#link-status--loading').removeClass('d-none');
+        } else {
+            $('#link-status--loading').addClass('d-none');
+        }
 
         this.renderNewLinkProfile();
         this.updateLinkChart();

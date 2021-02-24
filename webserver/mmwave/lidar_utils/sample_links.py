@@ -62,16 +62,16 @@ texas_tall_tower_clouds = {
         'name': 'radio_0',
         'color': '#E29842',
         'lng': -98.60241,
-        'lat':  33.88130,
+        'lat':  33.88128,
         'id': 0,
         'hgt': 430
     },
     'rx': {
         'name': 'radio_1',
         'color': '#42B72A',
-        'lng': -98.52612,
-        'lat':  33.84437,
+        'lng': -98.52611,
+        'lat':  33.84439,
         'id': 1,
-        'hgt': 60
+        'hgt': 30
     }
 }

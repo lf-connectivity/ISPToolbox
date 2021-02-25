@@ -12,7 +12,7 @@ cloud_rf_key = '71492256a3cd1e54e14f6413842f1ab41c907664'
 headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
 
-def createCloudRFRequest(lat, lon, txh, rad):
+def createCloudRFRequest(lat, lon, txh, rxh, rad):
     return {
         "uid": cloud_rf_uid,
         "key": cloud_rf_key,
@@ -20,7 +20,7 @@ def createCloudRFRequest(lat, lon, txh, rad):
         "lon": lon,
         "txh": txh,
         "frq": 868,
-        "rxh": 2,
+        "rxh": rxh,
         "dis": 'm',
         "txw": 0.1,
         "txg": 2.14,
@@ -60,7 +60,7 @@ def createCloudRFRequest(lat, lon, txh, rad):
     }
 
 
-def getViewShed(lat, lon, height, radius):
+def getViewShed(lat, lon, height, customerHeight, radius):
     '''
         Gets a viewshed (json polygon coverage) from an access point:
 
@@ -72,7 +72,7 @@ def getViewShed(lat, lon, height, radius):
 
         Returns geojson for viewshed
     '''
-    request_body = createCloudRFRequest(lat, lon, height, radius)
+    request_body = createCloudRFRequest(lat, lon, height, customerHeight, radius)
     resp = {}
     retries = 3
     try:

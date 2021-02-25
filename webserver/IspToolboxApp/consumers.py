@@ -143,8 +143,9 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         lat = content['lat']
         lon = content['lon']
         height = content['height']
+        customerHeight = content['customerHeight']
         radius = content['radius']
-        getTowerViewShed.delay(lat, lon, height, radius, self.channel_name, uuid)
+        getTowerViewShed.delay(lat, lon, height, customerHeight, radius, self.channel_name, uuid)
 
     async def building_overlays(self, event):
         await self.send_json(event)

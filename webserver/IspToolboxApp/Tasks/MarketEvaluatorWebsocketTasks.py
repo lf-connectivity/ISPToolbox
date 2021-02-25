@@ -106,6 +106,6 @@ def getCountyGeog(statecode, countycode, channelName, uuid):
 
 
 @shared_task
-def getTowerViewShed(lat, lon, height, radius, channelName, uuid):
-    result = getViewShed(lat, lon, height, radius)
+def getTowerViewShed(lat, lon, height, customerHeight, radius, channelName, uuid):
+    result = getViewShed(lat, lon, height, customerHeight, radius)
     sync_send(channelName, 'tower.viewshed', result, uuid)

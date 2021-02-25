@@ -11,14 +11,19 @@ import {
     calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,
     createHoverVoume, calculateCameraOffsetFromAnimation, updateControlPoints
 } from './LinkOrbitAnimation';
-import { LinkMode, OverrideSimple, OverrideDirect } from './DrawingModes.js';
 import { calculateLookVector, calculateLinkProfileFresnelPosition } from './HoverMoveLocation3DView';
+import { LinkMode} from './LinkDrawMode.js';
+import { OverrideSimple } from './SimpleDrawOverride.js';
+import { OverrideDirect } from './DirectDrawOverride.js';
 import LidarAvailabilityLayer from './availabilityOverlay';
 import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
 import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
+import { RadiusDrawStyle } from './RadiusDrawStyle';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
 import { Potree } from "./Potree.js";
+import { RadiusMode } from "./RadiusDrawMode.js";
+import {AccessPointTool} from "./AccessPointTool";
 
 type HighChartsExtremesEvent = {
     min: number | undefined,
@@ -65,6 +70,7 @@ export class LinkCheckPage {
 
     lidarAvailabilityLayer: LidarAvailabilityLayer;
 
+    accessPointTool: AccessPointTool;
     profileWS: LOSCheckWS;
     currentLinkHash: any;
 
@@ -218,6 +224,8 @@ export class LinkCheckPage {
         );
         this.link_status = new LinkStatus();
 
+        this.accessPointTool = new AccessPointTool(this.map);
+
         let initial_map_center = {
             'lon': (this.getCoordinateFromUI('0', 'lng') + this.getCoordinateFromUI('1', 'lng')) / 2.0,
             'lat': (this.getCoordinateFromUI('0', 'lat') + this.getCoordinateFromUI('1', 'lat')) / 2.0
@@ -267,12 +275,14 @@ export class LinkCheckPage {
                 modes: Object.assign({
                     draw_link: LinkMode(),
                     simple_select: OverrideSimple(),
-                    direct_select: OverrideDirect()
+                    direct_select: OverrideDirect(),
+                    draw_radius: RadiusMode(),
                 }, MapboxDraw.modes),
                 displayControlsDefault: false,
                 controls: {
                 },
-                styles: LOSCheckMapboxStyles
+                // @ts-ignore
+                styles: LOSCheckMapboxStyles.concat(RadiusDrawStyle)
             });
 
             this.map.addControl(this.Draw, 'bottom-right');
@@ -400,7 +410,10 @@ export class LinkCheckPage {
 
 
             $('#add-link-btn').click(
-                () => { this.Draw.changeMode('draw_line_string'); }
+                () => { this.Draw.changeMode('draw_link'); }
+            )
+            $('#add-ap-btn').click(
+                () => { this.Draw.changeMode('draw_radius'); }
             )
 
             // Update Callbacks for Radio Heights
@@ -600,7 +613,8 @@ export class LinkCheckPage {
     }
 
     updateRadioLocation(update: any) {
-        if (update.features.length) {
+        console.log(update);
+        if (update.features.length && update.features[0].geometry.type !== 'Point') {
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
             if (feat.properties.freq == undefined) {

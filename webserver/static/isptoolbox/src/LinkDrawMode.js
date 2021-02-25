@@ -30,7 +30,7 @@ export function LinkMode(){
     return link_mode;
 };
 
-function renderLinkEnds(geojson, display){
+export function renderLinkEnds(geojson, display){
     if(geojson.geometry.coordinates.length > 0) {
         const radio0 = {
             type: 'Feature',
@@ -63,46 +63,4 @@ function renderLinkEnds(geojson, display){
         };
         display(radio1);
     }
-}
-
-export function OverrideSimple(){
-    const simple_select = MapboxDraw.modes.simple_select;
-    simple_select.toDisplayFeatures = function(state, geojson, display) {
-        geojson.properties.active = this.isSelected(geojson.properties.id)
-          ? 'true'
-          : 'false';
-        display(geojson);
-        
-        renderLinkEnds(geojson, display);
-
-        this.fireActionable();
-
-        // Turn off tap drag zoom if there are any elements selected
-        if (this.getSelectedIds().length > 0) {
-
-            // Horrible hack; no documented way of doing this :)
-            this.map.handlers._handlersById.tapDragZoom.disable();
-        }
-        // Re-enable if nothing is selected
-        else {
-            this.map.handlers._handlersById.tapDragZoom.enable();
-        }
-
-        if (
-          geojson.properties.active !== 'active' ||
-          geojson.geometry.type === 'Point'
-        ) {
-          return;
-        }
-    };
-    return simple_select;
-}
-
-export function OverrideDirect(){
-    const direct_select = MapboxDraw.modes.direct_select;
-    const old_toDisplayFeatures = MapboxDraw.modes.direct_select.toDisplayFeatures;
-    direct_select.toDisplayFeatures = function(state, geojson, push) {
-        renderLinkEnds(geojson, push);
-        old_toDisplayFeatures.apply(this, [state, geojson, push]);
-    };
 }

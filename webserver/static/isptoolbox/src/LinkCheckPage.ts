@@ -1,6 +1,7 @@
 // Create new mapbox Map
 import * as MapboxGL from "mapbox-gl";
 
+import { isBeta } from './wireless_network.app.js';
 import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
 import { createLinkProfile, findOverlaps, findLidarObstructions, km2miles, m2ft, ft2m, calculateMaximumFresnelRadius } from './LinkCalcUtils';
@@ -504,9 +505,9 @@ export class LinkCheckPage {
                         this.cameraOffset.z += newCamera.z - this.oldCamera.z;
                     }
                 }
-                else {
+                else if (isBeta()) {
                     // Only update target if it was updated via the hover tool.
-                    // Otherwise, things get finnicky.
+                    // Otherwise, things get finnicky. BETA FUNCTIONALITY
                     if (Math.abs(target.x - this.oldTarget.x) >= SMALLEST_UPDATE) {
                         changed = true;
                         targetDelta.x = target.x - this.oldTarget.x;
@@ -527,13 +528,15 @@ export class LinkCheckPage {
                         newCamera.y - this.oldCamera.y,
                         newCamera.z - this.oldCamera.z
                     );
-
-                    updateControlPoints(this.globalLinkAnimation.controlPoints, cameraDelta, targetDelta);
+                    
+                    if (isBeta()) {
+                        updateControlPoints(this.globalLinkAnimation.controlPoints, cameraDelta, targetDelta);
+                    }
                     this.globalLinkAnimation.updatePath();
                 }
             }
 
-            if (this.animationPlaying) {
+            if (isBeta() && this.animationPlaying) {
                 // Set camera offset to actual camera angle - look vector normal.
                 // This is a hack to provide for a smooth transition from animation
                 // to hover view.
@@ -657,7 +660,6 @@ export class LinkCheckPage {
         } catch (err) {
         }
     };
-
 
     getRadioLocations() {
         const tx_lat = parseFloat(String($('#lat-0').val()));

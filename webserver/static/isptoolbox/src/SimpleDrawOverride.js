@@ -3,7 +3,6 @@ import {renderLinkEnds} from './LinkDrawMode.js';
 export function OverrideSimple(){
     const simple_select = MapboxDraw.modes.simple_select;
     simple_select.toDisplayFeatures = function(state, geojson, display) {
-        console.log({state, geojson, push});
         geojson.properties.active = this.isSelected(geojson.properties.id)
           ? 'true'
           : 'false';

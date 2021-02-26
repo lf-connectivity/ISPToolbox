@@ -1,3 +1,4 @@
+import {createGeoJSONCircle} from './RadiusModeUtils.js'
 export function RadiusMode() {
     let mode = Object.assign({}, MapboxDraw.modes.draw_line_string);
 
@@ -7,7 +8,7 @@ export function RadiusMode() {
         if (e.originalEvent.type.includes('touch')) {
             state.line.addCoordinate(
                 state.currentVertexPosition,
-                e.lngLat.lng,
+                e.lngLat.lng, 
                 e.lngLat.lat,
             );
         }
@@ -138,6 +139,49 @@ export function RadiusMode() {
     return mode;
 }
 
+/**
+ * This helper function adds helpful contextual instructutions to guide user through drawing a circle
+ */
+function addDrawInstructions(state, geojson, display) {
+    try {
+        const msg = getInstructionMessage(state);
+        if (
+            geojson.geometry.coordinates.length &&
+            state.line != null &&
+            state.line.id != null
+        ) {
+            const point = {
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: geojson.geometry.coordinates[0],
+                },
+                properties: {
+                    active: Constants.activeStates.ACTIVE,
+                    parent: state.line.id,
+                    draw_guide: msg,
+                },
+            };
+            display(point);
+        }
+    } catch {
+        const _a = 1 + 1; // kekw
+    }
+}
+
+function getInstructionMessage(state) {
+    if (typeof state.currentVertexPosition === 'number') {
+        if (state.currentVertexPosition === 0) {
+            return 'Click to place center of circle';
+        } else {
+            return 'Click to finish circle';
+        }
+    } else {
+        return '';
+    }
+}
+
+
 
 function lineDistance(lineFeature, unit = 'K') {
     const lat1 = lineFeature.geometry.coordinates[0][1];
@@ -187,50 +231,8 @@ function createVertex(parentId, coordinates, path, selected) {
     };
 }
 
-// create a circle-like polygon given a center point and radius
-// https://stackoverflow.com/questions/37599561/drawing-a-circle-with-the-radius-in-miles-meters-with-mapbox-gl-js/39006388#39006388
-function createGeoJSONCircle(
-    center,
-    radiusInKm,
-    parentId,
-    points = 64,
-) {
-    const coords = {
-        latitude: center[1],
-        longitude: center[0],
-    };
 
-    const km = radiusInKm;
-
-    const ret = [];
-    const distanceX = km / (111.32 * Math.cos((coords.latitude * Math.PI) / 180));
-    const distanceY = km / 110.574;
-
-    let theta;
-    let x;
-    let y;
-    for (let i = 0; i < points; i += 1) {
-        theta = (i / points) * (2 * Math.PI);
-        x = distanceX * Math.cos(theta);
-        y = distanceY * Math.sin(theta);
-
-        ret.push([coords.longitude + x, coords.latitude + y]);
-    }
-    ret.push(ret[0]);
-
-    return {
-        type: 'Feature',
-        geometry: {
-            type: 'Polygon',
-            coordinates: [ret],
-        },
-        properties: {
-            parent: parentId,
-        },
-    };
-}
-
-export function getDisplayMeasurements(
+function getDisplayMeasurements(
     lineFeature,
     minRadius,
     units = 'km',
@@ -270,48 +272,3 @@ const doubleClickZoom = {
         }, 0);
     },
 };
-
-
-/**
- * This helper function adds helpful contextual instructutions to guide user through drawing a circle
- */
-function addDrawInstructions(state, geojson, display) {
-    try {
-        const msg = getInstructionMessage(state);
-        if (
-            geojson.geometry.coordinates.length &&
-            state.line != null &&
-            state.line.id != null
-        ) {
-            const point = {
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: geojson.geometry.coordinates[0],
-                },
-                properties: {
-                    active: Constants.activeStates.ACTIVE,
-                    parent: state.line.id,
-                    draw_guide: msg,
-                },
-            };
-            display(point);
-        }
-    } catch {
-        const _a = 1 + 1; // kekw
-    }
-}
-
-function getInstructionMessage(state) {
-    if (typeof state.currentVertexPosition === 'number') {
-        if (state.currentVertexPosition === 0) {
-            return 'Click to place center of circle';
-        } else {
-            return 'Click to finish circle';
-        }
-    } else {
-        return '';
-    }
-}
-
-

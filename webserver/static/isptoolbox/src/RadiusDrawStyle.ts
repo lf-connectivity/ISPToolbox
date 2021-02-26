@@ -37,4 +37,36 @@ export const RadiusDrawStyle = [
       'text-halo-blur': 1,
     },
   },
+  // vertex point halos
+  {
+    id: 'gl-draw-polygon-and-line-vertex-halo-active-point',
+    type: 'circle',
+    filter: [
+      'all',
+      ['==', 'meta', 'vertex'],
+      ['==', '$type', 'Point'],
+      ['!=', 'mode', 'static'],
+      ['==', 'handles', 'true']
+    ],
+    paint: {
+      'circle-radius': 7,
+      'circle-color': '#FFF',
+    },
+  },
+  // vertex points
+  {
+    id: 'gl-draw-polygon-and-line-vertex-active-point',
+    type: 'circle',
+    filter: [
+      'all',
+      ['==', 'meta', 'vertex'],
+      ['==', '$type', 'Point'],
+      ['!=', 'mode', 'static'],
+      ['==', 'handles', 'true'],
+    ],
+    paint: {
+      'circle-radius': 6,
+      'circle-color': '#C2D8EC',
+    },
+  },
 ]

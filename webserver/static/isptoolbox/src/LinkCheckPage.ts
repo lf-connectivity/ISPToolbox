@@ -224,7 +224,6 @@ export class LinkCheckPage {
         );
         this.link_status = new LinkStatus();
 
-        this.accessPointTool = new AccessPointTool(this.map);
 
         let initial_map_center = {
             'lon': (this.getCoordinateFromUI('0', 'lng') + this.getCoordinateFromUI('1', 'lng')) / 2.0,
@@ -284,6 +283,8 @@ export class LinkCheckPage {
                 // @ts-ignore
                 styles: LOSCheckMapboxStyles.concat(RadiusDrawStyle)
             });
+
+            this.accessPointTool = new AccessPointTool(this.map, this.Draw);
 
             this.map.addControl(this.Draw, 'bottom-right');
             const deleteControl = new MapboxCustomDeleteControl({
@@ -613,8 +614,7 @@ export class LinkCheckPage {
     }
 
     updateRadioLocation(update: any) {
-        console.log(update);
-        if (update.features.length && update.features[0].geometry.type !== 'Point') {
+        if (update.features.length && update.features[0].properties.radius === undefined) {
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
             if (feat.properties.freq == undefined) {

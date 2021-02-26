@@ -504,7 +504,6 @@ export class LinkCheckPage {
                         changed = true;
                         this.cameraOffset.z += newCamera.z - this.oldCamera.z;
                     }
-<<<<<<< HEAD
                 }
                 else if (isBeta()) {
                     // Only update target if it was updated via the hover tool.
@@ -538,39 +537,6 @@ export class LinkCheckPage {
             }
 
             if (isBeta() && this.animationPlaying) {
-=======
-                }
-                else {
-                    // Only update target if it was updated via the hover tool.
-                    // Otherwise, things get finnicky.
-                    if (Math.abs(target.x - this.oldTarget.x) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        targetDelta.x = target.x - this.oldTarget.x;
-                    }
-                    if (Math.abs(target.y - this.oldTarget.y) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        targetDelta.y = target.y - this.oldTarget.y;
-                    }
-                    if (Math.abs(target.z - this.oldTarget.z) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        targetDelta.z = target.z - this.oldTarget.z;
-                    }
-                }
-
-                if (changed) {
-                    const cameraDelta = new THREE.Vector3(
-                        newCamera.x - this.oldCamera.x,
-                        newCamera.y - this.oldCamera.y,
-                        newCamera.z - this.oldCamera.z
-                    );
-
-                    updateControlPoints(this.globalLinkAnimation.controlPoints, cameraDelta, targetDelta);
-                    this.globalLinkAnimation.updatePath();
-                }
-            }
-
-            if (this.animationPlaying) {
->>>>>>> Allow user to change camera angle during animation
                 // Set camera offset to actual camera angle - look vector normal.
                 // This is a hack to provide for a smooth transition from animation
                 // to hover view.

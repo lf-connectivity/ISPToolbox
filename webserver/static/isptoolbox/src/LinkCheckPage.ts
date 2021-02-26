@@ -5,7 +5,7 @@ import { isBeta } from './wireless_network.app.js';
 import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
 import { createLinkProfile, findOverlaps, findLidarObstructions, km2miles, m2ft, ft2m, calculateMaximumFresnelRadius } from './LinkCalcUtils';
-import { updateObstructionsData } from './LinkObstructions';
+import { LinkStatus } from './LinkObstructions';
 import {
     createHoverPoint, createOrbitAnimationPath, createLinkGeometry,
     calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,
@@ -97,6 +97,7 @@ export class LinkCheckPage {
     selectedFeatureID: string | null;
 
     datasets: Map<LOSWSHandlers, Array<string>>;
+    link_status : LinkStatus;
 
     // variables for handling offsets for hover point volume
     oldCamera: any;
@@ -210,6 +211,7 @@ export class LinkCheckPage {
             this.networkID,
             [this.ws_message_handler.bind(this)]
         );
+        this.link_status = new LinkStatus();
 
         let initial_map_center = {
             'lon': (this.getCoordinateFromUI('0', 'lng') + this.getCoordinateFromUI('1', 'lng')) / 2.0,
@@ -766,7 +768,7 @@ export class LinkCheckPage {
             this.fresnel_width = Math.max(...fresnel.map((x) => x[2] - x[1]));
             if (this._lidar != null) {
                 const overlaps = findLidarObstructions(fresnel, this._lidar);
-                updateObstructionsData(overlaps);
+                this.link_status.updateObstructionsData(overlaps);
                 this.link_chart.xAxis[0].removePlotBand();
                 overlaps.forEach((x) => {
                     this.link_chart.xAxis[0].addPlotBand({
@@ -1066,11 +1068,7 @@ export class LinkCheckPage {
             }));
         }
         this.data_resolution = response.res;
-        if(response.still_loading){
-            $('#link-status--loading').removeClass('d-none');
-        } else {
-            $('#link-status--loading').addClass('d-none');
-        }
+        this.link_status.updateLoadingStatus(response.still_loading);
 
         this.renderNewLinkProfile();
         this.updateLinkChart();

@@ -274,10 +274,7 @@ export class LinkCheckPage {
             const deleteControl = new MapboxCustomDeleteControl({
                 map: this.map,
                 draw: this.Draw,
-                deleteCallback: (features) => {
-                    this.removeLinkHalo(features);
-                    this.clearInputs();
-                },
+                deleteCallback: this.deleteDrawingCallback.bind(this)
             });
 
             this.map.addControl(deleteControl, 'bottom-right');
@@ -321,13 +318,13 @@ export class LinkCheckPage {
             this.map.on('draw.selectionchange', this.updateRadioLocation.bind(this));
             this.map.on('draw.selectionchange', prioritizeDirectSelect.bind(this));
             this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
-
+            this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
 
             window.addEventListener('keydown', (event) => {
                 const featureCollection = this.Draw.getSelected();
                 if (event.target === this.map.getCanvas() && (event.key === "Backspace" || event.key === "Delete")) {
                     featureCollection.features.forEach((feat: any) => { this.Draw.delete(feat.id) })
-                    this.removeLinkHalo(featureCollection.features);
+                    this.deleteDrawingCallback(featureCollection);
                 }
             });
 
@@ -603,6 +600,12 @@ export class LinkCheckPage {
         }
     };
 
+    deleteDrawingCallback({features} : any) {
+        console.log(features);
+        this.removeLinkHalo(features);
+        this.clearInputs();
+    }
+
     highLightPointOnGround({ x, y }: { x: number, y: number }) {
         const integer_X = Math.round(x);
         if (this._coords !== null && integer_X < this._coords.length && integer_X >= 0) {
@@ -688,7 +691,6 @@ export class LinkCheckPage {
             this.selected_feature = query;
         }
         this.link_chart.showLoading();
-        console.trace();
         $("#loading_spinner").removeClass('d-none');
         $('#los-chart-tooltip-button').addClass('d-none');
         $('#loading_failed_spinner').addClass('d-none');

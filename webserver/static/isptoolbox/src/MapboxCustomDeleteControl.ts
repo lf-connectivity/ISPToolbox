@@ -1,7 +1,7 @@
 import * as MapboxGL from "mapbox-gl";
 
 interface deleteCallback {
-    (features: Array<MapboxGL.MapboxGeoJSONFeature>) : void;
+    (arg : {features: Array<MapboxGL.MapboxGeoJSONFeature>}) : void;
 };
 export default class MapboxCustomDeleteControl {
     _map: MapboxGL.Map;
@@ -39,10 +39,10 @@ export default class MapboxCustomDeleteControl {
             this._draw.delete(`${featureId}`);
           }
         });
-        this._deleteCallback(selectedFeature);
+        this._deleteCallback({features: selectedFeature});
       } else {
         this._draw.deleteAll();
-        this._deleteCallback(features);
+        this._deleteCallback({features: features});
       }
     };
   

@@ -9,7 +9,7 @@ context('Test E2E LOS Check', () => {
       // We should start off by loading the lidar view
       cy.get('#loading_spinner').should('be.visible').should('contain','Loading LiDAR');
       // It should show that the link failed
-      cy.get('.link-status').should('contain', 'Link Status').should('contain', 'Failed');
+      cy.get('.link-status', {timeout: 60000}).should('contain', 'Link Status').should('contain', 'Failed');
       // The chart should show the resolution metric
       cy.get('#link_chart').should('contain', 'resolution');
       // Clicking on the legend should display a tooltip that shows the data sources
@@ -25,7 +25,7 @@ context('Test E2E LOS Check', () => {
       cy.get('#lat-1').clear().type('38.53271');
       cy.get('#lng-1').clear().type('-121.75164{enter}');
       cy.get('#link_chart', {timeout: 10000}).should('be.visible').should('contain', 'resolution');
-      cy.get('.link-status').should('contain', 'Link Status').should('contain', 'Failed');
+      cy.get('.link-status', {timeout: 60000}).should('contain', 'Link Status').should('contain', 'Failed');
       cy.get('#freq-dropdown').click();
       cy.contains('60 GHz').click();
     });

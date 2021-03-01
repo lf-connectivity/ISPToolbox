@@ -110,6 +110,7 @@ class LidarEngine:
         <stuff>, Collected: <YYYY>-<YYYY>. Otherwise, a query will be done to determine
         when the start/end collection years are.
         """
+        print(source_name)
 
         dy_match = re.match(_DOUBLE_YEAR_REGEX, source_name)
         if dy_match:
@@ -118,19 +119,30 @@ class LidarEngine:
         else:
             sy_match = re.match(_SINGLE_YEAR_REGEX, source_name)
 
-            name = sy_match.group(1)
+            # If there isn't a year, we do a query, and if that fails, don't
+            # add any more info to the source w.r.t. collection date
+            if sy_match:
+                name = sy_match.group(1)
+            else:
+                name = source_name
+
             with connections['gis_data'].cursor() as cursor:
                 cursor.execute(_FESM_LPC_PROJ_QUERY, [source_name])
                 row = cursor.fetchone()
 
                 # Fallback if row not found
                 if not row:
-                    s_year, e_year = sy_match.group(2), sy_match.group(2)
+                    if sy_match:
+                        s_year, e_year = sy_match.group(2), sy_match.group(2)
+                    else:
+                        s_year, e_year = None, None
                 else:
                     s_date, e_date = row
                     s_year, e_year = s_date.year, e_date.year
 
-                if s_year == e_year:
+                if not s_year:
+                    return f'{name}'
+                elif s_year == e_year:
                     return f'{name} (Collected {s_year})'
                 else:
                     return f'{name} (Collected {s_year}-{e_year})'

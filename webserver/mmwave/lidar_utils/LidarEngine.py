@@ -110,7 +110,6 @@ class LidarEngine:
         <stuff>, Collected: <YYYY>-<YYYY>. Otherwise, a query will be done to determine
         when the start/end collection years are.
         """
-        print(source_name)
 
         dy_match = re.match(_DOUBLE_YEAR_REGEX, source_name)
         if dy_match:

@@ -6,6 +6,8 @@ from django.contrib.gis.geos import MultiLineString, LineString, Point
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 
+import mmwave.lidar_utils.lidar_engine_queries as lidar_engine_queries
+
 import logging
 import numpy as np
 import re
@@ -43,12 +45,6 @@ DEFAULT_BB_BUFFER = 3
 
 _DOUBLE_YEAR_REGEX = re.compile(r'^(.+)_(\d+)_LAS_(\d+)$')
 _SINGLE_YEAR_REGEX = re.compile(r'^(.+)_(\d+)$')
-
-_FESM_LPC_PROJ_QUERY = """
-SELECT s_date, e_date
-FROM fesm_lpc_proj
-WHERE LOWER(project_id)=LOWER(%s)
-"""
 
 
 class LidarEngine:
@@ -125,26 +121,19 @@ class LidarEngine:
             else:
                 name = source_name
 
-            with connections['gis_data'].cursor() as cursor:
-                cursor.execute(_FESM_LPC_PROJ_QUERY, [source_name])
-                row = cursor.fetchone()
+            s_year, e_year = lidar_engine_queries.get_collection_years_for_project_id(name)
 
-                # Fallback if row not found
-                if not row:
-                    if sy_match:
-                        s_year, e_year = sy_match.group(2), sy_match.group(2)
-                    else:
-                        s_year, e_year = None, None
-                else:
-                    s_date, e_date = row
-                    s_year, e_year = s_date.year, e_date.year
+            # if row not found, fall back on known info
+            if not s_year:
+                if sy_match:
+                    s_year, e_year = sy_match.group(2), sy_match.group(2)
 
-                if not s_year:
-                    return f'{name}'
-                elif s_year == e_year:
-                    return f'{name} (Collected {s_year})'
-                else:
-                    return f'{name} (Collected {s_year}-{e_year})'
+            if not s_year:
+                return f'{name}'
+            elif s_year == e_year:
+                return f'{name} (Collected {s_year})'
+            else:
+                return f'{name} (Collected {s_year}-{e_year})'
 
     def __selectLatestProfile(self, clouds):
         pattern_year = re.compile(r'2[0-9][0-9][0-9]')

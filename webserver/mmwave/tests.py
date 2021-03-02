@@ -3,11 +3,18 @@ from .tasks import getElevationProfile, MAXIMUM_NUM_POINTS_RETURNED
 from mmwave.lidar_utils.pdal_templates import (
     getLidarPointsAroundLink, takeMaxHeightAtDistance
 )
-# from mmwave.lidar_utils.LidarEngine import (
-#     LidarEngine, LIDAR_RESOLUTION_DEFAULTS, LidarResolution
-# )
+from mmwave.lidar_utils.LidarEngine import (
+    LidarEngine, LIDAR_RESOLUTION_DEFAULTS, LidarResolution
+)
 from django.contrib.gis.geos import Point, LineString, GEOSGeometry
 from mmwave.models import EPTLidarPointCloud
+import mmwave.lidar_utils.lidar_engine_queries
+
+import unittest.mock as mock
+
+import ptvsd # @nocommit - vscode python debugger
+ptvsd.enable_attach(address=('0.0.0.0', 3000))
+ptvsd.wait_for_attach()
 
 tx_point = [-75.5376148223877, 39.16653673334675]
 rx_point = [-75.5691146850586, 39.159016668347725]
@@ -146,3 +153,67 @@ class ElevationProfileTestCase(TestCase):
         link.srid = 4326
         pts, count, bounds, link = getLidarPointsAroundLink(path, link, 3857, 5, num_samples=MAXIMUM_NUM_POINTS_RETURNED)
         self.assertTrue(count > 10)
+
+class LidarEngineTestCase(TestCase):
+
+    def lidar_engine_rename_sources_workflow(self, s_year, e_year, source_name, expected_rename):
+        with mock.patch('mmwave.lidar_utils.lidar_engine_queries.get_collection_years_for_project_id') as query_mock:
+            query_mock.return_value = (s_year, e_year)
+            rename = LidarEngine._renameSource(source_name)
+            self.assertEqual(expected_rename, rename)
+
+    def test_GetSourcesTwoYears(self):
+        self.lidar_engine_rename_sources_workflow(
+            None,
+            None,
+            'USGS_LPS_CA_LosAngeles_2016_LAS_2018',
+            'USGS_LPS_CA_LosAngeles (Collected 2016-2018)'
+        )
+
+    def test_GetSourcesOneYearSameYears(self):
+        self.lidar_engine_rename_sources_workflow(
+            '2009',
+            '2009',
+            'MS_MSDeltaYahoo-Phasel_2009',
+            'MS_MSDeltaYahoo-Phasel (Collected 2009)',
+        )
+
+    def test_GetSourcesOneYearDifferentYears(self):
+        self.lidar_engine_rename_sources_workflow(
+            '2009',
+            '2010',
+            'MS_MSDeltaYahoo-Phasel_2009',
+            'MS_MSDeltaYahoo-Phasel (Collected 2009-2010)'
+        )
+
+    def test_GetSourcesOneYearNoDatabaseInfo(self):
+        self.lidar_engine_rename_sources_workflow(
+            None,
+            None,
+            'MS_MSDeltaYahoo-Phasel_2009',
+            'MS_MSDeltaYahoo-Phasel (Collected 2009)'
+        )
+
+    def test_GetSourcesNoYearsDatabaseInfoExistsSameYears(self):
+        self.lidar_engine_rename_sources_workflow(
+            '2009',
+            '2009',
+            'IA_FullState',
+            'IA_FullState (Collected 2009)'
+        )
+
+    def test_GetSourcesNoYearsDatabaseInfoExistsDifferentYears(self):
+        self.lidar_engine_rename_sources_workflow(
+            '2009',
+            '2010',
+            'IA_FullState',
+            'IA_FullState (Collected 2009-2010)'
+        )
+
+    def test_GetSourcesNoYearsNoDatabaseInfo(self):
+        self.lidar_engine_rename_sources_workflow(
+            None,
+            None,
+            'IA_FullState',
+            'IA_FullState'
+        )

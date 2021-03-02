@@ -101,8 +101,10 @@ export function createSupplementaryPointsForCircle(geojson) {
       index < vertices.length;
       index += Math.round(vertices.length / 4)
     ) {
+      const vertex = createVertex(properties.id, vertices[index], `0.${index}`, false);
+      vertex.properties.handle = 'true';
       supplementaryPoints.push(
-        createVertex(properties.id, vertices[index], `0.${index}`, false),
+        vertex
       );
     }
     return supplementaryPoints;

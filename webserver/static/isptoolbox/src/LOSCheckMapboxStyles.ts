@@ -78,8 +78,6 @@ export const LOSCheckMapboxStyles = [
             'all',
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
-            ['!has', 'user_largeQuery'],
-            ['!has', 'user_isInclude'],
         ],
         layout: {
             'line-cap': 'round',

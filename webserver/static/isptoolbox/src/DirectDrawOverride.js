@@ -1,6 +1,6 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
 import { createSupplementaryPointsForCircle, createGeoJSONCircle, lineDistance } from './RadiusModeUtils.js';
-import { moveFeatures, createSupplementaryPoints, Constants } from 'mapbox-gl-draw-circle';
+import { moveFeatures, createSupplementaryPoints, Constants, constrainFeatureMovement } from 'mapbox-gl-draw-circle';
 
 export function OverrideDirect() {
     const direct_select = MapboxDraw.modes.direct_select;

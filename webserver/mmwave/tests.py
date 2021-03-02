@@ -12,10 +12,6 @@ import mmwave.lidar_utils.lidar_engine_queries
 
 import unittest.mock as mock
 
-import ptvsd # @nocommit - vscode python debugger
-ptvsd.enable_attach(address=('0.0.0.0', 3000))
-ptvsd.wait_for_attach()
-
 tx_point = [-75.5376148223877, 39.16653673334675]
 rx_point = [-75.5691146850586, 39.159016668347725]
 

@@ -89,9 +89,6 @@ export function RadiusMode() {
         // create custom feature for radius circlemarker
         const center = geojson.geometry.coordinates[0];
     
-        // NOTE: CUSTOM MINIMUM DISTANCE FOR WISP TARGETING APPLICATION - IF YOU NEED
-        // A SMALLER MINIMUM SIZE PLEASE DUPLICATE THIS FILE AND REPLACE THE LINE
-        // BELOW
         const radiusInKm = Math.max(lineDistance(geojson, 'K'), mode.minRadius);
         const circleFeature = createGeoJSONCircle(center, radiusInKm, state.line.id);
         circleFeature.properties.meta = 'radius';
@@ -123,6 +120,7 @@ export function RadiusMode() {
                 },
                 properties: {
                     radius: lineDistance(lineGeoJson) * 1000,
+                    isCircle: true,
                 },
                 id: state.line.id,
             };
@@ -183,7 +181,7 @@ function getInstructionMessage(state) {
 
 
 
-function lineDistance(lineFeature, unit = 'K') {
+export function lineDistance(lineFeature, unit = 'K') {
     const lat1 = lineFeature.geometry.coordinates[0][1];
     const lat2 = lineFeature.geometry.coordinates[1][1];
     const lon1 = lineFeature.geometry.coordinates[0][0];

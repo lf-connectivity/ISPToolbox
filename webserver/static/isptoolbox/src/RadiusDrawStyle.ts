@@ -46,7 +46,6 @@ export const RadiusDrawStyle = [
       ['==', 'meta', 'vertex'],
       ['==', '$type', 'Point'],
       ['!=', 'mode', 'static'],
-      ['==', 'handles', 'true']
     ],
     paint: {
       'circle-radius': 7,
@@ -62,7 +61,6 @@ export const RadiusDrawStyle = [
       ['==', 'meta', 'vertex'],
       ['==', '$type', 'Point'],
       ['!=', 'mode', 'static'],
-      ['==', 'handles', 'true'],
     ],
     paint: {
       'circle-radius': 6,

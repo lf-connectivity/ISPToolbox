@@ -10,7 +10,10 @@
   },
   "author": "ISP Toolbox Team",
   "license": "Facebook Copyright 2020",
-  "dependencies": {},
+  "dependencies": {
+    "@mapbox/geojson-extent": "^1.0.0",
+    "mapbox-gl-draw-circle": "file:../mapbox-gl-draw-circle"
+  },
   "devDependencies": {
     "@types/mapbox-gl": "^2.0.0",
     "@types/jquery": "^3.5.5",

@@ -1,3 +1,5 @@
+import {Constants} from 'mapbox-gl-draw-circle';
+const extent = require('@mapbox/geojson-extent');
 // create a circle-like polygon given a center point and radius
 // https://stackoverflow.com/questions/37599561/drawing-a-circle-with-the-radius-in-miles-meters-with-mapbox-gl-js/39006388#39006388
 export function createGeoJSONCircle(center, radiusInKm, parentId, points = 64) {
@@ -53,10 +55,40 @@ function createVertex(parentId, coordinates, path, selected) {
         coordinates,
       },
     };
+}
+export function lineDistance(coord1, coord2, unit = 'K') {
+  const lat1 = coord1[1];
+  const lat2 = coord2[1];
+  const lon1 = coord1[0];
+  const lon2 = coord2[0];
+
+  if (lat1 == lat2 && lon1 == lon2) {
+    return 0;
+  } else {
+    var radlat1 = (Math.PI * lat1) / 180;
+    var radlat2 = (Math.PI * lat2) / 180;
+    var theta = lon1 - lon2;
+    var radtheta = (Math.PI * theta) / 180;
+    var dist =
+      Math.sin(radlat1) * Math.sin(radlat2) +
+      Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    if (dist > 1) {
+      dist = 1;
+    }
+    dist = Math.acos(dist);
+    dist = (dist * 180) / Math.PI;
+    dist = dist * 60 * 1.1515;
+    if (unit == 'K') {
+      dist = dist * 1.609344;
+    }
+    if (unit == 'N') {
+      dist = dist * 0.8684;
+    }
+    return dist;
   }
+}
 
 export function createSupplementaryPointsForCircle(geojson) {
-    console.log(geojson);
     const {properties, geometry} = geojson;
 
     if (!properties.user_isCircle) {
@@ -74,4 +106,4 @@ export function createSupplementaryPointsForCircle(geojson) {
       );
     }
     return supplementaryPoints;
-  }
+}

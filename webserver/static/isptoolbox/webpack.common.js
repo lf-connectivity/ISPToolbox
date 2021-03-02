@@ -15,7 +15,10 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions : ['.tsx', '.ts', 'js'],
+        alias: {
+            'mapbox-gl-draw-circle': path.resolve(__dirname, '../mapbox-gl-draw-circle/'),
+        },
+        extensions : ['.js', '.jsx', '.ts', '.tsx'],
     },
     output : {
         filename: '[name].min.js',

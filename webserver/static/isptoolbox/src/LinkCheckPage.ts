@@ -1,7 +1,6 @@
 // Create new mapbox Map
 import * as MapboxGL from "mapbox-gl";
 
-import { isBeta } from './wireless_network.app.js';
 import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
 import { createLinkProfile, findOverlaps, findLidarObstructions, km2miles, m2ft, ft2m, calculateMaximumFresnelRadius } from './LinkCalcUtils';
@@ -24,12 +23,24 @@ import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } f
 import { Potree } from "./Potree.js";
 import { RadiusMode } from "./RadiusDrawMode.js";
 import {AccessPointTool} from "./AccessPointTool";
+import {
+    CircleMode,
+    DragCircleMode,
+    DirectMode,
+    SimpleSelectMode
+} from 'mapbox-gl-draw-circle';
 
 type HighChartsExtremesEvent = {
     min: number | undefined,
     max: number | undefined,
 }
-
+function isBeta() : boolean{
+    const contents = document.getElementById('los_beta')?.textContent;
+    if(typeof contents !== "string"){
+        return false
+    }
+    return JSON.parse(contents);
+}
 let potree = (window as any).Potree as null | typeof Potree;
 // @ts-ignore
 const THREE = window.THREE;
@@ -614,7 +625,7 @@ export class LinkCheckPage {
     }
 
     updateRadioLocation(update: any) {
-        if (update.features.length && update.features[0].properties.radius === undefined) {
+        if (update.features.length && update.features[0].properties.isCircle === undefined) {
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
             if (feat.properties.freq == undefined) {

@@ -11,7 +11,6 @@ export class AccessPointTool {
         this.map.on('draw.create', this.drawCreateCallback.bind(this));
     }
     drawCreateCallback({features} : any) {
-        console.log(createGeoJSONCircle);
         const feature = features[0];
         if (feature.properties.radius) {
             const newCircle = {

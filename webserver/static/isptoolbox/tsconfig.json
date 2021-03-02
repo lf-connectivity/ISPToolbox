@@ -6,6 +6,7 @@
       "target": "es2018",
       "jsx": "react",
       "strictNullChecks": true,
+      "moduleResolution": "node",
       "allowJs": true
     },
     "exclude" : [

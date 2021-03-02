@@ -6,7 +6,6 @@ from mmwave.lidar_utils.pdal_templates import (
 from mmwave.lidar_utils.LidarEngine import LidarEngine
 from django.contrib.gis.geos import Point, LineString, GEOSGeometry
 from mmwave.models import EPTLidarPointCloud
-import mmwave.lidar_utils.lidar_engine_queries
 
 import unittest.mock as mock
 
@@ -149,6 +148,7 @@ class ElevationProfileTestCase(TestCase):
         self.assertTrue(count > 10)
 
 class LidarEngineTestCase(TestCase):
+
 
     def lidar_engine_rename_sources_workflow(self, s_year, e_year, source_name, expected_rename):
         with mock.patch('mmwave.lidar_utils.lidar_engine_queries.get_collection_years_for_project_id') as query_mock:

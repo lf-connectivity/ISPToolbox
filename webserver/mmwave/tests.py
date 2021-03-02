@@ -147,8 +147,8 @@ class ElevationProfileTestCase(TestCase):
         pts, count, bounds, link = getLidarPointsAroundLink(path, link, 3857, 5, num_samples=MAXIMUM_NUM_POINTS_RETURNED)
         self.assertTrue(count > 10)
 
-class LidarEngineTestCase(TestCase):
 
+class LidarEngineTestCase(TestCase):
 
     def lidar_engine_rename_sources_workflow(self, s_year, e_year, source_name, expected_rename):
         with mock.patch('mmwave.lidar_utils.lidar_engine_queries.get_collection_years_for_project_id') as query_mock:

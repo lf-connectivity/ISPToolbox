@@ -3,9 +3,7 @@ from .tasks import getElevationProfile, MAXIMUM_NUM_POINTS_RETURNED
 from mmwave.lidar_utils.pdal_templates import (
     getLidarPointsAroundLink, takeMaxHeightAtDistance
 )
-from mmwave.lidar_utils.LidarEngine import (
-    LidarEngine, LIDAR_RESOLUTION_DEFAULTS, LidarResolution
-)
+from mmwave.lidar_utils.LidarEngine import LidarEngine
 from django.contrib.gis.geos import Point, LineString, GEOSGeometry
 from mmwave.models import EPTLidarPointCloud
 import mmwave.lidar_utils.lidar_engine_queries

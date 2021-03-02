@@ -1,7 +1,6 @@
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
 from enum import IntEnum
-from django.db import connections
 from django.contrib.gis.geos import MultiLineString, LineString, Point
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat

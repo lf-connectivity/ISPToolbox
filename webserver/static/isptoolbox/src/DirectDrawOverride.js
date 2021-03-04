@@ -2,6 +2,11 @@ import { renderLinkEnds } from './LinkDrawMode.js';
 import { createSupplementaryPointsForCircle, createGeoJSONCircle, lineDistance } from './RadiusModeUtils.js';
 import { moveFeatures, createSupplementaryPoints, Constants, constrainFeatureMovement } from 'mapbox-gl-draw-circle';
 
+/**
+ * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
+ * 
+ * By overwritting some of the draw methods we can get the behavior we need
+ */
 export function OverrideDirect() {
     const direct_select = MapboxDraw.modes.direct_select;
     const old_toDisplayFeatures = MapboxDraw.modes.direct_select.toDisplayFeatures;
@@ -32,7 +37,6 @@ export function OverrideDirect() {
             const movedVertex = [e.lngLat.lng, e.lngLat.lat];
             const radius = lineDistance(center, movedVertex, 'K');
             const circleFeature = createGeoJSONCircle(center, radius, '0');
-            // $FlowFixMe
             state.feature.incomingCoords(circleFeature.geometry.coordinates);
             state.feature.properties.radiusInKm = radius;
         } else {

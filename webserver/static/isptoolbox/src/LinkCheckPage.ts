@@ -625,6 +625,8 @@ export class LinkCheckPage {
     }
 
     updateRadioLocation(update: any) {
+        // Filter out empty updates or circle feature updates
+        // TODO (achongfb): modularize this into a PTPLink Class and APClass
         if (update.features.length && update.features[0].properties.isCircle === undefined) {
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;

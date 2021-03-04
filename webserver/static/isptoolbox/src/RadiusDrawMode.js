@@ -162,9 +162,7 @@ function addDrawInstructions(state, geojson, display) {
             };
             display(point);
         }
-    } catch {
-        const _a = 1 + 1; // kekw
-    }
+    } catch {}
 }
 
 function getInstructionMessage(state) {

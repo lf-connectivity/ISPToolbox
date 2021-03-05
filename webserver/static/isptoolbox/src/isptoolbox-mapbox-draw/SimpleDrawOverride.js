@@ -1,6 +1,6 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
 import { createSupplementaryPointsForCircle } from './RadiusModeUtils.js';
-import { moveFeatures } from 'mapbox-gl-draw-circle';
+export const moveFeatures = require('@mapbox/mapbox-gl-draw/src/lib/move_features');
 
 export function OverrideSimple() {
   const simple_select = MapboxDraw.modes.simple_select;

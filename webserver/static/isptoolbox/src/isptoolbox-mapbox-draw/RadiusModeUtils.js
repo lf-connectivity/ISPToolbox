@@ -1,5 +1,3 @@
-import {Constants} from 'mapbox-gl-draw-circle';
-const extent = require('@mapbox/geojson-extent');
 // create a circle-like polygon given a center point and radius
 // https://stackoverflow.com/questions/37599561/drawing-a-circle-with-the-radius-in-miles-meters-with-mapbox-gl-js/39006388#39006388
 export function createGeoJSONCircle(center, radiusInKm, parentId, points = 64) {

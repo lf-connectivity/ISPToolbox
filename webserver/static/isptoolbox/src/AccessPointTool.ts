@@ -1,5 +1,5 @@
 import * as MapboxGL from "mapbox-gl";
-import { createGeoJSONCircle } from "./RadiusModeUtils.js";
+import { createGeoJSONCircle } from "./isptoolbox-mapbox-draw/RadiusModeUtils.js";
 
 export class AccessPointTool {
     map: MapboxGL.Map;

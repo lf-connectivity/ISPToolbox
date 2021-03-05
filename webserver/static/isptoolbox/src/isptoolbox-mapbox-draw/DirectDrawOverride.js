@@ -1,6 +1,9 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
 import { createSupplementaryPointsForCircle, createGeoJSONCircle, lineDistance } from './RadiusModeUtils.js';
-import { moveFeatures, createSupplementaryPoints, Constants, constrainFeatureMovement } from 'mapbox-gl-draw-circle';
+import * as Constants from '@mapbox/mapbox-gl-draw/src/constants';
+import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
+import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_feature_movement';
+import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_supplementary_points';
 
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
@@ -9,7 +12,6 @@ import { moveFeatures, createSupplementaryPoints, Constants, constrainFeatureMov
  */
 export function OverrideDirect() {
     const direct_select = MapboxDraw.modes.direct_select;
-    const old_toDisplayFeatures = MapboxDraw.modes.direct_select.toDisplayFeatures;
     direct_select.toDisplayFeatures = function (state, geojson, push) {
         if (state.featureId === geojson.properties.id) {
             geojson.properties.active = Constants.activeStates.ACTIVE;

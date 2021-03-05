@@ -49,8 +49,8 @@ const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];
 const DEFAULT_RADIO_HEIGHT = 60;
 
 const SMALLEST_UPDATE = 1e-5;
-const LEFT_NAVICATION_KEYS = ['ArrowLeft', 'Left', 'A'];
-const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D'];
+const LEFT_NAVIGATION_KEYS = ['ArrowLeft', 'Left', 'A', 'a'];
+const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D', 'd'];
 
 export enum UnitSystems {
     US = 'US',
@@ -81,7 +81,6 @@ export class LinkCheckPage {
     aAbout1: any;
     aAbout2: any;
     spacebarCallback: any;
-    fresnelNavigationCallback: any;
 
     clippingVolume: any;
     linkLine: any;
@@ -102,6 +101,8 @@ export class LinkCheckPage {
 
     datasets: Map<LOSWSHandlers, Array<string>>;
     link_status : LinkStatus;
+
+    navigationDelta: number;
 
     // variables for handling offsets for hover point volume
     oldCamera: any;
@@ -568,6 +569,24 @@ export class LinkCheckPage {
             this.animationWasPlaying = this.animationPlaying;
             this.hoverUpdated = false;
         });
+
+        // Fresnel navigation keyboard event listener
+        if (isBeta()) {
+            window.addEventListener('keydown', (event: any) => {
+                if (this.currentView === '3d') {
+                    if (LEFT_NAVIGATION_KEYS.includes(event.key)) {
+                        this.linkProfileFresnelPosition -= this.navigationDelta;
+                        this.fitFresnelPositionToBounds();
+                        this.moveLocation3DView({x: this.linkProfileFresnelPosition, y:0});
+                    }
+                    else if (RIGHT_NAVIGATION_KEYS.includes(event.key)) {
+                        this.linkProfileFresnelPosition += this.navigationDelta;
+                        this.fitFresnelPositionToBounds();
+                        this.moveLocation3DView({x: this.linkProfileFresnelPosition, y:0});
+                    }
+                }
+            });
+        }
     };
 
     removeLinkHalo: (features: Array<MapboxGL.MapboxGeoJSONFeature>) => void = (features) => {
@@ -913,6 +932,7 @@ export class LinkCheckPage {
                 }
                 this.animationPlaying = !this.animationPlaying;
             };
+
             this.spacebarCallback = (event: any) => {
                 var key = event.which || event.keyCode;
                 if (key === 32 && this.currentView === '3d') {
@@ -921,26 +941,47 @@ export class LinkCheckPage {
                 }
             };
 
-            let fresnelNavigationCallback = (event: any) => {
-
-            };
             window.addEventListener('keydown', this.spacebarCallback);
+
             $('#3d-pause-play').click(animationClickCallback);
         }
     }
 
     /*
     Sets fresnel position to somewhere between the min and max value of x-axis,
-    depending on current zoom.
+    depending on current zoom. Also tries to round fresnel position to prevent
+    floating point positions.
     */
     fitFresnelPositionToBounds() {
-        let xMin = this.link_chart.xAxis[0].min;
-        let xMax = this.link_chart.xAxis[0].max;
+        // Round bounds to the nearest integer within the bound.
+        // Bound min and max by either the zoomed in portion or the overall
+        // fresnel cone.
+        let xMin = Math.max(Math.ceil(this.link_chart.xAxis[0].min), 0);
+        let xMax = Math.min(Math.floor(this.link_chart.xAxis[0].max), this._elevation.length);
+
+        // Round fresnel position first before applying bounds calculations
+        this.linkProfileFresnelPosition = Math.round(this.linkProfileFresnelPosition);
         if (this.linkProfileFresnelPosition < xMin) {
             this.linkProfileFresnelPosition = xMin;
         }
         else if (this.linkProfileFresnelPosition > xMax) {
             this.linkProfileFresnelPosition = xMax;
+        }
+    }
+
+    /*
+    Updates how far along the fresnel zone we should go on one keypress event.
+    Smaller distances means more units (1 x-axis unit distance is smaller), while
+    max distance should mean less units (1 unit is minimum)
+    */
+    updateNavigationDelta() {
+        // Less than 1 mile = 8 units
+        if (this._link_distance < 1600) {
+            this.navigationDelta = 8;
+        }
+        else {
+            // Minimal delta speed is 1
+            this.navigationDelta = Math.max(Math.round(17000 / this._link_distance), 1);
         }
     }
 
@@ -1117,6 +1158,7 @@ export class LinkCheckPage {
                         const scene = window.viewer.scene;
                         scene.pointclouds.forEach((cld: any) => { cld.material.elevationRange = [response.bb[4], response.bb[5]] });
                     }
+                    this.updateNavigationDelta();
                 }
             }
         } else {

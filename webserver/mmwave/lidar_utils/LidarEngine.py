@@ -147,6 +147,8 @@ class LidarEngine:
     def __calculateLinkDistance(self, link=None):
         if link is None:
             link = self.link
+        if link.empty:
+            return 0
         return geopy_distance(lonlat(link[0][0], link[0][1]), lonlat(link[1][0], link[1][1])).meters
 
     def __helperSortingFunction(self, profile):

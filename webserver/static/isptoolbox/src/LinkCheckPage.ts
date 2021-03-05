@@ -12,7 +12,7 @@ import {
     createHoverVoume, calculateCameraOffsetFromAnimation, updateControlPoints
 } from './LinkOrbitAnimation';
 import { LinkMode, OverrideSimple, OverrideDirect } from './DrawingModes.js';
-import { calculateLookVector } from './HoverMoveLocation3DView';
+import { calculateLookVector, calculateLinkProfileFresnelPosition } from './HoverMoveLocation3DView';
 import LidarAvailabilityLayer from './availabilityOverlay';
 import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
 import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
@@ -49,6 +49,8 @@ const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];
 const DEFAULT_RADIO_HEIGHT = 60;
 
 const SMALLEST_UPDATE = 1e-5;
+const LEFT_NAVICATION_KEYS = ['ArrowLeft', 'Left', 'A'];
+const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D'];
 
 export enum UnitSystems {
     US = 'US',
@@ -79,6 +81,7 @@ export class LinkCheckPage {
     aAbout1: any;
     aAbout2: any;
     spacebarCallback: any;
+    fresnelNavigationCallback: any;
 
     clippingVolume: any;
     linkLine: any;
@@ -93,6 +96,7 @@ export class LinkCheckPage {
     radio_names: [string, string];
 
     hover3dDot: any;
+    linkProfileFresnelPosition: number;
     currentMaterial: any;
     selectedFeatureID: string | null;
 
@@ -548,7 +552,14 @@ export class LinkCheckPage {
                         this.rx_loc_lidar,
                         this.getRadioHeightFromUI('0') + this._elevation[0], //tx_h
                         this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1] //rx_h
-                    );    
+                    );
+
+                    this.linkProfileFresnelPosition = calculateLinkProfileFresnelPosition(
+                        target,
+                        this.tx_loc_lidar,
+                        this.rx_loc_lidar,
+                        this._elevation.length
+                    );
                 }
             }
 
@@ -632,6 +643,8 @@ export class LinkCheckPage {
             location[0] += this.cameraOffset.x;
             location[1] += this.cameraOffset.y;
             location[2] += this.cameraOffset.z;
+
+            this.linkProfileFresnelPosition = x;
 
             // Stop Current Animation
             if (this.currentView === '3d') {
@@ -728,6 +741,15 @@ export class LinkCheckPage {
             // @ts-ignore
             source.setData({ 'type': "FeatureCollection", "features": [] });
         }
+
+        // beta feature for keyboard fresnel navigation: hide only during animation
+        // start. Otherwise, do the normal thing and hide it.
+        if (!isBeta()) {
+            this.hideHover3DDot();
+        }
+    }
+
+    hideHover3DDot() {
         // @ts-ignore
         let scene = window.viewer.scene;
         // Add LOS Link Line
@@ -735,7 +757,7 @@ export class LinkCheckPage {
             scene.scene.remove(this.hover3dDot);
         }
         this.hover3dDot = null;
-    }
+    };
 
     renderNewLinkProfile() {
         // Check if we can update the chart
@@ -866,13 +888,28 @@ export class LinkCheckPage {
             }
             const animationClickCallback = () => {
                 if (this.animationPlaying) {
-                    this.globalLinkAnimation.pause();
-                    $('#pause-button-3d').addClass('d-none');
-                    $('#play-button-3d').removeClass('d-none');
+                    // beta feature: show the dot again.
+                    if (isBeta()) {
+                        this.fitFresnelPositionToBounds();
+                        this.moveLocation3DView({x: this.linkProfileFresnelPosition, y:0});
+
+                        // funny hack to get last line of code to toggle correctly
+                        this.animationPlaying = true;
+                    }
+                    else {
+                        this.globalLinkAnimation.pause();
+                        $('#pause-button-3d').addClass('d-none');
+                        $('#play-button-3d').removeClass('d-none');
+                    }
                 } else {
                     this.globalLinkAnimation.play(true);
                     $('#pause-button-3d').removeClass('d-none');
                     $('#play-button-3d').addClass('d-none');
+
+                    // beta feature: hide dot only when animation plays.
+                    if (isBeta()) {
+                        this.hideHover3DDot();
+                    }
                 }
                 this.animationPlaying = !this.animationPlaying;
             };
@@ -883,11 +920,29 @@ export class LinkCheckPage {
                     animationClickCallback();
                 }
             };
+
+            let fresnelNavigationCallback = (event: any) => {
+
+            };
             window.addEventListener('keydown', this.spacebarCallback);
             $('#3d-pause-play').click(animationClickCallback);
         }
     }
 
+    /*
+    Sets fresnel position to somewhere between the min and max value of x-axis,
+    depending on current zoom.
+    */
+    fitFresnelPositionToBounds() {
+        let xMin = this.link_chart.xAxis[0].min;
+        let xMax = this.link_chart.xAxis[0].max;
+        if (this.linkProfileFresnelPosition < xMin) {
+            this.linkProfileFresnelPosition = xMin;
+        }
+        else if (this.linkProfileFresnelPosition > xMax) {
+            this.linkProfileFresnelPosition = xMax;
+        }
+    }
 
     addLink(tx: any, rx: any, tx_h: any, rx_h: any) {
         this.updateLinkHeight = (tx_h: any, rx_h: any, start_animation: boolean = false) => {
@@ -905,7 +960,6 @@ export class LinkCheckPage {
         }
         this.updateLinkHeight(tx_h, rx_h, true);
     }
-
 
 
     updateLidarRender(name: Array<string>, urls: Array<string>, bb: Array<number>, tx: any, rx: any, tx_h: any, rx_h: any) {

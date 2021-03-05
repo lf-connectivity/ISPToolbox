@@ -857,6 +857,7 @@ export class LinkCheckPage {
             window.viewer.scene.addCameraAnimation(this.globalLinkAnimation);
             this.globalLinkAnimation.setDuration(animationDuration);
             this.globalLinkAnimation.setVisible(false);
+            this.globalLinkAnimation.setInterpolateControlPoints(true);
             if (start_animation) {
                 this.animationPlaying = true;
                 this.globalLinkAnimation.play(true);

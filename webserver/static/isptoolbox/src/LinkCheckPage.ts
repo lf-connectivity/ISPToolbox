@@ -589,11 +589,13 @@ export class LinkCheckPage {
             window.addEventListener('keydown', (event: any) => {
                 if (this.currentView === '3d') {
                     if (LEFT_NAVIGATION_KEYS.includes(event.key)) {
+                        this.toggleLinkProfileHighlight(this.linkProfileFresnelPosition, false);
                         this.linkProfileFresnelPosition -= this.navigationDelta;
                         this.fitFresnelPositionToBounds();
                         this.moveLocation3DView({x: this.linkProfileFresnelPosition, y:0});
                     }
                     else if (RIGHT_NAVIGATION_KEYS.includes(event.key)) {
+                        this.toggleLinkProfileHighlight(this.linkProfileFresnelPosition, false);
                         this.linkProfileFresnelPosition += this.navigationDelta;
                         this.fitFresnelPositionToBounds();
                         this.moveLocation3DView({x: this.linkProfileFresnelPosition, y:0});
@@ -673,6 +675,10 @@ export class LinkCheckPage {
             const rx_h = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
             const pos = x / this._elevation.length;
             const { location, lookAt } = calculateLookVector(this.tx_loc_lidar, tx_h, this.rx_loc_lidar, rx_h, pos);
+
+            if (isBeta()) {
+                this.toggleLinkProfileHighlight(x, true);
+            }
 
             // Factor in camera offset
             location[0] += this.cameraOffset.x;
@@ -783,6 +789,18 @@ export class LinkCheckPage {
             this.hideHover3DDot();
         }
     }
+
+    /*
+    Toggles whether or not the selected x-axis point in the link chart is highlighted or not.
+    */
+   toggleLinkProfileHighlight(x: number, visible: boolean) {
+        let state = visible ? 'hover' : undefined;
+
+        // Set the hover state over both the fresnel cone chart
+        // and the LOS chart in Highchart.
+        this.link_chart.series[3].data[x].setState(state);
+        this.link_chart.series[2].data[x].setState(state);
+   }
 
     hideHover3DDot() {
         // @ts-ignore

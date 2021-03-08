@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from workspace.models import Network
+from workspace.models import Network, AccessPointLocation
 from workspace import serializers
 from workspace.forms import NetworkForm
 from django.http import HttpResponseRedirect
@@ -9,6 +9,7 @@ from django.db.models import Count
 from rest_framework import generics
 from django.contrib.auth.forms import AuthenticationForm
 from IspToolboxAccounts.forms import IspToolboxUserCreationForm
+from rest_framework import generics, mixins
 
 
 class DefaultWorkspaceView(View):
@@ -68,9 +69,33 @@ class EditNetworkView(View):
 
 
 # REST Views
-class NetworkDetail(generics.RetrieveUpdateDestroyAPIView):
+class NetworkDetail(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
     serializer_class = serializers.NetworkSerializer
 
     def get_queryset(self):
         user = self.request.user
         return Network.objects.filter(owner=user)
+    
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+class AccessPointREST(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+    serializer_class = serializers.AccessPointSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return AccessPointLocation.objects.filter(owner=user)
+    
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)

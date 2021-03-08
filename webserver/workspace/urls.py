@@ -17,4 +17,6 @@ urlpatterns = [
     path('accounts/sign-in/', auth_views.LoginView.as_view(template_name='workspace/pages/default.html'), name="login_view"),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout_view"),
     path('accounts/create/', CreateAccountView.as_view(), name="create_account_view"),
+    path('workspace/api/network/', views.NetworkDetail.as_view()),
+    path('workspace/api/ap-los/', views.AccessPointREST.as_view()),
 ]

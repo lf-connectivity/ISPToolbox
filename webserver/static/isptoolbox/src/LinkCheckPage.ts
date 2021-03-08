@@ -466,6 +466,10 @@ export class LinkCheckPage {
                     $('#map').addClass('d-none');
                     $('#3d-controls').removeClass('d-none');
                     this.currentView = '3d';
+
+                    if (!this.animationPlaying) {
+                        this.highlightCurrentPosition(true);
+                    }
                 }
             });
             $('#map-view-btn').click(() => {
@@ -481,6 +485,7 @@ export class LinkCheckPage {
                     }
                     $('#3d-controls').addClass('d-none');
                     this.currentView = 'map';
+                    this.highlightCurrentPosition(false);
                 }
             });
         });
@@ -589,16 +594,16 @@ export class LinkCheckPage {
             window.addEventListener('keydown', (event: any) => {
                 if (this.currentView === '3d') {
                     if (LEFT_NAVIGATION_KEYS.includes(event.key)) {
-                        this.toggleLinkProfileHighlight(this.linkProfileFresnelPosition, false);
+                        this.highlightCurrentPosition(false);
                         this.linkProfileFresnelPosition -= this.navigationDelta;
                         this.fitFresnelPositionToBounds();
-                        this.moveLocation3DView({x: this.linkProfileFresnelPosition, y:0});
+                        this.moveLocation3DView();
                     }
                     else if (RIGHT_NAVIGATION_KEYS.includes(event.key)) {
-                        this.toggleLinkProfileHighlight(this.linkProfileFresnelPosition, false);
+                        this.highlightCurrentPosition(false);
                         this.linkProfileFresnelPosition += this.navigationDelta;
                         this.fitFresnelPositionToBounds();
-                        this.moveLocation3DView({x: this.linkProfileFresnelPosition, y:0});
+                        this.moveLocation3DView();
                     }
                 }
             });
@@ -669,16 +674,14 @@ export class LinkCheckPage {
         }
     };
 
-    moveLocation3DView({ x, y }: { x: number, y: number }) {
+    moveLocation3DView({ x, y }: { x: number, y: number } = {x: this.linkProfileFresnelPosition, y: 0}) {
         try {
             const tx_h = this.getRadioHeightFromUI('0') + this._elevation[0];
             const rx_h = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
             const pos = x / this._elevation.length;
             const { location, lookAt } = calculateLookVector(this.tx_loc_lidar, tx_h, this.rx_loc_lidar, rx_h, pos);
 
-            if (isBeta()) {
-                this.toggleLinkProfileHighlight(x, true);
-            }
+            this.highlightCurrentPosition(true);
 
             // Factor in camera offset
             location[0] += this.cameraOffset.x;
@@ -791,16 +794,18 @@ export class LinkCheckPage {
     }
 
     /*
-    Toggles whether or not the selected x-axis point in the link chart is highlighted or not.
+    Toggles whether or not the current x-axis point is highlighted in the link profile chart.
     */
-   toggleLinkProfileHighlight(x: number, visible: boolean) {
-        let state = visible ? 'hover' : undefined;
+    highlightCurrentPosition(visible: boolean) {
+        if (isBeta()) {
+            let state = visible ? 'hover' : undefined;
 
-        // Set the hover state over both the fresnel cone chart
-        // and the LOS chart in Highchart.
-        this.link_chart.series[3].data[x].setState(state);
-        this.link_chart.series[2].data[x].setState(state);
-   }
+            // Set the hover state over both the fresnel cone chart
+            // and the LOS chart in Highchart.
+            this.link_chart.series[3].data[this.linkProfileFresnelPosition].setState(state);
+            this.link_chart.series[2].data[this.linkProfileFresnelPosition].setState(state);
+        }
+    }
 
     hideHover3DDot() {
         // @ts-ignore
@@ -857,14 +862,22 @@ export class LinkCheckPage {
             }
         }
         if (this._elevation != null && this.updateLinkHeight != null && update3DView) {
+            if (isBeta()) {
+                this.highlightCurrentPosition(false);
+            }
+
             const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
             const rx_hgt = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
-            this.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);
+            this.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);            
             if (this._lidar != null) {
                 this.link_chart.yAxis[0].update({
                     min: Math.min(...[...this._lidar, tx_hgt, rx_hgt]),
                     max: Math.max(...[...this._lidar, tx_hgt, rx_hgt])
                 });
+            }
+
+            if (isBeta()) {
+                this.moveLocation3DView();
             }
         }
     }
@@ -944,7 +957,7 @@ export class LinkCheckPage {
                     // beta feature: show the dot again.
                     if (isBeta()) {
                         this.fitFresnelPositionToBounds();
-                        this.moveLocation3DView({x: this.linkProfileFresnelPosition, y:0});
+                        this.moveLocation3DView();
 
                         // funny hack to get last line of code to toggle correctly
                         this.animationPlaying = true;
@@ -959,8 +972,9 @@ export class LinkCheckPage {
                     $('#pause-button-3d').removeClass('d-none');
                     $('#play-button-3d').addClass('d-none');
 
-                    // beta feature: hide dot only when animation plays.
+                    // beta feature: hide dot and link profile highlight when animation plays.
                     if (isBeta()) {
+                        this.highlightCurrentPosition(false);
                         this.hideHover3DDot();
                     }
                 }
@@ -991,7 +1005,7 @@ export class LinkCheckPage {
         // Bound min and max by either the zoomed in portion or the overall
         // fresnel cone.
         let xMin = Math.max(Math.ceil(this.link_chart.xAxis[0].min), 0);
-        let xMax = Math.min(Math.floor(this.link_chart.xAxis[0].max), this._elevation.length);
+        let xMax = Math.min(Math.floor(this.link_chart.xAxis[0].max), this._elevation.length - 1);
 
         // Round fresnel position first before applying bounds calculations
         this.linkProfileFresnelPosition = Math.round(this.linkProfileFresnelPosition);

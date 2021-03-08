@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'dataUpdate',
     'isptoolbox_storage',
     'workspace',
+    'gis_data',
     # S3 Static File Storage
     'storages',
     # Social Auth
@@ -118,8 +119,8 @@ REST_FRAMEWORK = {
     'PAGINATE_BY': 10
 }
 
-SITE_ID = 2
-if 'POSTGRES_DB' in os.environ:
+SITE_ID = 1
+if PROD:
     SITE_ID = 3
 
 AUTHENTICATION_BACKENDS = (
@@ -246,6 +247,8 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+DATABASE_ROUTERS = ['gis_data.models.GISDataRouter']
 
 
 # Password validation

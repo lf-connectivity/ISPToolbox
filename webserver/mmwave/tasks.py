@@ -14,7 +14,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import traceback
 
-from mmwave.models import Msftcombined
+from gis_data.models import MsftBuildingOutlines
 from mmwave.lidar_utils.LidarEngine import (
         LidarEngine, LidarResolution, LIDAR_RESOLUTION_DEFAULTS,
         LIDAR_RESOLUTION_MAX_LINK_LENGTH, LidarEngineException
@@ -112,7 +112,7 @@ def getBuildingProfile(tx, rx):
     """
     link_profile, link = createLinkProfile(tx, rx)
     # Query Buildings between point A and B
-    buildings = Msftcombined.objects.using('gis_data').filter(geog__intersects=link).values('geog', 'gid').all()
+    buildings = MsftBuildingOutlines.objects.filter(geog__intersects=link).values('geog', 'gid').all()
 
     # Return list of building intersections with gid to indicate intersection
     building_profile = []

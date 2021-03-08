@@ -791,6 +791,7 @@ export class LinkCheckPage {
         if (!isBeta()) {
             this.hideHover3DDot();
         }
+        this.highlightCurrentPosition(true);
     }
 
     /*

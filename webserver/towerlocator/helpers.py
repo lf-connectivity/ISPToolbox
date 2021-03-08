@@ -56,7 +56,7 @@ def createCloudRFRequest(lat, lon, txh, rxh, rad):
         "col": 10,
         "rel": 90,
         "nf": -101,
-        "mat": 0.0
+        "mat": 0.01
     }
 
 

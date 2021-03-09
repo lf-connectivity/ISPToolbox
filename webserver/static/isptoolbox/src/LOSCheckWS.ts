@@ -60,6 +60,18 @@ class LOSCheckWS {
         this.connect();
     }
 
+    setConnectionStatus(connected: boolean){
+        const element = $('#los-check-connection-status');
+        const geocoder = $('#geocoder');
+        if(connected){
+            element.addClass('d-none');
+            geocoder.removeClass('d-none');
+        } else {
+            element.removeClass('d-none');
+            geocoder.addClass('d-none');
+        }
+    }
+
     connect(){
         const protocol = location.protocol !== 'https:' ? 'ws://' : 'wss://';
         const domain = location.protocol !== 'https:' ? location.host : 'isptoolbox.io';
@@ -67,12 +79,14 @@ class LOSCheckWS {
 
 
         this.ws.onclose = (e) => {
+            this.setConnectionStatus(false);
             setTimeout(()=> {
                 this.connect();
             }, 1000)
         }
 
         this.ws.onopen = (e) => {
+            this.setConnectionStatus(true);
             while(this.pendingRequests.length > 0) {
                 const msg = this.pendingRequests.pop();
                 if (typeof msg === 'string')

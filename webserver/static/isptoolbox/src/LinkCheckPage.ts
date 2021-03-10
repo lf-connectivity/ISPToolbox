@@ -717,10 +717,18 @@ export class LinkCheckPage {
                 scene.scene.remove(this.hover3dDot);
             }
 
-            this.hover3dDot = createHoverPoint(lookAt, [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h]);
+            this.hover3dDot = createHoverPoint(lookAt, [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h], this.isOverlapping());
+
             scene.scene.add(this.hover3dDot);
         } catch (err) {
         }
+    };
+
+    isOverlapping() {
+        return this.link_status.obstructions.some(interval => {
+            return this.linkProfileFresnelPosition >= interval[0] && 
+                   this.linkProfileFresnelPosition <= interval[1];
+        });
     };
 
     getRadioLocations() {

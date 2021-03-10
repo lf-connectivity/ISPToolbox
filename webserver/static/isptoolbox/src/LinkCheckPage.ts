@@ -141,6 +141,7 @@ export class LinkCheckPage {
 
         this.datasets = new Map();
 
+        this.linkProfileFresnelPosition = 0;
         this.oldCamera = null;
         this.animationWasPlaying = false;
         this.cameraOffset = new THREE.Vector3();
@@ -681,14 +682,14 @@ export class LinkCheckPage {
             const pos = x / this._elevation.length;
             const { location, lookAt } = calculateLookVector(this.tx_loc_lidar, tx_h, this.rx_loc_lidar, rx_h, pos);
 
-            this.highlightCurrentPosition(true);
-
             // Factor in camera offset
             location[0] += this.cameraOffset.x;
             location[1] += this.cameraOffset.y;
             location[2] += this.cameraOffset.z;
 
-            this.linkProfileFresnelPosition = x;
+            // Floating points might happen
+            this.linkProfileFresnelPosition = Math.floor(x);
+            this.highlightCurrentPosition(true);
 
             // Stop Current Animation
             if (this.currentView === '3d') {

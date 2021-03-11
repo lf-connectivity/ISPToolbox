@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 import uuid
 from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import Point
@@ -14,7 +14,7 @@ class Network(models.Model):
     )
     created_date = models.DateField(auto_now_add=True, editable=False)
     last_edited = models.DateField(auto_now_add=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     map_center = geo_models.PointField(default=Point(-97.03125, 36.59788913307022))
     zoom_level = models.FloatField(default=3.75)
 
@@ -58,10 +58,10 @@ class PTPLink(models.Model):
 
 class ISPCompany(models.Model):
     name = models.CharField(max_length=128)
-    employees = models.ManyToManyField(User, through='Employee')
+    employees = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Employee')
 
 
 class Employee(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     company = models.ForeignKey(ISPCompany, on_delete=models.CASCADE)
     date_joined = models.DateField()

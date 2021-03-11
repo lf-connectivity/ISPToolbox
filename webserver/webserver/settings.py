@@ -52,6 +52,8 @@ STATIC_URL = '/static/'
 INSTALLED_APPS = [
     # Async / Websockets
     'channels',
+    # IspToolbox User Accounts
+    'IspToolboxAccounts',
     # ISP Toolbox App
     'IspToolboxApp',
     # Django
@@ -67,7 +69,6 @@ INSTALLED_APPS = [
     'mmwave',
     'Overlay',
     'NetworkComparison',
-    'cms',
     'dataUpdate',
     'isptoolbox_storage',
     'workspace',
@@ -82,22 +83,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     # REST API
     'rest_framework',
-    # Wagtail CMS
-    "wagtail.contrib.search_promotions",
-    'wagtail.contrib.forms',
-    'wagtail.contrib.redirects',
-    'wagtail.embeds',
-    'wagtail.sites',
-    'wagtail.users',
-    'wagtail.snippets',
-    'wagtail.documents',
-    'wagtail.images',
-    'wagtail.search',
-    'wagtail.admin',
-    'wagtail.core',
     'django.contrib.humanize',
-    'modelcluster',
-    'taggit',
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_collect')
@@ -170,8 +156,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Wagtail CMS
-    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 CSP_INCLUDE_NONCE_IN = [
@@ -249,6 +233,7 @@ DATABASES = {
 }
 
 DATABASE_ROUTERS = ['gis_data.models.GISDataRouter']
+AUTH_USER_MODEL = "IspToolboxAccounts.User"
 
 
 # Password validation

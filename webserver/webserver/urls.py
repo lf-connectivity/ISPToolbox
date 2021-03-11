@@ -48,8 +48,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Health Check Endpoint
     path('elb-status/', views.HealthCheckView.as_view()),
-    path('login/', views.SocialLoginView.as_view(), name='login'),
-    path(r'accounts/', include('allauth.urls')),
     # Async Jobs
     path('gis/aoi/', views.index),
     path('gis/task/<str:task_id>/', views.TaskView.as_view(), name='task'),
@@ -104,7 +102,6 @@ urlpatterns = [
     path('demo/los-check/', LOSCheckDemo.as_view(), name='demo-los-check'),
     # CMS
     path('', HomepageRedirect.as_view()),
-    path('', include('cms.urls'))
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

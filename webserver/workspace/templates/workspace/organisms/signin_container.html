@@ -1,0 +1,18 @@
+<div id="signin_container" class="{% if showSignUp %}d-none{% endif %} container signup_container pt-3" style="max-width: 500px; display: flex; flex-direction: column;">
+    {% with logo_style='width: 350px;' %}
+        {% include "workspace/atoms/isptoolbox_svg.html" %}
+    {% endwith %}
+    <p> Empowering small, local ISPs - by Facebook</p>
+    <h4>Welcome back!</h4>
+    <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="rounded"
+        data-auto-logout-link="false" data-use-continue-as="true">
+    </div>
+    <form action="{% url 'login_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form py-3">
+        {% csrf_token %}
+        {{ sign_in_form }}
+        <input type="submit" value="Login">
+    </form>
+    <a id="no-email-sign-in" href="#">
+        <p>Don't have an ISP Toolbox account? Sign up</p>
+    </a>
+</div>

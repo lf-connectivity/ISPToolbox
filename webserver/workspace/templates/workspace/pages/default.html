@@ -36,10 +36,9 @@
             </div>
         </div>
     {% else %}
-        <div class="container">
-            <h1> Sign Up for ISP Toolbox Pro</h1>
-            <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true"></div>
-        </div>
+        {% include "workspace/organisms/signup_container.html" %}
+        {% include "workspace/organisms/signin_container.html" %}
+        <script src="{% static "login_signup.min.js" %}"> </script>
     {% endif %}
 </body>
 </html>

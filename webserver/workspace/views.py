@@ -7,11 +7,21 @@ from workspace.forms import NetworkForm
 from django.http import HttpResponseRedirect
 from django.db.models import Count
 from rest_framework import generics
+from django.contrib.auth.forms import AuthenticationForm
+from IspToolboxAccounts.forms import IspToolboxUserCreationForm
 
 
 class DefaultWorkspaceView(View):
-    def get(self, request):
-        return render(request, 'workspace/pages/default.html', {})
+    def get(self, request, **kwargs):
+        return render(
+            request,
+            'workspace/pages/default.html',
+            {
+                'showSignUp': True,
+                'sign_in_form': AuthenticationForm,
+                'sign_up_form': IspToolboxUserCreationForm,
+            }
+        )
 
 
 class DefaultNetworkView(View):

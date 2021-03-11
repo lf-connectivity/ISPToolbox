@@ -4,7 +4,8 @@ module.exports = {
     entry: {
         wireless_network: '/src/wireless_network.app.js',
         market_evaluator: '/src/marketEvalTest.ts',
-        dsm_app: '/src/apps/IspToolboxDSMApp.ts'
+        dsm_app: '/src/apps/IspToolboxDSMApp.ts',
+        login_signup: '/src/login/login_signin.ts',
     },
     module : {
         rules : [

@@ -1,16 +1,29 @@
 <div class="account-dropdown pr-5">
 {% if user.is_authenticated %}
+    {% if user.socialaccount_set.all.0.get_avatar_url %}
     <img class="profile-picture mr-3" src="{{ user.socialaccount_set.all.0.get_avatar_url }}" />
+    {% else %}
+    <svg class="mr-3 my-auto" width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="15.5" cy="15.5" r="15.5" fill="#C2D8EC"/>
+        <path d="M9.73682 21.0482C9.73682 17.9575 12.2422 15.4521 15.3329 15.4521H16.4521C19.5428 15.4521 22.0482 17.9575 22.0482 21.0482" stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15.8924 15.4521C17.7468 15.4521 19.2501 13.9489 19.2501 12.0945C19.2501 10.2401 17.7468 8.73682 15.8924 8.73682C14.0381 8.73682 12.5348 10.2401 12.5348 12.0945C12.5348 13.9489 14.0381 15.4521 15.8924 15.4521Z" stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    {% endif %}
     <h5 class="nav-item mr-3 my-auto">
-        {{user.first_name}}
+        {% firstof user.first_name user.email user.username %}
     </h5>
+    <a href="{% url 'logout_view' %}?next={% url 'isptoolbox_pro_home'%}">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal" id="logout-btn-nav">
+            Logout
+        </button>
+    </a>
 {% else %}
     <svg class="mr-3 my-auto" width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="15.5" cy="15.5" r="15.5" fill="#C2D8EC"/>
         <path d="M9.73682 21.0482C9.73682 17.9575 12.2422 15.4521 15.3329 15.4521H16.4521C19.5428 15.4521 22.0482 17.9575 22.0482 21.0482" stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M15.8924 15.4521C17.7468 15.4521 19.2501 13.9489 19.2501 12.0945C19.2501 10.2401 17.7468 8.73682 15.8924 8.73682C14.0381 8.73682 12.5348 10.2401 12.5348 12.0945C12.5348 13.9489 14.0381 15.4521 15.8924 15.4521Z" stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal" id="login-btn-nav">
         Login
     </button>
 {% endif %}

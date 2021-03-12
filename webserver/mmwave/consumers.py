@@ -1,8 +1,11 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from mmwave import tasks
+from workspace.tasks import generateAccessPointCoverage
+
 
 msg_handlers = {
     'link': tasks.getLinkInfo.delay,
+    'ap': generateAccessPointCoverage.delay,
     'error': None,
 }
 
@@ -40,6 +43,9 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
     async def standard_message(self, event):
         # message = event['message']
         # Send message to WebSocket
+        await self.send_json(event)
+
+    async def ap_status(self, event):
         await self.send_json(event)
 
     async def default_msg_handler(self):

@@ -286,13 +286,12 @@ export class LinkCheckPage {
                 styles: LOSCheckMapboxStyles.concat(RadiusDrawStyle)
             });
 
-            this.accessPointTool = new AccessPointTool(this.map, this.Draw);
+            this.accessPointTool = new AccessPointTool(this.map, this.Draw, this.profileWS);
 
             this.map.addControl(this.Draw, 'bottom-right');
             const deleteControl = new MapboxCustomDeleteControl({
                 map: this.map,
                 draw: this.Draw,
-                deleteCallback: this.deleteDrawingCallback.bind(this)
             });
 
             this.map.addControl(deleteControl, 'bottom-right');
@@ -337,12 +336,13 @@ export class LinkCheckPage {
             this.map.on('draw.selectionchange', prioritizeDirectSelect.bind(this));
             this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
             this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
+            this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
 
             window.addEventListener('keydown', (event) => {
                 const featureCollection = this.Draw.getSelected();
                 if (event.target === this.map.getCanvas() && (event.key === "Backspace" || event.key === "Delete")) {
-                    featureCollection.features.forEach((feat: any) => { this.Draw.delete(feat.id) })
-                    this.deleteDrawingCallback(featureCollection);
+                    featureCollection.features.forEach((feat:any) => {this.Draw.delete(feat.id)});
+                    this.map.fire('draw.delete', {features: featureCollection.features});
                 }
             });
 
@@ -413,10 +413,10 @@ export class LinkCheckPage {
 
 
             $('#add-link-btn').click(
-                () => { this.Draw.changeMode('draw_link'); }
+                () => { this.Draw.changeMode('draw_link'); this.map.fire('draw.modechange', {mode: 'draw_link'}); }
             )
             $('#add-ap-btn').click(
-                () => { this.Draw.changeMode('draw_radius'); }
+                () => { this.Draw.changeMode('draw_radius'); this.map.fire('draw.modechange', {mode: 'draw_radius'}); }
             )
 
             // Update Callbacks for Radio Heights
@@ -650,14 +650,18 @@ export class LinkCheckPage {
             $('#lat-0').val(feat.geometry.coordinates[0][1].toFixed(5));
             $('#lng-1').val(feat.geometry.coordinates[1][0].toFixed(5));
             $('#lat-1').val(feat.geometry.coordinates[1][1].toFixed(5));
-            if (feat.properties.radio0hgt == undefined) {
-                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', DEFAULT_RADIO_HEIGHT);
+            let radio0hgt = feat.properties.radio0hgt;
+            if (radio0hgt == undefined) {
+                radio0hgt = DEFAULT_RADIO_HEIGHT;
+                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', radio0hgt);
             }
-            $('#hgt-0').val(feat.properties.radio0hgt);
+            $('#hgt-0').val(radio0hgt);
+            let radio1hgt = feat.properties.radio1hgt;
             if (feat.properties.radio1hgt == undefined) {
-                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', DEFAULT_RADIO_HEIGHT);
+                radio1hgt = DEFAULT_RADIO_HEIGHT;
+                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', radio1hgt);
             }
-            $('#hgt-1').val(feat.properties.radio1hgt);
+            $('#hgt-1').val(radio1hgt);
             const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
             if (selected_link_source.type === 'geojson') {
                 selected_link_source.setData(feat.geometry);
@@ -669,6 +673,11 @@ export class LinkCheckPage {
     deleteDrawingCallback({features} : any) {
         this.removeLinkHalo(features);
         this.clearInputs();
+    }
+
+    drawModeChangeCallback({mode} : { mode: string}){
+        $('.isp-draw-mode-btn').filter(function(idx) {return $(this).attr('draw_mode') !== mode}).removeClass('btn-primary').addClass('btn-secondary');
+        $('.isp-draw-mode-btn').filter(function(idx) {return $(this).attr('draw_mode') === mode}).addClass('btn-primary').removeClass('btn-secondary');
     }
 
     highLightPointOnGround({ x, y }: { x: number, y: number }) {

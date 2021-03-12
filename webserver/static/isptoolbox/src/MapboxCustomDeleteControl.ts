@@ -8,16 +8,13 @@ export default class MapboxCustomDeleteControl {
     _draw: any; //MapboxDraw;
     _container: HTMLDivElement;
     _button: HTMLButtonElement;
-    _deleteCallback: deleteCallback;
   
     constructor(inputs: {
       map: MapboxGL.Map,
       draw: any//MapboxDraw,
-      deleteCallback: deleteCallback
     }) {
       this._map = inputs.map;
       this._draw = inputs.draw;
-      this._deleteCallback = inputs.deleteCallback;
     }
   
     clickCallback: {(event: MouseEvent) : void} = (event: MouseEvent) => {
@@ -39,10 +36,10 @@ export default class MapboxCustomDeleteControl {
             this._draw.delete(`${featureId}`);
           }
         });
-        this._deleteCallback({features: selectedFeature});
+        this._map.fire('draw.delete', {features: selectedFeature});
       } else {
         this._draw.deleteAll();
-        this._deleteCallback({features: features});
+        this._map.fire('draw.delete', {features: features});
       }
     };
   

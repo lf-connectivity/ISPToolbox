@@ -4,6 +4,8 @@ import * as Constants from '@mapbox/mapbox-gl-draw/src/constants';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_feature_movement';
 import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_supplementary_points';
+import createVertex from '@mapbox/mapbox-gl-draw/src/lib/create_vertex';
+
 
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
@@ -23,6 +25,11 @@ export function OverrideDirect() {
                 midpoints: true,
                 selectedPaths: state.selectedCoordPaths
               });
+            // Add a center point to geojson circle
+            if(geojson.properties.user_isCircle){
+                const center_vertex = createVertex(geojson.properties.id, geojson.properties.user_center, "0.4", false);
+                push(center_vertex);
+            }
             supplementaryPoints.forEach(push);
         } else {
             geojson.properties.active = Constants.activeStates.INACTIVE;
@@ -35,12 +42,25 @@ export function OverrideDirect() {
             state.feature.properties.isCircle &&
             !state.feature.properties.los_plotted
         ) {
-            const center = state.feature.properties.center;
-            const movedVertex = [e.lngLat.lng, e.lngLat.lat];
-            const radius = lineDistance(center, movedVertex, 'K');
-            const circleFeature = createGeoJSONCircle(center, radius, '0');
-            state.feature.incomingCoords(circleFeature.geometry.coordinates);
-            state.feature.properties.radiusInKm = radius;
+            if(state.selectedCoordPaths.includes("0.4")){
+                moveFeatures(this.getSelected(), delta);
+                this.getSelected()
+                    .filter(feature => feature.properties.isCircle)
+                    .map(circle => circle.properties.center)
+                    .forEach(center => {
+                        center[0] += delta.lng;
+                        center[1] += delta.lat;
+                    });
+
+                state.dragMoveLocation = e.lngLat;
+            } else {
+                let center = state.feature.properties.center;
+                let movedVertex = [e.lngLat.lng, e.lngLat.lat];
+                let radius = lineDistance(center, movedVertex, 'K');
+                let circleFeature = createGeoJSONCircle(center, radius, '0');
+                state.feature.incomingCoords(circleFeature.geometry.coordinates);
+                state.feature.properties.radius = radius;
+            }
         } else {
             const selectedCoords = state.selectedCoordPaths.map(coord_path =>
                 state.feature.getCoordinate(coord_path),

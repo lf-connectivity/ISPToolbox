@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from workspace.models import Network, AccessPointLocation
+from workspace.models import Network, AccessPointLocation, AccessPointCoverage
+from gis_data.models import MsftBuildingOutlines
 from workspace import serializers
 from workspace.forms import NetworkForm
 from django.http import HttpResponseRedirect
@@ -10,6 +11,8 @@ from rest_framework import generics
 from django.contrib.auth.forms import AuthenticationForm
 from IspToolboxAccounts.forms import IspToolboxUserCreationForm
 from rest_framework import generics, mixins
+from django.http import JsonResponse
+import json
 
 
 class DefaultWorkspaceView(View):
@@ -85,10 +88,11 @@ class NetworkDetail(mixins.ListModelMixin,
         return self.create(request, *args, **kwargs)
 
 
-class AccessPointREST(mixins.ListModelMixin,
+class AccessPointLocationListCreate(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
     serializer_class = serializers.AccessPointSerializer
+    lookup_field = 'uuid'
 
     def get_queryset(self):
         user = self.request.user
@@ -99,3 +103,35 @@ class AccessPointREST(mixins.ListModelMixin,
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+
+class AccessPointLocationGet(mixins.RetrieveModelMixin, generics.GenericAPIView):
+    serializer_class = serializers.AccessPointSerializer
+    lookup_field = 'uuid'
+
+    def get_queryset(self):
+        user = self.request.user
+        return AccessPointLocation.objects.filter(owner=user)
+    
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+
+class AccessPointCoverageResults(View):
+    def get(self, request, uuid):
+        ap = AccessPointLocation.objects.filter(owner=request.user, uuid=uuid).get()
+        coverage = AccessPointCoverage.objects.filter(ap=ap).get()
+        features = []
+        for building in coverage.nearby_buildings.all():
+            feature = {
+                "type": "Feature",
+                "geometry": json.loads(
+                    MsftBuildingOutlines.objects.get(id=building.msftid).geog.json
+                ),
+                "properties": {
+                    "serviceable": building.status,
+                }
+            }
+            features.append(feature)
+        fc = {'type': 'FeatureCollection', 'features': features}
+        return JsonResponse(fc)

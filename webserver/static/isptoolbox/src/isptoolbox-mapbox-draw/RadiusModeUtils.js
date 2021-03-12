@@ -36,7 +36,7 @@ export function createGeoJSONCircle(center, radiusInKm, parentId, points = 64) {
     };
 }
 
-function createVertex(parentId, coordinates, path, selected) {
+export function createVertex(parentId, coordinates, path, selected) {
     return {
       type: "Feature",
       properties: {

@@ -3,20 +3,42 @@
 <div id="isp-draw-controls" class="pl-2">
     {% include "mmwave/atoms/reconnecting_msg.html" %}
     <div id="geocoder" class="geocoder"></div>
-    <button type="button" class="btn isptoolbox-btn btn-primary btn-large my-1 w-100" id="add-link-btn">
-        <svg width="27" height="21" viewBox="0 0 27 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.97874 16.6594C9.34361 18.128 8.44885 19.6143 6.98024 19.9792C5.51162 20.3441 4.02529 19.4493 3.66042 17.9807C3.29554 16.5121 4.1903 15.0257 5.65891 14.6609C7.12753 14.296 8.61386 15.1908 8.97874 16.6594Z" fill="white"/>
-            <path d="M22.979 2.65913C23.3439 4.12774 22.4491 5.61407 20.9805 5.97895C19.5119 6.34382 18.0255 5.44906 17.6607 3.98045C17.2958 2.51184 18.1905 1.0255 19.6592 0.660628C21.1278 0.295755 22.6141 1.19051 22.979 2.65913Z" fill="white"/>
-            <line x1="6.57927" y1="17.2931" x2="19.5793" y2="4.29314" stroke="white" stroke-width="2"/>
+    <button type="button" class="btn isptoolbox-btn btn-secondary btn-large my-1 w-100 isp-draw-mode-btn" id="add-link-btn" draw_mode="draw_link">
+        <svg width="27" height="21" viewBox="0 0 27 21" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8.97874 16.6594C9.34361 18.128 8.44885 19.6143 6.98024 19.9792C5.51162 20.3441 4.02529 19.4493 3.66042 17.9807C3.29554 16.5121 4.1903 15.0257 5.65891 14.6609C7.12753 14.296 8.61386 15.1908 8.97874 16.6594Z"/>
+            <path d="M22.979 2.65913C23.3439 4.12774 22.4491 5.61407 20.9805 5.97895C19.5119 6.34382 18.0255 5.44906 17.6607 3.98045C17.2958 2.51184 18.1905 1.0255 19.6592 0.660628C21.1278 0.295755 22.6141 1.19051 22.979 2.65913Z"/>
+            <line x1="6.57927" y1="17.2931" x2="19.5793" y2="4.29314" stroke-width="2" stroke="currentColor"/>
         </svg>
         Draw PtP Link
     </button>
     {% if beta %}
-        <button type="button" class="btn isptoolbox-btn btn-primary btn-large my-1 w-100" id="add-ap-btn">
+        <button type="button" class="btn isptoolbox-btn btn-secondary btn-large my-1 w-100 isp-draw-mode-btn"
+        draw_mode="draw_radius"
+        {% comment %}
+            this tool requires that the user be authenticated
+        {% endcomment %}
+        {% if user.is_authenticated %}
+            id="add-ap-btn"
+        {% else %}
+            id="add-ap-noact"
+            data-toggle="modal" data-target="#create_account_modal"
+        {% endif %}
+        >
             {% include "mmwave/atoms/ap_icon.html" %}
             Add Access Point
         </button>
-        <button type="button" class="btn isptoolbox-btn btn-primary btn-large my-1 w-100" id="add-cpe-btn">
+        <button type="button" class="btn isptoolbox-btn btn-secondary btn-large my-1 w-100 isp-draw-mode-btn"
+        draw_mode="draw_cpe"
+        {% comment %}
+            this tool requires that the user be authenticated
+        {% endcomment %}
+        {% if user.is_authenticated %}
+            id="add-cpe-btn"
+        {% else %}
+            id="add-cpe-noact"
+            data-toggle="modal" data-target="#create_account_modal"
+        {% endif %}
+        >
             {% include "mmwave/atoms/cpe_icon.html" %}
             Add CPE
         </button>

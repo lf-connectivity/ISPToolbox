@@ -18,5 +18,7 @@ urlpatterns = [
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout_view"),
     path('accounts/create/', CreateAccountView.as_view(), name="create_account_view"),
     path('workspace/api/network/', views.NetworkDetail.as_view()),
-    path('workspace/api/ap-los/', views.AccessPointREST.as_view()),
+    path('workspace/api/ap-los/', views.AccessPointLocationListCreate.as_view()),
+    path('workspace/api/ap-los/<uuid:uuid>/', views.AccessPointLocationGet.as_view()),
+    path('workspace/api/ap-los/coverage/<uuid:uuid>/', views.AccessPointCoverageResults.as_view()),
 ]

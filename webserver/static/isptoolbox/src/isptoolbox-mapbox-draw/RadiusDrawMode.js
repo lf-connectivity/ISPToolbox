@@ -130,7 +130,6 @@ export function RadiusMode() {
             });
         } else {
             this.deleteFeature([state.line.id], { silent: true });
-    
             this.changeMode('simple_select', {}, { silent: true });
         }
     };

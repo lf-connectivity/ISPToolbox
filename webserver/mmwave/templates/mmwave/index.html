@@ -13,6 +13,10 @@
       var radio_names = ["{{tx.name }}", "{{rx.name}}"];
       var tool_units = "{{units}}";
     </script>
+    {% if not user.authenticated %}
+      {% include "workspace/organisms/create_account_or_sign_in.html" %}
+      <script src="{% static "login_signup.min.js" %}"> </script>
+    {% endif %}
     {{ beta|json_script:"los_beta" }}
 </body>
 </html>

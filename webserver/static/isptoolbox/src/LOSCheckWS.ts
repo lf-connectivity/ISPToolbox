@@ -11,6 +11,7 @@ export enum LOSWSHandlers {
 }
 
 export type LinkResponse = {
+    type: "standard.message",
     handler: LOSWSHandlers.LINK,
     error : string | null,
     hash: string,
@@ -18,6 +19,7 @@ export type LinkResponse = {
 }
 
 export type TerrainResponse = {
+    type: "standard.message",
     handler: LOSWSHandlers.TERRAIN,
     error: string | null,
     hash: string,
@@ -28,6 +30,7 @@ export type TerrainResponse = {
 }
 
 export type LidarResponse = {
+    type: "standard.message",
     handler: LOSWSHandlers.LIDAR,
     error: string | null,
     hash: string,
@@ -42,17 +45,27 @@ export type LidarResponse = {
     tx : [number, number],
     still_loading: boolean,
 }
+export type AccessPointCoverageResponse = {
+    type: "ap.status",
+    uuid: string
+}
 
 export type LOSCheckResponse =  LinkResponse | TerrainResponse | LidarResponse;
+export type WSResponse = LOSCheckResponse | AccessPointCoverageResponse;
 
 interface LOSCheckWSCallbacks {
     (message : LOSCheckResponse) : void
+}
+
+interface AccesPointWSCallback {
+    (message : AccessPointCoverageResponse) : void
 }
 class LOSCheckWS {
     ws : WebSocket;
     networkName : string;
     pendingRequests : Array<string> = [];
     message_handlers: Array<LOSCheckWSCallbacks>;
+    ap_callback : AccesPointWSCallback;
     hash : string = '';
     constructor(networkName : string, message_handlers : Array<LOSCheckWSCallbacks>){
         this.networkName = networkName;
@@ -97,13 +110,21 @@ class LOSCheckWS {
         }
 
         this.ws.onmessage = (e) => {
-            const resp = JSON.parse(e.data) as LOSCheckResponse;
-            if(resp.hash === this.hash){
-                this.message_handlers.forEach((handler)=>{
-                    handler(resp);
-                })
+            const resp = JSON.parse(e.data) as WSResponse;
+            if(resp.type === "standard.message") {
+                if(resp.hash === this.hash){
+                    this.message_handlers.forEach((handler)=>{
+                        handler(resp);
+                    })
+                }
+            } else {
+                this.ap_callback(resp);
             }
         }
+    }
+
+    setAccessPointCallback(callback: AccesPointWSCallback){
+        this.ap_callback = callback;
     }
 
     sendRequest(tx: [number, number], rx: [number, number], fbid: string, freq: number = 0, aoi : [number ,number] = [0, 1]) {
@@ -117,6 +138,18 @@ class LOSCheckWS {
             aoi: aoi,
             hash: hash,
             freq: freq,
+        });
+        if(this.ws.readyState !== WebSocket.OPEN) {
+            this.pendingRequests.push(request);
+        } else {
+            this.ws.send(request);
+        }
+    }
+
+    sendAPRequest(uuid: string){
+        const request = JSON.stringify({
+            msg : 'ap',
+            uuid: uuid,
         });
         if(this.ws.readyState !== WebSocket.OPEN) {
             this.pendingRequests.push(request);

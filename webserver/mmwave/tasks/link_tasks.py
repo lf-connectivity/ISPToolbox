@@ -276,6 +276,7 @@ if settings.PROD:
         loadBoundariesFromEntWine()
         createInvertedOverlay()
 
+
 if settings.PROD:
     @periodic_task(run_every=(crontab(minute=0, hour=20)), name="add_high_resolution_boundary")
     def addHighResolutionBoundaries():
@@ -289,6 +290,7 @@ if settings.PROD:
         """
         updatePointCloudBoundariesTask()
         createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
+
 
 if settings.PROD:
     @periodic_task(run_every=(crontab(minute=0, hour=0, day_of_month=1)), name="upload_boundary_tileset_mapbox")
@@ -324,6 +326,7 @@ if settings.PROD:
                     f"""Failed to update overlay: {overlay_name}\n
                     exception: {str(e)}\n
                     traceback:\n{traceback.format_exc()}""")
+
 
 if settings.PROD:
     @periodic_task(run_every=(crontab(minute=0, hour=3, day_of_month=1)), name="create_overlay_new_clouds")

@@ -35,7 +35,7 @@ from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
 from IspToolboxApp.Views.redirect_view import HomepageRedirect
 from Overlay.views import OverlaySource
 from dataUpdate.views import CountrySourceUpdatedView
-from mmwave.views import LOSCheckDemo
+from mmwave.views import LOSCheckDemo, DSMExportView
 
 from rest_framework import routers
 from django.conf.urls.static import static
@@ -100,6 +100,7 @@ urlpatterns = [
     path('pro/', include('workspace.urls')),
     # Demo Views
     path('demo/los-check/', LOSCheckDemo.as_view(), name='demo-los-check'),
+    path('demo/dsm-app/', DSMExportView.as_view(), name="demo-dsm-app"),
     # CMS
     path('', HomepageRedirect.as_view()),
 ] + \

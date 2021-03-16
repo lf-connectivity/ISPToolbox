@@ -1,0 +1,42 @@
+<div class="modal fade" id="DSMExportModal" tabindex="-1" role="dialog" aria-labelledby="DSMExportModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="DSMExportModalLabel">Welcome to DSM Exporter</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        <div id="dsm_export_instructions">
+            <ul>
+            <li>1. Draw, create an outline around the area of interest</li>
+            <li>2. Export, click "Export DSM Data"</li>
+            <li>3. Download, click on the download link when the export is done</li>
+            </ul>
+        </div>
+        <div id="dsm_download_section" class="d-none">
+            <h1 id="dsm_export_status">status:</h1>
+            <div class="alert alert-danger d-none" role="alert" id="dsm_export_error">
+                Error Occured
+            </div>
+            <a id="dsm_download_link">
+                <button type="button" disabled class="btn isptoolbox-btn btn-secondary" id="dsm_download_btn">
+                    Download DSM
+                </button>
+            </a>
+        </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn isptoolbox-btn btn-primary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="fixed-top">
+    <button type="button" class="btn isptoolbox-btn btn-primary ml-3 mt-3" data-toggle="modal" data-target="#DSMExportModal" id="export-dsm-btn"
+        style="position: absolute;" >
+        Export DSM Data
+    </button>
+</div>

@@ -1,9 +1,13 @@
 from django.test import TestCase, TransactionTestCase, Client
-from .tasks import getElevationProfile, MAXIMUM_NUM_POINTS_RETURNED
+from mmwave.tasks import getElevationProfile
+from mmwave.tasks.link_tasks import MAXIMUM_NUM_POINTS_RETURNED
 from mmwave.lidar_utils.pdal_templates import (
     getLidarPointsAroundLink, takeMaxHeightAtDistance
 )
 from mmwave.lidar_utils.LidarEngine import LidarEngine
+from mmwave.lidar_utils.DSMEngine import DSMEngine
+import tempfile
+import os
 from django.contrib.gis.geos import Point, LineString, GEOSGeometry
 from mmwave.models import EPTLidarPointCloud
 
@@ -14,6 +18,49 @@ rx_point = [-75.5691146850586, 39.159016668347725]
 
 test_rx_pt_PuertoRico = [-66.10818070326883, 18.416250557878442]
 test_tx_pt_PuertoRico = [-66.10326724720488, 18.415117149683724]
+
+
+class TestDSMExport(TestCase):
+    def test_create_dsm(self):
+        """
+        Tests DSMEngine, verifies that a tif file is produced from a valid request
+        """
+        polygon = GEOSGeometry("""
+        {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -90.53931713104248,
+              33.547546782478754
+            ],
+            [
+              -90.54167747497559,
+              33.54085812669445
+            ],
+            [
+              -90.53605556488037,
+              33.53824690667674
+            ],
+            [
+              -90.53009033203125,
+              33.54246774356695
+            ],
+            [
+              -90.53931713104248,
+              33.547546782478754
+            ]
+          ]
+        ]
+      }""")
+        ept_sources = ["https://s3-us-west-2.amazonaws.com/usgs-lidar-public/MS_MSDeltaYazoo-Phase1_2009/ept.json"]
+        dsm_engine = DSMEngine(polygon, ept_sources)
+        created_dsm = False
+        with tempfile.NamedTemporaryFile(suffix='.tif') as temp:
+            dsm_engine.getDSM(20, temp.name)
+            self.assertTrue(os.path.getsize(temp.name) > 0)
+            created_dsm = True
+        self.assertTrue(created_dsm)
 
 
 class SimplePageLoadTest(TestCase):

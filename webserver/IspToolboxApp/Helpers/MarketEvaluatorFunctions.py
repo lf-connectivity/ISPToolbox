@@ -94,10 +94,10 @@ def broadbandNow(include, read_only):
         cursor.execute(broadbandnow_skeleton, [include])
         row = cursor.fetchone()
 
-        # NULL = no information
-        min_price = str(row[0]) if row[0] else None
+        # Fetch a price range from min to max. NULL = no rows that aren't null.
+        price_range = [str(col) if col else None for col in row]
 
-        return {'minimumBroadbandPrice': min_price}
+        return {'bbnPriceRange': price_range}
 
 # flake8: noqa
 def mlabSpeed(include, read_only):
@@ -198,11 +198,13 @@ def countyGeog(statecode, countycode):
     return resp
 
 broadbandnow_skeleton = """
-SELECT MIN(bbn.minprice_broadband_plan_terrestrial)
+SELECT MIN(bbn.minprice_broadband_plan_terrestrial),
+       MAX(bbn.minprice_broadband_plan_terrestrial)
 FROM broadbandnow as bbn
     JOIN tl_2019_blocks_census as cen
     ON cen.geoid10 = bbn.block_id
 WHERE ST_Intersects(cen.geog, ST_GeomFromGeoJSON(%s))
+AND bbn.minprice_broadband_plan_terrestrial IS NOT NULL
 """
 
 provider_skeleton = """

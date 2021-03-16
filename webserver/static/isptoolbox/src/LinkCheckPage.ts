@@ -18,6 +18,7 @@ import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
 import { Potree } from "./Potree.js";
 import {AccessPointTool} from "./AccessPointTool";
+import { hasCookie } from "./PageUtils";
 
 type HighChartsExtremesEvent = {
     min: number | undefined,
@@ -470,6 +471,19 @@ export class LinkCheckPage {
 
                     if (!this.animationPlaying) {
                         this.highlightCurrentPosition(true);
+                    }
+                    // If they haven't seen the tooltip yet, expand it by default for 30 seconds
+                    if (!hasCookie("losHelpSeen")) {
+                        // Set cookie so tooltip is closed next time they visit
+                        const now = new Date();
+                        const exp = now.getTime() + 365*24*60*60*1000;
+                        now.setTime(exp);
+                        document.cookie = "losHelpSeen=true; expires=" + now.toUTCString() + '; path=/;';
+                        // Set the tooltip copy to visible, hide after 30s
+                        $('.help-3D-copy').css({"opacity": "1", "visibility": "visible"});
+                        setTimeout(() => {
+                            $('.help-3D-copy').css({"opacity": "0", "visibility": "hidden"})
+                        }, 30000);
                     }
                 }
             });

@@ -56,3 +56,49 @@
         font-size: 14px
         letter-spacing: 0.02em
         color: $brand-dark-gray-color
+
+.help-3D-tooltip-icon
+    margin: 10px
+
+.help-3D-tooltip-icon-container
+    background: rgba(255,255,255,0.3)
+
+.help-3D-tooltip-icon-container:hover + .help-3D-copy
+    opacity: 1 !important
+    visibility: visible !important
+
+.help-3D-tooltip-icon-container:focus + .help-3D-copy
+    opacity: 1 !important
+    visibility: visible !important
+
+.help-3D
+    display: flex
+    align-items: center
+    margin: 10px
+    width: fit-content
+
+.help-3D-copy
+    display: flex
+    visibility: hidden
+    opacity: 0
+    transition: visibility 0.3s linear, opacity 0.3s linear
+    padding: 6.5px
+    background: rgba(255,255,255,0.3)
+
+.help-3D-arrow
+    width: 22px
+    height: 22px
+    background: $white-color
+    border-radius: 5px
+    display: flex
+    justify-content: center
+    align-items: center
+    margin-left: 5px
+
+.help-3D-text
+    font-family: $brand-font-family-sans-serif
+    font-style: normal
+    font-weight: bold
+    font-size: 14px
+    line-height: 20px
+    color: #FFFFFF

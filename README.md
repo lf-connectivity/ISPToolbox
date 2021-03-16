@@ -213,5 +213,6 @@ create sample overlay objects in your sandbox:
 
 - Check that potree static files are being pulled and are not 404ing
     - if they are you need to recursively clone submodules (potree is a submodule)
+        - `git submodule update --init --recursive`
 - Check that you have the lidar boundaries loaded in your database
     - `make default_objects`

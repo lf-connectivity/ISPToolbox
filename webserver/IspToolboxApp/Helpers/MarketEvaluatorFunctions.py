@@ -94,8 +94,11 @@ def broadbandNow(include, read_only):
         cursor.execute(broadbandnow_skeleton, [include])
         row = cursor.fetchone()
 
-        # Fetch a price range from min to max. NULL = no rows that aren't null.
-        price_range = [str(col) if col else None for col in row]
+        # Fetch a price range from min to max. If the entries are both null, return null.
+        if not row[0] and not row[1]:
+            price_range = None
+        else:
+            price_range = [str(col) for col in row]
 
         return {'bbnPriceRange': price_range}
 

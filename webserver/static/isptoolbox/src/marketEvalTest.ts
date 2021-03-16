@@ -65,7 +65,7 @@ type ProvidersEvent = {
 type BroadbandNowEvent = {
     type: 'broadband.now';
     value: {
-        minimumBroadbandPrice: string
+        bbnPriceRange: [string, string]
     }
 }
 
@@ -99,7 +99,7 @@ const handle_event = (meResponse: MarketEvaluatorEvent) => {
             break;
         
         case('broadband.now'):
-            $(`#${meResponse.type.replace('.','_')}`).text(meResponse.value.minimumBroadbandPrice);
+            $(`#${meResponse.type.replace('.','_')}`).text(JSON.stringify(meResponse.value.bbnPriceRange));
             break;
 
         case('median.speeds'):

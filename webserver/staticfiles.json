@@ -440,6 +440,7 @@
         "d3/LICENSE": "d3/LICENSE.4b3386256943",
         "d3/d3.js": "d3/d3.c04481e43bb1.js",
         "d3/d3.min.js": "d3/d3.min.5936da7688d0.js",
+        "dsm_app.min.js": "dsm_app.min.51625f27a783.js",
         "ept/ParseBuffer.js": "ept/ParseBuffer.bc124c6752c8.js",
         "facebook/js/fbconnect.js": "facebook/js/fbconnect.ce85e4f1e7d7.js",
         "geopackage/LICENSE": "geopackage/LICENSE.941a2a2cb4a9",
@@ -803,7 +804,7 @@
         "tween/README.txt": "tween/README.af498efb0cb3.txt",
         "tween/Tween.js": "tween/Tween.6c66c5fbda46.js",
         "tween/tween.min.js": "tween/tween.min.0333be8d916c.js",
-        "wireless_network.min.js": "wireless_network.min.325cf8f03889.js",
+        "wireless_network.min.js": "wireless_network.min.def4cbab488b.js",
         "zstd-codec/bundle.js": "zstd-codec/bundle.328f1f827c4e.js"
     },
     "version": "1.0"

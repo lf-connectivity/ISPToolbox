@@ -605,24 +605,22 @@ export class LinkCheckPage {
         });
 
         // Fresnel navigation keyboard event listener
-        if (isBeta()) {
-            window.addEventListener('keydown', (event: any) => {
-                if (this.currentView === '3d') {
-                    if (LEFT_NAVIGATION_KEYS.includes(event.key)) {
-                        this.highlightCurrentPosition(false);
-                        this.linkProfileFresnelPosition -= this.navigationDelta;
-                        this.fitFresnelPositionToBounds();
-                        this.moveLocation3DView();
-                    }
-                    else if (RIGHT_NAVIGATION_KEYS.includes(event.key)) {
-                        this.highlightCurrentPosition(false);
-                        this.linkProfileFresnelPosition += this.navigationDelta;
-                        this.fitFresnelPositionToBounds();
-                        this.moveLocation3DView();
-                    }
+        window.addEventListener('keydown', (event: any) => {
+            if (this.currentView === '3d') {
+                if (LEFT_NAVIGATION_KEYS.includes(event.key)) {
+                    this.highlightCurrentPosition(false);
+                    this.linkProfileFresnelPosition -= this.navigationDelta;
+                    this.fitFresnelPositionToBounds();
+                    this.moveLocation3DView();
                 }
-            });
-        }
+                else if (RIGHT_NAVIGATION_KEYS.includes(event.key)) {
+                    this.highlightCurrentPosition(false);
+                    this.linkProfileFresnelPosition += this.navigationDelta;
+                    this.fitFresnelPositionToBounds();
+                    this.moveLocation3DView();
+                }
+            }
+        });
     };
 
     removeLinkHalo: (features: Array<MapboxGL.MapboxGeoJSONFeature>) => void = (features) => {
@@ -808,12 +806,6 @@ export class LinkCheckPage {
             // @ts-ignore
             source.setData({ 'type': "FeatureCollection", "features": [] });
         }
-
-        // beta feature for keyboard fresnel navigation: hide only during animation
-        // start. Otherwise, do the normal thing and hide it.
-        if (!isBeta()) {
-            this.hideHover3DDot();
-        }
         this.highlightCurrentPosition(true);
     }
 
@@ -821,14 +813,12 @@ export class LinkCheckPage {
     Toggles whether or not the current x-axis point is highlighted in the link profile chart.
     */
     highlightCurrentPosition(visible: boolean) {
-        if (isBeta()) {
-            let state = visible ? 'hover' : undefined;
+        let state = visible ? 'hover' : undefined;
 
-            // Set the hover state over both the fresnel cone chart
-            // and the LOS chart in Highchart.
-            this.link_chart.series[3].data[this.linkProfileFresnelPosition].setState(state);
-            this.link_chart.series[2].data[this.linkProfileFresnelPosition].setState(state);
-        }
+        // Set the hover state over both the fresnel cone chart
+        // and the LOS chart in Highchart.
+        this.link_chart.series[3].data[this.linkProfileFresnelPosition].setState(state);
+        this.link_chart.series[2].data[this.linkProfileFresnelPosition].setState(state);
     }
 
     hideHover3DDot() {
@@ -886,9 +876,7 @@ export class LinkCheckPage {
             }
         }
         if (this._elevation != null && this.updateLinkHeight != null && update3DView) {
-            if (isBeta()) {
-                this.highlightCurrentPosition(false);
-            }
+            this.highlightCurrentPosition(false);
 
             const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
             const rx_hgt = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
@@ -900,9 +888,7 @@ export class LinkCheckPage {
                 });
             }
 
-            if (isBeta()) {
-                this.moveLocation3DView();
-            }
+            this.moveLocation3DView();
         }
     }
 
@@ -978,29 +964,19 @@ export class LinkCheckPage {
             }
             const animationClickCallback = () => {
                 if (this.animationPlaying) {
-                    // beta feature: show the dot again.
-                    if (isBeta()) {
-                        this.fitFresnelPositionToBounds();
-                        this.moveLocation3DView();
+                    this.fitFresnelPositionToBounds();
+                    this.moveLocation3DView();
 
-                        // funny hack to get last line of code to toggle correctly
-                        this.animationPlaying = true;
-                    }
-                    else {
-                        this.globalLinkAnimation.pause();
-                        $('#pause-button-3d').addClass('d-none');
-                        $('#play-button-3d').removeClass('d-none');
-                    }
+                    // funny hack to get last line of code to toggle correctly
+                    this.animationPlaying = true;
                 } else {
                     this.globalLinkAnimation.play(true);
                     $('#pause-button-3d').removeClass('d-none');
                     $('#play-button-3d').addClass('d-none');
 
-                    // beta feature: hide dot and link profile highlight when animation plays.
-                    if (isBeta()) {
-                        this.highlightCurrentPosition(false);
-                        this.hideHover3DDot();
-                    }
+                    // hide dot and link profile highlight when animation plays.
+                    this.highlightCurrentPosition(false);
+                    this.hideHover3DDot();
                 }
                 this.animationPlaying = !this.animationPlaying;
             };

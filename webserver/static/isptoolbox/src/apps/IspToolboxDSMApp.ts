@@ -3,6 +3,7 @@ import LidarAvailabilityLayer from '../availabilityOverlay';
 import { getMapDefault } from '../utils/MapDefaults';
 import type { MapDefault } from '../utils/MapDefaults';
 import { LOSCheckMapboxStyles } from '../LOSCheckMapboxStyles';
+import {dsmExportStyles } from '../isptoolbox-mapbox-draw/styles/dsm_export_styles';
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
 // @ts-ignore
@@ -33,7 +34,8 @@ export default class DSMExportApp {
             this.draw = new MapboxDraw({
                 userProperties: true,
                 displayControlsDefault: true,
-                styles: LOSCheckMapboxStyles
+                // @ts-ignore
+                styles: LOSCheckMapboxStyles.concat(dsmExportStyles)
             }
             );
             this.map.addControl(this.draw, 'bottom-right');

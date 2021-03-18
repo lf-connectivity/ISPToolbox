@@ -19,6 +19,8 @@ import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } f
 import { Potree } from "./Potree.js";
 import {AccessPointTool} from "./AccessPointTool";
 import { hasCookie } from "./PageUtils";
+import {getInitialFeatures} from './utils/MapDefaults';
+import {setCenterZoomPreferences} from './utils/MapPreferences';
 
 type HighChartsExtremesEvent = {
     min: number | undefined,
@@ -258,6 +260,10 @@ export class LinkCheckPage {
         });
 
         this.map.on('load', () => {
+            // @ts-ignore
+            if(window.ISPTOOLBOX_SESSION_INFO !== undefined){
+                setCenterZoomPreferences(this.map);
+            }
             var geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
                 mapboxgl: mapboxgl,
@@ -283,7 +289,7 @@ export class LinkCheckPage {
                 controls: {
                 },
                 // @ts-ignore
-                styles: LOSCheckMapboxStyles.concat(RadiusDrawStyle)
+                // styles: LOSCheckMapboxStyles.concat(RadiusDrawStyle)
             });
 
             this.accessPointTool = new AccessPointTool(this.map, this.Draw, this.profileWS);
@@ -308,6 +314,9 @@ export class LinkCheckPage {
 
             this.map.on('draw.update', this.updateRadioLocation.bind(this));
             this.map.on('draw.create', this.updateRadioLocation.bind(this));
+
+            const initial_features = getInitialFeatures();
+            initial_features?.features.forEach((f: any) => {this.Draw.add(f)});
             const features = this.Draw.add({
                 "type": 'Feature',
                 "geometry": {
@@ -326,7 +335,7 @@ export class LinkCheckPage {
             });
             this.selectedFeatureID = features.length ? features[0] : null;
             const prioritizeDirectSelect = function ({ features }: any) {
-                if (features.length == 1) {
+                if (features.length == 1 && features[0].geometry.type !== 'Point') {
                     this.Draw.changeMode('direct_select', {
                         featureId: features[0].id
                     });
@@ -636,7 +645,7 @@ export class LinkCheckPage {
     updateRadioLocation(update: any) {
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
-        if (update.features.length && update.features[0].properties.isCircle === undefined) {
+        if (update.features.length && update.features[0].properties.isCircle === undefined && update.features[0].geometry.type !== "Point") {
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
             if (feat.properties.freq == undefined) {
@@ -757,6 +766,9 @@ export class LinkCheckPage {
         const tx_lng = parseFloat(String($('#lng-0').val()));
         const rx_lat = parseFloat(String($('#lat-1').val()));
         const rx_lng = parseFloat(String($('#lng-1').val()));
+        if([tx_lat, tx_lng, rx_lat, rx_lng].some(Number.isNaN)) {
+            return null;
+        }
         const query_params: {
             tx: [number, number],
             rx: [number, number],
@@ -768,6 +780,7 @@ export class LinkCheckPage {
     // Overlay
     updateLinkProfile() {
         const query_params = this.getRadioLocations();
+        if(query_params !== null) {
 
         // @ts-ignore
         const query = new URLSearchParams(query_params).toString();
@@ -795,10 +808,12 @@ export class LinkCheckPage {
         this._elevation = [];
         this._lidar = [];
         this._link_distance = 0;
+        }
     }
 
     zoomUpdateLinkProfile(aoi: [number, number]) {
         const query_params = this.getRadioLocations();
+        if(query_params !== null) {
         this.profileWS.sendRequest(
             query_params.tx,
             query_params.rx,
@@ -806,6 +821,7 @@ export class LinkCheckPage {
             this.centerFreq,
             aoi
         );
+        }
     }
 
     mouseLeave() {

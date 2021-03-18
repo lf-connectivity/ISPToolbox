@@ -10,71 +10,17 @@ from django.db.models import Count
 from rest_framework import generics
 from django.contrib.auth.forms import AuthenticationForm
 from IspToolboxAccounts.forms import IspToolboxUserCreationForm
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, renderers, response
 from django.http import JsonResponse
+from rest_framework.response import Response
 import json
-
-
-class DefaultWorkspaceView(View):
-    def get(self, request, **kwargs):
-        return render(
-            request,
-            'workspace/pages/default.html',
-            {
-                'showSignUp': True,
-                'sign_in_form': AuthenticationForm,
-                'sign_up_form': IspToolboxUserCreationForm,
-            }
-        )
-
-
-class DefaultNetworkView(View):
-    def get(self, request):
-        order = request.GET.get('order', '-last_edited')
-        networks = Network.objects.filter(owner=request.user).all().annotate(num_links=Count('ptplinks')).order_by(order)
-        page = request.GET.get('page', 1)
-        paginator = Paginator(networks, 10)
-        try:
-            networks = paginator.page(page)
-        except PageNotAnInteger:
-            networks = paginator.page(1)
-        except EmptyPage:
-            networks = paginator.page(paginator.num_pages)
-        return render(request, 'workspace/pages/network_page.html', {
-                    'networks': networks,
-                    'form': NetworkForm(),
-                    'order': order
-                    }
-                )
-
-    def post(self, request):
-        form = NetworkForm(request.POST)
-
-        if form.is_valid() and not request.user.is_anonymous:
-            form.instance.owner = request.user
-            form.save()
-            return HttpResponseRedirect('/pro/networks/')
-        else:
-            return HttpResponseRedirect('/error/')
-
-
-class DeleteNetworkView(View):
-    def post(self, request, network_id=None):
-        Network.objects.filter(uuid=network_id, owner=request.user).all().delete()
-        return HttpResponseRedirect('/pro/networks/')
-
-
-class EditNetworkView(View):
-    def get(self, request, network_id=None):
-        network = Network.objects.filter(uuid=network_id).first()
-        geojson = Network.toFeatureCollection(serializers.NetworkSerializer(network).data)
-        return render(request, 'workspace/pages/network_edit.html', {'network': network, 'geojson': geojson})
 
 
 # REST Views
 class NetworkDetail(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
-                  generics.GenericAPIView):
+                  mixins.UpdateModelMixin,
+                  generics.RetrieveAPIView):
     serializer_class = serializers.NetworkSerializer
 
     def get_queryset(self):
@@ -84,6 +30,9 @@ class NetworkDetail(mixins.ListModelMixin,
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
@@ -92,14 +41,24 @@ class AccessPointLocationListCreate(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
     serializer_class = serializers.AccessPointSerializer
+    renderer_classes = [renderers.TemplateHTMLRenderer]
     lookup_field = 'uuid'
+    template_name = "workspace/molecules/access_point_pagination.html"
 
     def get_queryset(self):
         user = self.request.user
         return AccessPointLocation.objects.filter(owner=user)
     
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'serializer': serializer, 'data': serializer.data})
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)

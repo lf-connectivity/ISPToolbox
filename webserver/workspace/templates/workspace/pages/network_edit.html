@@ -6,7 +6,6 @@
     {% include "mmwave/map_view.html" %}
     <script src="{% static "wireless_network.min.js" %}"> </script>
     {% include "mmwave/3d_view.html" %}
-    {% include "mmwave/additional_js.html" %}
     {% include "mmwave/link_view.html" %}
     <script type="text/javascript"> 
       var networkID = "{{ network.uuid }}";
@@ -15,6 +14,7 @@
           initialMapZoom : {{ network.zoom_level }}
       };
     </script>
-    <p>{{geojson|safe}}</p>
+    {{ geojson|json_script:"isp-map-features" }}
+    {% include "workspace/organisms/access_point_modal.html" %}
 </body>
 </html>

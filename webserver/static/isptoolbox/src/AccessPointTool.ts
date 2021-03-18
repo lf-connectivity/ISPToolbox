@@ -30,6 +30,8 @@ export class AccessPointTool {
         this.map.on('draw.create', this.drawCreateCallback.bind(this));
         this.map.on('draw.delete', this.drawDeleteCallback.bind(this));
         this.ws.setAccessPointCallback(this.accessPointStatusCallback.bind(this));
+        // @ts-ignore
+        $('#accessPointModal').modal('show');
     }
     drawCreateCallback({ features }: any) {
         const feature = features[0];

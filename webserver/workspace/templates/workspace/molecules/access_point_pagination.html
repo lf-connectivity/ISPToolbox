@@ -1,0 +1,58 @@
+{% load rest_framework %}
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Access Point Name
+          {% if order == "name"%}
+          <a href="?order=-name&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_down_icon.html' %}
+          </a>
+          {% else %}
+          <a href="?order=name&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_up_icon.html' %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Radius
+            {% if order == "num_links"%}
+            <a href="?order=-num_links&page={{ networks.number }}">
+              {% include 'workspace/atoms/sort_down_icon.html' %}
+            </a>
+            {% else %}
+            <a href="?order=num_links&page={{ networks.number }}">
+              {% include 'workspace/atoms/sort_up_icon.html' %}
+            </a>
+            {% endif %}
+          </th>
+        <th scope="col">Height
+          {% if order == "num_links"%}
+          <a href="?order=-num_links&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_down_icon.html' %}
+          </a>
+          {% else %}
+          <a href="?order=num_links&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_up_icon.html' %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Last Modified
+          {% if order == "last_edited"%}
+          <a href="?order=-last_edited&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_down_icon.html' %}
+          </a>
+          {% else %}
+          <a href="?order=last_edited&page={{ networks.number }}">
+            {% include 'workspace/atoms/sort_up_icon.html' %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for ap in data %}
+        {% include 'workspace/atoms/access_point_row.html' %}
+    {% endfor %}
+</tbody>
+</table>

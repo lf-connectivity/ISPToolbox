@@ -42,6 +42,22 @@
             {% include "mmwave/atoms/cpe_icon.html" %}
             Add CPE
         </button>
+        <button type="button" class="btn isptoolbox-btn btn-secondary btn-large my-1 w-100 isp-draw-mode-btn"
+        draw_mode="draw_radius"
+        {% comment %}
+            this tool requires that the user be authenticated
+        {% endcomment %}
+        {% if user.is_authenticated %}
+            id="add-ap-btn"
+            data-toggle="modal" data-target="#accessPointModal"
+        {% else %}
+            id="add-ap-noact"
+            data-toggle="modal" data-target="#create_account_modal"
+        {% endif %}
+        >
+            {% include "mmwave/atoms/ap_icon.html" %}
+            View Access Points
+        </button>
     {% endif %}
 </div>
 </div>

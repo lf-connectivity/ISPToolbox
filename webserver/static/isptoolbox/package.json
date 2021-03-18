@@ -12,7 +12,8 @@
   "license": "Facebook Copyright 2020",
   "dependencies": {
     "@mapbox/geojson-extent": "^1.0.0",
-    "@mapbox/mapbox-gl-draw": "^1.2.2"
+    "@mapbox/mapbox-gl-draw": "^1.2.2",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/mapbox-gl": "^2.0.0",

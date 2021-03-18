@@ -4,6 +4,7 @@ import uuid
 from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import Point
 from enum import Enum
+import json
 
 
 class Network(models.Model):
@@ -51,6 +52,20 @@ class AccessPointLocation(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def getUsersAccessPoints(cls, user, serializer=None):
+        locations = cls.objects.filter(owner=user).all()
+        return {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'geometry': json.loads(loc.location.json),
+                    'properties': serializer(loc).data if serializer is not None else None,
+                } for loc in locations
+            ]
+        }
 
 
 class CoverageStatus(Enum):

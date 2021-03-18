@@ -20,12 +20,14 @@ class NetworkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Network
-        fields = ['name', 'uuid', 'created_date', 'owner', 'ptplinks']
+        fields = ['name', 'uuid', 'created_date', 'owner', 'ptplinks', 'map_center', 'zoom_level']
 
 
 class AccessPointSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     lookup_field = 'uuid'
+    created = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     class Meta:
         model = models.AccessPointLocation
         fields = '__all__'

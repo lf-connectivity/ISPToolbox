@@ -1,7 +1,7 @@
 <div class="fixed-bottom link-view-bar">
     {% include "mmwave/organisms/mapcontrols.html" %}
     {% include "mmwave/atoms/collapse_button.html" %}
-    <div id="data-container" class="collapse show">
+    <div id="data-container" class="collapse {% if not should_collapse_link_view %}show{% endif %} ">
         <div class="row no-gutters profile-view" id="bottom-row-link-view-container">
             <div class="col-12 col-lg-6 col-xl-8 profile-view-card">
                 <div class="card link-profile-card">

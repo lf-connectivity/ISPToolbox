@@ -1,6 +1,6 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
 import { createSupplementaryPointsForCircle } from './RadiusModeUtils.js';
-export const moveFeatures = require('@mapbox/mapbox-gl-draw/src/lib/move_features');
+import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 
 export function OverrideSimple() {
   const simple_select = MapboxDraw.modes.simple_select;
@@ -49,7 +49,6 @@ export function OverrideSimple() {
       // $FlowFixMe[prop-missing]
       lat: e.lngLat.lat - state.dragMoveLocation.lat,
     };
-
     moveFeatures(this.getSelected(), delta);
 
     this.getSelected()

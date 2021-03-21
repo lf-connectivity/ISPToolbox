@@ -10,9 +10,10 @@
     <script type="text/javascript"> 
       var networkID = "{{ network.uuid }}";
       var ISPTOOLBOX_SESSION_INFO = {
-          initialMapCenter : {{ network.map_center.json|safe}},
+          initialMapCenter : {{ network.map_center.json|safe }},
           initialMapZoom : {{ network.zoom_level }}
       };
+      var tool_units = "{{units}}";
     </script>
     {{ geojson|json_script:"isp-map-features" }}
     {% include "workspace/organisms/access_point_modal.html" %}

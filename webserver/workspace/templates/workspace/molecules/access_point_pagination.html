@@ -1,58 +1,77 @@
 {% load rest_framework %}
+{% if results %}
 <table class="table">
-    <thead>
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Access Point Name
-          {% if order == "name"%}
-          <a href="?order=-name&page={{ networks.number }}">
-            {% include 'workspace/atoms/sort_down_icon.html' %}
-          </a>
-          {% else %}
-          <a href="?order=name&page={{ networks.number }}">
-            {% include 'workspace/atoms/sort_up_icon.html' %}
-          </a>
-          {% endif %}
-        </th>
-        <th scope="col">Radius
-            {% if order == "num_links"%}
-            <a href="?order=-num_links&page={{ networks.number }}">
-              {% include 'workspace/atoms/sort_down_icon.html' %}
-            </a>
-            {% else %}
-            <a href="?order=num_links&page={{ networks.number }}">
-              {% include 'workspace/atoms/sort_up_icon.html' %}
-            </a>
-            {% endif %}
-          </th>
-        <th scope="col">Height
-          {% if order == "num_links"%}
-          <a href="?order=-num_links&page={{ networks.number }}">
-            {% include 'workspace/atoms/sort_down_icon.html' %}
-          </a>
-          {% else %}
-          <a href="?order=num_links&page={{ networks.number }}">
-            {% include 'workspace/atoms/sort_up_icon.html' %}
-          </a>
-          {% endif %}
-        </th>
-        <th scope="col">Last Modified
-          {% if order == "last_edited"%}
-          <a href="?order=-last_edited&page={{ networks.number }}">
-            {% include 'workspace/atoms/sort_down_icon.html' %}
-          </a>
-          {% else %}
-          <a href="?order=last_edited&page={{ networks.number }}">
-            {% include 'workspace/atoms/sort_up_icon.html' %}
-          </a>
-          {% endif %}
-        </th>
-        <th scope="col">Delete</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for ap in data %}
-        {% include 'workspace/atoms/access_point_row.html' %}
+  {% with ordering=request.GET.ordering units=request.GET.units %}
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Access Point Name
+        {% if ordering == "name"%}
+        <a href="?ordering=-name&page={{ page_link.number }}">
+          {% include 'workspace/atoms/arrow_icon.html' %}
+        </a>
+        {% else %}
+        <a href="?ordering=name&page={{ page_link.number }}">
+          {% with flip=True %}
+          {% include 'workspace/atoms/arrow_icon.html' %}
+          {% endwith %}
+        </a>
+        {% endif %}
+      </th>
+      <th scope="col">Radius
+        {% if ordering == "max_radius"%}
+        <a href="?ordering=-max_radius&page={{ page_link.number }}">
+          {% include 'workspace/atoms/arrow_icon.html' %}
+        </a>
+        {% else %}
+        <a href="?ordering=max_radius&page={{ page_link.number }}">
+          {% with flip=True %}
+          {% include 'workspace/atoms/arrow_icon.html' %}
+          {% endwith %}
+        </a>
+        {% endif %}
+      </th>
+      <th scope="col">Height
+        {% if ordering == "height"%}
+        <a href="?ordering=-height&page={{ page_link.number }}">
+          {% include 'workspace/atoms/arrow_icon.html' %}
+        </a>
+        {% else %}
+        <a href="?ordering=height&page={{ page_link.number }}">
+          {% with flip=True %}
+          {% include 'workspace/atoms/arrow_icon.html' %}
+          {% endwith %}
+        </a>
+        {% endif %}
+      </th>
+      <th scope="col">Last Modified
+        {% if ordering == "last_updated"%}
+        <a href="?ordering=-last_updated&page={{ page_link.number }}">
+          {% include 'workspace/atoms/arrow_icon.html' %}
+        </a>
+        {% else %}
+        <a href="?ordering=last_updated&page={{ page_link.number }}">
+          {% with flip=True %}
+          {% include 'workspace/atoms/arrow_icon.html' %}
+          {% endwith %}
+        </a>
+        {% endif %}
+      </th>
+      <th scope="col">Edit</th>
+      <th scope="col">Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for ap in results %}
+    {% include 'workspace/atoms/access_point_row.html' %}
     {% endfor %}
-</tbody>
+  </tbody>
+  {% endwith %}
 </table>
+{% else %}
+<div class="text-center">
+  {% include 'workspace/atoms/missing_icon.html' %}
+  <h3>No access points</h3>
+  <p>To get started: place an access point on the map or select bulk import.</p>
+</div>
+{% endif %}

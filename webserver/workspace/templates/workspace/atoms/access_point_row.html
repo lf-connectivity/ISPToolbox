@@ -3,8 +3,8 @@
 <tr>
     <th scope="row">{{ forloop.counter0}}</th>
     <td>{{ ap.name }}</td>
-    <td>{{ap.max_radius|floatformat:2}}</td>
-    <td>{{ap.height|floatformat:2}}</td>
+    <td>{% if units == "SI" %}{{ap.max_radius|floatformat:2}} km{% else %}{{ap.max_radius_miles|floatformat:2}} mi{% endif %}</td>
+    <td>{% if units == "SI" %}{{ap.height|floatformat:2}} m{% else %}{{ap.height_ft|floatformat:2}} ft{% endif %}</td>
     <td>{{ap.last_updated|lower}}</td>
     <td>
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#deleteNetworkModal"
@@ -12,6 +12,11 @@
             $('#isptoolbox_network_delete_modal_form').attr('action', '{% url 'delete_network' network_id=ap.uuid %}');
             $('#isptoolbox_network_delete_name').text('{{ ap.name}}');
             ">
+            {% include 'workspace/atoms/pen_icon.html'%}
+        </button>
+    </td>
+    <td>
+        <button type="button" class="btn btn-secondary ap-delete-btn" data-target="{{ap.uuid}}">
             {% include 'workspace/atoms/trash_icon.html'%}
         </button>
     </td>

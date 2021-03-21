@@ -60,6 +60,7 @@ class EditNetworkView(View):
             'network' : network,
             'geojson': geojson,
             'should_collapse_link_view': True,
-            'beta': True
+            'beta': True,
+            'units': 'US',
         }
         return render(request, 'workspace/pages/network_edit.html', context)

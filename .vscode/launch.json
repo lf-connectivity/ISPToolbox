@@ -29,5 +29,10 @@
       ],
       "django": true
     }
-  ]
+  ],
+  "search.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/potree": true,
+  },
 }

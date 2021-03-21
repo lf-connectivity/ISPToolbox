@@ -16,5 +16,5 @@ export function setCenterZoomPreferences(map: mapboxgl.Map) {
             }
         });
     }
-    map.on('moveend', _.debounce(requestChangeMapPreferences, 3000));
+    map.on('moveend', _.debounce(requestChangeMapPreferences, 1000));
 }

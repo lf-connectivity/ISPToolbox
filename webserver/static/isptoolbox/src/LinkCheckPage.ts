@@ -292,7 +292,8 @@ export class LinkCheckPage {
                 // styles: LOSCheckMapboxStyles.concat(RadiusDrawStyle)
             });
 
-            this.accessPointTool = new AccessPointTool(this.map, this.Draw, this.profileWS);
+            this.accessPointTool = new AccessPointTool('#accessPointModal', this.map, this.Draw, this.profileWS);
+
 
             this.map.addControl(this.Draw, 'bottom-right');
             const deleteControl = new MapboxCustomDeleteControl({
@@ -646,6 +647,8 @@ export class LinkCheckPage {
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
         if (update.features.length && update.features[0].properties.isCircle === undefined && update.features[0].geometry.type !== "Point") {
+            //@ts-ignore
+            $('#data-container').collapse('show');
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
             if (feat.properties.freq == undefined) {

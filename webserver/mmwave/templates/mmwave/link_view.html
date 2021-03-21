@@ -23,12 +23,12 @@
                 <h5 class="radio-toggle-label mx-3 py-2">Radio Specs</h5>
             </div>
             <div class="col-lg-3 col-xl-2 radio-0-card">
-                {% with tx as radio %}
+                {% with radio=tx radio_id='0' radio_name='radio_0' %}
                     {% include "./radio_view.html" %}
                 {% endwith %}
             </div>
             <div class="col-lg-3 col-xl-2 radio-1-card">
-                {% with rx as radio %}
+                {% with radio=rx radio_id='1' radio_name='radio_1' %}
                     {% include "./radio_view.html" %}
                 {% endwith %}
             </div>

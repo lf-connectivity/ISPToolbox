@@ -53,6 +53,14 @@ class AccessPointLocation(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
+    @property
+    def max_radius_miles(self):
+        return self.max_radius * 0.621371
+
+    @property
+    def height_ft(self):
+        return self.height * 3.28084
+
     @classmethod
     def getUsersAccessPoints(cls, user, serializer=None):
         locations = cls.objects.filter(owner=user).all()

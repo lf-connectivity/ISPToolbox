@@ -10,7 +10,7 @@ from django.db.models import Count
 from rest_framework import generics
 from django.contrib.auth.forms import AuthenticationForm
 from IspToolboxAccounts.forms import IspToolboxUserCreationForm
-from rest_framework import generics, mixins, renderers, response
+from rest_framework import generics, mixins, renderers, response, filters
 from django.http import JsonResponse
 from rest_framework.response import Response
 import json
@@ -41,30 +41,30 @@ class AccessPointLocationListCreate(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
     serializer_class = serializers.AccessPointSerializer
-    renderer_classes = [renderers.TemplateHTMLRenderer]
     lookup_field = 'uuid'
+
+    renderer_classes = [renderers.TemplateHTMLRenderer, renderers.JSONRenderer]
     template_name = "workspace/molecules/access_point_pagination.html"
+    
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['name', 'last_updated', 'height', 'max_radius']
+    ordering = ['-last_updated']
 
     def get_queryset(self):
         user = self.request.user
         return AccessPointLocation.objects.filter(owner=user)
     
     def get(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response({'serializer': serializer, 'data': serializer.data})
+        return self.list(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
 
-class AccessPointLocationGet(mixins.RetrieveModelMixin, generics.GenericAPIView):
+class AccessPointLocationGet(mixins.RetrieveModelMixin,
+            mixins.DestroyModelMixin,
+            mixins.UpdateModelMixin,
+            generics.GenericAPIView):
     serializer_class = serializers.AccessPointSerializer
     lookup_field = 'uuid'
 
@@ -74,6 +74,12 @@ class AccessPointLocationGet(mixins.RetrieveModelMixin, generics.GenericAPIView)
     
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 
 class AccessPointCoverageResults(View):

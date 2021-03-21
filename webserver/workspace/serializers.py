@@ -28,6 +28,8 @@ class AccessPointSerializer(serializers.ModelSerializer):
     lookup_field = 'uuid'
     created = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    height_ft = serializers.FloatField(read_only=True)
+    max_radius_miles = serializers.FloatField(read_only=True)
     class Meta:
         model = models.AccessPointLocation
         fields = '__all__'

@@ -230,33 +230,47 @@ class MarketEvaluatorPipelineView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class MarketEvaluatorExportNoPipeline(View):
     def post(self, request):
-        body = json.loads(request.body.decode('utf-8'))
-        isShape = body.get('shapes', False)
-        isBuildings = body.get('buildings', False)
-        include = body.get('include')['geometry']
-        unique_id = str(int(time.time())) + str(random.randint(0, 100000))
-        object_name = f'kml/ISPTOOLBOX_{unique_id}.kml'
-        resp = {'error': None}
-        geoList = []
         try:
-            if isShape:
-                shapes = include
-                shapes['layer'] = 'shape'
-                geoList.append(shapes)
+            resp = {'error': None}
+            body = json.loads(request.body.decode('utf-8'))
+            isShape = body.get('shapes', False)
+            isBuildings = body.get('buildings', False)
+            include = body.get('include')
+            unique_id = str(int(time.time())) + str(random.randint(0, 100000))
+            object_name = f'kml/ISPTOOLBOX_{unique_id}.kml'
+            geoList = []
+            if 'geometry' in include:
+                includeGeom = include['geometry']
+                if isShape:
+                    shapes = includeGeom
+                    shapes['layer'] = 'shape'
+                    geoList.append(shapes)
+            elif 'geometries' in include:
+                includeGeom = include['geometries']
+                if isShape:
+                    shapes = includeGeom
+                    for i in range(len(shapes)):
+                        shapes[i]['layer'] = 'shape'
+                        geoList.append(shapes[i])
+            else:
+                resp['error'] = "No geometries included in request."
+                return JsonResponse(resp, status=500)
             if isBuildings:
                 buildingOutlines = getMicrosoftBuildings(
-                    json.dumps(include), None
+                    json.dumps(includeGeom), None
                 )
                 buildingOutlines['buildings']['layer'] = 'buildings'
                 geoList.append(buildingOutlines['buildings'])
             kml = convertKml(geoList)
-            succee = writeToS3(kml, object_name)
-            if not succee:
-                return JsonResponse({'error': 'fail to upload to S3'})
+            success = writeToS3(kml, object_name)
+            if not success:
+                return JsonResponse({'error': 'fail to upload to S3'}, status=500)
             url = createPresignedUrl(object_name)
             resp = {'url': url}
         except Exception as e:
-            resp['error'] = str(e)
+            logging.error("Internal error while exporting polygon area:" + str(e))
+            resp['error'] = "Internal error while exporting"
+            return JsonResponse(resp, status=500)
         return JsonResponse(resp)
 
 

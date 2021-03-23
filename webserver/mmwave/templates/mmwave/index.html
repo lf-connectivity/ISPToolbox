@@ -11,7 +11,9 @@
       var userRequestIdentity = "{{ fbid }}";
       var networkID = "{{ networkID }}";
       var radio_names = ["{{tx.name }}", "{{rx.name}}"];
-      var tool_units = "{{units}}";
+      var ISPTOOLBOX_SESSION_INFO = {
+          units: "{{units}}",
+      };
     </script>
     {% if not user.authenticated %}
       {% include "workspace/organisms/create_account_or_sign_in.html" %}

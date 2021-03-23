@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from workspace.models import Network, AccessPointLocation, AccessPointCoverage
+from workspace import pagination
 from gis_data.models import MsftBuildingOutlines
 from workspace import serializers
 from workspace.forms import NetworkForm
@@ -45,6 +46,8 @@ class AccessPointLocationListCreate(mixins.ListModelMixin,
 
     renderer_classes = [renderers.TemplateHTMLRenderer, renderers.JSONRenderer]
     template_name = "workspace/molecules/access_point_pagination.html"
+
+    pagination_class = pagination.IspToolboxCustomAjaxPagination
     
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['name', 'last_updated', 'height', 'max_radius']
@@ -53,6 +56,13 @@ class AccessPointLocationListCreate(mixins.ListModelMixin,
     def get_queryset(self):
         user = self.request.user
         return AccessPointLocation.objects.filter(owner=user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({
+            'ordering': self.request.GET.get('ordering', self.ordering[0])
+        })
+        return context
     
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -85,7 +95,7 @@ class AccessPointLocationGet(mixins.RetrieveModelMixin,
 class AccessPointCoverageResults(View):
     def get(self, request, uuid):
         ap = AccessPointLocation.objects.filter(owner=request.user, uuid=uuid).get()
-        coverage = AccessPointCoverage.objects.filter(ap=ap).get()
+        coverage = AccessPointCoverage.objects.filter(ap=ap).order_by('-created').first()
         features = []
         for building in coverage.nearby_buildings.all():
             feature = {

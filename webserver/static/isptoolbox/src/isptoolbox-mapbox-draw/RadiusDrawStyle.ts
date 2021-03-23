@@ -1,7 +1,7 @@
 export const RadiusDrawStyle = [
   // polygon fill
   {
-    id: 'gl-draw-polygon-fill',
+    id: 'gl-draw-polygon-fill-active',
     type: 'fill',
     filter: [
       'all',
@@ -18,7 +18,7 @@ export const RadiusDrawStyle = [
     type: 'symbol',
     filter: ['==', 'meta', 'currentPosition'],
     layout: {
-      'text-field': '{radiusKm}',
+      'text-field': '{radius}',
       'text-anchor': 'left',
       'text-offset': [1, 0],
       'text-size': 22,
@@ -37,36 +37,63 @@ export const RadiusDrawStyle = [
       'text-halo-blur': 1,
     },
   },
-  // vertex point halos
   {
-    id: 'gl-draw-polygon-and-line-vertex-halo-active-point',
-    type: 'circle',
-    filter: [
-      'all',
-      ['==', 'meta', 'vertex'],
+    'id': 'gl-draw-point-point-stroke-inactive-ap',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', 'active', 'false'],
       ['==', '$type', 'Point'],
+      ['==', 'meta', 'feature'],
       ['!=', 'mode', 'static'],
-      ['has', 'handle'],
+      ['has', 'user_uuid'],
     ],
-    paint: {
+    'paint': {
       'circle-radius': 7,
-      'circle-color': '#FFF',
-    },
+      'circle-opacity': 1,
+      'circle-color': '#fff'
+    }
   },
-  // vertex points
   {
-    id: 'gl-draw-polygon-and-line-vertex-active-point',
-    type: 'circle',
-    filter: [
-      'all',
-      ['==', 'meta', 'vertex'],
+    'id': 'gl-draw-point-inactive-ap',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', 'active', 'false'],
       ['==', '$type', 'Point'],
+      ['==', 'meta', 'feature'],
       ['!=', 'mode', 'static'],
-      ['has', 'handle'],
+      ['has', 'user_uuid'],
     ],
-    paint: {
+    'paint': {
       'circle-radius': 6,
-      'circle-color': '#C2D8EC',
-    },
+      'circle-color': '#3bb2d0'
+    }
+  },
+  {
+    'id': 'gl-draw-point-stroke-active-ap',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['==', 'active', 'true'],
+      ['!=', 'meta', 'midpoint'],
+      ['has', 'user_uuid'],
+    ],
+    'paint': {
+      'circle-radius': 9,
+      'circle-color': '#fff'
+    }
+  },
+  {
+    'id': 'gl-draw-point-active-ap',
+    'type': 'circle',
+    'filter': ['all',
+      ['==', '$type', 'Point'],
+      ['!=', 'meta', 'midpoint'],
+      ['==', 'active', 'true'],
+      ['has', 'user_uuid'],
+    ],
+    'paint': {
+      'circle-radius': 7,
+      'circle-color': '#fbb03b'
+    }
   },
 ]

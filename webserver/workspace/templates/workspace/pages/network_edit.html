@@ -11,11 +11,13 @@
       var networkID = "{{ network.uuid }}";
       var ISPTOOLBOX_SESSION_INFO = {
           initialMapCenter : {{ network.map_center.json|safe }},
-          initialMapZoom : {{ network.zoom_level }}
+          initialMapZoom : {{ network.zoom_level }},
+          units: "{{units}}",
+          networkID: "{{network.uuid}}",
       };
-      var tool_units = "{{units}}";
     </script>
     {{ geojson|json_script:"isp-map-features" }}
     {% include "workspace/organisms/access_point_modal.html" %}
+    {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
 </body>
 </html>

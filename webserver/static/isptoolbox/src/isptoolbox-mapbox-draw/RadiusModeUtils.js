@@ -1,39 +1,11 @@
+const circle = require('@turf/circle').default;
 // create a circle-like polygon given a center point and radius
 // https://stackoverflow.com/questions/37599561/drawing-a-circle-with-the-radius-in-miles-meters-with-mapbox-gl-js/39006388#39006388
 export function createGeoJSONCircle(center, radiusInKm, parentId, points = 64) {
-    const coords = {
-        latitude: center[1],
-        longitude: center[0],
-    };
-
-    const km = radiusInKm;
-
-    const ret = [];
-    const distanceX = km / (111.32 * Math.cos((coords.latitude * Math.PI) / 180));
-    const distanceY = km / 110.574;
-
-    let theta;
-    let x;
-    let y;
-    for (let i = 0; i < points; i += 1) {
-        theta = (i / points) * (2 * Math.PI);
-        x = distanceX * Math.cos(theta);
-        y = distanceY * Math.sin(theta);
-
-        ret.push([coords.longitude + x, coords.latitude + y]);
-    }
-    ret.push(ret[0]);
-
-    return {
-        type: 'Feature',
-        geometry: {
-            type: 'Polygon',
-            coordinates: [ret],
-        },
-        properties: {
-            parent: parentId,
-        },
-    };
+    const ret = circle(center, radiusInKm, {steps: points, properties: {
+      parent: parentId,
+    }});
+    return ret;
 }
 
 export function createVertex(parentId, coordinates, path, selected) {
@@ -89,7 +61,7 @@ export function lineDistance(coord1, coord2, unit = 'K') {
 export function createSupplementaryPointsForCircle(geojson) {
     const {properties, geometry} = geojson;
 
-    if (!properties.user_isCircle) {
+    if (!properties.user_radius) {
       return null;
     }
     const supplementaryPoints = [];

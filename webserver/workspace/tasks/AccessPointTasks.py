@@ -19,7 +19,7 @@ from shapely import wkt
 
 EARTH_RADIUS = 6371008.8
 ARC_SECOND_DEGREES = 1.0/ 60.0 / 60.0
-LIMIT_BUILDINGS = 200
+LIMIT_BUILDINGS = 10000
 INTERVAL_UPDATE_FRONTEND = 10
 
 
@@ -52,12 +52,12 @@ def generateAccessPointCoverage(channel_id, request):
     ap_coverage.save()
 
     # For each building, run calculation if it's reachable
-    for idx, building in enumerate(nearby_buildings):
-        serviceable, margin = checkBuildingServiceable(ap, building)
-        building.status = CoverageStatus.SERVICEABLE.value if serviceable else CoverageStatus.UNSERVICEABLE.value
-        building.save()
-        if idx % 10 == 0:
-            sendMessageToChannel(channel_id, {"type": "ap.status", "status" :ap_coverage.status, "uuid": str(ap.uuid)})
+    # for idx, building in enumerate(nearby_buildings):
+    #     serviceable, margin = checkBuildingServiceable(ap, building)
+    #     building.status = CoverageStatus.SERVICEABLE.value if serviceable else CoverageStatus.UNSERVICEABLE.value
+    #     building.save()
+    #     if idx % 10 == 0:
+    #         sendMessageToChannel(channel_id, {"type": "ap.status", "status" :ap_coverage.status, "uuid": str(ap.uuid)})
     # save everything and then notify the client
     ap_coverage.status = CoverageCalculationStatus.COMPLETE.value
     ap_coverage.save()

@@ -47,8 +47,8 @@ class AccessPointLocation(models.Model):
     )
     height = models.FloatField()
     max_radius = models.FloatField()
-    no_check_radius = models.FloatField()
-    default_cpe_height = models.FloatField()
+    no_check_radius = models.FloatField(default=0.01)
+    default_cpe_height = models.FloatField(default=2)
 
     created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)

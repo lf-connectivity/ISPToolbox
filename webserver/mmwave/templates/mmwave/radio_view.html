@@ -5,7 +5,7 @@
             width: 14px;
             height: 7px;
             background: {% firstof radio.color 'purple' %};"></span>
-            <h5 style="padding-left: 10px; margin-bottom: 0;">{% firstof radio.name radio_name %}</h5>
+            <h5 style="padding-left: 10px; margin-bottom: 0;" id="radio_name-{% firstof radio.id radio_id %}" >{% firstof radio.name radio_name %}</h5>
         </div>
         <div class="card-text">
             <div class="row py-1 align-items-center">

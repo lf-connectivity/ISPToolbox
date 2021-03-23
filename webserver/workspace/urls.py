@@ -21,4 +21,5 @@ urlpatterns = [
     path('workspace/api/ap-los/', views.AccessPointLocationListCreate.as_view()),
     path('workspace/api/ap-los/<uuid:uuid>/', views.AccessPointLocationGet.as_view()),
     path('workspace/api/ap-los/coverage/<uuid:uuid>/', views.AccessPointCoverageResults.as_view()),
+    path('workspace/api/tower/bulk-upload/', views.BulkUploadTowersView.as_view(), name="bulk_tower_upload"),
 ]

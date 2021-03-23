@@ -1,7 +1,17 @@
 export const LOSCheckMapboxStyles = [
+    {
+        'id': 'gl-draw-polygon-midpoint',
+        'type': 'circle',
+        'filter': ['all',
+          ["literal", false]],
+        'paint': {
+          'circle-radius': 3,
+          'circle-color': '#fbb03b'
+        }
+      },
     // Standard Link Styling - unselected
     {
-        'id': 'gl-draw-line-inactive',
+        'id': 'gl-draw-line-inactive-link',
         'type': 'line',
         'filter': ['all', ['==', 'active', 'false'],
             ['==', '$type', 'LineString'],
@@ -35,27 +45,44 @@ export const LOSCheckMapboxStyles = [
     },
     // Halos around radios - unselected
     {
-        "id": "gl-draw-polygon-and-line-vertex-halo-active",
-        "type": "circle",
-        "filter": ["all", ["==", "$type", "LineString"]],
-        "paint": {
-            "circle-radius": 8,
+        'id': 'gl-draw-polygon-and-line-vertex-inactive-halo-link',
+        'type': 'circle',
+        'filter': ['all',
+          ["==", "$type", "LineString"],
+          ["!=", "mode", "static"],
+          ['==', 'active', 'false'],
+        ],
+        'paint': {
+            "circle-radius": 5,
             "circle-color": "#ffffff"
         }
     },
-    // Default Circle Appearance
     {
-        'id': 'gl-draw-point-inactive',
+        'id': 'gl-draw-polygon-and-line-vertex-inactive-link',
         'type': 'circle',
-        'filter': ['all', ['==', 'active', 'false'],
-            ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static']
+        'filter': ['all',
+          ["==", "$type", "LineString"],
+          ["!=", "mode", "static"],
+          ['==', 'active', 'false'],
         ],
         'paint': {
-            'circle-radius': 10,
-            'circle-color': '#FFFFFF'
+            "circle-radius": 3,
+            "circle-color": "#3bb2d0"
         }
     },
+    // // Default Circle Appearance
+    // {
+    //     'id': 'gl-draw-point-inactive-link',
+    //     'type': 'circle',
+    //     'filter': ['all', ['==', 'active', 'false'],
+    //         ['==', '$type', 'Point'],
+    //         ['!=', 'mode', 'static']
+    //     ],
+    //     'paint': {
+    //         'circle-radius': 10,
+    //         'circle-color': '#FFFFFF'
+    //     }
+    // },
     // Radio styling 
     {
         'id': 'selected_radio_render',
@@ -65,7 +92,7 @@ export const LOSCheckMapboxStyles = [
             ['==', 'meta', 'radio_point']
         ],
         'paint': {
-            'circle-radius': 7,
+            'circle-radius': 5,
             'circle-color': ['get', "color"],
         },
     },

@@ -10,17 +10,28 @@ import {
     calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,calculateCameraOffsetFromAnimation, updateControlPoints
 } from './LinkOrbitAnimation';
 import { calculateLookVector, calculateLinkProfileFresnelPosition } from './HoverMoveLocation3DView';
-import { LinkMode, OverrideDirect, OverrideSimple, RadiusMode, RadiusDrawStyle} from './isptoolbox-mapbox-draw/index';
+import { LinkMode, OverrideDirect, OverrideSimple, RadiusMode, RadiusDrawStyle, CPEDrawMode, combineStyles} from './isptoolbox-mapbox-draw/index';
 import LidarAvailabilityLayer from './availabilityOverlay';
 import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
 import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
 import { Potree } from "./Potree.js";
-import {AccessPointTool} from "./AccessPointTool";
+import {AccessPointTool, AccessPointEvents} from "./AccessPointTool";
 import { hasCookie } from "./PageUtils";
 import {getInitialFeatures} from './utils/MapDefaults';
-import {setCenterZoomPreferences} from './utils/MapPreferences';
+import {isUnitsUS, setCenterZoomPreferences} from './utils/MapPreferences';
+import PubSub from 'pubsub-js';
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
+//@ts-ignore
+import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
+
+
+export enum LinkCheckEvents {
+    SET_INPUTS = 'link.set_inputs',
+    CLEAR_INPUTS = 'link.clear_inputs',
+    SHOW_INPUTS = 'link.show_inputs',
+}
 
 type HighChartsExtremesEvent = {
     min: number | undefined,
@@ -37,8 +48,12 @@ let potree = (window as any).Potree as null | typeof Potree;
 // @ts-ignore
 const THREE = window.THREE;
 
-// @ts-ignore
-const MapboxDraw = window.MapboxDraw;
+const mapbox_draw_lib = window.MapboxDraw;
+
+//@ts-ignore
+const mapboxdrawstyles = combineStyles(combineStyles(styles, LOSCheckMapboxStyles), RadiusDrawStyle);
+console.log({styles, LOSCheckMapboxStyles, RadiusDrawStyle})
+console.log({mapboxdrawstyles});
 // @ts-ignore
 const MapboxGeocoder = window.MapboxGeocoder;
 //@ts-ignore
@@ -48,6 +63,9 @@ const HOVER_POINT_SOURCE = 'hover-point-link-source';
 const HOVER_POINT_LAYER = 'hover-point-link-layer';
 const SELECTED_LINK_SOURCE = 'selected-link-source';
 const SELECTED_LINK_LAYER = 'selected-link-layer';
+const LOWEST_LAYER_SOURCE = 'lowest_layer_source';
+const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
+
 const center_freq_values: { [key: string]: number } = {
     '2.4 GHz': 2.437,
     '5 GHz': 5.4925,
@@ -67,7 +85,7 @@ export enum UnitSystems {
 
 export class LinkCheckPage {
     map: MapboxGL.Map;
-    Draw: any;
+    draw: MapboxDraw;
     selected_feature: any;
     link_chart: any;
 
@@ -140,7 +158,7 @@ export class LinkCheckPage {
         this._lidar = [];
         this._link_distance = 0;
         //@ts-ignore
-        this.units = window.tool_units;
+        this.units = window.ISPTOOLBOX_SESSION_INFO.units;
 
         this.datasets = new Map();
 
@@ -187,7 +205,9 @@ export class LinkCheckPage {
             this.centerFreq = center_freq_values[event.target.id];
             $(".freq-dropdown-item").removeClass('active');
             $(this).addClass('active');
-            this.Draw.setFeatureProperty(this.selectedFeatureID, 'freq', this.centerFreq);
+            if(this.selectedFeatureID){
+            this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', this.centerFreq);
+            }
             this.updateLinkChart(true);
         });
 
@@ -247,21 +267,11 @@ export class LinkCheckPage {
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
             center: initial_map_center, // starting position [lng, lat]
             zoom: initial_zoom, // starting zoom
-            // bounds: [
-            //     [
-            //         Math.min(this.getCoordinateFromUI('0','lng'), this.getCoordinateFromUI('1','lng')),
-            //         Math.min(this.getCoordinateFromUI('0','lat'), this.getCoordinateFromUI('1','lat'))
-            //     ],
-            //     [
-            //         Math.max(this.getCoordinateFromUI('0','lng'), this.getCoordinateFromUI('1','lng')),
-            //         Math.max(this.getCoordinateFromUI('0','lat'), this.getCoordinateFromUI('1','lat'))
-            //     ]
-            // ]
         });
 
         this.map.on('load', () => {
             // @ts-ignore
-            if(window.ISPTOOLBOX_SESSION_INFO !== undefined){
+            if(window.ISPTOOLBOX_SESSION_INFO.networkID !== undefined){
                 setCenterZoomPreferences(this.map);
             }
             var geocoder = new MapboxGeocoder({
@@ -271,34 +281,46 @@ export class LinkCheckPage {
             });
             document.getElementById('geocoder')?.appendChild(geocoder.onAdd(this.map));
 
+            this.map.addSource(LOWEST_LAYER_SOURCE, {type: 'geojson', data : {type: 'FeatureCollection', features: []}});
+            this.map.addLayer({
+                'id': LOWEST_LAYER_LAYER,
+                'type': 'line',
+                'source': LOWEST_LAYER_SOURCE,
+                'layout': {
+                },
+                'paint': {
+                }
+            });
+
             const tx_lat = parseFloat(String($('#lat-0').val()));
             const tx_lng = parseFloat(String($('#lng-0').val()));
             const rx_lat = parseFloat(String($('#lat-1').val()));
             const rx_lng = parseFloat(String($('#lng-1').val()));
 
             // Add a modified drawing control       
-            this.Draw = new MapboxDraw({
+            this.draw = new mapbox_draw_lib({
                 userProperties: true,
-                modes: Object.assign({
+                //@ts-ignore
+                modes: {...MapboxDraw.modes,
                     draw_link: LinkMode(),
                     simple_select: OverrideSimple(),
                     direct_select: OverrideDirect(),
                     draw_radius: RadiusMode(),
-                }, MapboxDraw.modes),
+                    draw_cpe: CPEDrawMode(),
+                },
                 displayControlsDefault: false,
                 controls: {
                 },
-                // @ts-ignore
-                // styles: LOSCheckMapboxStyles.concat(RadiusDrawStyle)
+                styles: mapboxdrawstyles
             });
 
-            this.accessPointTool = new AccessPointTool('#accessPointModal', this.map, this.Draw, this.profileWS);
+            this.accessPointTool = new AccessPointTool('#accessPointModal', this.map, this.draw, this.profileWS);
 
 
-            this.map.addControl(this.Draw, 'bottom-right');
+            this.map.addControl(this.draw, 'bottom-right');
             const deleteControl = new MapboxCustomDeleteControl({
                 map: this.map,
-                draw: this.Draw,
+                draw: this.draw,
             });
 
             this.map.addControl(deleteControl, 'bottom-right');
@@ -317,8 +339,14 @@ export class LinkCheckPage {
             this.map.on('draw.create', this.updateRadioLocation.bind(this));
 
             const initial_features = getInitialFeatures();
-            initial_features?.features.forEach((f: any) => {this.Draw.add(f)});
-            const features = this.Draw.add({
+            initial_features?.features.forEach((f: any) => {
+                if(f.properties.max_radius !== undefined){
+                    f.properties.radius = f.properties.max_radius;
+                    f.properties.center = f.geometry.coordinates;
+                }
+                this.draw.add(f);
+            });
+            const features = this.draw.add({
                 "type": 'Feature',
                 "geometry": {
                     "type": "LineString",
@@ -337,21 +365,27 @@ export class LinkCheckPage {
             this.selectedFeatureID = features.length ? features[0] : null;
             const prioritizeDirectSelect = function ({ features }: any) {
                 if (features.length == 1 && features[0].geometry.type !== 'Point') {
-                    this.Draw.changeMode('direct_select', {
+                    this.draw.changeMode('direct_select', {
                         featureId: features[0].id
                     });
+                    this.map.fire('draw.modechange', {mode:  'direct_select', featureId: features[0].id});
                 }
             }
             this.map.on('draw.selectionchange', this.updateRadioLocation.bind(this));
             this.map.on('draw.selectionchange', prioritizeDirectSelect.bind(this));
             this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
+            this.map.on('draw.selectionchange', this.showInputs.bind(this));
             this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
             this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
+            PubSub.subscribe(AccessPointEvents.AP_SELECTED, this.showLinkCheckProfile.bind(this));
+            PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
+            PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
+            PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));
 
             window.addEventListener('keydown', (event) => {
-                const featureCollection = this.Draw.getSelected();
+                const featureCollection = this.draw.getSelected();
                 if (event.target === this.map.getCanvas() && (event.key === "Backspace" || event.key === "Delete")) {
-                    featureCollection.features.forEach((feat:any) => {this.Draw.delete(feat.id)});
+                    featureCollection.features.forEach((feat:any) => {this.draw.delete(feat.id)});
                     this.map.fire('draw.delete', {features: featureCollection.features});
                 }
             });
@@ -387,7 +421,7 @@ export class LinkCheckPage {
                     'line-color': '#FFFFFF',
                     'line-width': 7
                 }
-            }, this.Draw.options.styles[0].id);
+            }, LOWEST_LAYER_LAYER);
             this.map.addSource(HOVER_POINT_SOURCE, {
                 'type': 'geojson',
                 'data': {
@@ -405,7 +439,7 @@ export class LinkCheckPage {
                     'circle-radius': 7,
                     'circle-color': '#FFFFFF'
                 }
-            }, this.Draw.options.styles[this.Draw.options.styles.length - 1].id);
+            }, LOWEST_LAYER_LAYER);
 
             this.map.addLayer({
                 'id': HOVER_POINT_LAYER,
@@ -415,7 +449,7 @@ export class LinkCheckPage {
                     'circle-radius': 5,
                     'circle-color': '#3887be'
                 }
-            }, this.Draw.options.styles[this.Draw.options.styles.length - 1].id);
+            }, LOWEST_LAYER_LAYER);
 
 
             this.updateLinkProfile();
@@ -423,26 +457,38 @@ export class LinkCheckPage {
 
 
             $('#add-link-btn').click(
-                () => { this.Draw.changeMode('draw_link'); this.map.fire('draw.modechange', {mode: 'draw_link'}); }
+                () => {
+                    //@ts-ignore
+                    this.draw.changeMode('draw_link');
+                    this.map.fire('draw.modechange', {mode: 'draw_link'}); }
             )
             $('#add-ap-btn').click(
-                () => { this.Draw.changeMode('draw_radius'); this.map.fire('draw.modechange', {mode: 'draw_radius'}); }
+                () => {
+                    //@ts-ignore
+                    this.draw.changeMode('draw_radius');
+                    this.map.fire('draw.modechange', {mode: 'draw_radius'}); }
+            )
+            $('#add-cpe-btn').click(
+                () => {
+                    //@ts-ignore
+                    this.draw.changeMode('draw_cpe');
+                    this.map.fire('draw.modechange', {mode: 'draw_cpe'}); }
             )
 
             // Update Callbacks for Radio Heights
             $('#hgt-0').change(
                 () => {
                     this.updateLinkChart(true);
-                    if (this.selectedFeatureID != null && this.Draw.get(this.selectedFeatureID)) {
-                        this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', parseFloat(String($('#hgt-0').val())))
+                    if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
+                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', parseFloat(String($('#hgt-0').val())))
                     }
                 }
             );
             $('#hgt-1').change(
                 () => {
                     this.updateLinkChart(true);
-                    if (this.selectedFeatureID != null && this.Draw.get(this.selectedFeatureID)) {
-                        this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', parseFloat(String($('#hgt-1').val())))
+                    if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
+                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', parseFloat(String($('#hgt-1').val())))
                     }
                 }
             );
@@ -450,14 +496,18 @@ export class LinkCheckPage {
                 $(id).change(
                     () => {
                         if (this.selectedFeatureID != null) {
-                            const feat = this.Draw.get(this.selectedFeatureID);
-                            feat.geometry.coordinates[coord1][coord2] = parseFloat(String($(id).val()))
-                            this.Draw.add(feat);
-                            const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
-                            if (selected_link_source.type === 'geojson') {
-                                selected_link_source.setData(feat.geometry);
+                            const feat = this.draw.get(this.selectedFeatureID);
+                            if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
+                                //@ts-ignore
+                                feat.geometry.coordinates[coord1][coord2] = parseFloat(String($(id).val()))
+                                this.draw.add(feat);
+                                const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+                                if (selected_link_source.type === 'geojson') {
+                                    //@ts-ignore
+                                    selected_link_source.setData(feat.geometry);
+                                }
+                                this.updateLinkProfile();
                             }
-                            this.updateLinkProfile();
                         }
                     }
                 );
@@ -643,16 +693,27 @@ export class LinkCheckPage {
         }
     }
 
+    setInputs(msg: string, data : {radio: number, latitude: number, longitude: number, name: string, height: number}){
+        $(`#lat-${data.radio}`).val(data.latitude.toFixed(6));
+        $(`#lng-${data.radio}`).val(data.longitude.toFixed(6));
+        $(`#hgt-${data.radio}`).val(data.height.toFixed(0));
+        $(`#radio_name-${data.radio}`).text(data.name);
+    }
+
+    showLinkCheckProfile(){
+        //@ts-ignore
+        $('#data-container').collapse('show');
+    }
+
     updateRadioLocation(update: any) {
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
-        if (update.features.length && update.features[0].properties.isCircle === undefined && update.features[0].geometry.type !== "Point") {
-            //@ts-ignore
-            $('#data-container').collapse('show');
+        if (update.features.length && update.features[0].properties.radius === undefined && update.features[0].geometry.type !== "Point") {
+            this.showLinkCheckProfile();
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
-            if (feat.properties.freq == undefined) {
-                this.Draw.setFeatureProperty(this.selectedFeatureID, 'freq', DEFAULT_LINK_FREQ);
+            if (feat.properties.freq == undefined && this.selectedFeatureID) {
+                this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', DEFAULT_LINK_FREQ);
             }
             const current_freq = Object.entries(center_freq_values).filter((v) => v[1] === feat.properties.freq);
             if (current_freq.length !== 0) {
@@ -663,15 +724,15 @@ export class LinkCheckPage {
             $('#lng-1').val(feat.geometry.coordinates[1][0].toFixed(5));
             $('#lat-1').val(feat.geometry.coordinates[1][1].toFixed(5));
             let radio0hgt = feat.properties.radio0hgt;
-            if (radio0hgt == undefined) {
+            if (radio0hgt == undefined && this.selectedFeatureID) {
                 radio0hgt = DEFAULT_RADIO_HEIGHT;
-                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', radio0hgt);
+                this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', radio0hgt);
             }
             $('#hgt-0').val(radio0hgt);
             let radio1hgt = feat.properties.radio1hgt;
-            if (feat.properties.radio1hgt == undefined) {
+            if (feat.properties.radio1hgt == undefined && this.selectedFeatureID) {
                 radio1hgt = DEFAULT_RADIO_HEIGHT;
-                this.Draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', radio1hgt);
+                this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', radio1hgt);
             }
             $('#hgt-1').val(radio1hgt);
             const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
@@ -684,7 +745,7 @@ export class LinkCheckPage {
 
     deleteDrawingCallback({features} : any) {
         this.removeLinkHalo(features);
-        this.clearInputs();
+        PubSub.publish(LinkCheckEvents.CLEAR_INPUTS);
     }
 
     drawModeChangeCallback({mode} : { mode: string}){
@@ -793,15 +854,10 @@ export class LinkCheckPage {
             this.selected_feature = query;
         }
         this.link_chart.showLoading();
-        $("#loading_spinner").removeClass('d-none');
-        $('#los-chart-tooltip-button').addClass('d-none');
-        $('#loading_failed_spinner').addClass('d-none');
-        $("#drawing_instructions").addClass('d-none');
-        $("#link_chart").addClass('d-none');
+        PubSub.publish(LinkCheckEvents.SHOW_INPUTS);
 
         // Create Callback Function for WebSocket
         // Use Websocket for request:
-        $("#3D-view-btn").addClass('d-none');
         this.profileWS.sendRequest(
             query_params.tx,
             query_params.rx,
@@ -1216,7 +1272,7 @@ export class LinkCheckPage {
             if (response.error !== null) {
                 $("#3D-view-btn").addClass('d-none');
             } else {
-                if (this.Draw.get(this.selectedFeatureID)) {
+                if (this.selectedFeatureID && this.draw.get(this.selectedFeatureID)) {
                     $("#3D-view-btn").removeClass('d-none');
 
                     if (this.currentLinkHash !== response.hash && this._elevation.length > 1) {
@@ -1289,6 +1345,16 @@ export class LinkCheckPage {
         $("#loading_spinner").addClass('d-none');
     }
 
+    showInputs(): void {
+        $("#loading_spinner").removeClass('d-none');
+        $('#los-chart-tooltip-button').addClass('d-none');
+        $('#loading_failed_spinner').addClass('d-none');
+        $("#drawing_instructions").addClass('d-none');
+        $("#link_chart").addClass('d-none');
+        $("#3D-view-btn").addClass('d-none');
+        $('.radio-card-body').removeClass('d-none');
+    }
+
     showPlotIfValidState() {
         if (this._lidar.length && this._elevation.length && this.selected_feature) {
             this.link_chart.hideLoading();
@@ -1331,6 +1397,5 @@ export class LinkCheckPage {
                     this.units === UnitSystems.US ? 'Elevation [ft]' : 'Elevation [m]'
             }
         });
-
     }
 }

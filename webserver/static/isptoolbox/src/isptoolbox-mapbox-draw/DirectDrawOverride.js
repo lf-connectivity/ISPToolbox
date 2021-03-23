@@ -19,14 +19,14 @@ export function OverrideDirect() {
             geojson.properties.active = Constants.activeStates.ACTIVE;
             renderLinkEnds(geojson, push);
             push(geojson);
-            const supplementaryPoints = geojson.properties.user_isCircle ? createSupplementaryPointsForCircle(geojson)
+            const supplementaryPoints = geojson.properties.user_radius ? createSupplementaryPointsForCircle(geojson)
               : createSupplementaryPoints(geojson, {
                 map: this.map,
                 midpoints: true,
                 selectedPaths: state.selectedCoordPaths
               });
             // Add a center point to geojson circle
-            if(geojson.properties.user_isCircle){
+            if(geojson.properties.user_radius){
                 const center_vertex = createVertex(geojson.properties.id, geojson.properties.user_center, "0.4", false);
                 push(center_vertex);
             }
@@ -39,13 +39,12 @@ export function OverrideDirect() {
     };
     direct_select.dragVertex = function (state, e, delta) {
         if (
-            state.feature.properties.isCircle &&
-            !state.feature.properties.los_plotted
+            state.feature.properties.radius
         ) {
             if(state.selectedCoordPaths.includes("0.4")){
                 moveFeatures(this.getSelected(), delta);
                 this.getSelected()
-                    .filter(feature => feature.properties.isCircle)
+                    .filter(feature => feature.properties.radius)
                     .map(circle => circle.properties.center)
                     .forEach(center => {
                         center[0] += delta.lng;
@@ -93,7 +92,7 @@ export function OverrideDirect() {
     direct_select.dragFeature = function (state, e, delta) {
         moveFeatures(this.getSelected(), delta);
         this.getSelected()
-            .filter(feature => feature.properties.isCircle)
+            .filter(feature => feature.properties.radius)
             .map(circle => circle.properties.center)
             .forEach(center => {
                 center[0] += delta.lng;

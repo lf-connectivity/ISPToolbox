@@ -1,9 +1,10 @@
 import {createGeoJSONCircle} from './RadiusModeUtils.js'
+import {isUnitsUS} from '../utils/MapPreferences';
 export function RadiusMode() {
     let mode = Object.assign({}, MapboxDraw.modes.draw_line_string);
 
     mode.minRadius = 0.0;
-    mode.units = 'km';
+    mode.units = isUnitsUS() ? 'mi' : 'km';
     mode.clickAnywhere = function (state, e) {
         if (e.originalEvent.type.includes('touch')) {
             state.line.addCoordinate(
@@ -77,7 +78,7 @@ export function RadiusMode() {
             properties: {
                 meta: 'currentPosition',
                 parent: state.line.id,
-                radiusKm: displayMeasurements.km,
+                radius: displayMeasurements.km,
             },
             geometry: {
                 type: 'Point',
@@ -120,7 +121,6 @@ export function RadiusMode() {
                 },
                 properties: {
                     radius: lineDistance(lineGeoJson) * 1000,
-                    isCircle: true,
                 },
                 id: state.line.id,
             };

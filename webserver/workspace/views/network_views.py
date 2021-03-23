@@ -1,10 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from workspace.models import Network, AccessPointLocation, AccessPointCoverage, AccessPointLocation
 from gis_data.models import MsftBuildingOutlines
 from workspace import serializers
-from workspace.forms import NetworkForm
+from workspace.forms import NetworkForm, UploadTowerCSVForm
 from django.http import HttpResponseRedirect
 from django.db.models import Count
 from rest_framework import generics
@@ -14,7 +14,9 @@ from rest_framework import generics, mixins
 from django.http import JsonResponse
 from workspace.serializers import AccessPointSerializer
 import json
-
+import io
+import csv
+from django.contrib.gis.geos import Point
 
 class DefaultNetworkView(View):
     def get(self, request):
@@ -52,6 +54,26 @@ class DeleteNetworkView(View):
         return HttpResponseRedirect('/pro/networks/')
 
 
+class BulkUploadTowersView(View):
+    def post(self, request):
+        if not request.user.is_anonymous:
+            try:
+                csv_file = request.FILES.get('file', None)
+                decoded_file = csv_file.read().decode('utf-8').splitlines()
+                for row in csv.DictReader(decoded_file, delimiter=','):
+                    _, created = AccessPointLocation.objects.update_or_create(
+                        owner=request.user,
+                        name=row['name'],
+                        location=Point(y=float(row['latitude']), x=float(row['longitude'])),
+                        height=float(row['height']),
+                        max_radius=float(row['radius']),
+                    )
+                return redirect(request.GET.get('next', '/pro'))
+            except Exception as e:
+                return JsonResponse({'error' : str(e)})
+        return redirect(request.GET.get('next', '/pro'))
+
+
 class EditNetworkView(View):
     def get(self, request, network_id=None):
         network = Network.objects.filter(uuid=network_id).first()
@@ -62,5 +84,6 @@ class EditNetworkView(View):
             'should_collapse_link_view': True,
             'beta': True,
             'units': 'US',
+            'tower_upload_form': UploadTowerCSVForm,
         }
         return render(request, 'workspace/pages/network_edit.html', context)

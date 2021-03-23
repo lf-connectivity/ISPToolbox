@@ -31,7 +31,7 @@ export function OverrideSimple() {
     ) {
       return;
     }
-    const supplementaryPoints = geojson.properties.user_isCircle
+    const supplementaryPoints = geojson.properties.user_radius
       ? createSupplementaryPointsForCircle(geojson)
       : [];
     supplementaryPoints.forEach(display);
@@ -52,7 +52,7 @@ export function OverrideSimple() {
     moveFeatures(this.getSelected(), delta);
 
     this.getSelected()
-      .filter(feature => feature.properties.isCircle)
+      .filter(feature => feature.properties.radius)
       .map(circle => circle.properties.center)
       .forEach(center => {
         center[0] += delta.lng;

@@ -13,6 +13,8 @@
   "dependencies": {
     "@mapbox/geojson-extent": "^1.0.0",
     "@mapbox/mapbox-gl-draw": "^1.2.2",
+    "@turf/circle": "^6.3.0",
+    "@types/mapbox__mapbox-gl-draw": "^1.2.1",
     "lodash": "^4.17.21",
     "pubsub-js": "^1.9.3"
   },

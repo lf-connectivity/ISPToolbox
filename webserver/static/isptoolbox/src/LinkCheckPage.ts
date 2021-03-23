@@ -478,12 +478,12 @@ export class LinkCheckPage {
                         const now = new Date();
                         const exp = now.getTime() + 365*24*60*60*1000;
                         now.setTime(exp);
-                        document.cookie = "losHelpSeen=true; expires=" + now.toUTCString() + '; path=/;';
-                        // Set the tooltip copy to visible, hide after 30s
+                        document.cookie = "losHelpSeen=true; Expires=" + now.toUTCString() + '; SameSite=None; Secure; path=/;';
+                        // Set the tooltip copy to visible, hide after 10s
                         $('.help-3D-copy').css({"opacity": "1", "visibility": "visible"});
                         setTimeout(() => {
                             $('.help-3D-copy').css({"opacity": "0", "visibility": "hidden"})
-                        }, 30000);
+                        }, 10000);
                     }
                 }
             });

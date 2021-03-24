@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from workspace import models
 
+
 class RadioSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Radio
@@ -30,6 +31,15 @@ class AccessPointSerializer(serializers.ModelSerializer):
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     height_ft = serializers.FloatField(read_only=True)
     max_radius_miles = serializers.FloatField(read_only=True)
+
     class Meta:
         model = models.AccessPointLocation
+        fields = '__all__'
+
+
+class NetworkMapPreferencesSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = models.NetworkMapPreferences
         fields = '__all__'

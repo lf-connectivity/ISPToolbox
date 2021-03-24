@@ -10,8 +10,10 @@
     <script type="text/javascript"> 
       var networkID = "{{ network.uuid }}";
       var ISPTOOLBOX_SESSION_INFO = {
-          initialMapCenter : {{ network.map_center.json|safe }},
-          initialMapZoom : {{ network.zoom_level }},
+        {% if map_preferences %}
+          initialMapCenter : {{ map_preferences.center.json|safe }},
+          initialMapZoom : {{ map_preferences.zoom }},
+        {% endif %}
           units: "{{units}}",
           networkID: "{{network.uuid}}",
       };

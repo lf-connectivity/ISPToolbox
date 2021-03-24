@@ -15,6 +15,8 @@ from mmwave.tasks.dsm_tasks import exportDSMData
 from celery import states
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from workspace.models import NetworkMapPreferences, AccessPointLocation
+from workspace.serializers import AccessPointSerializer
 
 
 @method_decorator(xframe_options_exempt, name='dispatch')
@@ -51,13 +53,21 @@ class LOSCheckDemo(View):
             'networkID': networkID,
             'units': units,
             'demo': True,
-            'beta': beta
+            'beta': beta,
         }
 
         # we're in demo view: suggest user sign-in or create an account
         if request.user.is_anonymous:
             context['sign_up_form'] = UserCreationForm
             context['sign_in_form'] = AuthenticationForm
+        else:
+            # TODO achong: remove this once workspace is built
+            map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)
+            geojson = AccessPointLocation.getUsersAccessPoints(request.user, AccessPointSerializer)
+            context.update({
+                'map_preferences': map_preferences,
+                'geojson': geojson,
+            })
 
         return render(request, 'mmwave/index.html', context)
 

@@ -12,12 +12,22 @@
       var networkID = "{{ networkID }}";
       var radio_names = ["{{tx.name }}", "{{rx.name}}"];
       var ISPTOOLBOX_SESSION_INFO = {
+        {% if map_preferences %}
+          initialMapCenter : {{ map_preferences.center.json|safe }},
+          initialMapZoom : {{ map_preferences.zoom }},
+        {% endif %}
           units: "{{units}}",
       };
     </script>
-    {% if not user.authenticated %}
+    {% if geojson and beta %}
+      {{ geojson|json_script:"isp-map-features" }}
+    {% endif %}
+    {% if not request.user.is_authenticated %}
       {% include "workspace/organisms/create_account_or_sign_in.html" %}
       <script src="{% static "login_signup.min.js" %}"> </script>
+    {% else %}
+      {% include "workspace/organisms/access_point_modal.html" %}
+      {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
     {% endif %}
     {{ beta|json_script:"los_beta" }}
 </body>

@@ -67,8 +67,7 @@ export class AccessPointModal {
         );
 
         // Open Modal
-        // @ts-ignore
-        $(this.selector).modal('show');
+        
     }
 
     getAccessPoints(msg: string, data : {ordering: string | null, page: number | string | null} | null) {

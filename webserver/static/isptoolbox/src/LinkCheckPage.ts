@@ -52,8 +52,6 @@ const mapbox_draw_lib = window.MapboxDraw;
 
 //@ts-ignore
 const mapboxdrawstyles = combineStyles(combineStyles(styles, LOSCheckMapboxStyles), RadiusDrawStyle);
-console.log({styles, LOSCheckMapboxStyles, RadiusDrawStyle})
-console.log({mapboxdrawstyles});
 // @ts-ignore
 const MapboxGeocoder = window.MapboxGeocoder;
 //@ts-ignore
@@ -270,10 +268,9 @@ export class LinkCheckPage {
         });
 
         this.map.on('load', () => {
-            // @ts-ignore
-            if(window.ISPTOOLBOX_SESSION_INFO.networkID !== undefined){
-                setCenterZoomPreferences(this.map);
-            }
+            // When map movement ends save where the user is looking
+            setCenterZoomPreferences(this.map);
+            
             var geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
                 mapboxgl: mapboxgl,

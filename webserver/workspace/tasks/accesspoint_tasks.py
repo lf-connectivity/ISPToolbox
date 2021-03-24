@@ -1,7 +1,7 @@
 from celery import shared_task
 from workspace.models import (
-    AccessPointLocation, AccessPointCoverage, BuildingCoverage, BuildingCoverage,
-    CoverageStatus, CoverageCalculationStatus
+    AccessPointLocation, AccessPointCoverage, BuildingCoverage,
+    CoverageCalculationStatus
 )
 from gis_data.models import MsftBuildingOutlines
 from django.contrib.gis.geos import GEOSGeometry, LineString
@@ -12,16 +12,12 @@ from mmwave.lidar_utils.LidarEngine import LidarEngine, LidarResolution
 import numpy as np
 import math
 import json
-import random
-from shapely.ops import polylabel
-from shapely import wkt
 
 
 EARTH_RADIUS = 6371008.8
-ARC_SECOND_DEGREES = 1.0/ 60.0 / 60.0
+ARC_SECOND_DEGREES = 1.0 / 60.0 / 60.0
 LIMIT_BUILDINGS = 10000
 INTERVAL_UPDATE_FRONTEND = 10
-
 
 
 def sendMessageToChannel(network_id, message):
@@ -61,7 +57,7 @@ def generateAccessPointCoverage(channel_id, request):
     # save everything and then notify the client
     ap_coverage.status = CoverageCalculationStatus.COMPLETE.value
     ap_coverage.save()
-    sendMessageToChannel(channel_id, {"type": "ap.status", "status" :ap_coverage.status, "uuid": str(ap.uuid)})
+    sendMessageToChannel(channel_id, {"type": "ap.status", "status": ap_coverage.status, "uuid": str(ap.uuid)})
 
 
 def checkBuildingServiceable(access_point, building):
@@ -78,8 +74,8 @@ def checkBuildingServiceable(access_point, building):
 
 def checkForObstructions(access_point, profile):
     # TODO achong: use ap height (from ground?), cpe height and no_check_radius, add curvature of earth
-    start = profile[0] + 2 #access_point.height
-    end = profile[-1] + 2 #access_point.default_cpe_height
+    start = profile[0] + 2  # access_point.height
+    end = profile[-1] + 2  # access_point.default_cpe_height
     length = len(profile)
     result = np.linspace(start, end, length) - profile
     if np.any(result < 0):
@@ -87,11 +83,11 @@ def checkForObstructions(access_point, profile):
     else:
         return True, np.min(result)
 
+
 def destination(origin, distance, bearing):
     """
-    Helper function to get location of point at distnace, bearing from point 
-
-    distance 
+    Helper function to get location of point at distance, bearing from point
+    distance
     """
     longitude1 = math.radians(origin[0])
     latitude1 = math.radians(origin[1])
@@ -110,6 +106,7 @@ def destination(origin, distance, bearing):
     lat = math.degrees(latitude2)
 
     return [lng, lat]
+
 
 def createGeoJSONCircle(center, radius, steps=64):
     """

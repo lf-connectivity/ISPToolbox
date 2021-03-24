@@ -3,7 +3,7 @@ from django.views import View
 from IspToolboxAccounts.forms import IspToolboxUserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect, render
-from workspace.views import DefaultWorkspaceView
+
 
 class CreateAccountView(View):
     def post(self, request):
@@ -14,6 +14,8 @@ class CreateAccountView(View):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        if request.GET.get('next', None) is not None:
+            redirect(request.GET.get('next'))
         return render(
             request,
             'workspace/pages/default.html',

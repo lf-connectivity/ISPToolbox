@@ -1,22 +1,15 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from workspace.models import Network, AccessPointLocation, AccessPointCoverage, AccessPointLocation
-from gis_data.models import MsftBuildingOutlines
-from workspace import serializers
+from workspace.models import Network, AccessPointLocation, NetworkMapPreferences
 from workspace.forms import NetworkForm, UploadTowerCSVForm
 from django.http import HttpResponseRedirect
 from django.db.models import Count
-from rest_framework import generics
-from django.contrib.auth.forms import AuthenticationForm
-from IspToolboxAccounts.forms import IspToolboxUserCreationForm
-from rest_framework import generics, mixins
 from django.http import JsonResponse
 from workspace.serializers import AccessPointSerializer
-import json
-import io
 import csv
 from django.contrib.gis.geos import Point
+
 
 class DefaultNetworkView(View):
     def get(self, request):
@@ -70,7 +63,7 @@ class BulkUploadTowersView(View):
                     )
                 return redirect(request.GET.get('next', '/pro'))
             except Exception as e:
-                return JsonResponse({'error' : str(e)})
+                return JsonResponse({'error': str(e)})
         return redirect(request.GET.get('next', '/pro'))
 
 
@@ -78,12 +71,14 @@ class EditNetworkView(View):
     def get(self, request, network_id=None):
         network = Network.objects.filter(uuid=network_id).first()
         geojson = AccessPointLocation.getUsersAccessPoints(request.user, AccessPointSerializer)
+        map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)
         context = {
-            'network' : network,
+            'network': network,
             'geojson': geojson,
             'should_collapse_link_view': True,
             'beta': True,
             'units': 'US',
             'tower_upload_form': UploadTowerCSVForm,
+            'map_preferences': map_preferences,
         }
         return render(request, 'workspace/pages/network_edit.html', context)

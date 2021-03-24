@@ -8,8 +8,8 @@ export function setCenterZoomPreferences(map: mapboxgl.Map) {
         const center = map.getCenter();
         const zoom = map.getZoom();
         $.ajax({
-            url: `/pro/workspace/api/network/${(window as any).ISPTOOLBOX_SESSION_INFO.networkID as string}/`,
-            data: { map_center: `SRID=4326;POINT (${center.lng} ${center.lat})`, zoom_level: zoom },
+            url: '/pro/workspace/api/network/map/',
+            data: { center: `SRID=4326;POINT (${center.lng} ${center.lat})`, zoom: zoom },
             method: "PATCH",
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')

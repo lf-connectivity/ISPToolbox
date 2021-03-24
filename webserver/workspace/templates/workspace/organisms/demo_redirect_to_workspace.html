@@ -1,0 +1,26 @@
+<!-- Modal -->
+<div class="modal fade" id="redirect_workspace_modal" tabindex="-1" role="dialog" aria-labelledby="suggest create account" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">This Feature Requires An ISP Toolbox Account</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body text-center">
+        {% with logo_style='width: 350px;' %}
+            {% include "workspace/atoms/isptoolbox_svg.html" %}
+        {% endwith %}
+        <p> Empowering small, local ISPs - by Facebook</p>
+        {% include 'workspace/organisms/value_props.html' %}
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary isptoolbox-btn" data-dismiss="modal">Close</button>
+        <a href="{% url 'isptoolbox_pro_home' %}" target="_parent">
+            <button class="btn btn-primary isptoolbox-btn">Create Account at pro.isptoolbox.io</button>
+        </a>
+    </div>
+    </div>
+</div>
+</div>

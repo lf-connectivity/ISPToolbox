@@ -334,11 +334,12 @@ export class AccessPointTool {
     }
 
     sendCoverageRequest(msg: string, data: {features: Array<GeoJSON.Feature>}){
-        data.features.forEach((f) => {
+        if(data.features.length === 1){
+            const f = data.features[0];
             if(f.properties){
                 this.ws.sendAPRequest(f.properties.uuid);
             }
-        })
+        }
     }
 
     createAccessPointLocation(id: string) {

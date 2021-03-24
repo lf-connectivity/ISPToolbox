@@ -7,7 +7,11 @@
     <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="rounded"
         data-auto-logout-link="false" data-use-continue-as="true">
     </div>
-    <form action="{% url 'login_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form py-3">
+    <form action="{% url 'login_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form py-3"
+    {% if target_iframe_parent %}
+    target='_parent'
+    {% endif %}
+    >
         {% csrf_token %}
         {{ sign_in_form }}
         <input type="submit" value="Login">

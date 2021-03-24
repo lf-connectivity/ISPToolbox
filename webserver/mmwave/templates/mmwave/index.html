@@ -23,8 +23,7 @@
       {{ geojson|json_script:"isp-map-features" }}
     {% endif %}
     {% if not request.user.is_authenticated %}
-      {% include "workspace/organisms/create_account_or_sign_in.html" %}
-      <script src="{% static "login_signup.min.js" %}"> </script>
+      {% include "workspace/organisms/demo_redirect_to_workspace.html" %}
     {% else %}
       {% include "workspace/organisms/access_point_modal.html" %}
       {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}

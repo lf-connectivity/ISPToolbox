@@ -102,7 +102,7 @@ WAGTAIL_SITE_NAME = 'Help Center'
 CSP_EXCLUDE_URL_PREFIXES = ('cms/', 'pages/',)
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.DjangoModelPermissions',),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }

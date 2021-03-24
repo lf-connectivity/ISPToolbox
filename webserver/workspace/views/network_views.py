@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from workspace.serializers import AccessPointSerializer
 import csv
 from django.contrib.gis.geos import Point
+import uuid
 
 
 class DefaultNetworkView(View):
@@ -69,7 +70,9 @@ class BulkUploadTowersView(View):
 
 class EditNetworkView(View):
     def get(self, request, network_id=None):
-        network = Network.objects.filter(uuid=network_id).first()
+        network = Network.objects.filter(uuid=network_id, owner=request.user).first()
+        if network is None:
+            network = {'uuid': uuid.uuid4()}
         geojson = AccessPointLocation.getUsersAccessPoints(request.user, AccessPointSerializer)
         map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)
         context = {

@@ -667,7 +667,6 @@ export class LinkCheckPage {
     };
 
     deleteDrawingCallback({features} : any) {
-        console.log(features);
         this.removeLinkHalo(features);
         this.clearInputs();
     }
@@ -817,8 +816,12 @@ export class LinkCheckPage {
 
         // Set the hover state over both the fresnel cone chart
         // and the LOS chart in Highchart.
-        this.link_chart.series[3].data[this.linkProfileFresnelPosition].setState(state);
-        this.link_chart.series[2].data[this.linkProfileFresnelPosition].setState(state);
+        if(this.link_chart.series[3].data.length > this.linkProfileFresnelPosition){
+            this.link_chart.series[3].data[this.linkProfileFresnelPosition].setState(state);
+        }
+        if(this.link_chart.series[2].data.length > this.linkProfileFresnelPosition){
+            this.link_chart.series[2].data[this.linkProfileFresnelPosition].setState(state);
+        }
     }
 
     hideHover3DDot() {

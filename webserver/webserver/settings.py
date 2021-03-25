@@ -152,8 +152,29 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # These keys have full access to AWS S3 and secrets manager
 
+FB_SDK_SECRETS = json.loads(get_secret("prod/fb_sdk_isptoolbox",
+                                       aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                       aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+SOCIAL_AUTH_FACEBOOK_KEY = FB_SDK_SECRETS['fb_sdk_isptoolbox_app_key']  # App ID
+SOCIAL_AUTH_FACEBOOK_SECRET = FB_SDK_SECRETS['fb_sdk_isptoolbox_app_secret']  # app key
 
 MAPBOX_ACCESS_TOKEN_PUBLIC = 'pk.eyJ1IjoiaXNwdG9vbGJveCIsImEiOiJja2p5eHd1aGcwMjhoMm5wcGkxdnl4N2htIn0.cLO8vp0k2kXclp4CNzwWhQ'
+MAPBOX_ACCOUNT = 'isptoolbox'
+
+MAPBOX_SECRETS = json.loads(get_secret("prod/mapbox",
+                                       aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                       aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+MAPBOX_ACCESS_TOKEN_BACKEND = MAPBOX_SECRETS['MAPBOX_ACCESS_TOKEN_BACKEND']
+MAPBOX_ACCOUNT_PASSWORD = MAPBOX_SECRETS['MAPBOX_ACCOUNT_PASSWORD']
+MAPBOX_ACCOUNT_EMAIL = MAPBOX_SECRETS['MAPBOX_ACCOUNT_EMAIL']
+
+# This UID and key are used for the cloudrf API, currently using the 10,000 requests/month plan
+CLOUD_RF = json.loads(get_secret("prod/cloudrf",
+                                 aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                 aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+
+CLOUDRF_UID = CLOUD_RF['cloud_rf_uid']
+CLOUDRF_KEY = CLOUD_RF['cloud_rf_key']
 
 MIDDLEWARE = [
     'IspToolboxApp.middleware.HealthCheckMiddleware',
@@ -212,8 +233,8 @@ GIS_DB_CREDENTIALS = json.loads(get_secret("prod/gis_db",
                                            aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
 if PROD:
     DJANGO_ORM_DB_CREDENTIALS = json.loads(get_secret("prod/isptoolbox_django",
-                                            aws_access_key_id=AWS_ACCESS_KEY_ID,
-                                            aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+                                                      aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
     DJANGO_ORM_DB_CREDENTIALS.update({
         'name': 'django_db',
     })
@@ -225,7 +246,6 @@ else:
         'host': os.environ.get('POSTGRES_DB', 'localhost'),
         'port': '5432',
     }
-print(DJANGO_ORM_DB_CREDENTIALS)
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -260,7 +280,6 @@ DATABASES = {
         'PORT': GIS_DB_CREDENTIALS['port'],
     }
 }
-print(DATABASES)
 
 DATABASE_ROUTERS = ['gis_data.models.GISDataRouter']
 AUTH_USER_MODEL = "IspToolboxAccounts.User"

@@ -30,10 +30,17 @@ All of these frameworks have stellar open source documentation, so be sure to co
 - ensure docker daemon is running (dockerd)
 - clone git repository
     - make sure you clone all submodules `git submodule update --init --recursive`
-- `make debug` to run locally on localhost:8000
+- `make setup_dev` to build docker containers - these will have volume mounts - this enables hot reloading code, only re-run this if you've added an npm module or modified the pip/conda dependencies
+- `make run_dev` to run locally on localhost:8000
 ## Make command list
-`make setup`
+`make setup_dev`
 - Installs required packages on system. Should only need to be ran once during first-time setup.
+
+`make run_dev`
+- Runs code in development environment
+    - gis data is production
+    - your local code checkout is mounted as a volume in docker
+    - hot reloading should be enabled
 
 `make update`
 - Updates and/or installs python packages as definred in requirements.txt via pip.
@@ -47,14 +54,11 @@ All of these frameworks have stellar open source documentation, so be sure to co
 `make run`
 - Starts the webserver.
 
-`make debug`
-- runs backend in debug configuration. attach to django using vscode
-
 ## Running fbctower locally with WWW OnDemand
 
 1. On your EC2 instance
 
-    `make debug`
+    `make run_dev`
 
 this will startup the whole backend stack on your machine
 

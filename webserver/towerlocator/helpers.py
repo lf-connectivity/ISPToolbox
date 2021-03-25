@@ -3,10 +3,11 @@ import json
 import io
 from IspToolboxApp.tasks.MarketEvaluatorHelpers import createPipelineFromKMZ
 from bots.github_issues import make_github_issue
+from django.conf import settings
 
-# This UID and key are used for the cloudrf API, currently using the 10,000 requests/month plan
-cloud_rf_uid = '27141'
-cloud_rf_key = '71492256a3cd1e54e14f6413842f1ab41c907664'
+
+cloud_rf_uid = settings.CLOUDRF_UID
+cloud_rf_key = settings.CLOUDRF_KEY
 
 # https://api.cloudrf.com/
 headers = {'Content-Type': 'application/x-www-form-urlencoded'}

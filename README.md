@@ -1,16 +1,31 @@
 # ISP Toolbox Webserver
 ISP Toolbox Backend Server Code
-- powers market evaluator, network cost comparison
-- hosted: AWS, EC2
+- powers market evaluator, network cost comparison, los-check, dsm-export
+- hosted: AWS, EC2, S3
 - database: AWS Postgres
-- KV store: Elasticache
-- domain: https://fbctower.com
+- KV store: Elasticache - redis
+- domain: https://isptoolbox.io/
+
+## Development Philosophy:
+-    Move Fast and Break Things! - Get to market as fast as possible, you want people to use your code and improve connectivity with it
+-    Don't reinvent the wheel - ["not invented here"](https://en.wikipedia.org/wiki/Not_invented_here) syndrome is real, always research if someone already built what you want
+-    [KISS](https://en.wikipedia.org/wiki/KISS_principle) - keep it simple, stupid
+-    [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) - don't repeat yourself
+
+## Main Technologies / Frameworks:
+This is basically the Instagram techstack
+- [Django](https://docs.djangoproject.com/en/3.1/) - web framework + ORM
+- [Celery](https://docs.celeryproject.org/en/stable/) - async tasks (things that aren't CRUD)
+- [django rest framework](https://www.django-rest-framework.org/) - ORM -> REST API generator
+- [Channels](https://channels.readthedocs.io/en/stable/) - websocket interface
+
+All of these frameworks have stellar open source documentation, so be sure to consult them
 
 ## Getting Dev Environment Setup
 - get AWS account `fbc-tower-design` - bunnylol aws
 - create EC2 instance from template
 - chmod 400 on .pem file
-- ssh using the isptoolbox.pem in the /terraform folder
+- ssh using the isptoolbox.pem in the lastpass folder - ask a dev for the pem
 - install docker and docker compose
 - ensure docker daemon is running (dockerd)
 - clone git repository

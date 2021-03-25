@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import json
+from .secrets import get_secret
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -199,10 +202,13 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Load Secrets
+GIS_DB_CREDENTIALS = json.loads(get_secret("prod/gis_data",
+                                           aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                           aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -221,16 +227,18 @@ DATABASES = {
     'gis_data': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'postgres',
-        'USER': 'fbcmasteruser',
-        'HOST': 'isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com',
-        'PORT': '5432',
+        'USER': GIS_DB_CREDENTIALS['username'],
+        'PASSWORD': GIS_DB_CREDENTIALS['password'],
+        'HOST': GIS_DB_CREDENTIALS['host'],
+        'PORT': GIS_DB_CREDENTIALS['port'],
     },
     'gis_data_read_replica': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'postgres',
-        'USER': 'fbcmasteruser',
+        'USER': GIS_DB_CREDENTIALS['username'],
+        'PASSWORD': GIS_DB_CREDENTIALS['password'],
         'HOST': 'isptoolbox-db-prod-read-replica1.cahmkzzberpf.us-west-1.rds.amazonaws.com',
-        'PORT': '5432',
+        'PORT': GIS_DB_CREDENTIALS['port'],
     }
 }
 

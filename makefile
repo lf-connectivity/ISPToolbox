@@ -8,15 +8,10 @@ run_dev:
 	@echo ----------------------------------------------Start Development Server------------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
-migrate:
+prod_migrate:
 	@echo ----------------------------------------------RUNNING DJANGO MIGRATIONS PROD----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py migrate
-
-prod_makemigrations:
-	@echo ----------------------------------------------CREATING DJANGO MIGRATIONS PROD----------------------------------------
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py makemigrations
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py migrate	
 
 prod_shell:
 	@echo ----------------------------------------------DJANGO SHELL PROD----------------------------------------
@@ -24,7 +19,7 @@ prod_shell:
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py shell
 
 debug_shell:
-	@echo ----------------------------------------------STARTING DEBUG----------------------------------------
+	@echo ----------------------------------------------STARTING DEBUG SHELL----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py shell
 
@@ -32,11 +27,6 @@ default_objects:
 	@echo ----------------------------------------------CREATING SAMPLE OBJECTS----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py create_default_overlays
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py get_latest_usgs
-
-debug:
-	@echo ----------------------------------------------STARTING DEBUG----------------------------------------
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
 test: 
 	@echo ----------------------------------------------STARTING TESTS----------------------------------------

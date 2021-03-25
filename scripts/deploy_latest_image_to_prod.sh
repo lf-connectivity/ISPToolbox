@@ -8,3 +8,4 @@ aws ecs update-service --cluster isptoolbox-production-webserver-cluster \
     --service isptoolbox-production-webserver-service --force-new-deployment
 echo "It may take a few minutes for the old containers to stop. \
     The webserver has a 300 second draining period from the load balancer"
+echo "Make sure you ran migrations - otherwise users might get 500 errors"

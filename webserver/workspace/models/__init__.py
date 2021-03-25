@@ -1,7 +1,7 @@
 from .workspace_models import ISPCompany, Employee, NetworkMapPreferences
 from .network_models import (
     Network, AccessPointLocation, CoverageStatus, BuildingCoverage, CoverageCalculationStatus,
-    AccessPointCoverage, Radio, PTPLink
+    AccessPointCoverage, Radio, PTPLink, CPE
 )
 
 __all__ = [

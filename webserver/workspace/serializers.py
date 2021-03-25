@@ -44,6 +44,7 @@ class NetworkMapPreferencesSerializer(serializers.ModelSerializer):
         model = models.NetworkMapPreferences
         fields = '__all__'
 
+
 class CPESerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     lookup_field = 'uuid'

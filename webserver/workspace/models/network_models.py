@@ -132,6 +132,7 @@ class PTPLink(models.Model):
     radios = models.ManyToManyField(Radio)
     network = models.ForeignKey(Network, on_delete=models.CASCADE, related_name='ptplinks')
 
+
 class CPE(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -149,5 +150,3 @@ class CPE(models.Model):
     @property
     def height_ft(self):
         return self.height * 3.28084
-
-    

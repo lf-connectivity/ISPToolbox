@@ -43,3 +43,14 @@ class NetworkMapPreferencesSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.NetworkMapPreferences
         fields = '__all__'
+
+class CPESerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    lookup_field = 'uuid'
+    created = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    height_ft = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = models.CPE
+        fields = '__all__'

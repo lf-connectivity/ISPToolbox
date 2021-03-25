@@ -131,3 +131,23 @@ class PTPLink(models.Model):
     frequency = models.FloatField(default=2.4)
     radios = models.ManyToManyField(Radio)
     network = models.ForeignKey(Network, on_delete=models.CASCADE, related_name='ptplinks')
+
+class CPE(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    uuid = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    height = models.FloatField()
+    created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    location = geo_models.PointField()
+
+    @property
+    def height_ft(self):
+        return self.height * 3.28084
+
+    

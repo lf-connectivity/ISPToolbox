@@ -1,5 +1,5 @@
 from celery import shared_task
-from IspToolboxApp.Models.MarketingConvertModels import MarketingPinConversion
+from IspToolboxApp.models.MarketingConvertModels import MarketingPinConversion
 import datetime
 import heapq
 from django.contrib.gis.geos import Point, \

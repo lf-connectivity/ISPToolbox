@@ -1,6 +1,6 @@
 from django.views import View
 from django.http import JsonResponse, HttpResponse
-from IspToolboxApp.Models.MarketingModels import MarketingAccount, MarketingAudience
+from IspToolboxApp.models.MarketingModels import MarketingAccount, MarketingAudience
 from django.contrib.gis.geos import GEOSGeometry
 from django.utils.decorators import method_decorator
 

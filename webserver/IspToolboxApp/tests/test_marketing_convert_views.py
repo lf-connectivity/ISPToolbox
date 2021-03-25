@@ -1,6 +1,6 @@
 from django.test import TestCase
-from IspToolboxApp.Models.MarketingConvertModels import MarketingPinConversion
-from IspToolboxApp.Tasks.MarketingPinConversionTasks import ConvertPins
+from IspToolboxApp.models.MarketingConvertModels import MarketingPinConversion
+from IspToolboxApp.tasks.MarketingPinConversionTasks import ConvertPins
 from django.contrib.gis.geos import GEOSGeometry
 
 from .static_test_data import exclude_polygon_collection, \

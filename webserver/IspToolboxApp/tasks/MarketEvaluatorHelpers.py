@@ -2,7 +2,7 @@ from django.db import connections
 import logging
 import json
 from shapely.geometry import shape
-from IspToolboxApp.Tasks.mmWaveTasks.mmwave import getOSMNodes
+from IspToolboxApp.tasks.mmWaveTasks.mmwave import getOSMNodes
 from zipfile import ZipFile
 import tempfile
 import os

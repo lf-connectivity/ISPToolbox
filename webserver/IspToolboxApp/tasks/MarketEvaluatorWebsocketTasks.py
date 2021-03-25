@@ -3,10 +3,10 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, broadbandNow, mlabSpeed, \
     grantGeog, zipGeog, countyGeog, medianIncome
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
+from IspToolboxApp.tasks.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
     getOSMBuildings
 from towerlocator.helpers import getViewShed
-from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
+from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 
 
 def sync_send(channelName, consumer, value, uuid):

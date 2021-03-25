@@ -7,9 +7,9 @@ from IspToolboxApp.util.admin_timeseries_util import (
     get_next_in_date_hierarchy, get_request_datetime, daterange)
 
 # Register your models here.
-from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline, MarketEvaluatorSummary
-from IspToolboxApp.Models.MarketingModels import MarketingAudience, MarketingAccount
-from IspToolboxApp.Models.MarketingConvertModels import MarketingPinConversion
+from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline, MarketEvaluatorSummary
+from IspToolboxApp.models.MarketingModels import MarketingAudience, MarketingAccount
+from IspToolboxApp.models.MarketingConvertModels import MarketingPinConversion
 
 admin.site.register(MarketEvaluatorPipeline)
 admin.site.register(MarketingAudience)

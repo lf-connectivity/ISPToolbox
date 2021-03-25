@@ -1,7 +1,7 @@
 import requests
 import json
 import io
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import createPipelineFromKMZ
+from IspToolboxApp.tasks.MarketEvaluatorHelpers import createPipelineFromKMZ
 from bots.github_issues import make_github_issue
 
 # This UID and key are used for the cloudrf API, currently using the 10,000 requests/month plan

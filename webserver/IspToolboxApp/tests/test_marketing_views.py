@@ -1,5 +1,5 @@
 from django.test import TestCase, Client
-from IspToolboxApp.Views.RetargetingPixelView import marketing_api_secret
+from IspToolboxApp.views.RetargetingPixelView import marketing_api_secret
 import json
 
 

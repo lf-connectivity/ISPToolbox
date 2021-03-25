@@ -2,14 +2,14 @@ from celery import shared_task
 from area import area
 from django.db import connections
 from NetworkComparison.util import squaredMetersToMiles
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate
+from IspToolboxApp.tasks.MarketEvaluatorHelpers import getQueryTemplate
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json
 from django.contrib.gis.geos import GEOSGeometry
 from NetworkComparison.NCTasks.osm_anchor_institution_task import fetchAnchorInstitutions
 from NetworkComparison.NCTasks.buildings_mst import getBuildingsMST
-from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
+from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 
 
 def sync_send(channelName, consumer, value, uuid):

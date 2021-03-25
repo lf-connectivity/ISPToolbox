@@ -5,8 +5,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 
-from IspToolboxApp.Models.MarketingConvertModels import MarketingPinConversion
-from IspToolboxApp.Tasks.MarketingPinConversionTasks import ConvertPins
+from IspToolboxApp.models.MarketingConvertModels import MarketingPinConversion
+from IspToolboxApp.tasks.MarketingPinConversionTasks import ConvertPins
 
 from celery import current_app
 

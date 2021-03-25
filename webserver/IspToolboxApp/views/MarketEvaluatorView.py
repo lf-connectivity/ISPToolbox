@@ -2,9 +2,9 @@ from django.views import View
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
-import IspToolboxApp.Tasks.MarketEvaluatorTasks
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import\
+from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
+import IspToolboxApp.tasks.MarketEvaluatorTasks
+from IspToolboxApp.tasks.MarketEvaluatorHelpers import\
     getMicrosoftBuildingsOffset, createPipelineFromKMZ, convertKml, getMicrosoftBuildings
 from django.http import JsonResponse
 import json
@@ -122,7 +122,7 @@ class MarketEvaluatorPipelineKMZ(View):
                 'uuid': pipeline.uuid,
                 'token': pipeline.token,
                 'error': None}
-            task = IspToolboxApp.Tasks.MarketEvaluatorTasks.genMarketEvaluatorData.delay(
+            task = IspToolboxApp.tasks.MarketEvaluatorTasks.genMarketEvaluatorData.delay(
                 pipeline.uuid)
             pipeline.task = task.id
             pipeline.save(update_fields=['task'])
@@ -219,7 +219,7 @@ class MarketEvaluatorPipelineView(View):
         except BaseException:
             logging.info('Failed to get exclude')
 
-        task = IspToolboxApp.Tasks.MarketEvaluatorTasks.genMarketEvaluatorData.delay(
+        task = IspToolboxApp.tasks.MarketEvaluatorTasks.genMarketEvaluatorData.delay(
             run.uuid)
         run.task = task.id
         run.save(update_fields=['task'])

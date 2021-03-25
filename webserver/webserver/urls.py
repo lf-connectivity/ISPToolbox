@@ -19,20 +19,15 @@ from django.urls import path, include
 
 from IspToolboxApp import views
 
-from IspToolboxApp.Views.market_evaluator_views.MarketEvaluator import BuildingsView, \
-    IncomeView, Form477View, ServiceProviders, CountBuildingsView, RDOFView, DataAvailableView
-from IspToolboxApp.Views.MarketEvaluatorView import MarketEvaluatorPipelineBroadbandNow, \
-    MarketEvaluatorPipelineServiceProviders, MarketEvaluatorPipelineIncome, \
-    MarketEvaluatorPipelineKMZ, MarketEvaluatorPipelineView, MarketEvaluatorPipelineBuildings, \
-    MarketEvaluatorExport, MarketEvaluatorExportNoPipeline
-from IspToolboxApp.Views.RetargetingPixelView import MarketingAccountView, \
+from IspToolboxApp.views.market_evaluator_views.MarketEvaluator import BuildingsView
+from IspToolboxApp.views.MarketEvaluatorView import (
+    MarketEvaluatorPipelineKMZ,
+    MarketEvaluatorExport, MarketEvaluatorExportNoPipeline)
+from IspToolboxApp.views.RetargetingPixelView import MarketingAccountView, \
     MarketingAudienceView, MarketingAudienceGeoPixelCheck
-from IspToolboxApp.Views.MarketingViews import MarketingConvertPolygons
-from IspToolboxApp.Views.mmWavePlannerViews import MMWavePlannerView, MMWaveHelpCenterView
-from IspToolboxApp.Views.market_evaluator_views.GrantViews import SelectCensusGroupView
-from IspToolboxApp.Views.market_evaluator_views.GeographicViews import SelectZipView, SelectCountyView
-from IspToolboxApp.Views.MLabSpeedView import MLabSpeedView
-from IspToolboxApp.Views.redirect_view import HomepageRedirect
+from IspToolboxApp.views.MarketingViews import MarketingConvertPolygons
+from IspToolboxApp.views.mmWavePlannerViews import MMWavePlannerView, MMWaveHelpCenterView
+from IspToolboxApp.views.redirect_view import HomepageRedirect
 from Overlay.views import OverlaySource
 from dataUpdate.views import CountrySourceUpdatedView
 from mmwave.views import LOSCheckDemo, DSMExportView
@@ -41,6 +36,10 @@ from rest_framework import routers
 from django.conf.urls.static import static
 from django.conf import settings
 
+from django.conf.urls import (
+    handler404, handler500
+)
+
 # REST API Router
 router = routers.DefaultRouter()
 
@@ -48,37 +47,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Health Check Endpoint
     path('elb-status/', views.HealthCheckView.as_view()),
-    # Async Jobs
-    path('gis/aoi/', views.index),
-    path('gis/task/<str:task_id>/', views.TaskView.as_view(), name='task'),
-    path('gis/progress/<str:task_id>/', views.ProgressView.as_view(), name='progress'),
-    path('gis/result/<str:task_id>/', views.ResultView.as_view(), name='result'),
     path('gis/osmBuildings/', BuildingsView.as_view(), name='osmBuildings'),
     # Market Evaluator
-    path('market-evaluator/grants/', SelectCensusGroupView.as_view(), name='select_cbg'),
-    path('market-evaluator/zip-geo/', SelectZipView.as_view(), name='select_zip'),
-    path('market-evaluator/county-geo/', SelectCountyView.as_view(), name='select_county'),
-    path('market-evaluator/market-income/', IncomeView.as_view(), name='PRIncome'),
-    path('market-evaluator/market-competition/',  Form477View.as_view(), name='PRIncome'),
-    path('market-evaluator/market-providers/', ServiceProviders.as_view(), name='Providers'),
-    path('market-evaluator/market-count/', CountBuildingsView.as_view(), name='PRIncome'),
-    path('market-evaluator/market-size/', BuildingsView.as_view(), name='BuildingOutlines'),
-    path('market-evaluator/market-rdof/', RDOFView.as_view(), name='PRIncome'),
-    path('market-evaluator/market-data-available/',  DataAvailableView.as_view(), name='PRIncome'),
     # Pipeline Functions for MarketEvaluator
-    path('market-evaluator/', MarketEvaluatorPipelineView.as_view(), name='marketEvalAsync'),
-    path('market-evaluator/kmz/', MarketEvaluatorPipelineKMZ.as_view(), name='marketEvalKMZAsync'),
-    path('market-evaluator/buildings/', MarketEvaluatorPipelineBuildings.as_view(), name='marketEvalAsyncBuildings'),
-    path('market-evaluator/income/', MarketEvaluatorPipelineIncome.as_view(), name='marketEvalAsyncIncome'),
-    path(
-        'market-evaluator/service-providers/',
-        MarketEvaluatorPipelineServiceProviders.as_view(),
-        name='marketEvalAsyncServiceProviders'
-    ),
-    path('market-evaluator/speeds/', MLabSpeedView.as_view()),
-    path('market-evaluator/broadbandnow/', MarketEvaluatorPipelineBroadbandNow.as_view(), name='bbnow'),
+    path('market-evaluator/kmz/', MarketEvaluatorPipelineKMZ.as_view(), name='marketEvalKMZAsync'),  # ajax request from fb
     path('market-evaluator/export/', MarketEvaluatorExport.as_view(), name='export'),
-    path('market-evaluator/export-np/', MarketEvaluatorExportNoPipeline.as_view(), name='exportnp'),
+    path('market-evaluator/export-np/', MarketEvaluatorExportNoPipeline.as_view(), name='exportnp'),  # ajax request from fb
     path('market-evaluator/test/', views.MarketEvaluatorTest.as_view(), name='market-eval-test'),
     # GeoTargeting Views
     path('marketing/audience/', MarketingAudienceView.as_view(), name="marketing_audience"),
@@ -101,8 +75,12 @@ urlpatterns = [
     # Demo Views
     path('demo/los-check/', LOSCheckDemo.as_view(), name='demo-los-check'),
     path('demo/dsm-app/', DSMExportView.as_view(), name="demo-dsm-app"),
-    # CMS
+    # Redirect
     path('', HomepageRedirect.as_view()),
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+handler500 = 'workspace.views.Error500View'  # noqa
+handler404 = 'workspace.views.Error404View'  # noqa

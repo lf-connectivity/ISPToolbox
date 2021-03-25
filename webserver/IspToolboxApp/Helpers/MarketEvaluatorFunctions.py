@@ -1,9 +1,9 @@
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode, \
+from IspToolboxApp.tasks.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode, \
     checkIfPrecomputedIncomeAvailable
-from IspToolboxApp.Models.MLabSpeedDataModels import StandardizedMlab, StandardizedPostal
-from IspToolboxApp.Models.GeographicModels import Tl2019UsZcta510, Tl2019UsCounty
+from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlab, StandardizedPostal
+from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty
 from django.db import connections
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import select_gis_database
+from IspToolboxApp.tasks.MarketEvaluatorHelpers import select_gis_database
 
 
 

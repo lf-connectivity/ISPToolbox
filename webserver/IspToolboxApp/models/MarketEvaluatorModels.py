@@ -4,7 +4,7 @@ import secrets
 import datetime
 import pytz
 from django.contrib.gis.db import models as gis_models
-from IspToolboxApp.Tasks.MarketEvaluatorHelpers import (getQueryTemplate, checkIfPrecomputedIncomeAvailable,
+from IspToolboxApp.tasks.MarketEvaluatorHelpers import (getQueryTemplate, checkIfPrecomputedIncomeAvailable,
                                                         caTechToTechCode, checkIfPolyInCanada)
 from django.db import connections
 

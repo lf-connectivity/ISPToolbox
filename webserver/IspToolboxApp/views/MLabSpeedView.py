@@ -1,6 +1,6 @@
 from django.views import View
-from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline
-from IspToolboxApp.Models.MLabSpeedDataModels import StandardizedMlab
+from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
+from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlab
 from django.http import JsonResponse
 
 

@@ -3,10 +3,10 @@ import json
 from datetime import datetime
 import pytz
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
-from .Tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
+from .tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
     genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getTowerViewShed
 from NetworkComparison.tasks import genPolySize
-from IspToolboxApp.Models.MarketEvaluatorModels import MarketEvaluatorPipeline, WebsocketToken
+from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline, WebsocketToken
 from celery.task.control import revoke
 from asgiref.sync import sync_to_async
 from IspToolboxApp.util.validate_user_input import (

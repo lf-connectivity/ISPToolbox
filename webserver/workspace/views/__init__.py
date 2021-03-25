@@ -4,9 +4,10 @@ from .rest_views import (
     NetworkDetail, AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     NetworkMapPreferencesView
 )
+from .error_views import Error500View, Error404View
 
 __all__ = [
     'DefaultWorkspaceView', 'DefaultNetworkView', 'DeleteNetworkView', 'EditNetworkView',
     'BulkUploadTowersView', 'NetworkDetail', 'AccessPointLocationListCreate', 'AccessPointLocationGet',
-    'AccessPointCoverageResults', 'NetworkMapPreferencesView'
+    'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'Error500View', 'Error404View',
 ]

@@ -38,7 +38,7 @@ def createCloudRFRequest(lat, lon, txh, rxh, rad):
         "blu": -120,
         "clm": 0,
         "cli": 5,
-        "cll": 0,
+        "cll": 1,
         "fbr": 0,
         "file": 'kmz',
         "grn": -90,
@@ -56,7 +56,7 @@ def createCloudRFRequest(lat, lon, txh, rxh, rad):
         "col": 10,
         "rel": 90,
         "nf": -101,
-        "mat": 0.01
+        "mat": 0.03
     }
 
 

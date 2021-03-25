@@ -7,5 +7,5 @@ from .network_models import (
 __all__ = [
     'ISPCompany', 'Employee', 'NetworkMapPreferences', 'Network', 'AccessPointLocation',
     'CoverageStatus', 'BuildingCoverage', 'CoverageCalculationStatus',
-    'AccessPointCoverage', 'Radio', 'PTPLink'
+    'AccessPointCoverage', 'Radio', 'PTPLink', 'CPE'
 ]

@@ -3,7 +3,7 @@ from mmwave.lidar_utils.DSMEngine import DSMEngine
 from mmwave.models import DSMConversionJob, EPTLidarPointCloud
 import tempfile
 
-DEFAULT_RESOLUTION = 1  # meters
+DEFAULT_RESOLUTION = 0.5  # meters
 
 
 @shared_task
@@ -28,5 +28,5 @@ def exportDSMData(DSMConversionJob_uuid):
     dsm_engine = DSMEngine(conversion.area_of_interest[0], sources)
 
     with tempfile.NamedTemporaryFile(suffix="tif") as temp_fp:
-        dsm_engine.getDSM(1, temp_fp.name)
+        dsm_engine.getDSM(DEFAULT_RESOLUTION, temp_fp.name)
         conversion.writeDSMtoS3(temp_fp)

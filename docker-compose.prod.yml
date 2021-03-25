@@ -5,6 +5,3 @@ services:
     environment:
       DEBUG: 'False'
       PROD: 'TRUE'
-      POSTGRES_DB: 'isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com'
-      DB_NAME: "django_db"
-      DB_USERNAME: "fbcmasteruser"

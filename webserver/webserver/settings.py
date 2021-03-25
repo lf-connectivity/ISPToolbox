@@ -150,6 +150,9 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# These keys have full access to AWS S3 and secrets manager
+
+
 MAPBOX_ACCESS_TOKEN_PUBLIC = 'pk.eyJ1IjoiaXNwdG9vbGJveCIsImEiOiJja2p5eHd1aGcwMjhoMm5wcGkxdnl4N2htIn0.cLO8vp0k2kXclp4CNzwWhQ'
 
 MIDDLEWARE = [
@@ -204,24 +207,39 @@ CHANNEL_LAYERS = {
 }
 
 # Load Secrets
-GIS_DB_CREDENTIALS = json.loads(get_secret("prod/gis_data",
+GIS_DB_CREDENTIALS = json.loads(get_secret("prod/gis_db",
                                            aws_access_key_id=AWS_ACCESS_KEY_ID,
                                            aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+if PROD:
+    DJANGO_ORM_DB_CREDENTIALS = json.loads(get_secret("prod/isptoolbox_django",
+                                            aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                            aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+    DJANGO_ORM_DB_CREDENTIALS.update({
+        'name': 'django_db',
+    })
+else:
+    DJANGO_ORM_DB_CREDENTIALS = {
+        'name': os.environ.get('DB_NAME', 'django_test'),
+        'username': os.environ.get('DB_USERNAME', 'postgres'),
+        'password': os.environ.get('DB_PASSWORD', 'password'),
+        'host': os.environ.get('POSTGRES_DB', 'localhost'),
+        'port': '5432',
+    }
+print(DJANGO_ORM_DB_CREDENTIALS)
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DB_NAME', 'django_test'),
-        'USER': os.environ.get('DB_USERNAME', 'postgres'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'password'),
-        'HOST': os.environ.get('POSTGRES_DB', 'localhost'),
+        'NAME': DJANGO_ORM_DB_CREDENTIALS['name'],
+        'USER': DJANGO_ORM_DB_CREDENTIALS['username'],
+        'PASSWORD': DJANGO_ORM_DB_CREDENTIALS['password'],
+        'HOST': DJANGO_ORM_DB_CREDENTIALS['host'],
         'TEST': {
             'NAME': 'testing_database_isptoolbox',
         },
-        # for migrations : POSTGRES_DB=isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com
-        'PORT': '5432',
+        'PORT': DJANGO_ORM_DB_CREDENTIALS['port'],
     },
     # This DB is not managed by Django ORM, therefore we hardcode parameters
     # Contains static GIS data: microsoft buildings dataset, income data, fcc broadband availablility
@@ -242,6 +260,7 @@ DATABASES = {
         'PORT': GIS_DB_CREDENTIALS['port'],
     }
 }
+print(DATABASES)
 
 DATABASE_ROUTERS = ['gis_data.models.GISDataRouter']
 AUTH_USER_MODEL = "IspToolboxAccounts.User"

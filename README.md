@@ -154,6 +154,7 @@ Once you're ready to push database schema changes to production:
 
 The latest environment variables are in the `terraform/variables.tf` file
 
+`DB_NAME=django_db DB_USERNAME=fbcmasteruser DB_PASSWORD=<db-password> POSTGRES_DB=isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com python manage.py migrate`
 
 ## Troubleshooting:
 

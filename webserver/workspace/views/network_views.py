@@ -10,8 +10,11 @@ from workspace.serializers import AccessPointSerializer
 import csv
 from django.contrib.gis.geos import Point
 import uuid
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 
+@method_decorator(login_required, name='dispatch')
 class DefaultNetworkView(View):
     def get(self, request):
         order = request.GET.get('order', '-last_edited')
@@ -68,6 +71,7 @@ class BulkUploadTowersView(View):
         return redirect(request.GET.get('next', '/pro'))
 
 
+@method_decorator(login_required, name='dispatch')
 class EditNetworkView(View):
     def get(self, request, network_id=None):
         network = Network.objects.filter(uuid=network_id, owner=request.user).first()

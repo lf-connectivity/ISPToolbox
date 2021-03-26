@@ -26,8 +26,19 @@ class TGLink(models.Model):
 
 
 class EPTLidarPointCloudManager(models.Manager):
+    """
+    This Manager is used to filter out the point clouds that have data / boundary issues
+    """
     def get_queryset(self):
         return super(EPTLidarPointCloudManager, self).get_queryset().filter(valid=True)
+
+
+class EPTLidarPointCloudManagerAll(models.Manager):
+    """
+    This Manager includes all point clouds, even the ones that have been marked invalid
+    """
+    def get_queryset(self):
+        return super(EPTLidarPointCloudManager, self).get_queryset()
 
 
 class EPTLidarPointCloud(models.Model):
@@ -41,6 +52,7 @@ class EPTLidarPointCloud(models.Model):
     date_time_added_to_isptoolbox = models.DateTimeField(auto_now_add=True)
 
     objects = EPTLidarPointCloudManager()
+    objects_include_invalid = EPTLidarPointCloudManagerAll()
 
     valid = models.BooleanField(
         default=True,

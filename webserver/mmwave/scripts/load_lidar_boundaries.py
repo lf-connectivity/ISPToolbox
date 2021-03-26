@@ -27,7 +27,7 @@ def loadBoundariesFromEntWine(send_email_success=False, send_email_failure=True)
         new_point_clouds = []
         for feat in response_content['features']:
             props = feat['properties']
-            pt_cloud_exists = EPTLidarPointCloud.objects.filter(
+            pt_cloud_exists = EPTLidarPointCloud.objects_include_invalid.filter(
                     name=props['name'],
                     url=props['url'],
                     count=props['count'],

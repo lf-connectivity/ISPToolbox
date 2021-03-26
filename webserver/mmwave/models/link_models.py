@@ -38,7 +38,7 @@ class EPTLidarPointCloudManagerAll(models.Manager):
     This Manager includes all point clouds, even the ones that have been marked invalid
     """
     def get_queryset(self):
-        return super(EPTLidarPointCloudManager, self).get_queryset()
+        return super(EPTLidarPointCloudManagerAll, self).get_queryset()
 
 
 class EPTLidarPointCloud(models.Model):

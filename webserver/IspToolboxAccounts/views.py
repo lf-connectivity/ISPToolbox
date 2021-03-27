@@ -18,7 +18,7 @@ class CreateAccountView(View):
             redirect(request.GET.get('next'))
         return render(
             request,
-            'workspace/pages/default.html',
+            'workspace/pages/login_view.html',
             {
                 'showSignUp': True,
                 'sign_in_form': AuthenticationForm,

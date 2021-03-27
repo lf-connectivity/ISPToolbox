@@ -1,0 +1,42 @@
+{% extends "workspace/pages/base.html" %}
+{% load static %}
+
+{% block beforenav %}
+<div id="fb-root"></div><script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v9.0&appId=2704261536510806&autoLogAppEvents=1" nonce="olbpdF6R"></script>
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="container">
+    <div class="row d-flex justify-content-around">
+        <div class="card" style="width: 18rem;">
+            <a href="{% url 'edit_account_network' %}">
+                <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
+            </a>
+            <div class="card-body">
+                <a href="{% url 'edit_account_network' %}">
+                    <h5 class="card-title">Network</h5>
+                </a>
+                <p class="card-text">Evaluate PtP Links using LiDAR Data</p>
+            </div>
+        </div>
+        <div class="card" style="width: 18rem;">
+            <a href="">
+                <img class="card-img-top" src='{% static "mmwave/market_isptoolboxpro.gif" %}' alt="Card image cap">
+            </a>
+            <div class="card-body">
+                <a href="">
+                    <h5 class="card-title">Market</h5>
+                </a>
+                <p class="card-text">Evaluate new or existing markets and determine which technologies are most applicable.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+{% include "workspace/organisms/signup_container.html" %}
+{% include "workspace/organisms/signin_container.html" %}
+<script src="{% static "login_signup.min.js" %}"> </script>
+{% endif %}
+
+{% endblock %}

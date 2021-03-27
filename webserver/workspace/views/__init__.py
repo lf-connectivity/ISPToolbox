@@ -1,4 +1,4 @@
-from .login_views import DefaultWorkspaceView
+from .login_views import DefaultWorkspaceView, OptionalInfoWorkspaceView
 from .network_views import DefaultNetworkView, DeleteNetworkView, EditNetworkView, BulkUploadTowersView
 from .rest_views import (
     NetworkDetail, AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
@@ -10,4 +10,5 @@ __all__ = [
     'DefaultWorkspaceView', 'DefaultNetworkView', 'DeleteNetworkView', 'EditNetworkView',
     'BulkUploadTowersView', 'NetworkDetail', 'AccessPointLocationListCreate', 'AccessPointLocationGet',
     'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'Error500View', 'Error404View',
+    'OptionalInfoWorkspaceView',
 ]

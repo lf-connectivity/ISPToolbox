@@ -1,5 +1,4 @@
 from django.urls import path
-from workspace.views import DefaultWorkspaceView, DefaultNetworkView, DeleteNetworkView, EditNetworkView
 from workspace import views
 from mmwave.views import CreateExportDSM
 from IspToolboxAccounts.views import CreateAccountView
@@ -7,15 +6,16 @@ from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
-    path('', DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
-    path('networks/', DefaultNetworkView.as_view(), name="networks"),
-    path('network/delete/<uuid:network_id>', DeleteNetworkView.as_view(), name="delete_network"),
-    path('network/edit/<uuid:network_id>/', EditNetworkView.as_view(), name="edit_network"),
-    path('network/edit/', EditNetworkView.as_view(), name="edit_account_network"),
+    path('', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
+    path('optional-info/', views.OptionalInfoWorkspaceView.as_view(), name="optional_info"),
+    path('networks/', views.DefaultNetworkView.as_view(), name="networks"),
+    path('network/delete/<uuid:network_id>', views.DeleteNetworkView.as_view(), name="delete_network"),
+    path('network/edit/<uuid:network_id>/', views.EditNetworkView.as_view(), name="edit_network"),
+    path('network/edit/', views.EditNetworkView.as_view(), name="edit_account_network"),
     path('workspace/api/network/<uuid:pk>/', views.NetworkDetail.as_view()),
     path('workspace/api/dsm-export/', CreateExportDSM.as_view()),
     path('workspace/api/dsm-export/<uuid:uuid>/', CreateExportDSM.as_view()),
-    path('accounts/sign-in/', auth_views.LoginView.as_view(template_name='workspace/pages/default.html'), name="login_view"),
+    path('accounts/sign-in/', auth_views.LoginView.as_view(template_name='workspace/pages/login_view.html'), name="login_view"),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout_view"),
     path('accounts/create/', CreateAccountView.as_view(), name="create_account_view"),
     path('workspace/api/network/', views.NetworkDetail.as_view()),
@@ -24,4 +24,5 @@ urlpatterns = [
     path('workspace/api/ap-los/coverage/<uuid:uuid>/', views.AccessPointCoverageResults.as_view()),
     path('workspace/api/tower/bulk-upload/', views.BulkUploadTowersView.as_view(), name="bulk_tower_upload"),
     path('workspace/api/network/map/', views.NetworkMapPreferencesView.as_view(), name="map_preference_update"),
+    path('workspace/500/', views.Error500View, name='404'),
 ]

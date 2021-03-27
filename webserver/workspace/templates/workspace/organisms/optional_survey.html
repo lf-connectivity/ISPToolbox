@@ -1,0 +1,12 @@
+<div id="signin_container" class="{% if showSignUp %}d-none{% endif %} container signup_container pt-3" style="max-width: 500px; display: flex; flex-direction: column;">
+    {% with logo_style='width: 350px;' %}
+        {% include "workspace/atoms/isptoolbox_svg.html" %}
+    {% endwith %}
+    <p> Empowering small, local ISPs - by Facebook</p>
+    <h4>We'd like to get to know you</h4>
+    <form action="{% url 'login_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form py-3">
+        {% csrf_token %}
+        {{ optional_info_form }}
+        <input class="btn isptoolbox-btn btn-primary" type="submit" value="Complete Profile">
+    </form>
+</div>

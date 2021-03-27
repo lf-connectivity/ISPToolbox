@@ -1,19 +1,16 @@
-<div style="    background-color: #f5f4f4;
-background-image: linear-gradient(rgba(0, 0, 0, .035) 1px, transparent 1px), linear-gradient(
-90deg
-, rgba(0, 0, 0, .035) 1px, transparent 1px);
-background-position: left center;
-background-size: 60px 60px, 60px 60px;
-margin-left: auto;
+{% extends "workspace/pages/base.html" %}
+{% load static %}
+{% block content %}
+<!-- Style Sheets-->
+<link href='{% static "stylesheets/pages/workspace.css" %}' rel='stylesheet' />
+<div style="margin-left: auto;
 margin-right: auto;
-padding-left: 30px;
-padding-right: 30px;
+padding-top: 100px;
 height: 100%;
 text-align: center;
 display: flex;
 align-items: center;
-justify-content: center;"
->
+justify-content: center;">
     <div>
     {% include "workspace/atoms/missing_icon.html" %}
     <h1 style="color: #2d2d2d;
@@ -36,3 +33,4 @@ justify-content: center;"
     text-align: center;">{{ error_msg }}</h3>
     </div>
 </div> 
+{% endblock %}

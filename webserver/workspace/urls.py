@@ -28,9 +28,13 @@ urlpatterns = [
     path('workspace/api/ap-los/coverage/<uuid:uuid>/', views.AccessPointCoverageResults.as_view()),
     path('workspace/api/tower/bulk-upload/', views.BulkUploadTowersView.as_view(), name="bulk_tower_upload"),
     path('workspace/api/network/map/', views.NetworkMapPreferencesView.as_view(), name="map_preference_update"),
+<<<<<<< HEAD
     path('workspace/500/', views.Error500View, name='404'),
     # Legal
     path('workspace/terms/', views.TermsOfService.as_view(), name="terms"),
     path('workspace/data-policy/', views.DataPolicy.as_view(), name="data_policy"),
     path('workspace/cookie-policy/', views.Cookies.as_view(), name="cookies"),
+=======
+    path('workspace/api/cpe/<uuid:uuid>/', views.CPEGet.as_view())
+>>>>>>> CPE views
 ]

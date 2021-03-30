@@ -99,6 +99,7 @@ class AccessPointLocationGet(mixins.RetrieveModelMixin,
     def post(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
+
 class CPEGet(mixins.RetrieveModelMixin,
              mixins.DestroyModelMixin,
              mixins.UpdateModelMixin,

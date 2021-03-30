@@ -6,7 +6,22 @@
     <h4>We'd like to get to know you</h4>
     <form action="{% url 'login_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form py-3">
         {% csrf_token %}
-        {{ optional_info_form }}
+        <ol>
+        {% for field in optional_info_form %}
+            {{ field.errors }}
+            {% if not field.field.modifycheckbox %}
+            <li>{{ field.label_tag }}<span class="pl-3">(optional)</span></li>
+                {{ field }}
+            {% else %}
+                <button class="btn btn-primary isptoolbox-btn">{{ field.label_tag}}</button>
+                {{ field }}
+            {% endif %}
+            {% if field.help_text %}
+            <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+        {% endfor %}
+        </ol>
         <input class="btn isptoolbox-btn btn-primary" type="submit" value="Complete Profile">
     </form>
+    <a href="{% url 'isptoolbox_pro_home' %}">No, thanks. Maybe another time</a>
 </div>

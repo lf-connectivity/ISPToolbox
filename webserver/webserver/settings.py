@@ -115,14 +115,15 @@ if PROD:
     SITE_ID = 3
 
 AUTHENTICATION_BACKENDS = (
+    'IspToolboxAccounts.backends.EmailBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
-    'django.contrib.auth.backends.ModelBackend',
 )
 
 LOGIN_REDIRECT_URL = "/pro"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/pro"
 LOGIN_URL = "/pro"
 
+ACCOUNT_EMAIL_REQUIRED = True
 # facebook
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {

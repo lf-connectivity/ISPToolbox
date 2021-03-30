@@ -1,4 +1,4 @@
-<div id="signin_container" class="{% if showSignUp %}d-none{% endif %} container signup_container pt-3" style="max-width: 500px; display: flex; flex-direction: column;">
+<div id="signin_container" class="{% if showSignUp %}d-none{% endif %} justify-content-center container signup_container pt-3" style="display: flex; flex-direction: column;">
     {% with logo_style='width: 350px;' %}
         {% include "workspace/atoms/isptoolbox_svg.html" %}
     {% endwith %}
@@ -7,15 +7,15 @@
     <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="rounded"
         data-auto-logout-link="false" data-use-continue-as="true">
     </div>
-    <form action="{% url 'login_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form py-3"
-    {% if target_iframe_parent %}
-    target='_parent'
-    {% endif %}
-    >
-        {% csrf_token %}
-        {{ sign_in_form }}
-        <input class="btn isptoolbox-btn btn-primary" type="submit" value="Login">
-    </form>
+    <div>
+    <div id="sign_up-form" class="isp-signupform mx-auto">
+        <form action="{% url 'login_view'%}" method="post" class="isptoolbox-form py-3">
+            {% csrf_token %}
+            {{ sign_in_form }}
+            <input hidden type="text" value="{% firstof request.GET.next request.full_path %}" name="next">
+            <input class="btn isptoolbox-btn btn-primary" type="submit" value="Login">
+        </form>
+    </div>
     <a id="no-email-sign-in" href="#">
         <p>Don't have an ISP Toolbox account? Sign up</p>
     </a>

@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.views import View
-from django.contrib.auth.forms import AuthenticationForm
-from IspToolboxAccounts.forms import IspToolboxUserCreationForm, IspToolboxUserSignUpInfoForm
+from IspToolboxAccounts.forms import (
+    IspToolboxUserCreationForm, IspToolboxUserSignUpInfoForm, IspToolboxUserAuthenticationForm
+)
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
@@ -13,10 +14,11 @@ class DefaultWorkspaceView(View):
             'workspace/pages/login_view.html',
             {
                 'showSignUp': True,
-                'sign_in_form': AuthenticationForm,
+                'sign_in_form': IspToolboxUserAuthenticationForm,
                 'sign_up_form': IspToolboxUserCreationForm,
             }
         )
+
 
 @method_decorator(login_required, name='dispatch')
 class OptionalInfoWorkspaceView(View):

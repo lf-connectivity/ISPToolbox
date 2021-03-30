@@ -5,10 +5,11 @@ from .rest_views import (
     NetworkMapPreferencesView
 )
 from .error_views import Error500View, Error404View
+from .legal_views import DataPolicy, Cookies, TermsOfService
 
 __all__ = [
     'DefaultWorkspaceView', 'DefaultNetworkView', 'DeleteNetworkView', 'EditNetworkView',
     'BulkUploadTowersView', 'NetworkDetail', 'AccessPointLocationListCreate', 'AccessPointLocationGet',
     'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'Error500View', 'Error404View',
-    'OptionalInfoWorkspaceView',
+    'OptionalInfoWorkspaceView', 'DataPolicy', 'Cookies', 'TermsOfService'
 ]

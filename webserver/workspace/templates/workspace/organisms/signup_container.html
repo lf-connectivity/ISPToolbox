@@ -1,24 +1,21 @@
-<div id="signup_container" class="{% if not showSignUp %}d-none{% endif %} container signup_container pt-3" style="max-width: 500px; display: flex; flex-direction: column;">
+<div id="signup_container" class="{% if not showSignUp %}d-none{% endif %}justify-content-center container signup_container pt-3" style="display: flex; flex-direction: column;">
     {% with logo_style='width: 350px;' %}
         {% include "workspace/atoms/isptoolbox_svg.html" %}
     {% endwith %}
     <p> Empowering small, local ISPs - by Facebook</p>
-    <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="rounded"
-        data-auto-logout-link="false" data-use-continue-as="true"></div>
+    <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="rounded" data-auto-logout-link="false" data-use-continue-as="true"></div>
     <a href="#" id="signup_email">
         <p>Don't have a facebook account? Use email</p>
     </a>
     <h4>Create an Account</h4>
-    <div id="sign_up-form">
-        <form action="{% url 'create_account_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form pb-3"
-        {% if target_iframe_parent %}
-            target='_parent'
-        {% endif %}
-        >
+    <div id="sign_up-form" class="isp-signupform mx-auto">
+        <form action="{% url 'create_account_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form pb-3">
             {% csrf_token %}
             {{ sign_up_form }}
-            <input type="submit" class="btn btn-primary isptoolbox-btn" value="Create Account">
+            <input hidden type="text" value="{% firstof request.GET.next request.full_path %}" name="next">
+            <input type="submit" class="btn btn-primary isptoolbox-btn" value="Sign Up">
         </form>
+        <p>By signing up, you agree to our <a href="{% url 'terms' %}">Terms</a>, <a href="{% url 'data_policy' %}">Data Policy</a>, and <a href="{% url 'cookies' %}">Cookie Policy</a>.</p>
     </div>
     {% include 'workspace/organisms/value_props.html' %}
     <a href="#" id="dy_have_account">

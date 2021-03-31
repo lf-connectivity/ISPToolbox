@@ -4,9 +4,7 @@ from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from dataUpdate.models import Source
 from django.conf import settings
-from elasticsearch import Elasticsearch
-from dataUpdate.scripts.load_asn_elasticsearch import queryASNElasticCache, ASN_INDEX_ES
-import json
+from dataUpdate.scripts.load_asn_elasticsearch import queryASNElasticCache
 
 
 class CountrySourceUpdatedView(View):

@@ -2,9 +2,42 @@
 
 {% block content %}
 <div class="isptoolbox-theme-background">
-    <form action="{% url 'asn-search' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input>
-        <input type="submit" class="btn isptoolbox-btn btn-primary" value="Search">
-    </form>
+    <div class="container pt-5">
+        <h1>ARIN - American Registry of Internet Numbers : ASN Search</h1>
+        <h5> Search for a company name, asn, owner name:</h5>
+        <form action="{% url 'asn-search' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <input type="text" placeholder="company, name, asn" name="query">
+                <input type="submit" class="btn isptoolbox-btn btn-primary" value="Search">
+            </div>
+        </form>
+        <p>Search results for: "{{query}}"</p>
+        {% if error %}
+            {{ error }}
+        {% endif %}
+        {% if results %}
+        {% for hit in results %}
+        <div class="row d-flex justify-content-around pb-3">
+            <p>score: {{ hit.score }}</p>
+            <a href="https://rdap.arin.net/registry/autnum/{{hit.source.startAutnum}}">
+                {{hit.source.name}} - {{hit.source.handle }}
+            </a>
+            <button class="btn btn-primary isptoolbox-btn"
+                type="button" data-toggle="collapse"
+                data-target="#collapse-{{hit.source.handle }}" aria-expanded="false"
+            aria-controls="collapse-{{hit.source.handle }}">
+                toggle details
+            </button>
+        </div>
+        <div class="collapse" id="collapse-{{hit.source.handle }}">
+            <p>
+                <pre>{{hit.entities}}</pre>
+            </p>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
 </div>
+
+{% endblock %}

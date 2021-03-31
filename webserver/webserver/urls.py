@@ -85,3 +85,4 @@ urlpatterns = [
 
 handler500 = 'workspace.views.Error500View'  # noqa
 handler404 = 'workspace.views.Error404View'  # noqa
+handler403 = 'workspace.views.Error403View'  # noqa

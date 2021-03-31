@@ -1,8 +1,13 @@
 from django.views import View
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
 from dataUpdate.models import Source
 from django.conf import settings
+from elasticsearch import Elasticsearch
+from dataUpdate.scripts.load_asn_elasticsearch import queryASNElasticCache, ASN_INDEX_ES
+import json
+
 
 class CountrySourceUpdatedView(View):
     def get(self, request):
@@ -35,7 +40,23 @@ class ASNElasticSearchView(View):
         if request.user.is_superuser or self.validate_auth_header(request):
             return render(request, 'asn/asn-check.html', {})
         else:
-            return HttpResponseForbidden()
-    
+            raise PermissionDenied
+
     def post(self, request):
-        return HttpResponseForbidden()
+        if request.user.is_superuser or self.validate_auth_header(request):
+            query = request.POST.get('query', None)
+            context = {'error': None, 'query': query, 'results': None}
+            try:
+                result = queryASNElasticCache(query)
+                context.update({
+                    'results': result
+                })
+            except Exception:
+                context.update({
+                    'error': 'An Error Occured'
+                })
+            if request.POST.get('format', None) == 'json':
+                return JsonResponse(context)
+            return render(request, 'asn/asn-check.html', context)
+        else:
+            raise PermissionDenied

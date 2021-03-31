@@ -15,3 +15,11 @@ def Error404View(request, exception, **kwargs):
         'error_msg': 'Sorry, the page you\'re looking for doesn\'t exist or may have moved.'
     }
     return render(request, 'workspace/error.html', context)
+
+
+def Error403View(request, exception, **kwargs):
+    context = {
+        'error_title': 'Forbidden',
+        'error_msg': 'Sorry, you\'re not authorized to perform that request'
+    }
+    return render(request, 'workspace/error.html', context)

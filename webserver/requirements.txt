@@ -26,6 +26,7 @@ Django==3.1.6
 djangorestframework==3.11.2
 docutils==0.15.2
 draftjs-exporter==2.1.7
+elasticsearch==7.12.0
 fastkml==0.11
 flower==0.9.5
 future==0.18.2

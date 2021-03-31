@@ -1,0 +1,10 @@
+{% extends "workspace/pages/base.html" %}
+
+{% block content %}
+<div class="isptoolbox-theme-background">
+    <form action="{% url 'asn-search' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input>
+        <input type="submit" class="btn isptoolbox-btn btn-primary" value="Search">
+    </form>
+</div>

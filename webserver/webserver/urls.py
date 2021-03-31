@@ -29,7 +29,7 @@ from IspToolboxApp.views.MarketingViews import MarketingConvertPolygons
 from IspToolboxApp.views.mmWavePlannerViews import MMWavePlannerView, MMWaveHelpCenterView
 from IspToolboxApp.views.redirect_view import HomepageRedirect
 from Overlay.views import OverlaySource
-from dataUpdate.views import CountrySourceUpdatedView
+from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView
 from mmwave.views import LOSCheckDemo, DSMExportView
 
 from rest_framework import routers
@@ -65,6 +65,7 @@ urlpatterns = [
     path('help-center/', MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),
     # Path Overlay
     path('overlay/', OverlaySource.as_view(), name='overlay_source'),
+    path('asn/', ASNElasticSearchView.as_view(), name="asn-search"),
     # Sources Last Updated Dates
     path('sources/last-update/', CountrySourceUpdatedView.as_view(), name='source_updated_dates'),
     # REST API Endpoints

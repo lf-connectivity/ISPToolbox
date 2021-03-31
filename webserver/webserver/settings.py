@@ -177,6 +177,15 @@ CLOUD_RF = json.loads(get_secret("prod/cloudrf",
 CLOUDRF_UID = CLOUD_RF['cloud_rf_uid']
 CLOUDRF_KEY = CLOUD_RF['cloud_rf_key']
 
+# This is a tiny, tiny elastic search cluster
+ELASTICSEARCH_SECRETS = json.loads(get_secret("prod/elastic_search_asn",
+                                       aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                       aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+
+ES_ENDPOINT = ELASTICSEARCH_SECRETS['ENDPOINT_ELASTICSEARCH']
+USERNAME_ES = ELASTICSEARCH_SECRETS['ADMIN_ELASTICSEARCH']
+PASSWORD_ES = ELASTICSEARCH_SECRETS['PASSWORD_ELASTICSEARCH']
+
 MIDDLEWARE = [
     'IspToolboxApp.middleware.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',

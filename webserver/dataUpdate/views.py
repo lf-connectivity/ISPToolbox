@@ -36,24 +36,19 @@ class ASNElasticSearchView(View):
 
     def get(self, request):
         if request.user.is_superuser or self.validate_auth_header(request):
-            return render(request, 'asn/asn-check.html', {})
-        else:
-            raise PermissionDenied
-
-    def post(self, request):
-        if request.user.is_superuser or self.validate_auth_header(request):
-            query = request.POST.get('query', None)
+            query = request.GET.get('query', None)
             context = {'error': None, 'query': query, 'results': None}
-            try:
-                result = queryASNElasticCache(query)
-                context.update({
-                    'results': result
-                })
-            except Exception:
-                context.update({
-                    'error': 'An Error Occured'
-                })
-            if request.POST.get('format', None) == 'json':
+            if query is not None:
+                try:
+                    result = queryASNElasticCache(query)
+                    context.update({
+                        'results': result
+                    })
+                except Exception:
+                    context.update({
+                        'error': 'An Error Occured'
+                    })
+            if request.GET.get('format', None) == 'json':
                 return JsonResponse(context)
             return render(request, 'asn/asn-check.html', context)
         else:

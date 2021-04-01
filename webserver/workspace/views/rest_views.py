@@ -1,5 +1,8 @@
 from django.views import View
-from workspace.models import Network, AccessPointLocation, AccessPointCoverage, NetworkMapPreferences
+from workspace.models import (
+    Network, AccessPointLocation, AccessPointCoverage, NetworkMapPreferences,
+    CPELocation, APToCPELink
+)
 from workspace import pagination
 from gis_data.models import MsftBuildingOutlines
 from workspace import serializers
@@ -96,23 +99,63 @@ class AccessPointLocationGet(mixins.RetrieveModelMixin,
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
 
 
-class CPEGet(mixins.RetrieveModelMixin,
-             mixins.DestroyModelMixin,
-             mixins.UpdateModelMixin,
-             generics.GenericAPIView):
+class CPELocationCreate(mixins.CreateModelMixin,
+                        generics.GenericAPIView):
+    serializer_class = serializers.CPESerializer
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+class CPELocationGet(mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.UpdateModelMixin,
+                     generics.GenericAPIView):
     serializer_class = serializers.CPESerializer
     lookup_field = 'uuid'
 
     def get_queryset(self):
         user = self.request.user
-        return AccessPointLocation.objects.filter(owner=user)
+        return CPELocation.objects.filter(owner=user)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+class APToCPELinkCreate(mixins.CreateModelMixin,
+                        generics.GenericAPIView):
+    serializer_class = serializers.APToCPELinkSerializer
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+class APToCPELinkGet(mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.UpdateModelMixin,
+                     generics.GenericAPIView):
+    serializer_class = serializers.APToCPELinkSerializer
+    lookup_field = 'uuid'
+
+    def get_queryset(self):
+        user = self.request.user
+        return APToCPELink.objects.filter(owner=user)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)

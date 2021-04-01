@@ -6,6 +6,7 @@ from django.contrib.gis.geos import Point
 from enum import Enum
 import json
 
+from workspace.constants import FeatureType, CoverageCalculationStatus, CoverageStatus
 
 class Network(models.Model):
     name = models.CharField(max_length=100)
@@ -35,10 +36,26 @@ class Network(models.Model):
             }
 
 
-class AccessPointLocation(models.Model):
+class GeoJSONModel(object):
+    @classmethod
+    def get_features_for_user(cls, user, serializer=None):
+        objects = cls.objects.filter(owner=user).all()
+        return {
+        'type': 'FeatureCollection',
+        'features': [
+            {
+                'type': 'Feature',
+                'geometry': json.loads(obj.geojson.json),
+                'properties': {k: v for k, v in serializer(obj).data.items() if k != 'geojson'} if serializer is not None else None,
+            } for obj in objects
+        ]
+    }
+
+
+class AccessPointLocation(models.Model, GeoJSONModel):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
-    location = geo_models.PointField()
+    geojson = geo_models.PointField()
 
     uuid = models.UUIDField(
         primary_key=True,
@@ -61,25 +78,52 @@ class AccessPointLocation(models.Model):
     def height_ft(self):
         return self.height * 3.28084
 
-    @classmethod
-    def getUsersAccessPoints(cls, user, serializer=None):
-        locations = cls.objects.filter(owner=user).all()
-        return {
-            'type': 'FeatureCollection',
-            'features': [
-                {
-                    'type': 'Feature',
-                    'geometry': json.loads(loc.location.json),
-                    'properties': serializer(loc).data if serializer is not None else None,
-                } for loc in locations
-            ]
-        }
+    @property
+    def feature_type(self):
+        return FeatureType.AP.value
 
 
-class CoverageStatus(Enum):
-    SERVICEABLE = "serviceable"
-    UNSERVICEABLE = "unserviceable"
-    UNKNOWN = "unknown"
+class CPELocation(models.Model, GeoJSONModel):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    uuid = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    height = models.FloatField()
+    created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    geojson = geo_models.PointField()
+
+    @property
+    def height_ft(self):
+        return self.height * 3.28084
+
+    @property
+    def feature_type(self):
+        return FeatureType.CPE.value
+
+
+class APToCPELink(models.Model, GeoJSONModel):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    uuid = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+    frequency = models.FloatField(default=2.4)
+    geojson = geo_models.LineStringField()
+    ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, editable=False)
+    cpe = models.ForeignKey(CPELocation, on_delete=models.CASCADE, editable=False)
+
+    created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    @property
+    def feature_type(self):
+        return FeatureType.AP_CPE_LINK.value
 
 
 class BuildingCoverage(models.Model):
@@ -91,12 +135,6 @@ class BuildingCoverage(models.Model):
         choices=[(tag, tag.value) for tag in CoverageStatus]
     )
     height_margin = models.FloatField(blank=True, default=0.0)
-
-
-class CoverageCalculationStatus(Enum):   # A subclass of Enum
-    START = "Started"
-    FAIL = "Failed"
-    COMPLETE = "Complete"
 
 
 class AccessPointCoverage(models.Model):
@@ -130,23 +168,5 @@ class PTPLink(models.Model):
     )
     frequency = models.FloatField(default=2.4)
     radios = models.ManyToManyField(Radio)
+
     network = models.ForeignKey(Network, on_delete=models.CASCADE, related_name='ptplinks')
-
-
-class CPE(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    uuid = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
-
-    height = models.FloatField()
-    created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
-    location = geo_models.PointField()
-
-    @property
-    def height_ft(self):
-        return self.height * 3.28084

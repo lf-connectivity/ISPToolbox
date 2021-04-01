@@ -10,7 +10,7 @@ from .legal_views import DataPolicy, Cookies, TermsOfService
 __all__ = [
     'DefaultWorkspaceView', 'DefaultNetworkView', 'DeleteNetworkView', 'EditNetworkView',
     'BulkUploadTowersView', 'NetworkDetail', 'AccessPointLocationListCreate', 'AccessPointLocationGet',
-    'CPELocationCreate', 'CPELocationGet', 'APToCPELinkCreate', 'APToCPELinkGet', 
+    'CPELocationCreate', 'CPELocationGet', 'APToCPELinkCreate', 'APToCPELinkGet',
     'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'Error500View', 'Error404View',
     'Error403View', 'OptionalInfoWorkspaceView', 'DataPolicy', 'Cookies', 'TermsOfService'
 ]

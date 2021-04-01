@@ -1,4 +1,3 @@
-from datetime import timezone
 from rest_framework import serializers
 
 from workspace import models

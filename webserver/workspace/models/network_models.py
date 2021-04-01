@@ -3,10 +3,10 @@ from django.conf import settings
 import uuid
 from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import Point
-from enum import Enum
 import json
 
 from workspace.constants import FeatureType, CoverageCalculationStatus, CoverageStatus
+
 
 class Network(models.Model):
     name = models.CharField(max_length=100)
@@ -41,15 +41,15 @@ class GeoJSONModel(object):
     def get_features_for_user(cls, user, serializer=None):
         objects = cls.objects.filter(owner=user).all()
         return {
-        'type': 'FeatureCollection',
-        'features': [
-            {
-                'type': 'Feature',
-                'geometry': json.loads(obj.geojson.json),
-                'properties': {k: v for k, v in serializer(obj).data.items() if k != 'geojson'} if serializer is not None else None,
-            } for obj in objects
-        ]
-    }
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'geometry': json.loads(obj.geojson.json),
+                    'properties': {k: v for k, v in serializer(obj).data.items() if k != 'geojson'} if serializer else None
+                } for obj in objects
+            ]
+        }
 
 
 class AccessPointLocation(models.Model, GeoJSONModel):

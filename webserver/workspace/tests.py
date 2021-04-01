@@ -8,9 +8,6 @@ from workspace.constants import FeatureType
 from workspace.models import AccessPointLocation, CPELocation, APToCPELink
 from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
 
-import ptvsd # @nocommit - vscode python debugger
-ptvsd.enable_attach(address=('0.0.0.0', 3000))
-ptvsd.wait_for_attach()
 
 ################################################################################
 #  UNIVERSAL CONSTANTS
@@ -152,7 +149,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
             'type': 'FeatureCollection',
             'features': features
         }
-    
+
     def trim_mtime_from_feature_collection(self, feature_collection):
         for feature in feature_collection['features']:
             if 'properties' in feature and 'last_updated' in feature['properties']:
@@ -161,9 +158,10 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
     def get_feature_collection_flow(self, model_cls, serializer, expected_features):
         feature_collection = model_cls.get_features_for_user(self.testuser, serializer)
         self.trim_mtime_from_feature_collection(feature_collection)
-        self.assertJSONEqual(json.dumps(self.build_expected_feature_collection(expected_features)),
-            json.dumps(feature_collection))
-
+        self.assertJSONEqual(
+            json.dumps(self.build_expected_feature_collection(expected_features)),
+            json.dumps(feature_collection)
+        )
 
     def test_feature_types(self):
         self.assertTrue(self.test_ap.feature_type, FeatureType.AP.value)
@@ -229,16 +227,24 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
     def create_geojson_model(self, model_cls, endpoint, data):
         """Uses the POST endpoint for the model class to create a model, then check if it's in db."""
 
-        response = self.client.post(f'{endpoint}/', data, format='json',
-            HTTP_ACCEPT=JSON_CONTENT_TYPE)
+        response = self.client.post(
+            f'{endpoint}/',
+            data,
+            format='json',
+            HTTP_ACCEPT=JSON_CONTENT_TYPE
+        )
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         new_id = response.json()['uuid']
         return model_cls.objects.get(uuid=new_id)
 
     def update_geojson_model(self, model_cls, endpoint, model_id, data):
         """Uses the PATCH endpoint for the model class to create a model, then retrieve it from db."""
-        response = self.client.patch(f'{endpoint}/{model_id}/', data, format='json',
-            HTTP_ACCEPT=JSON_CONTENT_TYPE)
+        response = self.client.patch(
+            f'{endpoint}/{model_id}/',
+            data,
+            format='json',
+            HTTP_ACCEPT=JSON_CONTENT_TYPE
+        )
         self.assertEqual(response.status_code, HTTP_200_OK)
         return model_cls.objects.get(uuid=model_id)
 

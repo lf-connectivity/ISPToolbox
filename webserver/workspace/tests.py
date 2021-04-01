@@ -23,8 +23,11 @@ JSON_CONTENT_TYPE = 'application/json'
 #  TEST CASE DEFAULTS
 ################################################################################
 
-DEFAULT_USERNAME = 'testuser@test.com'
+DEFAULT_USERNAME = 'testuser'
 DEFAULT_PASSWORD = 'cant_crack_this'
+DEFAULT_EMAIL = 'testuser@test.com'
+DEFAULT_FIRST_NAME = 'Test'
+DEFAULT_LAST_NAME = 'User'
 
 DEFAULT_TEST_POINT = {
     "type": "Point",
@@ -108,9 +111,12 @@ AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link'
 class WorkspaceBaseTestCase(TestCase):
     def setUp(self):
         """Set-up test user and test objects."""
-        self.testuser = get_user_model().objects.create_user(
+        self.testuser = get_user_model().objects.create_superuser(
             username=DEFAULT_USERNAME,
-            password=DEFAULT_PASSWORD
+            password=DEFAULT_PASSWORD,
+            email=DEFAULT_EMAIL,
+            first_name=DEFAULT_FIRST_NAME,
+            last_name=DEFAULT_LAST_NAME
         )
         self.testuser.save()
 

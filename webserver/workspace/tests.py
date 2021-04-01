@@ -326,7 +326,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertJSONEqual(cpe.geojson.json, UPDATED_TEST_POINT)
         self.assertEqual(cpe.height, UPDATED_HEIGHT)
 
-    def test_create_ap_cpe_link(self):
+    def test_update_ap_cpe_link(self):
         link_id = self.test_ap_cpe_link.uuid
         updated_link = {
             'frequency': UPDATED_FREQUENCY,

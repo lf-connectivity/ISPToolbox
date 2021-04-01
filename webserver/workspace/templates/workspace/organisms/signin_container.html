@@ -11,7 +11,11 @@
     <div id="sign_up-form" class="isp-signupform mx-auto">
         <form action="{% url 'login_view'%}" method="post" class="isptoolbox-form py-3">
             {% csrf_token %}
-            {{ sign_in_form }}
+            {% if form %}
+                {{ form }}
+            {% else %}
+                {{ authentication_form }}
+            {% endif %}
             <input hidden type="text" value="{% firstof request.GET.next request.full_path %}" name="next">
             <input class="btn isptoolbox-btn btn-primary" type="submit" value="Login">
         </form>

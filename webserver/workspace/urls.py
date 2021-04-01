@@ -3,6 +3,7 @@ from workspace import views
 from mmwave.views import CreateExportDSM
 from IspToolboxAccounts.views import CreateAccountView
 from django.contrib.auth import views as auth_views
+from IspToolboxAccounts import forms
 
 
 urlpatterns = [
@@ -17,7 +18,15 @@ urlpatterns = [
     path('workspace/api/dsm-export/<uuid:uuid>/', CreateExportDSM.as_view()),
     path(
         'accounts/sign-in/',
-        auth_views.LoginView.as_view(template_name='workspace/pages/login_view.html'),
+        auth_views.LoginView.as_view(
+            template_name='workspace/pages/login_view.html',
+            authentication_form = forms.IspToolboxUserAuthenticationForm,
+            extra_context = {
+                'showSignUp': False,
+                'authentication_form': forms.IspToolboxUserAuthenticationForm,
+                'sign_up_form': forms.IspToolboxUserCreationForm,
+            }
+        ),
         name="login_view"
     ),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout_view"),

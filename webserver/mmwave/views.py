@@ -59,7 +59,7 @@ class LOSCheckDemo(View):
         # we're in demo view: suggest user sign-in or create an account
         if request.user.is_anonymous:
             context['sign_up_form'] = UserCreationForm
-            context['sign_in_form'] = AuthenticationForm
+            context['authentication_form'] = AuthenticationForm
         else:
             # TODO achong: remove this once workspace is built
             map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)

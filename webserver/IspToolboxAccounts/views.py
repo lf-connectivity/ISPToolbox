@@ -31,7 +31,7 @@ class CreateAccountView(View):
             'workspace/pages/login_view.html',
             {
                 'showSignUp': True,
-                'sign_in_form': AuthenticationForm,
+                'authentication_form': AuthenticationForm,
                 'sign_up_form': form,
             }
         )

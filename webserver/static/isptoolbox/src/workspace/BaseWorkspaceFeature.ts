@@ -1,5 +1,4 @@
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import mapboxgl, * as MapboxGL from "mapbox-gl";
 import { AccessPointEvents } from "../AccessPointTool";
 import { getCookie } from '../utils/Cookie';
 
@@ -7,7 +6,7 @@ import { getCookie } from '../utils/Cookie';
  * Abstract class for organizing and defining interactions between UI components
  * to be saved in Workspace and the backend
  */
-abstract class BaseWorkspaceFeature {
+export abstract class BaseWorkspaceFeature {
     readonly mapboxId: string
     draw: MapboxDraw
     featureData: {
@@ -135,3 +134,5 @@ abstract class BaseWorkspaceFeature {
         return serialization;
     }
 }
+
+module.exports = BaseWorkspaceFeature

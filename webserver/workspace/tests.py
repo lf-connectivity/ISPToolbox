@@ -414,4 +414,4 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         feature_collection = geojson_utils.merge_feature_collections(aps, empty_feature_collection)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
-            json.dumps(feature_collection))
+                             json.dumps(feature_collection))

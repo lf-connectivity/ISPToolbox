@@ -4,8 +4,8 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CON
 from rest_framework.test import APIClient
 import json
 
-from workspace.constants import FeatureType
 from workspace.models import AccessPointLocation, CPELocation, APToCPELink
+from workspace.models.model_constants import FeatureType
 from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
 
 

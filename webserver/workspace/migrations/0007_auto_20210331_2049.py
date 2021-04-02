@@ -22,8 +22,7 @@ class Migration(migrations.Migration):
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('frequency', models.FloatField(default=2.4)),
                 ('geojson', django.contrib.gis.db.models.fields.LineStringField(srid=4326)),
-            ],
-            bases=(models.Model, workspace.models.network_models.GeoJSONModel),
+            ]
         ),
         migrations.CreateModel(
             name='CPELocation',
@@ -35,8 +34,7 @@ class Migration(migrations.Migration):
                 ('last_updated', models.DateTimeField(auto_now=True)),
                 ('geojson', django.contrib.gis.db.models.fields.PointField(srid=4326)),
                 ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            bases=(models.Model, workspace.models.network_models.GeoJSONModel),
+            ]
         ),
         migrations.RenameField(
             model_name='accesspointlocation',

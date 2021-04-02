@@ -5,7 +5,7 @@ from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import Point
 import json
 
-from workspace.constants import FeatureType, CoverageCalculationStatus, CoverageStatus
+from .model_constants import FeatureType, CoverageCalculationStatus, CoverageStatus
 
 
 class Network(models.Model):
@@ -36,7 +36,17 @@ class Network(models.Model):
             }
 
 
-class GeoJSONModel(object):
+class WorkspaceFeature(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    geojson = geo_models.PointField()
+    uuid = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
     @classmethod
     def get_features_for_user(cls, user, serializer=None):
         objects = cls.objects.filter(owner=user).all()
@@ -51,24 +61,16 @@ class GeoJSONModel(object):
             ]
         }
 
+    class Meta:
+        abstract = True
 
-class AccessPointLocation(models.Model, GeoJSONModel):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+class AccessPointLocation(WorkspaceFeature):
     name = models.CharField(max_length=50)
-    geojson = geo_models.PointField()
-
-    uuid = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
     height = models.FloatField()
     max_radius = models.FloatField()
     no_check_radius = models.FloatField(default=0.01)
     default_cpe_height = models.FloatField(default=2)
-
-    created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
 
     @property
     def max_radius_miles(self):
@@ -83,19 +85,9 @@ class AccessPointLocation(models.Model, GeoJSONModel):
         return FeatureType.AP.value
 
 
-class CPELocation(models.Model, GeoJSONModel):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+class CPELocation(WorkspaceFeature):
     name = models.CharField(max_length=100)
-    uuid = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
-
     height = models.FloatField()
-    created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
-    geojson = geo_models.PointField()
 
     @property
     def height_ft(self):
@@ -106,20 +98,11 @@ class CPELocation(models.Model, GeoJSONModel):
         return FeatureType.CPE.value
 
 
-class APToCPELink(models.Model, GeoJSONModel):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    uuid = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
+class APToCPELink(WorkspaceFeature):
     frequency = models.FloatField(default=2.4)
     geojson = geo_models.LineStringField()
     ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, editable=False)
     cpe = models.ForeignKey(CPELocation, on_delete=models.CASCADE, editable=False)
-
-    created = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
 
     @property
     def feature_type(self):

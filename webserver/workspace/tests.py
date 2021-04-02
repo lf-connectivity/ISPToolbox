@@ -4,6 +4,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CON
 from rest_framework.test import APIClient
 import json
 
+from workspace import geojson_utils
 from workspace.models import AccessPointLocation, CPELocation, APToCPELink
 from workspace.models.model_constants import FeatureType
 from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
@@ -142,9 +143,7 @@ class WorkspaceBaseTestCase(TestCase):
         )
         self.test_ap_cpe_link.save()
 
-
-class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
-    def build_expected_feature_collection(self, features):
+    def build_feature_collection(self, features):
         return {
             'type': 'FeatureCollection',
             'features': features
@@ -155,11 +154,13 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
             if 'properties' in feature and 'last_updated' in feature['properties']:
                 del feature['properties']['last_updated']
 
+
+class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
     def get_feature_collection_flow(self, model_cls, serializer, expected_features):
         feature_collection = model_cls.get_features_for_user(self.testuser, serializer)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(
-            json.dumps(self.build_expected_feature_collection(expected_features)),
+            json.dumps(self.build_feature_collection(expected_features)),
             json.dumps(feature_collection)
         )
 
@@ -344,3 +345,72 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.delete_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, self.test_ap_cpe_link.uuid)
         self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
+
+class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
+    def test_merge_two_feature_collections(self):
+        expected_height_ft = DEFAULT_HEIGHT * 3.28084
+        expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
+        expected_ap = {
+            'type': 'Feature',
+            'geometry': json.loads(DEFAULT_TEST_POINT),
+            'properties': {
+                'name': DEFAULT_NAME,
+                'height': DEFAULT_HEIGHT,
+                'uuid': str(self.test_ap.uuid),
+                'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
+                'default_cpe_height': DEFAULT_CPE_HEIGHT,
+                'feature_type': FeatureType.AP.value,
+                'max_radius': DEFAULT_MAX_RADIUS,
+                'height_ft': expected_height_ft,
+                'max_radius_miles': expected_max_radius_miles
+            }
+        }
+        expected_cpe = {
+            'type': 'Feature',
+            'geometry': json.loads(DEFAULT_TEST_POINT),
+            'properties': {
+                'name': DEFAULT_NAME,
+                'height': DEFAULT_HEIGHT,
+                'uuid': str(self.test_cpe.uuid),
+                'feature_type': FeatureType.CPE.value,
+                'height_ft': expected_height_ft,
+            }
+        }
+        expected_feature_collection = self.build_feature_collection([expected_ap, expected_cpe])
+
+        aps = AccessPointLocation.get_features_for_user(self.testuser, AccessPointSerializer)
+        cpes = CPELocation.get_features_for_user(self.testuser, CPESerializer)
+        feature_collection = geojson_utils.merge_feature_collections(aps, cpes)
+        self.trim_mtime_from_feature_collection(feature_collection)
+        self.assertJSONEqual(json.dumps(expected_feature_collection),
+            json.dumps(feature_collection))
+
+    def test_merge_two_feature_collections_one_empty(self):
+        expected_height_ft = DEFAULT_HEIGHT * 3.28084
+        expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
+        expected_ap = {
+            'type': 'Feature',
+            'geometry': json.loads(DEFAULT_TEST_POINT),
+            'properties': {
+                'name': DEFAULT_NAME,
+                'height': DEFAULT_HEIGHT,
+                'uuid': str(self.test_ap.uuid),
+                'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
+                'default_cpe_height': DEFAULT_CPE_HEIGHT,
+                'feature_type': FeatureType.AP.value,
+                'max_radius': DEFAULT_MAX_RADIUS,
+                'height_ft': expected_height_ft,
+                'max_radius_miles': expected_max_radius_miles
+            }
+        }
+        expected_feature_collection = self.build_feature_collection([expected_ap])
+
+        aps = AccessPointLocation.get_features_for_user(self.testuser, AccessPointSerializer)
+        empty_feature_collection = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        feature_collection = geojson_utils.merge_feature_collections(aps, empty_feature_collection)
+        self.trim_mtime_from_feature_collection(feature_collection)
+        self.assertJSONEqual(json.dumps(expected_feature_collection),
+            json.dumps(feature_collection))

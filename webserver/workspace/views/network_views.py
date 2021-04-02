@@ -1,18 +1,19 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from workspace.models import Network, AccessPointLocation, NetworkMapPreferences
-from workspace.forms import NetworkForm, UploadTowerCSVForm
 from django.http import HttpResponseRedirect
 from django.db.models import Count
 from django.http import JsonResponse
-from workspace.serializers import AccessPointSerializer
-import csv
 from django.contrib.gis.geos import Point
-import uuid
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+import csv
+import uuid
 
+from workspace.models import Network, AccessPointLocation, CPELocation, APToCPELink, NetworkMapPreferences
+from workspace.forms import NetworkForm, UploadTowerCSVForm
+from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
+from workspace import geojson_utils
 
 @method_decorator(login_required, name='dispatch')
 class DefaultNetworkView(View):
@@ -77,7 +78,10 @@ class EditNetworkView(View):
         network = Network.objects.filter(uuid=network_id, owner=request.user).first()
         if network is None:
             network = {'uuid': uuid.uuid4()}
-        geojson = AccessPointLocation.getUsersAccessPoints(request.user, AccessPointSerializer)
+        aps = AccessPointLocation.get_features_for_user(request.user, AccessPointSerializer)
+        cpes = CPELocation.get_features_for_user(request.user, CPESerializer)
+        links = APToCPELink.get_features_for_user(request.user, APToCPELinkSerializer)
+        geojson = geojson_utils.merge_feature_collections(aps, cpes, links)
         map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)
         context = {
             'network': network,

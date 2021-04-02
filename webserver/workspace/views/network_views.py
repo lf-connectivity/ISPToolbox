@@ -10,10 +10,11 @@ from django.utils.decorators import method_decorator
 import csv
 import uuid
 
+from workspace import geojson_utils
 from workspace.models import Network, AccessPointLocation, CPELocation, APToCPELink, NetworkMapPreferences
 from workspace.forms import NetworkForm, UploadTowerCSVForm
 from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
-from workspace import geojson_utils
+
 
 @method_decorator(login_required, name='dispatch')
 class DefaultNetworkView(View):

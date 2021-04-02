@@ -20,8 +20,8 @@ urlpatterns = [
         'accounts/sign-in/',
         auth_views.LoginView.as_view(
             template_name='workspace/pages/login_view.html',
-            authentication_form = forms.IspToolboxUserAuthenticationForm,
-            extra_context = {
+            authentication_form=forms.IspToolboxUserAuthenticationForm,
+            extra_context={
                 'showSignUp': False,
                 'authentication_form': forms.IspToolboxUserAuthenticationForm,
                 'sign_up_form': forms.IspToolboxUserCreationForm,

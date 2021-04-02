@@ -8,7 +8,7 @@ import { getCookie } from '../utils/Cookie';
  * to be saved in Workspace and the backend
  */
 abstract class BaseWorkspaceFeature {
-    map: mapboxgl.Map
+    readonly mapboxId: string
     draw: MapboxDraw
     featureData: {
         id: string,
@@ -25,7 +25,6 @@ abstract class BaseWorkspaceFeature {
      * object request to the backend to save the object. Also executes a success
      * callback if that is defined.
      * 
-     * @param map Mapbox map object
      * @param draw Mapbox draw object
      * @param apiEndpoint The REST API endpoint for creating/updating/deleting objects.
      *  This should be defined as a constant in the subclass's constructor
@@ -34,8 +33,7 @@ abstract class BaseWorkspaceFeature {
      * @param featureData Feature data for an object
      * @param successCallback Function to execute on successfully saving object
      */
-    constructor(map: mapboxgl.Map,
-                draw: MapboxDraw,
+    constructor(draw: MapboxDraw,
                 featureData: {
                     id: string,
                     properties: any,
@@ -44,8 +42,8 @@ abstract class BaseWorkspaceFeature {
                 apiEndpoint: string,
                 serializedFields: Array<string>,
                 successCallback?: (resp: any) => void) {
-        this.map = map;
         this.draw = draw;
+        this.mapboxId = featureData.id;
         this.apiEndpoint = apiEndpoint;
         this.serializedFields = serializedFields;
         this.featureData = featureData;

@@ -1,5 +1,6 @@
 import itertools
 
+
 def merge_feature_collections(*geojsons):
     """Merge multiple feature collections into one."""
 

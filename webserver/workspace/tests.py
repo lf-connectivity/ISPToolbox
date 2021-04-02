@@ -346,6 +346,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
 
+
 class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
     def test_merge_two_feature_collections(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
@@ -383,7 +384,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         feature_collection = geojson_utils.merge_feature_collections(aps, cpes)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
-            json.dumps(feature_collection))
+                             json.dumps(feature_collection))
 
     def test_merge_two_feature_collections_one_empty(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084

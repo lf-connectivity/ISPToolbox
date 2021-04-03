@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.gis.db import models as gis_models
+from django.conf import settings
 import uuid
 from IspToolboxApp.util.s3 import createPresignedUrl, writeToS3
 import secrets
@@ -36,7 +37,10 @@ class DSMConversionJob(models.Model):
         writeToS3(fp, self.createS3Path())
 
     def createS3Path(self):
-        return 'dsm-export-' + str(self.uuid) + '.tif'
+        if settings.PROD:
+            return 'dsm/dsm-export-' + str(self.uuid) + '.tif'
+        else:
+            return 'dsm/test-dsm-export-' + str(self.uuid) + '.tif'
 
     def getS3Presigned(self):
         return createPresignedUrl(self.createS3Path())

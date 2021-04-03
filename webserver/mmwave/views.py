@@ -10,8 +10,9 @@ import mmwave.lidar_utils.sample_links as samples
 import copy
 import uuid
 import json
-from mmwave.models.dsm_models import DSMException, DSMConversionJob
-from mmwave.tasks.dsm_tasks import exportDSMData
+from mmwave.models.dsm_models import DSMException, DSMConversionJob, MAXIMUM_AOI_AREA_KM2
+from mmwave.tasks.dsm_tasks import exportDSMData, DEFAULT_RESOLUTION
+from mmwave.forms import DSMExportAOIFileForm
 from celery import states
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -86,7 +87,12 @@ class DSMExportView(View):
             lat = samples.sunflower['tx']['lat']
             lon = samples.sunflower['tx']['lng']
 
-        context = {'mapdefault': {'center': [lon, lat], 'zoom': 15}}
+        context = {
+            'mapdefault': {'center': [lon, lat], 'zoom': 15},
+            'resolution': f'{DEFAULT_RESOLUTION} m',
+            'area_limit': f'{MAXIMUM_AOI_AREA_KM2} km2',
+            'upload_form': DSMExportAOIFileForm
+        }
         return render(request, 'mmwave/pages/dsm_app.index.html', context)
 
 
@@ -97,9 +103,14 @@ class CreateExportDSM(View):
         """
         """
         try:
-            request_area = GEOSGeometry(json.dumps(
-                json.load(request).get('aoi', {})
-            ))
+            aoi_form = DSMExportAOIFileForm(request.POST, request.FILES)
+            request_area = None
+            if aoi_form.is_valid():
+                request_area = GEOSGeometry(json.dumps(aoi_form.convertToAOI()))
+            else:
+                request_area = GEOSGeometry(json.dumps(
+                    json.load(request).get('aoi', {})
+                ))
             # Start pipeline - return credentials + uuid
             conversion = DSMConversionJob(area_of_interest=request_area)
             conversion.save()

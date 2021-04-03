@@ -72,6 +72,7 @@ class DSMEngine:
                 "dimension":"Z",
                 "data_type":"float",
                 "output_type":"mean",
+                "gdalopts":"COMPRESS=DEFLATE,ZLEVEL=9",
                 "resolution": {resolution}
             }}
         ]}}"""

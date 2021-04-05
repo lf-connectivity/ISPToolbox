@@ -13,6 +13,7 @@
         </form>
         {% if query %}
             <p>Search results for: "{{query}}"</p>
+            <p>cache hit: {{cached}}</p>
         {% endif %}
         {% if error %}
             {{ error }}

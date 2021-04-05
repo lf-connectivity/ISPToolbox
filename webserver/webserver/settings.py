@@ -159,6 +159,7 @@ FB_SDK_SECRETS = json.loads(get_secret("prod/fb_sdk_isptoolbox",
                                        aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
 SOCIAL_AUTH_FACEBOOK_KEY = FB_SDK_SECRETS['fb_sdk_isptoolbox_app_key']  # App ID
 SOCIAL_AUTH_FACEBOOK_SECRET = FB_SDK_SECRETS['fb_sdk_isptoolbox_app_secret']  # app key
+ASN_CURL_SECRET = FB_SDK_SECRETS['asn_fb_curl']
 
 MAPBOX_ACCESS_TOKEN_PUBLIC = 'pk.eyJ1IjoiaXNwdG9vbGJveCIsImEiOiJja2p5eHd1aGcwMjhoMm5wcGkxdnl4N2htIn0.cLO8vp0k2kXclp4CNzwWhQ'
 MAPBOX_ACCOUNT = 'isptoolbox'

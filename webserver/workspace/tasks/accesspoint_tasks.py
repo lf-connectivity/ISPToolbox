@@ -33,7 +33,7 @@ def generateAccessPointCoverage(channel_id, request):
     """
     ap = AccessPointLocation.objects.get(uuid=request['uuid'])
     # Get circle geometry
-    circle_json = json.dumps(createGeoJSONCircle(ap.location, ap.max_radius))
+    circle_json = json.dumps(createGeoJSONCircle(ap.geojson, ap.max_radius))
     circle = GEOSGeometry(circle_json)
     # Find all buildings that intersect the access point radius
     buildings = MsftBuildingOutlines.objects.filter(geog__intersects=circle).all()[0:LIMIT_BUILDINGS]
@@ -67,7 +67,7 @@ def checkBuildingServiceable(access_point, building):
     """
     building = MsftBuildingOutlines.objects.filter(id=building.msftid).get()
     building_center = building.geog.centroid
-    le = LidarEngine(LineString([access_point.location, building_center]), LidarResolution.ULTRA, 1024)
+    le = LidarEngine(LineString([access_point.geojson, building_center]), LidarResolution.ULTRA, 1024)
     profile = le.getProfile()
     return checkForObstructions(access_point, profile)
 

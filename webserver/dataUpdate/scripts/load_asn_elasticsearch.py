@@ -81,7 +81,7 @@ def updateASNElasticSearch(
                 try:
                     asn_info = getASNInformation(asn)
                     convertVCardsHelper(asn_info)
-                    res = es.index(index="ASN_INDEX_ES", id=asn, body=asn_info)
+                    res = es.index(index=ASN_INDEX_ES, id=asn, body=asn_info)
                     # result_json_callback
                     print((asn, res))
                     success = True
@@ -136,11 +136,3 @@ def queryASNElasticCache(query):
         for r in result
     ]
     return result
-
-
-if __name__ == '__main__':
-    """
-    This doesn't work anymore since django settings are required for ES
-    TODO achong: add this as celery async task that runs once a month w/ timeouts
-    """
-    updateASNElasticSearch(lambda x: True, None, lambda x, y: None)

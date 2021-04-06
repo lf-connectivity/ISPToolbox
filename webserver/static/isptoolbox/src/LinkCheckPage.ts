@@ -851,6 +851,7 @@ export class LinkCheckPage {
             this.selected_feature = query;
         }
         this.link_chart.showLoading();
+        this.showLoading();
         PubSub.publish(LinkCheckEvents.SHOW_INPUTS);
 
         // Create Callback Function for WebSocket
@@ -1343,13 +1344,16 @@ export class LinkCheckPage {
     }
 
     showInputs(): void {
+        $('.radio-card-body').removeClass('d-none');
+    }
+
+    showLoading(): void {
         $("#loading_spinner").removeClass('d-none');
+        $("#link_chart").addClass('d-none');
         $('#los-chart-tooltip-button').addClass('d-none');
         $('#loading_failed_spinner').addClass('d-none');
         $("#drawing_instructions").addClass('d-none');
-        $("#link_chart").addClass('d-none');
         $("#3D-view-btn").addClass('d-none');
-        $('.radio-card-body').removeClass('d-none');
     }
 
     showPlotIfValidState() {

@@ -133,5 +133,6 @@ class CreateExportDSM(View):
         job_status = job.getTaskStatus()
         return JsonResponse({
             'status': job_status,
+            'error': job.error,
             'url': job.getS3Presigned() if job_status == states.SUCCESS else None
         })

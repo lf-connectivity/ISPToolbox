@@ -1,4 +1,5 @@
-import pdal
+import subprocess
+import shlex
 
 
 class DSMEngine:
@@ -21,15 +22,19 @@ class DSMEngine:
             resolution: float - resolution of output raster (meters)
             filepath: file-like object to put geotiff (e.g. tempfile)
         Returns:
-            number of points the pipeline processed?
+            a process handle of the pdal request
 
         Raises:
             not sure lol
         """
         query_json = self.__createQueryPipeline(resolution, filepath)
-        pipeline = pdal.Pipeline(query_json)
-        count = pipeline.execute()
-        return count
+        command = shlex.split(
+            'pdal pipeline --stdin'
+        )
+        process = subprocess.Popen(command, stdin=subprocess.PIPE)
+        process.stdin.write(query_json.encode())
+        process.stdin.close()
+        return process
 
     def __createQueryPipeline(self, resolution, outputfilepath):
         """

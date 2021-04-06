@@ -9,7 +9,7 @@ import {
 import PubSub from 'pubsub-js';
 //@ts-ignore
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
-import {dsmExportStyles } from '../isptoolbox-mapbox-draw/styles/dsm_export_styles';
+import { dsmExportStyles } from '../isptoolbox-mapbox-draw/styles/dsm_export_styles';
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
 // @ts-ignore
@@ -25,7 +25,7 @@ export default class DSMExportApp {
     map: MapboxGL.Map;
     draw: any;
     availability: LidarAvailabilityLayer;
-    uploadform : DSMUploadAOIForm;
+    uploadform: DSMUploadAOIForm;
     constructor(map_settings: MapDefault) {
         this.map = new mapboxgl.Map({
             container: 'map',
@@ -65,13 +65,13 @@ export default class DSMExportApp {
         PubSub.subscribe(DSMExportEvents.UPLOADED, this.uploadReceived.bind(this));
         $('#draw-polygon-button').on('click', () => {
             this.draw.changeMode('draw_polygon');
-            this.map.fire('draw.modechange', {mode: 'draw_polygon'});
+            this.map.fire('draw.modechange', { mode: 'draw_polygon' });
         });
         $("#export-dsm-btn").on("click", this.exportButtonCallback.bind(this));
     }
 
-    drawChangeModeCallback({mode} : {mode: string}) {
-        if(mode === 'draw_polygon'){
+    drawChangeModeCallback({ mode }: { mode: string }) {
+        if (mode === 'draw_polygon') {
             $('#draw-polygon-button').addClass('btn-primary').removeClass('btn-secondary');
         } else {
             $('#draw-polygon-button').removeClass('btn-primary').addClass('btn-secondary');
@@ -121,7 +121,7 @@ export default class DSMExportApp {
         );
     }
 
-    uploadReceived(msg: string, resp: any){
+    uploadReceived(msg: string, resp: any) {
         $("#dsm_export_instructions").addClass('d-none');
         $("#dsm_download_section").removeClass("d-none");
         //@ts-ignore
@@ -140,13 +140,16 @@ export default class DSMExportApp {
                     case "SUCCESS":
                         this.setDownloadLink(resp.url);
                         $("#dsm_export_status").text(`status:${resp.status}`);
+                        $('#dsm-export-status-details').text("");
                         break;
                     case "FAILURE":
                         this.renderErrorMessage(resp.error);
                         $("#dsm_export_status").text(`status:${resp.status}`);
+                        $('#dsm-export-status-details').text(resp.error);
                         break;
                     default:
                         $("#dsm_export_status").text(`status:${resp.status}`);
+                        $('#dsm-export-status-details').text(`${resp.error ?  '- '+resp.error : ''}`);
                         setTimeout(() => { checkResult(uuid, token) }, 2500);
                         break;
                 }
@@ -158,10 +161,10 @@ export default class DSMExportApp {
     setDownloadLink(url: null | string) {
         if (url) {
             $("#dsm_download_link").attr("href", url);
-            $("#dsm_download_btn").prop( "disabled", false );
+            $("#dsm_download_btn").prop("disabled", false);
         } else {
             $("#dsm_download_link").removeAttr("href");
-            $("#dsm_download_btn").prop( "disabled", true );
+            $("#dsm_download_btn").prop("disabled", true);
         }
     }
 }
@@ -169,41 +172,41 @@ export default class DSMExportApp {
 /**
  * This javascript helps ajaxify the upload requests
  */
-class DSMUploadAOIForm{
+class DSMUploadAOIForm {
     selector: string;
-    constructor(selector: string){
+    constructor(selector: string) {
         this.selector = selector;
         $(this.selector).on('submit', this.formSubmitCallback.bind(this));
     }
 
-    formSubmitCallback(event : any){
+    formSubmitCallback(event: any) {
         const form = $(this.selector)[0] as HTMLFormElement;
         event.preventDefault();
         const data = new FormData();
-        $(this.selector + ' input[type=file]').each( (idx, elem) => {
+        $(this.selector + ' input[type=file]').each((idx, elem) => {
             const element = elem as HTMLInputElement;
             const name = element.getAttribute('name');
             const files = element.files;
-            if(files && name){
+            if (files && name) {
                 data.append(name, files[0]);
             }
         });
         const url = form.getAttribute('action');
         const method = form.getAttribute('method');
-        if(method && url){
+        if (method && url) {
             const csrf =
                 // @ts-ignore
                 document.querySelector('[name=csrfmiddlewaretoken]')?.value;
             $.ajax({
-                    url,
-                    method,
-                    data,
-                    contentType: false,
-                    processData: false,
-                    headers: {
-                        'X-CSRFToken': csrf
-                    },
-                }
+                url,
+                method,
+                data,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': csrf
+                },
+            }
             ).done(function (data) {
                 // @ts-ignore
                 $('#DSMUpload').modal('hide');

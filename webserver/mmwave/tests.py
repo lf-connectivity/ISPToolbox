@@ -57,7 +57,7 @@ class TestDSMExport(TestCase):
         dsm_engine = DSMEngine(polygon, ept_sources)
         created_dsm = False
         with tempfile.NamedTemporaryFile(suffix='.tif') as temp:
-            dsm_engine.getDSM(20, temp.name)
+            dsm_engine.getDSM(20, temp.name).wait()
             self.assertTrue(os.path.getsize(temp.name) > 0)
             created_dsm = True
         self.assertTrue(created_dsm)

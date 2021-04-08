@@ -177,45 +177,43 @@ export class WorkspaceManager {
         // Initialize features
         this.features = {};
 
-        // Add Workspace features from user, if they exist.
-        if (initialFeatures) {
-            const nonLinks = initialFeatures?.features.filter((feature: any) => {
-                return feature.properties.feature_type !== undefined && 
-                       (feature.properties.feature_type === WorkspaceFeatureTypes.AP ||
-                        feature.properties.feature_type === WorkspaceFeatureTypes.CPE);
-            });
-            
-            nonLinks.forEach((feature: any) => {
-                let feature_type = feature.properties.feature_type;
-                let workspaceFeature = undefined;
+        // Add APs and CPEs
+        const nonLinks = initialFeatures?.features.filter((feature: any) => {
+            return feature.properties.feature_type !== undefined && 
+                   (feature.properties.feature_type === WorkspaceFeatureTypes.AP ||
+                    feature.properties.feature_type === WorkspaceFeatureTypes.CPE);
+        });
         
-                // Add all the APs and CPEs
-                if (feature_type === WorkspaceFeatureTypes.AP) {
-                    feature.properties.radius = feature.properties.max_radius;
-                    feature.properties.center = feature.geometry.coordinates;
-                    workspaceFeature = new AccessPoint(this.draw, feature);
-                }
-                else {
-                    workspaceFeature = new CPE(this.draw, feature);
-                }
-                this.features[workspaceFeature.workspaceId] = workspaceFeature;
-            });
+        nonLinks.forEach((feature: any) => {
+            let feature_type = feature.properties.feature_type;
+            let workspaceFeature = undefined;
     
-            // Add links
-            const links = initialFeatures?.features.filter((feature: any) => {
-                return feature.properties.feature_type !== undefined && 
-                       feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK;
-            });
-            
-            links.forEach((feature: any) => {
-                let apWorkspaceId = feature.properties.ap;
-                let cpeWorkspaceId = feature.properties.cpe;
-                let ap = this.features[apWorkspaceId] as AccessPoint;
-                let cpe = this.features[cpeWorkspaceId] as CPE;
-                let workspaceFeature = new APToCPELink(this.draw, feature, ap, cpe);
-                this.features[workspaceFeature.workspaceId] = workspaceFeature;
-            });
-        }
+            // Add all the APs and CPEs
+            if (feature_type === WorkspaceFeatureTypes.AP) {
+                feature.properties.radius = feature.properties.max_radius;
+                feature.properties.center = feature.geometry.coordinates;
+                workspaceFeature = new AccessPoint(this.draw, feature);
+            }
+            else {
+                workspaceFeature = new CPE(this.draw, feature);
+            }
+            this.features[workspaceFeature.workspaceId] = workspaceFeature;
+        });
+
+        // Add links
+        const links = initialFeatures?.features.filter((feature: any) => {
+            return feature.properties.feature_type !== undefined && 
+                   feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK;
+        });
+        
+        links.forEach((feature: any) => {
+            let apWorkspaceId = feature.properties.ap;
+            let cpeWorkspaceId = feature.properties.cpe;
+            let ap = this.features[apWorkspaceId] as AccessPoint;
+            let cpe = this.features[cpeWorkspaceId] as CPE;
+            let workspaceFeature = new APToCPELink(this.draw, feature, ap, cpe);
+            this.features[workspaceFeature.workspaceId] = workspaceFeature;
+        });
 
         // Initialize Constructors
         this.map.on('draw.create', this.saveFeatures.bind(this));
@@ -387,15 +385,6 @@ export class WorkspaceManager {
                 height: isUnitsUS() ? aps[0].properties.height * 3.28084 : aps[0].properties.height,
                 name: aps[0].properties.name
             });
-        }
-        else if (aps.length === 0) {
-            const source = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
-            if (source.type == 'geojson') {
-                source.setData({
-                    'type': 'FeatureCollection',
-                    'features': []
-                });
-            }
         }
     }
 

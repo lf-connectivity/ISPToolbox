@@ -6,3 +6,9 @@ export enum WorkspaceEvents {
     AP_RENDER = 'ap.render',
     AP_SELECTED = 'ap.selected',
 }
+
+export enum WorkspaceFeatureTypes {
+    AP = 'access_point',
+    CPE = 'cpe',
+    AP_CPE_LINK = 'ap_cpe_link'
+}

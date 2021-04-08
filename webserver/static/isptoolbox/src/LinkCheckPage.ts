@@ -17,7 +17,6 @@ import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
 import { Potree } from "./Potree.js";
-import {AccessPointTool, AccessPointEvents} from "./AccessPointTool";
 import { hasCookie } from "./PageUtils";
 import {getInitialFeatures} from './utils/MapDefaults';
 import {isUnitsUS, setCenterZoomPreferences} from './utils/MapPreferences';
@@ -25,6 +24,8 @@ import PubSub from 'pubsub-js';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 //@ts-ignore
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
+import { WorkspaceManager } from './workspace/WorkspaceManager';
+import { WorkspaceEvents } from './workspace/WorkspaceConstants';
 
 
 export enum LinkCheckEvents {
@@ -89,7 +90,7 @@ export class LinkCheckPage {
 
     lidarAvailabilityLayer: LidarAvailabilityLayer;
 
-    accessPointTool: AccessPointTool;
+    workspaceManager: WorkspaceManager;
     profileWS: LOSCheckWS;
     currentLinkHash: any;
 
@@ -311,9 +312,6 @@ export class LinkCheckPage {
                 styles: mapboxdrawstyles
             });
 
-            this.accessPointTool = new AccessPointTool('#accessPointModal', this.map, this.draw, this.profileWS);
-
-
             this.map.addControl(this.draw, 'bottom-right');
             const deleteControl = new MapboxCustomDeleteControl({
                 map: this.map,
@@ -331,18 +329,12 @@ export class LinkCheckPage {
             // });
             // this.map.setTerrain({"source": "mapbox-dem"});
 
-
             this.map.on('draw.update', this.updateRadioLocation.bind(this));
             this.map.on('draw.create', this.updateRadioLocation.bind(this));
 
-            const initial_features = getInitialFeatures();
-            initial_features?.features.forEach((f: any) => {
-                if(f.properties.max_radius !== undefined){
-                    f.properties.radius = f.properties.max_radius;
-                    f.properties.center = f.geometry.coordinates;
-                }
-                this.draw.add(f);
-            });
+            this.workspaceManager = new WorkspaceManager('#accessPointModal', this.map, this.draw, this.profileWS, getInitialFeatures());
+
+
             const features = this.draw.add({
                 "type": 'Feature',
                 "geometry": {
@@ -374,7 +366,7 @@ export class LinkCheckPage {
             this.map.on('draw.selectionchange', this.showInputs.bind(this));
             this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
             this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
-            PubSub.subscribe(AccessPointEvents.AP_SELECTED, this.showLinkCheckProfile.bind(this));
+            PubSub.subscribe(WorkspaceEvents.AP_SELECTED, this.showLinkCheckProfile.bind(this));
             PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
             PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
             PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));

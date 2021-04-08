@@ -386,6 +386,15 @@ export class WorkspaceManager {
                 name: aps[0].properties.name
             });
         }
+        else if (aps.length === 0) {
+            const source = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
+            if (source.type == 'geojson') {
+                source.setData({
+                    'type': 'FeatureCollection',
+                    'features': []
+                });
+            }
+        }
     }
 
     drawModeChangeCallback(a: any) {

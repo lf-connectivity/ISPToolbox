@@ -4,8 +4,15 @@
     {% endwith %}
     <p> Empowering small, local ISPs - by Facebook</p>
     <h4>Welcome back!</h4>
-    <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="rounded"
-        data-auto-logout-link="false" data-use-continue-as="true">
+    <div class="fb-login-button"
+        data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'isptoolbox_pro_home' %}, '')});"
+        data-width="" data-size="large"
+        data-button-type="continue_with"
+        data-layout="rounded"
+        data-auto-logout-link="false"
+        data-scope="public_profile,email"
+        data-use-continue-as="true"
+    >
     </div>
     <div>
     <div id="sign_up-form" class="isp-signupform mx-auto">

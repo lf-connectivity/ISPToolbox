@@ -35,7 +35,6 @@ from mmwave.views import LOSCheckDemo, DSMExportView
 from rest_framework import routers
 from django.conf.urls.static import static
 from django.conf import settings
-
 from django.conf.urls import (
     handler404, handler500
 )
@@ -78,6 +77,9 @@ urlpatterns = [
     path('demo/dsm-app/', DSMExportView.as_view(), name="demo-dsm-app"),
     # Redirect
     path('', HomepageRedirect.as_view()),
+    # TODO achong: only include allauth urls we need
+    # Facebook SDK Login
+    path('accounts/', include('allauth.urls')),
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

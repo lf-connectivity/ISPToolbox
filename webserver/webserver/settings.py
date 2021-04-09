@@ -123,32 +123,34 @@ LOGIN_REDIRECT_URL = "/pro"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/pro"
 LOGIN_URL = "/pro"
 
-ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
 # facebook
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'METHOD': 'js_sdk',
         'SDK_URL': '//connect.facebook.net/en_US/sdk.js',
         'SCOPE': ['email', 'public_profile'],
-        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
         'INIT_PARAMS': {'cookie': True},
         'FIELDS': [
             'id',
-            'email',
-            'name',
             'first_name',
             'last_name',
-            'verified',
-            'locale',
-            'timezone',
-            'link',
-            'gender',
-            'updated_time',
+            'middle_name',
+            'name',
+            'name_format',
+            'picture',
+            'short_name',
+            'email',
         ],
         'EXCHANGE_TOKEN': True,
         'VERIFIED_EMAIL': False,
-        'VERSION': 'v8.0',
+        'VERSION': 'v10.0',
     }
 }
 

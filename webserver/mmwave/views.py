@@ -16,8 +16,9 @@ from mmwave.forms import DSMExportAOIFileForm
 from celery import states
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from workspace.models import NetworkMapPreferences, AccessPointLocation
-from workspace.serializers import AccessPointSerializer
+from workspace.models import NetworkMapPreferences, AccessPointLocation, CPELocation, APToCPELink
+from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
+from workspace import geojson_utils
 
 
 @method_decorator(xframe_options_exempt, name='dispatch')
@@ -64,7 +65,10 @@ class LOSCheckDemo(View):
         else:
             # TODO achong: remove this once workspace is built
             map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)
-            geojson = AccessPointLocation.getUsersAccessPoints(request.user, AccessPointSerializer)
+            aps = AccessPointLocation.get_features_for_user(request.user, AccessPointSerializer)
+            cpes = CPELocation.get_features_for_user(request.user, CPESerializer)
+            links = APToCPELink.get_features_for_user(request.user, APToCPELinkSerializer)
+            geojson = geojson_utils.merge_feature_collections(aps, cpes, links)
             context.update({
                 'map_preferences': map_preferences,
                 'geojson': geojson,

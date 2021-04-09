@@ -1,6 +1,7 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
 import { createSupplementaryPointsForCircle } from './RadiusModeUtils.js';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
+import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
 export function OverrideSimple() {
   const simple_select = MapboxDraw.modes.simple_select;
@@ -38,6 +39,18 @@ export function OverrideSimple() {
   };
 
   simple_select.dragMove = function (state, e) {
+    // deselect uneditable features, and only move those that are editable.
+    // Links are uneditable; users should move APs and CPEs instead.
+    const editableFeatures = this.getSelected().filter(
+      feature => {
+        return (!('feature_type' in feature.properties)) ||
+               (feature.properties.feature_type !== WorkspaceFeatureTypes.AP_CPE_LINK);
+      }
+    );
+    this.clearSelectedFeatures();
+    this.getSelected().forEach(feature => this.doRender(feature.id));
+    editableFeatures.forEach(feature => this.select(feature.id));
+
     // Dragging when drag move is enabled
     // $FlowFixMe[prop-missing]
     state.dragMoving = true;

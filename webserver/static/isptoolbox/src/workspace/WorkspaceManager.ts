@@ -188,32 +188,26 @@ export class WorkspaceManager {
             let feature_type = feature.properties.feature_type;
             let workspaceFeature = undefined;
     
-            // Add all the APs and CPEs
-            if (feature_type === WorkspaceFeatureTypes.AP) {
-                feature.properties.radius = feature.properties.max_radius;
-                feature.properties.center = feature.geometry.coordinates;
-                workspaceFeature = new AccessPoint(this.draw, feature);
-            }
-            else {
-                workspaceFeature = new CPE(this.draw, feature);
-            }
-            this.features[workspaceFeature.workspaceId] = workspaceFeature;
-        });
+            // Add links
+            const links = initialFeatures?.features.filter((feature: any) => {
+                return feature.properties.feature_type !== undefined && 
+                       feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK;
+            });
+            
+            links.forEach((feature: any) => {
+                let apWorkspaceId = feature.properties.ap;
+                let cpeWorkspaceId = feature.properties.cpe;
+                let ap = this.features[apWorkspaceId] as AccessPoint;
+                let cpe = this.features[cpeWorkspaceId] as CPE;
+                let workspaceFeature = cpe.linkAP(ap);
 
-        // Add links
-        const links = initialFeatures?.features.filter((feature: any) => {
-            return feature.properties.feature_type !== undefined && 
-                   feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK;
-        });
-        
-        links.forEach((feature: any) => {
-            let apWorkspaceId = feature.properties.ap;
-            let cpeWorkspaceId = feature.properties.cpe;
-            let ap = this.features[apWorkspaceId] as AccessPoint;
-            let cpe = this.features[cpeWorkspaceId] as CPE;
-            let workspaceFeature = new APToCPELink(this.draw, feature, ap, cpe);
-            this.features[workspaceFeature.workspaceId] = workspaceFeature;
-        });
+                // Hack to get feature properties set properly
+                workspaceFeature.featureData.properties = feature.properties;
+                this.draw.add(workspaceFeature.featureData);
+
+                this.features[workspaceFeature.workspaceId] = workspaceFeature;
+            });
+        }
 
         // Initialize Constructors
         this.map.on('draw.create', this.saveFeatures.bind(this));
@@ -361,7 +355,7 @@ export class WorkspaceManager {
             }
         });
 
-        features.forEach(async (feature) => {
+        features.forEach((feature) => {
             if (feature.properties.uuid) {
                 let workspaceFeature = this.features[feature.properties.uuid]
                 workspaceFeature.delete((resp) => {
@@ -492,6 +486,7 @@ export class WorkspaceManager {
                         this.map.fire('draw.create', {
                             features: [cpe.mapboxId, link.mapboxId]
                         });
+                        this.draw.changeMode('simple_select', {featureIds: [link.mapboxId]});
                     });
                 });
             }

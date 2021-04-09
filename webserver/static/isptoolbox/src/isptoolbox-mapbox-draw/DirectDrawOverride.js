@@ -5,6 +5,7 @@ import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_feature_movement';
 import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_supplementary_points';
 import createVertex from '@mapbox/mapbox-gl-draw/src/lib/create_vertex';
+import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
 
 /**
@@ -38,6 +39,22 @@ export function OverrideDirect() {
         this.fireActionable(state);
     };
     direct_select.dragVertex = function (state, e, delta) {
+
+        // Only allow editing of vertices that are not from associated AP/CPE links.
+        // This would include user draw PtP links.
+        if (
+            ('feature_type' in state.feature.properties) &&
+            state.feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
+        ) {
+            // Clear vertices and go back to simple select mode
+            this.clearSelectedFeatures();
+            this.clearSelectedCoordinates();
+            // $FlowFixMe
+            this.doRender(state.feature.id);
+            this.changeMode(Constants.modes.SIMPLE_SELECT);
+            return;
+          }
+
         if (
             state.feature.properties.radius
         ) {
@@ -90,6 +107,25 @@ export function OverrideDirect() {
         }
     };
     direct_select.dragFeature = function (state, e, delta) {
+        // deselect uneditable features, and only move those that are editable.
+        // Links are uneditable; users should move APs and CPEs instead.
+        const selected = this.getSelected();
+        const editableFeatures = this.getSelected().filter(
+            feature => {
+                return (!('feature_type' in feature.properties)) ||
+                       (feature.properties.feature_type !== WorkspaceFeatureTypes.AP_CPE_LINK)
+            }
+        );
+        this.clearSelectedFeatures();
+        this.clearSelectedCoordinates();
+        selected.forEach(feature => this.doRender(feature.id));
+
+        if (editableFeatures.length > 0) {
+            editableFeatures.forEach(feature => this.select(feature.id));
+        } else {
+            this.changeMode('simple_select');
+        }
+
         moveFeatures(this.getSelected(), delta);
         this.getSelected()
             .filter(feature => feature.properties.radius)

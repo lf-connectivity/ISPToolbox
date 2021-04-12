@@ -184,9 +184,17 @@ export class WorkspaceManager {
                     feature.properties.feature_type === WorkspaceFeatureTypes.CPE);
         });
         
-        nonLinks.forEach((feature: any) => {
-            let feature_type = feature.properties.feature_type;
-            let workspaceFeature = undefined;
+                // Add all the APs and CPEs
+                if (feature_type === WorkspaceFeatureTypes.AP) {
+                    feature.properties.radius = feature.properties.max_radius;
+                    feature.properties.center = feature.geometry.coordinates;
+                    workspaceFeature = new AccessPoint(this.map, this.draw, feature);
+                }
+                else {
+                    workspaceFeature = new CPE(this.map, this.draw, feature);
+                }
+                this.features[workspaceFeature.workspaceId] = workspaceFeature;
+            });
     
             // Add links
             const links = initialFeatures?.features.filter((feature: any) => {
@@ -199,12 +207,9 @@ export class WorkspaceManager {
                 let cpeWorkspaceId = feature.properties.cpe;
                 let ap = this.features[apWorkspaceId] as AccessPoint;
                 let cpe = this.features[cpeWorkspaceId] as CPE;
-                let workspaceFeature = cpe.linkAP(ap);
-
-                // Hack to get feature properties set properly
-                workspaceFeature.featureData.properties = feature.properties;
-                this.draw.add(workspaceFeature.featureData);
-
+                let workspaceFeature = new APToCPELink(this.map, this.draw, feature, ap, cpe);
+                ap.links.set(cpe, workspaceFeature);
+                cpe.ap = ap;
                 this.features[workspaceFeature.workspaceId] = workspaceFeature;
             });
         }
@@ -297,7 +302,7 @@ export class WorkspaceManager {
                             },
                             id: feature.id,
                         }
-                        workspaceFeature = new AccessPoint(this.draw, newCircle);
+                        workspaceFeature = new AccessPoint(this.map, this.draw, newCircle);
                     }
                     break;
 
@@ -311,21 +316,21 @@ export class WorkspaceManager {
                                 height: feature.properties.height ? feature.properties.height : DEFAULT_CPE_HEIGHT
                             }
                         }
-                        workspaceFeature = new CPE(this.draw, newFeature);
+                        workspaceFeature = new CPE(this.map, this.draw, newFeature);
                     }
                     break;
 
                 case 'simple_select':
                     switch(feature.geometry.type) {
                         case 'Point':
-                            workspaceFeature = new CPE(this.draw, feature);
+                            workspaceFeature = new CPE(this.map, this.draw, feature);
                             break;
                         case 'LineString':
                             let apWorkspaceId = feature.properties.ap;
                             let cpeWorkspaceId = feature.properties.cpe;
                             let ap = this.features[apWorkspaceId] as AccessPoint;
                             let cpe = this.features[cpeWorkspaceId] as CPE;
-                            workspaceFeature = new APToCPELink(this.draw, feature, ap, cpe);
+                            workspaceFeature = new APToCPELink(this.map, this.draw, feature, ap, cpe);
                             break;
                     }
                     break;
@@ -358,9 +363,40 @@ export class WorkspaceManager {
         features.forEach((feature) => {
             if (feature.properties.uuid) {
                 let workspaceFeature = this.features[feature.properties.uuid]
-                workspaceFeature.delete((resp) => {
-                    delete this.features[feature.properties.uuid];
-                });
+                let featureType = workspaceFeature.getFeatureType();
+
+                switch(featureType) {
+                    case WorkspaceFeatureTypes.AP:
+                        const source = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
+                        if (source.type == 'geojson') {
+                            source.setData({
+                                'type': 'FeatureCollection',
+                                'features': []
+                            });
+                        }
+                        workspaceFeature.delete((resp) => {
+                            delete this.features[feature.properties.uuid];
+                        });
+                        break;
+                    case WorkspaceFeatureTypes.CPE:
+                        workspaceFeature.delete((resp) => {
+                            delete this.features[feature.properties.uuid];
+                        });
+                        break;
+
+                    // Do not invoke delete on links whose AP or CPEs don't exist anymore. It will 404.
+                    case WorkspaceFeatureTypes.AP_CPE_LINK:
+                        let link = workspaceFeature as APToCPELink;
+                        if (this.draw.get(link.ap.mapboxId) && this.draw.get(link.cpe.mapboxId)) {
+                            workspaceFeature.delete((resp) => {
+                                delete this.features[feature.properties.uuid];
+                            });
+                        }
+                        else {
+                            delete this.features[feature.properties.uuid];
+                        }
+                        break;
+                }
             }
         });
 
@@ -397,7 +433,19 @@ export class WorkspaceManager {
     updateFeatures({ features, action }: { features: Array<any>, action: 'move' | 'change_coordinates' }) {
         features.forEach((feature: any) => {
             if (feature.properties.uuid) {
-                this.features[feature.properties.uuid].update(feature);
+                switch(feature.properties.feature_type) {
+                    case WorkspaceFeatureTypes.AP:
+                        let ap = this.features[feature.properties.uuid] as AccessPoint;
+                        ap.move(feature.geometry.coordinates as [number, number]);
+                        break;
+                    case WorkspaceFeatureTypes.CPE:
+                        let cpe = this.features[feature.properties.uuid] as CPE;
+                        cpe.move(feature.geometry.coordinates as [number, number]);
+                        break;
+                    default:
+                        this.features[feature.properties.uuid].update(feature);
+                        break;
+                }
             }
         });
 
@@ -476,7 +524,7 @@ export class WorkspaceManager {
                 } as Feature<Point, any>
 
                 // Persist CPE, then persist link.
-                const cpe = new CPE(this.draw, newCPE);
+                const cpe = new CPE(this.map, this.draw, newCPE);
                 cpe.create((resp) => {
                     this.features[cpe.workspaceId] = cpe;
                     const link = cpe.linkAP(ap);

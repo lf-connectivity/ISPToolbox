@@ -1,3 +1,4 @@
+import mapboxgl, * as MapboxGL from "mapbox-gl";
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Point, LineString, GeoJsonProperties }  from 'geojson';
 import { WorkspaceEvents } from './WorkspaceConstants';
@@ -10,8 +11,9 @@ const BASE_WORKSPACE_RESPONSE_FIELDS = ['uuid', 'feature_type', 'last_updated']
  * to be saved in Workspace and the backend
  */
 export abstract class BaseWorkspaceFeature {
-    readonly mapboxId: string
+    mapboxId: string
     workspaceId: string
+    map: MapboxGL.Map
     draw: MapboxDraw
     featureData: Feature<Geometry, any>
 
@@ -23,6 +25,7 @@ export abstract class BaseWorkspaceFeature {
      * Base constructor for a workspace feature. Sets parameters that will be
      * useful for UI interactions in the future
      * 
+     * @param map: Mapbox map object
      * @param draw Mapbox draw object
      * @param apiEndpoint The REST API endpoint for creating/updating/deleting objects.
      *  This should be defined as a constant in the subclass's constructor
@@ -31,11 +34,13 @@ export abstract class BaseWorkspaceFeature {
      *  be defined as a constant in the subclass's constructor
      * @param featureData Feature data for an object
      */
-    constructor(draw: MapboxDraw,
+    constructor(map: MapboxGL.Map,
+                draw: MapboxDraw,
                 featureData: Feature<Geometry, any>,
                 apiEndpoint: string,
                 responseFields: Array<string>,
                 serializedFields: Array<string>) {
+        this.map = map;
         this.draw = draw;
         this.mapboxId = String(this.draw.add(featureData)[0]);
         this.apiEndpoint = apiEndpoint;
@@ -83,7 +88,10 @@ export abstract class BaseWorkspaceFeature {
      */
     update(newFeatureData: any,
            successFollowup?: (resp: any) => void) {
+        console.log(this.featureData);
         this.featureData = newFeatureData;
+        console.log(this.featureData);
+        console.log(this.serialize());
         $.ajax({
             url: `${this.apiEndpoint}/${this.featureData.properties.uuid}/`,
             method: 'PATCH',
@@ -93,6 +101,7 @@ export abstract class BaseWorkspaceFeature {
                 'Accept': 'application/json'
             } 
         }).done((resp) => {
+            console.log(resp);
             this.updateFeatureProperties(resp);
             PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
             if (successFollowup) {
@@ -124,6 +133,15 @@ export abstract class BaseWorkspaceFeature {
                 successFollowup(resp);
             }
         });
+    }
+
+    /**
+     * Gets the feature type for this workspace feature.
+     * 
+     * @returns A string indicating this feature's feature type
+     */
+    getFeatureType(): string {
+        return this.featureData.properties.feature_type;
     }
 
     protected updateFeatureProperties(response: any) {
@@ -170,7 +188,17 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
          successFollowup ?: (resp: any) => void) {
         this.featureData.geometry.coordinates = newCoords;
         this.draw.add(this.featureData);
-        this.update(successFollowup);
+        this.update(this.featureData, successFollowup);
+    }
+
+    /**
+     * Compares the point represented by the given feature with the one in this
+     * current feature to see if they are the same or not.
+     * 
+     * @param feature Feature to compare coordinates to. Must be a point feature.
+     */
+    hasMoved(feature: Feature<Point, any>) {
+        return this.featureData.geometry.coordinates === feature.geometry.coordinates;
     }
 }
 
@@ -197,8 +225,12 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
                successFollowup ?: (resp: any) => void) {
         if (index >= 0 && index < this.featureData.geometry.coordinates.length) {
             this.featureData.geometry.coordinates[index] = newCoords;
-            this.draw.add(this.featureData);
-            this.update(successFollowup);
+            this.update(this.featureData, (resp) => {
+                this.draw.add(this.featureData);
+                if (successFollowup) {
+                    successFollowup(resp);
+                }
+            });
         }
     }
 }

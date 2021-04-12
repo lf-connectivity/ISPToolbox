@@ -1,3 +1,4 @@
+import mapboxgl, * as MapboxGL from "mapbox-gl";
 import { Feature, Geometry, Point, LineString, GeoJsonProperties, Position }  from 'geojson';
 import { BaseWorkspaceFeature, WorkspaceLineStringFeature, WorkspacePointFeature } from './BaseWorkspaceFeature';
 import { isUnitsUS } from '../utils/MapPreferences';
@@ -19,12 +20,16 @@ const CPE_SERIALIZER_FIELDS = ['name', 'height'];
 const AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link';
 const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe'];
 
-export class AccessPoint extends WorkspacePointFeature {
-    private readonly links: Map<CPE, APToCPELink> // mapbox ID
+const LINK_AP_INDEX = 0;
+const LINK_CPE_INDEX = 1;
 
-    constructor(draw: MapboxDraw,
+export class AccessPoint extends WorkspacePointFeature {
+    readonly links: Map<CPE, APToCPELink> // mapbox ID
+
+    constructor(map: mapboxgl.Map,
+                draw: MapboxDraw,
                 featureData: Feature<Geometry, any>) {
-        super(draw, featureData, AP_API_ENDPOINT, AP_RESPONSE_FIELDS, AP_SERIALIZER_FIELDS);
+        super(map, draw, featureData, AP_API_ENDPOINT, AP_RESPONSE_FIELDS, AP_SERIALIZER_FIELDS);
         this.links = new Map();
     }
 
@@ -46,10 +51,44 @@ export class AccessPoint extends WorkspacePointFeature {
         });
     }
 
-    update(newFeatureData: any, successFollowup?: (resp: any) => void) {
+    update(newFeatureData: Feature<Point, any>, successFollowup?: (resp: any) => void) {
         super.update(newFeatureData, (resp: any) => {
             PubSub.publish(WorkspaceEvents.AP_RENDER, {features: [this.featureData]});
             PubSub.publish(WorkspaceEvents.AP_SELECTED, {features: [this.featureData]});
+
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        });
+    }
+
+    move(newCoords: [number, number],
+         successFollowup ?: (resp: any) => void) {
+        console.log(`new coords of AP ${newCoords}`)
+        super.move(newCoords, (resp) => {
+            // this.links.forEach((link) => {
+            //     link.moveVertex(LINK_AP_INDEX, newCoords, (resp) => {
+            //         this.map.fire('draw.update', {features: [link.featureData], action: 'move'});
+            //     });
+            // });
+
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        })
+    }
+
+    delete(successFollowup ?: (resp: any) => void) {
+        super.delete((resp) => {
+            this.links.forEach((link, cpe) => {
+                cpe.ap = undefined;
+
+                // Link is already deleted in backend because of cascading delete
+                this.draw.delete(link.mapboxId);
+                this.map.fire('draw.delete', {features: [link.featureData]});
+            });
+            this.links.clear();
+
             if (successFollowup) {
                 successFollowup(resp);
             }
@@ -77,7 +116,8 @@ export class AccessPoint extends WorkspacePointFeature {
         };
 
         cpe.ap = this;
-        const newLink = new APToCPELink(this.draw, newLinkFeature, this, cpe);
+        const newLink = new APToCPELink(this.map, this.draw, newLinkFeature, this, cpe);
+        this.links.set(cpe, newLink);
         return newLink;
     }
 }
@@ -85,9 +125,10 @@ export class AccessPoint extends WorkspacePointFeature {
 export class CPE extends WorkspacePointFeature {
     ap?: AccessPoint
 
-    constructor(draw: MapboxDraw,
+    constructor(map: MapboxGL.Map,
+                draw: MapboxDraw,
                 featureData: Feature<Geometry, any>) {
-        super(draw, featureData, CPE_ENDPOINT, CPE_RESPONSE_FIELDS, CPE_SERIALIZER_FIELDS);
+        super(map, draw, featureData, CPE_ENDPOINT, CPE_RESPONSE_FIELDS, CPE_SERIALIZER_FIELDS);
     }
 
     /**
@@ -98,17 +139,60 @@ export class CPE extends WorkspacePointFeature {
     linkAP(ap: AccessPoint): APToCPELink {
         return ap.linkCPE(this);
     }
+
+    update(newFeatureData: Feature<Point, any>, successFollowup?: (resp: any) => void) {
+        super.update(newFeatureData, (resp: any) => {
+            PubSub.publish(WorkspaceEvents.AP_SELECTED, {features: [this.featureData]});
+
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        });
+    }
+
+    move(newCoords: [number, number],
+         successFollowup ?: (resp: any) => void) {
+        super.move(newCoords, (resp) => {
+            // if (this.ap) {
+            //     let link = this.ap.links.get(this);
+            //     link?.moveVertex(LINK_CPE_INDEX, newCoords, (resp) => {
+            //         this.map.fire('draw.update', {features: [link?.featureData], action: 'move'});
+            //     });
+            // }
+
+           if (successFollowup) {
+                successFollowup(resp);
+            }
+       });
+   }
+
+   delete(successFollowup ?: (resp: any) => void) {
+        super.delete((resp) => {
+            if (this.ap) {
+                let link = this.ap.links.get(this) as APToCPELink;
+                this.ap.links.delete(this);
+                this.draw.delete(link.mapboxId);
+                this.map.fire('draw.delete', {features: [link.featureData]});
+                this.ap = undefined;
+            }
+
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        });
+    }
 }
 
 export class APToCPELink extends WorkspaceLineStringFeature {
     ap: AccessPoint
     cpe: CPE
 
-    constructor(draw: MapboxDraw,
+    constructor(map: MapboxGL.Map,
+                draw: MapboxDraw,
                 featureData: Feature<LineString, any>,
                 ap: AccessPoint,
                 cpe: CPE) {
-        super(draw, featureData, AP_CPE_LINK_ENDPOINT, AP_CPE_LINK_FIELDS, AP_CPE_LINK_FIELDS);
+        super(map, draw, featureData, AP_CPE_LINK_ENDPOINT, AP_CPE_LINK_FIELDS, AP_CPE_LINK_FIELDS);
         this.ap = ap;
         this.cpe = cpe;
         this.draw.setFeatureProperty(this.mapboxId, 'ap', this.ap.workspaceId);

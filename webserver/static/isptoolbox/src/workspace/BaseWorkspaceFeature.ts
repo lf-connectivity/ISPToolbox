@@ -190,16 +190,6 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
         this.draw.add(this.featureData);
         this.update(this.featureData, successFollowup);
     }
-
-    /**
-     * Compares the point represented by the given feature with the one in this
-     * current feature to see if they are the same or not.
-     * 
-     * @param feature Feature to compare coordinates to. Must be a point feature.
-     */
-    hasMoved(feature: Feature<Point, any>) {
-        return this.featureData.geometry.coordinates === feature.geometry.coordinates;
-    }
 }
 
 /**

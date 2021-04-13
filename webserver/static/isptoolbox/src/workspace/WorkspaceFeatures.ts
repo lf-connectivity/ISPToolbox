@@ -62,22 +62,6 @@ export class AccessPoint extends WorkspacePointFeature {
         });
     }
 
-    move(newCoords: [number, number],
-         successFollowup ?: (resp: any) => void) {
-        console.log(`new coords of AP ${newCoords}`)
-        super.move(newCoords, (resp) => {
-            // this.links.forEach((link) => {
-            //     link.moveVertex(LINK_AP_INDEX, newCoords, (resp) => {
-            //         this.map.fire('draw.update', {features: [link.featureData], action: 'move'});
-            //     });
-            // });
-
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        })
-    }
-
     delete(successFollowup ?: (resp: any) => void) {
         super.delete((resp) => {
             this.links.forEach((link, cpe) => {
@@ -94,6 +78,16 @@ export class AccessPoint extends WorkspacePointFeature {
             }
         });
     }
+
+
+    move(newCoords: [number, number],
+        successFollowup ?: (resp: any) => void) {
+       super.move(newCoords, successFollowup);
+
+       this.links.forEach((link) => {
+           link.moveVertex(LINK_AP_INDEX, newCoords);
+       });
+   }
 
     /**
      * Links the AP with the given CPE and creates an APToCPELink object to represent the link.
@@ -153,14 +147,14 @@ export class CPE extends WorkspacePointFeature {
     move(newCoords: [number, number],
          successFollowup ?: (resp: any) => void) {
         super.move(newCoords, (resp) => {
-            // if (this.ap) {
-            //     let link = this.ap.links.get(this);
-            //     link?.moveVertex(LINK_CPE_INDEX, newCoords, (resp) => {
-            //         this.map.fire('draw.update', {features: [link?.featureData], action: 'move'});
-            //     });
-            // }
+            if (this.ap) {
+                let link = this.ap.links.get(this);
+                link?.moveVertex(LINK_CPE_INDEX, newCoords, (resp) => {
+                    this.map.fire('draw.update', {features: [link?.featureData], action: 'move'});
+                });
+            }
 
-           if (successFollowup) {
+            if (successFollowup) {
                 successFollowup(resp);
             }
        });

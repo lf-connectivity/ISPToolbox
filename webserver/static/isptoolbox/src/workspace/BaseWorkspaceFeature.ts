@@ -88,10 +88,7 @@ export abstract class BaseWorkspaceFeature {
      */
     update(newFeatureData: any,
            successFollowup?: (resp: any) => void) {
-        console.log(this.featureData);
         this.featureData = newFeatureData;
-        console.log(this.featureData);
-        console.log(this.serialize());
         $.ajax({
             url: `${this.apiEndpoint}/${this.featureData.properties.uuid}/`,
             method: 'PATCH',
@@ -101,7 +98,6 @@ export abstract class BaseWorkspaceFeature {
                 'Accept': 'application/json'
             } 
         }).done((resp) => {
-            console.log(resp);
             this.updateFeatureProperties(resp);
             PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
             if (successFollowup) {
@@ -188,7 +184,12 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
          successFollowup ?: (resp: any) => void) {
         this.featureData.geometry.coordinates = newCoords;
         this.draw.add(this.featureData);
-        this.update(this.featureData, successFollowup);
+        this.update(this.featureData, (resp) => {
+            this.draw.add(this.featureData);
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        });
     }
 }
 
@@ -214,13 +215,10 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
                newCoords: [number, number],
                successFollowup ?: (resp: any) => void) {
         if (index >= 0 && index < this.featureData.geometry.coordinates.length) {
-            this.featureData.geometry.coordinates[index] = newCoords;
-            this.update(this.featureData, (resp) => {
-                this.draw.add(this.featureData);
-                if (successFollowup) {
-                    successFollowup(resp);
-                }
-            });
+            let newFeatureData = {...this.featureData};
+            newFeatureData.geometry.coordinates[index] = newCoords;
+            this.draw.add(newFeatureData);
+            this.map.fire('draw.update', {features: [newFeatureData], action: 'move'});
         }
     }
 }

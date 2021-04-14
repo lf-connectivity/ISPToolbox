@@ -215,9 +215,9 @@ SELECT providername,
     Max(maxaddown)               AS maxdown,
     Max(maxadup)                 AS maxadup,
     Array_agg(DISTINCT techcode) AS tech
-FROM   form477jun2019
+FROM   form477jun2020
     JOIN tl_2019_blocks_census
-      ON tl_2019_blocks_census.geoid10 = form477jun2019.blockcode
+      ON tl_2019_blocks_census.geoid10 = form477jun2020.blockcode
 WHERE  {}
     AND consumer > 0
 GROUP  BY providername

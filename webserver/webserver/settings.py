@@ -252,6 +252,7 @@ if PROD:
                                                       aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
     DJANGO_ORM_DB_CREDENTIALS.update({
         'name': 'django_db',
+        'host-read-replica': 'isptoolbox-db-prod-read-replica1.cahmkzzberpf.us-west-1.rds.amazonaws.com',
     })
 else:
     DJANGO_ORM_DB_CREDENTIALS = {
@@ -259,6 +260,7 @@ else:
         'username': os.environ.get('DB_USERNAME', 'postgres'),
         'password': os.environ.get('DB_PASSWORD', 'password'),
         'host': os.environ.get('POSTGRES_DB', 'localhost'),
+        'host-read-replica': os.environ.get('POSTGRES_DB', 'localhost'),
         'port': '5432',
     }
 
@@ -276,6 +278,14 @@ DATABASES = {
         },
         'PORT': DJANGO_ORM_DB_CREDENTIALS['port'],
     },
+    'default-read-replica': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': DJANGO_ORM_DB_CREDENTIALS['name'],
+        'USER': DJANGO_ORM_DB_CREDENTIALS['username'],
+        'PASSWORD': DJANGO_ORM_DB_CREDENTIALS['password'],
+        'HOST': DJANGO_ORM_DB_CREDENTIALS['host-read-replica'],
+        'PORT': DJANGO_ORM_DB_CREDENTIALS['port'],
+    },
     # This DB is not managed by Django ORM, therefore we hardcode parameters
     # Contains static GIS data: microsoft buildings dataset, income data, fcc broadband availablility
     'gis_data': {
@@ -291,7 +301,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': GIS_DB_CREDENTIALS['username'],
         'PASSWORD': GIS_DB_CREDENTIALS['password'],
-        'HOST': 'isptoolbox-db-prod-read-replica1.cahmkzzberpf.us-west-1.rds.amazonaws.com',
+        'HOST': 'isptoolbox-gis-db-prod-read-replica.cahmkzzberpf.us-west-1.rds.amazonaws.com',
         'PORT': GIS_DB_CREDENTIALS['port'],
     }
 }

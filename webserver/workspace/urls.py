@@ -43,6 +43,9 @@ urlpatterns = [
     path('workspace/api/tower/bulk-upload/', views.BulkUploadTowersView.as_view(), name="bulk_tower_upload"),
     path('workspace/api/network/map/', views.NetworkMapPreferencesView.as_view(), name="map_preference_update"),
     path('workspace/500/', views.Error500View, name='404'),
+    # Facebook SDK Login
+    path('fb/deauthorize-callback/', views.FBDeauthorizeSocialView.as_view(), name="fb_deauthorize"),
+    path('fb/delete-callback/', views.FBDataDeletionView.as_view(), name="fb_deletion"),
     # Legal
     path('workspace/terms/', views.TermsOfService.as_view(), name="terms"),
     path('workspace/data-policy/', views.DataPolicy.as_view(), name="data_policy"),

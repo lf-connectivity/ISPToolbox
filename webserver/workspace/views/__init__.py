@@ -7,6 +7,7 @@ from .rest_views import (
     NetworkMapPreferencesView, CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet
 )
 from .error_views import Error500View, Error404View, Error403View
+from .social_views import FBDeauthorizeSocialView, FBDataDeletionView
 from .legal_views import DataPolicy, Cookies, TermsOfService
 
 __all__ = [
@@ -15,5 +16,6 @@ __all__ = [
     'CPELocationCreate', 'CPELocationGet', 'APToCPELinkCreate', 'APToCPELinkGet',
     'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'Error500View', 'Error404View',
     'Error403View', 'OptionalInfoWorkspaceView',
+    'FBDeauthorizeSocialView', 'FBDataDeletionView',
     'DataPolicy', 'Cookies', 'TermsOfService',
 ]

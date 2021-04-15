@@ -2,7 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from IspToolboxAccounts.models import User, IspToolboxUserSignUpInfo
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
 
 class IspToolboxUserCreationForm(UserCreationForm):
@@ -68,3 +68,35 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
         'company_website', 'is_business_role', 'is_tech_role', 'is_sales_role', 'company_size',
         'is_goal_start', 'is_goal_acquire_customers', 'is_goal_expand'
     ]
+
+
+class IspToolboxUserPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['new_password1'].help_text = _('Use 8 or more characters with a mix of letters and numbers.')
+        self.fields['new_password2'].help_text = _('Enter the same password as before, for verification.')
+
+
+class IspToolboxUserInfoChangeForm(forms.ModelForm):
+    class Meta:
+        fields = ['email', 'first_name', 'last_name']
+        model = User
+
+
+class IspToolboxUserDeleteAccountForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['confirmation'].help_text = _('Type `permanently delete` to confirm')
+
+    confirmation = forms.CharField(
+                required=True,
+                widget=forms.TextInput(attrs={'placeholder': 'permanently delete'}))
+
+    def try_delete(self, request):
+        valid_input = self.cleaned_data.get('confirmation') == 'permanently delete'
+        if valid_input:
+            request.user.delete()
+            return True
+        else:
+            self.add_error('confirmation', 'incorrect')
+            return False

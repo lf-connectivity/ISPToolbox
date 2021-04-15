@@ -1,7 +1,12 @@
 @use '../fonts'
+@import ../theme
 
 body
     font-family: 'Basis Grotesque Pro' !important
+
+    .dropdown-menu
+        border: none
+        border-radius: 0px
     
 .homepage-logo
     align-items: center
@@ -19,10 +24,16 @@ body
         svg
             height: auto
             width: 100px
+    
+    @media (max-width: $breakpoint-tablet)
+        .wordmark
+            display: none
 
     .logo-container
         display: block
         width: 185px
+
+
     
 .workspace-nav
     align-items: center
@@ -30,8 +41,6 @@ body
     display: flex
     height: 70px
     justify-content: space-between
-    position: fixed
-    top: 0
     width: 100%
 
     .account-dropdown
@@ -41,3 +50,6 @@ body
             height: 40px
             width: 40px
             border-radius: 20px
+
+    .dropdown-menu
+        margin-top: 1rem!important

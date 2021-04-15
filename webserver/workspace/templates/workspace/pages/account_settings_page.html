@@ -1,0 +1,117 @@
+{% extends 'workspace/pages/base.html' %}
+
+{% block content %}
+
+<div class="container account_setting_form_container">
+    <div class="card">
+        <div class="card-body">
+            <div class="card-header d-flex justify-content-between">
+                <h1>
+                    Update Account
+                </h1>
+                <button class="btn isptoolbox-btn btn-secondary" type="submit"
+                    onclick="document.getElementById('changeaccountinfoform').removeAttribute('disabled')"
+                >
+                    Edit
+                </button>
+            </div>
+            <form action={{ request.path }} method="post" class="pb-3">
+                <fieldset class="isptoolbox-form" disabled id="changeaccountinfoform">
+                {% csrf_token %}
+                {{ account_form }}
+                <input class="btn isptoolbox-btn btn-primary mt-2" type="submit" name="update_account" value="Update Account">
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="card-header d-flex justify-content-between">
+                <h1>
+                    Change Password
+                </h1>
+                <button class="btn isptoolbox-btn btn-secondary" type="submit"
+                    onclick="document.getElementById('changepasswordform').removeAttribute('disabled')"
+                >
+                    Edit
+                </button>
+            </div>
+
+            <form action={{ request.path }} method="post" class="pb-3">
+                <fieldset class="isptoolbox-form" disabled id="changepasswordform">
+                {% csrf_token %}
+                {{ password_form }}
+                <input class="btn isptoolbox-btn btn-primary mt-2" type="submit" name="change_password" value="Change Password">
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-header">
+                Organization
+            </h1>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-header">
+                User Info
+            </h1>
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-header">
+                Social
+            </h1>
+            <form method="post" class="isptoolbox-form pb-3">
+                {% csrf_token %}
+                {{ social_form }}
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="card-header d-flex justify-content-between">
+                <h1>
+                    Delete Account
+                </h1>
+            </div>
+
+            <form action={{ request.path }} method="post" class="isptoolbox-form pb-3 d-none" id="deleteaccountform">
+                <p> Are you sure you want to delete your account? This is permanent.</p>
+                {% csrf_token %}
+                {{ delete_account_form }}
+                <div class="d-flex">
+                    <input class="btn isptoolbox-btn btn-danger" type="submit" name="delete_account" value="Confirm">
+                    <button class="btn isptoolbox-btn btn-secondary"
+                    onclick="
+                    document.getElementById('deleteaccountform').classList.add('d-none'); event.preventDefault();
+                    document.getElementById('delete_account_btn').classList.remove('d-none');
+                    "
+                        >
+                        Cancel
+                    </button>
+                </div>
+            </form>
+            <button class="btn isptoolbox-btn btn-danger" type="submit" id="delete_account_btn"
+              onclick="
+                document.getElementById('deleteaccountform').classList.remove('d-none');
+                document.getElementById('delete_account_btn').classList.add('d-none');
+            "
+                >
+                Delete Account
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

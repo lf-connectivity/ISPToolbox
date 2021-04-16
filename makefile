@@ -27,6 +27,7 @@ default_objects:
 	@echo ----------------------------------------------CREATING SAMPLE OBJECTS----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py create_default_overlays
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py get_latest_usgs
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py create_social_app
 
 test: 
 	@echo ----------------------------------------------STARTING TESTS----------------------------------------

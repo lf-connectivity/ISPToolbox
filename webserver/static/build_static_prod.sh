@@ -1,4 +1,4 @@
-npm install -g sass
+npm install -g sass@1.32.8
 cd /usr/src/app/isptoolbox
 npm install
 cd /usr/src/app/potree

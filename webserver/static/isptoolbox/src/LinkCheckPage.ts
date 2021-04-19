@@ -26,6 +26,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents } from './workspace/WorkspaceConstants';
+import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/LinkCheckDrawPtPPopup';
 
 
 export enum LinkCheckEvents {
@@ -137,6 +138,9 @@ export class LinkCheckPage {
     animationWasPlaying: boolean;
     hoverUpdated: boolean;
 
+    addressBarPtPDialog: LinkCheckDrawPtPPopup;
+    geocoder: typeof MapboxGeocoder;
+
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
         if (!(window as any).webgl2support) {
             potree = null;
@@ -230,7 +234,6 @@ export class LinkCheckPage {
             });
         }
 
-
         this.link_chart = createLinkChart(
             this.link_chart,
             this.highLightPointOnGround.bind(this),
@@ -271,13 +274,6 @@ export class LinkCheckPage {
         this.map.on('load', () => {
             // When map movement ends save where the user is looking
             setCenterZoomPreferences(this.map);
-            
-            var geocoder = new MapboxGeocoder({
-                accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl,
-                placeholder: 'Search for an address'
-            });
-            document.getElementById('geocoder')?.appendChild(geocoder.onAdd(this.map));
 
             this.map.addSource(LOWEST_LAYER_SOURCE, {type: 'geojson', data : {type: 'FeatureCollection', features: []}});
             this.map.addLayer({
@@ -311,6 +307,27 @@ export class LinkCheckPage {
                 },
                 styles: mapboxdrawstyles
             });
+
+            this.geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl,
+                placeholder: 'Search for an address'
+            });
+
+            this.addressBarPtPDialog = new LinkCheckDrawPtPPopup(this.map, this.draw, this.geocoder);
+
+            // Popup
+            this.geocoder.on('result', ({result}: any) => {
+                // Display popup, but only if it's a specific address (addres or poi)
+                let placeType = result.place_type[0];
+                if (placeType === 'address' || placeType === 'poi') {
+                    this.addressBarPtPDialog.setAddress(result.place_name);
+                    this.addressBarPtPDialog.setLngLat(result.center);
+                    this.addressBarPtPDialog.show();
+                }
+            });
+
+            document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
 
             this.map.addControl(this.draw, 'bottom-right');
             const deleteControl = new MapboxCustomDeleteControl({

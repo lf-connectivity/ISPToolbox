@@ -109,12 +109,13 @@ export class LinkCheckDrawPtPPopup {
             //@ts-ignore
             this.draw.changeMode('draw_link', {start: this.lnglat});
             this.map.fire('draw.modechange', {mode: 'draw_link'});
-            console.log('ptp button clicked');
             this.hide();
         });
 
         $(`#${ADD_TOWER_BUTTON_ID}`).on('click', () => {
-            console.log('To be implemented')
+             //@ts-ignore
+             this.draw.changeMode('draw_radius', {start: this.lnglat});
+             this.map.fire('draw.modechange', {mode: 'draw_radius'});
             this.hide();
         });
 

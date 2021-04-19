@@ -10,6 +10,7 @@ import hmac
 import hashlib
 import base64
 import json
+import logging
 
 
 def fb_decode(data):
@@ -39,7 +40,8 @@ class FBDeauthorizeSocialView(View):
     def post(self, request):
         try:
             fb_request = fb_parse_request(request)
-        except Exception:
+        except Exception as e:
+            logging.info(f'fbsdk callback failed: {str(e)}')
             raise PermissionDenied
 
         if fb_request is None:
@@ -58,7 +60,8 @@ class FBDataDeletionView(View):
     def post(self, request):
         try:
             fb_request = fb_parse_request(request)
-        except Exception:
+        except Exception as e:
+            logging.info(f'fbsdk callback failed: {str(e)}')
             raise PermissionDenied
 
         if fb_request is None:

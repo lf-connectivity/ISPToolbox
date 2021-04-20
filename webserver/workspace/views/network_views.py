@@ -83,6 +83,7 @@ class EditNetworkView(View):
         cpes = CPELocation.get_features_for_user(request.user, CPESerializer)
         links = APToCPELink.get_features_for_user(request.user, APToCPELinkSerializer)
         geojson = geojson_utils.merge_feature_collections(aps, cpes, links)
+        beta = True;
         map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)
         context = {
             'network': network,

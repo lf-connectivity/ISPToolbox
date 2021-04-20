@@ -19,6 +19,7 @@
       };
     </script>
     {{ geojson|json_script:"isp-map-features" }}
+    {{ beta|json_script:"los_beta" }}
     {% include "workspace/organisms/access_point_modal.html" %}
     {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
 </body>

@@ -28,6 +28,7 @@ docutils==0.15.2
 draftjs-exporter==2.1.7
 elasticsearch==7.12.0
 fastkml==0.11
+fiona==1.8.17
 flower==0.9.5
 future==0.18.2
 geographiclib==1.50 

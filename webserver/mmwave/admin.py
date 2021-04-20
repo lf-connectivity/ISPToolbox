@@ -1,5 +1,5 @@
 from django.contrib import admin
-from mmwave.models import TGLink, LOSSummary, EPTLidarPointCloud
+from mmwave.models import TGLink, LOSSummary, EPTLidarPointCloud, USGSLidarMetaDataModel
 from django.db.models import Count
 from django.db.models.functions import Trunc
 from django.db.models import DateTimeField
@@ -15,6 +15,7 @@ class TGLinkAdmin(admin.ModelAdmin):
 
 
 admin.site.register(EPTLidarPointCloud)
+admin.site.register(USGSLidarMetaDataModel)
 
 
 @admin.register(LOSSummary)

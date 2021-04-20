@@ -31,8 +31,12 @@ def update_lidar_metadata():
         with fiona.open(fp.name, 'r', driver="GPKG") as src:
             for idx, layer in enumerate(src):
                 if USGSLidarMetaDataModel.objects.filter(workunit=layer['properties']['workunit']).exists():
-                    pass
+                    # Update object if it already exists
+                    update = layer['properties'].copy()
+                    del update['workunit']
+                    USGSLidarMetaDataModel.objects.filter(workunit=layer['properties']['workunit']).update(**update)
                 else:
+                    # Create new object if it doesnt exist
                     try:
                         metadata_new = USGSLidarMetaDataModel(**(layer['properties']))
                         metadata_new.save()

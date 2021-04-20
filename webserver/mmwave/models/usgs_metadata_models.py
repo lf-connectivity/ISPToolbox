@@ -30,7 +30,7 @@ class USGSLidarMetaDataModel(models.Model):
     onemeter_category = models.CharField(max_length=255)
     onemeter_reason = models.CharField(max_length=255, null=True)
     seamless_category = models.CharField(max_length=255, null=True)
-    seamless_reason = models.CharField(max_length=255)
+    seamless_reason = models.CharField(max_length=255, null=True)
     lpc_link = models.CharField(max_length=255)
     opr_link = models.CharField(max_length=255)
     metadata_link = models.CharField(max_length=255)

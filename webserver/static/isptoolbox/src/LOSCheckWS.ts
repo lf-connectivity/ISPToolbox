@@ -3,6 +3,14 @@
  * Connection Manager for LOS Check Websocket
  *
  **/
+import PubSub from 'pubsub-js';
+
+export enum LOSWSEvents {
+    LIDAR_MSG = 'ws.lidar_msg',
+    TERRAIN_MSG = 'ws.terrain_msg',
+    LINK_MSG = 'ws.link_msg',
+    VIEWSHED_MSG = 'ws.viewshed_msg',
+}
 
 export enum LOSWSHandlers {
     LIDAR = 'lidar',
@@ -29,6 +37,12 @@ export type TerrainResponse = {
     terrain_profile: Array<{elevation: number, lat : number, lng: number}>,
 }
 
+export type ViewShedResponse = {
+    type: "ap.viewshed",
+    url: string,
+    coordinates: GeoJSON.Polygon
+}
+
 export type LidarResponse = {
     type: "standard.message",
     handler: LOSWSHandlers.LIDAR,
@@ -51,7 +65,7 @@ export type AccessPointCoverageResponse = {
 }
 
 export type LOSCheckResponse =  LinkResponse | TerrainResponse | LidarResponse;
-export type WSResponse = LOSCheckResponse | AccessPointCoverageResponse;
+export type WSResponse = LOSCheckResponse | AccessPointCoverageResponse | ViewShedResponse;
 
 interface LOSCheckWSCallbacks {
     (message : LOSCheckResponse) : void
@@ -111,14 +125,20 @@ class LOSCheckWS {
 
         this.ws.onmessage = (e) => {
             const resp = JSON.parse(e.data) as WSResponse;
-            if(resp.type === "standard.message") {
-                if(resp.hash === this.hash){
+            switch(resp.type){
+                case "standard.message":
                     this.message_handlers.forEach((handler)=>{
                         handler(resp);
-                    })
-                }
-            } else {
-                this.ap_callback(resp);
+                    });
+                    break;
+                case "ap.status":
+                    this.ap_callback(resp);
+                    break;
+                case "ap.viewshed":
+                    PubSub.publish(LOSWSEvents.VIEWSHED_MSG, resp);
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -146,9 +166,10 @@ class LOSCheckWS {
         }
     }
 
-    sendAPRequest(uuid: string){
+    sendAPRequest(uuid: string, height: number){
         const request = JSON.stringify({
             msg : 'ap',
+            ap_hgt: height,
             uuid: uuid,
         });
         if(this.ws.readyState !== WebSocket.OPEN) {

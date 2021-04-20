@@ -1,4 +1,5 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
+import * as _ from "lodash";
 import { Feature, Geometry, Point, LineString, GeoJsonProperties, Position }  from 'geojson';
 import { createGeoJSONCircle } from "../isptoolbox-mapbox-draw/RadiusModeUtils.js";
 import { getCookie } from '../utils/Cookie';
@@ -14,6 +15,7 @@ import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { makeItArrayIfItsNot } from "../everpolate.js";
+import { ViewshedTool } from "../organisms/ViewshedTool";
 
 
 const DEFAULT_AP_HEIGHT = 30.48;
@@ -21,7 +23,8 @@ const DEFAULT_CPE_HEIGHT = 1.0;
 const DEFAULT_NO_CHECK_RADIUS = 0.01;
 const DEFAULT_AP_NAME = 'Unnamed AP';
 const DEFAULT_CPE_NAME = 'Unnamed CPE';
-const DEFAULT_LINK_FREQUENCY = 5.4925
+const DEFAULT_LINK_FREQUENCY = 5.4925;
+const DEBOUNCE_VIEWSHED_S = 2000;
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -29,6 +32,9 @@ const ACCESS_POINT_RADIUS_VIS_LAYER_FILL = 'ap_vis_data_layer-fill';
 
 const ACCESS_POINT_BUILDING_DATA = 'ap_building_source';
 const ACCESS_POINT_BUILDING_LAYER = 'ap_building_layer';
+
+const EMPTY_SOURCE_AFTER_BUILDING = 'empty_building_source';
+export const EMPTY_LAYER_AFTER_BUILDING = "empty_building_layer";
 
 export class LOSModal {
     selector: string;
@@ -145,7 +151,8 @@ export class LOSModal {
                 });
             })
             const feats = ap.map((feat:any) => this.draw.get(feat.id));
-            this.map.fire('draw.update', {features: feats, action: 'move'});            
+            this.map.fire('draw.update', {features: feats, action: 'move'});   
+            PubSub.publish(WorkspaceEvents.AP_UPDATE, feats[0]);        
         });
 
         $('.sort-ap').on('click', (event) => {
@@ -169,12 +176,14 @@ export class WorkspaceManager {
     ws: LOSCheckWS;
     readonly features: { [workspaceId: string] : BaseWorkspaceFeature }; // Map from workspace UUID to feature
     view: LOSModal;
+    viewshed: ViewshedTool;
 
     constructor(selector: string, map: MapboxGL.Map, draw: MapboxDraw, ws: LOSCheckWS, initialFeatures: any) {
         this.map = map;
         this.draw = draw;
         this.ws = ws;
         this.view = new LOSModal(selector, this.map, this.draw);
+        this.viewshed = new ViewshedTool(this.map, this.draw);
 
         // Initialize features
         this.features = {};
@@ -263,6 +272,15 @@ export class WorkspaceManager {
                 ],
                 'fill-opacity': 0.9
             }
+        });
+
+        this.map.addSource(EMPTY_SOURCE_AFTER_BUILDING, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
+        this.map.addLayer({
+            'id': EMPTY_LAYER_AFTER_BUILDING,
+            'type': 'fill',
+            'source': EMPTY_SOURCE_AFTER_BUILDING,
+            'layout': {},
+            'paint': {}
         });
 
         // Add Pubsub Callbacks
@@ -472,10 +490,12 @@ export class WorkspaceManager {
                     case WorkspaceFeatureTypes.AP:
                         let ap = this.features[feature.properties.uuid] as AccessPoint;
                         ap.move(feature.geometry.coordinates as [number, number]);
+                        ap.update(feature);
                         break;
                     case WorkspaceFeatureTypes.CPE:
                         let cpe = this.features[feature.properties.uuid] as CPE;
                         cpe.move(feature.geometry.coordinates as [number, number]);
+                        cpe.update(feature);
                         break;
                     default:
                         this.features[feature.properties.uuid].update(feature);
@@ -530,7 +550,7 @@ export class WorkspaceManager {
                 // clear coverage for UUID
                 let ap = this.features[f.properties.uuid] as AccessPoint;
                 ap.awaitNewCoverage();
-                this.ws.sendAPRequest(f.properties.uuid);
+                this.ws.sendAPRequest(f.properties.uuid, f.properties.height);
                 PubSub.publish(WorkspaceEvents.AP_RENDER, {});
             }
         });

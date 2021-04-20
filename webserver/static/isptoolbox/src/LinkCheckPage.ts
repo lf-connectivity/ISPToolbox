@@ -60,7 +60,7 @@ const HOVER_POINT_LAYER = 'hover-point-link-layer';
 const SELECTED_LINK_SOURCE = 'selected-link-source';
 const SELECTED_LINK_LAYER = 'selected-link-layer';
 const LOWEST_LAYER_SOURCE = 'lowest_layer_source';
-const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
+export const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
 
 const center_freq_values: { [key: string]: number } = {
     '2.4 GHz': 2.437,

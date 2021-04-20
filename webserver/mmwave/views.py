@@ -138,5 +138,5 @@ class CreateExportDSM(View):
         return JsonResponse({
             'status': job_status,
             'error': job.error,
-            'url': job.getS3Presigned() if job_status == states.SUCCESS else None
+            'url': job.create_presigned_url() if job_status == states.SUCCESS else None
         })

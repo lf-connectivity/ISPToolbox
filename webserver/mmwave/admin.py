@@ -1,5 +1,5 @@
 from django.contrib import admin
-from mmwave.models import TGLink, LOSSummary, EPTLidarPointCloud, USGSLidarMetaDataModel
+from mmwave import models
 from django.db.models import Count
 from django.db.models.functions import Trunc
 from django.db.models import DateTimeField
@@ -8,17 +8,18 @@ from IspToolboxApp.util.admin_timeseries_util import (
     get_next_in_date_hierarchy, daterange, get_request_datetime
 )
 
-
-@admin.register(TGLink)
+admin.site.register(models.DSMConversionJob)
+admin.site.register(models.ViewShedJob)
+@admin.register(models.TGLink)
 class TGLinkAdmin(admin.ModelAdmin):
     list_display = ("uuid", "created", "linklength_m", "fbid")
 
 
-admin.site.register(EPTLidarPointCloud)
-admin.site.register(USGSLidarMetaDataModel)
+admin.site.register(models.EPTLidarPointCloud)
+admin.site.register(models.USGSLidarMetaDataModel)
 
 
-@admin.register(LOSSummary)
+@admin.register(models.LOSSummary)
 class LOSSummaryAdmin(admin.ModelAdmin):
     change_list_template = 'admin/los_summary_list.html'
     date_hierarchy = 'created'

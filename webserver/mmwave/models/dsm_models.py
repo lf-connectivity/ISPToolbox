@@ -2,10 +2,11 @@ from django.db import models
 from django.contrib.gis.db import models as gis_models
 from django.conf import settings
 import uuid
-from IspToolboxApp.util.s3 import createPresignedUrl, writeToS3
+from IspToolboxApp.util.s3 import S3PublicExportMixin
 import secrets
 from celery.result import AsyncResult
 from celery import states
+from enum import Enum
 from area import area
 
 
@@ -16,7 +17,14 @@ class DSMException(Exception):
     pass
 
 
-class DSMConversionJob(models.Model):
+class DSMResolutionOptionsEnum(Enum):
+    LOW = 10
+    MEDIUM = 5
+    HIGH = 1
+    ULTRA = 0.5
+
+
+class DSMConversionJob(models.Model, S3PublicExportMixin):
     uuid = models.UUIDField(
         default=uuid.uuid4,
         editable=False,
@@ -32,18 +40,18 @@ class DSMConversionJob(models.Model):
     task = models.UUIDField(null=True)
     error = models.CharField(null=True, max_length=200, default=None)
     created = models.DateTimeField(auto_now_add=True)
+    resolution = models.DecimalField(max_digits=5, decimal_places=2, default=0.5)
 
-    def writeDSMtoS3(self, fp):
-        writeToS3(fp, self.createS3Path())
+    def delete(self):
+        self.delete_object()
+        return super(DSMConversionJob, self).delete()
 
-    def createS3Path(self):
+    def get_s3_key(self, **kwargs):
         if settings.PROD:
-            return 'dsm/dsm-export-' + str(self.uuid) + '.tif'
+            key = 'dsm/' + "{:.2f}".format(self.resolution) + '/dsm-export-' + str(self.uuid) + '.tif'
         else:
-            return 'dsm/test-dsm-export-' + str(self.uuid) + '.tif'
-
-    def getS3Presigned(self):
-        return createPresignedUrl(self.createS3Path())
+            key = 'dsm/' + "{:.2f}".format(self.resolution) + '/test-dsm-export-' + str(self.uuid) + '.tif'
+        return key
 
     def getTaskStatus(self):
         if self.task:

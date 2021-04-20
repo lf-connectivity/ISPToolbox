@@ -14,7 +14,7 @@ import random
 from rasterio.errors import RasterioIOError
 from IspToolboxApp.templates.errorMsg import kmz_err_msg
 import uuid as uuidv4
-from IspToolboxApp.util.s3 import writeToS3, createPresignedUrl
+from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
 
 
 class MarketEvaluatorPipelineBuildings(View):
@@ -262,7 +262,7 @@ class MarketEvaluatorExportNoPipeline(View):
                 buildingOutlines['buildings']['layer'] = 'buildings'
                 geoList.append(buildingOutlines['buildings'])
             kml = convertKml(geoList)
-            success = writeToS3(kml, object_name)
+            success = writeS3Object(object_name, kml)
             if not success:
                 return JsonResponse({'error': 'fail to upload to S3'}, status=500)
             url = createPresignedUrl(object_name)
@@ -304,7 +304,7 @@ class MarketEvaluatorExport(View):
                 buildingOutlines['buildings']['layer'] = 'buildings'
                 geoList.append(buildingOutlines['buildings'])
             kml = convertKml(geoList)
-            succee = writeToS3(kml, object_name)
+            succee = writeS3Object(object_name, kml)
             if not succee:
                 return JsonResponse({'error': 'fail to upload to S3'})
             url = createPresignedUrl(object_name)

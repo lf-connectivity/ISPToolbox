@@ -2,10 +2,12 @@ from django.db import models
 from django.conf import settings
 import uuid
 from django.contrib.gis.db import models as geo_models
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, GEOSGeometry
 import json
-
+from workspace.utils.geojson_circle import createGeoJSONCircle
 from .model_constants import FeatureType, CoverageCalculationStatus, CoverageStatus
+
+BUFFER_DSM_EXPORT_KM = 0.5
 
 
 class Network(models.Model):
@@ -83,6 +85,22 @@ class AccessPointLocation(WorkspaceFeature):
     @property
     def feature_type(self):
         return FeatureType.AP.value
+
+    def getDSMExtentRequired(self):
+        """
+        Get the AOI necessary to render AP location
+        """
+        geo_circle = createGeoJSONCircle(self.geojson, self.max_radius)
+        aoi = GEOSGeometry(json.dumps(geo_circle))
+        return aoi
+
+    def createDSMJobEnvelope(self):
+        """
+        Get the suggest aoi to export w/ buffer
+        """
+        geo_circle = createGeoJSONCircle(self.geojson, self.max_radius + BUFFER_DSM_EXPORT_KM)
+        aoi = GEOSGeometry(json.dumps(geo_circle))
+        return aoi.envelope
 
 
 class CPELocation(WorkspaceFeature):

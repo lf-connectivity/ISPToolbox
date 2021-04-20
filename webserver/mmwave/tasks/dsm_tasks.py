@@ -7,8 +7,6 @@ import time
 import random
 from area import area
 
-DEFAULT_RESOLUTION = 0.5  # meters
-
 
 @shared_task
 def exportDSMData(DSMConversionJob_uuid):
@@ -29,14 +27,14 @@ def exportDSMData(DSMConversionJob_uuid):
         )
     pt_clouds = query.all()
     sources = [cld.url for cld in pt_clouds]
-    dsm_engine = DSMEngine(conversion.area_of_interest[0], sources)
+    dsm_engine = DSMEngine(conversion.area_of_interest.envelope, sources)
     t_estimate = create_time_estimate(conversion.area_of_interest[0].envelope)
     start_time = time.time()
 
     with tempfile.NamedTemporaryFile(suffix=".tif") as temp_fp:
         # Run the DSM generation in a separate process, monitor that process and keep the
         # user informed of it's status
-        process = dsm_engine.getDSM(DEFAULT_RESOLUTION, temp_fp.name)
+        process = dsm_engine.getDSM(conversion.resolution, temp_fp.name)
         conversion.error = 'Loading data...'
         conversion.save(update_fields=['error'])
         while process.poll() is None:
@@ -59,7 +57,7 @@ def exportDSMData(DSMConversionJob_uuid):
             time.sleep(3)
         conversion.error = 'Uploading DSM'
         conversion.save(update_fields=['error'])
-        conversion.writeDSMtoS3(temp_fp)
+        conversion.write_object(temp_fp)
 
 
 def human_readable_size(size, decimal_places=3):

@@ -11,7 +11,7 @@ import copy
 import uuid
 import json
 from mmwave.models.dsm_models import DSMException, DSMConversionJob, MAXIMUM_AOI_AREA_KM2
-from mmwave.tasks.dsm_tasks import exportDSMData, DEFAULT_RESOLUTION
+from mmwave.tasks.dsm_tasks import exportDSMData
 from mmwave.forms import DSMExportAOIFileForm
 from celery import states
 from django.views.decorators.csrf import csrf_exempt
@@ -93,7 +93,7 @@ class DSMExportView(View):
 
         context = {
             'mapdefault': {'center': [lon, lat], 'zoom': 15},
-            'resolution': f'{DEFAULT_RESOLUTION} m',
+            'resolution': f'{0.5} m',
             'area_limit': f'{MAXIMUM_AOI_AREA_KM2} km2',
             'upload_form': DSMExportAOIFileForm
         }

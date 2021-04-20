@@ -4,7 +4,7 @@ import tempfile
 from mmwave.models import USGSLidarMetaDataModel
 from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 
-wesm_endpoint = "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/metadata/WESM.gpkg"
+WESM_ENDPOINT = "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/metadata/WESM.gpkg"
 SUCCESSFUL_UPDATE_SUBJECT = "[Automated Message][Success] Automated LiDAR Metadata Update Successful"
 UNSUCCESSFUL_UPDATE_SUBJECT = "[Automated Message][Failure] Automated LiDAR Metadata Update Failed"
 
@@ -13,7 +13,7 @@ def pull_latest_wesm_data(fp):
     """
     Use GET request to get gpkg file
     """
-    resp = requests.get(wesm_endpoint)
+    resp = requests.get(WESM_ENDPOINT)
     fp.write(resp.content)
 
 

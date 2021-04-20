@@ -66,17 +66,15 @@ export class LinkCheckDrawPtPPopup {
     private street: string;
     private city: string;
     private lnglat: [number, number];
-    private addTowerButton: boolean;
     private popup: mapboxgl.Popup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, geocoder: any, addTowerButton: boolean = true) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, geocoder: any) {
         this.map = map;
         this.draw = draw;
         this.geocoder = geocoder;
         this.street = DEFAULT_STREET;
         this.city = DEFAULT_CITY;
         this.lnglat = DEFAULT_LATLNG;
-        this.addTowerButton = addTowerButton;
         this.popup = new window.mapboxgl.Popup();;
     }
 
@@ -113,9 +111,9 @@ export class LinkCheckDrawPtPPopup {
         });
 
         $(`#${ADD_TOWER_BUTTON_ID}`).on('click', () => {
-             //@ts-ignore
-             this.draw.changeMode('draw_radius', {start: this.lnglat});
-             this.map.fire('draw.modechange', {mode: 'draw_radius'});
+            //@ts-ignore
+            this.draw.changeMode('draw_radius', {start: this.lnglat});
+            this.map.fire('draw.modechange', {mode: 'draw_radius'});
             this.hide();
         });
 
@@ -132,7 +130,6 @@ export class LinkCheckDrawPtPPopup {
     }
 
     private getHTML() {
-        let towerButton = this.addTowerButton ? `<button class='btn btn-primary isptoolbox-btn' id='${ADD_TOWER_BUTTON_ID}'>Place Tower</button>` : '';
         return `
         <center>
         <h6>${this.street}</h6>
@@ -145,7 +142,7 @@ export class LinkCheckDrawPtPPopup {
         <br/>
         <button class='btn btn-primary isptoolbox-btn' id='${DRAW_PTP_BUTTON_ID}'>Draw PtP</button>
         <br/>
-        ${towerButton}
+        <button class='btn btn-primary isptoolbox-btn' id='${ADD_TOWER_BUTTON_ID}'>Place Tower</button>
         </center>
         `
     }

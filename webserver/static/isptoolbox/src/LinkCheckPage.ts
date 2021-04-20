@@ -317,15 +317,17 @@ export class LinkCheckPage {
             this.addressBarPtPDialog = new LinkCheckDrawPtPPopup(this.map, this.draw, this.geocoder);
 
             // Popup
-            this.geocoder.on('result', ({result}: any) => {
-                // Display popup, but only if it's a specific address (addres or poi)
-                let placeType = result.place_type[0];
-                if (placeType === 'address' || placeType === 'poi') {
-                    this.addressBarPtPDialog.setAddress(result.place_name);
-                    this.addressBarPtPDialog.setLngLat(result.center);
-                    this.addressBarPtPDialog.show();
-                }
-            });
+            if (isBeta()) {
+                this.geocoder.on('result', ({result}: any) => {
+                    // Display popup, but only if it's a specific address (addres or poi)
+                    let placeType = result.place_type[0];
+                    if (placeType === 'address' || placeType === 'poi') {
+                        this.addressBarPtPDialog.setAddress(result.place_name);
+                        this.addressBarPtPDialog.setLngLat(result.center);
+                        this.addressBarPtPDialog.show();
+                    }
+                });
+            }
 
             document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
 

@@ -4,7 +4,7 @@ area==1.1.1
 argh==0.26.2
 asgiref==3.2.10
 async-timeout==3.0.1
-autobahn==20.7.1
+autobahn==20.12.3
 billiard==3.6.3.0
 boto3==1.14.47
 botocore==1.17.47

@@ -1,7 +1,7 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
-const DEFAULT_STREET = '123 Random Street';
+const DEFAULT_STREET = 'Unknown Street Name';
 const DEFAULT_CITY = 'Anytown, USA, 12345';
 const DEFAULT_LATLNG: [number, number] = [0.00000, 0.00000];
 
@@ -14,6 +14,7 @@ const US_STATE_ABBREVIATIONS = {
     'Arizona': 'AZ',
     'Arkansas': 'AR',
     'California': 'CA',
+    'Connecticut': 'CT',
     'District of Columbia': 'DC',
     'Florida': 'FL',
     'Georgia': 'GA',
@@ -62,20 +63,25 @@ const US_STATE_ABBREVIATIONS = {
 export class LinkCheckDrawPtPPopup {
     private map: mapboxgl.Map;
     private draw: MapboxDraw;
-    private geocoder: any;
+    private geocoder?: any;
     private street: string;
     private city: string;
     private lnglat: [number, number];
     private popup: mapboxgl.Popup;
+    private static _instance: LinkCheckDrawPtPPopup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, geocoder: any) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, geocoder?: any) {
+        if (LinkCheckDrawPtPPopup._instance) {
+            return LinkCheckDrawPtPPopup._instance;
+        }
+        LinkCheckDrawPtPPopup._instance = this;
         this.map = map;
         this.draw = draw;
         this.geocoder = geocoder;
         this.street = DEFAULT_STREET;
         this.city = DEFAULT_CITY;
         this.lnglat = DEFAULT_LATLNG;
-        this.popup = new window.mapboxgl.Popup();;
+        this.popup = new window.mapboxgl.Popup();
     }
 
     setAddress(address: string) {
@@ -88,7 +94,7 @@ export class LinkCheckDrawPtPPopup {
 
         // @ts-ignore
         this.city = `${components[2]}, ${US_STATE_ABBREVIATIONS[stateName]}, ${zipCode}`;
-        this.street = components[3];
+        this.street = components[3] || DEFAULT_STREET;
     }
 
     setLngLat(lnglat: [number, number]) {
@@ -117,15 +123,28 @@ export class LinkCheckDrawPtPPopup {
             this.hide();
         });
 
-        this.popup.on('close', () => {
-            this.geocoder.clear();
-        });
+        if (this.geocoder) {
+            this.popup.on('close', () => {
+                this.geocoder.clear();
+            });
+        }
     }
 
     hide() {
         if (this.popup.isOpen()) {
             this.popup.remove();
-            this.geocoder.clear();
+            if (this.geocoder) {
+                this.geocoder.clear();
+            }
+        }
+    }
+
+    static getInstance() {
+        if (LinkCheckDrawPtPPopup._instance) {
+            return LinkCheckDrawPtPPopup._instance;
+        }
+        else {
+            throw new Error('No instance of LinkCheckDrawPtPPopup instantiated.')
         }
     }
 

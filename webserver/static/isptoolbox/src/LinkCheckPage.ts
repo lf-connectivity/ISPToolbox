@@ -1,6 +1,6 @@
 // Create new mapbox Map
 import * as MapboxGL from "mapbox-gl";
-
+import { MapboxSDKClient } from './MapboxSDKClient.js';
 import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
 import { createLinkProfile, findLidarObstructions, km2miles, m2ft, ft2m, calculateMaximumFresnelRadius } from './LinkCalcUtils';
@@ -26,7 +26,8 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents } from './workspace/WorkspaceConstants';
-import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/LinkCheckDrawPtPPopup';
+import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
+import { isBeta } from './BetaCheck';
 
 
 export enum LinkCheckEvents {
@@ -39,13 +40,7 @@ type HighChartsExtremesEvent = {
     min: number | undefined,
     max: number | undefined,
 }
-function isBeta() : boolean{
-    const contents = document.getElementById('los_beta')?.textContent;
-    if(typeof contents !== "string"){
-        return false
-    }
-    return JSON.parse(contents);
-}
+
 let potree = (window as any).Potree as null | typeof Potree;
 // @ts-ignore
 const THREE = window.THREE;
@@ -138,7 +133,6 @@ export class LinkCheckPage {
     animationWasPlaying: boolean;
     hoverUpdated: boolean;
 
-    addressBarPtPDialog: LinkCheckDrawPtPPopup;
     geocoder: typeof MapboxGeocoder;
 
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
@@ -314,7 +308,9 @@ export class LinkCheckPage {
                 placeholder: 'Search for an address'
             });
 
-            this.addressBarPtPDialog = new LinkCheckDrawPtPPopup(this.map, this.draw, this.geocoder);
+            // instantiate singletons
+            new MapboxSDKClient(mapboxgl.accessToken);
+            new LinkCheckDrawPtPPopup(this.map, this.draw, this.geocoder);
 
             // Popup
             if (isBeta()) {
@@ -322,9 +318,10 @@ export class LinkCheckPage {
                     // Display popup, but only if it's a specific address (addres or poi)
                     let placeType = result.place_type[0];
                     if (placeType === 'address' || placeType === 'poi') {
-                        this.addressBarPtPDialog.setAddress(result.place_name);
-                        this.addressBarPtPDialog.setLngLat(result.center);
-                        this.addressBarPtPDialog.show();
+                        let addressBarPopup = LinkCheckDrawPtPPopup.getInstance();
+                        addressBarPopup.setAddress(result.place_name);
+                        addressBarPopup.setLngLat(result.center);
+                        addressBarPopup.show();
                     }
                 });
             }

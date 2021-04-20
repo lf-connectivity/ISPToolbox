@@ -6,13 +6,20 @@ import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_f
 import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_supplementary_points';
 import createVertex from '@mapbox/mapbox-gl-draw/src/lib/create_vertex';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
-
+import { LinkCheckDrawPtPPopup } from './popups/LinkCheckDrawPtPPopup';
+import { MapboxSDKClient } from '../MapboxSDKClient';
+import { isBeta } from '../BetaCheck';
 
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
  * 
  * By overwritting some of the draw methods we can get the behavior we need
  */
+function isShiftDown(e) {
+    if (!e.originalEvent) return false;
+    return e.originalEvent.shiftKey === true;
+}
+
 export function OverrideDirect() {
     const direct_select = MapboxDraw.modes.direct_select;
     direct_select.toDisplayFeatures = function (state, geojson, push) {
@@ -38,6 +45,36 @@ export function OverrideDirect() {
         }
         this.fireActionable(state);
     };
+
+    direct_select.onVertex = function (state, e) {
+        if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
+            let mapboxClient = MapboxSDKClient.getInstance();
+            let lngLat = [e.lngLat.lng, e.lngLat.lat];
+            mapboxClient.reverseGeocode(lngLat, (response) => {
+                let result = response.body.features;
+                let popup = LinkCheckDrawPtPPopup.getInstance();
+                popup.setLngLat(lngLat);
+
+                // Choose the best fitting/most granular result. Might not have
+                // a street address in all cases though.
+                popup.setAddress(result[0].place_name);
+                popup.show();
+            });
+        }
+
+        this.startDragging(state, e);
+        const about = e.featureTarget.properties;
+        const selectedIndex = state.selectedCoordPaths.indexOf(about.coord_path);
+        if (!isShiftDown(e) && selectedIndex === -1) {
+            state.selectedCoordPaths = [about.coord_path];
+        } else if (isShiftDown(e) && selectedIndex === -1) {
+            state.selectedCoordPaths.push(about.coord_path);
+        }
+
+        const selectedCoordinates = this.pathsToCoordinates(state.featureId, state.selectedCoordPaths);
+        this.setSelectedCoordinates(selectedCoordinates);
+    }
+
     direct_select.dragVertex = function (state, e, delta) {
 
         // Only allow editing of vertices that are not from associated AP/CPE links.
@@ -78,6 +115,7 @@ export function OverrideDirect() {
                 state.feature.properties.radius = radius;
             }
         } else {
+            LinkCheckDrawPtPPopup.getInstance().hide();
             const selectedCoords = state.selectedCoordPaths.map(coord_path =>
                 state.feature.getCoordinate(coord_path),
             );

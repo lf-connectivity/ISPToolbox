@@ -312,7 +312,7 @@ export class LinkCheckPage {
             new MapboxSDKClient(mapboxgl.accessToken);
             new LinkCheckDrawPtPPopup(this.map, this.draw, this.geocoder);
 
-            // Popup
+            // Popups
             if (isBeta()) {
                 this.geocoder.on('result', ({result}: any) => {
                     // Display popup, but only if it's a specific address (addres or poi)
@@ -322,6 +322,46 @@ export class LinkCheckPage {
                         addressBarPopup.setAddress(result.place_name);
                         addressBarPopup.setLngLat(result.center);
                         addressBarPopup.show();
+                    }
+                });
+
+                // Long press -> show popup
+                let onLongPress: any = undefined;
+                this.map.on('touchstart', (e: any) => {
+                    if (onLongPress) {
+                        clearTimeout(onLongPress);
+                    }
+                    onLongPress = setTimeout(() => {
+                        let mapboxClient = MapboxSDKClient.getInstance();
+                        let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+                        mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                            let result = response.body.features;
+                            let popup = LinkCheckDrawPtPPopup.getInstance();
+                            popup.setLngLat(lngLat);
+
+                            // Choose the best fitting/most granular result. Might not have
+                            // a street address in all cases though.
+                            popup.setAddress(result[0].place_name);
+                            popup.show();
+                        });
+                    }, 1000)
+                });
+
+                this.map.on('touchend', (e) => {
+                    if (onLongPress) {
+                        clearTimeout(onLongPress);
+                    }
+                });
+
+                this.map.on('touchcancel', (e) => {
+                    if (onLongPress) {
+                        clearTimeout(onLongPress);
+                    }
+                });
+
+                this.map.on('touchmove', (e) => {
+                    if (onLongPress) {
+                        clearTimeout(onLongPress);
                     }
                 });
             }

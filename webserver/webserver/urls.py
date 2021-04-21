@@ -31,6 +31,7 @@ from IspToolboxApp.views.redirect_view import HomepageRedirect
 from Overlay.views import OverlaySource
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView
 from mmwave.views import LOSCheckDemo, DSMExportView
+from IspToolboxAccounts.views import IntegrationTestAccountCreationView
 
 from rest_framework import routers
 from django.conf.urls.static import static
@@ -80,6 +81,8 @@ urlpatterns = [
     # TODO achong: only include allauth urls we need
     # Facebook SDK Login
     path('accounts/', include('allauth.urls')),
+    # Integration Test Endpoints - be sure to 404 in prod
+    path('test/accounts/', IntegrationTestAccountCreationView.as_view(), name="test-accounts"),
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

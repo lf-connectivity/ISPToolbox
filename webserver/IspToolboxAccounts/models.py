@@ -30,6 +30,30 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def create_user(self, email, first_name, last_name, password=None):
+        """
+        Creates and saves a User with the given email, first & last name and
+        password
+        """
+        if not email:
+            raise ValueError('Users must have an email address')
+        if not password:
+            raise ValueError("User must have a password")
+        if not first_name:
+            raise ValueError("User must have a first name")
+        if not last_name:
+            raise ValueError("User must have a last name")
+
+        user = self.model(
+            email=self.normalize_email(email),
+            first_name=first_name,
+            last_name=last_name,
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
 
 class User(AbstractUser):
     username = None

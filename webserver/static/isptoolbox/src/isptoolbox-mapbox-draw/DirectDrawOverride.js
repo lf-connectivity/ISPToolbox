@@ -47,6 +47,9 @@ export function OverrideDirect() {
     };
 
     direct_select.onVertex = function (state, e) {
+        // If it's a PtP link, open a popup if the user clicks on a vertex. This
+        // is the only way I could think of of implementing this at a granular
+        // sub-feature level.
         if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
             let mapboxClient = MapboxSDKClient.getInstance();
             let lngLat = [e.lngLat.lng, e.lngLat.lat];

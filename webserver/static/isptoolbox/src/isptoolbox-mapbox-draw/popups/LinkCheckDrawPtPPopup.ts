@@ -1,5 +1,6 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
 
 const DEFAULT_STREET = 'Unknown Street Name';
 const DEFAULT_CITY = 'Anytown, USA, 12345';
@@ -60,54 +61,21 @@ const US_STATE_ABBREVIATIONS = {
     'Wyoming': 'WY',
 };
 
-export class LinkCheckDrawPtPPopup {
-    private map: mapboxgl.Map;
-    private draw: MapboxDraw;
-    private geocoder?: any;
-    private street: string;
-    private city: string;
-    private lnglat: [number, number];
-    private popup: mapboxgl.Popup;
+export class LinkCheckDrawPtPPopup extends LinkCheckBasePopup {
+    private geocoder: any;
     private static _instance: LinkCheckDrawPtPPopup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, geocoder?: any) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, geocoder: any) {
         if (LinkCheckDrawPtPPopup._instance) {
             return LinkCheckDrawPtPPopup._instance;
         }
-        LinkCheckDrawPtPPopup._instance = this;
-        this.map = map;
-        this.draw = draw;
+        super(map, draw);
         this.geocoder = geocoder;
-        this.street = DEFAULT_STREET;
-        this.city = DEFAULT_CITY;
-        this.lnglat = DEFAULT_LATLNG;
-        this.popup = new window.mapboxgl.Popup();
-    }
-
-    setAddress(address: string) {
-        // Address should be in the form <stuff>, street, city, state ZIP CODE, USA
-        let components = address.split(', ').reverse()
-        
-        // Change state name (state ZIP) to "<abbreviated state>, zip"
-        let stateName = components[1].split(' ').slice(0, -1).join(' ');
-        let zipCode = components[1].split(' ').slice(-1)[0];
-
-        // @ts-ignore
-        this.city = `${components[2]}, ${US_STATE_ABBREVIATIONS[stateName]}, ${zipCode}`;
-        this.street = components[3] || DEFAULT_STREET;
-    }
-
-    setLngLat(lnglat: [number, number]) {
-        this.lnglat = lnglat;
+        LinkCheckDrawPtPPopup._instance = this;
     }
 
     show() {
-        this.popup.setLngLat(this.lnglat)
-                  .setHTML(this.getHTML());
-
-        if (!this.popup.isOpen()) {
-            this.popup.addTo(this.map);
-        }
+        super.show();
         
         $(`#${DRAW_PTP_BUTTON_ID}`).on('click', () => {
             //@ts-ignore
@@ -131,11 +99,9 @@ export class LinkCheckDrawPtPPopup {
     }
 
     hide() {
+        super.hide();
         if (this.popup.isOpen()) {
-            this.popup.remove();
-            if (this.geocoder) {
-                this.geocoder.clear();
-            }
+            this.geocoder.clear();
         }
     }
 
@@ -148,7 +114,7 @@ export class LinkCheckDrawPtPPopup {
         }
     }
 
-    private getHTML() {
+    protected getHTML() {
         return `
         <center>
         <h6>${this.street}</h6>

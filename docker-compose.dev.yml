@@ -27,3 +27,8 @@ services:
       POSTGRES_DB: 'postgres'
     volumes:
       - ./webserver:/usr/src/app
+  node:
+    ports:
+      - 8080:8080
+    volumes:
+      - ./node-webserver:/usr/src/app

@@ -10,6 +10,8 @@ from .rest_views import (
 from .error_views import Error500View, Error404View, Error403View
 from .social_views import FBDeauthorizeSocialView, FBDataDeletionView
 from .legal_views import DataPolicy, Cookies, TermsOfService
+from .multiplayer_views import MultiplayerTestView
+
 
 __all__ = [
     'DefaultWorkspaceView', 'DefaultNetworkView', 'AccountSettingsView', 'DeleteNetworkView', 'EditNetworkView',
@@ -20,4 +22,5 @@ __all__ = [
     'OptionalInfoWorkspaceView', 'OptionalInfoWorkspaceUpdateView',
     'FBDeauthorizeSocialView', 'FBDataDeletionView',
     'DataPolicy', 'Cookies', 'TermsOfService',
+    'MultiplayerTestView'
 ]

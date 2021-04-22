@@ -41,6 +41,14 @@ services:
             - postgres
         environment:
             - REDIS_BACKEND=redis://redis:6379
+
+    node:
+        image: isptoolbox-node
+        build: ./node-webserver
+        depends_on:
+            - redis
+        environment:
+            - REDIS_BACKEND=redis://redis:6379
     
     websocket-app:
         image: isptoolbox-django-ws

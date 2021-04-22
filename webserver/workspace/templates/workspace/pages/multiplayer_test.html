@@ -1,0 +1,21 @@
+{% extends "workspace/pages/base.html" %}
+{% load static %}
+
+{% block additional_headers %}
+    <!-- Mapbox Map -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.css' rel='stylesheet' />
+    <!-- Mapbox Draw -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.css' type='text/css' />
+    <!-- Mapbox Geocoder -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.css' type='text/css' />
+    <link rel='stylesheet' href='{% static "stylesheets/organisms/multiplayer.css" %}' />
+{% endblock %}
+
+{% block content %}
+    {{ session|json_script:"session_information" }}
+    <script defer src="{% static "multiplayer_test.min.js" %}"> </script>
+    <div id="map" style = "width: 100%; height: calc(100vh - 70px); background-color: black;"></div>
+{% endblock %}

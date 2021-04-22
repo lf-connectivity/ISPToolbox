@@ -6,6 +6,7 @@ import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_f
 import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_supplementary_points';
 import createVertex from '@mapbox/mapbox-gl-draw/src/lib/create_vertex';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import { LinkCheckBasePopup } from './popups/LinkCheckBasePopup';
 import { LinkCheckDrawPtPPopup } from './popups/LinkCheckDrawPtPPopup';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { isBeta } from '../BetaCheck';
@@ -54,13 +55,8 @@ export function OverrideDirect() {
             let mapboxClient = MapboxSDKClient.getInstance();
             let lngLat = [e.lngLat.lng, e.lngLat.lat];
             mapboxClient.reverseGeocode(lngLat, (response) => {
-                let result = response.body.features;
-                let popup = LinkCheckDrawPtPPopup.getInstance();
-                popup.setLngLat(lngLat);
-
-                // Choose the best fitting/most granular result. Might not have
-                // a street address in all cases though.
-                popup.setAddress(result[0].place_name);
+                let popup = 
+                    LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckDrawPtPPopup, lngLat, response);
                 popup.show();
             });
         }

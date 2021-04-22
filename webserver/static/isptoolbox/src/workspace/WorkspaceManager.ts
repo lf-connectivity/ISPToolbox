@@ -10,6 +10,9 @@ import {LinkCheckEvents} from '../LinkCheckPage';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature, WorkspaceLineStringFeature } from './BaseWorkspaceFeature';
 import { AccessPoint, APToCPELink, CPE } from './WorkspaceFeatures';
+import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
+import { MapboxSDKClient } from "../MapboxSDKClient";
+import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 
 
 const DEFAULT_AP_HEIGHT = 30.48;
@@ -270,6 +273,33 @@ export class WorkspaceManager {
         // @ts-ignore
         // $('#bulkUploadAccessPoint').modal('show');
 
+        // Add building layer callbacks
+        this.map.on('click', ACCESS_POINT_BUILDING_LAYER, (e: any) => {
+            if (this.addCPEPopup) {
+                this.addCPEPopup.remove();
+            }
+
+            let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+            let mapboxClient = MapboxSDKClient.getInstance();
+            mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
+                popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>
+                    feature.getFeatureType() === WorkspaceFeatureTypes.AP
+                ) as AccessPoint[]);
+                popup.show();
+            });
+        });
+
+        // Change the cursor to a pointer when the mouse is over the states layer.
+        this.map.on('mouseenter', ACCESS_POINT_BUILDING_LAYER, () => {
+            this.map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+        this.map.on('mouseleave', ACCESS_POINT_BUILDING_LAYER, () => {
+            this.map.getCanvas().style.cursor = '';
+        });
+
     }
     saveFeatures({ features }: any) {
         const mode = String(this.draw.getMode());
@@ -500,64 +530,9 @@ export class WorkspaceManager {
 
     plotBuildings(resp: any, uuid: string) {
         const source = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
-        this.map.on('click', ACCESS_POINT_BUILDING_LAYER, (e: any) => {
-            if (this.addCPEPopup) {
-                this.addCPEPopup.remove();
-            }
-
-            this.addCPEPopup = new window.mapboxgl.Popup()
-                                                  .setLngLat(e.lngLat)
-                                                  .setHTML(CPE_POPUP_HTML)
-                                                  .addTo(this.map);
-            const add_link_function = () => {
-                const ap = this.features[uuid] as AccessPoint;
-                const newCPE = {
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [e.lngLat.lng, e.lngLat.lat]
-                    },
-                    'properties': {
-                        'name': DEFAULT_CPE_NAME,
-                        'height': ap.featureData.properties?.default_cpe_height
-                    }
-                } as Feature<Point, any>
-
-                // Persist CPE, then persist link.
-                const cpe = new CPE(this.map, this.draw, newCPE);
-                cpe.create((resp) => {
-                    this.features[cpe.workspaceId] = cpe;
-                    const link = cpe.linkAP(ap);
-                    link.create((resp) => {
-                        this.features[link.workspaceId] = link;
-                        this.addCPEPopup?.remove();
-                        this.map.fire('draw.create', {
-                            features: [cpe.mapboxId, link.mapboxId]
-                        });
-                        this.draw.changeMode('simple_select', {featureIds: [link.mapboxId]});
-                    });
-                });
-            }
-            $('#add-cpe-btn-popup').on('click', add_link_function);
-            this.addCPEPopup.on('close', () => {
-                this.addCPEPopup = undefined;
-            });
-        });
-
-        // Change the cursor to a pointer when the mouse is over the states layer.
-        this.map.on('mouseenter', ACCESS_POINT_BUILDING_LAYER, () => {
-            this.map.getCanvas().style.cursor = 'pointer';
-        });
-
-        // Change it back to a pointer when it leaves.
-        this.map.on('mouseleave', ACCESS_POINT_BUILDING_LAYER, () => {
-            this.map.getCanvas().style.cursor = '';
-        });
 
         if (source.type === "geojson") {
             source.setData(resp);
         }
     }
 }
-
-const CPE_POPUP_HTML = "<h5>Install a customer here?</h5><button class='btn btn-primary isptoolbox-btn' id='add-cpe-btn-popup'>Add CPE</button>"

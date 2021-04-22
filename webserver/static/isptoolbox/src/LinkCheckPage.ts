@@ -28,6 +28,7 @@ import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents } from './workspace/WorkspaceConstants';
 import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
 import { isBeta } from './BetaCheck';
+import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 
 
 export enum LinkCheckEvents {
@@ -311,6 +312,7 @@ export class LinkCheckPage {
             // instantiate singletons
             new MapboxSDKClient(mapboxgl.accessToken);
             new LinkCheckDrawPtPPopup(this.map, this.draw, this.geocoder);
+            new LinkCheckCustomerConnectPopup(this.map, this.draw);
 
             // Popups
             if (isBeta()) {

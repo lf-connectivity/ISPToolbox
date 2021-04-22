@@ -1,0 +1,21 @@
+<div id="signup_container" class="d-none">
+<div class="container signup_container onboarding_container">
+    <h3>Create a Free Account</h3>
+    <p class="onboarding_container--intro-copy">Start creating a workspace within ISP Toolbox, save and reuse files across all tools.</p>
+    <h4>Create an Account</h4>
+    <div class="isp-signupform mx-auto">
+        <form action="{% url 'create_account_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form pb-3">
+            {% csrf_token %}
+            {{ sign_up_form }}
+            <input hidden type="text" value="{% firstof request.GET.next request.full_path %}" name="next">
+            <input type="submit" class="btn btn-primary isptoolbox-btn" value="Sign Up">
+        </form>
+    </div>
+    {% include 'workspace/atoms/terms_disclaimer.html' %}
+    {% include 'workspace/atoms/content_break.html' %}
+    <a href="#" id="signup_fb">Sign Up with a Facebook Account</a>
+</div>
+<div class="container text-center">
+    <p>Already have an account? <a href="#" class="dy_have_account" >Sign in</a></p>
+</div>
+</div>

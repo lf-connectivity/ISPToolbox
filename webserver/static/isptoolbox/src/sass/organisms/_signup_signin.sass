@@ -3,6 +3,27 @@
 .signup_container
     text-align: center
     background: $brand-theme-color
+    margin-top: 100px
+    margin-bottom: 30px
+    max-width: 500px
+    display: flex
+    flex-direction: column
+    padding: 3rem 3rem 2rem 3rem
+
+    &--intro-copy
+        font-size: 17px
+        margin-top: 12px
+        letter-spacing: 0.01em
+        color: $brand-dark-gray-color
+    
+    .fb-login-button 
+        text-align: center
+        margin: 20px auto
+
+    &--question
+        margin-bottom: 45px
+    &--question:last-child
+            margin-bottom: 20px
     label
         font-family: Basis Grotesque Pro
         font-size: 16px
@@ -11,27 +32,109 @@
         line-height: 27px
         letter-spacing: 0.01em
         text-align: left
+        color: $brand-dark-gray-color
 
     input
         margin-bottom: 10px
-        line-height: 40px
-        padding-left: 5px
-    input[type="text"]
+        line-height: 16px
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"], select
         border: none
         border-bottom: 2px solid $brand-primary-color
-    input[type="email"]
-        border: none
-        border-bottom: 2px solid $brand-primary-color
-    input[type="password"]
-        border: none
-        border-bottom: 2px solid $brand-primary-color
-    max-width: 500px
-
+        background-color: $white-color
+        width: 100%
+        padding: 9px 10px
+        &:focus
+            outline: 0
+    select 
+        color: $brand-dark-gray-color
+        background-image: url("data:image/svg+xml,%3Csvg width='12' height='6' viewBox='0 0 12 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.3254 0.620372L0.945767 0.294976L0.294976 1.05423L0.674604 1.37963L1.3254 0.620372ZM5.66667 5L5.34127 5.37963L5.66667 5.65854L5.99206 5.37963L5.66667 5ZM10.6587 1.37963L11.0384 1.05423L10.3876 0.294976L10.0079 0.620372L10.6587 1.37963ZM0.674604 1.37963L5.34127 5.37963L5.99206 4.62037L1.3254 0.620372L0.674604 1.37963ZM5.99206 5.37963L10.6587 1.37963L10.0079 0.620372L5.34127 4.62037L5.99206 5.37963Z' fill='%232D2D2D'/%3E%3C/svg%3E%0A")        
+        background-repeat: no-repeat
+        background-position: 97% 50%
+        -moz-appearance: none
+        -webkit-appearance: none
+        -webkit-border-radius: 0px
+        appearance: none
+        outline-width: 0
+    ol
+        padding-left: 1rem
     br
         display: none
+    &--required
+        color: $brand-secondary-color
+        padding-left: 2px
+    &--errors
+        color: $dark-error-color
+    &--description
+        font-size: 14px
 
-.valprops
-    background: $brand-ternary-color
+.onboarding_container .checklist--items ul
+    display: grid
+    grid-template-columns: repeat(3, 1fr)
+    gap: 10px
+    padding: 0
+    list-style-type: none
+    li
+        display: flex
+    label
+        text-align: center
+        background: lighten($brand-theme-color, 11%)
+        border: solid 1px $brand-primary-color
+        padding: 10px 20px
+        display: flex
+        align-items: center
+        justify-content: center
+        cursor: pointer
+        transition: all ease 0.2s
+        line-height: 21px
+    label:hover
+        background: $white-color
+    input
+        // uncomment to make checkbox invisible
+        // position: absolute
+        // opacity: 0
+        
+.onboarding_container .content-break
+    display: flex
+    font-size: 16px
+    justify-content: center
+    line-height: 30px
+    max-width: 400px
+    padding: 16px
+    position: relative
+    text-align: center
+    &--line
+        background: darken($brand-theme-color, 15%)
+        height: 1px
+        position: absolute
+        width: 100%
+        z-index: 0
+    &--word
+        background: $brand-theme-color
+        color: $brand-dark-gray-color
+        padding: 0 8px
+        position: absolute
+        top: 0
+        z-index: 1
+
+.onboarding_container .valprops
+    background: lighten($brand-theme-color, 8%)
+    padding: 1.5rem
+    ol, p
+        padding: 0
+        margin: 0
+    svg
+        margin: 2px 20px 2px 0
+        fill: $brand-secondary-color
+    li
+        margin-bottom: 12px
+    li:last-child
+        margin-bottom: 0
 
 .isp-signupform
-    max-width: 400px
+    max-width: 500px
+    width: 100%
+
+.onboarding_container--other-options
+    max-width: 500px
+    margin: auto auto 100px auto
+    text-align: center

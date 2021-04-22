@@ -1,9 +1,6 @@
-<div id="signin_container" class="{% if showSignUp %}d-none{% endif %} justify-content-center container signup_container pt-3" style="display: flex; flex-direction: column;">
-    {% with logo_style='width: 350px;' %}
-        {% include "workspace/atoms/isptoolbox_svg.html" %}
-    {% endwith %}
-    <p> Empowering small, local ISPs - by Facebook</p>
-    <h4>Welcome back!</h4>
+<div id="signin_container" class="{% if showSignUp %}d-none{% endif %}">
+<div class="container signup_container onboarding_container">
+    <h3>Welcome back!</h3>
     <div class="fb-login-button"
         data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'isptoolbox_pro_home' %}, '')});"
         data-width="" data-size="large"
@@ -14,8 +11,8 @@
         data-use-continue-as="true"
     >
     </div>
-    <div>
-    <div id="sign_up-form" class="isp-signupform mx-auto">
+    {% include 'workspace/atoms/content_break.html' %}
+    <div class="isp-signupform mx-auto">
         <form action="{% url 'login_view'%}" method="post" class="isptoolbox-form py-3">
             {% csrf_token %}
             {% if form %}
@@ -27,7 +24,8 @@
             <input class="btn isptoolbox-btn btn-primary" type="submit" value="Login">
         </form>
     </div>
-    <a id="no-email-sign-in" href="#">
-        <p>Don't have an ISP Toolbox account? Sign up</p>
-    </a>
+</div>
+<div class="container text-center">
+    <p>Don’t have an account?<a href="#" id="no_act_yet"> Sign Up</a></p>
+</div>
 </div>

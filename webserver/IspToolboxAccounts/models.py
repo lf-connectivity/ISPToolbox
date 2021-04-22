@@ -67,33 +67,42 @@ class User(AbstractUser):
 
 
 class IspToolboxUserSignUpInfo(models.Model):
-
-    class CompanySizeChoices(models.TextChoices):
-        ASPIRING = 'aspiring', _('I don\'t service anyone right now')
-        SMALL = 'small', _('1 - 100')
-        MEDIUM = 'medium', _('101 - 500')
-        LARGE = 'large', _('501 - 2,000')
-        XLARGE = 'xlarge', _('2,001 - 5,000')
-        XXLARGE = 'xxlarge', _('+5,000')
+    SUBSCRIBER_SIZE_CHOICES = (
+        ("", _("Choose subscriber size")),
+        ("aspiring", _("I don\'t service anyone right now")),
+        ("small", _("1 - 100")),
+        ("medium", _("101 - 500")),
+        ("large", _("501 - 2,000")),
+        ("xlarge", _("2,001 - 5,000")),
+        ("xxlarge", _("5,000+")),
+    )
+    ROLE_CHOICES = (
+       ("bus_fin", _("Business & Finance")),
+       ("tech_install", _("Tech & Installation")),
+       ("mar_sales", _("Marketing & Sales")),
+    )
+    GOAL_CHOICES = (
+       ("start_business", _("Start an ISP Business")),
+       ("customer_acquistion", _("Acquire more customers")),
+       ("expansion", _("Expand service to new areas")),
+    )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     company_website = models.CharField(max_length=100, null=True)
-    company_size = models.CharField(
-        default=None,
+    subscriber_size = models.CharField(
         null=True,
         max_length=50,
-        choices=CompanySizeChoices.choices
+    )
+    individual_role = models.CharField(
+        null=True,
+        max_length=200,
+    )
+    company_goal = models.CharField(
+        null=True,
+        max_length=500,
     )
 
-    is_business_role = models.BooleanField()
-    is_tech_role = models.BooleanField()
-    is_sales_role = models.BooleanField()
+    # ip_prefix = models.GenericIPAddressField()
+    # ip_prefix_length = models.IntegerField()
 
-    is_goal_start = models.BooleanField()
-    is_goal_acquire_customers = models.BooleanField()
-    is_goal_expand = models.BooleanField()
-
-    ip_prefix = models.GenericIPAddressField()
-    ip_prefix_length = models.IntegerField()
-
-    asn = models.CharField(max_length=30)
+    # asn = models.CharField(max_length=30)

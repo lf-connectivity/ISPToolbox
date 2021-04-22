@@ -1,36 +1,28 @@
 {% load socialaccount %}
 {% providers_media_js %}
 
-<div id="signup_container" class="{% if not showSignUp %}d-none{% endif %} justify-content-center container signup_container pt-3" style="display: flex; flex-direction: column;">
-    {% with logo_style='width: 350px;' %}
-        {% include "workspace/atoms/isptoolbox_svg.html" %}
-    {% endwith %}
-    <p> Empowering small, local ISPs - by Facebook</p>
-    <div class="fb-login-button"
-        data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'isptoolbox_pro_home' %}, '')});"
-        data-width="" data-size="large"
-        data-button-type="continue_with"
-        data-layout="rounded"
-        data-auto-logout-link="false"
-        data-scope="public_profile,email"
-        data-use-continue-as="true"
-    >
+<div id="fb_sign_up_container" class="{% if not showSignUp %}d-none{% endif %}">
+    <div class="container signup_container onboarding_container">
+        <h3>Create a Free Account</h3>
+        <p class="onboarding_container--intro-copy">Start creating a workspace within ISP Toolbox, save and reuse files across all tools.</p>
+
+        {% include 'workspace/organisms/value_props.html' %}
+
+        <div class="fb-login-button"
+            data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'isptoolbox_pro_home' %}, '')});"
+            data-width="" data-size="large"
+            data-button-type="continue_with"
+            data-layout="rounded"
+            data-auto-logout-link="false"
+            data-scope="public_profile,email"
+            data-use-continue-as="true"
+        >
+        </div>
+        {% include 'workspace/atoms/terms_disclaimer.html' %}
+        {% include 'workspace/atoms/content_break.html' %}
+        <a href="#" id="signup_email">Sign Up with Email</a>
     </div>
-    <div class="pt-3">
-    <p>or</p>
+    <div class="container text-center">
+        <p>Already have an account? <a href="#" class="dy_have_account">Sign in</a></p>
     </div>
-    <h4>Create an Account</h4>
-    <div id="sign_up-form" class="isp-signupform mx-auto">
-        <form action="{% url 'create_account_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form pb-3">
-            {% csrf_token %}
-            {{ sign_up_form }}
-            <input hidden type="text" value="{% firstof request.GET.next request.full_path %}" name="next">
-            <input type="submit" class="btn btn-primary isptoolbox-btn" value="Sign Up">
-        </form>
-        <p>By signing up, you agree to our <a href="{% url 'terms' %}">Terms</a>, <a href="{% url 'data_policy' %}">Data Policy</a>, and <a href="{% url 'cookies' %}">Cookie Policy</a>.</p>
-    </div>
-    {% include 'workspace/organisms/value_props.html' %}
-    <a href="#" id="dy_have_account">
-        <p>Already have an account? Sign in</p>
-    </a>
 </div>

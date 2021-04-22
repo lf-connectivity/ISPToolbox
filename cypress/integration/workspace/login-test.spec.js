@@ -33,6 +33,8 @@ describe('Test Sign Up / Login', () => {
     it('Create Account Email Test', function () {
         cy.visit('/pro');
 
+        cy.get('a').contains('with Email').click();
+
         // Create an Account
         cy.get('input[name=email]').type(this.user_signup.email);
         cy.get('input[name=first_name]').type(this.user_signup.first_name);

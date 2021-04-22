@@ -1,27 +1,35 @@
-<div id="signin_container" class="{% if showSignUp %}d-none{% endif %} container signup_container pt-3" style="max-width: 500px; display: flex; flex-direction: column;">
-    {% with logo_style='width: 350px;' %}
-        {% include "workspace/atoms/isptoolbox_svg.html" %}
-    {% endwith %}
-    <p> Empowering small, local ISPs - by Facebook</p>
-    <h4>We'd like to get to know you</h4>
+<div id="signin_container" class="{% if showSignUp %}d-none{% endif %} container signup_container onboarding_container">
+    <h3>We'd like to get to know you</h3>
+    <p class="onboarding_container--intro-copy">Your answers will help us prioritize features that will be most helpful to you and your business</p>
     <form action="{% url 'login_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form py-3">
         {% csrf_token %}
         <ol>
         {% for field in optional_info_form %}
-            {{ field.errors }}
-            {% if not field.field.modifycheckbox %}
-            <li>{{ field.label_tag }}<span class="pl-3">(optional)</span></li>
-                {{ field }}
-            {% else %}
-                <button class="btn btn-primary isptoolbox-btn">{{ field.label_tag}}</button>
-                {{ field }}
-            {% endif %}
-            {% if field.help_text %}
-            <p class="help">{{ field.help_text|safe }}</p>
-            {% endif %}
+            <li class="onboarding_container--question">
+                {{ field.label_tag }}
+                {% if field.css_classes == 'required' %}
+                    <span class="onboarding_container--required">(required)</span>
+                {% endif %}
+                {% if field.help_text %}
+                    <p class="onboarding_container--description">{{ field.help_text|safe }}</p>
+                {% endif %}
+                
+                {% if not field.widget_type == 'checkboxselectmultiple' %}
+                    {{ field }}
+                {% else %}
+                    <div class="checklist--items">
+                        {{ field }}
+                    </div>
+                {% endif %}
+                <p class="onboarding_container--errors">{{ field.errors }}</p>
+            </li>
         {% endfor %}
         </ol>
         <input class="btn isptoolbox-btn btn-primary" type="submit" value="Complete Profile">
     </form>
-    <a href="{% url 'isptoolbox_pro_home' %}">No, thanks. Maybe another time</a>
 </div>
+
+<!-- Uncomment if we make the company website optional -->
+<!-- <div class="{% if showSignUp %}d-none{% endif %} container signup_container onboarding_container--other-options">
+    <a href="{% url 'isptoolbox_pro_home' %}">Skip for now</a>
+</div> -->

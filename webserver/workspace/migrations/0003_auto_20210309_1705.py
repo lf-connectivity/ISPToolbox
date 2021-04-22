@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='accesspointcoverage',
             name='status',
-            field=models.CharField(choices=[(workspace.models.CoverageCalculationStatus['START'], 'Started'), (workspace.models.CoverageCalculationStatus['FAIL'], 'Failed'), (workspace.models.CoverageCalculationStatus['COMPLETE'], 'Complete')], default='Started', max_length=20),
+            field=models.CharField(choices=[(workspace.models.AccessPointCoverageBuildings.CoverageCalculationStatus['START'], 'Started'), (workspace.models.AccessPointCoverageBuildings.CoverageCalculationStatus['FAIL'], 'Failed'), (workspace.models.AccessPointCoverageBuildings.CoverageCalculationStatus['COMPLETE'], 'Complete')], default='Started', max_length=20),
         ),
         migrations.AlterField(
             model_name='buildingcoverage',
             name='status',
-            field=models.CharField(choices=[(workspace.models.CoverageStatus['SERVICEABLE'], 'serviceable'), (workspace.models.CoverageStatus['UNSERVICEABLE'], 'unserviceable'), (workspace.models.CoverageStatus['UNKNOWN'], 'unknown')], default='unknown', max_length=20),
+            field=models.CharField(choices=[(workspace.models.BuildingCoverage.CoverageStatus['SERVICEABLE'], 'serviceable'), (workspace.models.BuildingCoverage.CoverageStatus['UNSERVICEABLE'], 'unserviceable'), (workspace.models.BuildingCoverage.CoverageStatus['UNKNOWN'], 'unknown')], default='unknown', max_length=20),
         ),
     ]

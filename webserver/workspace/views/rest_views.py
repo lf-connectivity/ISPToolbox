@@ -1,6 +1,6 @@
 from django.views import View
 from workspace.models import (
-    Network, AccessPointLocation, AccessPointCoverage, NetworkMapPreferences,
+    Network, AccessPointLocation, AccessPointCoverageBuildings, NetworkMapPreferences,
     CPELocation, APToCPELink
 )
 from workspace import pagination
@@ -167,7 +167,7 @@ class APToCPELinkGet(mixins.RetrieveModelMixin,
 class AccessPointCoverageResults(View):
     def get(self, request, uuid):
         ap = AccessPointLocation.objects.filter(owner=request.user, uuid=uuid).get()
-        coverage = AccessPointCoverage.objects.filter(ap=ap).order_by('-created').first()
+        coverage = AccessPointCoverageBuildings.objects.filter(ap=ap).order_by('-created').first()
         features = []
         for building in coverage.nearby_buildings.all():
             feature = {

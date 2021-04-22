@@ -5,7 +5,7 @@ from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import Point, GEOSGeometry
 import json
 from workspace.utils.geojson_circle import createGeoJSONCircle
-from .model_constants import FeatureType, CoverageCalculationStatus, CoverageStatus
+from .model_constants import FeatureType
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
@@ -128,22 +128,32 @@ class APToCPELink(WorkspaceFeature):
 
 
 class BuildingCoverage(models.Model):
+    class CoverageStatus(models.TextChoices):
+        SERVICEABLE = 'serviceable'
+        UNSERVICEABLE = 'unserviceable'
+        UNKNOWN = 'unknown'
+
     msftid = models.IntegerField(null=True, blank=True)
     geog = geo_models.GeometryField(null=True, blank=True)
     status = models.CharField(
-        default=CoverageStatus.UNKNOWN.value,
+        default=CoverageStatus.UNKNOWN,
         max_length=20,
-        choices=[(tag, tag.value) for tag in CoverageStatus]
+        choices=CoverageStatus.choices
     )
     height_margin = models.FloatField(blank=True, default=0.0)
 
 
-class AccessPointCoverage(models.Model):
-    ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE)
+class AccessPointCoverageBuildings(models.Model):
+    class CoverageCalculationStatus(models.TextChoices):
+        START = 'Started'
+        FAIL = 'Failed'
+        COMPLETE = 'Complete'
+
+    ap = models.OneToOneField(AccessPointLocation, on_delete=models.CASCADE, primary_key=True)
     status = models.CharField(
-        default=CoverageCalculationStatus.START.value,
+        default=CoverageCalculationStatus.START,
         max_length=20,
-        choices=[(tag, tag.value) for tag in CoverageCalculationStatus]
+        choices=CoverageCalculationStatus.choices
     )
     nearby_buildings = models.ManyToManyField(BuildingCoverage, related_name="nearby_buildings")
     created = models.DateTimeField(auto_now_add=True)

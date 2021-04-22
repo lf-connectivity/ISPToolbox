@@ -1,14 +1,12 @@
 from celery import shared_task
 from workspace.models import (
-    AccessPointLocation, AccessPointCoverage, BuildingCoverage,
-    CoverageCalculationStatus
+    AccessPointLocation, AccessPointCoverageBuildings, BuildingCoverage
 )
 from gis_data.models import MsftBuildingOutlines
 from django.contrib.gis.geos import GEOSGeometry, LineString
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from mmwave.lidar_utils.LidarEngine import LidarEngine, LidarResolution
 from workspace.utils.geojson_circle import createGeoJSONCircle
+from workspace.tasks.websocket_utils import updateClientAPStatus
 
 import numpy as np
 import json
@@ -17,12 +15,6 @@ import json
 ARC_SECOND_DEGREES = 1.0 / 60.0 / 60.0
 LIMIT_BUILDINGS = 10000
 INTERVAL_UPDATE_FRONTEND = 10
-
-
-def sendMessageToChannel(network_id, message):
-    channel_layer = get_channel_layer()
-    channel_name = 'los_check_%s' % network_id
-    async_to_sync(channel_layer.group_send)(channel_name, message)
 
 
 @shared_task
@@ -36,7 +28,9 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
     circle = GEOSGeometry(circle_json)
     # Find all buildings that intersect the access point radius
     buildings = MsftBuildingOutlines.objects.filter(geog__intersects=circle).all()[0:LIMIT_BUILDINGS]
-    ap_coverage = AccessPointCoverage(ap=ap)
+    if AccessPointCoverageBuildings.objects.filter(ap=ap).exists():
+        AccessPointCoverageBuildings.objects.filter(ap=ap).get().delete()
+    ap_coverage = AccessPointCoverageBuildings(ap=ap)
     ap_coverage.save()
     nearby_buildings = []
     for building in buildings:
@@ -46,17 +40,9 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
         nearby_buildings.append(b)
     ap_coverage.save()
 
-    # For each building, run calculation if it's reachable
-    # for idx, building in enumerate(nearby_buildings):
-    #     serviceable, margin = checkBuildingServiceable(ap, building)
-    #     building.status = CoverageStatus.SERVICEABLE.value if serviceable else CoverageStatus.UNSERVICEABLE.value
-    #     building.save()
-    #     if idx % 10 == 0:
-    #         sendMessageToChannel(channel_id, {"type": "ap.status", "status" :ap_coverage.status, "uuid": str(ap.uuid)})
-    # save everything and then notify the client
-    ap_coverage.status = CoverageCalculationStatus.COMPLETE.value
+    ap_coverage.status = AccessPointCoverageBuildings.CoverageCalculationStatus.COMPLETE.value
     ap_coverage.save()
-    sendMessageToChannel(channel_id, {"type": "ap.status", "status": ap_coverage.status, "uuid": str(ap.uuid)})
+    updateClientAPStatus(channel_id, ap.uuid, user_id)
 
 
 def checkBuildingServiceable(access_point, building):

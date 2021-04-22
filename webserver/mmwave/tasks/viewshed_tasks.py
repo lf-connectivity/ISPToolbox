@@ -17,9 +17,12 @@ from rasterio.warp import calculate_default_transform, reproject, Resampling
 from PIL import Image
 import math
 import numpy as np
+from workspace.tasks.coverage_tasks import calculateCoverage
+from workspace.tasks.websocket_utils import updateClientAPStatus
 
 DEFAULT_MAX_DISTANCE_KM = 3
 DEFAULT_PROJECTION = 3857
+DEFAULT_OBSTRUCTED_COLOR = [0, 0, 0, 128]
 
 
 @shared_task
@@ -27,7 +30,9 @@ def fullviewshedForAccessPoint(network_id, data, user_id):
     for resolution in DSMResolutionOptionsEnum:
         if resolution == DSMResolutionOptionsEnum.ULTRA:
             break
-        renderViewshedForAccessPoint(network_id, data, user_id, resolution=resolution.value)
+        viewshed = renderViewshedForAccessPoint(network_id, data, user_id, resolution=resolution.value)
+        calculateCoverage(viewshed, data['uuid'], user_id)
+        updateClientAPStatus(network_id, data['uuid'], user_id)
 
 
 def renderViewshed(viewshed_job_uuid, dsm_file):
@@ -67,6 +72,7 @@ def renderViewshed(viewshed_job_uuid, dsm_file):
                             resampling=Resampling.nearest)
                     bb = dst.bounds
                 temp_transform.seek(0)
+                viewshedjob.write_object(temp_transform, tif=True)
 
                 # convert reprojected file to PNG
                 with tempfile.NamedTemporaryFile(suffix=".png") as raster_temp:
@@ -148,6 +154,7 @@ def renderViewshedForAccessPoint(network_id, data, user_id, resolution):
         'coordinates': coordinates,
     }
     async_to_sync(channel_layer.group_send)(channel_name, resp)
+    return viewshed_job.uuid
 
 
 def swapCoordinates(polygon):
@@ -161,7 +168,7 @@ def convertViewshedRGBA(viewshed):
     im = Image.open(viewshed)
     img = np.asarray(im)
     numpy_image = np.zeros((im.size[1], im.size[0], 4), np.uint8)
-    numpy_image[img == 0] = [0, 0, 0, 255]
+    numpy_image[img == 0] = DEFAULT_OBSTRUCTED_COLOR
 
     rgbaimg = Image.fromarray(numpy_image.astype('uint8'), 'RGBA')
     rgbaimg.save(viewshed)

@@ -33,6 +33,8 @@ const ACCESS_POINT_RADIUS_VIS_LAYER_FILL = 'ap_vis_data_layer-fill';
 const ACCESS_POINT_BUILDING_DATA = 'ap_building_source';
 const ACCESS_POINT_BUILDING_LAYER = 'ap_building_layer';
 
+const ACCESS_POINT_BUILDING_OUTLINE_LAYER = 'ap_building_outline_layer';
+
 const EMPTY_SOURCE_AFTER_BUILDING = 'empty_building_source';
 export const EMPTY_LAYER_AFTER_BUILDING = "empty_building_layer";
 
@@ -254,14 +256,15 @@ export class WorkspaceManager {
             'line-width': 2
         }});
 
+
         this.map.addSource(ACCESS_POINT_BUILDING_DATA, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
         this.map.addLayer({
-            'id': ACCESS_POINT_BUILDING_LAYER,
-            'type': 'fill',
+            'id': ACCESS_POINT_BUILDING_OUTLINE_LAYER,
+            'type': 'line',
             'source': ACCESS_POINT_BUILDING_DATA,
             'layout': {},
             'paint': {
-                'fill-color': [
+                'line-color': [
                     'match',
                     ['get', 'serviceable'],
                     'unserviceable',
@@ -270,7 +273,18 @@ export class WorkspaceManager {
                     '#34eb46',
                 /* other */ '#ccc'
                 ],
-                'fill-opacity': 0.9
+                'line-width': 1,
+                'line-opacity': 0.9,
+            }
+        });
+
+        this.map.addLayer({
+            'id': ACCESS_POINT_BUILDING_LAYER,
+            'type': 'fill',
+            'source': ACCESS_POINT_BUILDING_DATA,
+            'layout': {},
+            'paint': {
+                'fill-opacity': 0,
             }
         });
 

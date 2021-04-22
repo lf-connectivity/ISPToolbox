@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('msftid', models.IntegerField(blank=True, null=True)),
                 ('geog', django.contrib.gis.db.models.fields.GeometryField(blank=True, null=True, srid=4326)),
-                ('status', models.CharField(choices=[(workspace.models.CoverageStatus['SERVICEABLE'], 'serviceable'), (workspace.models.CoverageStatus['UNSERVICEABLE'], 'unserviceable'), (workspace.models.CoverageStatus['UNKNOWN'], 'unknown')], default=workspace.models.CoverageStatus['UNKNOWN'], max_length=20)),
+                ('status', models.CharField(choices=[(workspace.models.BuildingCoverage.CoverageStatus['SERVICEABLE'], 'serviceable'), (workspace.models.BuildingCoverage.CoverageStatus['UNSERVICEABLE'], 'unserviceable'), (workspace.models.BuildingCoverage.CoverageStatus['UNKNOWN'], 'unknown')], default=workspace.models.BuildingCoverage.CoverageStatus['UNKNOWN'], max_length=20)),
                 ('height_margin', models.FloatField(blank=True, default=0.0)),
             ],
         ),
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
             name='AccessPointCoverage',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('status', models.CharField(choices=[(workspace.models.CoverageCalculationStatus['START'], 'Started'), (workspace.models.CoverageCalculationStatus['FAIL'], 'Failed'), (workspace.models.CoverageCalculationStatus['COMPLETE'], 'Complete')], max_length=20)),
+                ('status', models.CharField(choices=[(workspace.models.AccessPointCoverageBuildings.CoverageCalculationStatus['START'], 'Started'), (workspace.models.AccessPointCoverageBuildings.CoverageCalculationStatus['FAIL'], 'Failed'), (workspace.models.AccessPointCoverageBuildings.CoverageCalculationStatus['COMPLETE'], 'Complete')], max_length=20)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('ap', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='workspace.accesspointlocation')),
                 ('nearby_buildings', models.ManyToManyField(related_name='nearby_buildings', to='workspace.BuildingCoverage')),

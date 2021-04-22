@@ -57,7 +57,7 @@ class DSMEngine:
                 "resolution" : {resolution}
             }},
             {{
-                "class": 7,
+                "class": 18,
                 "type": "filters.outlier",
                 "method": "statistical",
                 "mean_k": 12,
@@ -65,7 +65,7 @@ class DSMEngine:
             }},
             {{
                 "type": "filters.range",
-                "limits": "Classification![7:7]"
+                "limits": "Classification![18:18]"
             }},
             {{
                 "type":"filters.crop",

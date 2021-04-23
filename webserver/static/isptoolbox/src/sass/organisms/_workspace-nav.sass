@@ -11,16 +11,15 @@ body
 .homepage-logo
     align-items: center
     display: flex
-    padding-left: calc(-23.33px + 5.9vw)
+    margin: auto
 
     .wordmark
         align-items: center
         display: flex
-        margin-top: -2px
         p
             color: #677b8c
             font-size: 14px
-            margin: 0 10px 2px 15px
+            margin: 0 10px 0 15px
         svg
             height: auto
             width: 100px
@@ -38,18 +37,26 @@ body
 .workspace-nav
     align-items: center
     background-color: #fff
-    display: flex
+    display: grid 
+    grid-template-columns: repeat(3, 1fr)
     height: 70px
-    justify-content: space-between
     width: 100%
+    padding: 0 30px
 
     .account-dropdown
         display: flex
         flex-direction: row
-        .profile-picture
+        justify-content: flex-end
+        .dropdown a
+            display: flex
+            align-items: center
+        &--picture
             height: 40px
             width: 40px
             border-radius: 20px
+        &--name
+            font-family: $brand-font-family-mono
+            font-size: 1rem
 
     .dropdown-menu
         margin-top: 1rem!important

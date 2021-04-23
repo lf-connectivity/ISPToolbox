@@ -22,6 +22,14 @@ DEFAULT_MAX_DISTANCE_KM = 3
 DEFAULT_PROJECTION = 3857
 
 
+@shared_task
+def fullviewshedForAccessPoint(network_id, data, user_id):
+    for resolution in DSMResolutionOptionsEnum:
+        if resolution == DSMResolutionOptionsEnum.ULTRA:
+            break
+        renderViewshedForAccessPoint(network_id, data, user_id, resolution=resolution.value)
+
+
 def renderViewshed(viewshed_job_uuid, dsm_file):
     # get object from database
     viewshedjob = ViewShedJob.objects.get(uuid=viewshed_job_uuid)
@@ -67,26 +75,23 @@ def renderViewshed(viewshed_job_uuid, dsm_file):
                         raster_temp.name,
                         driver='PNG'
                     )
-                    convertVieshedRGBA(raster_temp.name)
+                    convertViewshedRGBA(raster_temp.name)
                     viewshedjob.write_object(raster_temp)
     return bb
 
 
 def createRawGDALViewshedCommand(viewshedjob, dsm_filepath, output_filepath, dsm_projection):
+    """
+    Generate shell commmand to run gdal_viewshed: requires gdal-bin > 3.1.0
+
+    documentation: https://gdal.org/programs/gdal_viewshed.html
+    """
     transformed_observer = viewshedjob.observer.transform(dsm_projection, clone=True)
     return f"""gdal_viewshed -b 1 -ov 1
         -oz {viewshedjob.observer_height} -tz {viewshedjob.target_height} -md {viewshedjob.radius}
         -ox {transformed_observer.x} -oy {transformed_observer.y} -om NORMAL
         {dsm_filepath} {output_filepath}
     """
-
-
-@shared_task
-def fullviewshedForAccessPoint(network_id, data, user_id):
-    for resolution in DSMResolutionOptionsEnum:
-        if resolution == DSMResolutionOptionsEnum.ULTRA:
-            break
-        renderViewshedForAccessPoint(network_id, data, user_id, resolution=resolution.value)
 
 
 def renderViewshedForAccessPoint(network_id, data, user_id, resolution):
@@ -152,7 +157,7 @@ def swapCoordinates(polygon):
     return polygon
 
 
-def convertVieshedRGBA(viewshed):
+def convertViewshedRGBA(viewshed):
     im = Image.open(viewshed)
     img = np.asarray(im)
     numpy_image = np.zeros((im.size[1], im.size[0], 4), np.uint8)

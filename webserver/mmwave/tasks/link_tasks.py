@@ -92,28 +92,6 @@ def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
     return []
 
 
-def getElevationPoint(pt):
-    """
-    pt - Point - GEOS object
-    """
-    params = {'key': google_maps_api_key, 'locations': f"{pt.y},{pt.x}"}
-    try:
-        r = requests.get('https://maps.googleapis.com/maps/api/elevation/json', params=params)
-        elevation_resp = r.json()
-        point = [
-            {
-                'elevation': res['elevation'],
-                'lat': res['location']['lat'],
-                'lng': res['location']['lng'],
-            } for res in elevation_resp['results']
-        ]
-        return point
-    except Exception:
-        return None
-
-    return []
-
-
 def createLinkProfile(tx, rx, num_samples=MAXIMUM_NUM_POINTS_RETURNED):
     """
     tx - Point - GEOS object

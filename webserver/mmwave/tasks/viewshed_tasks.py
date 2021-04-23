@@ -138,7 +138,7 @@ def renderViewshedForAccessPoint(network_id, data, user_id, resolution):
 
     viewshed_job.save()
 
-    with tempfile.NamedTemporaryFile(mode='w+b', suffix="tif") as dsm_file:
+    with tempfile.NamedTemporaryFile(mode='w+b', suffix=".tif") as dsm_file:
         dsm_job.read_object(dsm_file)
         renderViewshed(viewshed_job_uuid=viewshed_job.uuid, dsm_file=dsm_file)
 

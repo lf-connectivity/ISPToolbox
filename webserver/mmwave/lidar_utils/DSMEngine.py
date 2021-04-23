@@ -1,5 +1,6 @@
 import subprocess
 import shlex
+import tempfile
 
 
 class DSMEngine:
@@ -27,16 +28,31 @@ class DSMEngine:
         Raises:
             not sure lol
         """
-        query_json = self.__createQueryPipeline(resolution, filepath)
-        command = shlex.split(
-            'pdal pipeline --stdin'
-        )
-        process = subprocess.Popen(command, stdin=subprocess.PIPE)
-        process.stdin.write(query_json.encode())
-        process.stdin.close()
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            files = []
+            # Iterate over all sources
+            for source in self.sources:
+                with tempfile.NamedTemporaryFile(suffix=".tif", delete=False, dir=tmp_dir) as tmp_tif:
+                    files.append(tmp_tif.name)
+                    query_json = self.__createQueryPipeline(resolution, tmp_tif.name, source)
+                    command = shlex.split(
+                        'pdal pipeline --stdin'
+                    )
+                    process = subprocess.Popen(command, stdin=subprocess.PIPE)
+                    process.stdin.write(query_json.encode())
+                    process.stdin.close()
+                    process.wait()
+            # Combine sources together
+            process = self.__combineTifs(files, filepath)
+            process.wait()
+            return process
+
+    def __combineTifs(self, files, output_filepath):
+        cmd = shlex.split(f'gdal_merge.py -o {output_filepath} -of GTiff ' + " ".join(files))
+        process = subprocess.Popen(cmd)
         return process
 
-    def __createQueryPipeline(self, resolution, outputfilepath):
+    def __createQueryPipeline(self, resolution, outputfilepath, source):
         """
         Creates the json string that pdal uses as a pipeline
         pdal docs: https://pdal.io/project/docs.html
@@ -50,14 +66,14 @@ class DSMEngine:
         "pipeline": [
             {{
                 "type":"readers.ept",
-                "filename": "{self.sources[0]}",
+                "filename": "{source}",
                 "bounds": "{
                     [self.polygon.extent[0], self.polygon.extent[2]],
                     [self.polygon.extent[1], self.polygon.extent[3]]}",
                 "resolution" : {resolution}
             }},
             {{
-                "class": 18,
+                "class": 7,
                 "type": "filters.outlier",
                 "method": "statistical",
                 "mean_k": 12,
@@ -65,7 +81,7 @@ class DSMEngine:
             }},
             {{
                 "type": "filters.range",
-                "limits": "Classification![18:18]"
+                "limits": "Classification![7:7]"
             }},
             {{
                 "type":"filters.crop",

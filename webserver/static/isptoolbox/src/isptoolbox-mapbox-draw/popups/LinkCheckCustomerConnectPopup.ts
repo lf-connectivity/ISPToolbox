@@ -73,6 +73,10 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         });
     }
 
+    getAccessPoints(): Array<AccessPoint> {
+        return this.accessPoints;
+    }
+
     show() {
         super.show();
         this.setMainPageEventHandlers();

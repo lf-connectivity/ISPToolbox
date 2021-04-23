@@ -25,25 +25,21 @@ const LINK_CPE_INDEX = 1;
 
 export class AccessPoint extends WorkspacePointFeature {
     readonly links: Map<CPE, APToCPELink> // mapbox ID
+    coverage: Array<any>;
+    awaitingCoverage: boolean;
 
     constructor(map: mapboxgl.Map,
                 draw: MapboxDraw,
                 featureData: Feature<Geometry, any>) {
         super(map, draw, featureData, AP_API_ENDPOINT, AP_RESPONSE_FIELDS, AP_SERIALIZER_FIELDS);
         this.links = new Map();
+        this.coverage = [];
+        this.awaitingCoverage = false;
     }
 
     create(successFollowup?: (resp: any) => void) {
         super.create((resp) => {
-            const data = {
-                radio: 0,
-                latitude: this.featureData.geometry.coordinates[1],
-                longitude: this.featureData.geometry.coordinates[0],
-                height: isUnitsUS() ? this.featureData.properties?.height_ft : this.featureData.properties?.height,
-                name: this.featureData.properties?.name
-            };
-            PubSub.publish(LinkCheckEvents.SET_INPUTS, data);
-            PubSub.publish(WorkspaceEvents.AP_SELECTED, {features: [this.featureData]});
+            PubSub.publish(WorkspaceEvents.AP_UPDATE, {features: [this.featureData]});
             
             if (successFollowup) {
                 successFollowup(resp);
@@ -54,7 +50,7 @@ export class AccessPoint extends WorkspacePointFeature {
     update(newFeatureData: Feature<Point, any>, successFollowup?: (resp: any) => void) {
         super.update(newFeatureData, (resp: any) => {
             PubSub.publish(WorkspaceEvents.AP_RENDER, {features: [this.featureData]});
-            PubSub.publish(WorkspaceEvents.AP_SELECTED, {features: [this.featureData]});
+            PubSub.publish(WorkspaceEvents.AP_UPDATE, {features: [this.featureData]});
 
             if (successFollowup) {
                 successFollowup(resp);
@@ -89,6 +85,16 @@ export class AccessPoint extends WorkspacePointFeature {
        });
    }
 
+    awaitNewCoverage() {
+        this.coverage = [];
+        this.awaitingCoverage = true;
+    }
+
+    setCoverage(coverage: Array<any>) {
+        this.coverage = coverage;
+        this.awaitingCoverage = false;
+    }
+
     /**
      * Links the AP with the given CPE and creates an APToCPELink object to represent the link.
      * @param cpe CPE to link to this AP.
@@ -115,6 +121,7 @@ export class AccessPoint extends WorkspacePointFeature {
         return newLink;
     }
 }
+
 
 export class CPE extends WorkspacePointFeature {
     ap?: AccessPoint

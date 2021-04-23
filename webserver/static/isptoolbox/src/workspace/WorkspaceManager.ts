@@ -13,6 +13,7 @@ import { AccessPoint, APToCPELink, CPE } from './WorkspaceFeatures';
 import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
+import { makeItArrayIfItsNot } from "../everpolate.js";
 
 
 const DEFAULT_AP_HEIGHT = 30.48;
@@ -42,7 +43,6 @@ export class LOSModal {
         PubSub.subscribe(WorkspaceEvents.LOS_MODAL_OPENED, this.getAccessPoints.bind(this));
         PubSub.subscribe(WorkspaceEvents.APS_LOADED, this.addModalCallbacks.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_DELETED, this.deleteAccessPoint.bind(this));
-        PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.updateAccessPoint.bind(this));
 
         // Modal Callbacks
         $(this.selector).on(
@@ -169,7 +169,6 @@ export class WorkspaceManager {
     ws: LOSCheckWS;
     readonly features: { [workspaceId: string] : BaseWorkspaceFeature }; // Map from workspace UUID to feature
     view: LOSModal;
-    addCPEPopup?: mapboxgl.Popup;
 
     constructor(selector: string, map: MapboxGL.Map, draw: MapboxDraw, ws: LOSCheckWS, initialFeatures: any) {
         this.map = map;
@@ -268,17 +267,13 @@ export class WorkspaceManager {
 
         // Add Pubsub Callbacks
         this.ws.setAccessPointCallback(this.accessPointStatusCallback.bind(this));
-        PubSub.subscribe(WorkspaceEvents.AP_SELECTED, this.sendCoverageRequest.bind(this));
+        PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.sendCoverageRequest.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_RENDER, this.renderAccessPointRadius.bind(this));
         // @ts-ignore
         // $('#bulkUploadAccessPoint').modal('show');
 
         // Add building layer callbacks
         this.map.on('click', ACCESS_POINT_BUILDING_LAYER, (e: any) => {
-            if (this.addCPEPopup) {
-                this.addCPEPopup.remove();
-            }
-
             let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
             let mapboxClient = MapboxSDKClient.getInstance();
             mapboxClient.reverseGeocode(lngLat, (response: any) => {
@@ -286,6 +281,12 @@ export class WorkspaceManager {
                 popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>
                     feature.getFeatureType() === WorkspaceFeatureTypes.AP
                 ) as AccessPoint[]);
+
+                // Render all APs 
+                let feats = popup.getAccessPoints().map((ap: AccessPoint) => ap.mapboxId);
+                this.draw.changeMode('simple_select', {featureIds: feats});
+                this.map.fire('draw.modechange', { mode: 'simple_select'});
+                PubSub.publish(WorkspaceEvents.AP_RENDER, {});
                 popup.show();
             });
         });
@@ -436,25 +437,16 @@ export class WorkspaceManager {
     drawSelectionChangeCallback({features}: {features: Array<any>}){
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features});
         const aps = features.filter((f) => f.properties.feature_type === WorkspaceFeatureTypes.AP);
-        if(aps.length === 1) {
-            PubSub.publish(WorkspaceEvents.AP_SELECTED, {features: aps});
-            PubSub.publish(LinkCheckEvents.SET_INPUTS, {
-                radio: 0,
-                latitude: aps[0].properties.center[1],
-                longitude: aps[0].properties.center[0],
-                height: isUnitsUS() ? aps[0].properties.height * 3.28084 : aps[0].properties.height,
-                name: aps[0].properties.name
-            });
-        }
-        else if (aps.length === 0) {
-            const source = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
-            if (source.type == 'geojson') {
-                source.setData({
-                    'type': 'FeatureCollection',
-                    'features': []
-                });
+
+        // Request coverage for any AP that doesn't have coverage and isn't awaiting any either
+        aps.forEach((apFeature: any) => {
+            if (apFeature.properties.uuid) {
+                let ap = this.features[apFeature.properties.uuid] as AccessPoint;
+                if (!ap.coverage.length && !ap.awaitingCoverage) {
+                    this.sendCoverageRequest('', {features: [apFeature]});
+                }
             }
-        }
+        });
     }
 
     drawModeChangeCallback(a: any) {
@@ -486,41 +478,55 @@ export class WorkspaceManager {
     }
 
     renderAccessPointRadius(msg: string, data: any){
-        const features = data.features;
-        const fc = this.draw.getAll();
+        const fc = this.draw.getSelected();
         const circle_feats : Array<any> = [];
+        const buildings: Set<any> = new Set();
         fc.features.forEach((feat: any) => {
             if(feat.properties.radius){
-                if(features.map((f : any)=>f.id).includes(feat.id)){
-                    if(feat.geometry.type === 'Point'){
-                        const new_feat = createGeoJSONCircle(
-                                feat.geometry,
-                                feat.properties.radius,
-                                feat.properties.parent);
-                        circle_feats.push(new_feat);
+                if(feat.geometry.type === 'Point'){
+                    const new_feat = createGeoJSONCircle(
+                            feat.geometry,
+                            feat.properties.radius,
+                            feat.properties.parent);
+                    circle_feats.push(new_feat);
+
+                    // render coverage
+                    if (feat.properties.uuid) {
+                        let ap = this.features[feat.properties.uuid] as AccessPoint;
+                        ap.coverage.forEach((building: any) => {
+                            buildings.add(building);
+                        });
                     }
-                }   
+                }
             }
         });
-        const source = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
-        if(source.type ==='geojson'){
-            source.setData({type: 'FeatureCollection', features: circle_feats});
+        const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
+        if(radiusSource.type ==='geojson'){
+            radiusSource.setData({type: 'FeatureCollection', features: circle_feats});
+        }
+
+        const buildingSource = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
+        if(buildingSource.type ==='geojson'){
+            buildingSource.setData({type: 'FeatureCollection', features: Array.from(buildings)});
         }
     }
 
     sendCoverageRequest(msg: string, data: {features: Array<GeoJSON.Feature>}){
-        if(data.features.length === 1){
-            const f = data.features[0];
+        data.features.forEach((f: GeoJSON.Feature) => {
             if(f.properties){
+                // clear coverage for UUID
+                let ap = this.features[f.properties.uuid] as AccessPoint;
+                ap.awaitNewCoverage();
                 this.ws.sendAPRequest(f.properties.uuid);
+                PubSub.publish(WorkspaceEvents.AP_RENDER, {});
             }
-        }
+        });
     }
 
     accessPointStatusCallback(message: AccessPointCoverageResponse) {
         $.ajax({
             url: `/pro/workspace/api/ap-los/coverage/${message.uuid}/`,
-            success: (resp) => { this.plotBuildings(resp, message.uuid) },
+            success: (resp) => { this.updateCoverage(resp, message.uuid) },
             "method": "GET",
             "headers": {
                 'X-CSRFToken': getCookie('csrftoken')
@@ -528,11 +534,9 @@ export class WorkspaceManager {
         });
     }
 
-    plotBuildings(resp: any, uuid: string) {
-        const source = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
-
-        if (source.type === "geojson") {
-            source.setData(resp);
-        }
+    updateCoverage(resp: any, uuid: string) {
+        const ap = this.features[uuid] as AccessPoint;
+        ap.setCoverage(resp.features);
+        PubSub.publish(WorkspaceEvents.AP_RENDER, {});
     }
 }

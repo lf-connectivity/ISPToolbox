@@ -76,6 +76,10 @@ class IspToolboxUserSignUpInfo(models.Model):
         ("xlarge", _("2,001 - 5,000")),
         ("xxlarge", _("5,000+")),
     )
+    BUSINESS_TYPES = (
+        ("wireless", _("Wireless")),
+       ("fiber", _("Fiber")),
+    )
     ROLE_CHOICES = (
        ("bus_fin", _("Business & Finance")),
        ("tech_install", _("Tech & Installation")),

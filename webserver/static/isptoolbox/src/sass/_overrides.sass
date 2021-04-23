@@ -1,0 +1,13 @@
+// Use this file to override default browser styles.
+@import 'theme'
+
+p, h1, h2, h3, h4, h5, h6, ul
+    color: $brand-dark-gray-color
+
+a
+    text-decoration: none
+    color: $brand-secondary-color
+    font-weight: bold
+    &:hover
+        color: darken($brand-secondary-color, 7%)
+        text-decoration: none

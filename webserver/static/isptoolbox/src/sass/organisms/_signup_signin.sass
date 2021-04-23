@@ -10,11 +10,9 @@
     flex-direction: column
     padding: 3rem 3rem 2rem 3rem
 
-    &--intro-copy
-        font-size: 17px
+    .onboarding_container--intro-copy
         margin-top: 12px
         letter-spacing: 0.01em
-        color: $brand-dark-gray-color
     
     .fb-login-button 
         text-align: center
@@ -66,6 +64,8 @@
         color: $dark-error-color
     &--description
         font-size: 14px
+    .login-button
+        margin-top: 20px
 
 .onboarding_container .checklist--items ul
     display: grid
@@ -119,11 +119,13 @@
 .onboarding_container .valprops
     background: lighten($brand-theme-color, 8%)
     padding: 1.5rem
+    text-align: left
     ol, p
         padding: 0
         margin: 0
     svg
-        margin: 2px 20px 2px 0
+        margin: 5px 15px 2px 0
+        min-width: 18px
         fill: $brand-secondary-color
     li
         margin-bottom: 12px

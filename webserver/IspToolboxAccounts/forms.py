@@ -41,6 +41,17 @@ class IspToolboxUserAuthenticationForm(AuthenticationForm):
         self.fields['username'].widget.attrs.update({
             'name': 'email'
         })
+    username = forms.EmailField(
+            label="Email",
+            label_suffix="",
+            required=True,
+            widget=forms.TextInput(attrs={'placeholder': 'name@company.com'}))
+
+    password = forms.CharField(
+            label="Password",
+            label_suffix="", 
+            widget=forms.PasswordInput)
+
     error_css_class = "error"
     required_css_class = "required"
 
@@ -52,6 +63,12 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
         required=True,
         error_messages={'required': 'Please enter your company\'s website'},
         widget=forms.TextInput(attrs={'placeholder': 'www.company.com'}))
+    business_type = forms.MultipleChoiceField(
+        label="What technology do you use to service customers?",
+        label_suffix="",
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        choices=IspToolboxUserSignUpInfo.BUSINESS_TYPES)
     individual_role = forms.MultipleChoiceField(
         label="What is your role?",
         label_suffix="",
@@ -88,7 +105,7 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
         }
 
     field_order = [
-        'company_website', 'individual_role', 'subscriber_size', 'company_goal'
+        'company_website', 'business_type', 'individual_role', 'subscriber_size', 'company_goal'
     ]
     error_css_class = "error"
     required_css_class = "required"

@@ -1,6 +1,6 @@
 <div id="signin_container" class="{% if showSignUp %}d-none{% endif %}">
 <div class="container signup_container onboarding_container">
-    <h3>Welcome back!</h3>
+    <h3>Welcome Back!</h3>
     <div class="fb-login-button"
         data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'isptoolbox_pro_home' %}, '')});"
         data-width="" data-size="large"
@@ -21,7 +21,7 @@
                 {{ authentication_form }}
             {% endif %}
             <input hidden type="text" value="{% firstof request.GET.next request.full_path %}" name="next">
-            <input class="btn isptoolbox-btn btn-primary" type="submit" value="Login">
+            <input class="btn isptoolbox-btn btn-primary login-button" type="submit" value="Login">
         </form>
     </div>
 </div>

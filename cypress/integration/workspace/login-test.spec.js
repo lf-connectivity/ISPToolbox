@@ -27,7 +27,7 @@ describe('Test Sign Up / Login', () => {
         cy.getCookie('sessionid').should('exist')
     
         // UI should reflect this user being logged in
-        cy.get('h5').should('contain', this.user.first_name);
+        cy.get('h6').should('contain', this.user.first_name);
     })
 
     it('Create Account Email Test', function () {
@@ -50,6 +50,6 @@ describe('Test Sign Up / Login', () => {
         cy.getCookie('sessionid').should('exist')
     
         // UI should reflect this user being logged in
-        cy.get('h5').should('contain', this.user_signup.first_name);
+        cy.get('h6').should('contain', this.user_signup.first_name);
       })
   })

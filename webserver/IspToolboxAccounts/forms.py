@@ -49,7 +49,7 @@ class IspToolboxUserAuthenticationForm(AuthenticationForm):
 
     password = forms.CharField(
             label="Password",
-            label_suffix="", 
+            label_suffix="",
             widget=forms.PasswordInput)
 
     error_css_class = "error"

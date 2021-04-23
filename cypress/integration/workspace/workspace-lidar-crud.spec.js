@@ -29,7 +29,7 @@ describe('Test Workspace Features for LiDAR Tool', () => {
   
     it('Check Login Works', function () {
       cy.visit('/pro');
-      cy.get('h5').should('contain', this.user.first_name);
+      cy.get('h6').should('contain', this.user.first_name);
     });
 
     it('Check Simple Network CRUD Operations', function () {

@@ -257,7 +257,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             let apDist = this.apDistances.get(ap);
             let apClear = this.apClearLOS.get(ap);
             retval += `
-                <li id='${CONNECT_TOWER_INDEX_LI_BASE_ID}-${i}'>
+                <li>
                     <div>
                         <p>${apName} - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
                         <a id='${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}' class="link">View LOS</a>

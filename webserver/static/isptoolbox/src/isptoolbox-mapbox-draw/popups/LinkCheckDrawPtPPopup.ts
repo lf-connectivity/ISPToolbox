@@ -51,15 +51,17 @@ export class LinkCheckDrawPtPPopup extends LinkCheckBasePopup {
 
     protected getHTML() {
         return `
-        <div>
-            <div>
+        <div class="tooltip--location">
+            <div class="title"> 
                 <h6>${this.street}</h6>
+            </div>
+            <div class="description">
                 <p>${this.city}</p>
                 <p>${this.displayLngLat()}</p>
             </div>
-            <div align='center'>
+            <div class="button-row">
                 <button class='btn btn-primary isptoolbox-btn' id='${DRAW_PTP_BUTTON_ID}'>Draw PtP</button>
-                <a id='${ADD_TOWER_BUTTON_ID}'>Place Tower</a>
+                <a id='${ADD_TOWER_BUTTON_ID}' class="link">Place Tower</a>
             </div>
         </div>
         `

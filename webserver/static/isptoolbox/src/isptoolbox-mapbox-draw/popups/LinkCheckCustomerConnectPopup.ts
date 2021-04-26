@@ -20,6 +20,17 @@ const NO_SVG = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmln
 <path d="M7 0C3.15 0 0 3.15 0 7C0 10.85 3.15 14 7 14C10.85 14 14 10.85 14 7C14 3.15 10.85 0 7 0ZM7 1.75C8.1375 1.75 9.1875 2.1 10.0625 2.7125L2.7125 10.0625C2.1 9.1875 1.75 8.1375 1.75 7C1.75 4.1125 4.1125 1.75 7 1.75ZM7 12.25C5.8625 12.25 4.8125 11.9 3.9375 11.2875L11.2875 3.9375C11.9 4.8125 12.25 5.8625 12.25 7C12.25 9.8875 9.8875 12.25 7 12.25Z" fill="#F23E3E"/>
 </svg>`
 
+const BACK_SVG = `<svg class="back-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0)">
+    <path d="M8.70692 10.2929L4.41392 5.99992L8.70692 1.70692C8.88908 1.51832 8.98987 1.26571 8.98759 1.00352C8.98531 0.741321 8.88015 0.490508 8.69474 0.3051C8.50933 0.119692 8.25852 0.0145232 7.99632 0.0122448C7.73412 0.00996636 7.48152 0.110761 7.29292 0.292919L2.29292 5.29292C2.10545 5.48045 2.00013 5.73475 2.00013 5.99992C2.00013 6.26508 2.10545 6.51939 2.29292 6.70692L7.29292 11.7069C7.38517 11.8024 7.49551 11.8786 7.61751 11.931C7.73952 11.9834 7.87074 12.011 8.00352 12.0122C8.1363 12.0133 8.26798 11.988 8.39087 11.9377C8.51377 11.8875 8.62542 11.8132 8.71931 11.7193C8.81321 11.6254 8.88746 11.5138 8.93774 11.3909C8.98802 11.268 9.01332 11.1363 9.01217 11.0035C9.01101 10.8707 8.98343 10.7395 8.93102 10.6175C8.87861 10.4955 8.80243 10.3852 8.70692 10.2929Z" fill="white"/>
+</g>
+<defs>
+    <clipPath id="clip0">
+        <rect width="12" height="12" fill="white" transform="translate(12) rotate(90)"/>
+    </clipPath>
+</defs>
+</svg>`
+
 export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     private apDistances: Map<AccessPoint, number>; // AP to distance from customer
     private apClearLOS: Map<AccessPoint, boolean> // Clear LOS from AP
@@ -142,29 +153,30 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         let apName = this.accessPoints[this.apConnectIndex].featureData.properties?.name;
         let apDist = this.apDistances.get(this.accessPoints[this.apConnectIndex]);
         return `
-            <div>
-                <div>
+            <div class="tooltip--cpe">
+                <div class="title ${this.isClearLOS? `success`: `fail`}">
                     <h6>${this.isClearLOS ? `Clear line of sight ${YES_SVG}` : `No clear line of sight ${NO_SVG}`}</h6>
                 </div>
-                <hr/>
-                <div align='center'>
-                    <p>${this.street}</p>
-                    <p>${this.city}</p>
-                    <p>${this.displayLngLat()}</p>
+
+                <div class="description">
+                    <p class="bold">${this.street}</p>
+                    <p class="small">${this.city}</p>
+                    <p class="small">${this.displayLngLat()}</p>
                 </div>
-                <hr/>
-                <div>
-                    <div style='display: flex; flex-flow: row; justify-content: space-between;'>
-                        <p>Draw PtP to:</p>
-                        ${this.accessPoints.length > 1 ? `<a id='${SWITCH_TOWER_LINK_ID}'>Switch</a>` : ''}
+
+                <div class="description section">
+                    <div class="draw-ptp-row">
+                        <p class="small">Draw PtP to:</p>
+                        ${this.accessPoints.length > 1 ? `<a id='${SWITCH_TOWER_LINK_ID}' class="link">Switch</a>` : ''}
                     </div>
                     <div>
-                        <p><b>${apName}</b> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
+                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
                     </div>
                 </div>
-                <div align='center'>
+
+                <div class="button-row">
                     <button class='btn btn-primary isptoolbox-btn' id='${VIEW_LOS_BUTTON_ID}'>View Line of Sight</button>
-                    <a id='${PLACE_TOWER_LINK_ID}'>Place Tower</a>
+                    <a id='${PLACE_TOWER_LINK_ID}' class="link">Place Tower</a>
                 </div>
             </div>
         `;
@@ -172,9 +184,14 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
     protected getSwitchTowerHTML() {
         return `
-            <div>
-                <div>
-                    <h6><a id='${BACK_TO_MAIN_LINK_ID}'> &#x3008; </a> Towers within Coverage </h6>
+            <div class="tooltip--towers">
+                <div class="title">
+                    <h6>
+                        <a id='${BACK_TO_MAIN_LINK_ID}'> 
+                            ${BACK_SVG}
+                        </a> 
+                        Towers within Coverage
+                     </h6>
                 </div>
                 <div>
                     <ul>
@@ -192,10 +209,10 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             let apDist = this.apDistances.get(ap);
             let apClear = this.apClearLOS.get(ap);
             retval += `
-                <li style='display: flex; flex-flow: row; justify-content: space-between; align-items: center;'>
+                <li>
                     <div>
-                        <p><b>${apName}</b> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
-                        <a id='${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}'>View LOS</a>
+                        <p>${apName} - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
+                        <a id='${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}' class="link">View LOS</a>
                     </div>
                     <div>
                         ${apClear ? YES_SVG : NO_SVG}

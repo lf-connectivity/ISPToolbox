@@ -30,7 +30,7 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
     """
     Calculate the coverage area of an access point location
     """
-    ap = AccessPointLocation.objects.get(uuid=request['uuid'], owner=user_id)
+    ap = AccessPointLocation.objects.get(uuid=request['uuid'])
     # Get circle geometry
     circle_json = json.dumps(createGeoJSONCircle(ap.geojson, ap.max_radius))
     circle = GEOSGeometry(circle_json)

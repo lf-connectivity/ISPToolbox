@@ -71,8 +71,9 @@ export abstract class LinkCheckBasePopup {
         this.street = DEFAULT_STREET;
         this.city = DEFAULT_CITY;
         this.lnglat = DEFAULT_LNGLAT;
-        this.popup = new window.mapboxgl.Popup();
-
+        this.popup = new window.mapboxgl.Popup({
+            className: "lineofsight-tooltip"
+        });
         this.popup.on('close', () => {
             this.cleanup();
         });
@@ -111,7 +112,7 @@ export abstract class LinkCheckBasePopup {
     }
 
     displayLngLat() {
-        return `(${this.lnglat[0].toFixed(5)}, ${this.lnglat[1].toFixed(5)})`
+        return `${this.lnglat[0].toFixed(5)}&deg;, ${this.lnglat[1].toFixed(5)}&deg;`
     }
 
     /**

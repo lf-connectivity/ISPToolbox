@@ -1,0 +1,127 @@
+@import ../theme
+
+.mapboxgl-popup.lineofsight-tooltip
+    color: $white-color
+    font-family: $brand-font-family-sans-serif
+    min-width:270px
+    .title
+        margin-bottom: 20px
+        h6
+            font-size: 16px
+            margin-bottom: 0
+            display: flex
+            align-items: center
+            font-weight: bold
+            letter-spacing: 0.02em
+    .title.success h6
+            color: $success-color
+    .title.fail h6
+            color: $error-color
+    .tooltip--cpe .title svg
+        margin-left: 6px
+    .tooltip--towers .title svg
+        margin-right: 6px
+    .description
+        margin-bottom: 15px
+        letter-spacing: 0.017em
+        &.section
+            border-top: $mid-gray-color-2 solid 1px
+            padding-top: 15px
+    p
+        font-size: 14px
+        line-height: 18px
+        margin-bottom: 4px
+        letter-spacing: 0.017em
+    .small
+        font-size: 12px
+    .bold
+        font-weight: bold
+    .draw-ptp-row
+        display: flex
+        flex-flow: row
+        justify-content: space-between
+        align-items: center
+    a
+        color: $brand-primary-color
+        font-weight: bold
+        font-size: 14px
+        letter-spacing: 0.017em
+        cursor: pointer
+        transition: 0.2s ease all
+        &:hover
+            color: darken($brand-primary-color, 7%)
+    .button-row
+        display: flex
+        flex-flow: column
+        align-items: center
+        margin-top: 30px
+        button
+            width: 100%
+        .link
+            font-size: 14px
+            margin-top: 12px
+
+    .tooltip--towers
+        .back-icon
+            margin-bottom: 2px
+        ul
+            padding: 0
+            max-height: 210px
+            overflow-y: scroll
+            margin: 0
+        li
+            border-bottom: $mid-gray-color-2 solid 1px
+            display: flex
+            flex-flow: row
+            justify-content: space-between
+            align-items: center
+            padding: 10px 0
+            p
+                margin: 0 0 4px 0
+        li:first-child
+            padding-top: 0
+        li:last-child
+            border-bottom: 0
+            padding-bottom: 0
+        p
+            line-height: 18px
+
+
+.lineofsight-tooltip .mapboxgl-popup-content
+    background-color: $brand-dark-gray-color
+    padding:20px
+    color: white
+
+.lineofsight-tooltip .mapboxgl-popup-close-button
+    width: 40px
+    height: 40px
+    font-size: 33px
+    color: $brand-ternary-color
+    top: 6px
+    right: 4px
+    &:focus
+        outline: 0
+
+.lineofsight-tooltip.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip
+    border-top-color: $brand-dark-gray-color
+
+.lineofsight-tooltip.mapboxgl-popup-anchor-top .mapboxgl-popup-tip
+    border-bottom-color: $brand-dark-gray-color
+
+.lineofsight-tooltip.mapboxgl-popup-anchor-left .mapboxgl-popup-tip
+    border-right-color: $brand-dark-gray-color
+
+.lineofsight-tooltip.mapboxgl-popup-anchor-right .mapboxgl-popup-tip
+    border-left-color: $brand-dark-gray-color
+
+.lineofsight-tooltip.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip
+    border-bottom-color: $brand-dark-gray-color
+
+.lineofsight-tooltip.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip
+    border-bottom-color: $brand-dark-gray-color
+
+.lineofsight-tooltip.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip
+    border-top-color: $brand-dark-gray-color
+
+.lineofsight-tooltip.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip
+    border-top-color: $brand-dark-gray-color

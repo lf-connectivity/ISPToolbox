@@ -28,21 +28,6 @@
             Place Tower
         </button>
         <button type="button" class="btn isptoolbox-btn btn-secondary btn-large my-1 w-100 isp-draw-mode-btn"
-        draw_mode="draw_cpe"
-        {% comment %}
-            this tool requires that the user be authenticated
-        {% endcomment %}
-        {% if user.is_authenticated %}
-            id="add-cpe-btn"
-        {% else %}
-            id="add-cpe-noact"
-            data-toggle="modal" data-target="#redirect_workspace_modal"
-        {% endif %}
-        >
-            {% include "mmwave/atoms/cpe_icon.html" %}
-            Add CPE
-        </button>
-        <button type="button" class="btn isptoolbox-btn btn-secondary btn-large my-1 w-100 isp-draw-mode-btn"
         {% comment %}
             this tool requires that the user be authenticated
         {% endcomment %}

@@ -1,16 +1,21 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
+import { Feature, Geometry, Point, LineString, GeoJsonProperties, Position }  from 'geojson';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { distance, point } from "@turf/turf";
 import { isUnitsUS } from '../../utils/MapPreferences';
 import { km2miles } from '../../LinkCalcUtils';
 import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
 import { AccessPoint, CPE } from '../../workspace/WorkspaceFeatures';
+import { WorkspaceEvents, WorkspaceFeatureTypes } from "../../workspace/WorkspaceConstants";
 
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
 const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-customer-popup';
 const VIEW_LOS_BUTTON_ID = 'view-los-btn-customer-popup';
 const PLACE_TOWER_LINK_ID = 'place-tower-link-customer-popup';
 const CONNECT_TOWER_INDEX_LINK_BASE_ID = 'connect-tower-link-customer-popup';
+const CONNECT_TOWER_INDEX_LI_BASE_ID = 'connect-tower-li-customer-popup';
+
+const MOCK_HEIGHT = 150;
 
 const YES_SVG = `<svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M10.2929 0.292431L3.99992 6.58543L1.70692 4.29243C1.51832 4.11027 1.26571 4.00948 1.00352 4.01176C0.741321 4.01403 0.490508 4.1192 0.3051 4.30461C0.119692 4.49002 0.0145233 4.74083 0.0122448 5.00303C0.00996641 5.26523 0.110761 5.51783 0.292919 5.70643L3.29292 8.70643C3.48045 8.8939 3.73475 8.99922 3.99992 8.99922C4.26508 8.99922 4.51939 8.8939 4.70692 8.70643L11.7069 1.70643C11.8891 1.51783 11.9899 1.26523 11.9876 1.00303C11.9853 0.740832 11.8801 0.49002 11.6947 0.304612C11.5093 0.119204 11.2585 0.014035 10.9963 0.0117566C10.7341 0.00947813 10.4815 0.110272 10.2929 0.292431Z" fill="#42B72A"/>
@@ -90,6 +95,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
     show() {
         super.show();
+        this.highlightAllAPs();
         this.setMainPageEventHandlers();
     }
 
@@ -99,6 +105,34 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.apClearLOS.clear();
         this.isClearLOS = false;
         this.apConnectIndex = 0;
+
+        this.changeSelection([]);
+    }
+
+    highlightAllAPs() {
+        this.changeSelection(this.accessPoints);
+    }
+
+    highlightAP(ap: AccessPoint) {
+        this.changeSelection([ap]);
+    }
+
+    createCPE() {
+        let ap = this.accessPoints[this.apConnectIndex];
+        let newCPE = {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+                'coordinates': this.lnglat
+            },
+            'properties': {
+                'name': this.street,
+                'ap': ap.workspaceId,
+                'feature_type': WorkspaceFeatureTypes.CPE,
+                'height': MOCK_HEIGHT // TODO: determine building height
+            }
+        } as Feature<Point, any>;
+        this.map.fire('draw.create', {features: [newCPE]});
     }
 
     setMainPageEventHandlers() {
@@ -108,8 +142,8 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         });
 
         $(`#${VIEW_LOS_BUTTON_ID}`).on('click', () => {
-            // Will do later :)
-            console.log('viewing los')
+            this.createCPE();
+            this.hide();
         });
 
         $(`#${PLACE_TOWER_LINK_ID}`).on('click', () => {
@@ -129,9 +163,16 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.accessPoints.forEach((_: AccessPoint, i: number) => {
             $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('click', () => {
                 this.apConnectIndex = i;
-                this.isClearLOS = this.apClearLOS.get(this.accessPoints[this.apConnectIndex]) ? true : false;
-                this.popup.setHTML(this.getMainPageHTML());
-                this.setMainPageEventHandlers();
+                this.createCPE();
+                this.hide();
+            });
+
+            $(`#${CONNECT_TOWER_INDEX_LI_BASE_ID}-${i}`).on('mouseenter', () => {
+                this.highlightAP(this.accessPoints[i])
+            });
+
+            $(`#${CONNECT_TOWER_INDEX_LI_BASE_ID}-${i}`).on('mouseleave', () => {
+                this.highlightAllAPs();
             });
         });
     }
@@ -143,6 +184,13 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         else {
             throw new Error('No instance of LinkCheckCustomerConnectPopup instantiated.')
         }
+    }
+
+    private changeSelection(aps: Array<AccessPoint>) {
+        let feats = aps.map((ap: AccessPoint) => ap.mapboxId);
+        this.draw.changeMode('simple_select', {featureIds: feats});
+        this.map.fire('draw.modechange', { mode: 'simple_select'});
+        PubSub.publish(WorkspaceEvents.AP_RENDER, {});
     }
 
     protected getHTML() {
@@ -209,7 +257,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             let apDist = this.apDistances.get(ap);
             let apClear = this.apClearLOS.get(ap);
             retval += `
-                <li>
+                <li id='${CONNECT_TOWER_INDEX_LI_BASE_ID}-${i}'>
                     <div>
                         <p>${apName} - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
                         <a id='${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}' class="link">View LOS</a>

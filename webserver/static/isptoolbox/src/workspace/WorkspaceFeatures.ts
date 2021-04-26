@@ -227,4 +227,18 @@ export class APToCPELink extends WorkspaceLineStringFeature {
             }
         });
     }
+
+    // Delete the CPE when deleting a link
+    delete(successFollowup ?: (resp: any) => void) {
+        super.delete((resp) => {
+            this.cpe.ap = undefined;
+            this.ap.links.delete(this.cpe);
+            this.draw.delete(this.cpe.mapboxId);
+            this.map.fire('draw.delete', {features: [this.cpe.featureData]});
+
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        });
+    }
 }

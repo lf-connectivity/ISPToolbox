@@ -3,6 +3,8 @@ from django.contrib.gis.db import models as gis_models
 import uuid
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
+from django.conf import settings
+from IspToolboxApp.util import s3
 
 
 # Create your models here.
@@ -60,6 +62,31 @@ class EPTLidarPointCloud(models.Model):
             Used to invalidate certain point clouds if the USGS says they are bad / have data issues
         """
     )
+    noisy_data = models.BooleanField(
+        default=False,
+        help_text="""
+            dataset is noisy and requires outlier filtering for it to be usable
+        """
+    )
+
+    def get_s3_key_tile(self, x, y, z, **kwargs):
+        if settings.PROD or kwargs.get('tile_prod'):
+            key = f'tiles/{self.name}/{int(z)}/{int(x)}/{int(y)}/tile{kwargs.get("suffix")}'
+        else:
+            key = f'test-tiles/{self.name}/{int(z)}/{int(x)}/{int(y)}/tile{kwargs.get("suffix")}'
+        return key
+
+    def getTile(self, x, y, z, fp, **kwargs):
+        return s3.readFromS3(self.get_s3_key_tile(x, y, z, **kwargs), fp)
+
+    def createTile(self, x, y, z, fp, **kwargs):
+        return s3.writeS3Object(self.get_s3_key_tile(x, y, z, **kwargs), fp)
+
+    def deleteTile(self, x, y, z, **kwargs):
+        return s3.deleteS3Object(self.get_s3_key_tile(x, y, z, **kwargs))
+
+    def existsTile(self, x, y, z, **kwargs):
+        return s3.checkObjectExists(self.get_s3_key_tile(x, y, z, **kwargs))
 
 
 class LOSSummary(TGLink):

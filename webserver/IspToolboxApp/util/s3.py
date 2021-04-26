@@ -49,7 +49,7 @@ def writeS3Object(object_name, data):
 
 def deleteS3Object(key):
     try:
-        s3_resource.Bucket(bucket_name).delete_object(Key=key)
+        s3_client.delete_object(Bucket=bucket_name, Key=key)
     except Exception as e:
         logging.error(e)
         return False

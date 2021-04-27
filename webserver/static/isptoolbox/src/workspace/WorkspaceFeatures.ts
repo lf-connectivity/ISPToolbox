@@ -5,6 +5,7 @@ import { isUnitsUS } from '../utils/MapPreferences';
 import { LinkCheckEvents } from '../LinkCheckPage';
 import { WorkspaceEvents } from './WorkspaceConstants'
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 
 const AP_API_ENDPOINT = '/pro/workspace/api/ap-los';
 const AP_RESPONSE_FIELDS = ['name', 'height', 'max_radius', 'no_check_radius',
@@ -25,7 +26,7 @@ const LINK_CPE_INDEX = 1;
 
 export class AccessPoint extends WorkspacePointFeature {
     readonly links: Map<CPE, APToCPELink> // mapbox ID
-    coverage: Array<any>;
+    coverage: BuildingCoverage;
     awaitingCoverage: boolean;
 
     constructor(map: mapboxgl.Map,
@@ -33,7 +34,7 @@ export class AccessPoint extends WorkspacePointFeature {
                 featureData: Feature<Geometry, any>) {
         super(map, draw, featureData, AP_API_ENDPOINT, AP_RESPONSE_FIELDS, AP_SERIALIZER_FIELDS);
         this.links = new Map();
-        this.coverage = [];
+        this.coverage = EMPTY_BUILDING_COVERAGE
         this.awaitingCoverage = false;
     }
 
@@ -86,12 +87,12 @@ export class AccessPoint extends WorkspacePointFeature {
    }
 
     awaitNewCoverage() {
-        this.coverage = [];
+        this.coverage = EMPTY_BUILDING_COVERAGE;
         this.awaitingCoverage = true;
     }
 
     setCoverage(coverage: Array<any>) {
-        this.coverage = coverage;
+        this.coverage = new BuildingCoverage(coverage);
         this.awaitingCoverage = false;
     }
 

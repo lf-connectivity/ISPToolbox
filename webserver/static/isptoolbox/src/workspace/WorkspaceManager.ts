@@ -16,6 +16,7 @@ import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { makeItArrayIfItsNot } from "../everpolate.js";
 import { ViewshedTool } from "../organisms/ViewshedTool";
+import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 
 
 const DEFAULT_AP_HEIGHT = 30.48;
@@ -306,6 +307,7 @@ export class WorkspaceManager {
 
         // Add building layer callbacks
         this.map.on('click', ACCESS_POINT_BUILDING_LAYER, (e: any) => {
+            console.log(e.features[0]);
             let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
             let mapboxClient = MapboxSDKClient.getInstance();
             mapboxClient.reverseGeocode(lngLat, (response: any) => {
@@ -442,13 +444,6 @@ export class WorkspaceManager {
 
                 switch(featureType) {
                     case WorkspaceFeatureTypes.AP:
-                        const source = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
-                        if (source.type == 'geojson') {
-                            source.setData({
-                                'type': 'FeatureCollection',
-                                'features': []
-                            });
-                        }
                         workspaceFeature.delete((resp) => {
                             delete this.features[feature.properties.uuid];
                         });
@@ -487,7 +482,7 @@ export class WorkspaceManager {
         aps.forEach((apFeature: any) => {
             if (apFeature.properties.uuid) {
                 let ap = this.features[apFeature.properties.uuid] as AccessPoint;
-                if (!ap.coverage.length && !ap.awaitingCoverage) {
+                if (ap.coverage === EMPTY_BUILDING_COVERAGE && !ap.awaitingCoverage) {
                     this.sendCoverageRequest('', {features: [apFeature]});
                 }
             }
@@ -527,7 +522,7 @@ export class WorkspaceManager {
     renderAccessPointRadius(msg: string, data: any){
         const fc = this.draw.getSelected();
         const circle_feats : Array<any> = [];
-        const buildings: Set<any> = new Set();
+        const selectedAPs : Array<AccessPoint> = [];
         fc.features.forEach((feat: any) => {
             if(feat.properties.radius){
                 if(feat.geometry.type === 'Point'){
@@ -540,9 +535,7 @@ export class WorkspaceManager {
                     // render coverage
                     if (feat.properties.uuid) {
                         let ap = this.features[feat.properties.uuid] as AccessPoint;
-                        ap.coverage.forEach((building: any) => {
-                            buildings.add(building);
-                        });
+                        selectedAPs.push(ap);
                     }
                 }
             }
@@ -554,7 +547,11 @@ export class WorkspaceManager {
 
         const buildingSource = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
         if(buildingSource.type ==='geojson'){
-            buildingSource.setData({type: 'FeatureCollection', features: Array.from(buildings)});
+            const coverage = BuildingCoverage.union(selectedAPs.map(ap => {
+                return ap.coverage;
+            }));
+            console.log(coverage.toFeatureArray());
+            buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
         }
     }
 

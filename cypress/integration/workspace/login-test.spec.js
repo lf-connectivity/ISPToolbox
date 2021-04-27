@@ -41,6 +41,7 @@ describe('Test Sign Up / Login', () => {
         cy.get('input[name=last_name]').type(this.user_signup.last_name);
         cy.get('input[name=password1]').type(this.user_signup.password1);
         cy.get('input[name=password2]').type(this.user_signup.password2);
+        cy.get('input[name=registration_code]').type(this.user_signup.registration_code);
         cy.get('input[type=submit]').contains('Sign Up').click();
     
         // we should be redirected to homepage

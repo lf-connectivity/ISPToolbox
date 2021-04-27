@@ -3,6 +3,7 @@ from IspToolboxAccounts.models import User, IspToolboxUserSignUpInfo
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.conf import settings
 
 
 class IspToolboxUserCreationForm(UserCreationForm):
@@ -26,6 +27,12 @@ class IspToolboxUserCreationForm(UserCreationForm):
                 label_suffix="",
                 required=True,
                 widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
+
+    registration_code = forms.CharField(
+        label="Registration Code",
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Company Provided Registration Code'})
+    ) if not settings.ENABLE_ACCOUNT_CREATION else ''
 
     class Meta(UserCreationForm.Meta):
         model = User

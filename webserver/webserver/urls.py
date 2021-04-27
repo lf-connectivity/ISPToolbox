@@ -78,14 +78,25 @@ urlpatterns = [
     path('demo/dsm-app/', DSMExportView.as_view(), name="demo-dsm-app"),
     # Redirect
     path('', HomepageRedirect.as_view()),
-    # TODO achong: only include allauth urls we need
-    # Facebook SDK Login
-    path('accounts/', include('allauth.urls')),
     # Integration Test Endpoints - be sure to 404 in prod
     path('test/accounts/', IntegrationTestAccountCreationView.as_view(), name="test-accounts"),
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# Facebook SDK Login
+if not settings.ENABLE_ACCOUNT_CREATION:
+    social_login = [
+        path('fb-sdk/facebook/login/token/', views.HealthCheckView.as_view(), name="facebook_login_by_token"),
+        path('fb-sdk/facebook/login/', views.HealthCheckView.as_view(), name="facebook_login"),
+        path('fb-sdk/facebook/login/callback/', views.HealthCheckView.as_view(), name="facebook_callback"),
+        path('fb-sdk/social/', include('allauth.socialaccount.urls')),
+    ]
+else:
+    social_login = [
+        path('fb-sdk/', include('allauth.socialaccount.providers.facebook.urls')),
+        path('fb-sdk/social/', include('allauth.socialaccount.urls')),
+    ]
+urlpatterns += social_login
 
 
 handler500 = 'workspace.views.Error500View'  # noqa

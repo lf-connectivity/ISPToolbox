@@ -154,6 +154,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+ENABLE_ACCOUNT_CREATION = False
+
 # These keys have full access to AWS S3 and secrets manager
 
 FB_SDK_SECRETS = json.loads(get_secret("prod/fb_sdk_isptoolbox",

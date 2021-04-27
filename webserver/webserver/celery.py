@@ -13,6 +13,10 @@ celery_app.autodiscover_tasks()
 celery_app.conf.update(
     worker_pool_restarts=True,
 )
+# This setting is used to route dsm tasks to dsm workers only
+celery_app.conf.task_routes = {
+    'mmwave.scripts.*': {'queue': 'dsm'},
+}
 
 
 @celery_app.on_after_finalize.connect

@@ -15,7 +15,7 @@ class DSMEngine:
         self.polygon = polygon.transform(projection, clone=True)
         self.sources = sources
 
-    def getDSM(self, resolution, filepath):
+    def getDSM(self, resolution, filepath, filter_outliers=False):
         """
         Get DSM for polygon of interest and put it in the filepath as a geotiff
 
@@ -34,7 +34,7 @@ class DSMEngine:
             for source in self.sources:
                 with tempfile.NamedTemporaryFile(suffix=".tif", delete=False, dir=tmp_dir) as tmp_tif:
                     files.append(tmp_tif.name)
-                    query_json = self.__createQueryPipeline(resolution, tmp_tif.name, source)
+                    query_json = self.__createQueryPipeline(resolution, tmp_tif.name, source, filter_outliers)
                     command = shlex.split(
                         'pdal pipeline --stdin'
                     )
@@ -52,7 +52,7 @@ class DSMEngine:
         process = subprocess.Popen(cmd)
         return process
 
-    def __createQueryPipeline(self, resolution, outputfilepath, source):
+    def __createQueryPipeline(self, resolution, outputfilepath, source, filter_outliers: bool):
         """
         Creates the json string that pdal uses as a pipeline
         pdal docs: https://pdal.io/project/docs.html
@@ -61,6 +61,19 @@ class DSMEngine:
         TODO achong: check LAS version to use classifications of high noise
         points
         TODO achong: combine multiple sources together
+        """
+        outlier_filter = f"""
+        {{
+            "class": 18,
+            "type": "filters.outlier",
+            "method": "statistical",
+            "mean_k": 12,
+            "multiplier": 2.2
+        }},
+        {{
+            "type": "filters.range",
+            "limits": "Classification![18:18]"
+        }},
         """
         query_json = f"""{{
         "pipeline": [
@@ -72,17 +85,7 @@ class DSMEngine:
                     [self.polygon.extent[1], self.polygon.extent[3]]}",
                 "resolution" : {resolution}
             }},
-            {{
-                "class": 7,
-                "type": "filters.outlier",
-                "method": "statistical",
-                "mean_k": 12,
-                "multiplier": 2.2
-            }},
-            {{
-                "type": "filters.range",
-                "limits": "Classification![7:7]"
-            }},
+            {outlier_filter if filter_outliers else ''}
             {{
                 "type":"filters.crop",
                 "polygon":"{self.polygon.wkt}"

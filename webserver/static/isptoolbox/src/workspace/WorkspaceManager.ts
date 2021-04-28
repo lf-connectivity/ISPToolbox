@@ -312,7 +312,6 @@ export class WorkspaceManager {
             let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
             let mapboxClient = MapboxSDKClient.getInstance();
             mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                console.log(buildingId);
                 let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
                 popup.setBuildingId(buildingId);
                 popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>

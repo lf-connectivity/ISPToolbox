@@ -57,7 +57,7 @@ export class LinkCheckDrawPtPPopup extends LinkCheckBasePopup {
             </div>
             <div class="description">
                 <p>${this.city}</p>
-                <p>${this.displayLngLat()}</p>
+                <p>${this.displayLatLng()}</p>
             </div>
             <div class="button-row">
                 <button class='btn btn-primary isptoolbox-btn' id='${DRAW_PTP_BUTTON_ID}'>Draw PtP</button>

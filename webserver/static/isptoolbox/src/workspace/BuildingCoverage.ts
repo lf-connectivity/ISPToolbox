@@ -1,24 +1,33 @@
 import {Polygon, Feature} from 'geojson';
 
-// Have to use a string JSON key for map
-function toKey(building: Polygon): string{
-    return JSON.stringify(building);
-};
-
 export enum BuildingCoverageStatus {
     SERVICEABLE = 'serviceable',
     UNSERVICEABLE = 'unserviceable',
     UNKNOWN = 'unknown'
 }
 
+export function updateCoverageStatus(currentStatus: BuildingCoverageStatus, newStatus: BuildingCoverageStatus) : BuildingCoverageStatus{
+    switch(currentStatus) {
+        case BuildingCoverageStatus.SERVICEABLE:
+            return BuildingCoverageStatus.SERVICEABLE;
+        case BuildingCoverageStatus.UNSERVICEABLE:
+            // unserviceable + unservicable -> unservicable
+            // unserviceable + unknown -> unknown
+            // unservicaeable + serviceable -> serviceable
+            return newStatus;
+        case BuildingCoverageStatus.UNKNOWN:
+            return (status === BuildingCoverageStatus.SERVICEABLE) ? 
+                BuildingCoverageStatus.SERVICEABLE : BuildingCoverageStatus.UNKNOWN;
+    }
+}
+
 export class BuildingCoverage {
-    private buildings: Map<string, [Polygon, BuildingCoverageStatus]>;
+    private buildings: Map<number, [Polygon, BuildingCoverageStatus]>;
 
     constructor(coverageResponse: Array<Feature<Polygon, any>>) {
         this.buildings = new Map();
         coverageResponse.forEach((feat: Feature<Polygon, any>) => {
-            let key = toKey(feat.geometry);
-
+            let key = feat.properties.msftid;
             let status = BuildingCoverageStatus.UNKNOWN;
             if (feat.properties.serviceable) {
                 status = feat.properties.serviceable as BuildingCoverageStatus;
@@ -27,11 +36,10 @@ export class BuildingCoverage {
         });
     }
 
-    getCoverageStatus(building: Polygon): BuildingCoverageStatus {
-        let key = toKey(building);
-        if (this.buildings.has(key)) {
+    getCoverageStatus(buildingId: number): BuildingCoverageStatus {
+        if (this.buildings.has(buildingId)) {
             // @ts-ignore
-            return this.buildings.get(key)[1] as BuildingCoverageStatus;
+            return this.buildings.get(buildingId)[1] as BuildingCoverageStatus;
         }
         else {
             return BuildingCoverageStatus.UNKNOWN;
@@ -40,12 +48,13 @@ export class BuildingCoverage {
 
     toFeatureArray(): Array<Feature<Polygon, any>> {
         let arr: Array<Feature<Polygon, any>> = [];
-        this.buildings.forEach(([building, status]: [Polygon, BuildingCoverageStatus], key: string) => {
+        this.buildings.forEach(([building, status]: [Polygon, BuildingCoverageStatus], id: number) => {
             arr.push({
                 'type': 'Feature',
                 'geometry': building,
                 'properties': {
-                    'serviceable': status
+                    'serviceable': status,
+                    'msftid': id
                 }
             })
         });
@@ -66,30 +75,14 @@ export class BuildingCoverage {
     static union(coverages: Array<BuildingCoverage>): BuildingCoverage {
         let union = new BuildingCoverage([]);
         coverages.forEach((coverage: BuildingCoverage) => {
-            coverage.buildings.forEach(([building, status]: [Polygon, BuildingCoverageStatus], key: string) => {
-                if (!union.buildings.has(key)) {
-                    union.buildings.set(key, [building, status]);
+            coverage.buildings.forEach(([building, status]: [Polygon, BuildingCoverageStatus], id: number) => {
+                if (!union.buildings.has(id)) {
+                    union.buildings.set(id, [building, status]);
                 }
                 else {
-                    let result = union.buildings.get(key) as [Polygon, BuildingCoverageStatus];
+                    let result = union.buildings.get(id) as [Polygon, BuildingCoverageStatus];
                     let unionStatus = result[1];
-                    let newStatus = BuildingCoverageStatus.UNKNOWN;
-                    switch(unionStatus) {
-                        case BuildingCoverageStatus.SERVICEABLE:
-                            newStatus = BuildingCoverageStatus.SERVICEABLE;
-                            break;
-                        case BuildingCoverageStatus.UNSERVICEABLE:
-                            // unserviceable + unservicable -> unservicable
-                            // unserviceable + unknown -> unknown
-                            // unservicaeable + serviceable -> serviceable
-                            newStatus = status;
-                            break;
-                        case BuildingCoverageStatus.UNKNOWN:
-                            newStatus = (status === BuildingCoverageStatus.SERVICEABLE) ? 
-                                BuildingCoverageStatus.SERVICEABLE : BuildingCoverageStatus.UNKNOWN;
-                            break;
-                    }
-                    union.buildings.set(key, [building, newStatus]);
+                    union.buildings.set(id, [building, updateCoverageStatus(unionStatus, status)]);
                 }
             });
         });

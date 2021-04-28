@@ -307,11 +307,14 @@ export class WorkspaceManager {
 
         // Add building layer callbacks
         this.map.on('click', ACCESS_POINT_BUILDING_LAYER, (e: any) => {
-            console.log(e.features[0]);
+            let building = this.map.queryRenderedFeatures(e.point, {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
+            let buildingId = building.properties?.msftid;
             let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
             let mapboxClient = MapboxSDKClient.getInstance();
             mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                console.log(buildingId);
                 let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
+                popup.setBuildingId(buildingId);
                 popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>
                     feature.getFeatureType() === WorkspaceFeatureTypes.AP
                 ) as AccessPoint[]);
@@ -550,7 +553,6 @@ export class WorkspaceManager {
             const coverage = BuildingCoverage.union(selectedAPs.map(ap => {
                 return ap.coverage;
             }));
-            console.log(coverage.toFeatureArray());
             buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
         }
     }

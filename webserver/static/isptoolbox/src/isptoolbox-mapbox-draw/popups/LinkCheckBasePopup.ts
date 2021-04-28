@@ -111,8 +111,8 @@ export abstract class LinkCheckBasePopup {
         }
     }
 
-    displayLngLat() {
-        return `${this.lnglat[0].toFixed(5)}&deg;, ${this.lnglat[1].toFixed(5)}&deg;`
+    displayLatLng() {
+        return `${this.lnglat[1].toFixed(5)}&deg;, ${this.lnglat[0].toFixed(5)}&deg;`
     }
 
     /**

@@ -177,6 +177,7 @@ class AccessPointCoverageResults(View):
                 ),
                 "properties": {
                     "serviceable": building.status,
+                    "msftid": building.msftid
                 }
             }
             features.append(feature)

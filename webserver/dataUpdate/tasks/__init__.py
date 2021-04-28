@@ -1,4 +1,4 @@
-from .asn_tasks import ONCALL_ALERT_EMAIL_TITLE
-# Need to import something so that if in prod periodic task will be initialized
+from .asn_tasks import updateElasticSearchIndex
+from .mlab_tasks import updateGISData
 
-__all__ = ['ONCALL_ALERT_EMAIL_TITLE']
+__all__ = ['updateElasticSearchIndex', 'updateGISData']

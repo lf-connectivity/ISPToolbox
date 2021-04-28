@@ -5,10 +5,7 @@ from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
 
 from celery import shared_task
-from celery.decorators import periodic_task
-from celery.schedules import crontab
-
-from django.conf import settings
+from webserver.celery import celery_app as app
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -265,85 +262,81 @@ def getTerrainProfile(network_id, data):
     async_to_sync(channel_layer.group_send)(channel_name, resp)
 
 
-if settings.PROD:
-    @periodic_task(run_every=(crontab(minute=0, hour=20)), name="refresh_lidar_point_cloud")
-    def pullLatestPointCloudsEntwine():
-        """
-        This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database
-        by default: sends an email notification to isptoolbox@fb.com on error, otherwise stays silent
+@app.task
+def pullLatestPointCloudsEntwine():
+    """
+    This task automatically queries entwine for USGS point clouds and saves the new point clouds in the database
+    by default: sends an email notification to isptoolbox@fb.com on error, otherwise stays silent
 
-        """
-        loadBoundariesFromEntWine()
-        createInvertedOverlay()
-
-
-if settings.PROD:
-    @periodic_task(run_every=(crontab(minute=0, hour=20)), name="add_high_resolution_boundary")
-    def addHighResolutionBoundaries():
-        """
-        This task updates the lidar boundaries and availability overlay
-
-        1. computes the high resolution boundaries for PointClouds that do not have it and stores to database
-        2. calculates the lidar availability overlay
-        3. uploads the availability overlay to mapbox as a tileset
-
-        """
-        updatePointCloudBoundariesTask()
-        createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
+    """
+    loadBoundariesFromEntWine()
+    createInvertedOverlay()
 
 
-if settings.PROD:
-    @periodic_task(run_every=(crontab(minute=0, hour=0, day_of_month=1)), name="upload_boundary_tileset_mapbox")
-    def uploadBoundaryTilesetMapbox():
-        """
-        This task takes the boundaries stored as geojsons in S3 and uploads them to mapbox
-        to create tilesets
+@app.task
+def addHighResolutionBoundaries():
+    """
+    This task updates the lidar boundaries and availability overlay
 
-        """
-        overlays = [
-            {
-                'tileset_name': 'highreslidarboundary',
-                's3': HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
-            }
-        ]
-        for overlay in overlays:
-            overlay_geojson = getOverlayFromS3(overlay['s3'])
-            overlay_name = overlay['tileset_name']
-            try:
-                resp, data = uploadNewTileset(overlay_geojson, overlay_name)
-                if resp.status_code == 201:
-                    sendEmailToISPToolboxOncall(
-                        f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
-                        f'Updated overlay in mapbox {overlay_name}')
-                else:
-                    sendEmailToISPToolboxOncall(
-                        f'[Automated Message] Failed to update Overlay: {overlay_name}',
-                        f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}\n' +
-                        f'data:\n {json.dumps(data)}')
-            except Exception as e:
-                sendEmailToISPToolboxOncall(
-                    f'[Automated Message] Failed to update Overlay {overlay_name}',
-                    f"""Failed to update overlay: {overlay_name}\n
-                    exception: {str(e)}\n
-                    traceback:\n{traceback.format_exc()}""")
+    1. computes the high resolution boundaries for PointClouds that do not have it and stores to database
+    2. calculates the lidar availability overlay
+    3. uploads the availability overlay to mapbox as a tileset
+
+    """
+    updatePointCloudBoundariesTask()
+    createInvertedOverlay(use_high_resolution_boundaries=True, invert=True)
 
 
-if settings.PROD:
-    @periodic_task(run_every=(crontab(minute=0, hour=3, day_of_month=1)), name="create_overlay_new_clouds")
-    def createNewlyAddedCloudOverlay():
-        """
-        This task creates an overlay of the newly added point clouds, so we can show new users
-        (last 30 days)
+@app.task
+def uploadBoundaryTilesetMapbox():
+    """
+    This task takes the boundaries stored as geojsons in S3 and uploads them to mapbox
+    to create tilesets
 
-        """
+    """
+    overlays = [
+        {
+            'tileset_name': 'highreslidarboundary',
+            's3': HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
+        }
+    ]
+    for overlay in overlays:
+        overlay_geojson = getOverlayFromS3(overlay['s3'])
+        overlay_name = overlay['tileset_name']
         try:
-            path = createNewPointCloudAvailability()
-            sendEmailToISPToolboxOncall(
-                '[Automated Message] Updated Latest Added Point Clouds Overlay',
-                f'Updated S3 {path}')
+            resp, data = uploadNewTileset(overlay_geojson, overlay_name)
+            if resp.status_code == 201:
+                sendEmailToISPToolboxOncall(
+                    f'[Automated Message] Succesfully created updated overlay: {overlay_name}',
+                    f'Updated overlay in mapbox {overlay_name}')
+            else:
+                sendEmailToISPToolboxOncall(
+                    f'[Automated Message] Failed to update Overlay: {overlay_name}',
+                    f'Failed to update overlay: {overlay_name}\nresp: {resp.status_code}\n' +
+                    f'data:\n {json.dumps(data)}')
         except Exception as e:
             sendEmailToISPToolboxOncall(
-                '[Automated Message] Failed to update Latest Added Point Clouds Overlay',
-                f"""Failed to update overlay: \n
+                f'[Automated Message] Failed to update Overlay {overlay_name}',
+                f"""Failed to update overlay: {overlay_name}\n
                 exception: {str(e)}\n
                 traceback:\n{traceback.format_exc()}""")
+
+
+@app.task
+def createNewlyAddedCloudOverlay():
+    """
+    This task creates an overlay of the newly added point clouds, so we can show new users
+    (last 30 days)
+
+    """
+    try:
+        path = createNewPointCloudAvailability()
+        sendEmailToISPToolboxOncall(
+            '[Automated Message] Updated Latest Added Point Clouds Overlay',
+            f'Updated S3 {path}')
+    except Exception as e:
+        sendEmailToISPToolboxOncall(
+            '[Automated Message] Failed to update Latest Added Point Clouds Overlay',
+            f"""Failed to update overlay: \n
+            exception: {str(e)}\n
+            traceback:\n{traceback.format_exc()}""")

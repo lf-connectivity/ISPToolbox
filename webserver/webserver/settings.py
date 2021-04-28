@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'corsheaders',
+    # Django Admin Docs
+    'django.contrib.admindocs',
     # Other ISP Toolbox Apps
     'mmwave',
     'Overlay',

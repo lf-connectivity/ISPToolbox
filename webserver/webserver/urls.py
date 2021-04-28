@@ -44,6 +44,7 @@ from django.conf.urls import (
 router = routers.DefaultRouter()
 
 urlpatterns = [
+    path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
     # Health Check Endpoint
     path('elb-status/', views.HealthCheckView.as_view()),

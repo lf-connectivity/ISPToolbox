@@ -64,7 +64,15 @@ export const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
 
 const center_freq_values: { [key: string]: number } = {
     '2.4 GHz': 2.437,
+    // https://www.fcc.gov/35-ghz-band-overview
+    '3.65 GHz': 3.6,
     '5 GHz': 5.4925,
+    // https://ecfsapi.fcc.gov/file/6519416904.pdf
+    '11 GHz': 11.2,
+    // https://www.fcc.gov/document/rechannelization-177-197-ghz-frequency-bands-fixed-microwave
+    '18 GHz': 18.7,
+    // https://www.fcc.gov/auction/102/factsheet
+    '24 GHz': 24.35,
     '60 GHz': 64.790,
 };
 const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];

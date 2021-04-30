@@ -773,7 +773,7 @@ export class LinkCheckPage {
         if (update.features.length && update.features[0].properties.radius === undefined && update.features[0].geometry.type !== "Point") {
             this.showLinkCheckProfile();
             const feat = update.features[0];
-            console.log(feat);
+            this.selectedFeatureID = feat.id;
 
             // Workspace AP-CPE link frequency, heights, and name
             if (feat.properties.feature_type && feat.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK) {
@@ -795,7 +795,6 @@ export class LinkCheckPage {
                 $('#radio_name-1').text(cpe.featureData.properties?.name);
             }
             else {
-                this.selectedFeatureID = feat.id;
                 if (feat.properties.freq == undefined && this.selectedFeatureID) {
                     this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', DEFAULT_LINK_FREQ);
                 }
@@ -815,8 +814,8 @@ export class LinkCheckPage {
                     this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', radio1hgt);
                 }
                 $('#hgt-1').val(radio1hgt);
-                $('radio_name-0').val(DEFAULT_RADIO_0_NAME);
-                $('radio_name-1').val(DEFAULT_RADIO_1_NAME);
+                $('#radio_name-0').text(DEFAULT_RADIO_0_NAME);
+                $('#radio_name-1').text(DEFAULT_RADIO_1_NAME);
             }
 
             

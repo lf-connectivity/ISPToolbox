@@ -29,6 +29,7 @@ import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceCon
 import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
 import { isBeta } from './BetaCheck';
 import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
+var _ = require('lodash');
 
 export enum LinkCheckEvents {
     SET_INPUTS = 'link.set_inputs',
@@ -219,7 +220,18 @@ export class LinkCheckPage {
             $(".freq-dropdown-item").removeClass('active');
             $(this).addClass('active');
             if(this.selectedFeatureID){
-            this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', this.centerFreq);
+                if (this.workspaceLinkSelected()) {
+                    let link = this.draw.get(this.selectedFeatureID);
+
+                    // @ts-ignore
+                    link.properties.frequency = this.centerFreq;
+
+                    // @ts-ignore
+                    this.workspaceManager.features[link.properties.uuid].update(link);
+                }
+                else {
+                    this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', this.centerFreq);
+                }
             }
             this.updateLinkChart(true);
         });
@@ -539,20 +551,40 @@ export class LinkCheckPage {
 
             // Update Callbacks for Radio Heights
             $('#hgt-0').change(
-                () => {
+                _.debounce((e: any) => {
                     this.updateLinkChart(true);
                     if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
-                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', parseFloat(String($('#hgt-0').val())))
+                        let height = parseFloat(String($('#hgt-0').val()));
+                        if (this.workspaceLinkSelected()) {
+                            // @ts-ignore
+                            let link = this.draw.get(this.selectedFeatureID);
+                            let ap = this.workspaceManager.features[link?.properties?.ap];
+                            ap.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
+                            ap.update(ap.featureData);
+                        }
+                        else {
+                            this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height)
+                        }
                     }
-                }
+                }, 500)
             );
             $('#hgt-1').change(
-                () => {
+                _.debounce((e: any) => {
                     this.updateLinkChart(true);
                     if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
-                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', parseFloat(String($('#hgt-1').val())))
+                        let height = parseFloat(String($('#hgt-1').val()));
+                        if (this.workspaceLinkSelected()) {
+                            // @ts-ignore
+                            let link = this.draw.get(this.selectedFeatureID);
+                            let cpe = this.workspaceManager.features[link?.properties?.cpe];
+                            cpe.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
+                            cpe.update(cpe.featureData);
+                        }
+                        else {
+                            this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height)
+                        }
                     }
-                }
+                }, 500)
             );
             const createRadioCoordinateChangeCallback = (id: string, coord1: number, coord2: number) => {
                 $(id).change(
@@ -744,6 +776,16 @@ export class LinkCheckPage {
             }
         });
     };
+
+    workspaceLinkSelected(): boolean {
+        if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
+            let feat = this.draw.get(this.selectedFeatureID);
+            return feat?.properties?.feature_type && feat?.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
+        }
+        else {
+            return false;
+        }
+    }
 
     removeLinkHalo: (features: Array<MapboxGL.MapboxGeoJSONFeature>) => void = (features) => {
         const contains_selected = features.filter((feat) => { return feat.id === this.selectedFeatureID }).length > 0;

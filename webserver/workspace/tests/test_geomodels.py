@@ -137,6 +137,7 @@ class WorkspaceBaseTestCase(TestCase):
 
         self.test_ap_cpe_link = APToCPELink(
             owner=self.testuser,
+            frequency=DEFAULT_FREQUENCY,
             geojson=DEFAULT_TEST_LINESTRING,
             ap=self.test_ap,
             cpe=self.test_cpe

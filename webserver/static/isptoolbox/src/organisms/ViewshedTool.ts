@@ -43,7 +43,6 @@ export class ViewshedTool {
 
     updateViewshedImage(msg: string, data: ViewShedResponse) {
         const source = this.map.getSource(VIEWSHED_OVERLAY_SOURCE);
-        console.log(data);
         if(source){
             if (source.type === 'image') {
                 source.updateImage({

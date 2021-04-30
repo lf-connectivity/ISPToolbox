@@ -17,6 +17,7 @@ import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBa
 import { makeItArrayIfItsNot } from "../everpolate.js";
 import { ViewshedTool } from "../organisms/ViewshedTool";
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
+import { feature } from "@turf/helpers";
 
 
 const DEFAULT_AP_HEIGHT = 30.48;
@@ -307,20 +308,24 @@ export class WorkspaceManager {
 
         // Add building layer callbacks
         this.map.on('click', ACCESS_POINT_BUILDING_LAYER, (e: any) => {
-            let building = this.map.queryRenderedFeatures(e.point, {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
-            let buildingId = building.properties?.msftid;
-            let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
-            let mapboxClient = MapboxSDKClient.getInstance();
-            mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
-                popup.setBuildingId(buildingId);
-                popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>
-                    feature.getFeatureType() === WorkspaceFeatureTypes.AP
-                ) as AccessPoint[]);
+            // Check if we clicked on a CPE
+            const features = this.map.queryRenderedFeatures(e.point);
+            if (! features.some((feat) => {return feat.source.includes('mapbox-gl-draw')})){
+                let building = this.map.queryRenderedFeatures(e.point, {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
+                let buildingId = building.properties?.msftid;
+                let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+                let mapboxClient = MapboxSDKClient.getInstance();
+                mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                    let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
+                    popup.setBuildingId(buildingId);
+                    popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>
+                        feature.getFeatureType() === WorkspaceFeatureTypes.AP
+                    ) as AccessPoint[]);
 
-                // Render all APs 
-                popup.show();
-            });
+                    // Render all APs 
+                    popup.show();
+                });
+            }
         });
 
         // Change the cursor to a pointer when the mouse is over the states layer.
@@ -476,6 +481,13 @@ export class WorkspaceManager {
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features});
     }
 
+    getFeatures(feat_type: WorkspaceFeatureTypes) {
+        return this.draw.getAll()['features'].filter((feat) => {
+            return (feat.properties && feat.properties.feature_type) ?
+                feat.properties.feature_type === feat_type : false;
+        })
+    }
+
     drawSelectionChangeCallback({features}: {features: Array<any>}){
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features});
         const aps = features.filter((f) => f.properties.feature_type === WorkspaceFeatureTypes.AP);
@@ -543,18 +555,26 @@ export class WorkspaceManager {
             }
         });
         const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
-        if(radiusSource.type ==='geojson'){
+        if(
+            radiusSource.type ==='geojson' &&
+            this.getFeatures(WorkspaceFeatureTypes.AP).length > 0 &&
+            circle_feats.length !== 0
+        ){
             radiusSource.setData({type: 'FeatureCollection', features: circle_feats});
         }
 
         const buildingSource = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
-        if(buildingSource.type ==='geojson'){
-            const coverage = BuildingCoverage.union(selectedAPs.map(ap => {
-                return ap.coverage;
-            }));
-            buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
+        if(
+            buildingSource.type ==='geojson' &&
+            selectedAPs.length !== 0 &&
+            this.getFeatures(WorkspaceFeatureTypes.AP).length > 0
+        ){
+                const coverage = BuildingCoverage.union(selectedAPs.map(ap => {
+                    return ap.coverage;
+                }));
+                buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
+            }
         }
-    }
 
     sendCoverageRequest(msg: string, data: {features: Array<GeoJSON.Feature>}){
         data.features.forEach((f: GeoJSON.Feature) => {

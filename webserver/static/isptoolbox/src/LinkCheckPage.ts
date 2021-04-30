@@ -25,11 +25,10 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 //@ts-ignore
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 import { WorkspaceManager } from './workspace/WorkspaceManager';
-import { WorkspaceEvents } from './workspace/WorkspaceConstants';
+import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
 import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
 import { isBeta } from './BetaCheck';
 import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
-
 
 export enum LinkCheckEvents {
     SET_INPUTS = 'link.set_inputs',
@@ -75,8 +74,16 @@ const center_freq_values: { [key: string]: number } = {
     '24 GHz': 24.35,
     '60 GHz': 64.790,
 };
+
+const center_freq_values_reverse: Map<number, string> = new Map();
+Object.keys(center_freq_values).forEach((k: string) => {
+    center_freq_values_reverse.set(center_freq_values[k], k);
+})
+
 const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];
 const DEFAULT_RADIO_HEIGHT = 60;
+const DEFAULT_RADIO_0_NAME = 'radio_0';
+const DEFAULT_RADIO_1_NAME = 'radio_1';
 
 const SMALLEST_UPDATE = 1e-5;
 const LEFT_NAVIGATION_KEYS = ['ArrowLeft', 'Left', 'A', 'a'];
@@ -766,30 +773,58 @@ export class LinkCheckPage {
         if (update.features.length && update.features[0].properties.radius === undefined && update.features[0].geometry.type !== "Point") {
             this.showLinkCheckProfile();
             const feat = update.features[0];
-            this.selectedFeatureID = feat.id;
-            if (feat.properties.freq == undefined && this.selectedFeatureID) {
-                this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', DEFAULT_LINK_FREQ);
+            console.log(feat);
+
+            // Workspace AP-CPE link frequency, heights, and name
+            if (feat.properties.feature_type && feat.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK) {
+                if (center_freq_values_reverse.has(feat.properties.frequency)) {
+                    $('#freq-dropdown').text(center_freq_values_reverse.get(feat.properties.frequency) as string);
+                }
+
+                let ap = this.workspaceManager.features[feat.properties.ap];
+                let cpe = this.workspaceManager.features[feat.properties.cpe];
+
+                $('#hgt-0').val(
+                    Math.round(isUnitsUS() ? ap.featureData.properties?.height_ft : ap.featureData.properties?.height)
+                );
+                $('#hgt-1').val(
+                    Math.round(isUnitsUS() ? cpe.featureData.properties?.height_ft : cpe.featureData.properties?.height)
+                );
+
+                $('#radio_name-0').text(ap.featureData.properties?.name);
+                $('#radio_name-1').text(cpe.featureData.properties?.name);
             }
-            const current_freq = Object.entries(center_freq_values).filter((v) => v[1] === feat.properties.freq);
-            if (current_freq.length !== 0) {
-                $('#freq-dropdown').text(current_freq[0][0]);
+            else {
+                this.selectedFeatureID = feat.id;
+                if (feat.properties.freq == undefined && this.selectedFeatureID) {
+                    this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', DEFAULT_LINK_FREQ);
+                }
+                if (center_freq_values_reverse.has(feat.properties.freq)) {
+                    $('#freq-dropdown').text(center_freq_values_reverse.get(feat.properties.freq) as string);
+                }
+
+                let radio0hgt = feat.properties.radio0hgt;
+                if (radio0hgt == undefined && this.selectedFeatureID) {
+                    radio0hgt = DEFAULT_RADIO_HEIGHT;
+                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', radio0hgt);
+                }
+                $('#hgt-0').val(radio0hgt);
+                let radio1hgt = feat.properties.radio1hgt;
+                if (feat.properties.radio1hgt == undefined && this.selectedFeatureID) {
+                    radio1hgt = DEFAULT_RADIO_HEIGHT;
+                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', radio1hgt);
+                }
+                $('#hgt-1').val(radio1hgt);
+                $('radio_name-0').val(DEFAULT_RADIO_0_NAME);
+                $('radio_name-1').val(DEFAULT_RADIO_1_NAME);
             }
+
+            
             $('#lng-0').val(feat.geometry.coordinates[0][0].toFixed(5));
             $('#lat-0').val(feat.geometry.coordinates[0][1].toFixed(5));
             $('#lng-1').val(feat.geometry.coordinates[1][0].toFixed(5));
             $('#lat-1').val(feat.geometry.coordinates[1][1].toFixed(5));
-            let radio0hgt = feat.properties.radio0hgt;
-            if (radio0hgt == undefined && this.selectedFeatureID) {
-                radio0hgt = DEFAULT_RADIO_HEIGHT;
-                this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', radio0hgt);
-            }
-            $('#hgt-0').val(radio0hgt);
-            let radio1hgt = feat.properties.radio1hgt;
-            if (feat.properties.radio1hgt == undefined && this.selectedFeatureID) {
-                radio1hgt = DEFAULT_RADIO_HEIGHT;
-                this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', radio1hgt);
-            }
-            $('#hgt-1').val(radio1hgt);
+            
             const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
             if (selected_link_source.type === 'geojson') {
                 selected_link_source.setData(feat.geometry);

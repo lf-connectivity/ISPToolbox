@@ -117,7 +117,7 @@ class CPELocation(WorkspaceFeature):
 
 
 class APToCPELink(WorkspaceFeature):
-    frequency = models.FloatField(default=2.4)
+    frequency = models.FloatField(default=2.437)
     geojson = geo_models.LineStringField()
     ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, editable=False)
     cpe = models.ForeignKey(CPELocation, on_delete=models.CASCADE, editable=False)

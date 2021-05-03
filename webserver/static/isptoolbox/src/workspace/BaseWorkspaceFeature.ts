@@ -187,7 +187,7 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
         this.featureData.geometry.coordinates = newCoords;
         this.draw.add(this.featureData);
         this.update(this.featureData, (resp) => {
-            console.log(this.draw.add(this.featureData));
+            this.draw.add(this.featureData);
             if (successFollowup) {
                 successFollowup(resp);
             }

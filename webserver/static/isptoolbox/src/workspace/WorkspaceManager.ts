@@ -18,6 +18,7 @@ import { makeItArrayIfItsNot } from "../everpolate.js";
 import { ViewshedTool } from "../organisms/ViewshedTool";
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 import { feature } from "@turf/helpers";
+import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 
 
 const DEFAULT_AP_HEIGHT = 30.48;
@@ -328,6 +329,20 @@ export class WorkspaceManager {
             }
         });
 
+        const onClickPoint = (e: any) => {
+            // Show tooltip if only one AP is selected.
+            const selectedAPs = this.filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.AP);
+            const apPopup = LinkCheckTowerPopup.getInstance();
+            if (selectedAPs.length === 1) {
+                apPopup.setAccessPoint(this.features[selectedAPs[0].properties.uuid] as AccessPoint);
+                apPopup.show();
+            }
+        }
+
+        // Toggle showing AP tooltip upon clicking on an AP.
+        this.map.on('click', 'gl-draw-point-inactive.cold', onClickPoint);
+        this.map.on('click', 'gl-draw-point-active.hot', onClickPoint);
+
         // Change the cursor to a pointer when the mouse is over the states layer.
         this.map.on('mouseenter', ACCESS_POINT_BUILDING_LAYER, () => {
             this.map.getCanvas().style.cursor = 'pointer';
@@ -451,6 +466,13 @@ export class WorkspaceManager {
 
                 switch(featureType) {
                     case WorkspaceFeatureTypes.AP:
+                        let popup = LinkCheckTowerPopup.getInstance()
+                        let ap = workspaceFeature as AccessPoint;
+
+                        // Get rid of tower tooltip if the APs match
+                        if (popup.getAccessPoint() === ap) {
+                            popup.hide();
+                        }
                         workspaceFeature.delete((resp) => {
                             delete this.features[feature.properties.uuid];
                         });
@@ -488,17 +510,47 @@ export class WorkspaceManager {
         })
     }
 
+    filterByType(list: Array<any>, feat_type: WorkspaceFeatureTypes) {
+        return list.filter((feat: any) => {
+            return (feat.properties && feat.properties.feature_type) ?
+                feat.properties.feature_type === feat_type : false; 
+        });
+    }
+
     drawSelectionChangeCallback({features}: {features: Array<any>}){
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features});
         const aps = features.filter((f) => f.properties.feature_type === WorkspaceFeatureTypes.AP);
+        const apPopup = LinkCheckTowerPopup.getInstance();
+        const currentPopupAp = apPopup.getAccessPoint();
 
-        // Request coverage for any AP that doesn't have coverage and isn't awaiting any either
+        // Show tooltip if only one AP is selected and isn't being dragged
+        if (aps.length === 1) {
+            let ap = this.features[aps[0].properties.uuid] as AccessPoint;
+            if (ap.featureData.geometry.coordinates[0] === aps[0].geometry.coordinates[0] &&
+                ap.featureData.geometry.coordinates[1] === aps[0].geometry.coordinates[1]) {
+                apPopup.setAccessPoint(this.features[aps[0].properties.uuid] as AccessPoint);
+                apPopup.show();
+            }
+        }
+
         aps.forEach((apFeature: any) => {
+            // Request coverage for any AP that doesn't have coverage and isn't awaiting any either
             if (apFeature.properties.uuid) {
                 let ap = this.features[apFeature.properties.uuid] as AccessPoint;
                 if (ap.coverage === EMPTY_BUILDING_COVERAGE && !ap.awaitingCoverage) {
                     this.sendCoverageRequest('', {features: [apFeature]});
                 }
+            }
+
+            // Hide AP tooltip if user is dragging AP.
+            if (currentPopupAp &&
+                apFeature.properties.uuid == currentPopupAp.workspaceId &&
+                (
+                    apFeature.geometry.coordinates[0] !== currentPopupAp.featureData.geometry.coordinates[0] ||
+                    apFeature.geometry.coordinates[1] !== currentPopupAp.featureData.geometry.coordinates[1]
+                )
+                ) {
+                apPopup.hide();
             }
         });
     }
@@ -530,6 +582,13 @@ export class WorkspaceManager {
         const aps = features.filter(
             (feature: any) => feature.properties.feature_type && feature.properties.feature_type === WorkspaceFeatureTypes.AP
         );
+
+        // Show tooltip if only one AP is moved
+        if (aps.length === 1) {
+            const apPopup = LinkCheckTowerPopup.getInstance();
+            apPopup.setAccessPoint(this.features[aps[0].properties.uuid] as AccessPoint);
+            apPopup.show();
+        }
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features: aps});
     }
 

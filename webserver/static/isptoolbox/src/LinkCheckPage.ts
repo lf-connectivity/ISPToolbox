@@ -29,6 +29,7 @@ import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceCon
 import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
 import { isBeta } from './BetaCheck';
 import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
+import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -340,6 +341,7 @@ export class LinkCheckPage {
             new MapboxSDKClient(mapboxgl.accessToken);
             new LinkCheckDrawPtPPopup(this.map, this.draw, this.geocoder);
             new LinkCheckCustomerConnectPopup(this.map, this.draw);
+            new LinkCheckTowerPopup(this.map, this.draw);
 
             // Popups
             if (isBeta()) {
@@ -560,7 +562,9 @@ export class LinkCheckPage {
                             let link = this.draw.get(this.selectedFeatureID);
                             let ap = this.workspaceManager.features[link?.properties?.ap];
                             ap.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
-                            this.map.fire('draw.update', {features: [ap.featureData]})
+                            ap.update(ap.featureData, (resp: any) => {
+                                this.map.fire('draw.update', {features: [ap.featureData]});
+                            });
                         }
                         else {
                             this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height)
@@ -578,7 +582,9 @@ export class LinkCheckPage {
                             let link = this.draw.get(this.selectedFeatureID);
                             let cpe = this.workspaceManager.features[link?.properties?.cpe];
                             cpe.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
-                            this.map.fire('draw.update', {features: [cpe.featureData]})
+                            cpe.update(cpe.featureData, (resp: any) => {
+                                this.map.fire('draw.update', {features: [cpe.featureData]});
+                            });
                         }
                         else {
                             this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height)

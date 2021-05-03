@@ -32,6 +32,7 @@ class AccessPointSerializer(serializers.ModelSerializer):
     height_ft = serializers.FloatField(read_only=True)
     max_radius_miles = serializers.FloatField(read_only=True)
     feature_type = serializers.CharField(read_only=True)
+    default_cpe_height_ft = serializers.FloatField(read_only=True)
 
     class Meta:
         model = models.AccessPointLocation

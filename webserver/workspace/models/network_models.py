@@ -83,6 +83,10 @@ class AccessPointLocation(WorkspaceFeature):
         return self.height * 3.28084
 
     @property
+    def default_cpe_height_ft(self):
+        return self.default_cpe_height * 3.28084
+
+    @property
     def feature_type(self):
         return FeatureType.AP.value
 

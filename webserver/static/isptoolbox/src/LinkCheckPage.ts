@@ -560,7 +560,7 @@ export class LinkCheckPage {
                             let link = this.draw.get(this.selectedFeatureID);
                             let ap = this.workspaceManager.features[link?.properties?.ap];
                             ap.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
-                            ap.update(ap.featureData);
+                            this.map.fire('draw.update', {features: [ap.featureData]})
                         }
                         else {
                             this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height)
@@ -578,7 +578,7 @@ export class LinkCheckPage {
                             let link = this.draw.get(this.selectedFeatureID);
                             let cpe = this.workspaceManager.features[link?.properties?.cpe];
                             cpe.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
-                            cpe.update(cpe.featureData);
+                            this.map.fire('draw.update', {features: [cpe.featureData]})
                         }
                         else {
                             this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height)
@@ -588,22 +588,34 @@ export class LinkCheckPage {
             );
             const createRadioCoordinateChangeCallback = (id: string, coord1: number, coord2: number) => {
                 $(id).change(
-                    () => {
+                    _.debounce(() => {
                         if (this.selectedFeatureID != null) {
                             const feat = this.draw.get(this.selectedFeatureID);
+                            const newVal = parseFloat(String($(id).val()));
                             if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
-                                //@ts-ignore
-                                feat.geometry.coordinates[coord1][coord2] = parseFloat(String($(id).val()))
-                                this.draw.add(feat);
-                                const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
-                                if (selected_link_source.type === 'geojson') {
+                                if (this.workspaceLinkSelected()) {
+                                    // @ts-ignore
+                                    let point = this.workspaceManager.features[coord1 === 0 ? feat.properties.ap : feat.properties.cpe];
+
+                                    // @ts-ignore
+                                    point.featureData.geometry.coordinates[coord2] = newVal;
+                                    this.draw.add(point.featureData);
+                                    this.map.fire('draw.update', { features: [point.featureData]})
+                                }
+                                else {
                                     //@ts-ignore
-                                    selected_link_source.setData(feat.geometry);
+                                    feat.geometry.coordinates[coord1][coord2] = newVal;
+                                    this.draw.add(feat);
+                                    const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+                                    if (selected_link_source.type === 'geojson') {
+                                        //@ts-ignore
+                                        selected_link_source.setData(feat.geometry);
+                                    }
                                 }
                                 this.updateLinkProfile();
                             }
                         }
-                    }
+                    }, 500)
                 );
             }
             createRadioCoordinateChangeCallback('#lng-0', 0, 0);

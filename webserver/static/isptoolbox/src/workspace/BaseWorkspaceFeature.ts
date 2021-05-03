@@ -46,7 +46,9 @@ export abstract class BaseWorkspaceFeature {
         this.apiEndpoint = apiEndpoint;
         this.responseFields = responseFields.concat(BASE_WORKSPACE_RESPONSE_FIELDS);
         this.serializerFields = serializedFields;
-        this.featureData = featureData;
+
+        // @ts-ignore
+        this.featureData = this.draw.get(this.mapboxId);
         if ('uuid' in this.featureData.properties) {
             this.workspaceId = this.featureData.properties.uuid;
         }
@@ -185,7 +187,7 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
         this.featureData.geometry.coordinates = newCoords;
         this.draw.add(this.featureData);
         this.update(this.featureData, (resp) => {
-            this.draw.add(this.featureData);
+            console.log(this.draw.add(this.featureData));
             if (successFollowup) {
                 successFollowup(resp);
             }

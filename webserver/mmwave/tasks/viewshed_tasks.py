@@ -4,35 +4,36 @@ from celery import shared_task
 import shlex
 import subprocess
 import tempfile
-from mmwave.models import ViewShedJob, DSMConversionJob, DSMResolutionOptionsEnum
+from mmwave.models import ViewShedJob, DSMResolutionOptionsEnum, EPTLidarPointCloud
 from workspace.models import AccessPointLocation
+from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from workspace.utils.geojson_circle import destination
-from mmwave.tasks.dsm_tasks import exportDSMData
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from IspToolboxAccounts.models import User
 from rasterio import shutil
 import rasterio
 from rasterio.warp import calculate_default_transform, reproject, Resampling
+import PIL
 from PIL import Image
 import math
 import numpy as np
 from workspace.tasks.coverage_tasks import calculateCoverage
 from workspace.tasks.websocket_utils import updateClientAPStatus
+import time
+import logging
 
 DEFAULT_MAX_DISTANCE_KM = 3
 DEFAULT_PROJECTION = 3857
 DEFAULT_OBSTRUCTED_COLOR = [0, 0, 0, 128]
+PIL.Image.MAX_IMAGE_PIXELS = 20_000 * 20_000
 
 
 @shared_task
 def fullviewshedForAccessPoint(network_id, data, user_id):
-    for resolution in DSMResolutionOptionsEnum:
-        if resolution == DSMResolutionOptionsEnum.ULTRA:
-            break
-        viewshed = renderViewshedForAccessPoint(network_id, data, user_id, resolution=resolution.value)
-        calculateCoverage(viewshed, data['uuid'], user_id)
-        updateClientAPStatus(network_id, data['uuid'], user_id)
+    viewshed = renderViewshedForAccessPoint(network_id, data, user_id)
+    calculateCoverage(viewshed, data['uuid'], user_id)
+    updateClientAPStatus(network_id, data['uuid'], user_id)
 
 
 def renderViewshed(viewshed_job_uuid, dsm_file):
@@ -100,25 +101,10 @@ def createRawGDALViewshedCommand(viewshedjob, dsm_filepath, output_filepath, dsm
     """
 
 
-def renderViewshedForAccessPoint(network_id, data, user_id, resolution):
+def renderViewshedForAccessPoint(network_id, data, user_id):
     ap = AccessPointLocation.objects.get(uuid=data['uuid'], owner=user_id)
     aoi = ap.getDSMExtentRequired()
-
-    # Try and find an existing DSM conversion to save time, doesn't check user ownership
-    dsm_jobs = DSMConversionJob.objects.filter(area_of_interest__contains=aoi, resolution=resolution).all()
-    # There are no pre-existing dsm jobs that satisfy the requirement
-    if not dsm_jobs:
-        aoi = ap.createDSMJobEnvelope()
-        dsm_job = DSMConversionJob(area_of_interest=aoi, resolution=resolution)
-        dsm_job.save()
-        exportDSMData(dsm_job.uuid)
-    # There are dsm jobs that exist already, check if they are complete
-    else:
-        for dsm_job in dsm_jobs:
-            if dsm_job.check_object():
-                break
-        if not dsm_job.check_object():
-            exportDSMData(dsm_job.uuid)
+    dsm_engine = DSMTileEngine(aoi, EPTLidarPointCloud.query_intersect_aoi(aoi))
 
     # Calculate how far viewshed should extend
     pt_radius = destination(ap.geojson, ap.max_radius, 90)
@@ -139,8 +125,12 @@ def renderViewshedForAccessPoint(network_id, data, user_id, resolution):
     viewshed_job.save()
 
     with tempfile.NamedTemporaryFile(mode='w+b', suffix=".tif") as dsm_file:
-        dsm_job.read_object(dsm_file)
+        start = time.time()
+        dsm_engine.getDSM(dsm_file.name)
+        logging.info(f'dsm download: {time.time() - start}')
+        start = time.time()
         renderViewshed(viewshed_job_uuid=viewshed_job.uuid, dsm_file=dsm_file)
+        logging.info(f'compute viewshed and upload: {time.time() - start}')
 
     channel_layer = get_channel_layer()
     channel_name = 'los_check_%s' % network_id

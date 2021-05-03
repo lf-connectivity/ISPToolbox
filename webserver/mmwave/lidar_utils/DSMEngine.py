@@ -48,7 +48,9 @@ class DSMEngine:
             return process
 
     def __combineTifs(self, files, output_filepath):
-        cmd = shlex.split(f'gdal_merge.py -o {output_filepath} -of GTiff ' + " ".join(files))
+        cmd = shlex.split(f"""
+            gdal_merge.py -o {output_filepath} -of GTiff -co COMPRESS=DEFLATE -co ZLEVEL=9
+        """ + " ".join(files))
         process = subprocess.Popen(cmd)
         return process
 

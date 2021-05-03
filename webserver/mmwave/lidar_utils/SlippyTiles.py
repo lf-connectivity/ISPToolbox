@@ -2,6 +2,7 @@ import math
 from django.contrib.gis.geos import GEOSGeometry, Polygon
 
 BUFFER_TILE = 1.0 / 3600.0 / 6.0
+DEFAULT_OUTPUT_ZOOM = 17
 
 
 # tile utils: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames

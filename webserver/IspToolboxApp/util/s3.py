@@ -3,12 +3,17 @@ import boto3
 import botocore
 from botocore.exceptions import ClientError
 from django.conf import settings
+import concurrent.futures
+
+max_workers = 32
+
 
 bucket_name = 'isptoolbox-export-file'
 s3_resource = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                              aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
 s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+                         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                         config=botocore.config.Config(max_pool_connections=max_workers))
 
 
 class S3PublicExportMixin():
@@ -70,8 +75,34 @@ def readFromS3(object_name, fp):
     s3_client.download_fileobj(bucket_name, object_name, fp)
 
 
+def readMultipleHelper(client, s3key, local_filename):
+    return client.download_file(Filename=local_filename, Bucket=bucket_name, Key=s3key)
+
+
+def readMultipleS3Objects(keys, filenames):
+    with concurrent.futures.ThreadPoolExecutor(max_workers) as executor:
+        future_to_url = {
+            executor.submit(readMultipleHelper, s3_client, key, filename): key
+            for key, filename in zip(keys, filenames)
+        }
+    for future in concurrent.futures.as_completed(future_to_url):
+        try:
+            future.result()
+        except Exception:
+            pass
+
+
 def readS3Object(object_name, fp):
     s3_resource.Bucket(bucket_name).download_fileobj(object_name, fp)
+
+
+def checkPrefixExists(prefix):
+    try:
+        for object in s3_resource.Bucket(bucket_name).objects.filter(Prefix=prefix):
+            return True
+        return False
+    except ClientError:
+        return False
 
 
 def checkObjectExists(object_name):

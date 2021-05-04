@@ -337,11 +337,14 @@ export class WorkspaceManager {
                 apPopup.setAccessPoint(this.features[selectedAPs[0].properties.uuid] as AccessPoint);
                 apPopup.show();
             }
+            else if (selectedAPs.length > 1) {
+                apPopup.hide();
+            }
         }
 
         // Toggle showing AP tooltip upon clicking on an AP.
-        this.map.on('click', 'gl-draw-point-inactive.cold', onClickPoint);
-        this.map.on('click', 'gl-draw-point-active.hot', onClickPoint);
+        this.map.on('click', 'gl-draw-point-inactive-ap.cold', onClickPoint);
+        this.map.on('click', 'gl-draw-point-active-ap.hot', onClickPoint);
 
         // Change the cursor to a pointer when the mouse is over the states layer.
         this.map.on('mouseenter', ACCESS_POINT_BUILDING_LAYER, () => {
@@ -471,6 +474,7 @@ export class WorkspaceManager {
 
                         // Get rid of tower tooltip if the APs match
                         if (popup.getAccessPoint() === ap) {
+                            popup.onAPStopMoving();
                             popup.hide();
                         }
                         workspaceFeature.delete((resp) => {
@@ -519,19 +523,9 @@ export class WorkspaceManager {
 
     drawSelectionChangeCallback({features}: {features: Array<any>}){
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features});
-        const aps = features.filter((f) => f.properties.feature_type === WorkspaceFeatureTypes.AP);
+        const aps = this.filterByType(features, WorkspaceFeatureTypes.AP);
         const apPopup = LinkCheckTowerPopup.getInstance();
         const currentPopupAp = apPopup.getAccessPoint();
-
-        // Show tooltip if only one AP is selected and isn't being dragged
-        if (aps.length === 1) {
-            let ap = this.features[aps[0].properties.uuid] as AccessPoint;
-            if (ap.featureData.geometry.coordinates[0] === aps[0].geometry.coordinates[0] &&
-                ap.featureData.geometry.coordinates[1] === aps[0].geometry.coordinates[1]) {
-                apPopup.setAccessPoint(this.features[aps[0].properties.uuid] as AccessPoint);
-                apPopup.show();
-            }
-        }
 
         aps.forEach((apFeature: any) => {
             // Request coverage for any AP that doesn't have coverage and isn't awaiting any either
@@ -550,6 +544,7 @@ export class WorkspaceManager {
                     apFeature.geometry.coordinates[1] !== currentPopupAp.featureData.geometry.coordinates[1]
                 )
                 ) {
+                apPopup.onAPStartMoving();
                 apPopup.hide();
             }
         });
@@ -559,13 +554,21 @@ export class WorkspaceManager {
     }
 
     updateFeatures({ features, action }: { features: Array<any>, action: 'move' | 'change_coordinates' }) {
+        const apPopup = LinkCheckTowerPopup.getInstance();
+
         features.forEach((feature: any) => {
             if (feature.properties.uuid) {
                 switch(feature.properties.feature_type) {
                     case WorkspaceFeatureTypes.AP:
                         let ap = this.features[feature.properties.uuid] as AccessPoint;
-                        ap.move(feature.geometry.coordinates as [number, number]);
-                        ap.update(feature);
+                        ap.move(feature.geometry.coordinates as [number, number], () => {
+                            ap.update(feature, () => {
+                                if (apPopup.getAccessPoint() === ap) {
+                                    apPopup.onAPStopMoving();
+                                    apPopup.show();
+                                } 
+                            });
+                        });
                         break;
                     case WorkspaceFeatureTypes.CPE:
                         let cpe = this.features[feature.properties.uuid] as CPE;
@@ -579,16 +582,7 @@ export class WorkspaceManager {
             }
         });
 
-        const aps = features.filter(
-            (feature: any) => feature.properties.feature_type && feature.properties.feature_type === WorkspaceFeatureTypes.AP
-        );
-
-        // Show tooltip if only one AP is moved
-        if (aps.length === 1) {
-            const apPopup = LinkCheckTowerPopup.getInstance();
-            apPopup.setAccessPoint(this.features[aps[0].properties.uuid] as AccessPoint);
-            apPopup.show();
-        }
+        const aps = this.filterByType(features, WorkspaceFeatureTypes.AP);
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features: aps});
     }
 

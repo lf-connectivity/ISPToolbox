@@ -14,6 +14,7 @@ const PLOT_LIDAR_BUTTON_ID = 'plot-lidar-coverage-btn-tower-popup';
 
 export class LinkCheckTowerPopup extends LinkCheckBasePopup {
     private accessPoint?: AccessPoint;
+    private accessPointMoving: boolean;
     private static _instance: LinkCheckTowerPopup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
@@ -35,6 +36,17 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         this.setLngLat(accessPoint.featureData.geometry.coordinates);
     }
 
+    onAPStartMoving() {
+        this.accessPointMoving = true;
+    }
+
+    onAPStopMoving() {
+        this.accessPointMoving = false;
+
+        // @ts-ignore
+        this.setLngLat(this.accessPoint.featureData.geometry.coordinates);
+    }
+
     static getInstance() {
         if (LinkCheckTowerPopup._instance) {
             return LinkCheckTowerPopup._instance;
@@ -45,7 +57,9 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
     }
 
     cleanup() {
-        this.accessPoint = undefined;
+        if (!this.accessPointMoving) {
+            this.accessPoint = undefined;
+        }
     }
 
     getHTML() {

@@ -1,3 +1,5 @@
+import {WorkspaceFeatureTypes} from './workspace/WorkspaceConstants';
+
 export const LOSCheckMapboxStyles = [
     {
         'id': 'gl-draw-polygon-midpoint',
@@ -70,19 +72,6 @@ export const LOSCheckMapboxStyles = [
             "circle-color": "#3bb2d0"
         }
     },
-    // // Default Circle Appearance
-    // {
-    //     'id': 'gl-draw-point-inactive-link',
-    //     'type': 'circle',
-    //     'filter': ['all', ['==', 'active', 'false'],
-    //         ['==', '$type', 'Point'],
-    //         ['!=', 'mode', 'static']
-    //     ],
-    //     'paint': {
-    //         'circle-radius': 10,
-    //         'circle-color': '#FFFFFF'
-    //     }
-    // },
     // Radio styling 
     {
         'id': 'selected_radio_render',
@@ -96,6 +85,91 @@ export const LOSCheckMapboxStyles = [
             'circle-color': ['get', "color"],
         },
     },
+    // Default AP Appearance
+    {
+        'id': 'gl-draw-point-ap-halo-inactive',
+        'type': 'circle',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 10,
+            'circle-color': '#FFFFFF'
+        }
+    },
+    {
+        'id': 'gl-draw-point-ap-inactive',
+        'type': 'circle',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 9,
+            'circle-color': '#5692D1'
+        }
+    },
+    {
+        'id': 'gl-draw-point-ap-symbol-inactive',
+        'type': 'symbol',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', '$type', 'Point'],
+        ],
+        layout: {
+            'icon-image': 'ap-isptoolbox', // reference the image
+            'icon-size': 0.5
+        },
+    },
+    // Default CPE Appearance
+    {
+        'id': 'gl-draw-point-cpe-halo-inactive',
+        'type': 'circle',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 8,
+            'circle-color': '#FFFFFF'
+        }
+    },
+    {
+        'id': 'gl-draw-point-cpe-inactive',
+        'type': 'circle',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 7,
+            'circle-color': '#5692D1'
+        }
+    },
+    {
+        'id': 'gl-draw-point-cpe-symbol-inactive',
+        'type': 'symbol',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
+            ['==', '$type', 'Point'],
+        ],
+        layout: {
+            'icon-image': 'cpe-isptoolbox', // reference the image
+            'icon-size': 0.6
+        },
+    },
+
     // polygon outline stroke
     // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
     {

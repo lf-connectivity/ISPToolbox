@@ -37,7 +37,10 @@ export const RadiusDrawStyle = [
       'text-halo-blur': 1,
     },
   },
-  {
+]
+
+export const additional_radius_draw_styling = [
+    {
     'id': 'gl-draw-point-point-stroke-inactive-ap',
     'type': 'circle',
     'filter': ['all',

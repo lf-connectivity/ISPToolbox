@@ -10,10 +10,10 @@ import {
     calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,calculateCameraOffsetFromAnimation, updateControlPoints
 } from './LinkOrbitAnimation';
 import { calculateLookVector, calculateLinkProfileFresnelPosition } from './HoverMoveLocation3DView';
-import { LinkMode, OverrideDirect, OverrideSimple, RadiusMode, RadiusDrawStyle, CPEDrawMode, combineStyles} from './isptoolbox-mapbox-draw/index';
+import { LinkMode, OverrideDirect, OverrideSimple, RadiusMode, RadiusDrawStyle, CPEDrawMode, combineStyles, load_custom_icons} from './isptoolbox-mapbox-draw/index';
 import LidarAvailabilityLayer from './availabilityOverlay';
 import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
-import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
+import { LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
 import { Potree } from "./Potree.js";
@@ -297,6 +297,7 @@ export class LinkCheckPage {
         this.map.on('load', () => {
             // When map movement ends save where the user is looking
             setCenterZoomPreferences(this.map);
+            load_custom_icons(this.map);
 
             this.map.addSource(LOWEST_LAYER_SOURCE, {type: 'geojson', data : {type: 'FeatureCollection', features: []}});
             this.map.addLayer({

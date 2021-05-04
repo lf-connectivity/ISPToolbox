@@ -25,6 +25,7 @@
     "@types/lodash": "^4.14.168",
     "@types/mapbox-gl": "^2.0.0",
     "@types/pubsub-js": "^1.8.2",
+    "file-loader": "^6.2.0",
     "ts-loader": "^8.0.11",
     "typescript": "^4.0.5",
     "webpack": "^5.4.0",

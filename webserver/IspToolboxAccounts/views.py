@@ -24,19 +24,20 @@ class CreateAccountView(View):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
-        next_url = request.POST.get('next', request.GET.get('next', None))
-        url_is_safe = url_has_allowed_host_and_scheme(
-            url=next_url,
-            allowed_hosts=self.request.get_host(),
-            require_https=self.request.is_secure()
-        )
-        if next_url is not None and url_is_safe:
-            return redirect(next_url)
+            next_url = request.POST.get('next', request.GET.get('next', None))
+            url_is_safe = url_has_allowed_host_and_scheme(
+                url=next_url,
+                allowed_hosts=self.request.get_host(),
+                require_https=self.request.is_secure()
+            )
+            if next_url is not None and url_is_safe:
+                return redirect(next_url)
         return render(
             request,
             'workspace/pages/login_view.html',
             {
                 'showSignUp': True,
+                'showEmailSignUp': True,
                 'authentication_form': AuthenticationForm,
                 'sign_up_form': form,
             }

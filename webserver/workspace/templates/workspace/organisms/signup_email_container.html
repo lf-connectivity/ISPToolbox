@@ -1,4 +1,4 @@
-<div id="signup_container" class="d-none">
+<div id="signup_container" class="{% if not showSignUp or not showEmailSignUp %}d-none{% endif %}">
 <div class="container signup_container onboarding_container">
     <h3>Create a Free Account</h3>
     <p class="onboarding_container--intro-copy">Start creating a workspace within ISP Toolbox, save and reuse files across all tools.</p>

@@ -15,6 +15,7 @@ class DefaultWorkspaceView(View):
             'workspace/pages/login_view.html',
             {
                 'showSignUp': True,
+                'showEmailSignUp': False,
                 'authentication_form': IspToolboxUserAuthenticationForm,
                 'sign_up_form': IspToolboxUserCreationForm,
             }

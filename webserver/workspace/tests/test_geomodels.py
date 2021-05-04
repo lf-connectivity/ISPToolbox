@@ -172,6 +172,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
 
     def test_get_features_for_user_ap(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
+        expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
         expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
         expected_ap = {
             'type': 'Feature',
@@ -185,6 +186,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'feature_type': FeatureType.AP.value,
                 'max_radius': DEFAULT_MAX_RADIUS,
                 'height_ft': expected_height_ft,
+                'default_cpe_height_ft': expected_default_cpe_height_ft,
                 'max_radius_miles': expected_max_radius_miles
             }
         }
@@ -352,6 +354,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
     def test_merge_two_feature_collections(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
+        expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
         expected_ap = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_POINT),
@@ -364,6 +367,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'feature_type': FeatureType.AP.value,
                 'max_radius': DEFAULT_MAX_RADIUS,
                 'height_ft': expected_height_ft,
+                'default_cpe_height_ft': expected_default_cpe_height_ft,
                 'max_radius_miles': expected_max_radius_miles
             }
         }
@@ -390,6 +394,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
     def test_merge_two_feature_collections_one_empty(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
+        expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
         expected_ap = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_POINT),
@@ -402,6 +407,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'feature_type': FeatureType.AP.value,
                 'max_radius': DEFAULT_MAX_RADIUS,
                 'height_ft': expected_height_ft,
+                'default_cpe_height_ft': expected_default_cpe_height_ft,
                 'max_radius_miles': expected_max_radius_miles
             }
         }

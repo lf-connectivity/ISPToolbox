@@ -33,6 +33,6 @@ class DSMTileEngine:
             logging.info(f'Time to generate jobs: {time.time() - start} jobs:{ len(jobs)}')
             readMultipleS3Objects(jobs, tifs)
             logging.info(f'Finished: {time.time() - start} ')
-            cmd = shlex.split(f'gdal_merge.py -o {output_filepath} -of GTiff ' + " ".join(tifs))
+            cmd = shlex.split(f'gdal_merge.py -o {output_filepath} -of GTiff {" ".join(tifs)}')
             process = subprocess.Popen(cmd)
             process.wait()

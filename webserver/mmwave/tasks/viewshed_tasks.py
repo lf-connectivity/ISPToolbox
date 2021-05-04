@@ -4,7 +4,7 @@ from celery import shared_task
 import shlex
 import subprocess
 import tempfile
-from mmwave.models import ViewShedJob, DSMResolutionOptionsEnum, EPTLidarPointCloud
+from mmwave.models import ViewShedJob, EPTLidarPointCloud
 from workspace.models import AccessPointLocation
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from workspace.utils.geojson_circle import destination

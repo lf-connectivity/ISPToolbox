@@ -10,6 +10,8 @@ from IspToolboxApp.util.admin_timeseries_util import (
 
 admin.site.register(models.DSMConversionJob)
 admin.site.register(models.ViewShedJob)
+
+
 @admin.register(models.TGLink)
 class TGLinkAdmin(admin.ModelAdmin):
     list_display = ("uuid", "created", "linklength_m", "fbid")

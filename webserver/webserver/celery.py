@@ -19,6 +19,7 @@ celery_app.conf.task_routes = {
     'mmwave.scripts.*': {'queue': 'dsm'},
 }
 
+
 # These are all the tasks we want to run periodically
 @celery_app.on_after_finalize.connect
 def setup_periodic(sender, **kwargs):

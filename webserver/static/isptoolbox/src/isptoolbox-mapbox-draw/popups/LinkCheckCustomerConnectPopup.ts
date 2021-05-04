@@ -14,7 +14,6 @@ const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-customer-popup';
 const VIEW_LOS_BUTTON_ID = 'view-los-btn-customer-popup';
 const PLACE_TOWER_LINK_ID = 'place-tower-link-customer-popup';
 const CONNECT_TOWER_INDEX_LINK_BASE_ID = 'connect-tower-link-customer-popup';
-const CONNECT_TOWER_INDEX_LI_BASE_ID = 'connect-tower-li-customer-popup';
 
 const MOCK_HEIGHT = 150;
 
@@ -173,11 +172,11 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 this.hide();
             });
 
-            $(`#${CONNECT_TOWER_INDEX_LI_BASE_ID}-${i}`).on('mouseenter', () => {
+            $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseenter', () => {
                 this.highlightAP(this.accessPoints[i])
             });
 
-            $(`#${CONNECT_TOWER_INDEX_LI_BASE_ID}-${i}`).on('mouseleave', () => {
+            $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseleave', () => {
                 this.highlightAllAPs();
             });
         });
@@ -293,10 +292,10 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             let statusIcon = this.getStatusHTMLElements(apStatus).icon;
 
             retval += `
-                <li>
+                <li id='${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}'>
                     <div>
                         <p>${apName} - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
-                        <a id='${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}' class="link">View LOS</a>
+                        <a class="link">View LOS</a>
                     </div>
                     <div>
                         ${statusIcon}

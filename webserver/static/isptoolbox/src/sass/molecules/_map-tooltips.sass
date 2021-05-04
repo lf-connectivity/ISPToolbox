@@ -65,7 +65,7 @@
         .back-icon
             margin-bottom: 2px
         ul
-            padding: 0
+            padding: 0 3px 0 0
             max-height: 210px
             overflow-y: scroll
             margin: 0
@@ -75,7 +75,9 @@
             flex-flow: row
             justify-content: space-between
             align-items: center
-            padding: 10px 0
+            padding: 10px
+            transition: 0.15s ease-in-out all
+            cursor: pointer
             p
                 margin: 0 0 4px 0
         li:first-child
@@ -83,6 +85,8 @@
         li:last-child
             border-bottom: 0
             padding-bottom: 0
+        li:hover
+            background-color: lighten($brand-dark-gray-color, 5%)
         p
             line-height: 18px
 

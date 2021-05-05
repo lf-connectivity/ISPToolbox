@@ -3,6 +3,9 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
 import { AccessPoint } from "../../workspace/WorkspaceFeatures";
 import { isUnitsUS } from '../../utils/MapPreferences';
+import { ft2m, miles2km } from "../../LinkCalcUtils";
+
+var _ = require('lodash');
 
 const NAME_INPUT_ID = 'name-input-tower-popup';
 const LAT_INPUT_ID = 'lat-input-tower-popup';
@@ -11,6 +14,19 @@ const HGT_INPUT_ID = 'hgt-input-tower-popup';
 const CPE_HGT_INPUT_ID = 'cpe-hgt-input-tower-popup';
 const RADIUS_INPUT_ID = 'radius-input-tower-popup';
 const PLOT_LIDAR_BUTTON_ID = 'plot-lidar-coverage-btn-tower-popup';
+
+enum ImperialToMetricConversion {
+    FT_TO_M = 'ft2m',
+    MI_TO_KM = 'mi2km'
+}
+
+const CONVERSION_FORMULAS: Map<ImperialToMetricConversion, (input: number) => number> = new Map();
+CONVERSION_FORMULAS.set(ImperialToMetricConversion.FT_TO_M, (input: number) => {
+    return isUnitsUS() ? ft2m(input) : input
+});
+CONVERSION_FORMULAS.set(ImperialToMetricConversion.MI_TO_KM, (input: number) => {
+    return isUnitsUS() ? miles2km(input) : input
+});
 
 export class LinkCheckTowerPopup extends LinkCheckBasePopup {
     private accessPoint?: AccessPoint;
@@ -56,20 +72,84 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         }
     }
 
-    cleanup() {
+    protected cleanup() {
         if (!this.accessPointMoving) {
             this.accessPoint = undefined;
         }
     }
 
-    getHTML() {
+    protected setEventHandlers() {
+        const updateAP = () => {
+            if (this.accessPoint) {
+                let feat = this.accessPoint.featureData;
+                this.accessPoint.update(feat, (resp: any) => {
+                    // @ts-ignore
+                    this.map.fire('draw.update', {features: [feat]});
+                });
+            }
+        };
+
+        const createNumberChangeCallback = (id: string, property: string, conversionFormula: ImperialToMetricConversion) => {
+            let htmlID = `#${id}`;
+            $(htmlID).on('change',
+                _.debounce((e: any) => {
+                    let inputValue = parseFloat(String($(htmlID).val()));       
+                    let transformedValue = (CONVERSION_FORMULAS.get(conversionFormula) as any)(inputValue);
+
+                    // @ts-ignore
+                    this.accessPoint.featureData.properties[property] = transformedValue;
+                    updateAP();
+                }, 500)
+            );
+        }
+
+        const createCoordinateChangeCallback = (id: string, coord: number) => {
+            let htmlID = `#${id}`;
+            $(htmlID).on('change',
+                _.debounce((e: any) => {
+                    let newVal = parseFloat(String($(htmlID).val()));
+                    // @ts-ignore
+                    this.accessPoint.featureData.geometry.coordinates[coord] = newVal;
+
+                    // @ts-ignore
+                    this.draw.add(this.accessPoint.featureData);
+
+                    // @ts-ignore
+                    this.map.fire('draw.update', { features: [this.accessPoint.featureData]})
+                }, 500)
+            );
+        }
+
+        $(`#${NAME_INPUT_ID}`).on('input',
+            _.debounce((e: any) => {
+                let name = String($(`#${NAME_INPUT_ID}`).val());
+
+                // @ts-ignore
+                this.accessPoint.featureData.properties.name = name;
+                updateAP();
+            }, 500)
+        );
+
+        createNumberChangeCallback(HGT_INPUT_ID, 'height', ImperialToMetricConversion.FT_TO_M);
+        createNumberChangeCallback(RADIUS_INPUT_ID, 'max_radius', ImperialToMetricConversion.MI_TO_KM);
+        createNumberChangeCallback(CPE_HGT_INPUT_ID, 'default_cpe_height', ImperialToMetricConversion.FT_TO_M);
+
+        createCoordinateChangeCallback(LAT_INPUT_ID, 1);
+        createCoordinateChangeCallback(LNG_INPUT_ID, 0);
+    }
+
+    protected getHTML() {
+        const sanitizeName = (name: string) => {
+            return name.replace(/'/g, '&#39;');
+        }
+
         return `
             <div>
                 <div>
                     <h6>Edit Tower</h6>
                 </div>
                 <div>
-                    <input type='text' style='width: 225px' id='${NAME_INPUT_ID}' value='${this.accessPoint?.featureData.properties?.name}'>
+                    <input type='text' style='width: 225px' id='${NAME_INPUT_ID}' value='${sanitizeName(this.accessPoint?.featureData.properties?.name)}'>
                 </div>
                 <div>
                     <ul>

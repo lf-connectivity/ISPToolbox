@@ -103,6 +103,8 @@ export abstract class LinkCheckBasePopup {
         if (!this.popup.isOpen()) {
             this.popup.addTo(this.map);
         }
+
+        this.setEventHandlers();
     }
 
     hide() {
@@ -137,5 +139,6 @@ export abstract class LinkCheckBasePopup {
     }
 
     protected abstract getHTML(): string;
-    abstract cleanup(): void;
+    protected abstract cleanup(): void;
+    protected abstract setEventHandlers(): void;
 }

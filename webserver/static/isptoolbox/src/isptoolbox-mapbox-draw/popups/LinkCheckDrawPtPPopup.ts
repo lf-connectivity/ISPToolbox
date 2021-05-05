@@ -18,9 +18,7 @@ export class LinkCheckDrawPtPPopup extends LinkCheckBasePopup {
         LinkCheckDrawPtPPopup._instance = this;
     }
 
-    show() {
-        super.show();
-        
+    protected setEventHandlers() {     
         $(`#${DRAW_PTP_BUTTON_ID}`).on('click', () => {
             //@ts-ignore
             this.draw.changeMode('draw_link', {start: this.lnglat});
@@ -36,7 +34,7 @@ export class LinkCheckDrawPtPPopup extends LinkCheckBasePopup {
         });
     }
 
-    cleanup() {
+    protected cleanup() {
         this.geocoder.clear();
     }
 

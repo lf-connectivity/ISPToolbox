@@ -889,6 +889,8 @@ export class LinkCheckPage {
             if (selected_link_source.type === 'geojson') {
                 selected_link_source.setData(feat.geometry);
             }
+
+            this.updateLinkChart();
             this.updateLinkProfile();
         }
     };

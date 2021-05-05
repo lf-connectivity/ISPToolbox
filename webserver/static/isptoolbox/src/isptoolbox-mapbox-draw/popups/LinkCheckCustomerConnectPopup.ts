@@ -102,10 +102,9 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     show() {
         super.show();
         this.highlightAllAPs();
-        this.setMainPageEventHandlers();
     }
 
-    cleanup() {
+    protected cleanup() {
         this.accessPoints.length = 0;
         this.apDistances.clear();
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
@@ -180,6 +179,10 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 this.highlightAllAPs();
             });
         });
+    }
+
+    protected setEventHandlers() {
+        this.setMainPageEventHandlers();
     }
 
     static getInstance() {

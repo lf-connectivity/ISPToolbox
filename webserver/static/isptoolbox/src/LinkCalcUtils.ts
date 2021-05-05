@@ -153,6 +153,10 @@ export function km2miles(km : number) : number {
     return km * 0.621371;
 }
 
+export function miles2km(miles: number) : number {
+    return miles / 0.621371;
+}
+
 export function m2ft(m : number) : number {
     return m * 3.28084;
 }

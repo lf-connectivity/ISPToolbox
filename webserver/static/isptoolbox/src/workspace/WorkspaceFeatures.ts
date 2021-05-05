@@ -9,7 +9,7 @@ import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 
 const AP_API_ENDPOINT = '/pro/workspace/api/ap-los';
 const AP_RESPONSE_FIELDS = ['name', 'height', 'max_radius', 'no_check_radius',
-    'default_cpe_height', 'max_radius_miles', 'height_ft'];
+    'default_cpe_height', 'max_radius_miles', 'height_ft', 'default_cpe_height_ft'];
 const AP_SERIALIZER_FIELDS = ['name', 'height', 'max_radius', 'no_check_radius',
     'default_cpe_height'];
 
@@ -50,6 +50,8 @@ export class AccessPoint extends WorkspacePointFeature {
 
     update(newFeatureData: Feature<Point, any>, successFollowup?: (resp: any) => void) {
         super.update(newFeatureData, (resp: any) => {
+            // @ts-ignore
+            this.featureData.properties.radius = this.featureData.properties.max_radius
             PubSub.publish(WorkspaceEvents.AP_RENDER, {features: [this.featureData]});
             PubSub.publish(WorkspaceEvents.AP_UPDATE, {features: [this.featureData]});
 

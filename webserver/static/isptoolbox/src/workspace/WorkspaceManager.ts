@@ -566,7 +566,7 @@ export class WorkspaceManager {
                                 if (apPopup.getAccessPoint() === ap) {
                                     apPopup.onAPStopMoving();
                                     apPopup.show();
-                                } 
+                                }
                             });
                         });
                         break;

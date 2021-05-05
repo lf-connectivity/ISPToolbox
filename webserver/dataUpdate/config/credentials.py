@@ -1,8 +1,8 @@
-# Playground DB cloned from prod DB snapshot Oct 23.  Not guaranteed to be up to up to date with prod GIS db.
+# DB for monthly update scripts, not guaranteed to be up to up to date with prod GIS db.
 TEST_GIS_DB = {
     'NAME': 'postgres',
     'USER': 'fbcmasteruser',
-    'HOST': 'dev-justin-db-oct-23.cahmkzzberpf.us-west-1.rds.amazonaws.com',
+    'HOST': 'isptoolbox-db-monthly-update.cahmkzzberpf.us-west-1.rds.amazonaws.com',
     'PORT': '5432',
 }
 

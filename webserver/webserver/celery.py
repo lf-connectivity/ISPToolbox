@@ -24,9 +24,9 @@ celery_app.conf.task_routes = {
 @celery_app.on_after_finalize.connect
 def setup_periodic(sender, **kwargs):
     if settings.PROD:
-        # TODO: make jobs database backed with `django-celery-beat`
         import mmwave.tasks as mmwave_tasks
         import dataUpdate.tasks as dataUpdate_tasks
+        # TODO: make jobs database backed with `django-celery-beat`
         sender.add_periodic_task(
             crontab(minute=0, hour=20),
             mmwave_tasks.pullLatestPointCloudsEntwine.s(),
@@ -61,5 +61,5 @@ def setup_periodic(sender, **kwargs):
         sender.add_periodic_task(
             crontab(minute=0, hour=0, day_of_month=[1]),
             dataUpdate_tasks.updateGISData.s(),
-            name="update_mlab_data"
+            name="update_gis_data"
         )

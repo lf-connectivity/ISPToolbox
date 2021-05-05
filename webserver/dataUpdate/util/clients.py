@@ -3,6 +3,11 @@ from django.conf import settings
 
 
 def dbClient(prod=False):
+    """
+        Returns a psycopg2 connection for a database
+        if prod == True: returns connection to the production database
+        if prod == False: returns connection to the monthly update database
+    """
     import psycopg2
     connectionDict = TEST_GIS_DB
     if prod:

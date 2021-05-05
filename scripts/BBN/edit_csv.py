@@ -19,6 +19,7 @@ import glob
 OUTFILE = 'bbn.csv'
 BLOCK_IDS = set()
 
+
 def process_file(filename):
     infile = filename
 
@@ -62,6 +63,7 @@ def process_file(filename):
     print(f'{padded_block_ids} block_ids padded')
     print(f'{rows} rows processed')
     print(f'{rows_written} rows written\n\n')
+
 
 def main():
     # Truncate output file

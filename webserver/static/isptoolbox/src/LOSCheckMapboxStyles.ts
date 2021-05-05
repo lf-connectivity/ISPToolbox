@@ -86,17 +86,19 @@ export const LOSCheckMapboxStyles = [
         },
     },
     // Default AP Appearance
+    // INACTIVE AP
     {
         'id': 'gl-draw-point-ap-halo-inactive',
         'type': 'circle',
         'filter': [ 'all',
             ['has', 'user_feature_type'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
             ['!=', 'mode', 'static']
         ],
         'paint': {
-            'circle-radius': 10,
+            'circle-radius': 11,
             'circle-color': '#FFFFFF'
         }
     },
@@ -106,11 +108,12 @@ export const LOSCheckMapboxStyles = [
         'filter': [ 'all',
             ['has', 'user_feature_type'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
             ['!=', 'mode', 'static']
         ],
         'paint': {
-            'circle-radius': 9,
+            'circle-radius': 10,
             'circle-color': '#5692D1'
         }
     },
@@ -120,25 +123,73 @@ export const LOSCheckMapboxStyles = [
         'filter': [ 'all',
             ['has', 'user_feature_type'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
         ],
         layout: {
-            'icon-image': 'ap-isptoolbox', // reference the image
-            'icon-size': 0.5
+            'icon-image': 'ap-inactive-isptoolbox', // reference the image
+            'icon-size': 0.25
+        },
+    },
+    // ACTIVE AP
+    {
+        'id': 'gl-draw-point-ap-halo-active',
+        'type': 'circle',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', 'active', 'true'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 13,
+            'circle-color': '#FFFFFF'
+        }
+    },
+    {
+        'id': 'gl-draw-point-ap-active',
+        'type': 'circle',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', 'active', 'true'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 10,
+            'circle-color': '#5692D1'
+        }
+    },
+    {
+        'id': 'gl-draw-point-ap-symbol-active',
+        'type': 'symbol',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'active', 'true'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
+            ['==', '$type', 'Point'],
+        ],
+        layout: {
+            'icon-image': 'ap-active-isptoolbox', // reference the image
+            'icon-size': 0.25
         },
     },
     // Default CPE Appearance
+    // INACTIVE CPE
     {
         'id': 'gl-draw-point-cpe-halo-inactive',
         'type': 'circle',
         'filter': [ 'all',
             ['has', 'user_feature_type'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
+            ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
             ['!=', 'mode', 'static']
         ],
         'paint': {
-            'circle-radius': 8,
+            'circle-radius': 11,
             'circle-color': '#FFFFFF'
         }
     },
@@ -148,11 +199,12 @@ export const LOSCheckMapboxStyles = [
         'filter': [ 'all',
             ['has', 'user_feature_type'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
+            ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
             ['!=', 'mode', 'static']
         ],
         'paint': {
-            'circle-radius': 7,
+            'circle-radius': 10,
             'circle-color': '#5692D1'
         }
     },
@@ -161,12 +213,58 @@ export const LOSCheckMapboxStyles = [
         'type': 'symbol',
         'filter': [ 'all',
             ['has', 'user_feature_type'],
+            ['==', 'active', 'false'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
             ['==', '$type', 'Point'],
         ],
         layout: {
-            'icon-image': 'cpe-isptoolbox', // reference the image
-            'icon-size': 0.6
+            'icon-image': 'cpe-inactive-isptoolbox', // reference the image
+            'icon-size': 0.3
+        },
+    },
+    // ACTIVE CPE
+    {
+        'id': 'gl-draw-point-cpe-halo-active',
+        'type': 'circle',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'active', 'true'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 12,
+            'circle-color': '#5692D1'
+        }
+    },
+    {
+        'id': 'gl-draw-point-cpe-active',
+        'type': 'circle',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'active', 'true'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static']
+        ],
+        'paint': {
+            'circle-radius': 10,
+            'circle-color': '#FFFFFF'
+        }
+    },
+    {
+        'id': 'gl-draw-point-cpe-symbol-active',
+        'type': 'symbol',
+        'filter': [ 'all',
+            ['has', 'user_feature_type'],
+            ['==', 'active', 'true'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.CPE],
+            ['==', '$type', 'Point'],
+        ],
+        layout: {
+            'icon-image': 'cpe-active-isptoolbox', // reference the image
+            'icon-size': 0.3
         },
     },
 

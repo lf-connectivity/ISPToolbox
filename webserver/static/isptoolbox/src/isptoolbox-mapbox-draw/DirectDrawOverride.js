@@ -47,18 +47,39 @@ export function OverrideDirect() {
         this.fireActionable(state);
     };
 
+    /**
+     * Returns a function that reverse geocodes the given lngLat 
+     * and displays a popup at that location with the result 
+     * of the reverse geocode.
+     * 
+     * @param lngLat Long/lat
+     * @returns A function that calls reverseGeocode and displays the popup at the given coordinates.
+     */
+    const reverseGeocodeAndDisplayPopup = function (lngLat) {
+        return () => {
+            let mapboxClient = MapboxSDKClient.getInstance();
+            let coords = [lngLat.lng, lngLat.lat];
+            mapboxClient.reverseGeocode(coords, (response) => {
+                let popup =
+                    LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckDrawPtPPopup, coords, response);
+                popup.show();
+            });
+        }
+    }
+
+    // Abort controller used abort showing popup 
+    var popupAbortController = null;
+
     direct_select.onVertex = function (state, e) {
         // If it's a PtP link, open a popup if the user clicks on a vertex. This
         // is the only way I could think of of implementing this at a granular
         // sub-feature level.
         if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
-            let mapboxClient = MapboxSDKClient.getInstance();
-            let lngLat = [e.lngLat.lng, e.lngLat.lat];
-            mapboxClient.reverseGeocode(lngLat, (response) => {
-                let popup = 
-                    LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckDrawPtPPopup, lngLat, response);
-                popup.show();
-            });
+            // onVertex is called onMouseDown. We need to wait until mouseup to show the popup
+            // otherwise there will be a race condition with the reverseGeocode callback and the
+            // time when the user releases the mouse.
+            popupAbortController = new AbortController();
+            window.addEventListener('mouseup', reverseGeocodeAndDisplayPopup(e.lngLat), {once: true, signal: popupAbortController.signal});
         }
 
         this.startDragging(state, e);
@@ -75,7 +96,12 @@ export function OverrideDirect() {
     }
 
     direct_select.dragVertex = function (state, e, delta) {
-
+        // Abort and replace popup event listener if we are still dragging.
+        if (popupAbortController !== null && isBeta()) {
+            popupAbortController.abort();
+            popupAbortController = new AbortController();
+            window.addEventListener('mouseup', reverseGeocodeAndDisplayPopup(e.lngLat), {once: true, signal: popupAbortController.signal});
+        }
         // Only allow editing of vertices that are not from associated AP/CPE links.
         // This would include user draw PtP links.
         if (

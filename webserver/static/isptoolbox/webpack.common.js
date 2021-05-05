@@ -6,6 +6,7 @@ module.exports = {
         market_evaluator: '/src/apps/MarketEvaluatorTestApp.ts',
         dsm_app: '/src/apps/IspToolboxDSMApp.ts',
         login_signup: '/src/login/login_signin.ts',
+        latest_lidar: '/src/apps/LatestLiDARApp.ts',
     },
     module : {
         rules : [

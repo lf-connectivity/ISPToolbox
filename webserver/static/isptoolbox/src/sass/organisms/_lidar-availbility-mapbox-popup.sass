@@ -1,0 +1,23 @@
+@import '../theme'
+
+.lidar-availability-popup 
+    .mapboxgl-popup-content 
+        background-color: $brand-dark-gray-color
+        color: $white-color
+        border-radius: 0
+        font-family: $brand-font-family-mono
+        font-size: 13px
+        padding: 0.7rem
+        text-align: center
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip, 
+    .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip, 
+        .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip
+    border-top-color: $brand-dark-gray-color
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip, 
+    .mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip, 
+        .mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip
+    border-bottom-color: $brand-dark-gray-color
+.mapboxgl-popup-anchor-left .mapboxgl-popup-tip
+    border-right-color: $brand-dark-gray-color
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip
+    border-left-color: $brand-dark-gray-color

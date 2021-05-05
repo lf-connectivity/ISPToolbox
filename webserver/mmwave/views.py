@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views import View
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.gis.geos import GEOSGeometry
@@ -10,6 +11,8 @@ import mmwave.lidar_utils.sample_links as samples
 import copy
 import uuid
 import json
+import calendar
+from datetime import datetime
 from mmwave.models.dsm_models import DSMException, DSMConversionJob, MAXIMUM_AOI_AREA_KM2
 from mmwave.tasks.dsm_tasks import exportDSMData
 from mmwave.forms import DSMExportAOIFileForm
@@ -19,6 +22,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from workspace.models import NetworkMapPreferences, AccessPointLocation, CPELocation, APToCPELink
 from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
 from workspace import geojson_utils
+from django.utils.translation import gettext as _
 
 
 @method_decorator(xframe_options_exempt, name='dispatch')
@@ -140,3 +144,56 @@ class CreateExportDSM(View):
             'error': job.error,
             'url': job.create_presigned_url() if job_status == states.SUCCESS else None
         })
+
+
+@method_decorator(xframe_options_exempt, name='dispatch')
+class LatestLidarView(View):
+    def valid_date_request(self, month, year):
+        try:
+            request_date = datetime(month=month, year=year, day=1)
+            min_date = datetime(month=4, year=2021, day=1)
+            if request_date <= min_date:
+                return min_date
+            if request_date > datetime.today():
+                return datetime.today()
+            return request_date
+        except Exception:
+            return datetime.today()
+
+    def get(self, request, month=None, year=None):
+        context = {}
+
+        date = self.valid_date_request(month, year)
+        month = date.month
+        year = date.year
+
+        previous_month = month - 1 or 12
+        previous_year = year if month - 1 else year - 1
+        if previous_year >= 2021 and previous_month > 3:
+            previous_url = reverse('demo-latest_gis', kwargs={'month': previous_month, 'year': previous_year})
+        else:
+            previous_url = None
+        next_month = month + 1 if month + 1 <= 12 else 1
+        next_year = year if month + 1 <= 12 else year + 1
+        if datetime(year=next_year, month=next_month, day=1) <= datetime.today():
+            next_url = reverse('demo-latest_gis', kwargs={'month': next_month, 'year': next_year})
+        else:
+            next_url = None
+
+        context.update({
+            'previous_url': previous_url,
+            'next_url': next_url,
+        })
+
+        month = "{:02d}".format(month)
+
+        context.update({
+            'month': month,
+            'year': year,
+            'month_name':  _(calendar.month_name[int(month)]),
+        })
+        return render(
+            request,
+            'mmwave/pages/latest_lidar.index.html',
+            context
+        )

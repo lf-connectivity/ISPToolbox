@@ -1,0 +1,36 @@
+{% load static %}
+
+<div class="container pt-3">
+    <div class="row d-flex justify-content-around">
+        <div class="card" style="width: 18rem;">
+            <a href="{% url 'edit_account_network' %}">
+                <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
+            </a>
+            <div class="card-body">
+                <a href="{% url 'edit_account_network' %}">
+                    <h5 class="card-title">Network</h5>
+                </a>
+                <p class="card-text">Evaluate PtP Links using LiDAR Data</p>
+            </div>
+        </div>
+        <div class="card" style="width: 18rem;">
+            <a href="">
+                <img class="card-img-top" src='{% static "mmwave/market_isptoolboxpro.gif" %}' alt="Card image cap">
+            </a>
+            <div class="card-body">
+                <a href="">
+                    <h5 class="card-title">Market</h5>
+                </a>
+                <p class="card-text">Evaluate new or existing markets and determine which technologies are most applicable.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container pt-3 text-center"> 
+    <div class="alert alert-primary" role="alert">
+        {% now "Y" as current_year %}
+        {% now "m" as current_month %}
+        <a href="{% url 'demo-latest_gis' year=current_year month=current_month %}"
+        >See the latest GIS data</a>
+    </div>
+</div>

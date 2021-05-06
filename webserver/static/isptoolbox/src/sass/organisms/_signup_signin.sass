@@ -77,22 +77,33 @@
         display: flex
     label
         text-align: center
-        background: lighten($brand-theme-color, 11%)
+        background: lighten($brand-theme-color, 5%)
         border: solid 1px $brand-primary-color
-        padding: 10px 20px
+        padding: 13px 20px
         display: flex
         align-items: center
         justify-content: center
         cursor: pointer
-        transition: all ease 0.2s
-        line-height: 21px
+        transition: all ease-in-out 0.15s
+        font-weight: normal
+        margin: 1px
+        // ^ to not make the box jump when it's clicked
+        box-sizing: content-box
+        width: 100%
+        line-height: 120%
+        color: $brand-secondary-color
     label:hover
+        background: lighten($brand-theme-color, 10%)
+    input[type=checkbox]
+        position: absolute
+        opacity: 0
+    input[type=checkbox]:checked + label
         background: $white-color
-    input
-        // uncomment to make checkbox invisible
-        // position: absolute
-        // opacity: 0
-        
+        border: solid 2px $brand-primary-color
+        margin: 0px
+        color: $brand-dark-gray-color
+
+
 .onboarding_container .content-break
     display: flex
     font-size: 16px
@@ -140,3 +151,7 @@
     max-width: 500px
     margin: auto auto 100px auto
     text-align: center
+
+@media screen and (max-width: 768px)
+    .onboarding_container .checklist--items ul
+        grid-template-columns: auto

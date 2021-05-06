@@ -97,11 +97,6 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # checkboxes = [
-        #     'individual_role', 'company_goal'
-        # ]
-        # for field in checkboxes:
-        #     self.fields[field].modifycheckbox = True
 
     class Meta:
         model = IspToolboxUserSignUpInfo

@@ -7,9 +7,11 @@
         {% for field in optional_info_form %}
             <li class="onboarding_container--question">
                 {{ field.label_tag }}
+
                 {% if field.css_classes == 'required' %}
                     <span class="onboarding_container--required">(required)</span>
                 {% endif %}
+
                 {% if field.help_text %}
                     <p class="onboarding_container--description">{{ field.help_text|safe }}</p>
                 {% endif %}
@@ -18,9 +20,19 @@
                     {{ field }}
                 {% else %}
                     <div class="checklist--items">
-                        {{ field }}
+                        <ul>                 
+                        {% for checkboxselectmultiple in field %}
+                            <li>
+                                {{ checkboxselectmultiple.tag }}
+                                <label for="{{ checkboxselectmultiple.id_for_label }}">
+                                    {{ checkboxselectmultiple.choice_label }}
+                                </label>
+                            </li>
+                        {% endfor %}
+                        </ul> 
                     </div>
                 {% endif %}
+                
                 <p class="onboarding_container--errors">{{ field.errors }}</p>
             </li>
         {% endfor %}

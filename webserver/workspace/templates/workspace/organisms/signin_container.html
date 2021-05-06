@@ -16,12 +16,47 @@
         <form action="{% url 'login_view'%}" method="post" class="isptoolbox-form py-3">
             {% csrf_token %}
             {% if form %}
-                {{ form }}
+                <ul>
+                    {% for field in form %}
+                        <li class="onboarding_container--question">
+                            {{ field.label_tag }}
+                            
+                            {{ field }}
+                            
+                            {% if field.help_text %}
+                                <p class="onboarding_container--description">{{ field.help_text|safe }}</p>
+                            {% endif %}
+    
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <p class="onboarding_container--errors">{{ error|escape }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
             {% else %}
-                {{ authentication_form }}
+                <ul>
+                    {% for field in authentication_form %}
+                        <li class="onboarding_container--question">
+                            {{ field.label_tag }}
+                            
+                            {{ field }}
+                            {% if field.help_text %}
+                                <p class="onboarding_container--description">{{ field.help_text|safe }}</p>
+                            {% endif %}
+    
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <p class="onboarding_container--errors">{{ error|escape }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
             {% endif %}
             <input hidden type="text" value="{% firstof request.GET.next request.full_path %}" name="next">
-            <input class="btn isptoolbox-btn btn-primary login-button" type="submit" value="Login">
+            <input class="btn isptoolbox-btn btn-primary login-button large" type="submit" value="Login">
         </form>
     </div>
 </div>

@@ -1,8 +1,17 @@
-// Use this file to override default browser styles.
+// Use this file to override default browser styles. 
+// Anything beyond basic overrides should go into dedicated files ex: atoms/_headings
+
 @import 'theme'
+
+body 
+    font-family: 'Basis Grotesque Pro', Helvetica, Arial, sans-serif
+  
 
 p, h1, h2, h3, h4, h5, h6, ul
     color: $brand-dark-gray-color
+
+p, a, h1, h2, h3, h4, h5, h6
+    letter-spacing: 0.01rem
 
 a
     text-decoration: none
@@ -11,3 +20,15 @@ a
     &:hover
         color: darken($brand-secondary-color, 7%)
         text-decoration: none
+
+::-webkit-input-placeholder
+  color: lighten($mid-gray-color, 20%)
+
+:-ms-input-placeholder
+  color: lighten($mid-gray-color, 20%)
+
+::-moz-placeholder
+  color: lighten($mid-gray-color, 20%)
+
+:-moz-placeholder
+  color: lighten($mid-gray-color, 20%)

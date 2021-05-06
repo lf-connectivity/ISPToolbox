@@ -10,7 +10,11 @@ class IspToolboxUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['password1'].help_text = _('Use 8 or more characters with a mix of letters and numbers.')
-        self.fields['password2'].help_text = _('Enter the same password as before, for verification.')
+        self.fields['password2'].help_text = _('')
+        self.fields['password1'].label = "Password"
+        self.fields['password2'].label = "Repeat Password"
+        self.fields['password1'].label_suffix = ""
+        self.fields['password2'].label_suffix = ""
 
     email = forms.EmailField(
                 label="Email",
@@ -20,13 +24,11 @@ class IspToolboxUserCreationForm(UserCreationForm):
     first_name = forms.CharField(
                 label="First Name",
                 label_suffix="",
-                required=True,
-                widget=forms.TextInput(attrs={'placeholder': 'First Name'}))
+                required=True)
     last_name = forms.CharField(
                 label="Last Name",
                 label_suffix="",
-                required=True,
-                widget=forms.TextInput(attrs={'placeholder': 'Last Name'}))
+                required=True)
 
     registration_code = forms.CharField(
         label="Registration Code",
@@ -48,16 +50,14 @@ class IspToolboxUserAuthenticationForm(AuthenticationForm):
         self.fields['username'].widget.attrs.update({
             'name': 'email'
         })
+        self.fields['password'].label = "Password"
+        self.fields['password'].label_suffix = ""
+
     username = forms.EmailField(
             label="Email",
             label_suffix="",
             required=True,
             widget=forms.TextInput(attrs={'placeholder': 'name@company.com'}))
-
-    password = forms.CharField(
-            label="Password",
-            label_suffix="",
-            widget=forms.PasswordInput)
 
     error_css_class = "error"
     required_css_class = "required"
@@ -117,7 +117,10 @@ class IspToolboxUserPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['new_password1'].help_text = _('Use 8 or more characters with a mix of letters and numbers.')
-        self.fields['new_password2'].help_text = _('Enter the same password as before, for verification.')
+        self.fields['new_password1'].label = "New Password"
+        self.fields['new_password2'].label = "Repeat New Password"
+        self.fields['new_password1'].label_suffix = ""
+        self.fields['new_password2'].label_suffix = ""
 
 
 class IspToolboxUserInfoChangeForm(forms.ModelForm):

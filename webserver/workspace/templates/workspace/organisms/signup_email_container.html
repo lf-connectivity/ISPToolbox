@@ -1,21 +1,45 @@
 <div id="signup_container" class="{% if not showSignUp or not showEmailSignUp %}d-none{% endif %}">
 <div class="container signup_container onboarding_container">
-    <h3>Create a Free Account</h3>
-    <p class="onboarding_container--intro-copy">Start creating a workspace within ISP Toolbox, save and reuse files across all tools.</p>
-    <h4>Create an Account</h4>
+    <h1 class="heading-2">Let's get you set up</h1>
+    <p class="onboarding_container--intro-copy large-paragraph">Creating a workspace will allow you to save and reuse files across ISP Toolbox.</p>
+
     <div class="isp-signupform mx-auto">
         <form action="{% url 'create_account_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form pb-3">
             {% csrf_token %}
-            {{ sign_up_form }}
+            {% if sign_up_form.errors %}
+                {% for error in sign_up_form.non_field_errors %}
+                    <p class="onboarding_container--errors">{{ error|escape }}</p>
+                {% endfor %}
+            {% endif %}
+            <ul>
+                {% for field in sign_up_form %}
+                    <li class="onboarding_container--question">
+                        {{ field.label_tag }}
+                        
+                        {{ field }}
+                        
+                        {% if field.help_text %}
+                            <p class="onboarding_container--description">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                        
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <p class="onboarding_container--errors">{{ error|escape }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
             <input hidden type="text" value="{% firstof request.GET.next request.full_path %}" name="next">
-            <input type="submit" class="btn btn-primary isptoolbox-btn" value="Sign Up">
+            <input type="submit" class="btn btn-primary isptoolbox-btn signup-button large" value="Sign Up">
         </form>
     </div>
     {% include 'workspace/atoms/terms_disclaimer.html' %}
     {% include 'workspace/atoms/content_break.html' %}
     <a href="#" id="signup_fb">Sign Up with a Facebook Account</a>
 </div>
-<div class="container text-center">
+
+<div class="container onboarding_container--other-options text-center">
     <p>Already have an account? <a href="#" class="dy_have_account" >Sign in</a></p>
 </div>
 </div>

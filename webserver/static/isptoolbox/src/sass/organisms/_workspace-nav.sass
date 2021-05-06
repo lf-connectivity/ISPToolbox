@@ -1,12 +1,5 @@
 @use '../fonts'
 @import ../theme
-
-body
-    font-family: 'Basis Grotesque Pro' !important
-
-    .dropdown-menu
-        border: none
-        border-radius: 0px
     
 .homepage-logo
     align-items: center
@@ -19,12 +12,14 @@ body
         p
             color: #677b8c
             font-size: 14px
-            margin: 0 10px 0 15px
+            line-height: 0
+            margin: 5px 10px 0 15px
         svg
             height: auto
             width: 100px
+            margin-top: 6px
     
-    @media (max-width: $breakpoint-tablet)
+    @media (max-width: $breakpoint-xl)
         .wordmark
             display: none
 
@@ -43,6 +38,10 @@ body
     width: 100%
     padding: 0 30px
 
+    .dropdown-menu
+        border: none
+        border-radius: 0px
+
     .account-dropdown
         display: flex
         flex-direction: row
@@ -50,13 +49,32 @@ body
         .dropdown a
             display: flex
             align-items: center
+            &:hover
+                color: $brand-secondary-color
         &--picture
             height: 40px
             width: 40px
             border-radius: 20px
         &--name
             font-family: $brand-font-family-mono
-            font-size: 1rem
+            font-size: 0.875rem
 
     .dropdown-menu
         margin-top: 1rem!important
+        padding-bottom: 10px
+        a
+            font-family: $brand-font-family-mono
+            font-size: 0.875rem
+            padding: 5px 25px 15px 25px
+            &:hover
+                color: $brand-secondary-color
+                background-color: transparent
+
+@media (max-width: $breakpoint-sm)
+    .workspace-nav
+        display: flex
+        justify-content: space-between
+        .homepage-logo
+            margin: 0
+        .empty
+            display: none

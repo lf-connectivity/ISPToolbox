@@ -7,12 +7,20 @@
     {% endblock %}
 </head>
 <body>
-    {% block beforenav %}
-    {% endblock %}
+    <div class="d-flex flex-column min-vh-100">
+        <header>
+            {% block beforenav %}
+            {% endblock %}
 
-    {% include "workspace/organisms/nav.html" %}
-    <div style="margin-top: 70px;"></div>  
-    {% block content %}
-    {% endblock %}
+            {% include "workspace/organisms/nav.html" %}
+        </header>
+        <div class="container flex-grow-1" style="margin-top: 70px;">
+            {% block content %}
+            {% endblock %}
+        </div>
+        <footer>
+            {% include "workspace/organisms/footer.html" %}
+        </footer>
+      </div>
 </body>
 </html>

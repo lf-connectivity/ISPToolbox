@@ -3,7 +3,7 @@
 .signup_container
     text-align: center
     background: $brand-theme-color
-    margin-top: 100px
+    margin-top: 40px
     margin-bottom: 30px
     max-width: 500px
     display: flex
@@ -18,29 +18,44 @@
         text-align: center
         margin: 20px auto
 
-    &--question
-        margin-bottom: 45px
-    &--question:last-child
+    .onboarding_container--question
+        margin-bottom: 15px
+        &:last-child
+            margin-bottom: 0
+
+    .survey-form .onboarding_container--question
+        margin-bottom: 30px
+        &:last-child
             margin-bottom: 20px
+    .survey-form
+        .onboarding_container--question
+            display: block
+            width: 100%
     label
         font-family: Basis Grotesque Pro
-        font-size: 16px
-        font-style: normal
-        font-weight: 700
-        line-height: 27px
+        font-size: 1rem
+        font-weight: bold
+        line-height: 135%
         letter-spacing: 0.01em
         text-align: left
         color: $brand-dark-gray-color
+        margin-bottom: 7px
 
     input
-        margin-bottom: 10px
         line-height: 16px
+    input, select
+        margin-bottom: 5px 
+    .survery-form 
+        input, select, .checklist--items
+            margin-bottom: 10px 
+
     input[type="text"], input[type="email"], input[type="password"], input[type="number"], select
         border: none
         border-bottom: 2px solid $brand-primary-color
         background-color: $white-color
         width: 100%
         padding: 9px 10px
+        color: $brand-dark-gray-color
         &:focus
             outline: 0
     select 
@@ -55,17 +70,25 @@
         outline-width: 0
     ol
         padding-left: 1rem
+    .survey-form ol
+        padding-left: 0
     br
         display: none
     &--required
         color: $brand-secondary-color
         padding-left: 2px
-    &--errors
+    &--errors, .onboarding_container--errors
         color: $dark-error-color
-    &--description
         font-size: 14px
-    .login-button
+        margin-bottom: 0
+    .onboarding_container--errors:last-child
+        margin-bottom: 20px
+    &--description, .onboarding_container--description
+        font-size: 14px
+    .login-button, .signup-button
         margin-top: 20px
+    #signup_email, #signup_fb
+        margin-top: 0.7rem
 
 .onboarding_container .checklist--items ul
     display: grid
@@ -146,12 +169,34 @@
 .isp-signupform
     max-width: 500px
     width: 100%
+    ul
+        list-style: none
+        padding-left: 0
+        margin: 0
 
 .onboarding_container--other-options
     max-width: 500px
     margin: auto auto 100px auto
     text-align: center
 
-@media screen and (max-width: 768px)
+.signup_modal
+    .modal-title
+        padding: 1rem 2rem
+    .modal-body
+        padding: 0 3rem
+    .isptoolbox-btn
+        width: 100%
+        margin-top: 2rem
+    .modal-footer
+        display: block
+        text-align: center
+        padding: 2rem
+
+// medium screen and smaller
+@media (max-width: $breakpoint-sm)
+    .signup_container
+        margin-top: 15px
+        margin-bottom: 30px
+        padding: 2rem 2rem 1rem 2rem
     .onboarding_container .checklist--items ul
         grid-template-columns: auto

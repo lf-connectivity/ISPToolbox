@@ -1,3 +1,4 @@
+// Font Imports
 
  @font-face {
     font-family: 'Basis Grotesque Pro Mono';
@@ -36,8 +37,13 @@
     font-style: normal;
   }
 
-  body {
-      font-family: 'Basis Grotesque Pro', Helvetica, Arial, sans-serif ;
+  @font-face {
+    font-family: 'Basis Grotesque Pro';
+    src: url('/static/isptoolbox/fonts/BasisGrotesquePro-Bold.otf');
+    src: local('BasisGrotesquePro-Bold'),
+        url('/static/isptoolbox/fonts/BasisGrotesquePro-Bold.otf');
+    font-weight: bold;
+    font-style: normal;
   }
   
   .basisGrotesqueLight {
@@ -51,7 +57,13 @@
     font-weight: normal;
     font-style: normal;
   }
-  
+
+  .basisGrotesqueBold {
+    font-family: 'Basis Grotesque Pro', Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    font-style: normal;
+  }
+
   .basisGrotesqueMono {
     font-family: 'Basis Grotesque Pro Mono', 'SFMono-Regular', 'Liberation Mono',
       Courier, monospace;

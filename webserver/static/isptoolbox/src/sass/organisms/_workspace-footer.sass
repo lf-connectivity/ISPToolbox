@@ -1,0 +1,66 @@
+@use '../fonts'
+@import ../theme
+
+.workspace-footer
+    background-color: $brand-dark-gray-color
+    display: flex 
+    justify-content: flex-start
+    flex-flow: column
+    height: auto
+    width: 100%
+    padding: 15px 30px 10px 30px
+    .container_copyright
+        order: 2
+    .container_links
+        order: 1
+    p, a
+        margin: 0
+        font-size: 0.875rem
+        font-weight: normal
+    .container_copyright p
+        color: $mid-gray-color
+        font-weight: 300
+        padding-top: 5px
+    .container_links
+        display: flex
+        flex-flow: wrap
+        justify-content: space-between
+        a
+            color: $mid-gray-color
+            padding: 0
+            transition: all 0.2s ease
+        a svg path
+            stroke: $mid-gray-color
+        a:hover
+            color: $light-gray-color
+        a:hover svg path
+            stroke: $light-gray-color
+        a.arrow-link
+            display: flex
+            align-items: center
+            svg
+                margin-left: 3px
+
+@media (min-width: $breakpoint-sm)
+    .workspace-footer
+        align-items: center
+        display: flex 
+        justify-content: space-between
+        flex-flow: row
+        height: 50px
+        padding: 0 30px
+    .container_copyright
+        order: 1 !important
+    .container_links
+        order: 2 !important
+    .container_copyright p
+        padding-top: 0 !important
+    .container_links
+        display: flex
+        a
+            padding: 0 15px !important
+        a:first-child
+            padding-left: 0 !important
+        a:last-child
+            padding-right: 0 !important
+

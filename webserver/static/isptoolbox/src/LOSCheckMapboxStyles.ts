@@ -235,7 +235,7 @@ export const LOSCheckMapboxStyles = [
         ],
         'paint': {
             'circle-radius': 12,
-            'circle-color': '#5692D1'
+            'circle-color': '#FFFFFF'
         }
     },
     {
@@ -250,7 +250,7 @@ export const LOSCheckMapboxStyles = [
         ],
         'paint': {
             'circle-radius': 10,
-            'circle-color': '#FFFFFF'
+            'circle-color': '#5692D1'
         }
     },
     {
@@ -263,7 +263,7 @@ export const LOSCheckMapboxStyles = [
             ['==', '$type', 'Point'],
         ],
         layout: {
-            'icon-image': 'cpe-active-isptoolbox', // reference the image
+            'icon-image': 'cpe-inactive-isptoolbox', // reference the image
             'icon-size': 0.3
         },
     },

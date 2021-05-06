@@ -14,12 +14,12 @@ export function load_custom_icons(map: mapboxgl.Map) {
     img_cpe_active.onload = ()=>map.addImage('cpe-active-isptoolbox', img_cpe_active);
     img_cpe_active.src = cpe_active_icon;
 
-    let img_ap_inactive = new Image(50,50);
+    let img_ap_inactive = new Image(50,37);
     img_ap_inactive.crossOrigin = "Anonymous";
     img_ap_inactive.onload = ()=>map.addImage('ap-inactive-isptoolbox', img_ap_inactive);
     img_ap_inactive.src = ap_icon;
 
-    let img_ap_active = new Image(50,50);
+    let img_ap_active = new Image(50,37);
     img_ap_active.crossOrigin = "Anonymous";
     img_ap_active.onload = ()=>map.addImage('ap-active-isptoolbox', img_ap_active);
     img_ap_active.src = ap_icon;

@@ -47,13 +47,10 @@ class NewGISDataLayer {
         });
         const geojson_filename = `${year}-${month}-01-latest-added-pt-clouds.geojson`;
         const url = GIS_LAYER_PATH  + geojson_filename;
-        console.log(url);
         $.getJSON(url, this.ajaxcallback.bind(this));
-        console.log('kira');
     }
 
     ajaxcallback(data: any, status: string){
-        console.log(data);
         if (status === 'success') {
             const source = this.map.getSource(NEW_GIS_DATA_SOURCE);
             if (source && source.type === 'geojson') {

@@ -30,6 +30,7 @@ import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheck
 import { isBeta } from './BetaCheck';
 import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
+import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -144,6 +145,8 @@ export class LinkCheckPage {
 
     navigationDelta: number;
 
+    profileView: LinkProfileView;
+
     // variables for handling offsets for hover point volume
     oldCamera: any;
     oldTarget: any;
@@ -174,6 +177,8 @@ export class LinkCheckPage {
         this._link_distance = 0;
         //@ts-ignore
         this.units = window.ISPTOOLBOX_SESSION_INFO.units;
+
+        this.profileView = new LinkProfileView();
 
         this.datasets = new Map();
 
@@ -1345,7 +1350,6 @@ export class LinkCheckPage {
     }
 
     updateLegend() {
-        $("#los-chart-tooltip-button").removeClass('d-none')
         const sources: Array<string> = [];
         this.datasets.forEach((l, k) => { if (l instanceof Array) { l.forEach(v => { sources.push(v); }) } })
         $('#los-chart-tooltip-button').attr(
@@ -1364,12 +1368,13 @@ export class LinkCheckPage {
         ).tooltip('_fixTitle');
     }
 
-    setErrorMessage(error_message: string): void {
-        $("#link-request-error-description").text(error_message);
-        $('#loading_failed_spinner').removeClass('d-none');
-        $('#los-chart-tooltip-button').addClass('d-none');
-        $("#loading_spinner").addClass('d-none');
-        $("#link_chart").addClass('d-none');
+    setErrorMessage(error_message: string | null): void {
+        if (error_message !== null){
+            $("#link-request-error-description").text(error_message);
+            this.profileView.render(LinkProfileDisplayOption.LOADING_ERROR);
+        } else {
+            $("#link-request-error-description").text('');
+        }
     }
 
     // Websocket Message Callback Handlers
@@ -1486,40 +1491,29 @@ export class LinkCheckPage {
 
     clearInputs(): void {
         // Clear All Inputs
-        $('.radio-card-body').addClass('d-none');
-        $('#link-title').addClass('d-none');
-        $("#3D-view-btn").addClass('d-none');
-        // Instruct User to Select or Draw a Link
-        this.selected_feature = null;
-        $('#link_chart').addClass('d-none');
-        $('#loading_failed_spinner').addClass('d-none');
-        $('#los-chart-tooltip-button').addClass('d-none');
-        $("#drawing_instructions").removeClass('d-none');
-        $("#loading_spinner").addClass('d-none');
+        if(this.draw.getAll().features.length === 0 &&  (!this.selectedFeatureID || !this.draw.get(this.selectedFeatureID))){
+            this.profileView.render(LinkProfileDisplayOption.DRAWING_INSTRUCTIONS);
+        }
     }
 
     showInputs(): void {
-        $('.radio-card-body').removeClass('d-none');
+        if(this.draw.getSelected().features.length > 0){
+            $('.radio-card-body').removeClass('d-none');
+        }
     }
 
     showLoading(): void {
-        $("#loading_spinner").removeClass('d-none');
-        $("#link_chart").addClass('d-none');
-        $('#los-chart-tooltip-button').addClass('d-none');
-        $('#loading_failed_spinner').addClass('d-none');
-        $("#drawing_instructions").addClass('d-none');
-        $("#3D-view-btn").addClass('d-none');
+        this.profileView.render(LinkProfileDisplayOption.LOADING_CHART);
     }
 
     showPlotIfValidState() {
-        if (this._lidar.length && this._elevation.length && this.selected_feature) {
+        if (
+            this._lidar.length && this._elevation.length && this.selected_feature && this.selectedFeatureID &&
+            this.draw.get(this.selectedFeatureID) != null) {
             this.link_chart.hideLoading();
-            $("#loading_spinner").addClass('d-none');
-            $('.radio-card-body').removeClass('d-none');
-            $('#link-title').removeClass('d-none');
-            $("#los-chart-tooltip-button").removeClass('d-none');
+            this.profileView.render(LinkProfileDisplayOption.LINK_CHART);
+            
             this.link_chart.redraw();
-            $("#link_chart").removeClass('d-none');
             this.updateLegend();
         }
     }

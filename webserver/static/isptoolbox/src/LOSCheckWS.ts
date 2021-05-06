@@ -127,9 +127,11 @@ class LOSCheckWS {
             const resp = JSON.parse(e.data) as WSResponse;
             switch(resp.type){
                 case "standard.message":
-                    this.message_handlers.forEach((handler)=>{
-                        handler(resp);
-                    });
+                    if(resp.hash === this.hash){
+                        this.message_handlers.forEach((handler)=>{
+                            handler(resp);
+                        });
+                    }
                     break;
                 case "ap.status":
                     this.ap_callback(resp);

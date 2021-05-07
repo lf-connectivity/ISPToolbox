@@ -60,10 +60,16 @@
         .link
             font-size: 14px
             margin-top: 12px
+        .microcopy
+            margin: 8px 10px 0 10px
+            margin-bottom: 0
 
-    .tooltip--towers
+.mapboxgl-popup.lineofsight-tooltip
+    .tooltip--switch-towers
         .back-icon
             margin-bottom: 2px
+            margin-left: -5px
+            margin-right: 5px
         ul
             padding: 0 3px 0 0
             max-height: 210px
@@ -90,10 +96,89 @@
         p
             line-height: 18px
 
+.mapboxgl-popup.lineofsight-tooltip
+    input
+        background: darken($brand-dark-gray-color, 7%)
+        -webkit-appearance: none
+        border: 0
+        border-style: none
+        color: #fff
+        padding: 5px 3px 3px 3px
+        width: 100%
+        font-size: 14px
+        box-sizing: border-box
+        border-bottom: 2px solid transparent
+        &:focus
+            outline: 0
+            border-bottom: 2px solid $brand-primary-color
+        &:focus + span
+            border-bottom: 2px solid $brand-primary-color
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button
+        -webkit-appearance: none
+        margin: 0
+    /* Firefox */
+    input[type=number]
+        -moz-appearance: textfield
+    .input--tower-name
+        padding-left: 7px
+    .input--value
+        padding: 5px 3px 3px 3px
+        text-align: right
+        width: 50px
+        margin-left: 10px
+    .tooltip--tower-summary
+        .name-row
+            display: block
+        .input--tower-name
+            margin-top: 5px
+        .label
+            margin-bottom: 0
+        ul
+            margin: 0
+            padding: 0
+        li
+            align-items: center
+            border-bottom: $mid-gray-color-2 solid 1px
+            display: flex
+            flex-flow: row
+            justify-content: space-between
+            padding: .7rem 0
+        li:first-child
+            padding-top: 0
+        li:last-child
+            border-bottom: 0
+            padding-bottom: 0
+        .coordinates
+            display: flex
+            margin-top: 10px
+            align-items: baseline
+            justify-content: space-between
+            input
+                width: 100%
+                margin: 0
+                text-align: left
+                padding-left: 7px
+            .data-with-unit
+                flex-grow: 1
+            .comma
+                margin: 0 5px
+                color: $white-color
+    .data-with-unit
+        display: flex
+        span
+            background: darken($brand-dark-gray-color, 7%)
+            text-align: center
+            padding: 5px 3px 3px 0
+            width: 18px
+            color: $white-color
+            font-size: 14px
+            border-bottom: solid 2px transparent
 
 .lineofsight-tooltip .mapboxgl-popup-content
     background-color: $brand-dark-gray-color
-    padding:20px
+    padding: 20px
     color: white
 
 .lineofsight-tooltip .mapboxgl-popup-close-button

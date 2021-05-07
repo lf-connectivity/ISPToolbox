@@ -144,40 +144,41 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         }
 
         return `
-            <div>
-                <div>
+            <div class="tooltip--tower-summary">
+                <div class="title"> 
                     <h6>Edit Tower</h6>
                 </div>
                 <div>
-                    <input type='text' style='width: 225px' id='${NAME_INPUT_ID}' value='${sanitizeName(this.accessPoint?.featureData.properties?.name)}'>
-                </div>
-                <div>
                     <ul>
-                        <li>
-                            <p>Latitude</p>
-                            <div>
-                                <input type='number'
-                                       value='${this.accessPoint?.featureData.geometry.coordinates[1].toFixed(5)}'
-                                       id='${LAT_INPUT_ID}'
-                                       min='-90' max='90' step='.00001'
-                                >
-                                <span>&deg;</span>
+                        <li class="name-row">
+                            <input type='text' class="input--tower-name" id='${NAME_INPUT_ID}' value='${sanitizeName(this.accessPoint?.featureData.properties?.name)}'>
+                            <div class="coordinates">
+                                <div class="data-with-unit">
+                                    <input type='number'
+                                            value='${this.accessPoint?.featureData.geometry.coordinates[1].toFixed(5)}'
+                                            id='${LAT_INPUT_ID}'
+                                            min='-90' max='90' step='.00001'
+                                            placeholder='latitude'
+                                            class="input--value"
+                                    >
+                                    <span>&deg;</span>
+                                </div>
+                                <span class="comma">,</span>
+                                <div class="data-with-unit">
+                                    <input type='number'
+                                            value='${this.accessPoint?.featureData.geometry.coordinates[0].toFixed(5)}'
+                                            id='${LNG_INPUT_ID}'
+                                            min='-180' max='180' step='.00001'
+                                            placeholder='longitude'
+                                            class="input--value"
+                                    >
+                                    <span>&deg;</span>
+                                </div>
                             </div>
                         </li>
                         <li>
-                            <p>Longitude</p>
-                            <div>
-                                <input type='number'
-                                       value='${this.accessPoint?.featureData.geometry.coordinates[0].toFixed(5)}'
-                                       id='${LNG_INPUT_ID}'
-                                       min='-180' max='180' step='.00001'
-                                >
-                                <span>&deg;</span>
-                            </div>
-                        </li>
-                        <li>
-                            <p>Access Point Height</p>
-                            <div>
+                            <p class="label">Access Point Height</p>
+                            <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(
                                             isUnitsUS() ?
@@ -186,13 +187,14 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                                        )}'
                                        id='${HGT_INPUT_ID}'
                                        min='0' max='10000'
+                                       class="input--value"
                                 >
                                 <span>${isUnitsUS() ? 'ft' : 'm'}</span>
                             </div>
                         </li>
                         <li>
-                            <p>Receiver Height <span>(attachment height)</span></p>
-                            <div>
+                            <p class="label">Receiver Height <span>(attachment height)</span></p>
+                            <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(
                                             isUnitsUS() ?
@@ -201,13 +203,14 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                                        )}'
                                        id='${CPE_HGT_INPUT_ID}'
                                        min='0' max='10000'
+                                       class="input--value"
                                 >
                                 <span>${isUnitsUS() ? 'ft' : 'm'}</span>
                             </div>
                         </li>
                         <li>
-                            <p>Radius</p>
-                            <div>
+                            <p class="label">Radius</p>
+                            <div class="data-with-unit">
                                 <input type='number'
                                        value='${
                                             isUnitsUS() ?
@@ -216,6 +219,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                                        }'
                                        id='${RADIUS_INPUT_ID}'
                                        min='0.01' max='100' step='0.01'
+                                       class="input--value"
                                 >
                                 <span>${isUnitsUS() ? 'mi' : 'km'}</span>
                             </div>
@@ -225,7 +229,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
 
                 <div class="button-row">
                     <button class='btn btn-primary isptoolbox-btn' id='${PLOT_LIDAR_BUTTON_ID}'>Plot Lidar Coverage</button>
-                    <p>This may take several minutes</p>
+                    <p class="microcopy small">This may take several minutes</p>
                 </div>
             </div>
         `;

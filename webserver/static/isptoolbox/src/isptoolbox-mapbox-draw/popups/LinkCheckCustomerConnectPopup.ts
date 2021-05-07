@@ -268,7 +268,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
     protected getSwitchTowerHTML() {
         return `
-            <div class="tooltip--towers">
+            <div class="tooltip--switch-towers">
                 <div class="title">
                     <h6>
                         <a id='${BACK_TO_MAIN_LINK_ID}'> 

@@ -145,3 +145,34 @@ resource "aws_ecs_service" "async-production" {
     ignore_changes = [desired_count]
   }
 }
+
+data "template_file" "celery_app_scheduler" {
+  template = file("templates/celery_app_scheduler.json.tpl")
+
+  vars = {
+    docker_image_url_celery = "${aws_ecr_repository.django.repository_url}:latest"
+    region                  = var.region
+    rds_hostname            = data.aws_db_instance.database.address
+    rds_db_name             = var.POSTGRES_DB_NAME
+    rds_db_username         = var.POSTGRES_DB_USERNAME
+    rds_db_password         = var.POSTGRES_DB_PASSWORD
+    redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
+  }
+}
+
+resource "aws_ecs_task_definition" "celery-app-scheduler" {
+  family                = "celery-app-scheduler"
+  container_definitions = data.template_file.celery_app_scheduler.rendered
+  depends_on            = [aws_elasticache_replication_group.isptoolbox_redis]
+}
+
+resource "aws_ecs_service" "async-production-scheduler" {
+  name            = "${var.ecs_cluster_name}-async-service-scheduler"
+  cluster         = aws_ecs_cluster.async-production.id
+  task_definition = aws_ecs_task_definition.celery-app-scheduler.arn
+  desired_count   = 1
+  depends_on      = [aws_iam_role_policy.ecs-service-role-policy]
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+}

@@ -183,3 +183,10 @@ class AccessPointCoverageResults(View):
             features.append(feature)
         fc = {'type': 'FeatureCollection', 'features': features}
         return JsonResponse(fc)
+
+
+class AccessPointCoverageStatsView(View):
+    def get(self, request, uuid):
+        ap = AccessPointLocation.objects.filter(owner=request.user, uuid=uuid).get()
+        coverage = AccessPointCoverageBuildings.objects.filter(ap=ap).order_by('-created').first()
+        return JsonResponse(coverage.coverageStatistics())

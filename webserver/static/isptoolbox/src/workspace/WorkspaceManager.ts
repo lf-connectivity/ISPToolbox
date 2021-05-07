@@ -652,6 +652,14 @@ export class WorkspaceManager {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         });
+        $.ajax({
+            url: `/pro/workspace/api/ap-los/coverage/stats/${message.uuid}/`,
+            success: (resp) => { console.log(resp) },
+            "method": "GET",
+            "headers": {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
     }
 
     updateCoverage(resp: any, uuid: string) {

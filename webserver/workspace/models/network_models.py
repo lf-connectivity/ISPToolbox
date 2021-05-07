@@ -162,6 +162,22 @@ class AccessPointCoverageBuildings(models.Model):
     nearby_buildings = models.ManyToManyField(BuildingCoverage, related_name="nearby_buildings")
     created = models.DateTimeField(auto_now_add=True)
 
+    def coverageStatistics(self) -> dict:
+        serviceable = self.nearby_buildings.filter(
+            status=BuildingCoverage.CoverageStatus.SERVICEABLE
+        ).count()
+        unserviceable = self.nearby_buildings.filter(
+            status=BuildingCoverage.CoverageStatus.UNSERVICEABLE
+        ).count()
+        unknown = self.nearby_buildings.filter(
+            status=BuildingCoverage.CoverageStatus.UNKNOWN
+        ).count()
+        return {
+            'serviceable': serviceable,
+            'unserviceable': unserviceable,
+            'unknown': unknown
+        }
+
 
 class Radio(models.Model):
     name = models.CharField(max_length=100)

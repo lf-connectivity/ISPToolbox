@@ -41,6 +41,7 @@ urlpatterns = [
     path('workspace/api/ap-cpe-link/', views.APToCPELinkCreate.as_view()),
     path('workspace/api/ap-cpe-link/<uuid:uuid>/', views.APToCPELinkGet.as_view()),
     path('workspace/api/ap-los/coverage/<uuid:uuid>/', views.AccessPointCoverageResults.as_view()),
+    path('workspace/api/ap-los/coverage/stats/<uuid:uuid>/', views.AccessPointCoverageStatsView.as_view()),
     path('workspace/api/tower/bulk-upload/', views.BulkUploadTowersView.as_view(), name="bulk_tower_upload"),
     path('workspace/api/network/map/', views.NetworkMapPreferencesView.as_view(), name="map_preference_update"),
     path('workspace/500/', views.Error500View, name='404'),

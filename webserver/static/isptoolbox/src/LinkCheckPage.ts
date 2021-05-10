@@ -24,13 +24,16 @@ import PubSub from 'pubsub-js';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 //@ts-ignore
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
-import { WorkspaceManager } from './workspace/WorkspaceManager';
+import { ACCESS_POINT_RADIUS_VIS_LAYER_FILL, WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
 import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
 import { isBeta } from './BetaCheck';
 import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
+import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
+import { AccessPoint } from "./workspace/WorkspaceFeatures";
+import { BaseWorkspaceFeature } from "./workspace/BaseWorkspaceFeature";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -362,7 +365,7 @@ export class LinkCheckPage {
                     }
                 });
 
-                // Long press -> show popup
+                // Long press -> show popup on mobile
                 let onLongPress: any = undefined;
                 this.map.on('touchstart', (e: any) => {
                     if (onLongPress) {
@@ -399,6 +402,40 @@ export class LinkCheckPage {
                 this.map.on('touchmove', (e) => {
                     if (onLongPress) {
                         clearTimeout(onLongPress);
+                    }
+                });
+
+                // Clicking on point -> show popup on desktop
+                this.map.on('click', (e) => {
+                    if (e.originalEvent.button == 0 && // left click
+                        (
+                            !this.map.queryRenderedFeatures(e.point).length || // clicked on background
+                            (
+                                this.map.queryRenderedFeatures(e.point).length === 1 && // clicked on AP layer
+                                this.map.queryRenderedFeatures(e.point, {layers: [ACCESS_POINT_RADIUS_VIS_LAYER_FILL]}).length === 1
+                            )
+                        )
+                    ) {
+                        let mapboxClient = MapboxSDKClient.getInstance();
+                        let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+                        mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                            // See if it's accessible by any access points, then set a negative building ID to set status to unknown.
+                            let accessPoints = Object.values(this.workspaceManager.features).filter((feature: BaseWorkspaceFeature) =>
+                                feature.getFeatureType() === WorkspaceFeatureTypes.AP
+                            ) as AccessPoint[];
+                            let apPopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                                LinkCheckCustomerConnectPopup, lngLat, response) as LinkCheckCustomerConnectPopup;
+                            apPopup.setAccessPoints(accessPoints);
+                            apPopup.setBuildingId(-1);
+
+                            if (apPopup.getAccessPoints().length) {
+                                apPopup.show();
+                            }
+                            else {
+                                let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckDrawPtPPopup, lngLat, response);
+                                popup.show();
+                            }
+                        });
                     }
                 });
             }

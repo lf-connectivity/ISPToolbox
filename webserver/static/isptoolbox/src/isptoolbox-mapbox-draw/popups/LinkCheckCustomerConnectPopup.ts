@@ -227,7 +227,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 return {
                     icon: UNKNOWN_SVG,
                     divClass: 'title',
-                    message: 'Unknown link status'
+                    message: 'Check line of sight'
                 };
         }
     }

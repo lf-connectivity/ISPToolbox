@@ -31,7 +31,7 @@ const DEBOUNCE_VIEWSHED_S = 2000;
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
-const ACCESS_POINT_RADIUS_VIS_LAYER_FILL = 'ap_vis_data_layer-fill';
+export const ACCESS_POINT_RADIUS_VIS_LAYER_FILL = 'ap_vis_data_layer-fill';
 
 const ACCESS_POINT_BUILDING_DATA = 'ap_building_source';
 const ACCESS_POINT_BUILDING_LAYER = 'ap_building_layer';
@@ -343,8 +343,10 @@ export class WorkspaceManager {
         }
 
         // Toggle showing AP tooltip upon clicking on an AP.
-        this.map.on('click', 'gl-draw-point-inactive-ap.cold', onClickPoint);
-        this.map.on('click', 'gl-draw-point-active-ap.hot', onClickPoint);
+        this.map.on('click', 'gl-draw-point-ap-symbol-inactive.cold', onClickPoint);
+        this.map.on('click', 'gl-draw-point-ap-halo-inactive.cold', onClickPoint);
+        this.map.on('click', 'gl-draw-point-ap-symbol-inactive.hot', onClickPoint);
+        this.map.on('click', 'gl-draw-point-ap-halo-inactive.hot', onClickPoint);
 
         // Change the cursor to a pointer when the mouse is over the states layer.
         this.map.on('mouseenter', ACCESS_POINT_BUILDING_LAYER, () => {

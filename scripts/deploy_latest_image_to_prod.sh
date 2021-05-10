@@ -1,5 +1,8 @@
 #!/bin/bash
 # DEPLOY LATEST ECR DOCKER IMAGES TO ECS, PRODUCTION
+echo "Pushing Latest image to Async Scheduler"
+aws ecs update-service --cluster isptoolbox-production-async-cluster \
+    --service isptoolbox-production-async-service-scheduler --force-new-deployment
 echo "Pushing Latest image to Async Tier"
 aws ecs update-service --cluster isptoolbox-production-async-cluster \
     --service isptoolbox-production-async-service --force-new-deployment

@@ -5,7 +5,7 @@
     "essential": true,
     "cpu": 2048,
     "memory": 6144,
-    "command": ["celery","--beat","-A","webserver","worker","-l","info"],
+    "command": ["celery","-A","webserver","beat","-l","info"],
     "environment": [
       {
         "name": "DEBUG",

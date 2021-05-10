@@ -4,6 +4,7 @@ import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
 import { AccessPoint } from "../../workspace/WorkspaceFeatures";
 import { isUnitsUS } from '../../utils/MapPreferences';
 import { ft2m, miles2km } from "../../LinkCalcUtils";
+import * as StyleConstants from '../styles/StyleConstants';
 
 var _ = require('lodash');
 
@@ -138,6 +139,40 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         createCoordinateChangeCallback(LNG_INPUT_ID, 0);
     }
 
+    protected getStatsHTML() {
+        if (this.accessPoint?.featureData.id){
+            const feat = this.draw.get(this.accessPoint?.featureData.id as string);
+            if(feat &&
+                feat.properties?.serviceable != null && 
+                feat.properties?.unknown != null && 
+                feat.properties?.unserviceable != null){
+                return `
+                    <li>
+                        <div class="ap-stat">
+                            <p>${
+                                feat.properties?.serviceable
+                            }</p>
+                            <span style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">Serviceable</span>
+                        </div>
+                        <div class="ap-stat">
+                            <p>${
+                                feat.properties?.unknown
+                            }</p>
+                            <span style="color: ${StyleConstants.UNKNOWN_BUILDINGS_COLOR}">Unkown</span>
+                        </div>
+                        <div class="ap-stat">
+                            <p>${
+                                feat.properties?.unserviceable
+                            }</p>
+                            <span style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">Unserviceable</span>
+                        </div>
+                    </li>
+            `;
+            }
+        }
+        return '';
+    }
+
     protected getHTML() {
         const sanitizeName = (name: string) => {
             return name.replace(/'/g, '&#39;');
@@ -224,6 +259,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                                 <span>${isUnitsUS() ? 'mi' : 'km'}</span>
                             </div>
                         </li>
+                        ${this.getStatsHTML()}
                     </ul>
                 </div>
 

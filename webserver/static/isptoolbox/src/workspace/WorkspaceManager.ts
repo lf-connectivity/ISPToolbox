@@ -19,7 +19,7 @@ import { ViewshedTool } from "../organisms/ViewshedTool";
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 import { feature } from "@turf/helpers";
 import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
-
+import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 
 const DEFAULT_AP_HEIGHT = 30.48;
 const DEFAULT_CPE_HEIGHT = 1.0;
@@ -271,10 +271,10 @@ export class WorkspaceManager {
                     'match',
                     ['get', 'serviceable'],
                     'unserviceable',
-                    '#ff2f00',
+                    StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR ,
                     'serviceable',
-                    '#34eb46',
-                /* other */ '#ccc'
+                    StyleConstants.SERVICEABLE_BUILDINGS_COLOR,
+                /* other */ StyleConstants.UNKNOWN_BUILDINGS_COLOR
                 ],
                 'line-width': 1,
                 'line-opacity': 0.9,
@@ -654,7 +654,19 @@ export class WorkspaceManager {
         });
         $.ajax({
             url: `/pro/workspace/api/ap-los/coverage/stats/${message.uuid}/`,
-            success: (resp) => { console.log(resp) },
+            success: (resp) => {
+                const features = 
+                    this.draw.getAll().features.filter(
+                        (f: GeoJSON.Feature) => {return f.properties?.uuid === message.uuid}
+                    );
+                features.forEach((feat: GeoJSON.Feature) => {
+                    for (const [key, value] of Object.entries(resp)) {
+                        this.draw.setFeatureProperty(
+                            (feat.id as string), key, value
+                        );
+                    }
+                });
+            },
             "method": "GET",
             "headers": {
                 'X-CSRFToken': getCookie('csrftoken')

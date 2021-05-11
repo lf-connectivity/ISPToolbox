@@ -1,20 +1,21 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
+import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchMarker";
 
 const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-popup';
 const ADD_TOWER_BUTTON_ID = 'add-tower-btn-popup';
 
 export class LinkCheckDrawPtPPopup extends LinkCheckBasePopup {
-    private geocoder: any;
+    private marker: LinkCheckLocationSearchTool;
     private static _instance: LinkCheckDrawPtPPopup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, geocoder: any) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, marker: LinkCheckLocationSearchTool) {
         if (LinkCheckDrawPtPPopup._instance) {
             return LinkCheckDrawPtPPopup._instance;
         }
         super(map, draw);
-        this.geocoder = geocoder;
+        this.marker = marker;
         LinkCheckDrawPtPPopup._instance = this;
     }
 
@@ -23,6 +24,7 @@ export class LinkCheckDrawPtPPopup extends LinkCheckBasePopup {
             //@ts-ignore
             this.draw.changeMode('draw_link', {start: this.lnglat});
             this.map.fire('draw.modechange', {mode: 'draw_link'});
+            this.marker.hide();
             this.hide();
         });
 
@@ -30,12 +32,13 @@ export class LinkCheckDrawPtPPopup extends LinkCheckBasePopup {
             //@ts-ignore
             this.draw.changeMode('draw_radius', {start: this.lnglat});
             this.map.fire('draw.modechange', {mode: 'draw_radius'});
+            this.marker.hide();
             this.hide();
         });
     }
 
     protected cleanup() {
-        this.geocoder.clear();
+        this.marker.onPopupClose();
     }
 
     static getInstance() {

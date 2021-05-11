@@ -8,6 +8,7 @@ import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
 import { AccessPoint, CPE } from '../../workspace/WorkspaceFeatures';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from "../../workspace/WorkspaceConstants";
 import { BuildingCoverage, BuildingCoverageStatus, updateCoverageStatus } from "../../workspace/BuildingCoverage";
+import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchMarker";
 
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
 const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-customer-popup';
@@ -46,13 +47,15 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     private apConnectIndex: number;
     private losStatus: BuildingCoverageStatus;
     private buildingId: number;
+    private marker: LinkCheckLocationSearchTool;
     private static _instance: LinkCheckCustomerConnectPopup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, marker: LinkCheckLocationSearchTool) {
         if (LinkCheckCustomerConnectPopup._instance) {
             return LinkCheckCustomerConnectPopup._instance;
         }
         super(map, draw);
+        this.marker = marker;
         this.accessPoints = [];
         this.apDistances = new Map();
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
@@ -109,7 +112,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.apDistances.clear();
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.apConnectIndex = 0;
-
+        this.marker.onPopupClose();
         this.changeSelection([]);
     }
 
@@ -147,6 +150,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
         $(`#${VIEW_LOS_BUTTON_ID}`).on('click', () => {
             this.createCPE();
+            this.marker.hide();
             this.hide();
         });
 
@@ -154,6 +158,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             //@ts-ignore
             this.draw.changeMode('draw_radius', {start: this.lnglat});
             this.map.fire('draw.modechange', {mode: 'draw_radius'});
+            this.marker.hide();
             this.hide();
         });
     }

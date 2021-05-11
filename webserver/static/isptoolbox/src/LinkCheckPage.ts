@@ -24,16 +24,14 @@ import PubSub from 'pubsub-js';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 //@ts-ignore
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
-import { ACCESS_POINT_RADIUS_VIS_LAYER_FILL, WorkspaceManager } from './workspace/WorkspaceManager';
+import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
 import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
 import { isBeta } from './BetaCheck';
 import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
-import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
-import { AccessPoint } from "./workspace/WorkspaceFeatures";
-import { BaseWorkspaceFeature } from "./workspace/BaseWorkspaceFeature";
+import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearchTool";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -105,6 +103,7 @@ export class LinkCheckPage {
     draw: MapboxDraw;
     selected_feature: any;
     link_chart: any;
+    locationMarker: LinkCheckLocationSearchTool;
 
     lidarAvailabilityLayer: LidarAvailabilityLayer;
 
@@ -343,28 +342,12 @@ export class LinkCheckPage {
             this.geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
                 mapboxgl: mapboxgl,
+                marker: isBeta() ? false : true,
                 placeholder: 'Search for an address'
             });
 
-            // instantiate singletons
-            new MapboxSDKClient(mapboxgl.accessToken);
-            new LinkCheckDrawPtPPopup(this.map, this.draw, this.geocoder);
-            new LinkCheckCustomerConnectPopup(this.map, this.draw);
-            new LinkCheckTowerPopup(this.map, this.draw);
-
             // Popups
             if (isBeta()) {
-                this.geocoder.on('result', ({result}: any) => {
-                    // Display popup, but only if it's a specific address (addres or poi)
-                    let placeType = result.place_type[0];
-                    if (placeType === 'address' || placeType === 'poi') {
-                        let addressBarPopup = LinkCheckDrawPtPPopup.getInstance();
-                        addressBarPopup.setAddress(result.place_name);
-                        addressBarPopup.setLngLat(result.center);
-                        addressBarPopup.show();
-                    }
-                });
-
                 // Long press -> show popup on mobile
                 let onLongPress: any = undefined;
                 this.map.on('touchstart', (e: any) => {
@@ -404,40 +387,6 @@ export class LinkCheckPage {
                         clearTimeout(onLongPress);
                     }
                 });
-
-                // Clicking on point -> show popup on desktop
-                this.map.on('click', (e) => {
-                    if (e.originalEvent.button == 0 && // left click
-                        (
-                            !this.map.queryRenderedFeatures(e.point).length || // clicked on background
-                            (
-                                this.map.queryRenderedFeatures(e.point).length === 1 && // clicked on AP layer
-                                this.map.queryRenderedFeatures(e.point, {layers: [ACCESS_POINT_RADIUS_VIS_LAYER_FILL]}).length === 1
-                            )
-                        )
-                    ) {
-                        let mapboxClient = MapboxSDKClient.getInstance();
-                        let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
-                        mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                            // See if it's accessible by any access points, then set a negative building ID to set status to unknown.
-                            let accessPoints = Object.values(this.workspaceManager.features).filter((feature: BaseWorkspaceFeature) =>
-                                feature.getFeatureType() === WorkspaceFeatureTypes.AP
-                            ) as AccessPoint[];
-                            let apPopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                                LinkCheckCustomerConnectPopup, lngLat, response) as LinkCheckCustomerConnectPopup;
-                            apPopup.setAccessPoints(accessPoints);
-                            apPopup.setBuildingId(-1);
-
-                            if (apPopup.getAccessPoints().length) {
-                                apPopup.show();
-                            }
-                            else {
-                                let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckDrawPtPPopup, lngLat, response);
-                                popup.show();
-                            }
-                        });
-                    }
-                });
             }
 
             document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
@@ -463,6 +412,13 @@ export class LinkCheckPage {
             this.map.on('draw.create', this.updateRadioLocation.bind(this));
 
             this.workspaceManager = new WorkspaceManager('#accessPointModal', this.map, this.draw, this.profileWS, getInitialFeatures());
+            this.locationMarker = new LinkCheckLocationSearchTool(this.map, this.workspaceManager, this.geocoder);
+
+            // instantiate singletons
+            new MapboxSDKClient(mapboxgl.accessToken);
+            new LinkCheckDrawPtPPopup(this.map, this.draw, this.locationMarker);
+            new LinkCheckCustomerConnectPopup(this.map, this.draw, this.locationMarker);
+            new LinkCheckTowerPopup(this.map, this.draw);
 
 
             const features = this.draw.add({

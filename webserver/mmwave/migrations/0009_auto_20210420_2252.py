@@ -5,7 +5,6 @@ from django.conf import settings
 import django.contrib.gis.db.models.fields
 from django.db import migrations, models
 import django.db.models.deletion
-import mmwave.models.viewshed_models
 import uuid
 
 
@@ -30,7 +29,6 @@ class Migration(migrations.Migration):
                 ('observer_height', models.FloatField()),
                 ('target_height', models.FloatField()),
                 ('radius', models.FloatField()),
-                ('mode', models.CharField(choices=[(mmwave.models.viewshed_models.ViewshedModeOptionsEnum['VISIBLE'], 'VISIBLE'), (mmwave.models.viewshed_models.ViewshedModeOptionsEnum['DEM'], 'DEM'), (mmwave.models.viewshed_models.ViewshedModeOptionsEnum['GROUND'], 'GROUND')], default='VISIBLE', max_length=20)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

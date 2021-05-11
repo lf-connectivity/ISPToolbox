@@ -10,7 +10,6 @@ from IspToolboxApp.util.admin_timeseries_util import (
 from django.utils.html import format_html
 
 admin.site.register(models.DSMConversionJob)
-admin.site.register(models.ViewShedJob)
 
 
 @admin.register(models.TGLink)

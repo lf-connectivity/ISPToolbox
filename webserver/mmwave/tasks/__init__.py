@@ -5,12 +5,11 @@ from .link_tasks import (
 )
 from .dsm_tasks import exportDSMData
 from .lidar_tasks import updateLidarMetaData, pull_latest_pointcloud_metadata
-from .viewshed_tasks import renderViewshed, fullviewshedForAccessPoint
 from mmwave.scripts.create_dsm_for_ept import createTileDSM, convertPtCloudToDSMTiled
 
 __all__ = [
     'getLinkInfo', 'getLiDARProfile', 'getTerrainProfile', 'exportDSMData', 'getElevationProfile',
-    'updateLidarMetaData', 'renderViewshed', 'fullviewshedForAccessPoint', 'createTileDSM', 'convertPtCloudToDSMTiled',
+    'updateLidarMetaData', 'createTileDSM', 'convertPtCloudToDSMTiled',
     'pullLatestPointCloudsEntwine', 'addHighResolutionBoundaries',
     'uploadBoundaryTilesetMapbox', 'createNewlyAddedCloudOverlay',
     'pull_latest_pointcloud_metadata',

@@ -1,5 +1,6 @@
-from workspace.models import AccessPointLocation, AccessPointCoverageBuildings, BuildingCoverage
-from mmwave.models import ViewShedJob
+from workspace.models import (
+    AccessPointLocation, AccessPointCoverageBuildings, BuildingCoverage,
+)
 from gis_data.models import MsftBuildingOutlines
 import tempfile
 import rasterio
@@ -9,12 +10,12 @@ from shapely import wkt
 VISIBLE_PIXEL_VALUE = 255
 
 
-def calculateCoverage(viewshed_id: str, access_point_id: str, user_id: str) -> None:
+def calculateCoverage(access_point_id: str, user_id: str) -> None:
     """
     for an access point location calculate all the reachable buildings given a viewshed
     """
-    viewshed = ViewShedJob.objects.get(uuid=viewshed_id, owner=user_id)
     access_point = AccessPointLocation.objects.get(uuid=access_point_id, owner=user_id)
+    viewshed = access_point.viewshedmodel
     # Load Up Coverage
     with tempfile.NamedTemporaryFile(suffix=".tif") as fp:
         viewshed.read_object(fp, tif=True)

@@ -8,7 +8,7 @@ msg_handlers = {
     'link': [mmwave_tasks.getLinkInfo.delay],
     'ap': [
         workspace_tasks.generateAccessPointCoverage.delay,
-        mmwave_tasks.fullviewshedForAccessPoint.delay
+        workspace_tasks.computeViewshedCoverage.delay
     ],
     'error': None,
 }

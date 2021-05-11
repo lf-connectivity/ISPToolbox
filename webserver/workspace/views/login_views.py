@@ -12,7 +12,7 @@ from django.contrib.auth import logout
 
 class DefaultWorkspaceView(View):
     def get(self, request, **kwargs):
-        showSurvey = IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(
+        showSurvey = (not request.user.is_anonymous) and not IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(
             owner=request.user
         ).exists()
         return render(

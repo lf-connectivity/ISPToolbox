@@ -27,10 +27,12 @@
     </div>
 </div>
 <div class="container pt-3 text-center"> 
-    <div class="alert alert-primary" role="alert">
-        <a href="{% url 'optional_info' %}"
-        >Take a quick survey to help us make ISP Toolbox better</a>
-    </div>
+    {% if showSurvey %}
+        <div class="alert alert-primary" role="alert">
+            <a href="{% url 'optional_info' %}"
+            >Take a quick survey to help us make ISP Toolbox better</a>
+        </div>
+    {% endif %}
     <div class="alert alert-primary" role="alert">
         {% now "Y" as current_year %}
         {% now "m" as current_month %}

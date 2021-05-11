@@ -5,8 +5,7 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from IspToolboxAccounts.forms import (
     IspToolboxUserCreationForm, IspToolboxUserSignUpInfoForm, IspToolboxUserAuthenticationForm,
-    IspToolboxUserPasswordChangeForm, IspToolboxUserInfoChangeForm, IspToolboxUserDeleteAccountForm,
-    IspToolboxUserSignUpInfoForm
+    IspToolboxUserPasswordChangeForm, IspToolboxUserInfoChangeForm, IspToolboxUserDeleteAccountForm
 )
 from django.contrib.auth import logout
 
@@ -97,7 +96,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
                 context['password_form'].save()
         else:
             context.update({'password_form': IspToolboxUserPasswordChangeForm(user=request.user)})
-        
+
         if "user_info" in request.POST:
             if context['optional_account_form'].is_valid():
                 context['optional_account_form'].save()

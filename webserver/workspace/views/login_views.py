@@ -1,19 +1,26 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.views import View
+from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from IspToolboxAccounts.forms import (
     IspToolboxUserCreationForm, IspToolboxUserSignUpInfoForm, IspToolboxUserAuthenticationForm,
-    IspToolboxUserPasswordChangeForm, IspToolboxUserInfoChangeForm, IspToolboxUserDeleteAccountForm
+    IspToolboxUserPasswordChangeForm, IspToolboxUserInfoChangeForm, IspToolboxUserDeleteAccountForm,
+    IspToolboxUserSignUpInfoForm
 )
 from django.contrib.auth import logout
 
 
 class DefaultWorkspaceView(View):
     def get(self, request, **kwargs):
+        showSurvey = IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(
+            owner=request.user
+        ).exists()
         return render(
             request,
             'workspace/pages/login_view.html',
             {
+                'showSurvey': showSurvey,
                 'showSignUp': True,
                 'showEmailSignUp': False,
                 'authentication_form': IspToolboxUserAuthenticationForm,
@@ -22,15 +29,29 @@ class DefaultWorkspaceView(View):
         )
 
 
-class OptionalInfoWorkspaceView(LoginRequiredMixin, View):
-    def get(self, request, **kwargs):
-        return render(
-            request,
-            'workspace/pages/optional_info.html',
-            {
-                'optional_info_form': IspToolboxUserSignUpInfoForm
-            }
-        )
+class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
+    form_class = IspToolboxUserSignUpInfoForm
+    template_name = 'workspace/pages/optional_info.html'
+    success_url = reverse_lazy("isptoolbox_pro_home")
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+    def get(self, request):
+        if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists():
+            return redirect("optional_info_update")
+        else:
+            super().get(request)
+
+
+class OptionalInfoWorkspaceUpdateView(LoginRequiredMixin, UpdateView):
+    form_class = IspToolboxUserSignUpInfoForm
+    template_name = 'workspace/pages/optional_info.html'
+    success_url = reverse_lazy("isptoolbox_pro_home")
+
+    def get_object(self):
+        return IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=self.request.user)
 
 
 class AccountSettingsView(LoginRequiredMixin, View):
@@ -42,6 +63,13 @@ class AccountSettingsView(LoginRequiredMixin, View):
                 'account_form': IspToolboxUserInfoChangeForm(instance=request.user),
                 'password_form': IspToolboxUserPasswordChangeForm(user=request.user),
                 'delete_account_form': IspToolboxUserDeleteAccountForm,
+                'optional_account_form': (
+                        IspToolboxUserSignUpInfoForm(
+                            instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=request.user)
+                        )
+                        if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists()
+                        else IspToolboxUserSignUpInfoForm
+                ),
             }
         )
 
@@ -50,6 +78,13 @@ class AccountSettingsView(LoginRequiredMixin, View):
             'account_form': IspToolboxUserInfoChangeForm(request.POST, instance=request.user),
             'password_form': IspToolboxUserPasswordChangeForm(request.user, request.POST),
             'delete_account_form': IspToolboxUserDeleteAccountForm(request.POST),
+            'optional_account_form': IspToolboxUserSignUpInfoForm(
+                request.POST, instance=(
+                    IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=request.user)
+                    if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists()
+                    else None
+                )
+            )
         }
         if "update_account" in request.POST:
             if context['account_form'].is_valid():
@@ -62,6 +97,14 @@ class AccountSettingsView(LoginRequiredMixin, View):
                 context['password_form'].save()
         else:
             context.update({'password_form': IspToolboxUserPasswordChangeForm(user=request.user)})
+        
+        if "user_info" in request.POST:
+            if context['optional_account_form'].is_valid():
+                context['optional_account_form'].save()
+        else:
+            context.update({'optional_account_form': IspToolboxUserSignUpInfoForm(
+                instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=request.user)
+            )})
 
         if "delete_account" in request.POST and context['delete_account_form'].is_valid():
             if context['delete_account_form'].try_delete(request):

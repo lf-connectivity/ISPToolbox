@@ -91,7 +91,7 @@ class IspToolboxUserSignUpInfo(models.Model):
        ("expansion", _("Expand service to new areas")),
     )
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     company_website = models.CharField(max_length=100, null=True)
     subscriber_size = models.CharField(
         null=True,

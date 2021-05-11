@@ -59,9 +59,24 @@
 
     <div class="card">
         <div class="card-body">
-            <h1 class="card-header">
+            <div class="card-header d-flex justify-content-between">
+
+            <h1>
                 User Info
             </h1>
+            <button class="btn isptoolbox-btn btn-secondary" type="submit"
+                    onclick="document.getElementById('account_info_form').removeAttribute('disabled')"
+                >
+                Edit
+                </button>
+            </div>
+            <form action={{ request.path }} method="post" class="pb-3">
+                <fieldset class="isptoolbox-form" disabled id="account_info_form">
+                {% csrf_token %}
+                {{ optional_account_form }}
+                <input class="btn isptoolbox-btn btn-primary mt-2" type="submit" name="user_info" value="Update Info">
+                </fieldset>
+            </form>
         </div>
     </div>
 

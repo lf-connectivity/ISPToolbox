@@ -9,6 +9,7 @@ from IspToolboxAccounts import forms
 urlpatterns = [
     path('', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
     path('optional-info/', views.OptionalInfoWorkspaceView.as_view(), name="optional_info"),
+    path('optional-info/update/', views.OptionalInfoWorkspaceUpdateView.as_view(), name="optional_info_update"),
     path('networks/', views.DefaultNetworkView.as_view(), name="networks"),
     path('network/delete/<uuid:network_id>', views.DeleteNetworkView.as_view(), name="delete_network"),
     path('network/edit/<uuid:network_id>/', views.EditNetworkView.as_view(), name="edit_network"),

@@ -1,5 +1,5 @@
 from .login_views import (
-    DefaultWorkspaceView, OptionalInfoWorkspaceView, AccountSettingsView,
+    DefaultWorkspaceView, OptionalInfoWorkspaceView, OptionalInfoWorkspaceUpdateView, AccountSettingsView,
 )
 from .network_views import DefaultNetworkView, DeleteNetworkView, EditNetworkView, BulkUploadTowersView
 from .rest_views import (
@@ -16,7 +16,8 @@ __all__ = [
     'BulkUploadTowersView', 'NetworkDetail', 'AccessPointLocationListCreate', 'AccessPointLocationGet',
     'CPELocationCreate', 'CPELocationGet', 'APToCPELinkCreate', 'APToCPELinkGet',
     'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'AccessPointCoverageStatsView',
-    'Error500View', 'Error404View', 'Error403View', 'OptionalInfoWorkspaceView',
+    'Error500View', 'Error404View', 'Error403View',
+    'OptionalInfoWorkspaceView', 'OptionalInfoWorkspaceUpdateView',
     'FBDeauthorizeSocialView', 'FBDataDeletionView',
     'DataPolicy', 'Cookies', 'TermsOfService',
 ]

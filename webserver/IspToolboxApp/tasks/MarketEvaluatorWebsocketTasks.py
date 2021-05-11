@@ -2,8 +2,8 @@ from celery import shared_task
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, broadbandNow, mlabSpeed, \
-    grantGeog, zipGeog, countyGeog, medianIncome
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
+    grantGeog, zipGeog, countyGeog, medianIncome, censusBlockGeog
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
     getOSMBuildings
 from towerlocator.helpers import getViewShed
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
@@ -103,6 +103,12 @@ def getZipGeog(zipcode, channelName, uuid):
 def getCountyGeog(statecode, countycode, channelName, uuid):
     result = countyGeog(statecode, countycode)
     sync_send(channelName, 'county.geog', result, uuid)
+
+
+@shared_task
+def getCensusBlockGeog(blockcode, channelName, uuid):
+    result = censusBlockGeog(blockcode)
+    sync_send(channelName, 'censusblock.geog', result, uuid)
 
 
 @shared_task

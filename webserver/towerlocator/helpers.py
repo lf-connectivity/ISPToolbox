@@ -1,7 +1,7 @@
 import requests
 import json
 import io
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import createPipelineFromKMZ
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import createPipelineFromKMZ
 from bots.github_issues import make_github_issue
 from django.conf import settings
 

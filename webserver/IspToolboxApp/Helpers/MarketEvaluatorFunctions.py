@@ -1,9 +1,8 @@
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode, \
-    checkIfPrecomputedIncomeAvailable
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode, \
+    checkIfPrecomputedIncomeAvailable, select_gis_database
 from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlab, StandardizedPostal
-from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty
+from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty, Tl2020UsCensusBlocks
 from django.db import connections
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import select_gis_database
 
 
 
@@ -196,6 +195,18 @@ def countyGeog(statecode, countycode):
         resp['geojson'] = Tl2019UsCounty.getCountyGeog(countycode, statecode)
         resp['statecode'] = statecode
         resp['countycode'] = countycode
+    except BaseException:
+        resp = {'error': -2}
+    return resp
+
+def censusBlockGeog(blockcode):
+    '''
+        Returns census block geojson for provided blockcode.
+    '''
+    resp = {'error': 0}
+    try:
+        resp['geojson'] = Tl2020UsCensusBlocks.getBlockGeog(blockcode)
+        resp['blockcode'] = blockcode
     except BaseException:
         resp = {'error': -2}
     return resp

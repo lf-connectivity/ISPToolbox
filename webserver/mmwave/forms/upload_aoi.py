@@ -1,7 +1,7 @@
 from django import forms
 from django.core import validators
 import json
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import createGeoJsonsFromKML
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import createGeoJsonsFromKML
 from defusedxml import ElementTree
 from mmwave.models.dsm_models import DSMException
 

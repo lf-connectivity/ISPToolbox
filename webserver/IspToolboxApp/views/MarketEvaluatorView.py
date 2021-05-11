@@ -4,7 +4,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 import IspToolboxApp.tasks.MarketEvaluatorTasks
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import\
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import\
     getMicrosoftBuildingsOffset, createPipelineFromKMZ, convertKml, getMicrosoftBuildings
 from django.http import JsonResponse
 import json

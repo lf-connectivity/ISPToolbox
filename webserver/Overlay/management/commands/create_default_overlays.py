@@ -28,6 +28,12 @@ def create_sample_overlays():
             source_layer='cbrs_shp-6wi1gs'
         )
         cbrs[0].save()
+        censusBlocks = Overlay.objects.get_or_create(
+            type='censusBlocks',
+            source_url='mapbox://isptoolbox.census_blocks_with_ids',
+            source_layer='censusblocks'
+        )
+        censusBlocks[0].save()
         return True
     except Exception:
         return False

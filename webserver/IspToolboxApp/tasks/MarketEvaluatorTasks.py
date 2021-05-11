@@ -1,6 +1,6 @@
 from celery import shared_task
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, \
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, \
     checkIfIncomeProvidersAvailable, queryBuildingOutlines
 from django.contrib.gis.geos import GEOSGeometry
 import json

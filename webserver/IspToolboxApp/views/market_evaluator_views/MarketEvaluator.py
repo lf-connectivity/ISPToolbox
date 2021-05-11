@@ -1,7 +1,7 @@
 
 from django.views import View
 from IspToolboxApp.tasks.mmWaveTasks.mmwave import getOSMNodes
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import (
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import (
     checkIfPrecomputedIncomeAvailable, getQueryTemplate, checkIfPrecomputedBuildingsAvailable,
     getUniqueBuildingNodes, getAllNodes, filterIncludeExclude, checkIfIncomeProvidersAvailable)
 from shapely.geometry import shape

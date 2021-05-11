@@ -193,7 +193,13 @@ REDIS_BACKEND=
     - Username: isptoolboxmlab@gmail.com
 
 ## Overlay Update
-### Update Mapbox source on public."Overlay_overlay" Table
+### Update Mapbox sources on public."Overlay_overlay" Table
+
+create overlay objects in your sandbox:
+
+`make default_objects`
+
+### Alternatively update the table directly:
 
 *Below are example of SQL Commands*
 
@@ -210,11 +216,7 @@ VALUES ('tower', 'mapbox://victorleefb.9l1ok6po', 'towerLocator-3rfxut', NOW())
 INSERT INTO public."Overlay_overlay"(type, source_url, source_layer, created)
 VALUES ('communityConnect', 'mapbox://alexychong.bp1lmhp5', 'calculated-cc-speeds-shp-casfao', NOW())
 ```
-### Alternatively:
 
-create sample overlay objects in your sandbox:
-
-`make default_objects`
 
 ## Async Task Monitoring with Flower (pronounced flow-er)
  url: isptoolbox.io/async/

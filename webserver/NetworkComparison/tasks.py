@@ -2,7 +2,7 @@ from celery import shared_task
 from area import area
 from django.db import connections
 from NetworkComparison.util import squaredMetersToMiles
-from IspToolboxApp.tasks.MarketEvaluatorHelpers import getQueryTemplate
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getQueryTemplate
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json

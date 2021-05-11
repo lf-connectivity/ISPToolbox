@@ -41,7 +41,7 @@ class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
         if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists():
             return redirect("optional_info_update")
         else:
-            super().get(request)
+            return super().get(request)
 
 
 class OptionalInfoWorkspaceUpdateView(LoginRequiredMixin, UpdateView):

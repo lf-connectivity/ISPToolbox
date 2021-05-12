@@ -309,23 +309,26 @@ export class WorkspaceManager {
 
         // Add building layer callbacks
         this.map.on('click', ACCESS_POINT_BUILDING_LAYER, (e: any) => {
-            // Check if we clicked on a CPE
-            const features = this.map.queryRenderedFeatures(e.point);
-            if (! features.some((feat) => {return feat.source.includes('mapbox-gl-draw')})){
-                let building = this.map.queryRenderedFeatures(e.point, {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
-                let buildingId = building.properties?.msftid;
-                let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
-                let mapboxClient = MapboxSDKClient.getInstance();
-                mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                    let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
-                    popup.setBuildingId(buildingId);
-                    popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>
-                        feature.getFeatureType() === WorkspaceFeatureTypes.AP
-                    ) as AccessPoint[]);
+            // Only activate if in simple select mode
+            if (this.draw.getMode() == 'simple_select') {
+                // Check if we clicked on a CPE
+                const features = this.map.queryRenderedFeatures(e.point);
+                if (! features.some((feat) => {return feat.source.includes('mapbox-gl-draw')})){
+                    let building = this.map.queryRenderedFeatures(e.point, {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
+                    let buildingId = building.properties?.msftid;
+                    let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+                    let mapboxClient = MapboxSDKClient.getInstance();
+                    mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
+                        popup.setBuildingId(buildingId);
+                        popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>
+                            feature.getFeatureType() === WorkspaceFeatureTypes.AP
+                        ) as AccessPoint[]);
 
-                    // Render all APs 
-                    popup.show();
-                });
+                        // Render all APs
+                        popup.show();
+                    });
+                }
             }
         });
 

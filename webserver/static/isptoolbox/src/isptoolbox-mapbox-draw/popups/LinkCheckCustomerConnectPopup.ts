@@ -113,7 +113,6 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.apConnectIndex = 0;
         this.marker.onPopupClose();
-        this.changeSelection([]);
     }
 
     highlightAllAPs() {

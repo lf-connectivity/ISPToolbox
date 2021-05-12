@@ -7,6 +7,6 @@ context('Test E2E DSM Export', () => {
   
     it('Simple Page Load Test', () => {
       // Check modal appears
-      cy.get('#DSMExportModal').should('be.visible').should('contain','DSM');
+      cy.get('#DSMExportModal').should('be.visible', {timeout: 10000}).should('contain','DSM');
     });
 })

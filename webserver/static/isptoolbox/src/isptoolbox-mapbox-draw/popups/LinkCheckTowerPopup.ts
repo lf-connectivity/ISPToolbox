@@ -147,24 +147,18 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                 feat.properties?.unknown != null && 
                 feat.properties?.unserviceable != null){
                 return `
-                    <li>
-                        <div class="ap-stat">
-                            <p>${
+                    <li class="stat-row">
+                        <div class="ap-stat" style="border: 1px solid ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
+                            <p class="ap-stat--label">Clear LOS Rooftops</p>
+                            <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">${
                                 feat.properties?.serviceable
                             }</p>
-                            <span style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">Serviceable</span>
                         </div>
-                        <div class="ap-stat">
-                            <p>${
-                                feat.properties?.unknown
-                            }</p>
-                            <span style="color: ${StyleConstants.UNKNOWN_BUILDINGS_COLOR}">Unkown</span>
-                        </div>
-                        <div class="ap-stat">
-                            <p>${
+                        <div class="ap-stat" style="border: 1px solid ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
+                            <p class="ap-stat--label">Obstructed Rooftops</p>
+                            <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">${
                                 feat.properties?.unserviceable
                             }</p>
-                            <span style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">Unserviceable</span>
                         </div>
                     </li>
             `;
@@ -186,7 +180,11 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                 <div>
                     <ul>
                         <li class="name-row">
-                            <input type='text' class="input--tower-name" id='${NAME_INPUT_ID}' value='${sanitizeName(this.accessPoint?.featureData.properties?.name)}'>
+                            <input type='text' 
+                                class="input--tower-name" 
+                                id='${NAME_INPUT_ID}' 
+                                value='${sanitizeName(this.accessPoint?.featureData.properties?.name)}' 
+                                placeholder='Tower Name'>
                             <div class="coordinates">
                                 <div class="data-with-unit">
                                     <input type='number'
@@ -212,7 +210,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                             </div>
                         </li>
                         <li>
-                            <p class="label">Access Point Height</p>
+                            <p class="label">Access Point <span>Height Above Ground</span></p>
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(
@@ -228,7 +226,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                             </div>
                         </li>
                         <li>
-                            <p class="label">Receiver Height <span>(attachment height)</span></p>
+                            <p class="label">Receiver Height <span>Height Above Surfaces</span></p>
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(

@@ -135,6 +135,9 @@
             margin-top: 5px
         .label
             margin-bottom: 0
+            span
+                display: block
+                font-size: 12px
         ul
             margin: 0
             padding: 0
@@ -165,9 +168,23 @@
             .comma
                 margin: 0 5px
                 color: $white-color
+        .stat-row
+            display: grid
+            grid-template-columns: repeat(2, 1fr)
+            grid-column-gap: 10px
         .ap-stat
-            span
-                color: $white-color
+            align-items: center
+            display: flex
+            padding: 7px
+            margin-bottom: 0
+            &--label
+                margin-bottom: 0
+                font-size: 12px
+                line-height: 16px
+            &--value
+                font-family: $brand-font-family-mono
+                margin-bottom: 0
+                margin-left: 3px
     .data-with-unit
         display: flex
         span

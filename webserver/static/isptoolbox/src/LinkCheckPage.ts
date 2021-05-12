@@ -830,7 +830,11 @@ export class LinkCheckPage {
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
         if (update.features.length && update.features[0].properties.radius === undefined && update.features[0].geometry.type !== "Point") {
-            this.showLinkCheckProfile();
+
+            // Don't pop up the link profile view if it was an AP/customer link that was moved.
+            if (!(update.features[0].properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK && update.action === 'move')) {
+                this.showLinkCheckProfile();
+            }
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
 

@@ -381,16 +381,6 @@ export class WorkspaceManager {
             this.map.getCanvas().style.cursor = '';
         });
 
-        // Render AP coverage for every AP
-        if (initialFeatures) {
-            const aps = initialFeatures?.features.filter((feature: any) => {
-                return feature.properties.feature_type !== undefined &&
-                       feature.properties.feature_type === WorkspaceFeatureTypes.AP;
-            });
-
-            this.sendCoverageRequest('', {features: aps});
-        }
-
     }
     saveFeatures({ features }: any) {
         const mode = String(this.draw.getMode());
@@ -556,9 +546,7 @@ export class WorkspaceManager {
             // Request coverage for any AP that doesn't have coverage and isn't awaiting any either
             if (apFeature.properties.uuid) {
                 let ap = this.features[apFeature.properties.uuid] as AccessPoint;
-                if (ap.coverage === EMPTY_BUILDING_COVERAGE && !ap.awaitingCoverage) {
-                    this.sendCoverageRequest('', {features: [apFeature]});
-                }
+                this.sendCoverageRequest('', {features: [apFeature]});   
             }
 
             // Hide AP tooltip if user is dragging AP.

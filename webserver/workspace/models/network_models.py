@@ -6,6 +6,11 @@ from django.contrib.gis.geos import Point, GEOSGeometry
 import json
 from workspace.utils.geojson_circle import createGeoJSONCircle
 from .model_constants import FeatureType
+from mmwave.tasks.link_tasks import getDTMPoint
+from mmwave.models import EPTLidarPointCloud
+from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
@@ -111,6 +116,13 @@ class CPELocation(WorkspaceFeature):
     name = models.CharField(max_length=100)
     height = models.FloatField()
 
+    def convert_to_dtm_height(self) -> float:
+        point = self.geojson
+        dtm = getDTMPoint(point)
+        tile_engine = DSMTileEngine(point, EPTLidarPointCloud.query_intersect_aoi(point))
+        dsm = tile_engine.getSurfaceHeight(point)
+        return self.height + dsm - dtm
+
     @property
     def height_ft(self):
         return self.height * 3.28084
@@ -119,6 +131,11 @@ class CPELocation(WorkspaceFeature):
     def feature_type(self):
         return FeatureType.CPE.value
 
+@receiver(pre_save, sender=CPELocation)
+def modify_height(sender, instance, **kwargs):
+    # we are creating the cpe for the first time
+    if instance.created is None:
+        instance.height = instance.convert_to_dtm_height()
 
 class APToCPELink(WorkspaceFeature):
     frequency = models.FloatField(default=2.437)
@@ -160,7 +177,20 @@ class AccessPointCoverageBuildings(models.Model):
         choices=CoverageCalculationStatus.choices
     )
     nearby_buildings = models.ManyToManyField(BuildingCoverage, related_name="nearby_buildings")
+    hash = models.CharField(
+        max_length=255,
+        help_text="""
+            Hashvalue to determine if result has already been calculated
+        """,
+        default=""
+    )
     created = models.DateTimeField(auto_now_add=True)
+
+    def calculate_hash(self):
+        return f'{self.ap.geojson.x},{self.ap.geojson.y},{self.ap.max_radius}'
+
+    def result_cached(self):
+        return self.hash == self.calculate_hash()
 
     def coverageStatistics(self) -> dict:
         serviceable = self.nearby_buildings.filter(

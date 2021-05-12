@@ -1,6 +1,6 @@
 from mmwave.models import EPTLidarPointCloud
 from typing import Iterable
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, Point
 from mmwave.lidar_utils import SlippyTiles
 import tempfile
 import shlex
@@ -8,7 +8,8 @@ import subprocess
 import time
 import logging
 from IspToolboxApp.util.s3 import readMultipleS3Objects
-
+import rasterio
+import math
 
 class DSMTileEngine:
     def __init__(self, polygon: GEOSGeometry, clouds: Iterable[EPTLidarPointCloud]):
@@ -36,3 +37,24 @@ class DSMTileEngine:
             cmd = shlex.split(f'gdal_merge.py -o {output_filepath} -of GTiff {" ".join(tifs)}')
             process = subprocess.Popen(cmd)
             process.wait()
+
+    def getSurfaceHeight(self, pt: Point) -> float:
+        # get tile coordinates x,y,z
+        tile_x, tile_y = SlippyTiles.deg2num(pt[1], pt[0], SlippyTiles.DEFAULT_OUTPUT_ZOOM)
+        # read the tile from s3
+        with tempfile.NamedTemporaryFile(suffix='.tif') as tmp_tif:
+            found_tif = False
+            for cloud in self.clouds:
+                if cloud.existsTile(tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM):
+                    cloud.getTile(tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, tmp_tif)
+                    found_tif = True
+                    transformed_pt = pt.transform(cloud.srs, clone=True)
+                    break
+            # get the value at that point using rasterio
+            if found_tif:
+                with rasterio.open(tmp_tif.name) as dataset:
+                    py, px = dataset.index(transformed_pt.x, transformed_pt.y)
+                    return dataset.read(1)[py, px]
+            else:
+                return math.nan
+        return math.nan

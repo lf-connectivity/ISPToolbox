@@ -6,6 +6,7 @@ from workspace.models.network_models import AccessPointLocation
 from workspace.utils.geojson_circle import destination
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
+from mmwave.tasks.link_tasks import getDTMPoint
 import math
 import tempfile
 import shlex
@@ -70,6 +71,13 @@ class ViewshedModel(models.Model, S3PublicExportMixin):
             key = 'viewshed/test-viewshed-tower-' + str(self.ap.uuid) + ('.tif' if kwargs.get('tif') else '.png')
         return key
 
+    def translate_dtm_height_to_dsm_height(self) -> float:
+        point = self.ap.geojson
+        dtm = getDTMPoint(point)
+        tile_engine = DSMTileEngine(point, EPTLidarPointCloud.query_intersect_aoi(point))
+        dsm = tile_engine.getSurfaceHeight(point)
+        return self.ap.height + dtm - dsm
+
     def createRawGDALViewshedCommand(self, dsm_filepath, output_filepath, dsm_projection):
         """
         Generate shell commmand to run gdal_viewshed: requires gdal-bin > 3.1.0
@@ -77,8 +85,9 @@ class ViewshedModel(models.Model, S3PublicExportMixin):
         documentation: https://gdal.org/programs/gdal_viewshed.html
         """
         transformed_observer = self.ap.geojson.transform(dsm_projection, clone=True)
+        transformed_height = self.translate_dtm_height_to_dsm_height()
         return f"""gdal_viewshed -b 1 -ov 1
-            -oz {self.ap.height} -tz {self.ap.default_cpe_height} -md {self.calculateRadiusViewshed()}
+            -oz {transformed_height} -tz {self.ap.default_cpe_height} -md {self.calculateRadiusViewshed()}
             -ox {transformed_observer.x} -oy {transformed_observer.y} -om {self.mode}
             {dsm_filepath} {output_filepath}
         """

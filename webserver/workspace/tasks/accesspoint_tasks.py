@@ -10,6 +10,7 @@ from workspace.tasks.websocket_utils import updateClientAPStatus
 
 import numpy as np
 import json
+import logging
 
 
 ARC_SECOND_DEGREES = 1.0 / 60.0 / 60.0
@@ -23,25 +24,34 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
     Calculate the coverage area of an access point location
     """
     ap = AccessPointLocation.objects.get(uuid=request['uuid'])
-    # Get circle geometry
-    circle_json = json.dumps(createGeoJSONCircle(ap.geojson, ap.max_radius))
-    circle = GEOSGeometry(circle_json)
-    # Find all buildings that intersect the access point radius
-    buildings = MsftBuildingOutlines.objects.filter(geog__intersects=circle).all()[0:LIMIT_BUILDINGS]
-    if AccessPointCoverageBuildings.objects.filter(ap=ap).exists():
-        AccessPointCoverageBuildings.objects.filter(ap=ap).get().delete()
-    ap_coverage = AccessPointCoverageBuildings(ap=ap)
-    ap_coverage.save()
-    nearby_buildings = []
-    for building in buildings:
-        b = BuildingCoverage(msftid=building.id)
-        b.save()
-        ap_coverage.nearby_buildings.add(b)
-        nearby_buildings.append(b)
-    ap_coverage.save()
+    building_coverage, created = AccessPointCoverageBuildings.objects.get_or_create(ap=ap)
+    if created:
+        building_coverage.save()
+    # check if the result exists already
+    if not building_coverage.result_cached():
+        logging.info('cache miss building coverage')
+        new_hash = building_coverage.calculate_hash()
+        # Get circle geometry
+        circle_json = json.dumps(createGeoJSONCircle(building_coverage.ap.geojson, building_coverage.ap.max_radius))
+        circle = GEOSGeometry(circle_json)
 
-    ap_coverage.status = AccessPointCoverageBuildings.CoverageCalculationStatus.COMPLETE.value
-    ap_coverage.save()
+        # Find all buildings that intersect the access point radius
+        buildings = MsftBuildingOutlines.objects.filter(geog__intersects=circle).all()[0:LIMIT_BUILDINGS]
+        building_coverage.nearby_buildings.clear()
+        nearby_buildings = []
+        for building in buildings:
+            b = BuildingCoverage(msftid=building.id)
+            b.save()
+            building_coverage.nearby_buildings.add(b)
+            nearby_buildings.append(b)
+        building_coverage.save()
+
+        building_coverage.status = AccessPointCoverageBuildings.CoverageCalculationStatus.COMPLETE.value
+        building_coverage.hash = new_hash
+        building_coverage.save()
+    else:
+        logging.info('cache hit building coverage')
+
     updateClientAPStatus(channel_id, ap.uuid, user_id)
 
 

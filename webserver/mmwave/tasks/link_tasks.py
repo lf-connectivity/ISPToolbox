@@ -1,5 +1,6 @@
 import requests
 import json
+import math
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
@@ -87,6 +88,15 @@ def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
         return None
 
     return []
+
+def getDTMPoint(pt: Point) -> float:
+    try:
+        params = {'key': google_maps_api_key, 'locations': f'{pt.y},{pt.x}'}
+        r = requests.get('https://maps.googleapis.com/maps/api/elevation/json', params=params)
+        elevation_resp = r.json()
+        return elevation_resp['results'][0]['elevation']
+    except Exception:
+        return math.nan
 
 
 def createLinkProfile(tx, rx, num_samples=MAXIMUM_NUM_POINTS_RETURNED):

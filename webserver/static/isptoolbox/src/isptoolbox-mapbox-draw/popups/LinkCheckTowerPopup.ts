@@ -260,11 +260,6 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                         ${this.getStatsHTML()}
                     </ul>
                 </div>
-
-                <div class="button-row">
-                    <button class='btn btn-primary isptoolbox-btn' id='${PLOT_LIDAR_BUTTON_ID}'>Plot Lidar Coverage</button>
-                    <p class="microcopy small">This may take several minutes</p>
-                </div>
             </div>
         `;
     }

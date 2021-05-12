@@ -7,6 +7,7 @@ import pytz
 from IspToolboxApp.util.admin_timeseries_util import (
     get_next_in_date_hierarchy, daterange, get_request_datetime
 )
+from django.utils.html import format_html
 
 admin.site.register(models.DSMConversionJob)
 admin.site.register(models.ViewShedJob)
@@ -16,8 +17,22 @@ admin.site.register(models.ViewShedJob)
 class TGLinkAdmin(admin.ModelAdmin):
     list_display = ("uuid", "created", "linklength_m", "fbid")
 
+class EPTLidarPointCloudAdmin(admin.ModelAdmin):
+    def potree_inspect_cloud_url(self, pointcloud):
+        """
+            URL for easy access to potree visualization
+        """
+        url = f'https://usgs.entwine.io/data/view.html?r="{pointcloud.url.replace("/ept.json","")}"'
+        return format_html(
+            '<a class="button" href="{0}" >Potree</a>&nbsp;',
+            url
+        )
+    potree_inspect_cloud_url.short_description = 'Potree inspection link'
+    potree_inspect_cloud_url.allow_tags = True
+    
+    readonly_fields = ['potree_inspect_cloud_url']
 
-admin.site.register(models.EPTLidarPointCloud)
+admin.site.register(models.EPTLidarPointCloud, EPTLidarPointCloudAdmin)
 admin.site.register(models.USGSLidarMetaDataModel)
 
 

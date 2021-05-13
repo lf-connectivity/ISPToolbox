@@ -184,6 +184,16 @@ REDIS_BACKEND=
 
 `docker run --env-file .env -p 0.0.0.0:8000:8000 -p 127.0.0.1:3000:3000 623762516657.dkr.ecr.us-west-1.amazonaws.com/isptoolbox-django:latest python manage.py runserver 0.0.0.0:8000`
 
+### Reverting production to an earlier stable build
+
+1. use the digest hash of the last stable image and tag it as `latest`
+`./scripts/change_latest_image_production.sh <DIGEST_HASH>`
+
+you can see a list of the ecr images in the aws console, or in the workflow step on github
+
+2. update the tasks in ecs, they will pull the latest image
+`./scripts/deploy_latest_image_to_prod.sh`
+
 ## Administrative
 ### M-Lab
 - Make BigQueries on M-Lab data [here](https://www.measurementlab.net/data/docs/bq/quickstart/#subscribe-your-google-account-to-the-m-lab-discuss-group)

@@ -114,9 +114,16 @@ class AccessPointLocation(WorkspaceFeature):
 
 class CPELocation(WorkspaceFeature):
     name = models.CharField(max_length=100)
-    height = models.FloatField()
+    height = models.FloatField(
+        help_text="""
+        This height value is relative to the terrain
+        """
+    )
 
     def convert_to_dtm_height(self) -> float:
+        """
+        this converts current height - relative to dsm, to relative to dsm
+        """
         point = self.geojson
         dtm = getDTMPoint(point)
         tile_engine = DSMTileEngine(point, EPTLidarPointCloud.query_intersect_aoi(point))

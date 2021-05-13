@@ -546,7 +546,9 @@ export class WorkspaceManager {
             // Request coverage for any AP that doesn't have coverage and isn't awaiting any either
             if (apFeature.properties.uuid) {
                 let ap = this.features[apFeature.properties.uuid] as AccessPoint;
-                this.sendCoverageRequest('', {features: [apFeature]});   
+                if (!ap.awaitingCoverage) {
+                    this.sendCoverageRequest('', {features: [apFeature]});   
+                }
             }
 
             // Hide AP tooltip if user is dragging AP.

@@ -89,6 +89,7 @@ def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
 
     return []
 
+
 def getDTMPoint(pt: Point) -> float:
     try:
         params = {'key': google_maps_api_key, 'locations': f'{pt.y},{pt.x}'}

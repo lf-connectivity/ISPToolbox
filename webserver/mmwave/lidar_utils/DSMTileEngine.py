@@ -11,6 +11,7 @@ from IspToolboxApp.util.s3 import readMultipleS3Objects
 import rasterio
 import math
 
+
 class DSMTileEngine:
     def __init__(self, polygon: GEOSGeometry, clouds: Iterable[EPTLidarPointCloud]):
         self.polygon = polygon

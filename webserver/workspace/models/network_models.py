@@ -131,11 +131,13 @@ class CPELocation(WorkspaceFeature):
     def feature_type(self):
         return FeatureType.CPE.value
 
+
 @receiver(pre_save, sender=CPELocation)
 def modify_height(sender, instance, **kwargs):
     # we are creating the cpe for the first time
     if instance.created is None:
         instance.height = instance.convert_to_dtm_height()
+
 
 class APToCPELink(WorkspaceFeature):
     frequency = models.FloatField(default=2.437)

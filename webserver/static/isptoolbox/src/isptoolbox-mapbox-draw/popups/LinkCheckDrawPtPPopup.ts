@@ -1,7 +1,7 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
-import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchMarker";
+import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchTool";
 
 const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-popup';
 const ADD_TOWER_BUTTON_ID = 'add-tower-btn-popup';

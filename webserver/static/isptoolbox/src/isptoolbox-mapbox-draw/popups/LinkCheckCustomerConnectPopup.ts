@@ -8,7 +8,7 @@ import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
 import { AccessPoint, CPE } from '../../workspace/WorkspaceFeatures';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from "../../workspace/WorkspaceConstants";
 import { BuildingCoverage, BuildingCoverageStatus, updateCoverageStatus } from "../../workspace/BuildingCoverage";
-import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchMarker";
+import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchTool";
 
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
 const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-customer-popup';

@@ -11,6 +11,7 @@ import json
 import logging
 import time
 import random
+import traceback
 from rasterio.errors import RasterioIOError
 from IspToolboxApp.templates.errorMsg import kmz_err_msg
 import uuid as uuidv4
@@ -240,15 +241,23 @@ class MarketEvaluatorExportNoPipeline(View):
             object_name = f'kml/ISPTOOLBOX_{unique_id}.kml'
             geoList = []
             if 'geometry' in include:
+                # User exporting single geometry (one polygon)
                 includeGeom = include['geometry']
                 if isShape:
                     shapes = includeGeom
                     shapes['layer'] = 'shape'
                     geoList.append(shapes)
             elif 'geometries' in include:
-                includeGeom = include['geometries']
+                # User exporting multiple geometries, we need to form MultiPolygon geojson.
+                coordinates = []
+                geometries = include['geometries']
+                for geometry in geometries:
+                    coordinates.append(geometry['coordinates'])
+                includeGeom = {}
+                includeGeom['coordinates'] = coordinates
+                includeGeom['type'] = "MultiPolygon"
                 if isShape:
-                    shapes = includeGeom
+                    shapes = include['geometries']
                     for i in range(len(shapes)):
                         shapes[i]['layer'] = 'shape'
                         geoList.append(shapes[i])
@@ -269,6 +278,7 @@ class MarketEvaluatorExportNoPipeline(View):
             resp = {'url': url}
         except Exception as e:
             logging.error("Internal error while exporting polygon area:" + str(e))
+            traceback.print_exc()
             resp['error'] = "Internal error while exporting"
             return JsonResponse(resp, status=500)
         return JsonResponse(resp)

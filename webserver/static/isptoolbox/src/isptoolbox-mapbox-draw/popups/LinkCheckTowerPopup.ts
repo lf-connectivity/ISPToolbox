@@ -210,7 +210,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                             </div>
                         </li>
                         <li>
-                            <p class="label">Access Point <span>Height Above Ground</span></p>
+                            <p class="label">Access Point<span>Height Above Ground</span></p>
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(
@@ -226,7 +226,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                             </div>
                         </li>
                         <li>
-                            <p class="label">Receiver Height <span>Height Above Surfaces</span></p>
+                            <p class="label">Customer Antenna<span>Height Above Surfaces</span></p>
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(

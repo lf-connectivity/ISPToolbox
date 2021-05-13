@@ -51,7 +51,7 @@ def update_community_connect():
         # Grab geojson from computed table
         cursor.execute(geo_json_sql)
         geojson = cursor.fetchone()
-        uploadNewTileset(geojson, "alexychong.bp1lmhp5")
+        uploadNewTileset(geojson, "non_urban_overlay")
         try:
             sendNotifyEmail(successSubject, successMessage)
         except Exception as e:

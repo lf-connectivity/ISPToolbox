@@ -58,6 +58,12 @@ class EPTLidarPointCloud(models.Model):
             dataset is noisy and requires outlier filtering for it to be usable
         """
     )
+    inspected = models.BooleanField(
+        default=False,
+        help_text="""
+            Point cloud has been inspected by admin for noisy data
+        """
+    )
 
     @classmethod
     def query_intersect_aoi(cls, aoi: GEOSGeometry):

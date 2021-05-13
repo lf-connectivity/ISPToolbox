@@ -17,6 +17,7 @@ admin.site.register(models.ViewShedJob)
 class TGLinkAdmin(admin.ModelAdmin):
     list_display = ("uuid", "created", "linklength_m", "fbid")
 
+
 class EPTLidarPointCloudAdmin(admin.ModelAdmin):
     def potree_inspect_cloud_url(self, pointcloud):
         """
@@ -24,13 +25,15 @@ class EPTLidarPointCloudAdmin(admin.ModelAdmin):
         """
         url = f'https://usgs.entwine.io/data/view.html?r="{pointcloud.url.replace("/ept.json","")}"'
         return format_html(
-            '<a class="button" href="{0}" >Potree</a>&nbsp;',
+            '<a class="button" target="_blank" href="{0}" >Potree</a>&nbsp;',
             url
         )
     potree_inspect_cloud_url.short_description = 'Potree inspection link'
     potree_inspect_cloud_url.allow_tags = True
-    
+
     readonly_fields = ['potree_inspect_cloud_url']
+    list_display = ['pk', 'name', 'potree_inspect_cloud_url', 'noisy_data', 'inspected']
+
 
 admin.site.register(models.EPTLidarPointCloud, EPTLidarPointCloudAdmin)
 admin.site.register(models.USGSLidarMetaDataModel)

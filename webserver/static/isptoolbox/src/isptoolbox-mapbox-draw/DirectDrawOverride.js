@@ -9,7 +9,7 @@ import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { LinkCheckBasePopup } from './popups/LinkCheckBasePopup';
 import { LinkCheckDrawPtPPopup } from './popups/LinkCheckDrawPtPPopup';
 import { MapboxSDKClient } from '../MapboxSDKClient';
-import { isBeta } from '../BetaCheck';
+import { isBeta } from '../LinkCheckUtils';
 
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings

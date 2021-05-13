@@ -7,19 +7,18 @@ import LOSCheckWS from '../LOSCheckWS';
 import type { AccessPointCoverageResponse } from '../LOSCheckWS';
 import PubSub from 'pubsub-js';
 import {isUnitsUS} from '../utils/MapPreferences';
-import {LinkCheckEvents} from '../LinkCheckPage';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature, WorkspaceLineStringFeature } from './BaseWorkspaceFeature';
 import { AccessPoint, APToCPELink, CPE } from './WorkspaceFeatures';
 import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
-import { makeItArrayIfItsNot } from "../everpolate.js";
 import { ViewshedTool } from "../organisms/ViewshedTool";
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
-import { feature } from "@turf/helpers";
 import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
+import { getStreetAndAddressInfo } from "../LinkCheckUtils";
+import { LinkCheckEvents } from "../LinkCheckPage";
 
 const DEFAULT_AP_HEIGHT = 30.48;
 const DEFAULT_CPE_HEIGHT = 1.0;
@@ -577,8 +576,17 @@ export class WorkspaceManager {
                         break;
                     case WorkspaceFeatureTypes.CPE:
                         let cpe = this.features[feature.properties.uuid] as CPE;
-                        cpe.move(feature.geometry.coordinates as [number, number]);
-                        cpe.update(feature);
+                        let mapboxClient = MapboxSDKClient.getInstance();
+                        mapboxClient.reverseGeocode(feature.geometry.coordinates, (response: any) => {
+                            let result = response.body.features;
+                            feature.properties.name = getStreetAndAddressInfo(result[0].place_name).street;
+                            cpe.move(feature.geometry.coordinates as [number, number], () => {
+                                cpe.update(feature);
+
+                                // I hate this hack
+                                $(`#radio_name-1`).text(feature.properties.name);
+                            });
+                        });
                         break;
                     default:
                         this.features[feature.properties.uuid].update(feature);

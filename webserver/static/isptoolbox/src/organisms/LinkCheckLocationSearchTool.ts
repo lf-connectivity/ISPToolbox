@@ -1,5 +1,5 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
-import { isBeta } from "../BetaCheck";
+import { isBeta } from "../LinkCheckUtils";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { LinkCheckCustomerConnectPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup";
 import { LinkCheckDrawPtPPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup";

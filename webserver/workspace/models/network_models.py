@@ -9,8 +9,8 @@ from .model_constants import FeatureType
 from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
-from django.dispatch import receiver
-from django.db.models.signals import pre_save
+# from django.dispatch import receiver
+# from django.db.models.signals import pre_save
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
@@ -139,11 +139,11 @@ class CPELocation(WorkspaceFeature):
         return FeatureType.CPE.value
 
 
-@receiver(pre_save, sender=CPELocation)
-def modify_height(sender, instance, **kwargs):
-    # we are creating the cpe for the first time
-    if instance.created is None:
-        instance.height = instance.convert_to_dtm_height()
+# @receiver(pre_save, sender=CPELocation)
+# def modify_height(sender, instance, **kwargs):
+#     # we are creating the cpe for the first time
+#     if instance.created is None:
+#         instance.height = instance.convert_to_dtm_height()
 
 
 class APToCPELink(WorkspaceFeature):

@@ -1,3 +1,8 @@
+#!/bin/bash
+# exit if any of the commands error
+set -e
+
+# Build Static Files
 npm install -g sass@1.32.8
 cd /usr/src/app/isptoolbox
 npm install

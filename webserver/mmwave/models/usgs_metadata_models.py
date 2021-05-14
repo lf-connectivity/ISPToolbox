@@ -65,6 +65,10 @@ class EPTLidarPointCloud(models.Model):
         """
     )
 
+    @property
+    def number_of_tiles(self):
+        return LidarTileModel.objects.filter(cld=self).count()
+
     @classmethod
     def query_intersect_aoi(cls, aoi: GEOSGeometry):
         query = (
@@ -105,17 +109,40 @@ class EPTLidarPointCloud(models.Model):
             key = f'{folder}{int(z)}/{int(x)}/{int(y)}/tile{kwargs.get("suffix", ".tif")}'
         return key
 
-    def getTile(self, x, y, z, fp, **kwargs):
-        return s3.readFromS3(self.get_s3_key_tile(x, y, z, **kwargs), fp)
 
-    def createTile(self, x, y, z, fp, **kwargs):
-        return s3.writeS3Object(self.get_s3_key_tile(x, y, z, **kwargs), fp)
+class TileModel(models.Model):
+    """
+    Slippy Tile that points to binary blob with DSM data
+    """
+    zoom = models.IntegerField()
+    x = models.IntegerField()
+    y = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
 
-    def deleteTile(self, x, y, z, **kwargs):
-        return s3.deleteS3Object(self.get_s3_key_tile(x, y, z, **kwargs))
+    class Meta:
+        abstract = True
 
-    def existsTile(self, x, y, z, **kwargs):
-        return s3.checkObjectExists(self.get_s3_key_tile(x, y, z, **kwargs))
+
+class LidarTileModel(TileModel):
+    """
+    Slippy Tile that is associated with Lidar point cloud
+    """
+    cld = models.ForeignKey(EPTLidarPointCloud, on_delete=models.CASCADE)
+
+    def get_s3_key_tile(self, **kwargs):
+        return self.cld.get_s3_key_tile(self.x, self.y, self.z, **kwargs)
+
+    def getTile(self, fp, **kwargs):
+        return s3.readFromS3(self.get_s3_key_tile(**kwargs), fp)
+
+    def createTile(self, fp, **kwargs):
+        return s3.writeS3Object(self.get_s3_key_tile(**kwargs), fp)
+
+    def deleteTile(self, **kwargs):
+        return s3.deleteS3Object(self.get_s3_key_tile(**kwargs))
+
+    def existsTile(self, **kwargs):
+        return s3.checkObjectExists(self.get_s3_key_tile(**kwargs))
 
 
 class USGSLidarMetaDataModel(models.Model):

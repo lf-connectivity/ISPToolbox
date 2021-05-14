@@ -26,8 +26,7 @@ def exportDSMData(DSMConversionJob_uuid):
             )
         )
     pt_clouds = query.all()
-    sources = [cld.url for cld in pt_clouds]
-    dsm_engine = DSMEngine(conversion.area_of_interest.envelope, sources)
+    dsm_engine = DSMEngine(conversion.area_of_interest.envelope, pt_clouds)
     t_estimate = create_time_estimate(conversion.area_of_interest[0].envelope)
     start_time = time.time()
 

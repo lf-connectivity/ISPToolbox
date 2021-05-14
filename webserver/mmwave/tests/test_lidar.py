@@ -53,8 +53,14 @@ class TestDSMExport(TestCase):
           ]
         ]
       }""")
-        ept_sources = ["https://s3-us-west-2.amazonaws.com/usgs-lidar-public/MS_MSDeltaYazoo-Phase1_2009/ept.json"]
-        dsm_engine = DSMEngine(polygon, ept_sources)
+        cloud1 = EPTLidarPointCloud(
+            name="cloud1", count=1,
+            url="https://s3-us-west-2.amazonaws.com/usgs-lidar-public/MS_MSDeltaYazoo-Phase1_2009/ept.json",
+            srs=3857,
+            boundary=polygon
+        )
+        cloud1.save()
+        dsm_engine = DSMEngine(polygon, [cloud1])
         created_dsm = False
         with tempfile.NamedTemporaryFile(suffix='.tif') as temp:
             dsm_engine.getDSM(20, temp.name)

@@ -1,3 +1,6 @@
-# from django.urls import path
+from django.urls import path
+from mmwave import views as mmwave_views
 
-urlpatterns = []
+urlpatterns = [
+    path('admin/start-tiling/', mmwave_views.StartTilingJobView.as_view(), name='admin-tiling'),
+]

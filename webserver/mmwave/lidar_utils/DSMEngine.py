@@ -1,6 +1,10 @@
 import subprocess
 import shlex
 import tempfile
+from typing import Iterator
+
+from django.contrib.gis.geos.geometry import GEOSGeometry
+from mmwave.models import EPTLidarPointCloud
 
 
 class DSMEngine:
@@ -9,11 +13,11 @@ class DSMEngine:
 
     Args:
         polygon: GEOSGeometry - (Geometry Collection)
-        sources: str - List of EPT Paths
+        clouds: str - List of EPT Paths
     """
-    def __init__(self, polygon, sources, projection=3857):
+    def __init__(self, polygon: GEOSGeometry, clouds: Iterator[EPTLidarPointCloud], projection=3857):
         self.polygon = polygon.transform(projection, clone=True)
-        self.sources = sources
+        self.clouds = clouds
 
     def getDSM(self, resolution, filepath, filter_outliers=False):
         """
@@ -30,11 +34,11 @@ class DSMEngine:
         """
         with tempfile.TemporaryDirectory() as tmp_dir:
             files = []
-            # Iterate over all sources
-            for source in self.sources:
+            # Iterate over all clouds
+            for cloud in self.clouds:
                 with tempfile.NamedTemporaryFile(suffix=".tif", delete=False, dir=tmp_dir) as tmp_tif:
                     files.append(tmp_tif.name)
-                    query_json = self.__createQueryPipeline(resolution, tmp_tif.name, source, filter_outliers)
+                    query_json = self.__createQueryPipeline(resolution, tmp_tif.name, cloud.url, cloud.noisy_data)
                     command = shlex.split(
                         'pdal pipeline --stdin'
                     )
@@ -42,7 +46,7 @@ class DSMEngine:
                     process.stdin.write(query_json.encode())
                     process.stdin.close()
                     process.wait()
-            # Combine sources together
+            # Combine clouds together
             process = self.__combineTifs(files, filepath)
             process.wait()
             return process
@@ -62,7 +66,7 @@ class DSMEngine:
         (has a statistical filter for outlier points )
         TODO achong: check LAS version to use classifications of high noise
         points
-        TODO achong: combine multiple sources together
+        TODO achong: combine multiple clouds together
         """
         outlier_filter = f"""
         {{
@@ -97,7 +101,7 @@ class DSMEngine:
                 "filename":"{outputfilepath}",
                 "dimension":"Z",
                 "data_type":"float",
-                "output_type":"mean",
+                "output_type":"max",
                 "gdalopts":"COMPRESS=DEFLATE,ZLEVEL=9",
                 "resolution": {resolution}
             }}

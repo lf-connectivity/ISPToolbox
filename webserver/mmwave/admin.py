@@ -20,7 +20,7 @@ class TGLinkAdmin(admin.ModelAdmin):
 class EPTLidarPointCloudAdmin(admin.ModelAdmin):
     def potree_inspect_cloud_url(self, pointcloud):
         """
-            URL for easy access to potree visualization
+        URL for easy access to potree visualization
         """
         url = f'https://usgs.entwine.io/data/view.html?r="{pointcloud.url.replace("/ept.json","")}"'
         return format_html(
@@ -30,8 +30,10 @@ class EPTLidarPointCloudAdmin(admin.ModelAdmin):
     potree_inspect_cloud_url.short_description = 'Potree inspection link'
     potree_inspect_cloud_url.allow_tags = True
 
-    readonly_fields = ['potree_inspect_cloud_url']
+    readonly_fields = ['potree_inspect_cloud_url', 'number_of_tiles']
     list_display = ['pk', 'name', 'potree_inspect_cloud_url', 'noisy_data', 'inspected']
+
+    change_form_template = 'admin/mmwave/eptlidar_point_cloud_change_form_template.html'
 
 
 admin.site.register(models.EPTLidarPointCloud, EPTLidarPointCloudAdmin)
@@ -40,7 +42,7 @@ admin.site.register(models.USGSLidarMetaDataModel)
 
 @admin.register(models.LOSSummary)
 class LOSSummaryAdmin(admin.ModelAdmin):
-    change_list_template = 'admin/los_summary_list.html'
+    change_list_template = 'admin/mmwave/los_summary_list.html'
     date_hierarchy = 'created'
 
     def changelist_view(self, request, extra_context=None):

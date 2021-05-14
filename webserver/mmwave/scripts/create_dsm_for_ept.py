@@ -1,12 +1,15 @@
 from mmwave.lidar_utils.SlippyTiles import getTiles, getBoundaryofTile, DEFAULT_OUTPUT_ZOOM
 from mmwave.lidar_utils.DSMEngine import DSMEngine
-from celery import shared_task
-from mmwave.models import EPTLidarPointCloud
+from webserver.celery import celery_app as app
+from mmwave.models import EPTLidarPointCloud, LidarTileModel
 import tempfile
 
 
-@shared_task
+@app.task
 def convertPtCloudToDSMTiled(pk: int):
+    """
+    For a point cloud create all tiles at DEFAULT_OUTPUT_ZOOM
+    """
     cloud = EPTLidarPointCloud.objects.get(pk=pk)
     boundary = (
         cloud.high_resolution_boundary if cloud.high_resolution_boundary else
@@ -20,15 +23,19 @@ def convertPtCloudToDSMTiled(pk: int):
             createTileDSM.delay(tile, DEFAULT_OUTPUT_ZOOM, pk)
 
 
-@shared_task
+@app.task
 def createTileDSM(tile: tuple, z: int, pk: int):
     # Load the Tile and the Point Cloud
     x, y = tile
     cloud = EPTLidarPointCloud.objects.get(pk=pk)
+    lidartile, created = LidarTileModel.objects.get_or_create(
+        cloud=cloud, zoom=z, x=x, y=y
+    )
     boundary_tile = getBoundaryofTile(x, y, DEFAULT_OUTPUT_ZOOM)
     # If tile is valid run computation
-    if not cloud.existsTile(x, y, z):
-        engine = DSMEngine(boundary_tile, [cloud.url])
+    if created:
+        engine = DSMEngine(boundary_tile, [cloud])
         with tempfile.NamedTemporaryFile(suffix='.tif') as tmp_tif:
             engine.getDSM(1.0, tmp_tif.name)
-            cloud.createTile(x, y, z, tmp_tif)
+            lidartile.createTile(tmp_tif)
+    lidartile.save()

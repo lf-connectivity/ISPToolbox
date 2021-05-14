@@ -64,6 +64,7 @@ urlpatterns = [
     # Path mmWave Planner
     path('mmwave-planner/', MMWavePlannerView.as_view(), name='mmwaveplanner'),
     path('help-center/', MMWaveHelpCenterView.as_view(), name='mmwaveplanner-helpcenter'),
+    path('', include('mmwave.urls')),
     # Path Overlay
     path('overlay/', OverlaySource.as_view(), name='overlay_source'),
     path('asn/', ASNElasticSearchView.as_view(), name="asn-search"),

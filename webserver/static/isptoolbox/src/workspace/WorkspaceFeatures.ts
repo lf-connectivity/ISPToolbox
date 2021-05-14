@@ -68,7 +68,8 @@ export class AccessPoint extends WorkspacePointFeature {
 
                 // Link is already deleted in backend because of cascading delete
                 this.draw.delete(link.mapboxId);
-                this.map.fire('draw.delete', {features: [link.featureData]});
+                this.draw.delete(cpe.mapboxId);
+                this.map.fire('draw.delete', {features: [cpe.featureData, link.featureData]});
             });
             this.links.clear();
 

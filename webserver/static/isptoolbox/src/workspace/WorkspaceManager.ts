@@ -63,7 +63,7 @@ export class LOSModal {
         );
 
         // Open Modal
-        
+
     }
 
     getAccessPoints(msg: string, data : {ordering: string | null, page: number | string | null} | null) {
@@ -155,8 +155,8 @@ export class LOSModal {
                 });
             })
             const feats = ap.map((feat:any) => this.draw.get(feat.id));
-            this.map.fire('draw.update', {features: feats, action: 'move'});   
-            PubSub.publish(WorkspaceEvents.AP_UPDATE, feats[0]);        
+            this.map.fire('draw.update', {features: feats, action: 'move'});
+            PubSub.publish(WorkspaceEvents.AP_UPDATE, feats[0]);
         });
 
         $('.sort-ap').on('click', (event) => {
@@ -192,13 +192,18 @@ export class WorkspaceManager {
         // Initialize features
         this.features = {};
 
-        // Add APs and CPEs
-        const nonLinks = initialFeatures?.features.filter((feature: any) => {
-            return feature.properties.feature_type !== undefined && 
-                   (feature.properties.feature_type === WorkspaceFeatureTypes.AP ||
-                    feature.properties.feature_type === WorkspaceFeatureTypes.CPE);
-        });
-        
+        // Add Workspace features from user, if they exist.
+        if (initialFeatures) {
+            const nonLinks = initialFeatures?.features.filter((feature: any) => {
+                return feature.properties.feature_type !== undefined &&
+                       (feature.properties.feature_type === WorkspaceFeatureTypes.AP ||
+                        feature.properties.feature_type === WorkspaceFeatureTypes.CPE);
+            });
+
+            nonLinks.forEach((feature: any) => {
+                let feature_type = feature.properties.feature_type;
+                let workspaceFeature = undefined;
+
                 // Add all the APs and CPEs
                 if (feature_type === WorkspaceFeatureTypes.AP) {
                     feature.properties.radius = feature.properties.max_radius;
@@ -210,13 +215,13 @@ export class WorkspaceManager {
                 }
                 this.features[workspaceFeature.workspaceId] = workspaceFeature;
             });
-    
+
             // Add links
             const links = initialFeatures?.features.filter((feature: any) => {
-                return feature.properties.feature_type !== undefined && 
+                return feature.properties.feature_type !== undefined &&
                        feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK;
             });
-            
+
             links.forEach((feature: any) => {
                 let apWorkspaceId = feature.properties.ap;
                 let cpeWorkspaceId = feature.properties.cpe;
@@ -235,7 +240,7 @@ export class WorkspaceManager {
         this.map.on('draw.update', this.updateFeatures.bind(this));
         this.map.on('draw.selectionchange', this.drawSelectionChangeCallback.bind(this));
         this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
-        
+
         // Add Visualization Layers
         this.map.addSource(ACCESS_POINT_RADIUS_VIS_DATA, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
         this.map.addLayer({
@@ -336,19 +341,35 @@ export class WorkspaceManager {
             const selectedAPs = this.filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.AP);
             const apPopup = LinkCheckTowerPopup.getInstance();
             if (selectedAPs.length === 1) {
-                apPopup.setAccessPoint(this.features[selectedAPs[0].properties.uuid] as AccessPoint);
-                apPopup.show();
+                let ap = this.features[selectedAPs[0].properties.uuid] as AccessPoint;
+
+                // if the AP is the same, do nothing. If it's different, popup should reappear in the other place.
+                if (apPopup.getAccessPoint() !== ap) {
+                    // Setting this timeout so the natural mouseclick close popup trigger resolves
+                    // before this one
+                    setTimeout(() => {
+                        apPopup.hide();
+                        apPopup.setAccessPoint(ap);
+                        apPopup.show();
+                    }, 1);
+                }
             }
             else if (selectedAPs.length > 1) {
                 apPopup.hide();
             }
         }
 
-        // Toggle showing AP tooltip upon clicking on an AP.
-        this.map.on('click', 'gl-draw-point-ap-symbol-inactive.cold', onClickPoint);
-        this.map.on('click', 'gl-draw-point-ap-halo-inactive.cold', onClickPoint);
-        this.map.on('click', 'gl-draw-point-ap-symbol-inactive.hot', onClickPoint);
-        this.map.on('click', 'gl-draw-point-ap-halo-inactive.hot', onClickPoint);
+        // Keep trying to load the AP onClick event handler until we can find layers
+        // to do this, then stop.
+        const loadOnClick = () => {
+            this.map.getStyle().layers?.forEach((layer: any) => {
+                if (layer.id.includes('gl-draw-point-ap')) {
+                    this.map.on('click', layer.id, onClickPoint);
+                    this.map.off('idle', loadOnClick)
+                }
+            });
+        }
+        this.map.on('idle', loadOnClick)
 
         // Change the cursor to a pointer when the mouse is over the states layer.
         this.map.on('mouseenter', ACCESS_POINT_BUILDING_LAYER, () => {
@@ -363,10 +384,10 @@ export class WorkspaceManager {
         // Render AP coverage for every AP
         if (initialFeatures) {
             const aps = initialFeatures?.features.filter((feature: any) => {
-                return feature.properties.feature_type !== undefined && 
+                return feature.properties.feature_type !== undefined &&
                        feature.properties.feature_type === WorkspaceFeatureTypes.AP;
             });
-            
+
             this.sendCoverageRequest('', {features: aps});
         }
 
@@ -521,7 +542,7 @@ export class WorkspaceManager {
     filterByType(list: Array<any>, feat_type: WorkspaceFeatureTypes) {
         return list.filter((feat: any) => {
             return (feat.properties && feat.properties.feature_type) ?
-                feat.properties.feature_type === feat_type : false; 
+                feat.properties.feature_type === feat_type : false;
         });
     }
 
@@ -666,7 +687,7 @@ export class WorkspaceManager {
         $.ajax({
             url: `/pro/workspace/api/ap-los/coverage/stats/${message.uuid}/`,
             success: (resp) => {
-                const features = 
+                const features =
                     this.draw.getAll().features.filter(
                         (f: GeoJSON.Feature) => {return f.properties?.uuid === message.uuid}
                     );

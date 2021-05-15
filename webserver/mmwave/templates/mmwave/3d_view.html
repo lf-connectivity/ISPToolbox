@@ -1,15 +1,14 @@
 <!-- Modal -->
 {% load static %}
 
-<div id="3d-view-container" class="d-none">
-  <div>
-    <div class="potree_container" >
-      <div id="potree_render_area" style="width:100%;position: absolute; min-height: 400px;">
-      </div>
-      {% include "mmwave/molecules/webgl2_error.html" %}
-      <div id="potree_sidebar_container" class="d-none"> </div>
-    </div>      
+<div id="3d-view-container" class="d-none" style="position: absolute; width: 100%">
+  <div class="potree_container" >
+    <div id="potree_render_area" style="width:100%; min-height: 400px;">
+    </div>
+    {% include "mmwave/molecules/webgl2_error.html" %}
+    <div id="potree_sidebar_container" class="d-none"> </div>
   </div>
+  {% include 'mmwave/atoms/3d_help.html' %}
 </div>
 
 <style>

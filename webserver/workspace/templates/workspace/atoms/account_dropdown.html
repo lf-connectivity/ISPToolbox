@@ -18,7 +18,7 @@
                 <path d="M1.35355 0.646447L1 0.292893L0.292893 1L0.646447 1.35355L1.35355 0.646447ZM4 4L3.64645 4.35355L4 4.70711L4.35355 4.35355L4 4ZM7.35355 1.35355L7.70711 1L7 0.292893L6.64645 0.646447L7.35355 1.35355ZM0.646447 1.35355L3.64645 4.35355L4.35355 3.64645L1.35355 0.646447L0.646447 1.35355ZM4.35355 4.35355L7.35355 1.35355L6.64645 0.646447L3.64645 3.64645L4.35355 4.35355Z" fill="black"/>
             </svg>                
         </a>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-top: 1rem!important;">
             <a class="dropdown-item" href="{% url 'account_view' %}">Manage Account</a>
             <a class="dropdown-item" href="#">Privacy/Terms</a>
             <a class="dropdown-item" href="{% url 'logout_view' %}?next={% url 'isptoolbox_pro_home'%}">Logout</a>

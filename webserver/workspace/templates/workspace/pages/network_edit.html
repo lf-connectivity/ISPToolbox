@@ -3,8 +3,9 @@
 <html lang="en">
   {% include "mmwave/header.html" %}
 <body>
+    {% include "workspace/organisms/workspace_nav.html" %}
     {% include "mmwave/map_view.html" %}
-    <script src="{% static "wireless_network.min.js" %}"> </script>
+    <script async src="{% static "wireless_network.min.js" %}"> </script>
     {% include "mmwave/3d_view.html" %}
     {% include "mmwave/link_view.html" %}
     <script type="text/javascript"> 

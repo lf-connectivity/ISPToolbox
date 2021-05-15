@@ -193,7 +193,9 @@ export class LinkCheckPage {
         const resize_window = () => {
             const window_height = $(window).height();
             const bottom_row_height = $('#bottom-row-link-view-container').height()
-            let height = window_height != null && bottom_row_height != null ? window_height - bottom_row_height : 0;
+            const nav_height = $('#workspacenavelem').outerHeight(true);
+            let height = (window_height != null && bottom_row_height != null)  ? window_height - bottom_row_height : 0;
+            height = nav_height != null ? height - nav_height : height;
             height = Math.max(height, 400);
             $('#map').height(height);
             if (this.map != null) {
@@ -201,6 +203,10 @@ export class LinkCheckPage {
             }
             $('#3d-view-container').height(height);
             $('#potree_render_area').height(height);
+            
+            if(this.link_chart){
+                this.link_chart.redraw();
+            }
         }
         resize_window();
         $(window).resize(
@@ -271,8 +277,6 @@ export class LinkCheckPage {
             this.mouseLeave.bind(this),
             this.setExtremes.bind(this),
         );
-        //@ts-ignore
-        window.chart = this.link_chart;
 
         this.profileWS = new LOSCheckWS(
             this.networkID,

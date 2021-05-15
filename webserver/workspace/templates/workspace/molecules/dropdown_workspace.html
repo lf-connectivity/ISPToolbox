@@ -1,0 +1,21 @@
+{% load static %}
+<div class="d-flex flex-row">
+    <img src="{% static 'isptoolbox_favicon--light.png' %}" style="height: 25px; width: 25px;" class="my-auto mr-3">
+    {% if beta %}
+    <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle workspace-nav-dropdown-toggle d-flex flex-row" href="#" id="navbarDropdown" role="button"
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="navbar-toggler-icon my-auto mr-3" style="width: 1em !important; height: 1em !important;"></span>
+            <h5 class="my-auto mr-1" id="session_name_workspace">viewing: untitled workspace</h5>
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">New Workspace</a>
+            <div class=""></div>
+            <a class="dropdown-item" href="#">Import KML/KMZ</a>
+            <a class="dropdown-item" href="#">Open</a>
+            <a class="dropdown-item" href="#">Save Session As</a>
+            <a class="dropdown-item" href="#">Export Session as KMZ</a>
+        </div>
+    </div>
+    {% endif %}
+</div>

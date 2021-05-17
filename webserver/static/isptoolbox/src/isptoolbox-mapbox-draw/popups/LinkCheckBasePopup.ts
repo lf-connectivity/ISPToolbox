@@ -38,13 +38,11 @@ export abstract class LinkCheckBasePopup {
 
     show() {
         this.popup.setLngLat(this.lnglat)
-                  .setHTML(this.getHTML());
-
         if (!this.popup.isOpen()) {
+            this.popup.setHTML(this.getHTML());
             this.popup.addTo(this.map);
+            this.setEventHandlers();
         }
-
-        this.setEventHandlers();
     }
 
     hide() {

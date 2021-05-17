@@ -14,7 +14,7 @@ import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { ViewshedTool } from "../organisms/ViewshedTool";
-import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
+import { BuildingCoverage, BuildingCoverageStatus, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
@@ -578,6 +578,10 @@ export class WorkspaceManager {
                         let ap = this.features[feature.properties.uuid] as AccessPoint;
                         ap.move(feature.geometry.coordinates as [number, number], () => {
                             ap.update(feature, () => {
+                                Object.keys(BuildingCoverageStatus).forEach((status: string) => {
+                                    this.draw.setFeatureProperty(ap.mapboxId, status, null);
+                                });
+                                LinkCheckTowerPopup.onAPUpdate(ap);
                                 if (apPopup.getAccessPoint() === ap) {
                                     apPopup.onAPStopMoving();
                                     apPopup.show();
@@ -681,13 +685,27 @@ export class WorkspaceManager {
                     this.draw.getAll().features.filter(
                         (f: GeoJSON.Feature) => {return f.properties?.uuid === message.uuid}
                     );
+                
+                // Set last updated time
+                // TODO: non-US formats when we expand internationally with isUnitsUS false
+                const now = Intl.DateTimeFormat('en-US', {
+                    year: '2-digit',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).format(Date.now());
+                
+                // Set serviceable, unserviceable, and unknown
                 features.forEach((feat: GeoJSON.Feature) => {
                     for (const [key, value] of Object.entries(resp)) {
                         this.draw.setFeatureProperty(
                             (feat.id as string), key, value
                         );
                     }
+                    this.draw.setFeatureProperty((feat.id as string), 'last_updated', now);
                 });
+                LinkCheckTowerPopup.onAPUpdate(this.features[message.uuid] as AccessPoint);
             },
             "method": "GET",
             "headers": {

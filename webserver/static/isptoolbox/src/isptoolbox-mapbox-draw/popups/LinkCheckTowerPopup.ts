@@ -5,6 +5,7 @@ import { AccessPoint } from "../../workspace/WorkspaceFeatures";
 import { isUnitsUS } from '../../utils/MapPreferences';
 import { ft2m, miles2km } from "../../LinkCalcUtils";
 import * as StyleConstants from '../styles/StyleConstants';
+import ap_icon from '../styles/ap-icon.svg';
 
 var _ = require('lodash');
 
@@ -14,7 +15,7 @@ const LNG_INPUT_ID = 'lng-input-tower-popup';
 const HGT_INPUT_ID = 'hgt-input-tower-popup';
 const CPE_HGT_INPUT_ID = 'cpe-hgt-input-tower-popup';
 const RADIUS_INPUT_ID = 'radius-input-tower-popup';
-const PLOT_LIDAR_BUTTON_ID = 'plot-lidar-coverage-btn-tower-popup';
+const STATS_LI_ID = 'stats-li-tower-popup';
 
 enum ImperialToMetricConversion {
     FT_TO_M = 'ft2m',
@@ -62,6 +63,13 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
 
         // @ts-ignore
         this.setLngLat(this.accessPoint.featureData.geometry.coordinates);
+    }
+
+    static onAPUpdate(ap: AccessPoint) {
+        const popup = LinkCheckTowerPopup.getInstance();
+        if (popup.accessPoint === ap) {
+            $(`#${STATS_LI_ID}`).html(popup.getStatsHTML());
+        }
     }
 
     static getInstance() {
@@ -143,28 +151,36 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         if (this.accessPoint?.featureData.id){
             const feat = this.draw.get(this.accessPoint?.featureData.id as string);
             if(feat &&
-                feat.properties?.serviceable != null && 
+                feat.properties?.serviceable != null &&
                 feat.properties?.unknown != null && 
-                feat.properties?.unserviceable != null){
+                feat.properties?.unserviceable != null &&
+                feat.properties.unknown === 0){
                 return `
-                    <li class="stat-row">
-                        <div class="ap-stat" style="border: 1px solid ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
-                            <p class="ap-stat--label">Clear LOS Rooftops</p>
-                            <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">${
-                                feat.properties?.serviceable
-                            }</p>
-                        </div>
-                        <div class="ap-stat" style="border: 1px solid ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
-                            <p class="ap-stat--label">Obstructed Rooftops</p>
-                            <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">${
-                                feat.properties?.unserviceable
-                            }</p>
-                        </div>
-                    </li>
+                    <div class="ap-stat" style="border: 1px solid ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
+                        <p class="ap-stat--label">Clear LOS Rooftops</p>
+                        <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">${
+                            feat.properties?.serviceable
+                        }</p>
+                    </div>
+                    <div class="ap-stat" style="border: 1px solid ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
+                        <p class="ap-stat--label">Obstructed Rooftops</p>
+                        <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">${
+                            feat.properties?.unserviceable
+                        }</p>
+                    </div>
+                    <div style="grid-column: 1/ -1">
+                        <p align="center">Coverage updated ${feat.properties?.last_updated}</p>
+                    </div>
             `;
             }
         }
-        return '';
+        return `
+            <div align="center" style="grid-column: 1/ -1">
+                <img src="${ap_icon}" height="40" width="40">
+                <p align="center"><b>Plotting Lidar Coverage</p>
+                <p align="center">This may take several minutes</p>
+            </div>
+        `;
     }
 
     protected getHTML() {
@@ -257,7 +273,9 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                                 <span>${isUnitsUS() ? 'mi' : 'km'}</span>
                             </div>
                         </li>
-                        ${this.getStatsHTML()}
+                        <li class="stat-row" id=${STATS_LI_ID}>
+                            ${this.getStatsHTML()}
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 from django.test import RequestFactory, TestCase
 from django.contrib.gis.geos import Point
-from mmwave.models import ViewShedJob
+from workspace.models import ViewshedModel, AccessPointLocation
 from IspToolboxAccounts.models import User
 
 
@@ -16,15 +16,16 @@ class TestViewshedSimple(TestCase):
     def test_create_job(self):
         observer = Point(y=33.54510, x=-90.53714)
         height = 80  # meteres
-        target_height = 2  # meters
-        job = ViewShedJob(
+        ap = AccessPointLocation(
+            name="hi",
             owner=self.user,
-            observer=observer,
-            observer_height=height,
-            target_height=target_height,
-            radius=500
+            geojson=observer,
+            max_radius=3,
+            height=height
         )
-        job.save()
-        self.assertTrue(len(str(job.uuid)) > 10)
+        ap.save()
+        vs = ViewshedModel(ap=ap)
+        vs.save()
+        self.assertTrue(vs.pk > 0)
 
         # tasks.renderViewshed(job.uuid)

@@ -343,17 +343,13 @@ export class WorkspaceManager {
             const apPopup = LinkCheckTowerPopup.getInstance();
             if (selectedAPs.length === 1) {
                 let ap = this.features[selectedAPs[0].properties.uuid] as AccessPoint;
-
-                // if the AP is the same, do nothing. If it's different, popup should reappear in the other place.
-                if (apPopup.getAccessPoint() !== ap) {
-                    // Setting this timeout so the natural mouseclick close popup trigger resolves
-                    // before this one
-                    setTimeout(() => {
-                        apPopup.hide();
-                        apPopup.setAccessPoint(ap);
-                        apPopup.show();
-                    }, 1);
-                }
+                // Setting this timeout so the natural mouseclick close popup trigger resolves
+                // before this one
+                setTimeout(() => {
+                    apPopup.hide();
+                    apPopup.setAccessPoint(ap);
+                    apPopup.show();
+                }, 1);
             }
             else if (selectedAPs.length > 1) {
                 apPopup.hide();
@@ -490,7 +486,6 @@ export class WorkspaceManager {
 
                         // Get rid of tower tooltip if the APs match
                         if (popup.getAccessPoint() === ap) {
-                            popup.onAPStopMoving();
                             popup.hide();
                         }
                         workspaceFeature.delete((resp) => {
@@ -560,7 +555,6 @@ export class WorkspaceManager {
                     apFeature.geometry.coordinates[1] !== currentPopupAp.featureData.geometry.coordinates[1]
                 )
                 ) {
-                apPopup.onAPStartMoving();
                 apPopup.hide();
             }
         });
@@ -583,10 +577,6 @@ export class WorkspaceManager {
                                     this.draw.setFeatureProperty(ap.mapboxId, status, null);
                                 });
                                 LinkCheckTowerPopup.onAPUpdate(ap);
-                                if (apPopup.getAccessPoint() === ap) {
-                                    apPopup.onAPStopMoving();
-                                    apPopup.show();
-                                }
                             });
                         });
                         break;

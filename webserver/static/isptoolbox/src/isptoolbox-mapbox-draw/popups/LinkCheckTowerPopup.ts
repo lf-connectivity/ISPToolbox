@@ -54,17 +54,6 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         this.setLngLat(accessPoint.featureData.geometry.coordinates);
     }
 
-    onAPStartMoving() {
-        this.accessPointMoving = true;
-    }
-
-    onAPStopMoving() {
-        this.accessPointMoving = false;
-
-        // @ts-ignore
-        this.setLngLat(this.accessPoint.featureData.geometry.coordinates);
-    }
-
     static onAPUpdate(ap: AccessPoint) {
         const popup = LinkCheckTowerPopup.getInstance();
         if (popup.accessPoint === ap) {

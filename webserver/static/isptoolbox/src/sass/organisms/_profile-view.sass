@@ -67,7 +67,7 @@
             width: 1.25e  
 
 body
-    @media screen and (max-width: 991px)
+    @media screen and (max-width: $breakpoint-lg)
         .link-view-bar
             top: -16px
             position: relative !important
@@ -90,4 +90,10 @@ body
             top: -16px
             position: relative !important
 
+    @media screen and (min-width: $breakpoint-lg)
+        .view-container-3d
+            position: absolute
 
+    @media screen and (max-width: $breakpoint-lg-max)
+        #potree_render_area
+            position: static

@@ -1,3 +1,4 @@
+@import ../theme
 .planner-map
     width: 100%
     min-height: 400px
@@ -16,7 +17,7 @@
 .geocoder
     display: block
 
-@media screen and (min-width: 991px) and ( min-height: 800px)
+@media screen and (min-width: $breakpoint-lg) and ( min-height: 800px)
     .planner-map
         position: fixed !important
 
@@ -33,8 +34,6 @@
     .top-bar-wisp
         position: absolute !important
         top: 15px
-    
-
 
 #map-available
     width:100%
@@ -43,5 +42,5 @@
 
 .map-container-network
     position: relative
-    @media screen and (min-width: 991px) and ( min-height: 800px)
+    @media screen and (min-width: $breakpoint-lg) and ( min-height: 800px)
         position: absolute

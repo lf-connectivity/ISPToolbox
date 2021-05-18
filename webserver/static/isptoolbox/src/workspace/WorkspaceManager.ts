@@ -1,6 +1,6 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
 import * as _ from "lodash";
-import { Feature, Geometry, Point, LineString, GeoJsonProperties, Position }  from 'geojson';
+import { Geometry, GeoJsonProperties }  from 'geojson';
 import { createGeoJSONCircle } from "../isptoolbox-mapbox-draw/RadiusModeUtils.js";
 import { getCookie } from '../utils/Cookie';
 import LOSCheckWS from '../LOSCheckWS';
@@ -8,7 +8,7 @@ import type { AccessPointCoverageResponse } from '../LOSCheckWS';
 import PubSub from 'pubsub-js';
 import {isUnitsUS} from '../utils/MapPreferences';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
-import { BaseWorkspaceFeature, WorkspaceLineStringFeature } from './BaseWorkspaceFeature';
+import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { AccessPoint, APToCPELink, CPE } from './WorkspaceFeatures';
 import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { MapboxSDKClient } from "../MapboxSDKClient";
@@ -17,6 +17,7 @@ import { ViewshedTool } from "../organisms/ViewshedTool";
 import { BuildingCoverage, BuildingCoverageStatus, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
+import { FeatureCollection } from "@turf/turf";
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
 import { LinkCheckEvents } from "../LinkCheckPage";
 
@@ -307,7 +308,7 @@ export class WorkspaceManager {
         // Add Pubsub Callbacks
         this.ws.setAccessPointCallback(this.accessPointStatusCallback.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.sendCoverageRequest.bind(this));
-        PubSub.subscribe(WorkspaceEvents.AP_RENDER, this.renderAccessPointRadius.bind(this));
+        PubSub.subscribe(WorkspaceEvents.AP_RENDER, this.renderSelectedAccessPoints.bind(this));
         // @ts-ignore
         // $('#bulkUploadAccessPoint').modal('show');
 
@@ -614,8 +615,20 @@ export class WorkspaceManager {
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features: aps});
     }
 
-    renderAccessPointRadius(msg: string, data: any){
-        const fc = this.draw.getSelected();
+    renderSelectedAccessPoints(msg: string, data: any){
+        // If there are selected APs, only render circles/buildings for those, otherwise render all.
+        let fc = this.draw.getSelected();
+        if (fc.features.length === 0) {
+            fc = this.draw.getAll();
+        }
+        this.renderAccessPointRadius(fc)
+    }
+    
+    /**
+     * Renders access point circles and buildings from the given features.
+     * @param fc - FeatureCollection of features to select and render APs from.
+     */
+    renderAccessPointRadius(fc: FeatureCollection<Geometry, GeoJsonProperties>){
         const circle_feats : Array<any> = [];
         const selectedAPs : Array<AccessPoint> = [];
         fc.features.forEach((feat: any) => {
@@ -624,7 +637,7 @@ export class WorkspaceManager {
                     const new_feat = createGeoJSONCircle(
                             feat.geometry,
                             feat.properties.radius,
-                            feat.properties.parent);
+                            feat.id);
                     circle_feats.push(new_feat);
 
                     // render coverage
@@ -635,27 +648,21 @@ export class WorkspaceManager {
                 }
             }
         });
+        // Replace radius features with selected
         const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
-        if(
-            radiusSource.type ==='geojson' &&
-            this.getFeatures(WorkspaceFeatureTypes.AP).length > 0 &&
-            circle_feats.length !== 0
-        ){
+        if(radiusSource.type ==='geojson'){
             radiusSource.setData({type: 'FeatureCollection', features: circle_feats});
         }
 
+        // Replace building features with selected
         const buildingSource = this.map.getSource(ACCESS_POINT_BUILDING_DATA);
-        if(
-            buildingSource.type ==='geojson' &&
-            selectedAPs.length !== 0 &&
-            this.getFeatures(WorkspaceFeatureTypes.AP).length > 0
-        ){
-                const coverage = BuildingCoverage.union(selectedAPs.map(ap => {
-                    return ap.coverage;
-                }));
-                buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
-            }
+        if(buildingSource.type ==='geojson'){
+            const coverage = BuildingCoverage.union(selectedAPs.map(ap => {
+                return ap.coverage;
+            }));
+            buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
         }
+    }
 
     sendCoverageRequest(msg: string, data: {features: Array<GeoJSON.Feature>}){
         data.features.forEach((f: GeoJSON.Feature) => {

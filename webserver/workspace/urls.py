@@ -1,5 +1,4 @@
 from django.urls import path
-from workspace.views import DefaultWorkspaceView, DefaultNetworkView, DeleteNetworkView, EditNetworkView, MultiplayerTestView
 from workspace import views
 from mmwave.views import CreateExportDSM
 from IspToolboxAccounts.views import CreateAccountView
@@ -56,7 +55,6 @@ urlpatterns = [
     path('workspace/cookie-policy/', views.Cookies.as_view(), name="cookies"),
 
     # Multiplayer
-    path('workspace/multiplayer/demo/', MultiplayerTestView.as_view(), name='multiplayer_demo'),
-    path('workspace/multiplayer/demo/<uuid:session_id>/', MultiplayerTestView.as_view(), name='multiplayer_demo_uuid'),
+    path('workspace/multiplayer/demo/', views.MultiplayerTestView.as_view(), name='multiplayer_demo'),
+    path('workspace/multiplayer/demo/<uuid:session_id>/', views.MultiplayerTestView.as_view(), name='multiplayer_demo_uuid'),
 ]
-

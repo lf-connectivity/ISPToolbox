@@ -7,7 +7,7 @@ import json
 from workspace import geojson_utils
 from workspace.models import AccessPointLocation, CPELocation, APToCPELink
 from workspace.models.model_constants import FeatureType
-from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
+from workspace.models import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
 
 
 ################################################################################

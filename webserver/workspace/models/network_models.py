@@ -1,50 +1,23 @@
 from django.db import models
 from django.conf import settings
+from rest_framework import serializers
 import uuid
 from django.contrib.gis.db import models as geo_models
-from django.contrib.gis.geos import Point, GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry
 import json
 from workspace.utils.geojson_circle import createGeoJSONCircle
 from .model_constants import FeatureType
 from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
-# from django.dispatch import receiver
-# from django.db.models.signals import pre_save
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
 
-class Network(models.Model):
-    name = models.CharField(max_length=100)
-    uuid = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
-    created_date = models.DateField(auto_now_add=True, editable=False)
-    last_edited = models.DateField(auto_now_add=True)
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    map_center = geo_models.PointField(default=Point(-97.03125, 36.59788913307022))
-    zoom_level = models.FloatField(default=3.75)
-
-    @staticmethod
-    def toFeatureCollection(data):
-        return {
-                'type': 'FeatureCollection',
-                'features': [
-                    {
-                        'type': 'Feature',
-                        'geometry': {'type': 'LineString', 'coordinates': [radio['location'] for radio in link['radios']]},
-                        'properties': {k: v for k, v in link.items() if k not in ['radios', 'network']}
-                    } for link in data['ptplinks']
-                ],
-                'properties': {key: value for key, value in data.items() if key != 'ptplinks'}
-            }
-
-
 class WorkspaceFeature(models.Model):
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    session = models.ForeignKey('workspace.WorkspaceMapSession', on_delete=models.CASCADE, null=True, default=None)
     geojson = geo_models.PointField()
     uuid = models.UUIDField(
         primary_key=True,
@@ -53,6 +26,20 @@ class WorkspaceFeature(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def get_features_for_session(cls, user, session, serializer=None):
+        objects = cls.objects.filter(owner=user, session=session).all()
+        return {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'geometry': json.loads(obj.geojson.json),
+                    'properties': {k: v for k, v in serializer(obj).data.items() if k != 'geojson'} if serializer else None
+                } for obj in objects
+            ]
+        }
 
     @classmethod
     def get_features_for_user(cls, user, serializer=None):
@@ -112,6 +99,20 @@ class AccessPointLocation(WorkspaceFeature):
         return aoi.envelope
 
 
+class AccessPointSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    lookup_field = 'uuid'
+    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    height_ft = serializers.FloatField(read_only=True)
+    max_radius_miles = serializers.FloatField(read_only=True)
+    feature_type = serializers.CharField(read_only=True)
+    default_cpe_height_ft = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = AccessPointLocation
+        exclude = ['created']
+
+
 class CPELocation(WorkspaceFeature):
     name = models.CharField(max_length=100)
     height = models.FloatField(
@@ -139,6 +140,18 @@ class CPELocation(WorkspaceFeature):
         return FeatureType.CPE.value
 
 
+class CPESerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    lookup_field = 'uuid'
+    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    height_ft = serializers.FloatField(read_only=True)
+    feature_type = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = CPELocation
+        exclude = ['created']
+
+
 # @receiver(pre_save, sender=CPELocation)
 # def modify_height(sender, instance, **kwargs):
 #     # we are creating the cpe for the first time
@@ -155,6 +168,25 @@ class APToCPELink(WorkspaceFeature):
     @property
     def feature_type(self):
         return FeatureType.AP_CPE_LINK.value
+
+
+class APToCPELinkSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    lookup_field = 'uuid'
+    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    feature_type = serializers.CharField(read_only=True)
+    ap = serializers.PrimaryKeyRelatedField(
+        queryset=AccessPointLocation.objects.all(),
+        pk_field=serializers.UUIDField()
+    )
+    cpe = serializers.PrimaryKeyRelatedField(
+        queryset=CPELocation.objects.all(),
+        pk_field=serializers.UUIDField()
+    )
+
+    class Meta:
+        model = APToCPELink
+        exclude = ['created']
 
 
 class BuildingCoverage(models.Model):
@@ -229,6 +261,12 @@ class Radio(models.Model):
     installation_height = models.FloatField(default=10)
 
 
+class RadioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Radio
+        fields = '__all__'
+
+
 class PTPLink(models.Model):
     name = models.CharField(max_length=100)
     uuid = models.UUIDField(
@@ -239,4 +277,10 @@ class PTPLink(models.Model):
     frequency = models.FloatField(default=2.4)
     radios = models.ManyToManyField(Radio)
 
-    network = models.ForeignKey(Network, on_delete=models.CASCADE, related_name='ptplinks')
+
+class PTPLinkSerializer(serializers.ModelSerializer):
+    radios = RadioSerializer(many=True)
+
+    class Meta:
+        model = PTPLink
+        fields = '__all__'

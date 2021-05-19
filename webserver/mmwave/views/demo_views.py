@@ -20,7 +20,7 @@ from celery import states
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from workspace.models import NetworkMapPreferences, AccessPointLocation, CPELocation, APToCPELink
-from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
+from workspace.models import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
 from workspace import geojson_utils
 from django.utils.translation import gettext as _
 

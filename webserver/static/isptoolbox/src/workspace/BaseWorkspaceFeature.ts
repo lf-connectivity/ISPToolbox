@@ -3,6 +3,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Point, LineString, GeoJsonProperties }  from 'geojson';
 import { WorkspaceEvents } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
+import { getSessionID } from '../utils/MapPreferences';
 
 const BASE_WORKSPACE_RESPONSE_FIELDS = ['uuid', 'feature_type', 'last_updated']
 
@@ -161,6 +162,7 @@ export abstract class BaseWorkspaceFeature {
             }
         });
         serialization.geojson = JSON.stringify(this.featureData.geometry);
+        serialization.session = getSessionID();
         return serialization;
     }
 }

@@ -19,7 +19,7 @@ import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckT
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { FeatureCollection } from "@turf/turf";
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
-import { LinkCheckEvents } from "../LinkCheckPage";
+import { getSessionID } from '../utils/MapPreferences';
 
 const DEFAULT_AP_HEIGHT = 30.48;
 const DEFAULT_CPE_HEIGHT = 1.0;
@@ -67,7 +67,12 @@ export class LOSModal {
 
     }
 
-    getAccessPoints(msg: string, data : {ordering: string | null, page: number | string | null} | null) {
+    getAccessPoints(msg: string, data : {session: string | null, ordering: string | null | undefined, page: number | string | null | undefined} | null) {
+        if (data != null){
+            data['session'] = getSessionID();
+        } else {
+            data = {session: getSessionID(), ordering: undefined, page : undefined};
+        }
         $.get('/pro/workspace/api/ap-los/', data ? data : '', (result) => {
             $('#ap-list-modal-body').html(result);
         }, 'html').done(() => { PubSub.publish(WorkspaceEvents.APS_LOADED) });

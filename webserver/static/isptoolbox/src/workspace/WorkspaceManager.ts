@@ -243,28 +243,6 @@ export class WorkspaceManager {
         this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
 
         // Add Visualization Layers
-        this.map.addSource(ACCESS_POINT_RADIUS_VIS_DATA, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
-        this.map.addLayer({
-            'id': ACCESS_POINT_RADIUS_VIS_LAYER_FILL,
-            'type': 'fill',
-            'source': ACCESS_POINT_RADIUS_VIS_DATA,
-            'layout': {},
-            'paint': {
-            'fill-color': '#1172a9',
-            'fill-opacity': 0.4,
-            }});
-        this.map.addLayer({
-            'id': ACCESS_POINT_RADIUS_VIS_LAYER_LINE,
-            'type': 'line',
-            'source': ACCESS_POINT_RADIUS_VIS_DATA,
-            'layout': {},
-            'paint': {
-            'line-color': '#1172a9',
-            'line-dasharray': [0.2, 2],
-            'line-width': 2
-        }});
-
-
         this.map.addSource(ACCESS_POINT_BUILDING_DATA, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
         this.map.addLayer({
             'id': ACCESS_POINT_BUILDING_OUTLINE_LAYER,
@@ -294,7 +272,28 @@ export class WorkspaceManager {
             'paint': {
                 'fill-opacity': 0,
             }
-        });
+        },ACCESS_POINT_BUILDING_OUTLINE_LAYER);
+
+        this.map.addSource(ACCESS_POINT_RADIUS_VIS_DATA, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
+        this.map.addLayer({
+            'id': ACCESS_POINT_RADIUS_VIS_LAYER_FILL,
+            'type': 'fill',
+            'source': ACCESS_POINT_RADIUS_VIS_DATA,
+            'layout': {},
+            'paint': {
+            'fill-color': '#1172a9',
+            'fill-opacity': 0.4,
+        }}, ACCESS_POINT_BUILDING_LAYER));
+        this.map.addLayer({
+            'id': ACCESS_POINT_RADIUS_VIS_LAYER_LINE,
+            'type': 'line',
+            'source': ACCESS_POINT_RADIUS_VIS_DATA,
+            'layout': {},
+            'paint': {
+            'line-color': '#1172a9',
+            'line-dasharray': [0.2, 2],
+            'line-width': 2
+        }}, ACCESS_POINT_BUILDING_LAYER);
 
         this.map.addSource(EMPTY_SOURCE_AFTER_BUILDING, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
         this.map.addLayer({
@@ -303,7 +302,7 @@ export class WorkspaceManager {
             'source': EMPTY_SOURCE_AFTER_BUILDING,
             'layout': {},
             'paint': {}
-        });
+        }, ACCESS_POINT_BUILDING_LAYER);
 
         // Add Pubsub Callbacks
         this.ws.setAccessPointCallback(this.accessPointStatusCallback.bind(this));

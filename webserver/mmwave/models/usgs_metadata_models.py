@@ -104,10 +104,17 @@ class EPTLidarPointCloud(models.Model):
     def get_s3_key_tile(self, x, y, z, **kwargs):
         folder = self.get_s3_folder_key(**kwargs)
         if settings.PROD or kwargs.get('tile_prod', True):
-            key = f'{folder}{int(z)}/{int(x)}/{int(y)}/tile{kwargs.get("suffix", ".tif")}'
+            key = f'{folder}{int(z)}/{int(x)}/{int(y)}{kwargs.get("suffix", ".tif")}'
         else:
-            key = f'{folder}{int(z)}/{int(x)}/{int(y)}/tile{kwargs.get("suffix", ".tif")}'
+            key = f'{folder}{int(z)}/{int(x)}/{int(y)}{kwargs.get("suffix", ".tif")}'
         return key
+
+    def existsTile(self, x, y, z, **kwargs):
+        # Use or statement to allow development machines to get tiles
+        return (
+            LidarTileModel.objects.filter(cld=self, x=x, y=y, zoom=z).exists() or
+            s3.checkObjectExists(self.get_s3_key_tile(x, y, z, **kwargs))
+        )
 
 
 class TileModel(models.Model):

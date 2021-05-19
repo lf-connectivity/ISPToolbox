@@ -9,14 +9,14 @@ import numpy as np
 DEFAULT_INTERPOLATION_STEP = 50. / 100.  # cm
 DEFAULT_FILTERS = {
     'outlier': {
-        "class": 7,
+        "class": 18,
         "type": "filters.outlier",
         "method": "statistical",
         "mean_k": 12,
         "multiplier": 2.2
     },
     'circle': {
-        "class": 7,
+        "class": 18,
         "type": "filters.outlier",
         "method": "radius",
         "radius": 50.0,
@@ -59,7 +59,8 @@ def takeMaxHeightAtDistance(distance, heights):
 
 def getLidarPointsAroundLink(
             ept_path, link, ept_transform, resolution,
-            num_samples, interpolation_step=DEFAULT_INTERPOLATION_STEP, link_buffer=3
+            num_samples, interpolation_step=DEFAULT_INTERPOLATION_STEP, link_buffer=3,
+            use_outlier_filter=True
         ):
     link_length = geopy_distance(lonlat(link[0][0], link[0][1]), lonlat(link[1][0], link[1][1])).meters
     # TODO achong: - create link buffer based on LIDAR cloud reference frame units
@@ -76,11 +77,13 @@ def getLidarPointsAroundLink(
                 "resolution" : {resolution},
                 "polygon": ["{link_T.buffer(link_buffer).wkt}/ EPSG: 3857"]
             }},
-            {json.dumps(DEFAULT_FILTERS['outlier'])},
-            {{
-                "type": "filters.range",
-                "limits": "Classification![7:7]"
-            }},
+            {(
+                json.dumps(DEFAULT_FILTERS['outlier']) + ',' +
+                json.dumps({
+                    "type": "filters.range",
+                    "limits": "Classification![18:18]"
+                }) + ','
+            ) if use_outlier_filter else ''}
             {{
                 "type":"filters.crop",
                 "polygon":"{link_T.buffer(link_buffer).wkt}"

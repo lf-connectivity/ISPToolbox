@@ -17,5 +17,5 @@
 {% block content %}
     {{ session|json_script:"session_information" }}
     <script defer src="{% static "multiplayer_test.min.js" %}"> </script>
-    <div id="map" style = "width: 100%; height: calc(100vh - 70px); background-color: black;"></div>
+    <div id="map" style = "margin-top: 70px; width: 100%; height: calc(100vh - 70px); background-color: black;"></div>
 {% endblock %}

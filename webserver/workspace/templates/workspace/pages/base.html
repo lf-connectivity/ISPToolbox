@@ -14,10 +14,8 @@
 
             {% include "workspace/organisms/nav.html" %}
         </header>
-        <div class="container flex-grow-1" style="margin-top: 70px;">
-            {% block content %}
-            {% endblock %}
-        </div>
+        {% block content %}
+        {% endblock %}
         <footer>
             {% include "workspace/organisms/footer.html" %}
         </footer>

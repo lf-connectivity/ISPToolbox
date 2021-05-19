@@ -12,6 +12,9 @@ import rasterio
 import math
 
 
+USE_OLD_TILES = "/tile"
+
+
 class DSMTileEngine:
     def __init__(self, polygon: GEOSGeometry, clouds: Iterable[EPTLidarPointCloud]):
         self.polygon = polygon
@@ -29,7 +32,7 @@ class DSMTileEngine:
                 for cloud in self.clouds:
                     # if cloud.existsTile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM):
                     with tempfile.NamedTemporaryFile(suffix='.tif', delete=False, dir=tmp_dir) as tmp_tif:
-                        jobs.append(cloud.get_s3_key_tile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM))
+                        jobs.append(cloud.get_s3_key_tile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES))
                         tifs.append(tmp_tif.name)
                         break
             logging.info(f'Time to generate jobs: {time.time() - start} jobs:{ len(jobs)}')
@@ -46,8 +49,8 @@ class DSMTileEngine:
         with tempfile.NamedTemporaryFile(suffix='.tif') as tmp_tif:
             found_tif = False
             for cloud in self.clouds:
-                if cloud.existsTile(tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM):
-                    cloud.getTile(tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, tmp_tif)
+                if cloud.existsTile(tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES):
+                    cloud.getTile(tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, tmp_tif, old_path=USE_OLD_TILES)
                     found_tif = True
                     transformed_pt = pt.transform(cloud.srs, clone=True)
                     break

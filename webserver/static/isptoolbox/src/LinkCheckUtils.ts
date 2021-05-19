@@ -1,3 +1,5 @@
+import { validateNumber, validateString } from "./molecules/InputValidator";
+
 const US_STATE_ABBREVIATIONS = {
     'Alabama': 'AL',
     'Alaska': 'AK',
@@ -50,6 +52,20 @@ const US_STATE_ABBREVIATIONS = {
     'Wyoming': 'WY',
 };
 
+export const MIN_LAT = -90;
+export const MAX_LAT = 90;
+
+export const MIN_LNG = -180;
+export const MAX_LNG = 180;
+
+export const MIN_RADIUS = 0.01;
+export const MAX_RADIUS = 10;
+
+export const MIN_HEIGHT = 0;
+export const MAX_HEIGHT = 1000;
+
+export const MAX_TOWER_NAME_LEN = 50;
+
 const DEFAULT_STREET = 'Unknown Street Name';
 
 export function isBeta() : boolean{
@@ -74,3 +90,9 @@ export function getStreetAndAddressInfo(mapboxPlace: string) {
         street: components[3] || DEFAULT_STREET
     };
 }
+
+export const validateLng = validateNumber.bind(undefined, MIN_LNG, MAX_LNG);
+export const validateLat = validateNumber.bind(undefined, MIN_LAT, MAX_LAT);
+export const validateRadius = validateNumber.bind(undefined, MIN_RADIUS, MAX_RADIUS);
+export const validateHeight = validateNumber.bind(undefined, MIN_HEIGHT, MAX_HEIGHT);
+export const validateTowerName = validateString.bind(undefined, MAX_TOWER_NAME_LEN);

@@ -27,7 +27,7 @@ import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
 import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
-import { isBeta } from './LinkCheckUtils';
+import { isBeta, validateHeight, validateLat, validateLng } from './LinkCheckUtils';
 import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
@@ -557,9 +557,9 @@ export class LinkCheckPage {
             // Update Callbacks for Radio Heights
             $('#hgt-0').change(
                 _.debounce((e: any) => {
+                    let height = validateHeight(parseFloat(String($('#hgt-0').val())), 'hgt-0');
                     this.updateLinkChart(true);
                     if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
-                        let height = parseFloat(String($('#hgt-0').val()));
                         if (this.workspaceLinkSelected()) {
                             // @ts-ignore
                             let link = this.draw.get(this.selectedFeatureID);
@@ -577,9 +577,9 @@ export class LinkCheckPage {
             );
             $('#hgt-1').change(
                 _.debounce((e: any) => {
+                    let height = validateHeight(parseFloat(String($('#hgt-1').val())), 'hgt-1');
                     this.updateLinkChart(true);
                     if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
-                        let height = parseFloat(String($('#hgt-1').val()));
                         if (this.workspaceLinkSelected()) {
                             // @ts-ignore
                             let link = this.draw.get(this.selectedFeatureID);
@@ -595,12 +595,13 @@ export class LinkCheckPage {
                     }
                 }, 500)
             );
-            const createRadioCoordinateChangeCallback = (id: string, coord1: number, coord2: number) => {
-                $(id).change(
+            const createRadioCoordinateChangeCallback = (id: string, coord1: number, coord2: number, validatorFunction: (n: number, id: string) => number) => {
+                let htmlId = `#${id}`;
+                $(htmlId).change(
                     _.debounce(() => {
                         if (this.selectedFeatureID != null) {
                             const feat = this.draw.get(this.selectedFeatureID);
-                            const newVal = parseFloat(String($(id).val()));
+                            const newVal = validatorFunction(parseFloat(String($(htmlId).val())), id);
                             if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
                                 if (this.workspaceLinkSelected()) {
                                     // @ts-ignore
@@ -627,10 +628,10 @@ export class LinkCheckPage {
                     }, 500)
                 );
             }
-            createRadioCoordinateChangeCallback('#lng-0', 0, 0);
-            createRadioCoordinateChangeCallback('#lat-0', 0, 1);
-            createRadioCoordinateChangeCallback('#lng-1', 1, 0);
-            createRadioCoordinateChangeCallback('#lat-1', 1, 1);
+            createRadioCoordinateChangeCallback('lng-0', 0, 0, validateLng);
+            createRadioCoordinateChangeCallback('lat-0', 0, 1, validateLat);
+            createRadioCoordinateChangeCallback('lng-1', 1, 0, validateLng);
+            createRadioCoordinateChangeCallback('lat-1', 1, 1, validateLat);
 
 
             $('#3D-view-btn').click(() => {

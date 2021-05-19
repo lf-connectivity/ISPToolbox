@@ -1,11 +1,15 @@
 from django.views import View
 from workspace.models import (
-    Network, AccessPointLocation, AccessPointCoverageBuildings, NetworkMapPreferences,
+    AccessPointLocation, AccessPointCoverageBuildings,
     CPELocation, APToCPELink
 )
 from workspace import pagination
 from gis_data.models import MsftBuildingOutlines
-from workspace import serializers
+from workspace.models import (
+    AccessPointSerializer,
+    CPESerializer, APToCPELinkSerializer, WorkspaceMapSessionSerializer,
+    WorkspaceMapSession
+)
 from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
 import json
@@ -16,11 +20,11 @@ class NetworkDetail(mixins.ListModelMixin,
                     mixins.CreateModelMixin,
                     mixins.UpdateModelMixin,
                     generics.RetrieveAPIView):
-    serializer_class = serializers.NetworkSerializer
+    serializer_class = WorkspaceMapSessionSerializer
 
     def get_queryset(self):
         user = self.request.user
-        return Network.objects.filter(owner=user)
+        return WorkspaceMapSession.objects.filter(owner=user)
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -32,30 +36,13 @@ class NetworkDetail(mixins.ListModelMixin,
         return self.create(request, *args, **kwargs)
 
 
-class NetworkMapPreferencesView(mixins.UpdateModelMixin,
-                                generics.RetrieveAPIView):
-    serializer_class = serializers.NetworkMapPreferencesSerializer
-
-    def get_object(self):
-        user = self.request.user
-        obj, _ = NetworkMapPreferences.objects.get_or_create(owner=user)
-        return obj
-
-    def get_queryset(self):
-        user = self.request.user
-        return NetworkMapPreferences.objects.filter(owner=user)
-
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
-
-
 class AccessPointLocationListCreate(mixins.ListModelMixin,
                                     mixins.CreateModelMixin,
                                     generics.GenericAPIView):
-    serializer_class = serializers.AccessPointSerializer
+    serializer_class = AccessPointSerializer
     lookup_field = 'uuid'
 
-    renderer_classes = [renderers.TemplateHTMLRenderer, renderers.JSONRenderer]
+    renderer_classes = [renderers.TemplateHTMLRenderer, renderers.JSONRenderer, renderers.BrowsableAPIRenderer]
     template_name = "workspace/molecules/access_point_pagination.html"
 
     pagination_class = pagination.IspToolboxCustomAjaxPagination
@@ -66,7 +53,8 @@ class AccessPointLocationListCreate(mixins.ListModelMixin,
 
     def get_queryset(self):
         user = self.request.user
-        return AccessPointLocation.objects.filter(owner=user)
+        session = self.request.GET.get('session')
+        return AccessPointLocation.objects.filter(owner=user, session=session)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -86,7 +74,7 @@ class AccessPointLocationGet(mixins.RetrieveModelMixin,
                              mixins.DestroyModelMixin,
                              mixins.UpdateModelMixin,
                              generics.GenericAPIView):
-    serializer_class = serializers.AccessPointSerializer
+    serializer_class = AccessPointSerializer
     lookup_field = 'uuid'
 
     def get_queryset(self):
@@ -105,7 +93,7 @@ class AccessPointLocationGet(mixins.RetrieveModelMixin,
 
 class CPELocationCreate(mixins.CreateModelMixin,
                         generics.GenericAPIView):
-    serializer_class = serializers.CPESerializer
+    serializer_class = CPESerializer
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -115,7 +103,7 @@ class CPELocationGet(mixins.RetrieveModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
                      generics.GenericAPIView):
-    serializer_class = serializers.CPESerializer
+    serializer_class = CPESerializer
     lookup_field = 'uuid'
 
     def get_queryset(self):
@@ -134,7 +122,7 @@ class CPELocationGet(mixins.RetrieveModelMixin,
 
 class APToCPELinkCreate(mixins.CreateModelMixin,
                         generics.GenericAPIView):
-    serializer_class = serializers.APToCPELinkSerializer
+    serializer_class = APToCPELinkSerializer
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -144,7 +132,7 @@ class APToCPELinkGet(mixins.RetrieveModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
                      generics.GenericAPIView):
-    serializer_class = serializers.APToCPELinkSerializer
+    serializer_class = APToCPELinkSerializer
     lookup_field = 'uuid'
 
     def get_queryset(self):

@@ -1,0 +1,26 @@
+<div class="modal fade" id="saveAsModal" tabindex="-1" role="dialog" aria-labelledby="saveAsModalLabel" aria-hidden="true">
+    <form action="{% url 'session_saveas' %}" method="POST">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="saveAsModalLabel">Save As</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="isptoolbox-form mx-auto" >
+                {% csrf_token %}
+                {{ workspace_forms.save_as_session }}
+                <input type="text" value="{{session.uuid}}" hidden name="session">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary isptoolbox-btn" data-dismiss="modal">Close</button>
+            <input type="submit" class="btn btn-primary isptoolbox-btn" value="Submit">
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+   

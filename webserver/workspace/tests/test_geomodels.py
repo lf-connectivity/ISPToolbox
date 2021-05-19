@@ -181,6 +181,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
                 'uuid': str(self.test_ap.uuid),
+                'session': None,
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
                 'feature_type': FeatureType.AP.value,
@@ -201,6 +202,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
                 'uuid': str(self.test_cpe.uuid),
+                'session': None,
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
             }
@@ -216,6 +218,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'ap': str(self.test_ap.uuid),
                 'cpe': str(self.test_cpe.uuid),
                 'uuid': str(self.test_ap_cpe_link.uuid),
+                'session': None,
                 'feature_type': FeatureType.AP_CPE_LINK.value
             }
         }
@@ -361,6 +364,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
+                'session': None,
                 'uuid': str(self.test_ap.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
@@ -377,6 +381,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
+                'session': None,
                 'uuid': str(self.test_cpe.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
@@ -401,6 +406,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
+                'session': None,
                 'uuid': str(self.test_ap.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,

@@ -1,0 +1,109 @@
+{% load rest_framework %}
+{% if results %}
+{% with ordering=results.serializer.context.ordering units=request.GET.units %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Session Name
+        {% if ordering == "name"%}
+        <a name="" class="sort-ap" ordering-target="-name">
+          {% include 'workspace/atoms/arrow_icon.html' %}
+        </a>
+        {% else %}
+        <a name="" class="sort-ap" ordering-target="name">
+          {% with flip=True %}
+          {% include 'workspace/atoms/arrow_icon.html' %}
+          {% endwith %}
+        </a>
+        {% endif %}
+      </th>
+      <th scope="col">Number of Towers
+        {% if ordering == "number_of_towers"%}
+        <a name="" class="sort-ap" ordering-target="-number_of_towers">
+          {% include 'workspace/atoms/arrow_icon.html' %}
+        </a>
+        {% else %}
+        <a name="" class="sort-ap" ordering-target="number_of_towers">
+          {% with flip=True %}
+          {% include 'workspace/atoms/arrow_icon.html' %}
+          {% endwith %}
+        </a>
+        {% endif %}
+      </th>
+      <th scope="col">Created
+        {% if ordering == "last_updated"%}
+        <a class="sort-ap" ordering-target="-created">
+          {% include 'workspace/atoms/arrow_icon.html' %}
+        </a>
+        {% else %}
+        <a class="sort-ap" ordering-target="created">
+          {% with flip=True %}
+          {% include 'workspace/atoms/arrow_icon.html' %}
+          {% endwith %}
+        </a>
+        {% endif %}
+      </th>
+      <th scope="col">Last Modified
+        {% if ordering == "last_updated"%}
+        <a class="sort-ap" ordering-target="-last_updated">
+          {% include 'workspace/atoms/arrow_icon.html' %}
+        </a>
+        {% else %}
+        <a class="sort-ap" ordering-target="last_updated">
+          {% with flip=True %}
+          {% include 'workspace/atoms/arrow_icon.html' %}
+          {% endwith %}
+        </a>
+        {% endif %}
+      </th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for session in results %}
+    {% include 'workspace/atoms/workspace_session_row.html' %}
+    {% endfor %}
+  </tbody>
+</table>
+<input class="d-none" id="ap-modal-ordering" value="{{ordering}}">
+<input class="d-none" id="ap-modal-page-num" value="{{current}}">
+<nav class="d-flex">
+<ul class="pagination">
+  {% if previous or next %}
+  {% if previous %}
+    <li class="page-item previous ap-modal-page-change" page-target="{{previous}}">
+      <a class="page-link" href="#">&laquo; Previous</a>
+    </li>
+  {% else %}
+    <li class="page-item previous disabled">
+      <span class="page-link">
+        &laquo; Previous
+    </span>
+    </li>
+  {% endif %}
+
+  {% if next %}
+    <li class="page-item next ap-modal-page-change" page-target="{{next}}" >
+      <a class="page-link" href="#">Next &raquo;</a>
+    </li>
+  {% else %}
+    <li class="page-item next disabled">
+      <span class="page-link">
+        Next &raquo;
+      </span>
+    </li>
+  {% endif %}
+  {% endif %}
+</ul>
+</nav>
+
+
+{% endwith %}
+{% else %}
+<div class="text-center">
+  {% include 'workspace/atoms/missing_icon.html' %}
+  <h3>No access points</h3>
+  <p>To get started: place an access point on the map or select bulk import.</p>
+</div>
+{% endif %}

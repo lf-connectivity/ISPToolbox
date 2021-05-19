@@ -1,0 +1,20 @@
+{% load rest_framework %}
+
+<tr>
+    <th scope="row">{{ forloop.counter0|add:offset }}</th>
+    <td><input name="name" type="text" value="{{ session.name }}" ap-uuid-target="{{session.uuid}}" disabled></td>
+    <td>{{session.number_of_towers}}</td>
+    <td>{{session.created}}</td>
+    <td>{{session.last_updated}}</td>
+    <td class="d-flex">
+        <button type="button" class="btn btn-primary isptoolbox-btn d-none" id="ap-save-edit-{{session.uuid}}"  data-target="{{session.uuid}}">
+            Save
+        </button>
+        <a class="btn btn-secondary isptoolbox-btn ap-edit-btn" href="{% url 'edit_network' session.uuid session.name %}">
+            Open
+        </a>
+        <button type="button" class="btn btn-danger isptoolbox-btn session-delete-btn" data-target="{{session.uuid}}">
+            Delete
+        </button>
+    </td>
+</tr>

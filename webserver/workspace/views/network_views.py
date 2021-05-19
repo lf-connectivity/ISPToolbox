@@ -1,59 +1,16 @@
 from django.shortcuts import render, redirect
 from django.views import View
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponseRedirect
-from django.db.models import Count
 from django.http import JsonResponse
 from django.contrib.gis.geos import Point
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import LoginRequiredMixin
 import csv
-import uuid
 
-from workspace import geojson_utils
-from workspace.models import Network, AccessPointLocation, CPELocation, APToCPELink, NetworkMapPreferences
-from workspace.forms import NetworkForm, UploadTowerCSVForm
-from workspace.serializers import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
+from workspace.models import AccessPointLocation
+from workspace import models as workspace_models
+from workspace.forms import UploadTowerCSVForm, WorkspaceForms
 
 
-@method_decorator(login_required, name='dispatch')
-class DefaultNetworkView(View):
-    def get(self, request):
-        order = request.GET.get('order', '-last_edited')
-        networks = Network.objects.filter(owner=request.user).all().annotate(num_links=Count('ptplinks')).order_by(order)
-        page = request.GET.get('page', 1)
-        paginator = Paginator(networks, 10)
-        try:
-            networks = paginator.page(page)
-        except PageNotAnInteger:
-            networks = paginator.page(1)
-        except EmptyPage:
-            networks = paginator.page(paginator.num_pages)
-        return render(request, 'workspace/pages/network_page.html', {
-                    'networks': networks,
-                    'form': NetworkForm(),
-                    'order': order
-                    }
-                )
-
-    def post(self, request):
-        form = NetworkForm(request.POST)
-
-        if form.is_valid() and not request.user.is_anonymous:
-            form.instance.owner = request.user
-            form.save()
-            return HttpResponseRedirect('/pro/networks/')
-        else:
-            return HttpResponseRedirect('/error/')
-
-
-class DeleteNetworkView(View):
-    def post(self, request, network_id=None):
-        Network.objects.filter(uuid=network_id, owner=request.user).all().delete()
-        return HttpResponseRedirect('/pro/networks/')
-
-
-class BulkUploadTowersView(View):
+class BulkUploadTowersView(LoginRequiredMixin, View):
     def post(self, request):
         if not request.user.is_anonymous:
             try:
@@ -73,24 +30,32 @@ class BulkUploadTowersView(View):
         return redirect(request.GET.get('next', '/pro'))
 
 
-@method_decorator(login_required, name='dispatch')
-class EditNetworkView(View):
-    def get(self, request, network_id=None):
-        network = Network.objects.filter(uuid=network_id, owner=request.user).first()
-        if network is None:
-            network = {'uuid': uuid.uuid4()}
-        aps = AccessPointLocation.get_features_for_user(request.user, AccessPointSerializer)
-        cpes = CPELocation.get_features_for_user(request.user, CPESerializer)
-        links = APToCPELink.get_features_for_user(request.user, APToCPELinkSerializer)
-        geojson = geojson_utils.merge_feature_collections(aps, cpes, links)
-        map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)
+class EditNetworkView(LoginRequiredMixin, View):
+    def get(self, request, session_id=None, name=None):
+        if session_id is None:
+            if workspace_models.WorkspaceMapSession.objects.filter(owner=request.user).exists():
+                session = workspace_models.WorkspaceMapSession.objects.filter(
+                    owner=request.user
+                ).order_by('-last_updated').first()
+                return redirect("edit_network", session.uuid, session.name)
+            else:
+                session = workspace_models.WorkspaceMapSession(owner=request.user)
+                session.save()
+                return redirect("edit_network", session.uuid, session.name)
+
+        session = workspace_models.WorkspaceMapSession.objects.filter(
+            owner=request.user,
+            uuid=session_id
+        ).get()
+
+        geojson = session.get_session_geojson(request)
         context = {
-            'network': network,
+            'session': session,
             'geojson': geojson,
+            'workspace_forms': WorkspaceForms(request),
             'should_collapse_link_view': True,
             'beta': True,
             'units': 'US',
             'tower_upload_form': UploadTowerCSVForm,
-            'map_preferences': map_preferences,
         }
         return render(request, 'workspace/pages/network_edit.html', context)

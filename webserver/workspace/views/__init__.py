@@ -1,11 +1,15 @@
 from .login_views import (
     DefaultWorkspaceView, OptionalInfoWorkspaceView, OptionalInfoWorkspaceUpdateView, AccountSettingsView,
 )
-from .network_views import DefaultNetworkView, DeleteNetworkView, EditNetworkView, BulkUploadTowersView
+from .network_views import EditNetworkView, BulkUploadTowersView
 from .rest_views import (
-    NetworkDetail, AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
-    NetworkMapPreferencesView, CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
+    AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
+    CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
     AccessPointCoverageStatsView,
+)
+from .session_views import (
+    SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView,
+    SessionDuplicateRename,
 )
 from .error_views import Error500View, Error404View, Error403View
 from .social_views import FBDeauthorizeSocialView, FBDataDeletionView
@@ -14,10 +18,12 @@ from .multiplayer_views import MultiplayerTestView
 
 
 __all__ = [
-    'DefaultWorkspaceView', 'DefaultNetworkView', 'AccountSettingsView', 'DeleteNetworkView', 'EditNetworkView',
+    'DefaultWorkspaceView', 'AccountSettingsView', 'EditNetworkView',
     'BulkUploadTowersView', 'NetworkDetail', 'AccessPointLocationListCreate', 'AccessPointLocationGet',
     'CPELocationCreate', 'CPELocationGet', 'APToCPELinkCreate', 'APToCPELinkGet',
     'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'AccessPointCoverageStatsView',
+    'SessionCreateUpdateView', 'SessionListView', 'SessionDeleteView', 'SessionDownloadView',
+    'SessionDuplicateRename',
     'Error500View', 'Error404View', 'Error403View',
     'OptionalInfoWorkspaceView', 'OptionalInfoWorkspaceUpdateView',
     'FBDeauthorizeSocialView', 'FBDataDeletionView',

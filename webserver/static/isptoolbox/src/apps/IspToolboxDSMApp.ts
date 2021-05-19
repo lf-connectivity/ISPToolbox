@@ -218,10 +218,10 @@ class DSMUploadAOIForm {
 }
 
 $(() => {
+    // @ts-ignore
+    $('#DSMExportModal').modal('show');
     const mapDefault = getMapDefault();
     // Create Map Object
     mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
     new DSMExportApp(mapDefault);
-    // @ts-ignore
-    $('#DSMExportModal').modal('show');
 });

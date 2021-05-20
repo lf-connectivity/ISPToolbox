@@ -26,7 +26,7 @@ class WorkspaceMapSession(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
 
     # Map Preferences
-    center = geo_models.PointField(default=Point(-97.03125, 36.59788913307022))
+    center = geo_models.PointField(default=Point(-97.03125, 36.59789))
     zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
 
     duplicate_fks = [AccessPointLocation, CPELocation, APToCPELink]
@@ -50,9 +50,10 @@ class WorkspaceMapSession(models.Model):
             kwargs[field.name] = getattr(self, field.name)
 
         kwargs.pop('uuid')
-        kwargs.update(
-            {'name': new_name}
-        )
+        if new_name is not None:
+            kwargs.update(
+                {'name': new_name}
+            )
         new_instance = self.__class__(**kwargs)
         new_instance.save()
         # now you have id for the new instance so you can

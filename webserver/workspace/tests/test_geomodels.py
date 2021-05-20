@@ -3,9 +3,12 @@ from django.test import TestCase
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.test import APIClient
 import json
+from uuid import UUID
 
 from workspace import geojson_utils
-from workspace.models import AccessPointLocation, CPELocation, APToCPELink
+from workspace.models import (
+    AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession
+)
 from workspace.models.model_constants import FeatureType
 from workspace.models import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
 
@@ -118,9 +121,15 @@ class WorkspaceBaseTestCase(TestCase):
         )
         self.testuser.save()
 
+        self.test_session = WorkspaceMapSession(
+            owner=self.testuser,
+        )
+        self.test_session.save()
+
         self.test_ap = AccessPointLocation(
             owner=self.testuser,
             name=DEFAULT_NAME,
+            session=self.test_session,
             geojson=DEFAULT_TEST_POINT,
             height=DEFAULT_HEIGHT,
             max_radius=DEFAULT_MAX_RADIUS
@@ -130,6 +139,7 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_cpe = CPELocation(
             owner=self.testuser,
             name=DEFAULT_NAME,
+            session=self.test_session,
             geojson=DEFAULT_TEST_POINT,
             height=DEFAULT_HEIGHT
         )
@@ -138,6 +148,7 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_ap_cpe_link = APToCPELink(
             owner=self.testuser,
             frequency=DEFAULT_FREQUENCY,
+            session=self.test_session,
             geojson=DEFAULT_TEST_LINESTRING,
             ap=self.test_ap,
             cpe=self.test_cpe
@@ -155,6 +166,12 @@ class WorkspaceBaseTestCase(TestCase):
             if 'properties' in feature and 'last_updated' in feature['properties']:
                 del feature['properties']['last_updated']
 
+    def json_dumps(self, data):
+        """
+        Parses UUID properly
+        """
+        return json.dumps(data, default=lambda x: str(x) if isinstance(x, UUID) else None)
+
 
 class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
     def get_feature_collection_flow(self, model_cls, serializer, expected_features):
@@ -162,7 +179,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(
             json.dumps(self.build_feature_collection(expected_features)),
-            json.dumps(feature_collection)
+            self.json_dumps(feature_collection)
         )
 
     def test_feature_types(self):
@@ -181,7 +198,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
                 'uuid': str(self.test_ap.uuid),
-                'session': None,
+                'session': str(self.test_session.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
                 'feature_type': FeatureType.AP.value,
@@ -202,7 +219,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
                 'uuid': str(self.test_cpe.uuid),
-                'session': None,
+                'session': str(self.test_session.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
             }
@@ -218,7 +235,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'ap': str(self.test_ap.uuid),
                 'cpe': str(self.test_cpe.uuid),
                 'uuid': str(self.test_ap_cpe_link.uuid),
-                'session': None,
+                'session': str(self.test_session.uuid),
                 'feature_type': FeatureType.AP_CPE_LINK.value
             }
         }
@@ -364,7 +381,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
-                'session': None,
+                'session': str(self.test_session.uuid),
                 'uuid': str(self.test_ap.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
@@ -381,7 +398,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
-                'session': None,
+                'session': str(self.test_session.uuid),
                 'uuid': str(self.test_cpe.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
@@ -394,7 +411,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         feature_collection = geojson_utils.merge_feature_collections(aps, cpes)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
-                             json.dumps(feature_collection))
+                             self.json_dumps(feature_collection))
 
     def test_merge_two_feature_collections_one_empty(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
@@ -406,7 +423,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
-                'session': None,
+                'session': str(self.test_session.uuid),
                 'uuid': str(self.test_ap.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
@@ -427,4 +444,4 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         feature_collection = geojson_utils.merge_feature_collections(aps, empty_feature_collection)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
-                             json.dumps(feature_collection))
+                             self.json_dumps(feature_collection))

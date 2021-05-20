@@ -950,8 +950,7 @@ export class LinkCheckPage {
             if (this.currentView === '3d') {
                 if (this.globalLinkAnimation != null) {
                     this.globalLinkAnimation.pause();
-                    $('#pause-button-3d').addClass('d-none');
-                    $('#play-button-3d').removeClass('d-none');
+                    this.setPlayPauseButton(true);
                     this.animationPlaying = false;
                 }
                 // @ts-ignore
@@ -1154,13 +1153,22 @@ export class LinkCheckPage {
         this.zoomUpdateLinkProfile(extremes);
     }
 
+    setPlayPauseButton(pause: boolean){
+        if( pause ){
+            $('#pause-button-3d').addClass('d-none');
+            $('#play-button-3d').removeClass('d-none');
+        } else {
+            $('#pause-button-3d').removeClass('d-none');
+            $('#play-button-3d').addClass('d-none');
+        }
+    }
+
     createAnimationForLink(tx: any, rx: any, tx_h: any, rx_h: any, start_animation: boolean) {
         $('#3d-pause-play').off('click');
         if (this.globalLinkAnimation != null) {
             window.removeEventListener('keydown', this.spacebarCallback);
             this.globalLinkAnimation.pause();
-            $('#pause-button-3d').addClass('d-none');
-            $('#play-button-3d').removeClass('d-none');
+            this.setPlayPauseButton(true);
             this.animationPlaying = false;
             this.globalLinkAnimation = null;
         }
@@ -1209,6 +1217,7 @@ export class LinkCheckPage {
             if (start_animation) {
                 this.animationPlaying = true;
                 this.globalLinkAnimation.play(true);
+                this.setPlayPauseButton(false);
             } else {
                 this.animationPlaying = false;
             }
@@ -1221,8 +1230,7 @@ export class LinkCheckPage {
                     this.animationPlaying = true;
                 } else {
                     this.globalLinkAnimation.play(true);
-                    $('#pause-button-3d').removeClass('d-none');
-                    $('#play-button-3d').addClass('d-none');
+                    this.setPlayPauseButton(false);
 
                     // hide dot and link profile highlight when animation plays.
                     this.highlightCurrentPosition(false);

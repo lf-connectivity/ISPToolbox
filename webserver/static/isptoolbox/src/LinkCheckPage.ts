@@ -216,7 +216,10 @@ export class LinkCheckPage {
         const resizeObserver = new ResizeObserver(() => {
             resize_window();
         });
-        resizeObserver.observe(document.querySelector('#bottom-row-link-view-container'));
+        const bottom_row =  document.querySelector('#bottom-row-link-view-container');
+        if (bottom_row instanceof Element){
+            resizeObserver.observe(bottom_row);
+        }
         // Initialize Bootstrap Tooltips
         // @ts-ignore
         $('[data-toggle="tooltip"]').tooltip({

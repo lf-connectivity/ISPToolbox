@@ -52,6 +52,10 @@ def update_community_connect():
         cursor.execute(geo_json_sql)
         geojson = cursor.fetchone()
         uploadNewTileset(geojson, "non_urban_overlay")
+        complete = datetime.now()
+        s_us = Source.objects.get_or_create(source_id='NON_URBAN_OVERLAY', source_country='US')
+        s_us[0].last_updated = complete
+        s_us[0].save()
         try:
             sendNotifyEmail(successSubject, successMessage)
         except Exception as e:

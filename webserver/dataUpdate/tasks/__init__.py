@@ -1,4 +1,4 @@
 from .asn_tasks import updateElasticSearchIndex
-from .mlab_tasks import updateGISData
+from .gis_tasks import updateGISData, updateCCData, updateMlabData
 
-__all__ = ['updateElasticSearchIndex', 'updateGISData']
+__all__ = ['updateElasticSearchIndex', 'updateGISData', 'updateCCData', 'updateMlabData']

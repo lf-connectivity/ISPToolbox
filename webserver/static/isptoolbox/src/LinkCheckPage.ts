@@ -26,12 +26,12 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
-import { LinkCheckDrawPtPPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup';
 import { isBeta, validateHeight, validateLat, validateLng } from './LinkCheckUtils';
 import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
 import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearchTool";
+import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -365,13 +365,7 @@ export class LinkCheckPage {
                         let mapboxClient = MapboxSDKClient.getInstance();
                         let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
                         mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                            let result = response.body.features;
-                            let popup = LinkCheckDrawPtPPopup.getInstance();
-                            popup.setLngLat(lngLat);
-
-                            // Choose the best fitting/most granular result. Might not have
-                            // a street address in all cases though.
-                            popup.setAddress(result[0].place_name);
+                            let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
                             popup.show();
                         });
                     }, 1000)
@@ -423,7 +417,6 @@ export class LinkCheckPage {
 
             // instantiate singletons
             new MapboxSDKClient(mapboxgl.accessToken);
-            new LinkCheckDrawPtPPopup(this.map, this.draw, this.locationMarker);
             new LinkCheckCustomerConnectPopup(this.map, this.draw, this.locationMarker);
             new LinkCheckTowerPopup(this.map, this.draw);
 

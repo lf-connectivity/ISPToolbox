@@ -7,9 +7,9 @@ import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_sup
 import createVertex from '@mapbox/mapbox-gl-draw/src/lib/create_vertex';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { LinkCheckBasePopup } from './popups/LinkCheckBasePopup';
-import { LinkCheckDrawPtPPopup } from './popups/LinkCheckDrawPtPPopup';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { isBeta } from '../LinkCheckUtils';
+import { LinkCheckCustomerConnectPopup } from './popups/LinkCheckCustomerConnectPopup';
 
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
@@ -50,18 +50,20 @@ export function OverrideDirect() {
     /**
      * Returns a function that reverse geocodes the given lngLat 
      * and displays a popup at that location with the result 
-     * of the reverse geocode.
+     * of the reverse geocode. Also sets the popup state to denote the fact
+     * that it's coming from a specific vertex of this feature.
      * 
      * @param lngLat Long/lat
      * @returns A function that calls reverseGeocode and displays the popup at the given coordinates.
      */
-    const reverseGeocodeAndDisplayPopup = function (lngLat) {
+    const reverseGeocodeAndDisplayPopup = function (lngLat, state) {
         return () => {
             let mapboxClient = MapboxSDKClient.getInstance();
             let coords = [lngLat.lng, lngLat.lat];
             mapboxClient.reverseGeocode(coords, (response) => {
                 let popup =
-                    LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckDrawPtPPopup, coords, response);
+                    LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, coords, response);
+                popup.setPtPState(state);
                 popup.show();
             });
         }
@@ -79,7 +81,7 @@ export function OverrideDirect() {
             // otherwise there will be a race condition with the reverseGeocode callback and the
             // time when the user releases the mouse.
             popupAbortController = new AbortController();
-            window.addEventListener('mouseup', reverseGeocodeAndDisplayPopup(e.lngLat), {once: true, signal: popupAbortController.signal});
+            window.addEventListener('mouseup', reverseGeocodeAndDisplayPopup(e.lngLat, state), {once: true, signal: popupAbortController.signal});
         }
 
         this.startDragging(state, e);
@@ -100,7 +102,7 @@ export function OverrideDirect() {
         if (popupAbortController !== null && isBeta()) {
             popupAbortController.abort();
             popupAbortController = new AbortController();
-            window.addEventListener('mouseup', reverseGeocodeAndDisplayPopup(e.lngLat), {once: true, signal: popupAbortController.signal});
+            window.addEventListener('mouseup', reverseGeocodeAndDisplayPopup(e.lngLat, state), {once: true, signal: popupAbortController.signal});
         }
         // Only allow editing of vertices that are not from associated AP/CPE links.
         // This would include user draw PtP links.
@@ -140,7 +142,7 @@ export function OverrideDirect() {
                 state.feature.properties.radius = radius;
             }
         } else {
-            LinkCheckDrawPtPPopup.getInstance().hide();
+            LinkCheckCustomerConnectPopup.getInstance().hide();
             const selectedCoords = state.selectedCoordPaths.map(coord_path =>
                 state.feature.getCoordinate(coord_path),
             );

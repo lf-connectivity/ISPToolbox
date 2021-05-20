@@ -46,6 +46,10 @@ export class BuildingCoverage {
         }
     }
 
+    includes(buildingId: number): boolean {
+        return this.getCoverageStatus(buildingId) !== BuildingCoverageStatus.UNKNOWN;
+    }
+
     toFeatureArray(): Array<Feature<Polygon, any>> {
         let arr: Array<Feature<Polygon, any>> = [];
         this.buildings.forEach(([building, status]: [Polygon, BuildingCoverageStatus], id: number) => {

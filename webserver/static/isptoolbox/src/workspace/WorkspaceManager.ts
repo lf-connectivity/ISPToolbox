@@ -182,8 +182,12 @@ export class WorkspaceManager {
     readonly features: { [workspaceId: string] : BaseWorkspaceFeature }; // Map from workspace UUID to feature
     view: LOSModal;
     viewshed: ViewshedTool;
+    private static _instance: WorkspaceManager;
 
     constructor(selector: string, map: MapboxGL.Map, draw: MapboxDraw, ws: LOSCheckWS, initialFeatures: any) {
+        if (WorkspaceManager._instance) {
+            return WorkspaceManager._instance;
+        }
         this.map = map;
         this.draw = draw;
         this.ws = ws;
@@ -325,9 +329,6 @@ export class WorkspaceManager {
                     mapboxClient.reverseGeocode(lngLat, (response: any) => {
                         let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
                         popup.setBuildingId(buildingId);
-                        popup.setAccessPoints(Object.values(this.features).filter((feature: BaseWorkspaceFeature) =>
-                            feature.getFeatureType() === WorkspaceFeatureTypes.AP
-                        ) as AccessPoint[]);
 
                         // Render all APs
                         popup.show();
@@ -377,6 +378,7 @@ export class WorkspaceManager {
             this.map.getCanvas().style.cursor = '';
         });
 
+        WorkspaceManager._instance = this;
     }
     saveFeatures({ features }: any) {
         const mode = String(this.draw.getMode());
@@ -515,13 +517,6 @@ export class WorkspaceManager {
         });
 
         PubSub.publish(WorkspaceEvents.AP_RENDER, {features});
-    }
-
-    getFeatures(feat_type: WorkspaceFeatureTypes) {
-        return this.draw.getAll()['features'].filter((feat) => {
-            return (feat.properties && feat.properties.feature_type) ?
-                feat.properties.feature_type === feat_type : false;
-        })
     }
 
     filterByType(list: Array<any>, feat_type: WorkspaceFeatureTypes) {
@@ -714,5 +709,21 @@ export class WorkspaceManager {
         const ap = this.features[uuid] as AccessPoint;
         ap.setCoverage(resp.features);
         PubSub.publish(WorkspaceEvents.AP_RENDER, {});
+    }
+
+    static getInstance() {
+        if (WorkspaceManager._instance) {
+            return WorkspaceManager._instance;
+        }
+        else {
+            throw new Error('No instance of WorkspaceManager instantiated.')
+        }
+    }
+
+    static getFeatures(feat_type: WorkspaceFeatureTypes) {
+        return WorkspaceManager._instance.draw.getAll()['features'].filter((feat) => {
+            return (feat.properties && feat.properties.feature_type) ?
+                feat.properties.feature_type === feat_type : false;
+        })
     }
 }

@@ -9,12 +9,17 @@ import { AccessPoint, CPE } from '../../workspace/WorkspaceFeatures';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from "../../workspace/WorkspaceConstants";
 import { BuildingCoverage, BuildingCoverageStatus, updateCoverageStatus } from "../../workspace/BuildingCoverage";
 import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchTool";
+import { WorkspaceManager } from "../../workspace/WorkspaceManager";
+import { BaseWorkspaceFeature } from "../../workspace/BaseWorkspaceFeature";
 
+const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-customer-popup';
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
 const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-customer-popup';
 const VIEW_LOS_BUTTON_ID = 'view-los-btn-customer-popup';
 const PLACE_TOWER_LINK_ID = 'place-tower-link-customer-popup';
 const CONNECT_TOWER_INDEX_LINK_BASE_ID = 'connect-tower-link-customer-popup';
+
+const EMPTY_BUILDING_ID = -1;
 
 const YES_SVG = `<svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M10.2929 0.292431L3.99992 6.58543L1.70692 4.29243C1.51832 4.11027 1.26571 4.00948 1.00352 4.01176C0.741321 4.01403 0.490508 4.1192 0.3051 4.30461C0.119692 4.49002 0.0145233 4.74083 0.0122448 5.00303C0.00996641 5.26523 0.110761 5.51783 0.292919 5.70643L3.29292 8.70643C3.48045 8.8939 3.73475 8.99922 3.99992 8.99922C4.26508 8.99922 4.51939 8.8939 4.70692 8.70643L11.7069 1.70643C11.8891 1.51783 11.9899 1.26523 11.9876 1.00303C11.9853 0.740832 11.8801 0.49002 11.6947 0.304612C11.5093 0.119204 11.2585 0.014035 10.9963 0.0117566C10.7341 0.00947813 10.4815 0.110272 10.2929 0.292431Z" fill="#42B72A"/>
@@ -39,6 +44,11 @@ const BACK_SVG = `<svg class="back-icon" width="12" height="12" viewBox="0 0 12 
 </defs>
 </svg>`
 
+interface PtPLinkDirectSelectState {
+    featureId: string;
+    selectedCoordPaths: Array<string>;
+}
+
 export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     private apDistances: Map<AccessPoint, number>; // AP to distance from customer
     private accessPoints: Array<AccessPoint>; // Sorted array of valid APs, by distance from customer
@@ -46,8 +56,14 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     private losStatus: BuildingCoverageStatus;
     private buildingId: number;
     private marker: LinkCheckLocationSearchTool;
+    private ptpLinkDirectSelectState?: PtPLinkDirectSelectState;
     private static _instance: LinkCheckCustomerConnectPopup;
 
+    /*
+    ----------------------------------
+    GETTERS, SETTERS, AND CONSTRUCTORS
+    ----------------------------------
+    */
     constructor(map: mapboxgl.Map, draw: MapboxDraw, marker: LinkCheckLocationSearchTool) {
         if (LinkCheckCustomerConnectPopup._instance) {
             return LinkCheckCustomerConnectPopup._instance;
@@ -58,6 +74,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.apDistances = new Map();
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.apConnectIndex = 0;
+        this.ptpLinkDirectSelectState = undefined;
         LinkCheckCustomerConnectPopup._instance = this;
     }
 
@@ -65,128 +82,31 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.buildingId = buildingId;
     }
 
-    setAccessPoints(accessPoints: Array<AccessPoint>) {
-        // Filter APs by whether or not the lat long is in each AP's radius
-        let customerPt = point(this.lnglat);
-        accessPoints.forEach((ap: AccessPoint) => {
-            let distFromCustomer = distance(customerPt, ap.featureData.geometry);
-            if (distFromCustomer <= ap.featureData?.properties?.max_radius) {
-                this.accessPoints.push(ap);
-                this.apDistances.set(ap, isUnitsUS() ? km2miles(distFromCustomer) : distFromCustomer);
-            }
-        });
-
-        // sort by distance to customer
-        this.accessPoints.sort((ap1: AccessPoint, ap2: AccessPoint) => {
-            // @ts-ignore
-            return this.apDistances.get(ap1) - this.apDistances.get(ap2);
-        });
-
-        // set apConnect index to first tower with LOS. If there isn't any, mark
-        // set to closest tower.
-        this.accessPoints.every((ap: AccessPoint, i: number) => {
-            this.losStatus = updateCoverageStatus(this.losStatus, ap.coverage.getCoverageStatus(this.buildingId));
-            if (this.losStatus === BuildingCoverageStatus.SERVICEABLE) {
-                this.apConnectIndex = i;
-                return false;
-            }
-            else {
-                return true;
-            }
-        });
-    }
-
     getAccessPoints(): Array<AccessPoint> {
         return this.accessPoints;
     }
 
-    show() {
-        super.show();
-        this.highlightAllAPs();
+    setPtPState(directSelectState: PtPLinkDirectSelectState) {
+        this.ptpLinkDirectSelectState = {
+            featureId: directSelectState.featureId,
+            selectedCoordPaths: directSelectState.selectedCoordPaths
+        }
     }
 
-    protected cleanup() {
-        this.accessPoints.length = 0;
-        this.apDistances.clear();
-        this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
-        this.apConnectIndex = 0;
-        this.marker.onPopupClose();
-    }
-
-    highlightAllAPs() {
-        this.changeSelection(this.accessPoints);
-    }
-
-    highlightAP(ap: AccessPoint) {
-        this.changeSelection([ap]);
-    }
-
-    createCPE() {
-        let ap = this.accessPoints[this.apConnectIndex];
-        console.dir(ap.featureData.properties)
-        console.log(`${ap.featureData.properties?.default_cpe_height}`);
-        let newCPE = {
-            'type': 'Feature',
-            'geometry': {
-                'type': 'Point',
-                'coordinates': this.lnglat
-            },
-            'properties': {
-                'name': this.street,
-                'ap': ap.workspaceId,
-                'feature_type': WorkspaceFeatureTypes.CPE,
-                'height': ap.featureData.properties?.default_cpe_height
-            }
-        } as Feature<Point, any>;
-        this.map.fire('draw.create', {features: [newCPE]});
-    }
-
-    setMainPageEventHandlers() {
-        $(`#${SWITCH_TOWER_LINK_ID}`).on('click', () => {
-            this.popup.setHTML(this.getSwitchTowerHTML());
-            this.setSwitchTowerEventHandlers();
-        });
-
-        $(`#${VIEW_LOS_BUTTON_ID}`).on('click', () => {
-            this.createCPE();
-            this.marker.hide();
-            this.hide();
-        });
-
-        $(`#${PLACE_TOWER_LINK_ID}`).on('click', () => {
-            //@ts-ignore
-            this.draw.changeMode('draw_radius', {start: this.lnglat});
-            this.map.fire('draw.modechange', {mode: 'draw_radius'});
-            this.marker.hide();
-            this.hide();
-        });
-    }
-
-    setSwitchTowerEventHandlers() {
-        $(`#${BACK_TO_MAIN_LINK_ID}`).on('click', () => {
-            this.popup.setHTML(this.getMainPageHTML());
-            this.setMainPageEventHandlers();
-        });
-
-        this.accessPoints.forEach((_: AccessPoint, i: number) => {
-            $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('click', () => {
-                this.apConnectIndex = i;
-                this.createCPE();
-                this.hide();
-            });
-
-            $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseenter', () => {
-                this.highlightAP(this.accessPoints[i])
-            });
-
-            $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseleave', () => {
-                this.highlightAllAPs();
-            });
-        });
+    protected getHTML() {
+        return (this.accessPoints.length > 0) ? this.getInCoverageAreaMainPageHTML() : this.getNotInCoverageAreaHTML();
     }
 
     protected setEventHandlers() {
-        this.setMainPageEventHandlers();
+        (this.accessPoints.length > 0) ? this.setInCoverageAreaMainPageEventHandlers() : this.setNotInCoverageAreaEventHandlers();
+    }
+
+    show() {
+        this.calculateCoverageStatus();
+        super.show();
+        if (this.accessPoints.length > 0) {
+            this.highlightAllAPs();
+        }
     }
 
     static getInstance() {
@@ -198,15 +118,44 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         }
     }
 
+    protected cleanup() {
+        this.accessPoints.length = 0;
+        this.apDistances.clear();
+        this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
+        this.apConnectIndex = 0;
+        this.buildingId = EMPTY_BUILDING_ID;
+
+        // Revert selection back to original direct select state if that was how this
+        // popup was accessed.
+        if (this.ptpLinkDirectSelectState) {
+            console.log(this.ptpLinkDirectSelectState)
+            console.trace();
+            this.draw.changeMode('direct_select', this.ptpLinkDirectSelectState);
+            this.map.fire('mode.change', {mode: 'direct_select'});
+        }
+        this.ptpLinkDirectSelectState = undefined;
+        this.marker.onPopupClose();
+    }
+
+    /*
+    ----------------------------------------------------------------------
+    FUNCTONALITY FOR CONNECTING AP TO CPE FROM BUILDING - IN COVERAGE AREA
+    ----------------------------------------------------------------------
+    */
+
+    highlightAllAPs() {
+        this.changeSelection(this.accessPoints);
+    }
+
+    highlightAP(ap: AccessPoint) {
+        this.changeSelection([ap]);
+    }
+
     private changeSelection(aps: Array<AccessPoint>) {
         let feats = aps.map((ap: AccessPoint) => ap.mapboxId);
         this.draw.changeMode('simple_select', {featureIds: feats});
         this.map.fire('draw.modechange', { mode: 'simple_select'});
         PubSub.publish(WorkspaceEvents.AP_RENDER, {});
-    }
-
-    protected getHTML() {
-        return this.getMainPageHTML();
     }
 
     private getStatusHTMLElements(status: BuildingCoverageStatus): {
@@ -236,7 +185,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         }
     }
 
-    protected getMainPageHTML() {
+    protected getInCoverageAreaMainPageHTML() {
         let apName = this.accessPoints[this.apConnectIndex].featureData.properties?.name;
         let apDist = this.apDistances.get(this.accessPoints[this.apConnectIndex]);
         let statusElements = this.getStatusHTMLElements(this.losStatus);
@@ -311,5 +260,152 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             `
         });
         return retval;
+    }
+
+    setInCoverageAreaMainPageEventHandlers() {
+        $(`#${SWITCH_TOWER_LINK_ID}`).on('click', () => {
+            this.popup.setHTML(this.getSwitchTowerHTML());
+            this.setSwitchTowerEventHandlers();
+        });
+
+        $(`#${VIEW_LOS_BUTTON_ID}`).on('click', () => {
+            this.createCPE();
+        });
+
+        $(`#${PLACE_TOWER_LINK_ID}`).on('click', () => {
+            this.ptpLinkDirectSelectState = undefined;
+            //@ts-ignore
+            this.draw.changeMode('draw_radius', {start: this.lnglat});
+            this.map.fire('draw.modechange', {mode: 'draw_radius'});
+            this.marker.hide();
+            this.hide();
+        });
+    }
+
+    setSwitchTowerEventHandlers() {
+        $(`#${BACK_TO_MAIN_LINK_ID}`).on('click', () => {
+            this.popup.setHTML(this.getInCoverageAreaMainPageHTML());
+            this.setInCoverageAreaMainPageEventHandlers();
+        });
+
+        this.accessPoints.forEach((_: AccessPoint, i: number) => {
+            $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('click', () => {
+                this.apConnectIndex = i;
+                this.createCPE();
+            });
+
+            $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseenter', () => {
+                this.highlightAP(this.accessPoints[i])
+            });
+
+            $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseleave', () => {
+                this.highlightAllAPs();
+            });
+        });
+    }
+
+    /*
+    --------------------------------------------------------------
+    FUNCTONALITY FOR NO AP COVERAGE AREA - DRAW PTP OR PLACE TOWER
+    --------------------------------------------------------------
+    */
+
+    protected getNotInCoverageAreaHTML() {
+        return `
+        <div class="tooltip--location">
+            <div class="title"> 
+                <h6>${this.street}</h6>
+            </div>
+            <div class="description">
+                <p>${this.city}</p>
+                <p>${this.displayLatLng()}</p>
+            </div>
+            <div class="button-row">
+                <button class='btn btn-primary isptoolbox-btn' id='${DRAW_PTP_BUTTON_ID}'>Draw PtP</button>
+                <a id='${PLACE_TOWER_LINK_ID}' class="link">Place Tower</a>
+            </div>
+        </div>
+        `
+    }
+
+    protected setNotInCoverageAreaEventHandlers() {     
+        $(`#${DRAW_PTP_BUTTON_ID}`).on('click', () => {
+            this.ptpLinkDirectSelectState = undefined;
+            //@ts-ignore
+            this.draw.changeMode('draw_link', {start: this.lnglat});
+            this.map.fire('draw.modechange', {mode: 'draw_link'});
+            this.marker.hide();
+            this.hide();
+        });
+
+        $(`#${PLACE_TOWER_LINK_ID}`).on('click', () => {
+            this.ptpLinkDirectSelectState = undefined;
+            //@ts-ignore
+            this.draw.changeMode('draw_radius', {start: this.lnglat});
+            this.map.fire('draw.modechange', {mode: 'draw_radius'});
+            this.marker.hide();
+            this.hide();
+        });
+    }
+
+    /*
+    -----------------------
+    OTHER UTILITY FUNCTIONS
+    -----------------------
+    */
+    protected createCPE() {
+        let ap = this.accessPoints[this.apConnectIndex];
+        let newCPE = {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+                'coordinates': this.lnglat
+            },
+            'properties': {
+                'name': this.street,
+                'ap': ap.workspaceId,
+                'feature_type': WorkspaceFeatureTypes.CPE,
+                'height': ap.featureData.properties?.default_cpe_height
+            }
+        } as Feature<Point, any>;
+        this.map.fire('draw.create', {features: [newCPE]});
+        this.marker.hide();
+        this.hide();
+    }
+
+    protected calculateCoverageStatus() {
+        // Set APs.
+        let accessPoints = Object.values(WorkspaceManager.getInstance().features).filter((feature: BaseWorkspaceFeature) =>
+            feature.getFeatureType() === WorkspaceFeatureTypes.AP
+        ) as AccessPoint[];
+
+        // Filter APs by whether or not the lat long is in each AP's radius, or building in coverage area.
+        let customerPt = point(this.lnglat);
+        accessPoints.forEach((ap: AccessPoint) => {
+            let distFromCustomer = distance(customerPt, ap.featureData.geometry);
+            if (distFromCustomer <= ap.featureData?.properties?.max_radius || ap.coverage.includes(this.buildingId)) {
+                this.accessPoints.push(ap);
+                this.apDistances.set(ap, isUnitsUS() ? km2miles(distFromCustomer) : distFromCustomer);
+            }
+        });
+
+        // sort by distance to customer
+        this.accessPoints.sort((ap1: AccessPoint, ap2: AccessPoint) => {
+            // @ts-ignore
+            return this.apDistances.get(ap1) - this.apDistances.get(ap2);
+        });
+
+        // set apConnect index to first tower with LOS. If there isn't any, mark
+        // set to closest tower.
+        this.accessPoints.every((ap: AccessPoint, i: number) => {
+            this.losStatus = updateCoverageStatus(this.losStatus, ap.coverage.getCoverageStatus(this.buildingId));
+            if (this.losStatus === BuildingCoverageStatus.SERVICEABLE) {
+                this.apConnectIndex = i;
+                return false;
+            }
+            else {
+                return true;
+            }
+        });
     }
 }

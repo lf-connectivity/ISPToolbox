@@ -2,12 +2,8 @@ import mapboxgl, * as MapboxGL from "mapbox-gl";
 import { isBeta } from "../LinkCheckUtils";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { LinkCheckCustomerConnectPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup";
-import { LinkCheckDrawPtPPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckDrawPtPPopup";
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { ClickableMarker } from "../molecules/ClickableMarker";
-import { BaseWorkspaceFeature } from "../workspace/BaseWorkspaceFeature";
-import { WorkspaceFeatureTypes } from "../workspace/WorkspaceConstants";
-import { AccessPoint } from "../workspace/WorkspaceFeatures";
 import { WorkspaceManager } from "../workspace/WorkspaceManager";
 
 export class LinkCheckLocationSearchTool {
@@ -45,7 +41,6 @@ export class LinkCheckLocationSearchTool {
         this.marker.on('dragstart', () => {
             // have to do this so that after popup cleanup function we still remember if it was open or not
             if (this.isPopupOpen) {
-                LinkCheckDrawPtPPopup.getInstance().hide();
                 LinkCheckCustomerConnectPopup.getInstance().hide();
                 this.isPopupOpen = true;
             }
@@ -96,23 +91,9 @@ export class LinkCheckLocationSearchTool {
 
     private showPopup() {
         let lngLat: [number, number] = [this.marker.getLngLat().lng, this.marker.getLngLat().lat];
-
-        // See if it's accessible by any access points, then set a negative building ID to set status to unknown.
-        let accessPoints = Object.values(this.workspaceManager.features).filter((feature: BaseWorkspaceFeature) =>
-            feature.getFeatureType() === WorkspaceFeatureTypes.AP
-        ) as AccessPoint[];
-        let apPopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
             LinkCheckCustomerConnectPopup, lngLat, this.reverseGeocodeResponse) as LinkCheckCustomerConnectPopup;
-        apPopup.setAccessPoints(accessPoints);
-        apPopup.setBuildingId(-1);
-
-        if (apPopup.getAccessPoints().length) {
-            apPopup.show();
-        }
-        else {
-            let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckDrawPtPPopup, lngLat, this.reverseGeocodeResponse);
-            popup.show();
-        }
+        popup.show();
         this.isPopupOpen = true;
     }
 }

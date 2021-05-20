@@ -283,7 +283,7 @@ export class WorkspaceManager {
             'paint': {
             'fill-color': '#1172a9',
             'fill-opacity': 0.4,
-        }}, ACCESS_POINT_BUILDING_LAYER));
+        }}, ACCESS_POINT_BUILDING_LAYER);
         this.map.addLayer({
             'id': ACCESS_POINT_RADIUS_VIS_LAYER_LINE,
             'type': 'line',

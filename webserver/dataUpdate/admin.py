@@ -1,10 +1,11 @@
 from django.contrib import admin
 from dataUpdate.models import Source
-from dataUpdate.tasks import updateCCData, updateMlabData
+from dataUpdate.tasks import updateCCData, updateMlabData, updateCbrsData
 
 
 # Dict of update functions as celery tasks (with @shared_task annotation)
 UPDATE_FN = {
+    'CBRS': updateCbrsData,
     'MLAB': updateMlabData,
     'NON_URBAN_OVERLAY': updateCCData,
 }

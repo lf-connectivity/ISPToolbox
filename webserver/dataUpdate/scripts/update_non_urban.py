@@ -1,3 +1,6 @@
+import io
+import json
+import datetime
 from dataUpdate.util.clients import dbClient
 from dataUpdate.util.mail import sendNotifyEmail
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
@@ -20,6 +23,7 @@ compute_sql = """
                 WHERE NOT St_Intersects("good_geog"."geog", "tl_2019_us_urban"."geog");
               """
 
+# Based on: https://gis.stackexchange.com/a/191446/183050
 # flake8: noqa
 geo_json_sql = """
                 SELECT jsonb_build_object(
@@ -29,7 +33,7 @@ geo_json_sql = """
                 FROM (
                 SELECT jsonb_build_object(
                     'type',       'Feature',
-                    'geometry',   ST_AsGeoJSON(ST_Simplify(geog::geometry, 0.1, TRUE))::jsonb,
+                    'geometry',   ST_AsGeoJSON(ST_Simplify(geog::geometry, 0.0001, TRUE))::jsonb,
                     'properties', to_jsonb(inputs) - 'geog'
                 ) AS feature
                 FROM (SELECT geog, zipcode as ZIPCODE, download as DOWNLOAD, upload as UPLOAD FROM computed_community_connect) inputs) features;
@@ -37,6 +41,7 @@ geo_json_sql = """
 
 
 def update_community_connect():
+    from dataUpdate.models import Source
     try:
         successSubject = "[Automated Message] Automated Community Connect (non-urban) Data Refresh Successful"
         successMessage = "Monthly non-urban overlay data refresh was successful and the updated data should now be in our GIS database."
@@ -51,7 +56,9 @@ def update_community_connect():
         # Grab geojson from computed table
         cursor.execute(geo_json_sql)
         geojson = cursor.fetchone()
-        uploadNewTileset(geojson, "non_urban_overlay")
+        b = bytes(json.dumps(geojson[0]), 'utf-8')
+        bytesBuff = io.BytesIO(b)
+        uploadNewTileset(bytesBuff, "non_urban_overlay")
         complete = datetime.now()
         s_us = Source.objects.get_or_create(source_id='NON_URBAN_OVERLAY', source_country='US')
         s_us[0].last_updated = complete

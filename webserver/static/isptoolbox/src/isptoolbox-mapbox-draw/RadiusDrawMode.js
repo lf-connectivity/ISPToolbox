@@ -51,11 +51,16 @@ export function RadiusMode() {
         this.setActionableState({
             trash: true
         });
+
+        let cpeLngLats = opts.cpeLngLats || [];
+        let ptpLinksToRemove = opts.ptpLinksToRemove || [];
       
         return {
             line,
             currentVertexPosition,
-            direction
+            direction,
+            cpeLngLats,
+            ptpLinksToRemove
         };
     };
 
@@ -178,6 +183,14 @@ export function RadiusMode() {
                 },
                 id: state.line.id,
             };
+
+            if (state.cpeLngLats) {
+                pointWithRadius.properties.cpeLngLats = state.cpeLngLats;
+            }
+
+            if (state.ptpLinksToRemove) {
+                pointWithRadius.properties.ptpLinksToRemove = state.ptpLinksToRemove;
+            }
     
             this.map.fire('draw.create', {
                 features: [pointWithRadius],

@@ -45,8 +45,8 @@ const BACK_SVG = `<svg class="back-icon" width="12" height="12" viewBox="0 0 12 
 </svg>`
 
 interface PtPLinkDirectSelectState {
-    featureId: string;
-    selectedCoordPaths: Array<string>;
+    selectedFeatureId: string;
+    sharedVertexLinks: Array<Feature<LineString, any>>;
 }
 
 export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
@@ -56,7 +56,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     private losStatus: BuildingCoverageStatus;
     private buildingId: number;
     private marker: LinkCheckLocationSearchTool;
-    private ptpLinkDirectSelectState?: PtPLinkDirectSelectState;
+    private directSelectState?: PtPLinkDirectSelectState;
     private static _instance: LinkCheckCustomerConnectPopup;
 
     /*
@@ -74,7 +74,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.apDistances = new Map();
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.apConnectIndex = 0;
-        this.ptpLinkDirectSelectState = undefined;
+        this.directSelectState = undefined;
         LinkCheckCustomerConnectPopup._instance = this;
     }
 
@@ -86,10 +86,10 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         return this.accessPoints;
     }
 
-    setPtPState(directSelectState: PtPLinkDirectSelectState) {
-        this.ptpLinkDirectSelectState = {
-            featureId: directSelectState.featureId,
-            selectedCoordPaths: directSelectState.selectedCoordPaths
+    setPtPState(featureId: string, sharedVertexLinks: Array<Feature<LineString, any>>) {
+        this.directSelectState = {
+            selectedFeatureId: featureId,
+            sharedVertexLinks: sharedVertexLinks
         }
     }
 
@@ -127,13 +127,11 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
         // Revert selection back to original direct select state if that was how this
         // popup was accessed.
-        if (this.ptpLinkDirectSelectState) {
-            console.log(this.ptpLinkDirectSelectState)
-            console.trace();
-            this.draw.changeMode('direct_select', this.ptpLinkDirectSelectState);
+        if (this.directSelectState) {
+            this.draw.changeMode('direct_select', {featureId: this.directSelectState.selectedFeatureId});
             this.map.fire('mode.change', {mode: 'direct_select'});
         }
-        this.ptpLinkDirectSelectState = undefined;
+        this.directSelectState = undefined;
         this.marker.onPopupClose();
     }
 
@@ -272,14 +270,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             this.createCPE();
         });
 
-        $(`#${PLACE_TOWER_LINK_ID}`).on('click', () => {
-            this.ptpLinkDirectSelectState = undefined;
-            //@ts-ignore
-            this.draw.changeMode('draw_radius', {start: this.lnglat});
-            this.map.fire('draw.modechange', {mode: 'draw_radius'});
-            this.marker.hide();
-            this.hide();
-        });
+        $(`#${PLACE_TOWER_LINK_ID}`).on('click', this.onPlaceTower());
     }
 
     setSwitchTowerEventHandlers() {
@@ -330,7 +321,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
     protected setNotInCoverageAreaEventHandlers() {     
         $(`#${DRAW_PTP_BUTTON_ID}`).on('click', () => {
-            this.ptpLinkDirectSelectState = undefined;
+            this.directSelectState = undefined;
             //@ts-ignore
             this.draw.changeMode('draw_link', {start: this.lnglat});
             this.map.fire('draw.modechange', {mode: 'draw_link'});
@@ -338,14 +329,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             this.hide();
         });
 
-        $(`#${PLACE_TOWER_LINK_ID}`).on('click', () => {
-            this.ptpLinkDirectSelectState = undefined;
-            //@ts-ignore
-            this.draw.changeMode('draw_radius', {start: this.lnglat});
-            this.map.fire('draw.modechange', {mode: 'draw_radius'});
-            this.marker.hide();
-            this.hide();
-        });
+        $(`#${PLACE_TOWER_LINK_ID}`).on('click', this.onPlaceTower());
     }
 
     /*
@@ -407,5 +391,32 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 return true;
             }
         });
+    }
+
+    protected onPlaceTower() {
+        return () => {
+            if (this.directSelectState) {
+                // Find lat longs of CPEs
+                let cpeLngLats = this.directSelectState.sharedVertexLinks.map((feature: Feature<LineString, any>) => {
+                    let coords = feature.geometry.coordinates;
+                    return (coords[0][0] == this.lnglat[0] && coords[0][1] == this.lnglat[1]) ? coords[1] : coords[0]
+                });
+
+                let ptpLinksToRemove = this.directSelectState.sharedVertexLinks.map((feature: Feature<LineString, any>) => {
+                    return feature.id;
+                });
+
+                //@ts-ignore
+                this.draw.changeMode('draw_radius', {start: this.lnglat, cpeLngLats: cpeLngLats, ptpLinksToRemove: ptpLinksToRemove});
+            }
+            else {
+                //@ts-ignore
+                this.draw.changeMode('draw_radius', {start: this.lnglat});
+            }
+            this.directSelectState = undefined;
+            this.map.fire('draw.modechange', {mode: 'draw_radius'});
+            this.marker.hide();
+            this.hide();
+        }
     }
 }

@@ -388,6 +388,8 @@ export class WorkspaceManager {
             return (!feature.properties.uuid || !(feature.properties.uuid in this.features));
         });
 
+        const mapboxClient = MapboxSDKClient.getInstance();
+
         // Determine whether or not we're drawing an AP, CPE, or link
         // based on the mode.
         // Mode draw_radius: Points are APs.
@@ -413,6 +415,38 @@ export class WorkspaceManager {
                         }
                         workspaceFeature = new AccessPoint(this.map, this.draw, newCircle);
                         workspaceFeature.create((resp) => {
+                            if (feature.properties.ptpLinksToRemove) {
+                                feature.properties.ptpLinksToRemove.forEach((id: string) => {
+                                    let featToDelete = this.draw.get(id);
+                                    this.draw.delete(id);
+                                    this.map.fire('draw.delete', {features: [featToDelete]});
+                                });
+                            }
+
+                            if (feature.properties.cpeLngLats) {
+                                feature.properties.cpeLngLats.forEach((lngLat: [number, number]) => {
+                                    mapboxClient.reverseGeocode(lngLat, (mapboxResponse: any) => {
+                                        let result = mapboxResponse.body.features;
+                                        let street = getStreetAndAddressInfo(result[0].place_name);
+                                        let newCPE = {
+                                            'type': 'Feature',
+                                            'geometry': {
+                                                'type': 'Point',
+                                                'coordinates': lngLat
+                                            },
+                                            'properties': {
+                                                'name': street.street,
+
+                                                // @ts-ignore
+                                                'ap': workspaceFeature.workspaceId,
+                                                'feature_type': WorkspaceFeatureTypes.CPE,
+                                                'height': DEFAULT_CPE_HEIGHT
+                                            }
+                                        };
+                                        this.map.fire('draw.create', {features: [newCPE]});
+                                    });
+                                });
+                            }
                             // @ts-ignore
                             this.features[workspaceFeature.workspaceId] = workspaceFeature;
                         });

@@ -1276,6 +1276,7 @@ export class LinkCheckPage {
             this.globalLinkAnimation = new potree.CameraAnimation(
                 (window as any).viewer
             );
+            this.setPlayPauseButton(false);
 
             const { targets, positions } = createTrackShappedOrbitPath(tx, tx_h, rx, rx_h, 50.0, 50.0);
 

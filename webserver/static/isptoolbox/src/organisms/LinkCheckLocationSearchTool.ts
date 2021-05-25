@@ -29,6 +29,10 @@ export class LinkCheckLocationSearchTool {
                 this.setLngLat(result.center);
                 this.show();
             });
+
+            this.geocoder.on('clear', () => {
+                this.marker.remove();
+            })
         }
         
         // Clicking on point -> show popup on desktop

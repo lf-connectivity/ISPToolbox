@@ -350,6 +350,7 @@ export class LinkCheckPage {
                 accessToken: mapboxgl.accessToken,
                 mapboxgl: mapboxgl,
                 marker: isBeta() ? false : true,
+                countries: 'us, pr',
                 placeholder: 'Search for an address'
             });
 

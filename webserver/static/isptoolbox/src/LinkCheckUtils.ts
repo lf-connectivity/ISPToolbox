@@ -77,17 +77,27 @@ export function isBeta() : boolean{
 }
 
 export function getStreetAndAddressInfo(mapboxPlace: string) {
-    // Address should be in the form <stuff>, street, city, state ZIP CODE, USA
-    let components = mapboxPlace.split(', ').reverse()
-    
-    // Change state name (state ZIP) to "<abbreviated state>, zip"
-    let stateName = components[1].split(' ').slice(0, -1).join(' ');
+    // Address should be in the form <stuff>, street, city, state ZIP CODE, COUNTRY
+    let components = mapboxPlace.split(', ').reverse();
     let zipCode = components[1].split(' ').slice(-1)[0];
 
-    return {
+    // Format "state name" differently for Puerto Rico and US.
+    // TODO: support for other countries
+    let countryName = components[0];
+    let city;
+    if (countryName === 'United States') {
+        // Change state name (state ZIP) to "<abbreviated state>, zip"
+        let stateName = components[1].split(' ').slice(0, -1).join(' ');
         // @ts-ignore
-        city: `${components[2]}, ${US_STATE_ABBREVIATIONS[stateName]}, ${zipCode}`,
-        street: validateName(components[3] || DEFAULT_STREET)
+        city = `${components[2]}, ${US_STATE_ABBREVIATIONS[stateName]}, ${zipCode}`
+    }
+    else if (countryName === 'Puerto Rico') {
+        city = `${components[2]}, PR, ${zipCode}`
+    }
+
+    return {
+        city: city,
+        street: components[3] || DEFAULT_STREET
     };
 }
 

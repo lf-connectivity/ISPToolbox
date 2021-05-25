@@ -12,11 +12,6 @@ import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSe
 import { ACCESS_POINT_BUILDING_LAYER, WorkspaceManager } from "../../workspace/WorkspaceManager";
 import { BaseWorkspaceFeature } from "../../workspace/BaseWorkspaceFeature";
 
-interface PtPLinkDirectSelectState {
-    selectedFeatureId: string;
-    sharedVertexLinks: Array<Feature<LineString, any>>;
-}
-
 const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-customer-popup';
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
 const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-customer-popup';
@@ -25,6 +20,9 @@ const PLACE_TOWER_LINK_ID = 'place-tower-link-customer-popup';
 const CONNECT_TOWER_INDEX_LINK_BASE_ID = 'connect-tower-link-customer-popup';
 
 const EMPTY_BUILDING_ID = -1;
+
+// Five decimal places of precision for lat longs,
+const EPSILON = 0.000001
 
 const YES_SVG = `<svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M10.2929 0.292431L3.99992 6.58543L1.70692 4.29243C1.51832 4.11027 1.26571 4.00948 1.00352 4.01176C0.741321 4.01403 0.490508 4.1192 0.3051 4.30461C0.119692 4.49002 0.0145233 4.74083 0.0122448 5.00303C0.00996641 5.26523 0.110761 5.51783 0.292919 5.70643L3.29292 8.70643C3.48045 8.8939 3.73475 8.99922 3.99992 8.99922C4.26508 8.99922 4.51939 8.8939 4.70692 8.70643L11.7069 1.70643C11.8891 1.51783 11.9899 1.26523 11.9876 1.00303C11.9853 0.740832 11.8801 0.49002 11.6947 0.304612C11.5093 0.119204 11.2585 0.014035 10.9963 0.0117566C10.7341 0.00947813 10.4815 0.110272 10.2929 0.292431Z" fill="#42B72A"/>
@@ -49,10 +47,6 @@ const BACK_SVG = `<svg class="back-icon" width="12" height="12" viewBox="0 0 12 
 </defs>
 </svg>`
 
-const DEFAULT_PTP_LINK_DIRECT_SELECT_STATE = {
-    selectedFeatureId: '',
-    sharedVertexLinks: []
-}
 
 export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     protected apDistances: Map<AccessPoint, number>; // AP to distance from customer
@@ -410,24 +404,25 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
 
 export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerConnectPopup {
-    private directSelectState: PtPLinkDirectSelectState;
+    private selectedFeatureId: string;
+    private selectedVertex: number;
     private tooltipAction: boolean;
     private static _subclass_instance: LinkCheckVertexClickCustomerConnectPopup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw, marker: LinkCheckLocationSearchTool) {
         super(map, draw, marker);
-        this.directSelectState = DEFAULT_PTP_LINK_DIRECT_SELECT_STATE;
         this.tooltipAction = false;
         if (!LinkCheckVertexClickCustomerConnectPopup._subclass_instance) {
             LinkCheckVertexClickCustomerConnectPopup._subclass_instance = this;
         }
     }
 
-    setPtPState(featureId: string, sharedVertexLinks: Array<Feature<LineString, any>>) {
-        this.directSelectState = {
-            selectedFeatureId: featureId,
-            sharedVertexLinks: sharedVertexLinks
-        }
+    setSelectedFeatureId(selectedFeatureId: string) {
+        this.selectedFeatureId = selectedFeatureId;
+    }
+
+    setSelectedVertex(selectedVertex: number) {
+        this.selectedVertex = selectedVertex;
     }
 
     static getInstance() {
@@ -443,7 +438,7 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
         // Revert selection back to original direct select state if that was how this
         // popup was accessed.
         if (!this.tooltipAction) {
-            this.draw.changeMode('direct_select', {featureId: this.directSelectState.selectedFeatureId});
+            this.draw.changeMode('direct_select', {featureId: this.selectedFeatureId});
             this.map.fire('mode.change', {mode: 'direct_select'});
         }
         this.tooltipAction = false;
@@ -456,13 +451,28 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
     }
 
     protected onPlaceTower() {
+        const sameVertex = (coord1: [number, number], coord2: [number, number]) => {
+            return (Math.abs(coord1[0] - coord2[0]) < EPSILON && Math.abs(coord1[1] - coord2[1]) < EPSILON);
+        };
+
+        // Find all non-workspace PtP links sharing a vertex with the selected one
+
+        // @ts-ignore
+        let vertex = this.draw.get(this.selectedFeatureId).geometry.coordinates[this.selectedVertex] as [number, number];
+        let sharedLinks = this.draw.getFeatureIdsAt(this.map.project(vertex)).map((id) => this.draw.get(id)).filter((feat) => {
+            return (feat && feat.properties && feat.geometry.type === 'LineString' && !feat.properties.uuid &&
+                (sameVertex(feat.geometry.coordinates[0] as [number, number], vertex) || sameVertex(feat.geometry.coordinates[1] as [number, number], vertex))
+            );
+        });
+
+
         // Find lat longs of CPEs
-        let cpeLngLats = this.directSelectState.sharedVertexLinks.map((feature: Feature<LineString, any>) => {
+        let cpeLngLats = sharedLinks.map((feature: Feature<LineString, any>) => {
             let coords = feature.geometry.coordinates;
             return (coords[0][0] == this.lnglat[0] && coords[0][1] == this.lnglat[1]) ? coords[1] : coords[0]
         });
 
-        let ptpLinksToRemove = this.directSelectState.sharedVertexLinks.map((feature: Feature<LineString, any>) => {
+        let ptpLinksToRemove = sharedLinks.map((feature: Feature<LineString, any>) => {
             return feature.id;
         });
 

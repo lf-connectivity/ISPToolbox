@@ -11,9 +11,6 @@ import { MapboxSDKClient } from '../MapboxSDKClient';
 import { isBeta } from '../LinkCheckUtils';
 import { LinkCheckVertexClickCustomerConnectPopup } from './popups/LinkCheckCustomerConnectPopup';
 
-// Five decimal places of precision for lat longs,
-const EPSILON = 0.000001
-
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
  * 
@@ -61,11 +58,7 @@ export function OverrideDirect() {
      * @param e event e
      * @returns A function that calls reverseGeocode and displays the popup at the given coordinates.
      */
-    const createPopupFromVertexEvent = function (cls, state, e) {
-        const sameVertex = (coord1, coord2) => {
-            return (Math.abs(coord1[0] - coord2[0]) < EPSILON && Math.abs(coord1[1] - coord2[1]) < EPSILON);
-        };
-
+    const createPopupFromVertexEvent = function (state, e) {
         return () => {
             // Find which vertex the user has clicked. Works differently for drag and click vertex.
             let selectedCoord;
@@ -77,19 +70,12 @@ export function OverrideDirect() {
                 selectedCoord = Number(state.selectedCoordPaths[state.selectedCoordPaths.length - 1])
             }
             let vertexLngLat = state.feature.coordinates[selectedCoord];
-
             let mapboxClient = MapboxSDKClient.getInstance();
             mapboxClient.reverseGeocode(vertexLngLat, (response) => {
-
-                // Find all non-workspace PtP links sharing a vertex with the selected one
-                let links = cls._ctx.api.getFeatureIdsAt(e.point).map((id) => cls._ctx.api.get(id)).filter((feat) => {
-                    return (feat && feat.geometry.type === 'LineString' && !feat.properties.uuid &&
-                        (sameVertex(feat.geometry.coordinates[0], vertexLngLat) || sameVertex(feat.geometry.coordinates[1], vertexLngLat))
-                    );
-                });
                 let popup =
                     LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckVertexClickCustomerConnectPopup, vertexLngLat, response);
-                popup.setPtPState(state.feature.id, links);
+                popup.setSelectedFeatureId(state.feature.id);
+                popup.setSelectedVertex(selectedCoord);
                 popup.show();
             });
         }
@@ -107,7 +93,7 @@ export function OverrideDirect() {
             // otherwise there will be a race condition with the reverseGeocode callback and the
             // time when the user releases the mouse.
             popupAbortController = new AbortController();
-            window.addEventListener('mouseup', createPopupFromVertexEvent(this, state, e), {once: true, signal: popupAbortController.signal});
+            window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
         }
 
         this.startDragging(state, e);
@@ -129,7 +115,7 @@ export function OverrideDirect() {
             popupAbortController.abort();
             popupAbortController = new AbortController();
 
-            window.addEventListener('mouseup', createPopupFromVertexEvent(this, state, e), {once: true, signal: popupAbortController.signal});
+            window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
         }
         // Only allow editing of vertices that are not from associated AP/CPE links.
         // This would include user draw PtP links.

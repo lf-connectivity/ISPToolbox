@@ -155,7 +155,7 @@ export function OverrideDirect() {
                 state.feature.properties.radius = radius;
             }
         } else {
-            LinkCheckCustomerConnectPopup.getInstance().hide();
+            LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
             const selectedCoords = state.selectedCoordPaths.map(coord_path =>
                 state.feature.getCoordinate(coord_path),
             );

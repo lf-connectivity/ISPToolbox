@@ -6,10 +6,6 @@ import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_f
 import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_supplementary_points';
 import createVertex from '@mapbox/mapbox-gl-draw/src/lib/create_vertex';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
-import { LinkCheckBasePopup } from './popups/LinkCheckBasePopup';
-import { MapboxSDKClient } from '../MapboxSDKClient';
-import { isBeta } from '../LinkCheckUtils';
-import { LinkCheckVertexClickCustomerConnectPopup } from './popups/LinkCheckCustomerConnectPopup';
 
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
@@ -21,7 +17,7 @@ function isShiftDown(e) {
     return e.originalEvent.shiftKey === true;
 }
 
-export function OverrideDirect() {
+export function OverrideDirect(additionalFunctionality = {}) {
     const direct_select = MapboxDraw.modes.direct_select;
     direct_select.toDisplayFeatures = function (state, geojson, push) {
         if (state.featureId === geojson.properties.id) {
@@ -47,53 +43,9 @@ export function OverrideDirect() {
         this.fireActionable(state);
     };
 
-    /**
-     * Returns a function that reverse geocodes the given lngLat 
-     * and displays a popup at that location with the result 
-     * of the reverse geocode. Also queries for ptp links (non workspace)
-     * that share a vertex, to convert those ptp links to tower/customer
-     * 
-     * @param cls direct select class
-     * @param state mapbox state
-     * @param e event e
-     * @returns A function that calls reverseGeocode and displays the popup at the given coordinates.
-     */
-    const createPopupFromVertexEvent = function (state, e) {
-        return () => {
-            // Find which vertex the user has clicked. Works differently for drag and click vertex.
-            let selectedCoord;
-            if (e.featureTarget) {
-                selectedCoord = e.featureTarget.properties.coord_path;
-            }
-            else {
-                // Selected coordinate is the last item in selectedCoordPaths
-                selectedCoord = Number(state.selectedCoordPaths[state.selectedCoordPaths.length - 1])
-            }
-            let vertexLngLat = state.feature.coordinates[selectedCoord];
-            let mapboxClient = MapboxSDKClient.getInstance();
-            mapboxClient.reverseGeocode(vertexLngLat, (response) => {
-                let popup =
-                    LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckVertexClickCustomerConnectPopup, vertexLngLat, response);
-                popup.setSelectedFeatureId(state.feature.id);
-                popup.setSelectedVertex(selectedCoord);
-                popup.show();
-            });
-        }
-    }
-
-    // Abort controller used abort showing popup 
-    var popupAbortController = null;
-
     direct_select.onVertex = function (state, e) {
-        // If it's a PtP link, open a popup if the user clicks on a vertex. This
-        // is the only way I could think of of implementing this at a granular
-        // sub-feature level.
-        if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
-            // onVertex is called onMouseDown. We need to wait until mouseup to show the popup
-            // otherwise there will be a race condition with the reverseGeocode callback and the
-            // time when the user releases the mouse.
-            popupAbortController = new AbortController();
-            window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
+        if (additionalFunctionality.onVertex) {
+            additionalFunctionality.onVertex(state, e);
         }
 
         this.startDragging(state, e);
@@ -110,13 +62,10 @@ export function OverrideDirect() {
     }
 
     direct_select.dragVertex = function (state, e, delta) {
-        // Abort and replace popup event listener if we are still dragging.
-        if (popupAbortController !== null && isBeta()) {
-            popupAbortController.abort();
-            popupAbortController = new AbortController();
-
-            window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
+        if (additionalFunctionality.dragVertex) {
+            additionalFunctionality.dragVertex(state, e);
         }
+        
         // Only allow editing of vertices that are not from associated AP/CPE links.
         // This would include user draw PtP links.
         if (
@@ -155,7 +104,6 @@ export function OverrideDirect() {
                 state.feature.properties.radius = radius;
             }
         } else {
-            LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
             const selectedCoords = state.selectedCoordPaths.map(coord_path =>
                 state.feature.getCoordinate(coord_path),
             );

@@ -94,6 +94,9 @@ export function getStreetAndAddressInfo(mapboxPlace: string) {
     else if (countryName === 'Puerto Rico') {
         city = `${components[2]}, PR, ${zipCode}`
     }
+    else {
+        city = `${components[2]}, Unsupported Country`
+    }
 
     return {
         city: city,

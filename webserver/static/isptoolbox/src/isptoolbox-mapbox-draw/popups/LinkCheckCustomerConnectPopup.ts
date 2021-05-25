@@ -488,7 +488,7 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
 
 export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConnectPopup {
     private cpe: CPE;
-    private static _subclass_instance: LinkCheckCustomerConnectPopup;
+    private static _subclass_instance: LinkCheckCPEClickCustomerConnectPopup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw, marker: LinkCheckLocationSearchTool) {
         super(map, draw, marker);

@@ -7,7 +7,7 @@ import { ft2m, miles2km } from "../../LinkCalcUtils";
 import * as StyleConstants from '../styles/StyleConstants';
 import ap_icon from '../styles/ap-icon.svg';
 import { MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT, MIN_HEIGHT,
-    validateTowerName, validateLat, validateLng, validateRadius, validateHeight } from '../../LinkCheckUtils';
+    validateName, validateLat, validateLng, validateRadius, validateHeight } from '../../LinkCheckUtils';
 import { sanitizeString } from "../../molecules/InputValidator";
 
 var _ = require('lodash');
@@ -140,7 +140,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
 
         $(`#${NAME_INPUT_ID}`).on('input',
             _.debounce((e: any) => {
-                let name = validateTowerName(String($(`#${NAME_INPUT_ID}`).val()), NAME_INPUT_ID);
+                let name = validateName(String($(`#${NAME_INPUT_ID}`).val()), NAME_INPUT_ID);
 
                 // @ts-ignore
                 this.accessPoint.featureData.properties.name = name;

@@ -64,7 +64,7 @@ export const MAX_RADIUS = 10;
 export const MIN_HEIGHT = 0;
 export const MAX_HEIGHT = 1000;
 
-export const MAX_TOWER_NAME_LEN = 50;
+export const MAX_NAME_LEN = 50;
 
 const DEFAULT_STREET = 'Unknown Street Name';
 
@@ -87,7 +87,7 @@ export function getStreetAndAddressInfo(mapboxPlace: string) {
     return {
         // @ts-ignore
         city: `${components[2]}, ${US_STATE_ABBREVIATIONS[stateName]}, ${zipCode}`,
-        street: components[3] || DEFAULT_STREET
+        street: validateName(components[3] || DEFAULT_STREET)
     };
 }
 
@@ -95,4 +95,4 @@ export const validateLng = validateNumber.bind(undefined, MIN_LNG, MAX_LNG);
 export const validateLat = validateNumber.bind(undefined, MIN_LAT, MAX_LAT);
 export const validateRadius = validateNumber.bind(undefined, MIN_RADIUS, MAX_RADIUS);
 export const validateHeight = validateNumber.bind(undefined, MIN_HEIGHT, MAX_HEIGHT);
-export const validateTowerName = validateString.bind(undefined, MAX_TOWER_NAME_LEN);
+export const validateName = validateString.bind(undefined, MAX_NAME_LEN);

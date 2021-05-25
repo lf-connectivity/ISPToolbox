@@ -27,7 +27,7 @@ import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
 import { isBeta, validateHeight, validateLat, validateLng } from './LinkCheckUtils';
-import { LinkCheckCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
+import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup, LinkCheckVertexClickCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
 import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearchTool";
@@ -418,8 +418,9 @@ export class LinkCheckPage {
             // instantiate singletons
             new MapboxSDKClient(mapboxgl.accessToken);
             new LinkCheckCustomerConnectPopup(this.map, this.draw, this.locationMarker);
+            new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
+            new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
             new LinkCheckTowerPopup(this.map, this.draw);
-
 
             const features = this.draw.add({
                 "type": 'Feature',

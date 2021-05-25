@@ -10,7 +10,7 @@ import {isUnitsUS} from '../utils/MapPreferences';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { AccessPoint, APToCPELink, CPE } from './WorkspaceFeatures';
-import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
+import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { ViewshedTool } from "../organisms/ViewshedTool";
@@ -34,7 +34,7 @@ const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
 export const ACCESS_POINT_RADIUS_VIS_LAYER_FILL = 'ap_vis_data_layer-fill';
 
 const ACCESS_POINT_BUILDING_DATA = 'ap_building_source';
-const ACCESS_POINT_BUILDING_LAYER = 'ap_building_layer';
+export const ACCESS_POINT_BUILDING_LAYER = 'ap_building_layer';
 
 const ACCESS_POINT_BUILDING_OUTLINE_LAYER = 'ap_building_outline_layer';
 
@@ -337,7 +337,7 @@ export class WorkspaceManager {
             }
         });
 
-        const onClickPoint = (e: any) => {
+        const onClickAP = (e: any) => {
             // Show tooltip if only one AP is selected.
             const selectedAPs = this.filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.AP);
             const apPopup = LinkCheckTowerPopup.getInstance();
@@ -356,13 +356,37 @@ export class WorkspaceManager {
             }
         }
 
+        const onClickCPE = (e: any) => {
+            // Show tooltip if only one CPE is selected.
+            const selectedCPEs = this.filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.CPE);
+            let cpePopup = LinkCheckCPEClickCustomerConnectPopup.getInstance();
+            if (selectedCPEs.length === 1) {
+                let cpe = this.features[selectedCPEs[0].properties.uuid] as CPE;
+                let mapboxClient = MapboxSDKClient.getInstance();
+                let lngLat = cpe.featureData.geometry.coordinates as [number, number];
+                mapboxClient.reverseGeocode(lngLat, (resp: any) => {
+                    cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCPEClickCustomerConnectPopup, lngLat, resp);
+                    cpePopup.hide();
+                    cpePopup.setCPE(cpe);
+                    cpePopup.show();
+                });
+            }
+            else if (selectedCPEs.length > 1) {
+                cpePopup.hide();
+            }
+        }
+
         // Keep trying to load the AP onClick event handler until we can find layers
         // to do this, then stop.
         const loadOnClick = () => {
             this.map.getStyle().layers?.forEach((layer: any) => {
                 if (layer.id.includes('gl-draw-point-ap')) {
-                    this.map.on('click', layer.id, onClickPoint);
-                    this.map.off('idle', loadOnClick)
+                    this.map.on('click', layer.id, onClickAP);
+                    this.map.off('idle', loadOnClick);
+                }
+                else if (layer.id.includes('gl-draw-point-cpe')) {
+                    this.map.on('click', layer.id, onClickCPE);
+                    this.map.off('idle', loadOnClick);
                 }
             });
         }
@@ -570,7 +594,7 @@ export class WorkspaceManager {
             // Request coverage for any AP that doesn't have coverage and isn't awaiting any either
             if (apFeature.properties.uuid) {
                 let ap = this.features[apFeature.properties.uuid] as AccessPoint;
-                if (!ap.awaitingCoverage) {
+                if (!ap.awaitingCoverage && ap.coverage === EMPTY_BUILDING_COVERAGE) {
                     this.sendCoverageRequest('', {features: [apFeature]});   
                 }
             }
@@ -604,6 +628,7 @@ export class WorkspaceManager {
                                 Object.keys(BuildingCoverageStatus).forEach((status: string) => {
                                     this.draw.setFeatureProperty(ap.mapboxId, status, null);
                                 });
+                                ap.coverage = EMPTY_BUILDING_COVERAGE;
                                 LinkCheckTowerPopup.onAPUpdate(ap);
                             });
                         });
@@ -636,7 +661,7 @@ export class WorkspaceManager {
     renderSelectedAccessPoints(msg: string, data: any){
         // If there are selected APs, only render circles/buildings for those, otherwise render all.
         let fc = this.draw.getSelected();
-        if (fc.features.length === 0) {
+        if (this.filterByType(fc.features, WorkspaceFeatureTypes.AP).length === 0) {
             fc = this.draw.getAll();
         }
         this.renderAccessPointRadius(fc)

@@ -9,7 +9,7 @@ import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { LinkCheckBasePopup } from './popups/LinkCheckBasePopup';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { isBeta } from '../LinkCheckUtils';
-import { LinkCheckCustomerConnectPopup } from './popups/LinkCheckCustomerConnectPopup';
+import { LinkCheckVertexClickCustomerConnectPopup } from './popups/LinkCheckCustomerConnectPopup';
 
 // Five decimal places of precision for lat longs,
 const EPSILON = 0.000001
@@ -88,7 +88,7 @@ export function OverrideDirect() {
                     );
                 });
                 let popup =
-                    LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, vertexLngLat, response);
+                    LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckVertexClickCustomerConnectPopup, vertexLngLat, response);
                 popup.setPtPState(state.feature.id, links);
                 popup.show();
             });

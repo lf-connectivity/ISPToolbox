@@ -245,4 +245,23 @@ export class APToCPELink extends WorkspaceLineStringFeature {
             }
         });
     }
+
+    switchAP(newAP: AccessPoint) {
+        if (newAP !== this.ap) {
+            // Delete old AP data
+            this.ap.links.delete(this.cpe);
+
+            // Set new AP
+            this.ap = newAP;
+            this.ap.links.set(this.cpe, this);
+            this.cpe.ap = newAP;
+            this.draw.setFeatureProperty(this.mapboxId, 'ap', newAP.workspaceId);
+            this.featureData = this.draw.get(this.mapboxId) as Feature<LineString, any>;
+            this.featureData.geometry.coordinates[0] = newAP.featureData.geometry.coordinates;
+
+            // update
+            this.draw.add(this.featureData);
+            this.map.fire('draw.update', {features: [this.featureData]});
+        }
+    }
 }

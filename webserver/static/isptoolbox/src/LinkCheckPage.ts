@@ -894,6 +894,16 @@ export class LinkCheckPage {
         $('#data-container').collapse('show');
     }
 
+    updateAnimationTitles() {
+        // Update animation titles if they exist
+        if (this.aAbout1) {
+            this.aAbout1.title = this.radio_names[0].substr(0, 15);
+        }
+        if (this.aAbout2) {
+            this.aAbout2.title = this.radio_names[1].substr(0, 15);
+        }
+    }
+
     updateRadioLocation(update: any) {
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
@@ -926,6 +936,7 @@ export class LinkCheckPage {
                 $('#radio_name-1').text(cpe.featureData.properties?.name);
                 this.radio_names[0] = ap.featureData.properties?.name
                 this.radio_names[1] = cpe.featureData.properties?.name
+                this.updateAnimationTitles();
             }
             else {
                 if (feat.properties.freq == undefined && this.selectedFeatureID) {
@@ -951,6 +962,7 @@ export class LinkCheckPage {
                 $('#radio_name-1').text(DEFAULT_RADIO_1_NAME);
                 this.radio_names[0] = DEFAULT_RADIO_0_NAME
                 this.radio_names[1] = DEFAULT_RADIO_1_NAME
+                this.updateAnimationTitles();
             }
 
             
@@ -1246,7 +1258,6 @@ export class LinkCheckPage {
                 window.viewer.scene.annotations.add(this.aAbout1);
             } else {
                 this.aAbout1.position.set(tx[0], tx[1], tx_h + 10);
-                this.aAbout1.title = this.radio_names[0].substr(0, 15);
             }
             if (this.aAbout2 == null) {
                 this.aAbout2 = new potree.Annotation({
@@ -1257,8 +1268,8 @@ export class LinkCheckPage {
                 window.viewer.scene.annotations.add(this.aAbout2);
             } else {
                 this.aAbout2.position.set(rx[0], rx[1], rx_h + 10);
-                this.aAbout2.title = this.radio_names[1].substr(0, 15);
             }
+            this.updateAnimationTitles();
 
             this.globalLinkAnimation = new potree.CameraAnimation(
                 (window as any).viewer

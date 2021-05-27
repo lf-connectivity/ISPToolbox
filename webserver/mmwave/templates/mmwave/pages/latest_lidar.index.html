@@ -21,26 +21,26 @@
 {% endblock %}
 
 {% block content %}
-<div class="container flex-grow-1 mb-5" style="margin-top: 70px;">
-{{ month|json_script:"month-gis-data" }}
-{{ year|json_script:"year-gis-data" }}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-lg-8 col-xl-6">
-            <h1 class="heading-1 mb-4">Lidar Data Updates</h1>
-            <p class="large-paragraph">The purple regions on this map shows where new Lidar data has been added by the United States Geological Survey. 
-                Updates are made once per month. Check back on the first of each month to see the newely updated data.</p>
+<div class="container wide flex-grow-1 mb-5" style="margin-top: 70px;">
+    {{ month|json_script:"month-gis-data" }}
+    {{ year|json_script:"year-gis-data" }}
+    <div class="container wide mt-5">
+        <div class="row">
+            <div class="col-lg-8 col-xl-6">
+                <h1 class="heading-1 mb-4">Lidar Data Updates</h1>
+                <p class="large-paragraph">The purple regions on this map shows where new Lidar data has been added by the United States Geological Survey. 
+                    Updates are made once per month. Check back on the first of each month to see the newely updated data.</p>
+            </div>
         </div>
     </div>
-</div>
-<div class="container pt-3">
-    <div class="row data-heading">
-        <div class="decorative-line"></div>
-        <p class="date-heading--timestamp">Updates from {{month_name}} {{year}}</p>
+    <div class="container wide pt-3">
+        <div class="row data-heading">
+            <div class="decorative-line"></div>
+            <p class="date-heading--timestamp">Updates from {{month_name}} {{year}}</p>
+        </div>
     </div>
-</div>
-<div class="container mb-5">
-    <div id="map" style="height: 500px; min-height: calc(100vh - 250px); width: 100%"></div>
-</div>
+    <div class="container wide mb-5">
+        <div id="map" style="height: 500px; min-height: calc(100vh - 250px); width: 100%"></div>
+    </div>
 </div>
 {% endblock %}

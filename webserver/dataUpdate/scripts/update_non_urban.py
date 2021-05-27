@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from dataUpdate.util.clients import dbClient
 from dataUpdate.util.mail import sendNotifyEmail
 from isptoolbox_storage.mapbox.upload_tileset import newTilesetMTS

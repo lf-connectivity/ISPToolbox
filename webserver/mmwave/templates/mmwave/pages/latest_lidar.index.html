@@ -21,42 +21,26 @@
 {% endblock %}
 
 {% block content %}
-<div class="container flex-grow-1" style="margin-top: 70px;">
+<div class="container flex-grow-1 mb-5" style="margin-top: 70px;">
 {{ month|json_script:"month-gis-data" }}
 {{ year|json_script:"year-gis-data" }}
-<div class="container pt-3">
-    <div class="jumbotron">
-        <h1> New Data for the Month of {{month_name}} - {{year}} </h1>
-        <p>New GIS data has been added to ISP Toolbox - courtesy of the United States Geological Survey</p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 col-xl-6">
+            <h1 class="heading-1 mb-4">Lidar Data Updates</h1>
+            <p class="large-paragraph">The purple regions on this map shows where new Lidar data has been added by the United States Geological Survey. 
+                Updates are made once per month. Check back on the first of each month to see the newely updated data.</p>
+        </div>
     </div>
 </div>
-<div class="container">
-    <div id="map" style="height: 500px; width: 100%"></div>
-</div>
 <div class="container pt-3">
-    <nav aria-label="...">
-        <ul class="pagination pagination-lg">
-        {% if previous_url %} 
-        <li class="page-item">
-            <a 
-                class="page-link"
-                href="{{ previous_url }}"
-            >previous</a>
-        </li>
-        {% endif %}
-        <li class="page-item disabled">
-            <a class="page-link" href="#" tabindex="-1">{{month_name}} {{year}}</a>
-        </li>
-        {% if next_url %}
-            <li class="page-item">
-                <a
-                    class="page-link"
-                    href="{{next_url}}"
-                >next</a>
-            </li>
-        {% endif %}
-        </ul>
-    </nav>
+    <div class="row data-heading">
+        <div class="decorative-line"></div>
+        <p class="date-heading--timestamp">Updates from {{month_name}} {{year}}</p>
+    </div>
+</div>
+<div class="container mb-5">
+    <div id="map" style="height: 500px; min-height: calc(100vh - 250px); width: 100%"></div>
 </div>
 </div>
 {% endblock %}

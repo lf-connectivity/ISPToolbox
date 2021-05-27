@@ -924,6 +924,8 @@ export class LinkCheckPage {
 
                 $('#radio_name-0').text(ap.featureData.properties?.name);
                 $('#radio_name-1').text(cpe.featureData.properties?.name);
+                this.radio_names[0] = ap.featureData.properties?.name
+                this.radio_names[1] = cpe.featureData.properties?.name
             }
             else {
                 if (feat.properties.freq == undefined && this.selectedFeatureID) {
@@ -947,6 +949,8 @@ export class LinkCheckPage {
                 $('#hgt-1').val(radio1hgt);
                 $('#radio_name-0').text(DEFAULT_RADIO_0_NAME);
                 $('#radio_name-1').text(DEFAULT_RADIO_1_NAME);
+                this.radio_names[0] = DEFAULT_RADIO_0_NAME
+                this.radio_names[1] = DEFAULT_RADIO_1_NAME
             }
 
             
@@ -1236,22 +1240,24 @@ export class LinkCheckPage {
             if (this.aAbout1 == null) {
                 this.aAbout1 = new potree.Annotation({
                     position: [tx[0], tx[1], tx_h + 10],
-                    title: this.radio_names[0],
+                    title: this.radio_names[0].substr(0, 15)
                 });
                 // @ts-ignore
                 window.viewer.scene.annotations.add(this.aAbout1);
             } else {
                 this.aAbout1.position.set(tx[0], tx[1], tx_h + 10);
+                this.aAbout1.title = this.radio_names[0].substr(0, 15);
             }
             if (this.aAbout2 == null) {
                 this.aAbout2 = new potree.Annotation({
                     position: [rx[0], rx[1], rx_h + 10],
-                    title: this.radio_names[1]
+                    title: this.radio_names[1].substr(0, 15)
                 });
                 // @ts-ignore
                 window.viewer.scene.annotations.add(this.aAbout2);
             } else {
                 this.aAbout2.position.set(rx[0], rx[1], rx_h + 10);
+                this.aAbout2.title = this.radio_names[1].substr(0, 15);
             }
 
             this.globalLinkAnimation = new potree.CameraAnimation(

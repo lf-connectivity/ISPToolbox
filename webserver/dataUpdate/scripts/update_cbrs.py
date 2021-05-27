@@ -1,11 +1,9 @@
 import csv
 import requests
-import io
-import json
 from dataUpdate.util.clients import dbClient
 from dataUpdate.util.mail import sendNotifyEmail
 from datetime import datetime
-from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
+from isptoolbox_storage.mapbox.upload_tileset import newTilesetMTS
 
 AUCTION_URL = "https://auctiondata.fcc.gov/public/projects/auction105/reports/results_by_license/download"
 
@@ -134,10 +132,8 @@ def updateCBRSOverlay():
     dbconn = dbClient(prod=True)
     cursor = dbconn.cursor()
     cursor.execute(geo_json_sql)
-    geojson = cursor.fetchone()
-    b = bytes(json.dumps(geojson[0]), 'utf-8')
-    bytesBuff = io.BytesIO(b)
-    uploadNewTileset(bytesBuff, "cbrs_overlay")
+    geojson = cursor.fetchone()[0]
+    newTilesetMTS(geojson, "cbrs_overlay_MTS", 3, 9)
 
 
 def updateCbrs():
@@ -178,7 +174,7 @@ def updateCbrs():
             except Exception as e:
                 # Notification is doomed :(
                 # But we don't want to throw an exception and trigger the failure email so just return
-                print("MLab update success notification email failed due to error: " + str(e))
+                print("CBRS update success notification email failed due to error: " + str(e))
                 return
     except Exception as e:
         sendNotifyEmail(failSubject, failMessage.format(str(e)))

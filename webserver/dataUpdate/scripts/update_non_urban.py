@@ -1,9 +1,7 @@
-import io
-import json
 import datetime
 from dataUpdate.util.clients import dbClient
 from dataUpdate.util.mail import sendNotifyEmail
-from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
+from isptoolbox_storage.mapbox.upload_tileset import newTilesetMTS
 
 # flake8: noqa
 compute_sql = """
@@ -55,10 +53,8 @@ def update_community_connect():
         cursor.execute(compute_sql)
         # Grab geojson from computed table
         cursor.execute(geo_json_sql)
-        geojson = cursor.fetchone()
-        b = bytes(json.dumps(geojson[0]), 'utf-8')
-        bytesBuff = io.BytesIO(b)
-        uploadNewTileset(bytesBuff, "non_urban_overlay")
+        geojson = cursor.fetchone()[0]
+        newTilesetMTS(geojson, "non_urban_overlay_MTS", 3, 9)
         complete = datetime.now()
         s_us = Source.objects.get_or_create(source_id='NON_URBAN_OVERLAY', source_country='US')
         s_us[0].last_updated = complete

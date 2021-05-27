@@ -1,5 +1,7 @@
 import requests
 import boto3
+import json
+import io
 from django.conf import settings
 from functools import reduce
 from shapely.geometry import box, Polygon, MultiPolygon, GeometryCollection
@@ -166,3 +168,119 @@ def flatten_helper(geojson):
             data['id'] = geojson['id']
         return data
     return helper_func
+
+
+def geojsonToFeatureLDGeojsonFile(geojson):
+    """
+        Returns geojson features in line-delimited form for use in mapbox
+        @param geojson: geojson in dictionary form
+    """
+    feature_strings = [json.dumps(record) for record in geojson['features']]
+    line_delimited_json = '\n'.join(feature_strings)
+    return io.StringIO(line_delimited_json)
+
+
+def uploadNewTilesetSourceMTS(geojson, tileset_name, access_token_params):
+    """
+        IMPORTANT: *** Attempts to first delete an existing source with the same name ***
+        Creates a MTS tileset source using given geojson.
+        https://docs.mapbox.com/api/maps/mapbox-tiling-service/#replace-a-tileset-source
+        @param geojson_data: File-like object of line delimited GeoJSON features
+        @param tileset_name: The name of the tileset upload
+        @param access_token_params: Access token parameter to pass in the request
+    """
+    # Attempt to delete the source before creating a new one
+    upload_url = f'https://api.mapbox.com/tilesets/v1/sources/isptoolbox/{tileset_name}'
+    requests.delete(upload_url, params=access_token_params)
+
+    # Create the new source
+    geojson_file = geojsonToFeatureLDGeojsonFile(geojson)
+    files = {'file': geojson_file}
+    response = requests.post(upload_url, params=access_token_params, files=files)
+    if response.status_code == 200:
+        return response
+    else:
+        print(response.text)
+        raise Exception(f'Mapbox MTS upload failed during upload step.  Status code {response.status_code}')
+
+
+def createSimpleRecipeMTS(tileset_name, minzoom, maxzoom):
+    """
+        Returns a tileset recipe python dict.
+        @param tileset_name: The name of the tileset upload
+        @param minzoom: Minimum zoom extent to generate vector tiles for
+        @param minzoom: Maximum zoom extent to generate vector tiles for
+
+    """
+    return {
+        "version": 1,
+        "layers": {
+            "original": {
+                "source": f'mapbox://tileset-source/isptoolbox/{tileset_name}',
+                "minzoom": minzoom,
+                "maxzoom": maxzoom
+            }
+        }
+    }
+
+
+def createTilesetMTS(tileset_name, recipe, access_token_params):
+    """
+        Creates a MTS tileset using source with tileset_name
+        https://docs.mapbox.com/api/maps/mapbox-tiling-service/#create-a-tileset
+        @param tileset_name: The name of the tileset upload
+        @param recipe: The recipe to use for tileset creation as a python dictionary
+        @param access_token_params: Access token parameter to pass in the request
+        @raise Exception: If create request returns non-200
+    """
+    create_url = f'https://api.mapbox.com/tilesets/v1/isptoolbox.{tileset_name}'
+    data = {
+        "recipe": recipe,
+        "name": tileset_name
+    }
+    response = requests.post(create_url, json=data, params=access_token_params)
+    if response.status_code == 200:
+        return response
+    elif response.status_code == 400:
+        print(response.text)
+        raise Exception(f'Mapbox MTS upload failed during create step.  Status code {response.status_code}')
+
+
+def publishNewTilesetMTS(tileset_name, access_token_params):
+    """
+        Publishes a MTS tileset
+        https://docs.mapbox.com/api/maps/mapbox-tiling-service/#publish-a-tileset
+        @param tileset_name: The name of the tileset upload
+        @param access_token_params: Access token parameter to pass in the request
+        @raise Exception: If publish request returns non-200
+    """
+    publish_url = f'https://api.mapbox.com/tilesets/v1/isptoolbox.{tileset_name}/publish'
+    response = requests.post(publish_url, params=access_token_params)
+    if response.status_code == 200:
+        return response
+    else:
+        print(response.text)
+        raise Exception(f'Mapbox MTS upload failed during publish step.  Status code {response.status_code}')
+
+
+def newTilesetMTS(geojson_data, tileset_name, minzoom, maxzoom):
+    """
+        Creates a new tileset on isptoolbox mapbox using the Mapbox Tiling Service (MTS) pipeline:
+        https://docs.mapbox.com/api/maps/mapbox-tiling-service/
+        @param geojson_data: File-like object of line delimited GeoJSON features
+        @param tileset_name: The name of the tileset upload
+        @param minzoom: Minimum zoom extent to generate vector tiles for
+        @param minzoom: Maximum zoom extent to generate vector tiles for
+        @raise Exception: if any of the four upload steps fail (upload source, create recipe, create tileset, publish)
+    """
+    params = [
+        ('access_token', settings.MAPBOX_ACCESS_TOKEN_BACKEND),
+    ]
+    uploadNewTilesetSourceMTS(geojson_data, tileset_name, params)
+    recipe = createSimpleRecipeMTS(tileset_name, minzoom, maxzoom)
+    try:
+        createTilesetMTS(tileset_name, recipe, params)
+    except Exception:
+        # Tileset is probably already created, we have already updated the tileset's source so publish anyways
+        pass
+    publishNewTilesetMTS(tileset_name, params)

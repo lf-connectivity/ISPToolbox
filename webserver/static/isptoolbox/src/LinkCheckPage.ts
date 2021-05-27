@@ -17,7 +17,7 @@ import { LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
 import { Potree } from "./Potree.js";
-import { hasCookie } from "./PageUtils";
+import { hasCookie } from "./utils/Cookie";
 import {getInitialFeatures} from './utils/MapDefaults';
 import {isUnitsUS, setCenterZoomPreferences} from './utils/MapPreferences';
 import PubSub from 'pubsub-js';

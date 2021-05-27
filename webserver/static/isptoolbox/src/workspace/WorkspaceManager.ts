@@ -342,11 +342,17 @@ export class WorkspaceManager {
             }
         });
 
+        const hideLinkCheckProfile = () => {
+            //@ts-ignore
+            $('#data-container').collapse('hide');
+        }
+
         const onClickAP = (e: any) => {
             // Show tooltip if only one AP is selected.
             const selectedAPs = this.filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.AP);
             const apPopup = LinkCheckTowerPopup.getInstance();
             if (selectedAPs.length === 1) {
+                hideLinkCheckProfile();
                 let ap = this.features[selectedAPs[0].properties.uuid] as AccessPoint;
                 // Setting this timeout so the natural mouseclick close popup trigger resolves
                 // before this one

@@ -59,7 +59,7 @@ def setup_periodic(sender, **kwargs):
         )
         # Execute once at midnight on the first day of every month servertime (probably UTC)
         sender.add_periodic_task(
-            crontab(minute=0, hour=0, day_of_month=[1]),
+            crontab(minute=0, hour=0, day_of_month=[3]),
             dataUpdate_tasks.updateGISData.s(),
             name="update_gis_data"
         )

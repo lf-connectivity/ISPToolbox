@@ -13,3 +13,6 @@ class Overlay(models.Model):
             return cls.objects.filter(type=type).order_by("created").last()
         except:  # noqa: E722
             return None
+
+    def __str__(self):
+        return self.type

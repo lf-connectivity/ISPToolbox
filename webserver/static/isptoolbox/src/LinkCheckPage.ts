@@ -896,11 +896,13 @@ export class LinkCheckPage {
 
     updateAnimationTitles() {
         // Update animation titles if they exist
+        const name1 = this.radio_names[0].length > 15 ? this.radio_names[0].substr(0, 15) + '...' : this.radio_names[0];
+        const name2 = this.radio_names[1].length > 15 ? this.radio_names[1].substr(0, 15) + '...' : this.radio_names[1];
         if (this.aAbout1) {
-            this.aAbout1.title = this.radio_names[0].substr(0, 15);
+            this.aAbout1.title = name1
         }
         if (this.aAbout2) {
-            this.aAbout2.title = this.radio_names[1].substr(0, 15);
+            this.aAbout2.title = name2
         }
     }
 

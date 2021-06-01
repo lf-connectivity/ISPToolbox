@@ -1,5 +1,6 @@
 {% extends "workspace/pages/base.html" %}
 {% load static %}
+{% load i18n %}
 
 {% block additional_headers %}
 <!-- Jquery -->
@@ -28,8 +29,9 @@
         <div class="row">
             <div class="col-lg-8 col-xl-6">
                 <h1 class="heading-1 mb-4">Lidar Data Updates</h1>
-                <p class="large-paragraph">The purple regions on this map shows where new Lidar data has been added by the United States Geological Survey. 
-                    Updates are made once per month. Check back on the first of each month to see the newely updated data.</p>
+                <p class="large-paragraph">
+                {% translate "The purple regions on this map shows where new Lidar data has been added by the United States Geological Survey. Updates are made once per month. Check back on the first of each month to see the newly updated data." %}
+                </p>
             </div>
         </div>
     </div>

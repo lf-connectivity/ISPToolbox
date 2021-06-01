@@ -52,7 +52,7 @@ export class AccessPoint extends WorkspacePointFeature {
         super.update(newFeatureData, (resp: any) => {
             // @ts-ignore
             this.featureData.properties.radius = this.featureData.properties.max_radius
-            PubSub.publish(WorkspaceEvents.AP_RENDER, {features: [this.featureData]});
+            PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
             PubSub.publish(WorkspaceEvents.AP_UPDATE, {features: [this.featureData]});
 
             if (successFollowup) {

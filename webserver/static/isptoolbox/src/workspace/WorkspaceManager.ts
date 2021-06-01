@@ -20,6 +20,7 @@ import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants
 import { FeatureCollection } from "@turf/turf";
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
 import { getSessionID } from '../utils/MapPreferences';
+import { debounce } from "lodash";
 
 const DEFAULT_AP_HEIGHT = 30.48;
 const DEFAULT_CPE_HEIGHT = 1.0;
@@ -316,7 +317,8 @@ export class WorkspaceManager {
         // Add Pubsub Callbacks
         this.ws.setAccessPointCallback(this.accessPointStatusCallback.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.sendCoverageRequest.bind(this));
-        PubSub.subscribe(WorkspaceEvents.AP_RENDER, this.renderSelectedAccessPoints.bind(this));
+        PubSub.subscribe(WorkspaceEvents.AP_RENDER_SELECTED, this.renderSelectedAccessPoints.bind(this));
+        PubSub.subscribe(WorkspaceEvents.AP_RENDER_GIVEN, this.renderGivenApFeatures.bind(this));
         // @ts-ignore
         // $('#bulkUploadAccessPoint').modal('show');
 
@@ -585,7 +587,7 @@ export class WorkspaceManager {
             }
         });
 
-        PubSub.publish(WorkspaceEvents.AP_RENDER, {features});
+        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
     }
 
     filterByType(list: Array<any>, feat_type: WorkspaceFeatureTypes) {
@@ -596,7 +598,7 @@ export class WorkspaceManager {
     }
 
     drawSelectionChangeCallback({features}: {features: Array<any>}){
-        PubSub.publish(WorkspaceEvents.AP_RENDER, {features});
+        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
         const aps = this.filterByType(features, WorkspaceFeatureTypes.AP);
         const apPopup = LinkCheckTowerPopup.getInstance();
         const currentPopupAp = apPopup.getAccessPoint();
@@ -666,7 +668,7 @@ export class WorkspaceManager {
         });
 
         const aps = this.filterByType(features, WorkspaceFeatureTypes.AP);
-        PubSub.publish(WorkspaceEvents.AP_RENDER, {features: aps});
+        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
     }
 
     renderSelectedAccessPoints(msg: string, data: any){
@@ -675,7 +677,12 @@ export class WorkspaceManager {
         if (this.filterByType(fc.features, WorkspaceFeatureTypes.AP).length === 0) {
             fc = this.draw.getAll();
         }
-        this.renderAccessPointRadius(fc)
+        this.debouncedRenderAPRadius(fc);
+    }
+
+    renderGivenApFeatures(msg: string, data: any){
+        let fc = data;
+        this.debouncedRenderAPRadius(fc);
     }
     
     /**
@@ -718,6 +725,8 @@ export class WorkspaceManager {
         }
     }
 
+    debouncedRenderAPRadius = _.debounce(this.renderAccessPointRadius, 50);
+
     sendCoverageRequest(msg: string, data: {features: Array<GeoJSON.Feature>}){
         data.features.forEach((f: GeoJSON.Feature) => {
             if(f.properties){
@@ -725,7 +734,7 @@ export class WorkspaceManager {
                 let ap = this.features[f.properties.uuid] as AccessPoint;
                 ap.awaitNewCoverage();
                 this.ws.sendAPRequest(f.properties.uuid, f.properties.height);
-                PubSub.publish(WorkspaceEvents.AP_RENDER, {});
+                PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
             }
         });
     }
@@ -778,7 +787,7 @@ export class WorkspaceManager {
     updateCoverage(resp: any, uuid: string) {
         const ap = this.features[uuid] as AccessPoint;
         ap.setCoverage(resp.features);
-        PubSub.publish(WorkspaceEvents.AP_RENDER, {});
+        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
     }
 
     static getInstance() {

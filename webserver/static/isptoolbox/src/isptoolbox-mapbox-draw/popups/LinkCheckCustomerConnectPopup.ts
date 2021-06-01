@@ -97,7 +97,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             this.calculateCoverageStatus();
             super.show();
             if (this.accessPoints.length > 0) {
-                this.highlightAllAPs();
+                this.highlightAllAPFeatures();
             }
         }
     }
@@ -262,11 +262,11 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             });
 
             $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseenter', () => {
-                this.highlightAP(this.accessPoints[i])
+                this.highlightAndSelectAP(this.accessPoints[i])
             });
 
             $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseleave', () => {
-                this.highlightAllAPs();
+                this.highlightAndSelectAllAPs();
             });
         });
     }
@@ -386,11 +386,11 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.hide();
     }
 
-    protected highlightAllAPs() {
+    protected highlightAndSelectAllAPs() {
         this.changeSelection(this.accessPoints);
     }
 
-    protected highlightAP(ap: AccessPoint) {
+    protected highlightAndSelectAP(ap: AccessPoint) {
         this.changeSelection([ap]);
     }
 
@@ -398,7 +398,16 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         let feats = features.map((f: BaseWorkspaceFeature) => f.mapboxId);
         this.draw.changeMode('simple_select', {featureIds: feats});
         this.map.fire('draw.modechange', { mode: 'simple_select'});
-        PubSub.publish(WorkspaceEvents.AP_RENDER, {});
+        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
+    }
+
+    protected highlightAllAPFeatures() {
+        this.highlightFeatures(this.accessPoints);
+    }
+
+    protected highlightFeatures(aps: Array<BaseWorkspaceFeature>) {
+        const features = aps.map(f => {return f.featureData})
+        PubSub.publish(WorkspaceEvents.AP_RENDER_GIVEN, {features});
     }
 }
 

@@ -681,8 +681,7 @@ export class WorkspaceManager {
     }
 
     renderGivenApFeatures(msg: string, data: any){
-        let fc = data;
-        this.debouncedRenderAPRadius(fc);
+        this.debouncedRenderAPRadius(data);
     }
     
     /**

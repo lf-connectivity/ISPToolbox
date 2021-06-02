@@ -3,6 +3,7 @@
 <html lang="en">
   {% include "./header.html" %}
 <body class="los-body">
+    {% include "workspace/atoms/mapbox_global_public_key.html" %}
     {% include "./map_view.html" %}
     <script async src="{% static "wireless_network.min.js" %}"> </script>
     {% include "./3d_view.html" %}

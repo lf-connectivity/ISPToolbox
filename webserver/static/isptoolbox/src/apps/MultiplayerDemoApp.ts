@@ -13,7 +13,8 @@ const session = JSON.parse(
 ) as SessionInformation;
 
 // Create WebSocket Connection With Server
-window.mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
+//@ts-ignore
+window.mapboxgl.accessToken = window.mapbox_access_token;
 const map = new window.mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location

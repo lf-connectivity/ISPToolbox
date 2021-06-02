@@ -1,3 +1,4 @@
+{% load mapbox %}
 <!DOCTYPE html>
 <html lang="en">
   {% include "./header.html" %}
@@ -6,7 +7,7 @@
     {% include "./login_modal.html" %}
     <div id='map' class='planner-map'></div>
     <script >
-        mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleHljaG9uZyIsImEiOiJjazNxYzJ2YnYwMDNxM2NsZHMzd3Nsd3BwIn0.YqwoJq4jWP8WchOP9xeO4A';
+        mapboxgl.accessToken = "{% mapbox_public_key %}";
         var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location

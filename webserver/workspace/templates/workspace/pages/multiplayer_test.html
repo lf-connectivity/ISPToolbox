@@ -15,6 +15,7 @@
 {% endblock %}
 
 {% block content %}
+    {% include "workspace/atoms/mapbox_global_public_key.html" %}
     {{ session|json_script:"session_information" }}
     <script defer src="{% static "multiplayer_test.min.js" %}"> </script>
     <div id="map" style = "margin-top: 70px; width: 100%; height: calc(100vh - 70px); background-color: black;"></div>

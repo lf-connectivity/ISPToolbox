@@ -7,7 +7,7 @@ context('Test E2E LOS Check', () => {
   
     it('Check that a link is requested and rendered succesfully', () => {
       // We should start off by loading the lidar view
-      cy.get('#loading_spinner').should('be.visible').should('contain','Loading LiDAR');
+      cy.get('#loading_spinner', {timeout: 10000}).should('be.visible').should('contain','Loading LiDAR');
       // It should show that the link failed
       cy.get('.link-status', {timeout: 60000}).should('contain', 'Link Status').should('contain', 'Failed');
       // The chart should show the resolution metric

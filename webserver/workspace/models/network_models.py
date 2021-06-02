@@ -189,6 +189,48 @@ class APToCPELinkSerializer(serializers.ModelSerializer):
         exclude = ['created']
 
 
+class CoverageArea(WorkspaceFeature):
+    geojson = geo_models.PolygonField()
+
+    @property
+    def feature_type(self):
+        return FeatureType.COVERAGE_AREA.value
+
+
+class CoverageAreaSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    lookup_field = 'uuid'
+    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    feature_type = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = CoverageArea
+        exclude = ['created']
+
+
+class AccessPointBasedCoverageArea(WorkspaceFeature):
+    geojson = geo_models.PolygonField()
+    ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, editable=False)
+
+    @property
+    def feature_type(self):
+        return FeatureType.AP_COVERAGE_AREA.value
+
+
+class APCoverageAreaSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    lookup_field = 'uuid'
+    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    feature_type = serializers.CharField(read_only=True)
+    ap = serializers.PrimaryKeyRelatedField(
+        queryset=AccessPointLocation.objects.all(),
+        pk_field=serializers.UUIDField())
+
+    class Meta:
+        model = AccessPointBasedCoverageArea
+        exclude = ['created']
+
+
 class BuildingCoverage(models.Model):
     class CoverageStatus(models.TextChoices):
         SERVICEABLE = 'serviceable'
@@ -248,6 +290,8 @@ class AccessPointCoverageBuildings(models.Model):
             'unserviceable': unserviceable,
             'unknown': unknown
         }
+
+
 
 
 class Radio(models.Model):

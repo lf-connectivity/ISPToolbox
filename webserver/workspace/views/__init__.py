@@ -5,7 +5,8 @@ from .network_views import EditNetworkView, BulkUploadTowersView
 from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
-    AccessPointCoverageStatsView,
+    AccessPointCoverageStatsView, APCoverageAreaCreate, APCoverageAreaGet, CoverageAreaCreate,
+    CoverageAreaGet
 )
 from .session_views import (
     SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView,
@@ -21,6 +22,7 @@ __all__ = [
     'DefaultWorkspaceView', 'AccountSettingsView', 'EditNetworkView',
     'BulkUploadTowersView', 'NetworkDetail', 'AccessPointLocationListCreate', 'AccessPointLocationGet',
     'CPELocationCreate', 'CPELocationGet', 'APToCPELinkCreate', 'APToCPELinkGet',
+    'CoverageAreaCreate', 'CoverageAreaGet', 'APCoverageAreaGet', 'APCoverageAreaCreate',
     'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'AccessPointCoverageStatsView',
     'SessionCreateUpdateView', 'SessionListView', 'SessionDeleteView', 'SessionDownloadView',
     'SessionDuplicateRename',

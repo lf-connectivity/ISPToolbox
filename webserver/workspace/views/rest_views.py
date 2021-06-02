@@ -1,14 +1,14 @@
 from django.views import View
 from workspace.models import (
     AccessPointLocation, AccessPointCoverageBuildings,
-    CPELocation, APToCPELink
+    CPELocation, APToCPELink, CoverageArea, AccessPointBasedCoverageArea
 )
 from workspace import pagination
 from gis_data.models import MsftBuildingOutlines
 from workspace.models import (
     AccessPointSerializer,
     CPESerializer, APToCPELinkSerializer, WorkspaceMapSessionSerializer,
-    WorkspaceMapSession
+    WorkspaceMapSession, CoverageAreaSerializer, APCoverageAreaSerializer
 )
 from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
@@ -138,6 +138,70 @@ class APToCPELinkGet(mixins.RetrieveModelMixin,
     def get_queryset(self):
         user = self.request.user
         return APToCPELink.objects.filter(owner=user)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+class CoverageAreaCreate(mixins.CreateModelMixin,
+                         generics.GenericAPIView):
+    serializer_class = CoverageAreaSerializer
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+class CoverageAreaGet(mixins.RetrieveModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.UpdateModelMixin,
+                      generics.GenericAPIView):
+    serializer_class = CoverageAreaSerializer
+    lookup_field = 'uuid'
+
+    def get_queryset(self):
+        user = self.request.user
+        return CoverageArea.objects.filter(owner=user)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+class APCoverageAreaCreate(mixins.CreateModelMixin,
+                         generics.GenericAPIView):
+    serializer_class = APCoverageAreaSerializer
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+class APCoverageAreaGet(mixins.RetrieveModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.UpdateModelMixin,
+                        generics.GenericAPIView):
+    serializer_class = APCoverageAreaSerializer
+    lookup_field = 'uuid'
+
+    def get_queryset(self):
+        user = self.request.user
+        return AccessPointBasedCoverageArea.objects.filter(owner=user)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)

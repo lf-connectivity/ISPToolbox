@@ -7,10 +7,12 @@ from uuid import UUID
 
 from workspace import geojson_utils
 from workspace.models import (
-    AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession
+    AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession, CoverageArea, AccessPointBasedCoverageArea
 )
 from workspace.models.model_constants import FeatureType
-from workspace.models import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
+from workspace.models import (
+    AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageAreaSerializer, APCoverageAreaSerializer
+)
 
 
 ################################################################################
@@ -54,6 +56,31 @@ DEFAULT_TEST_LINESTRING = {
 }
 DEFAULT_TEST_LINESTRING = json.dumps(DEFAULT_TEST_LINESTRING)
 
+DEFAULT_TEST_POLYGON = {
+    "type": "Polygon",
+    "coordinates": [
+        [
+            [
+                -117.70889282226562,
+                34.45788034775209
+            ],
+            [
+                -118.09478759765625,
+                34.033314554166736
+            ],
+            [
+                -117.34085083007811,
+                34.09474769880026
+            ],
+            [
+                -117.70889282226562,
+                34.45788034775209
+            ]
+        ]
+    ]
+}
+DEFAULT_TEST_POLYGON = json.dumps(DEFAULT_TEST_POLYGON)
+
 DEFAULT_NAME = 'Test Object'
 DEFAULT_HEIGHT = 10.0
 DEFAULT_MAX_RADIUS = 14.2
@@ -90,6 +117,35 @@ UPDATED_TEST_LINESTRING = {
 }
 UPDATED_TEST_LINESTRING = json.dumps(UPDATED_TEST_LINESTRING)
 
+UPDATED_TEST_POLYGON = {
+    "type": "Polygon",
+    "coordinates": [
+        [
+            [
+                -117.81600952148438,
+                34.42503613021332
+            ],
+            [
+                -117.59902954101562,
+                34.42503613021332
+            ],
+            [
+                -117.59902954101562,
+                34.56312121279482
+            ],
+            [
+                -117.81600952148438,
+                34.56312121279482
+            ],
+            [
+                -117.81600952148438,
+                34.42503613021332
+            ]
+        ]
+    ]
+}
+UPDATED_TEST_POLYGON = json.dumps(UPDATED_TEST_POLYGON)
+
 UPDATED_NAME = 'Test Object Two: Electric Boogaloo'
 UPDATED_HEIGHT = 100
 UPDATED_MAX_RADIUS = 2.42
@@ -103,6 +159,8 @@ UPDATED_FREQUENCY = 5
 AP_ENDPOINT = '/pro/workspace/api/ap-los'
 CPE_ENDPOINT = '/pro/workspace/api/cpe'
 AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link'
+COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/coverage-area'
+AP_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/ap-coverage-area'
 
 
 ################################################################################
@@ -155,6 +213,21 @@ class WorkspaceBaseTestCase(TestCase):
         )
         self.test_ap_cpe_link.save()
 
+        self.test_coverage_area = CoverageArea(
+            owner=self.testuser,
+            session=self.test_session,
+            geojson=DEFAULT_TEST_POLYGON
+        )
+        self.test_coverage_area.save()
+
+        self.test_ap_coverage_area = AccessPointBasedCoverageArea(
+            owner=self.testuser,
+            session=self.test_session,
+            geojson=DEFAULT_TEST_POLYGON,
+            ap=self.test_ap
+        )
+        self.test_ap_coverage_area.save()
+
     def build_feature_collection(self, features):
         return {
             'type': 'FeatureCollection',
@@ -186,6 +259,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         self.assertTrue(self.test_ap.feature_type, FeatureType.AP.value)
         self.assertTrue(self.test_cpe.feature_type, FeatureType.CPE.value)
         self.assertTrue(self.test_ap_cpe_link.feature_type, FeatureType.AP_CPE_LINK.value)
+        self.assertTrue(self.test_coverage_area.feature_type, FeatureType.COVERAGE_AREA.value)
+        self.assertTrue(self.test_ap_coverage_area, FeatureType.AP_COVERAGE_AREA.value)
 
     def test_get_features_for_user_ap(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
@@ -240,6 +315,31 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
             }
         }
         self.get_feature_collection_flow(APToCPELink, APToCPELinkSerializer, [expected_link])
+
+    def test_get_features_for_user_coverage_area(self):
+        expected_link = {
+            'type': 'Feature',
+            'geometry': json.loads(DEFAULT_TEST_POLYGON),
+            'properties': {
+                'uuid': str(self.test_coverage_area.uuid),
+                'session': str(self.test_session.uuid),
+                'feature_type': FeatureType.COVERAGE_AREA.value
+            }
+        }
+        self.get_feature_collection_flow(CoverageArea, CoverageAreaSerializer, [expected_link])
+
+    def test_get_features_for_user_ap_coverage_area(self):
+        expected_link = {
+            'type': 'Feature',
+            'geometry': json.loads(DEFAULT_TEST_POLYGON),
+            'properties': {
+                'ap': str(self.test_ap.uuid),
+                'uuid': str(self.test_ap_coverage_area.uuid),
+                'session': str(self.test_session.uuid),
+                'feature_type': FeatureType.AP_COVERAGE_AREA.value
+            }
+        }
+        self.get_feature_collection_flow(AccessPointBasedCoverageArea, APCoverageAreaSerializer, [expected_link])
 
 
 class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
@@ -322,6 +422,24 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(link.ap, self.test_ap)
         self.assertEqual(link.cpe, self.test_cpe)
 
+    def test_create_coverage_area(self):
+        new_area = {
+            'geojson': DEFAULT_TEST_POLYGON,
+        }
+        area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
+        self.assertEqual(area.owner, self.testuser)
+        self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_POLYGON)
+
+    def test_create_ap_coverage_area(self):
+        new_area = {
+            'geojson': DEFAULT_TEST_POLYGON,
+            'ap': self.test_ap.uuid
+        }
+        area = self.create_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, new_area)
+        self.assertEqual(area.owner, self.testuser)
+        self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_POLYGON)
+        self.assertEqual(area.ap, self.test_ap)
+
     def test_update_ap(self):
         ap_id = self.test_ap.uuid
         updated_ap = {
@@ -363,11 +481,31 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(link.ap, self.test_ap)
         self.assertEqual(link.cpe, self.test_cpe)
 
+    def test_update_coverage_area(self):
+        area_id = self.test_coverage_area.uuid
+        updated_area = {
+            'geojson': UPDATED_TEST_POLYGON
+        }
+        area = self.update_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
+        self.assertEqual(area.owner, self.testuser)
+        self.assertJSONEqual(area.geojson.json, UPDATED_TEST_POLYGON)
+
+    def test_update_ap_coverage_area(self):
+        area_id = self.test_ap_coverage_area.uuid
+        updated_area = {
+            'geojson': UPDATED_TEST_POLYGON
+        }
+        area = self.update_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, area_id, updated_area)
+        self.assertEqual(area.owner, self.testuser)
+        self.assertJSONEqual(area.geojson.json, UPDATED_TEST_POLYGON)
+
     def test_delete_geojson_models(self):
-        # have to delete the AP CPE link first
+        # have to delete the AP CPE link and AP Coverage area first
         self.delete_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, self.test_ap_cpe_link.uuid)
+        self.delete_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, self.test_ap_coverage_area.uuid)
         self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
+        self.delete_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, self.test_coverage_area.uuid)
 
 
 class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):

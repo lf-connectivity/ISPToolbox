@@ -185,7 +185,7 @@ class CoverageAreaGet(mixins.RetrieveModelMixin,
 
 
 class APCoverageAreaCreate(mixins.CreateModelMixin,
-                         generics.GenericAPIView):
+                           generics.GenericAPIView):
     serializer_class = APCoverageAreaSerializer
 
     def post(self, request, *args, **kwargs):

@@ -293,7 +293,6 @@ class AccessPointCoverageBuildings(models.Model):
 
 
 
-
 class Radio(models.Model):
     name = models.CharField(max_length=100)
     uuid = models.UUIDField(

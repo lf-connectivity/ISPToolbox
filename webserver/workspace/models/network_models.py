@@ -209,7 +209,7 @@ class CoverageAreaSerializer(serializers.ModelSerializer):
 
 
 class AccessPointBasedCoverageArea(WorkspaceFeature):
-    geojson = geo_models.PolygonField()
+    geojson = geo_models.GeometryCollectionField()
     ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, editable=False)
 
     @property

@@ -81,6 +81,94 @@ DEFAULT_TEST_POLYGON = {
 }
 DEFAULT_TEST_POLYGON = json.dumps(DEFAULT_TEST_POLYGON)
 
+DEFAULT_TEST_GEO_COLLECTION = {
+    "type": "GeometryCollection",
+    "geometries": [
+        {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        -74.45676,
+                        40.36817
+                    ],
+                    [
+                        -74.45676,
+                        40.36718074074074
+                    ],
+                    [
+                        -74.45577074074075,
+                        40.36718074074074
+                    ],
+                    [
+                        -74.45577074074075,
+                        40.36817
+                    ],
+                    [
+                        -74.45676,
+                        40.36817
+                    ]
+                ]
+            ]
+        },
+        {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        -74.45577074074075,
+                        40.35926666666666
+                    ],
+                    [
+                        -74.45577074074075,
+                        40.35827740740741
+                    ],
+                    [
+                        -74.45379222222222,
+                        40.35827740740741
+                    ],
+                    [
+                        -74.45379222222222,
+                        40.35926666666666
+                    ],
+                    [
+                        -74.45577074074075,
+                        40.35926666666666
+                    ]
+                ]
+            ]
+        },
+        {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        -74.45478148148149,
+                        40.35629888888889
+                    ],
+                    [
+                        -74.45478148148149,
+                        40.35530962962963
+                    ],
+                    [
+                        -74.45379222222222,
+                        40.35530962962963
+                    ],
+                    [
+                        -74.45379222222222,
+                        40.35629888888889
+                    ],
+                    [
+                        -74.45478148148149,
+                        40.35629888888889
+                    ]
+                ]
+            ]
+        }
+    ]
+}
+DEFAULT_TEST_GEO_COLLECTION = json.dumps(DEFAULT_TEST_GEO_COLLECTION)
+
 DEFAULT_NAME = 'Test Object'
 DEFAULT_HEIGHT = 10.0
 DEFAULT_MAX_RADIUS = 14.2
@@ -145,6 +233,40 @@ UPDATED_TEST_POLYGON = {
     ]
 }
 UPDATED_TEST_POLYGON = json.dumps(UPDATED_TEST_POLYGON)
+
+UPDATED_TEST_GEO_COLLECTION = {
+    "type": "GeometryCollection",
+    "geometries": [
+        {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        -74.43994259259259,
+                        40.346406296296294
+                    ],
+                    [
+                        -74.43994259259259,
+                        40.34541703703704
+                    ],
+                    [
+                        -74.43895333333333,
+                        40.34541703703704
+                    ],
+                    [
+                        -74.43895333333333,
+                        40.346406296296294
+                    ],
+                    [
+                        -74.43994259259259,
+                        40.346406296296294
+                    ]
+                ]
+            ]
+        }
+    ]
+}
+UPDATED_TEST_GEO_COLLECTION = json.dumps(UPDATED_TEST_GEO_COLLECTION)
 
 UPDATED_NAME = 'Test Object Two: Electric Boogaloo'
 UPDATED_HEIGHT = 100
@@ -223,7 +345,7 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_ap_coverage_area = AccessPointBasedCoverageArea(
             owner=self.testuser,
             session=self.test_session,
-            geojson=DEFAULT_TEST_POLYGON,
+            geojson=DEFAULT_TEST_GEO_COLLECTION,
             ap=self.test_ap
         )
         self.test_ap_coverage_area.save()
@@ -331,7 +453,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
     def test_get_features_for_user_ap_coverage_area(self):
         expected_link = {
             'type': 'Feature',
-            'geometry': json.loads(DEFAULT_TEST_POLYGON),
+            'geometry': json.loads(DEFAULT_TEST_GEO_COLLECTION),
             'properties': {
                 'ap': str(self.test_ap.uuid),
                 'uuid': str(self.test_ap_coverage_area.uuid),
@@ -432,12 +554,12 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
 
     def test_create_ap_coverage_area(self):
         new_area = {
-            'geojson': DEFAULT_TEST_POLYGON,
+            'geojson': DEFAULT_TEST_GEO_COLLECTION,
             'ap': self.test_ap.uuid
         }
         area = self.create_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
-        self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_POLYGON)
+        self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_GEO_COLLECTION)
         self.assertEqual(area.ap, self.test_ap)
 
     def test_update_ap(self):
@@ -493,11 +615,11 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
     def test_update_ap_coverage_area(self):
         area_id = self.test_ap_coverage_area.uuid
         updated_area = {
-            'geojson': UPDATED_TEST_POLYGON
+            'geojson': UPDATED_TEST_GEO_COLLECTION
         }
         area = self.update_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, area_id, updated_area)
         self.assertEqual(area.owner, self.testuser)
-        self.assertJSONEqual(area.geojson.json, UPDATED_TEST_POLYGON)
+        self.assertJSONEqual(area.geojson.json, UPDATED_TEST_GEO_COLLECTION)
 
     def test_delete_geojson_models(self):
         # have to delete the AP CPE link and AP Coverage area first

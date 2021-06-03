@@ -11,6 +11,8 @@ import { BuildingCoverage, BuildingCoverageStatus, updateCoverageStatus } from "
 import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchTool";
 import { ACCESS_POINT_BUILDING_LAYER, WorkspaceManager } from "../../workspace/WorkspaceManager";
 import { BaseWorkspaceFeature } from "../../workspace/BaseWorkspaceFeature";
+import pass_svg from '../styles/pass-icon.svg';
+import fail_svg from '../styles/fail-icon.svg';
 
 const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-customer-popup';
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
@@ -23,18 +25,6 @@ const EMPTY_BUILDING_ID = -1;
 
 // Five decimal places of precision for lat longs,
 const EPSILON = 0.000001
-
-const YES_SVG = `<svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M10.2929 0.292431L3.99992 6.58543L1.70692 4.29243C1.51832 4.11027 1.26571 4.00948 1.00352 4.01176C0.741321 4.01403 0.490508 4.1192 0.3051 4.30461C0.119692 4.49002 0.0145233 4.74083 0.0122448 5.00303C0.00996641 5.26523 0.110761 5.51783 0.292919 5.70643L3.29292 8.70643C3.48045 8.8939 3.73475 8.99922 3.99992 8.99922C4.26508 8.99922 4.51939 8.8939 4.70692 8.70643L11.7069 1.70643C11.8891 1.51783 11.9899 1.26523 11.9876 1.00303C11.9853 0.740832 11.8801 0.49002 11.6947 0.304612C11.5093 0.119204 11.2585 0.014035 10.9963 0.0117566C10.7341 0.00947813 10.4815 0.110272 10.2929 0.292431Z" fill="#42B72A"/>
-</svg>`
-
-const NO_SVG = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M7 0C3.15 0 0 3.15 0 7C0 10.85 3.15 14 7 14C10.85 14 14 10.85 14 7C14 3.15 10.85 0 7 0ZM7 1.75C8.1375 1.75 9.1875 2.1 10.0625 2.7125L2.7125 10.0625C2.1 9.1875 1.75 8.1375 1.75 7C1.75 4.1125 4.1125 1.75 7 1.75ZM7 12.25C5.8625 12.25 4.8125 11.9 3.9375 11.2875L11.2875 3.9375C11.9 4.8125 12.25 5.8625 12.25 7C12.25 9.8875 9.8875 12.25 7 12.25Z" fill="#F23E3E"/>
-</svg>`
-
-const UNKNOWN_SVG = `<svg width="9" height="13" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M5.7685 8.9475C5.7685 8.225 5.913 7.7915 6.491 7.358C8.0805 6.0575 8.514 5.1905 8.514 4.0345C8.514 2.156 7.2135 1 4.757 1C2.445 1 1 2.5895 1 4.179C1 4.6125 1.1445 5.046 1.289 5.335L3.1675 4.9015C3.1675 4.757 3.023 4.468 3.023 4.3235C3.023 3.312 3.7455 2.734 4.9015 2.734C5.913 2.734 6.491 3.312 6.491 4.0345C6.491 4.9015 6.0575 5.335 5.046 6.202C4.0345 7.069 3.7455 7.647 3.7455 8.6585V8.9475H5.7685V8.9475ZM3.7455 12.56H5.913V10.3925H3.7455V12.56V12.56Z" fill="#A2A2A2" stroke="#919191" stroke-width="0.163934" stroke-miterlimit="10"/>
-</svg>`
 
 const BACK_SVG = `<svg class="back-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0)">
@@ -133,13 +123,13 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         switch(status) {
             case BuildingCoverageStatus.SERVICEABLE:
                 return {
-                    icon: YES_SVG,
+                    icon: pass_svg,
                     divClass: 'title success',
                     message: 'Clear line of sight'
                 };
             case BuildingCoverageStatus.UNSERVICEABLE:
                 return {
-                    icon: NO_SVG,
+                    icon: fail_svg,
                     divClass: 'title fail',
                     message: 'No clear line of sight'
                 };
@@ -168,7 +158,9 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         return `
             <div class="tooltip--cpe">
                 <div class="${statusElements.divClass}">
-                    <h6>${statusElements.message} ${this.losStatus === BuildingCoverageStatus.UNKNOWN ? '' : statusElements.icon}</h6>
+                    <h6>${statusElements.message}                    
+                        <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN ? '' : statusElements.icon} >
+                    </h6>
                 </div>
 
                 <div class="description">
@@ -542,7 +534,11 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
     }
 
     protected getButtonRowHTML() {
-        return ``;
+        return `
+            <div class="node-edits">
+                <a>Delete Radio</a>
+            </div>
+        `;
     }
 
     protected calculateAPConnectIndex() {

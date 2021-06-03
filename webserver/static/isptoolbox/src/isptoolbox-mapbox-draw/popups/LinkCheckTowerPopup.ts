@@ -6,6 +6,8 @@ import { isUnitsUS } from '../../utils/MapPreferences';
 import { ft2m, miles2km } from "../../LinkCalcUtils";
 import * as StyleConstants from '../styles/StyleConstants';
 import ap_icon from '../styles/ap-icon.svg';
+import pass_svg from '../styles/pass-icon.svg';
+import fail_svg from '../styles/fail-icon.svg';
 import { MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT, MIN_HEIGHT,
     validateName, validateLat, validateLng, validateRadius, validateHeight } from '../../LinkCheckUtils';
 import { sanitizeString } from "../../molecules/InputValidator";
@@ -24,7 +26,6 @@ enum ImperialToMetricConversion {
     FT_TO_M = 'ft2m',
     MI_TO_KM = 'mi2km'
 }
-
 
 
 const CONVERSION_FORMULAS: Map<ImperialToMetricConversion, (input: number) => number> = new Map();
@@ -165,27 +166,30 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                 feat.properties?.unserviceable != null &&
                 feat.properties.unknown === 0){
                 return `
-                    <div class="ap-stat" style="border: 1px solid ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
+                    <li class="ap-stat">
                         <p class="ap-stat--label">Clear LOS Rooftops</p>
-                        <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">${
-                            feat.properties?.serviceable
-                        }</p>
-                    </div>
-                    <div class="ap-stat" style="border: 1px solid ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
+                        <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
+                            <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
+                            ${feat.properties?.serviceable}
+                        </p>
+                    </li>
+                    <li class="ap-stat">
                         <p class="ap-stat--label">Obstructed Rooftops</p>
-                        <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">${
-                            feat.properties?.unserviceable
-                        }</p>
-                    </div>
-                    <div style="grid-column: 1/ -1">
-                        <p align="center">Coverage updated ${feat.properties?.last_updated}</p>
+                        <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
+                            <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
+                            ${feat.properties?.unserviceable}
+                        </p>
+                    </li>
+                    <div class="node-edits">
+                        <a>Delete Tower</a>
+                        <p>Last edited ${feat.properties?.last_updated}</p>
                     </div>
             `;
             }
         }
         return `
-            <div align="center" style="grid-column: 1/ -1">
-                <img src="${ap_icon}" height="40" width="40">
+            <div align="center">
+                <img src="${ap_icon}" height="35" width="35">
                 <p align="center"><b>Plotting Lidar Coverage</p>
                 <p align="center">This may take several minutes</p>
             </div>

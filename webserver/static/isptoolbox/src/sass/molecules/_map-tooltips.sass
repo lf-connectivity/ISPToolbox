@@ -3,7 +3,7 @@
 .mapboxgl-popup.lineofsight-tooltip
     color: $white-color
     font-family: $brand-font-family-sans-serif
-    min-width: 270px
+    min-width: 285px
     .title
         margin-bottom: 10px
         h6
@@ -18,9 +18,9 @@
             color: $success-color
     .title.fail h6
             color: $error-color
-    .tooltip--cpe .title svg
+    .tooltip--cpe .title img
         margin-left: 6px
-    .tooltip--towers .title svg
+    .tooltip--towers .title img
         margin-right: 6px
     .description
         margin-bottom: 10px
@@ -46,7 +46,7 @@
         color: $brand-primary-color
         font-weight: bold
         font-size: 14px
-        letter-spacing: 0.017em
+        letter-spacing: 0.02em
         cursor: pointer
         transition: 0.2s ease all
         &:hover
@@ -89,7 +89,7 @@
                 margin: 0 0 4px 0
         li:first-child
             padding-top: 0
-        li:last-child
+        li:last-of-type
             border-bottom: 0
             padding-bottom: 0
         li:hover
@@ -151,7 +151,7 @@
             padding: .5rem 0
         li:first-child
             padding-top: 0
-        li:last-child
+        li:last-of-type
             border-bottom: 0
             padding-bottom: 0
         .coordinates
@@ -170,22 +170,32 @@
                 margin: 0 5px
                 color: $white-color
         .stat-row
-            display: grid
-            grid-template-columns: repeat(2, 1fr)
-            grid-column-gap: 10px
-        .ap-stat
-            align-items: center
             display: flex
-            padding: 7px
+            flex-flow: column
+        .ap-stat
             margin-bottom: 0
+            align-items: center
+            border-bottom: none
+            display: flex
+            flex-flow: row
+            justify-content: space-between
+            padding: 0.6rem 0 0 0
+            width: 100%
             &--label
                 margin-bottom: 0
-                font-size: 12px
-                line-height: 16px
             &--value
-                font-family: $brand-font-family-mono
                 margin-bottom: 0
                 margin-left: 3px
+                font-weight: bold
+            &--icon img
+                margin-right: 2px
+                margin-bottom: 3px
+    .node-edits
+        display: flex
+        flex-flow: row
+        justify-content: space-between
+        margin-top: 13px
+        width: 100%
     .data-with-unit
         display: flex
         span

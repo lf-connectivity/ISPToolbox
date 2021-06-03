@@ -558,6 +558,11 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
                     this.setBuildingId(building.properties?.msftid);
                 }
                 super.show();
+                // Add delete btn event handler
+                $(`#cpe-delete-btn`).off().on('click', () => {
+                    this.hide();
+                    this.cpe.delete();
+                })
             }, 50);
         }
     }
@@ -570,7 +575,7 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
     protected getButtonRowHTML() {
         return `
             <div class="node-edits">
-                <a>Delete Radio</a>
+                <a id="cpe-delete-btn">Delete Radio</a>
             </div>
         `;
     }

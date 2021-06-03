@@ -11,6 +11,8 @@ import fail_svg from '../styles/fail-icon.svg';
 import { MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT, MIN_HEIGHT,
     validateName, validateLat, validateLng, validateRadius, validateHeight } from '../../LinkCheckUtils';
 import { sanitizeString } from "../../molecules/InputValidator";
+import { WorkspaceEvents } from "../../workspace/WorkspaceConstants";
+import { waitForElement } from "../../utils/JQueryUtils";
 
 var _ = require('lodash');
 
@@ -181,7 +183,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                         </p>
                     </li>
                     <div class="node-edits">
-                        <a>Delete Tower</a>
+                        <a id="tower-delete-btn">Delete Tower</a>
                         <p>Last edited ${feat.properties?.last_updated}</p>
                     </div>
             `;
@@ -202,6 +204,19 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
             this.accessPoint?.featureData.properties?.height_ft :
             this.accessPoint?.featureData.properties?.height
        )
+    }
+
+    show() {
+        if (!this.popup.isOpen()) {
+            super.show();
+            //  Wait for delete button to be visible and add delete btn event handler
+            waitForElement(`#tower-delete-btn`, () => {
+                $(`#tower-delete-btn`).off().on('click', () => {
+                    this.map.fire('draw.delete', {features: [this.accessPoint?.featureData]});
+                    PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
+                })
+            });
+        }
     }
 
     protected getHTML() {

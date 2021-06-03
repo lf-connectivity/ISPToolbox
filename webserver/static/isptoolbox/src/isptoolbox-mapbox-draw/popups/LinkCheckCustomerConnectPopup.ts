@@ -218,7 +218,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                         <a class="link">View LOS</a>
                     </div>
                     <div>
-                        ${statusIcon}
+                        <img src="${statusIcon}"/>
                     </div>
                 </li>
             `

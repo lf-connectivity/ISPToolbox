@@ -6,6 +6,7 @@ export enum WorkspaceEvents {
     AP_RENDER_SELECTED = 'ap.render',
     AP_RENDER_GIVEN = 'ap.render_given',
     AP_SELECTED = 'ap.selected',
+    AP_COVERAGE_UPDATED = 'ap.coverage_updated'
 }
 
 export enum WorkspaceFeatureTypes {

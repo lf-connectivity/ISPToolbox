@@ -604,14 +604,6 @@ export class WorkspaceManager {
         const currentPopupAp = apPopup.getAccessPoint();
 
         aps.forEach((apFeature: any) => {
-            // Request coverage for any AP that doesn't have coverage and isn't awaiting any either
-            if (apFeature.properties.uuid) {
-                let ap = this.features[apFeature.properties.uuid] as AccessPoint;
-                if (!ap.awaitingCoverage && ap.coverage === EMPTY_BUILDING_COVERAGE) {
-                    this.sendCoverageRequest('', {features: [apFeature]});   
-                }
-            }
-
             // Hide AP tooltip if user is dragging AP.
             if (currentPopupAp &&
                 apFeature.properties.uuid == currentPopupAp.workspaceId &&
@@ -703,6 +695,9 @@ export class WorkspaceManager {
                     // render coverage
                     if (feat.properties.uuid) {
                         let ap = this.features[feat.properties.uuid] as AccessPoint;
+                        if (!ap.awaitingCoverage && ap.coverage === EMPTY_BUILDING_COVERAGE) {
+                            this.sendCoverageRequest('', {features: [feat]});
+                        }
                         selectedAPs.push(ap);
                     }
                 }
@@ -785,6 +780,7 @@ export class WorkspaceManager {
         const ap = this.features[uuid] as AccessPoint;
         ap.setCoverage(resp.features);
         PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
+        PubSub.publish(WorkspaceEvents.AP_COVERAGE_UPDATED, {'uuid': uuid});
     }
 
     static getInstance() {

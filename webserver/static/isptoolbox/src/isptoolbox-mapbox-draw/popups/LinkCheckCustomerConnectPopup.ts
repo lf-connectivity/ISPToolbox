@@ -19,7 +19,10 @@ const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
 const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-customer-popup';
 const VIEW_LOS_BUTTON_ID = 'view-los-btn-customer-popup';
 const PLACE_TOWER_LINK_ID = 'place-tower-link-customer-popup';
+const STATUS_MESSAGE_DIV_ID = 'status-message-div-customer-popup';
+const RADIO_TOWER_CONNECT_DIV_ID = 'radio-tower-connect-div-customer-popup';
 const CONNECT_TOWER_INDEX_LINK_BASE_ID = 'connect-tower-link-customer-popup';
+const CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID = 'connect-tower-status-icon-customer-popup';
 
 const EMPTY_BUILDING_ID = -1;
 
@@ -61,6 +64,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.ptpRowPrompt = 'Draw PtP to:'
         this.apConnectIndex = 0;
+        PubSub.subscribe(WorkspaceEvents.AP_COVERAGE_UPDATED, this.onCoverageUpdate.bind(this));
         if (!LinkCheckCustomerConnectPopup._instance) {
             LinkCheckCustomerConnectPopup._instance = this;
         }
@@ -157,7 +161,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         let statusElements = this.getStatusHTMLElements(this.losStatus);
         return `
             <div class="tooltip--cpe">
-                <div class="${statusElements.divClass}">
+                <div id="${STATUS_MESSAGE_DIV_ID}" class="${statusElements.divClass}">
                     <h6>${statusElements.message}                    
                         <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN ? '' : statusElements.icon} >
                     </h6>
@@ -174,7 +178,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                         <p class="small">${this.ptpRowPrompt}</p>
                         ${this.accessPoints.length > 1 ? `<a id='${SWITCH_TOWER_LINK_ID}' class="link">Switch</a>` : ''}
                     </div>
-                    <div>
+                    <div id="${RADIO_TOWER_CONNECT_DIV_ID}">
                         <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
                     </div>
                 </div>
@@ -217,7 +221,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                         <p>${apName} - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
                         <a class="link">View LOS</a>
                     </div>
-                    <div>
+                    <div id='${CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID}-${i}'>
                         <img src="${statusIcon}"/>
                     </div>
                 </li>
@@ -258,7 +262,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             });
 
             $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseleave', () => {
-                this.highlightAndSelectAllAPs();
+                this.highlightAllAPFeatures();
             });
         });
     }
@@ -330,6 +334,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     protected calculateAPConnectIndex() {
         // set apConnect index to first tower with LOS. If there isn't any, mark
         // set to closest tower.
+        this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.accessPoints.every((ap: AccessPoint, i: number) => {
             this.losStatus = updateCoverageStatus(this.losStatus, ap.coverage.getCoverageStatus(this.buildingId));
             if (this.losStatus === BuildingCoverageStatus.SERVICEABLE) {
@@ -376,6 +381,35 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.map.fire('draw.modechange', {mode: 'draw_radius'});
         this.marker.hide();
         this.hide();
+    }
+
+    protected onCoverageUpdate(msg: string, data: any) {
+        this.accessPoints.every((ap: AccessPoint, i: number) => {
+            if (ap.workspaceId === data.uuid) {
+                let apStatus = ap.coverage.getCoverageStatus(this.buildingId);
+                let statusIcon = this.getStatusHTMLElements(apStatus).icon;
+                $(`#${CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID}-${i}`).html(`<img src="${statusIcon}"/>`);
+
+                this.calculateAPConnectIndex();
+                let apName = this.accessPoints[this.apConnectIndex].featureData.properties?.name;
+                let apDist = this.apDistances.get(this.accessPoints[this.apConnectIndex]);
+                let statusElements = this.getStatusHTMLElements(this.losStatus);
+
+                $(`#${STATUS_MESSAGE_DIV_ID}`).attr('class', statusElements.divClass);
+                $(`#${STATUS_MESSAGE_DIV_ID}`).html(`
+                    <h6>${statusElements.message}
+                        <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN ? '' : statusElements.icon} >
+                    </h6>
+                `);
+                $(`#${RADIO_TOWER_CONNECT_DIV_ID}`).html(`
+                    <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
+                `)
+                return false;
+            }
+            else {
+                return true;
+            }
+        })
     }
 
     protected highlightAndSelectAllAPs() {
@@ -543,6 +577,7 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
 
     protected calculateAPConnectIndex() {
         // Set AP connect index to AP that matches connected AP.
+        this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.accessPoints.forEach((ap: AccessPoint, i: number) => {
             this.losStatus = updateCoverageStatus(this.losStatus, ap.coverage.getCoverageStatus(this.buildingId));
             if (ap === this.cpe.ap) {
@@ -559,5 +594,15 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
         }
         this.marker.hide();
         this.hide();
+    }
+
+    protected onCoverageUpdate(msg: string, data: any) {
+        if (this.buildingId === EMPTY_BUILDING_ID) {
+            let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
+            if (building) {
+                this.setBuildingId(building.properties?.msftid);
+            }
+        }
+        super.onCoverageUpdate(msg, data);
     }
 }

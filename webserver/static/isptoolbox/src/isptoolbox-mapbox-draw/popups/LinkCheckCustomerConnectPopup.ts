@@ -61,6 +61,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.marker = marker;
         this.accessPoints = [];
         this.apDistances = new Map();
+        this.buildingId = EMPTY_BUILDING_ID;
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.ptpRowPrompt = 'Draw PtP to:'
         this.apConnectIndex = 0;
@@ -384,32 +385,34 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     }
 
     protected onCoverageUpdate(msg: string, data: any) {
-        this.accessPoints.every((ap: AccessPoint, i: number) => {
-            if (ap.workspaceId === data.uuid) {
-                let apStatus = ap.coverage.getCoverageStatus(this.buildingId);
-                let statusIcon = this.getStatusHTMLElements(apStatus).icon;
-                $(`#${CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID}-${i}`).html(`<img src="${statusIcon}"/>`);
+        if (this.popup.isOpen()) {
+            this.accessPoints.every((ap: AccessPoint, i: number) => {
+                if (ap.workspaceId === data.uuid) {
+                    let apStatus = ap.coverage.getCoverageStatus(this.buildingId);
+                    let statusIcon = this.getStatusHTMLElements(apStatus).icon;
+                    $(`#${CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID}-${i}`).html(`<img src="${statusIcon}"/>`);
 
-                this.calculateAPConnectIndex();
-                let apName = this.accessPoints[this.apConnectIndex].featureData.properties?.name;
-                let apDist = this.apDistances.get(this.accessPoints[this.apConnectIndex]);
-                let statusElements = this.getStatusHTMLElements(this.losStatus);
+                    this.calculateAPConnectIndex();
+                    let apName = this.accessPoints[this.apConnectIndex].featureData.properties?.name;
+                    let apDist = this.apDistances.get(this.accessPoints[this.apConnectIndex]);
+                    let statusElements = this.getStatusHTMLElements(this.losStatus);
 
-                $(`#${STATUS_MESSAGE_DIV_ID}`).attr('class', statusElements.divClass);
-                $(`#${STATUS_MESSAGE_DIV_ID}`).html(`
-                    <h6>${statusElements.message}
-                        <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN ? '' : statusElements.icon} >
-                    </h6>
-                `);
-                $(`#${RADIO_TOWER_CONNECT_DIV_ID}`).html(`
-                    <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
-                `)
-                return false;
-            }
-            else {
-                return true;
-            }
-        })
+                    $(`#${STATUS_MESSAGE_DIV_ID}`).attr('class', statusElements.divClass);
+                    $(`#${STATUS_MESSAGE_DIV_ID}`).html(`
+                        <h6>${statusElements.message}
+                            <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN ? '' : statusElements.icon} >
+                        </h6>
+                    `);
+                    $(`#${RADIO_TOWER_CONNECT_DIV_ID}`).html(`
+                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
+                    `)
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            });
+        }
     }
 
     protected highlightAndSelectAllAPs() {
@@ -602,12 +605,14 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
     }
 
     protected onCoverageUpdate(msg: string, data: any) {
-        if (this.buildingId === EMPTY_BUILDING_ID) {
-            let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
-            if (building) {
-                this.setBuildingId(building.properties?.msftid);
+        if (this.popup.isOpen()) {
+            if (this.buildingId === EMPTY_BUILDING_ID) {
+                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
+                if (building) {
+                    this.setBuildingId(building.properties?.msftid);
+                }
             }
+            super.onCoverageUpdate(msg, data);
         }
-        super.onCoverageUpdate(msg, data);
     }
 }

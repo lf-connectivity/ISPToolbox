@@ -66,7 +66,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         const popup = LinkCheckTowerPopup.getInstance();
         if (popup.accessPoint === ap) {
             $(`#${STATS_LI_ID}`).html(popup.getStatsHTML());
-            this.getInstance().updatePopupEventHandlers(ap);
+            popup.setEventHandlers();
             // Adjust lat/lng/height if they have been changed from bottom bar
             let coord = popup.accessPoint.featureData.geometry.coordinates;
             if (String($(`#${LAT_INPUT_ID}`).val()) !== coord[1].toFixed(5) ||
@@ -141,6 +141,11 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
             );
         }
 
+        $(`#tower-delete-btn`).off().on('click', () => {
+            this.map.fire('draw.delete', {features: [this.accessPoint?.featureData]});
+            PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
+        });
+
         $(`#${NAME_INPUT_ID}`).on('input',
             _.debounce((e: any) => {
                 let name = validateName(String($(`#${NAME_INPUT_ID}`).val()), NAME_INPUT_ID);
@@ -204,24 +209,6 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
             this.accessPoint?.featureData.properties?.height_ft :
             this.accessPoint?.featureData.properties?.height
        )
-    }
-
-    updatePopupEventHandlers(ap: AccessPoint) {
-        if (ap.coverage !== EMPTY_BUILDING_COVERAGE) {
-            $(`#tower-delete-btn`).off().on('click', () => {
-                this.map.fire('draw.delete', {features: [this.accessPoint?.featureData]});
-                PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
-            })
-        }
-    }
-
-    show() {
-        if (!this.popup.isOpen()) {
-            super.show();
-            if (this.accessPoint) {
-                this.updatePopupEventHandlers(this.accessPoint);
-            }
-        }
     }
 
     protected getHTML() {

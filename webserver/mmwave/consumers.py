@@ -54,10 +54,22 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
             self.channel_name
         )
 
-        # Close all the tasks
-        for _, tasks in self.tasks_to_revoke.items():
-            for task in tasks:
-                revoke(task, terminate=True)
+        # Close all the tasks, recursively going down the data structure
+        # to get all of them.
+        def get_tasks(start):
+            tasks = []
+            if type(start) == dict:
+                for value in start.values():
+                    tasks.extend(get_tasks(value))
+            elif type(start) == list:
+                for item in start:
+                    tasks.extend(get_tasks(item))
+            else:
+                tasks = [start]
+            return tasks
+
+        for task in get_tasks(self.tasks_to_revoke):
+            revoke(task, terminate=True)
 
     # Receive message from WebSocket
     async def receive_json(self, text_data_json):

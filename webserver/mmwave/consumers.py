@@ -1,4 +1,3 @@
-from collections import defaultdict
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from celery.task.control import revoke
 from mmwave import tasks as mmwave_tasks
@@ -22,7 +21,7 @@ class LOSConsumerMessageType(enum.Enum):
 
 msg_handlers = {
     LOSConsumerMessageType.LINK: [mmwave_tasks.getLinkInfo.delay],
-    LOSConsumerMessageType.AP : [
+    LOSConsumerMessageType.AP: [
         workspace_tasks.generateAccessPointCoverage.delay,
         workspace_tasks.computeViewshedCoverage.delay
     ],
@@ -63,7 +62,7 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
     # Receive message from WebSocket
     async def receive_json(self, text_data_json):
         msg_type = text_data_json.get('msg', 'error')
-        
+
         # Switch Case Message Type on Different Handlers
         msg_type_enum = LOSConsumerMessageType.get(msg_type, None)
 
@@ -82,7 +81,7 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
             else:
                 uuid = text_data_json.get('uuid')
                 old_tasks = self.tasks_to_revoke[LOSConsumerMessageType.AP].get(uuid, [])
-                
+
             for old_task in old_tasks:
                 revoke(old_task, terminate=True)
             # start new tasks
@@ -90,7 +89,7 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
             for handler in handlers:
                 new_task = handler(self.network_id, text_data_json, self.user.id)
                 new_tasks.append(new_task.id)
-            
+
             # update session tasks accordingly
             if msg_type_enum is LOSConsumerMessageType.LINK:
                 self.tasks_to_revoke[LOSConsumerMessageType.LINK] = new_tasks

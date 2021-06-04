@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@types/jquery": "^3.5.5",
+    "@types/jqueryui": "1.12.15",
     "@types/lodash": "^4.14.168",
     "@types/mapbox-gl": "^2.0.0",
     "@types/pubsub-js": "^1.8.2",

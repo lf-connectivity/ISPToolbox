@@ -12,7 +12,7 @@ import { MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT,
     validateName, validateLat, validateLng, validateRadius, validateHeight } from '../../LinkCheckUtils';
 import { sanitizeString } from "../../molecules/InputValidator";
 import { WorkspaceEvents } from "../../workspace/WorkspaceConstants";
-import { waitForElement } from "../../utils/JQueryUtils";
+import { EMPTY_BUILDING_COVERAGE } from "../../workspace/BuildingCoverage";
 
 var _ = require('lodash');
 
@@ -66,7 +66,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         const popup = LinkCheckTowerPopup.getInstance();
         if (popup.accessPoint === ap) {
             $(`#${STATS_LI_ID}`).html(popup.getStatsHTML());
-
+            this.getInstance().updatePopupEventHandlers(ap);
             // Adjust lat/lng/height if they have been changed from bottom bar
             let coord = popup.accessPoint.featureData.geometry.coordinates;
             if (String($(`#${LAT_INPUT_ID}`).val()) !== coord[1].toFixed(5) ||
@@ -206,16 +206,21 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
        )
     }
 
+    updatePopupEventHandlers(ap: AccessPoint) {
+        if (ap.coverage !== EMPTY_BUILDING_COVERAGE) {
+            $(`#tower-delete-btn`).off().on('click', () => {
+                this.map.fire('draw.delete', {features: [this.accessPoint?.featureData]});
+                PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
+            })
+        }
+    }
+
     show() {
         if (!this.popup.isOpen()) {
             super.show();
-            //  Wait for delete button to be visible and add delete btn event handler
-            waitForElement(`#tower-delete-btn`, () => {
-                $(`#tower-delete-btn`).off().on('click', () => {
-                    this.map.fire('draw.delete', {features: [this.accessPoint?.featureData]});
-                    PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
-                })
-            });
+            if (this.accessPoint) {
+                this.updatePopupEventHandlers(this.accessPoint);
+            }
         }
     }
 

@@ -36,7 +36,6 @@ if "PROD" in os.environ and os.environ.get("PROD").lower() != 'false':
     PROD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     # Static Files S3
-    AWS_DEFAULT_ACL = 'public-read'
 
     AWS_STORAGE_BUCKET_NAME = 'isptoolbox-static'
     AWS_S3_OBJECT_PARAMETERS = {

@@ -1,0 +1,19 @@
+<div class="modal fade" id="apDeleteModal" tabindex="-1" role="dialog" aria-labelledby="apDeleteModalTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="apDeleteModalTitle">Are you sure you want to delete this tower?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+        </button>
+      </div>
+      <div class="modal-body">
+        Deleting this tower will also remove all links associated with the tower.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary isptoolbox-btn negative" data-dismiss="modal" id="ap-delete-confirm-btn">Delete Tower</button>
+        <button type="button" class="btn btn-secondary isptoolbox-btn" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -142,8 +142,10 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         }
 
         $(`#tower-delete-btn`).off().on('click', () => {
-            this.map.fire('draw.delete', {features: [this.accessPoint?.featureData]});
-            PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
+            $(`#ap-delete-confirm-btn`).off().on('click', () => {
+                this.map.fire('draw.delete', {features: [this.accessPoint?.featureData]});
+                PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
+            });
         });
 
         $(`#${NAME_INPUT_ID}`).on('input',
@@ -188,7 +190,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                         </p>
                     </li>
                     <div class="node-edits">
-                        <a id="tower-delete-btn">Delete Tower</a>
+                        <a id="tower-delete-btn" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
                         <p>Last edited ${feat.properties?.last_updated}</p>
                     </div>
             `;
@@ -199,6 +201,9 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                 <img src="${ap_icon}" height="35" width="35">
                 <p align="center"><b>Plotting Lidar Coverage</p>
                 <p align="center">This may take several minutes</p>
+            </div>
+            <div class="node-edits">
+                <a id="tower-delete-btn" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
             </div>
         `;
     }

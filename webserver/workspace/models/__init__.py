@@ -5,7 +5,7 @@ from .network_models import (
     CoverageArea, CoverageAreaSerializer, AccessPointBasedCoverageArea, APCoverageAreaSerializer,
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
 )
-from .viewshed_models import ViewshedModel
+from .viewshed_models import Viewshed, ViewshedTile
 from .multiplayer_models import MultiplayerSession
 from .session_models import (
     NetworkMapPreferences, WorkspaceMapSession,
@@ -18,7 +18,7 @@ __all__ = [
     'ISPCompany', 'Employee', 'NetworkMapPreferences', 'AccessPointLocation',
     'BuildingCoverage', 'AccessPointCoverageBuildings', 'Radio', 'PTPLink', 'CPELocation',
     'APToCPELink',
-    'ViewshedModel', 'WorkspaceMapSession',
+    'Viewshed', 'ViewshedTile', 'WorkspaceMapSession',
     'AccessPointSerializer', 'CPESerializer', 'APToCPELinkSerializer',
     'CoverageArea', 'CoverageAreaSerializer', 'AccessPointBasedCoverageArea', 'APCoverageAreaSerializer',
     'NetworkMapPreferencesSerializer', 'WorkspaceMapSessionSerializer',

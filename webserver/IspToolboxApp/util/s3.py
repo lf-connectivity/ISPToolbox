@@ -24,26 +24,28 @@ class S3PublicExportMixin():
 
     for latest details on bucket check aws console - as of writing it is private
     """
+    bucket_name = bucket_name
+
     def delete_object(self, **kwargs):
-        return deleteS3Object(self.get_s3_key(**kwargs))
+        return deleteS3Object(self.get_s3_key(**kwargs), bucket_name=self.bucket_name)
 
     def write_object(self, data, **kwargs):
-        return writeS3Object(self.get_s3_key(**kwargs), data)
+        return writeS3Object(self.get_s3_key(**kwargs), data, bucket_name=self.bucket_name)
 
     def read_object(self, fp, **kwargs):
-        return readS3Object(self.get_s3_key(**kwargs), fp)
+        return readS3Object(self.get_s3_key(**kwargs), fp, bucket_name=self.bucket_name)
 
     def check_object(self, **kwargs):
-        return checkObjectExists(self.get_s3_key(**kwargs))
+        return checkObjectExists(self.get_s3_key(**kwargs), bucket_name=self.bucket_name)
 
     def create_presigned_url(self, **kwargs):
-        return createPresignedUrl(self.get_s3_key(**kwargs))
+        return createPresignedUrl(self.get_s3_key(**kwargs), bucket_name=self.bucket_name)
 
     def get_s3_key(self, **kwargs):
         raise NotImplementedError
 
 
-def writeS3Object(object_name, data):
+def writeS3Object(object_name, data, bucket_name=bucket_name):
     try:
         s3_resource.Bucket(bucket_name).put_object(Key=object_name, Body=data)
     except Exception as e:
@@ -52,7 +54,7 @@ def writeS3Object(object_name, data):
     return True
 
 
-def deleteS3Object(key):
+def deleteS3Object(key, bucket_name=bucket_name):
     try:
         s3_client.delete_object(Bucket=bucket_name, Key=key)
     except Exception as e:
@@ -61,7 +63,7 @@ def deleteS3Object(key):
     return True
 
 
-def createPresignedUrl(object_name, expiration=300):
+def createPresignedUrl(object_name, bucket_name=bucket_name, expiration=300):
     try:
         response = s3_client.generate_presigned_url(
             'get_object', Params={'Bucket': bucket_name, 'Key': object_name}, ExpiresIn=expiration)
@@ -71,7 +73,7 @@ def createPresignedUrl(object_name, expiration=300):
     return response
 
 
-def readFromS3(object_name, fp):
+def readFromS3(object_name, fp, bucket_name=bucket_name):
     s3_client.download_fileobj(bucket_name, object_name, fp)
 
 
@@ -92,7 +94,7 @@ def readMultipleS3Objects(keys, filenames):
             pass
 
 
-def readS3Object(object_name, fp):
+def readS3Object(object_name, fp, bucket_name=bucket_name):
     s3_resource.Bucket(bucket_name).download_fileobj(object_name, fp)
 
 
@@ -105,7 +107,7 @@ def checkPrefixExists(prefix):
         return False
 
 
-def checkObjectExists(object_name):
+def checkObjectExists(object_name, bucket_name=bucket_name):
     try:
         s3_resource.Object(bucket_name, object_name).load()
         return True

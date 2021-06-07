@@ -1,4 +1,4 @@
-from workspace.models.viewshed_models import ViewshedModel
+from workspace.models.viewshed_models import Viewshed
 import json
 from webserver.celery import celery_app as app
 from workspace.models import AccessPointLocation
@@ -25,14 +25,16 @@ def computeViewshedCoverage(network_id, data, user_id):
 def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
     ap = AccessPointLocation.objects.get(uuid=ap_uuid, owner=user_id)
     try:
-        assert(ap.viewshedmodel is not None)
-    except ViewshedModel.DoesNotExist:
-        ViewshedModel(ap=ap).save()
+        assert(ap.viewshed is not None)
+    except Viewshed.DoesNotExist:
+        Viewshed(ap=ap).save()
         logging.info('created new viewshed object')
 
-    if not ap.viewshedmodel.result_cached():
+    if not ap.viewshed.result_cached():
         logging.info('viewshed result not cached!')
-        ap.viewshedmodel.calculateViewshed()
+        ap.viewshed.delete()
+        Viewshed(ap=ap).save()
+        ap.viewshed.calculateViewshed()
     else:
         logging.info('cache hit on viewshed result')
 
@@ -41,8 +43,10 @@ def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
     coordinates = swapCoordinates(coordinates)
     resp = {
         'type': 'ap.viewshed',
-        'url': ap.viewshedmodel.create_presigned_url(),
+        'url': ap.viewshed.create_presigned_url(),
         'coordinates': coordinates,
+        'token': ap.viewshed.createJWT(),
+        'base_url': ap.viewshed.getBaseTileSetUrl(),
     }
     sendMessageToChannel(network_id, resp)
 

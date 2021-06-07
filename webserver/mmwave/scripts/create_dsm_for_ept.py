@@ -37,5 +37,5 @@ def createTileDSM(tile: tuple, z: int, pk: int):
         engine = DSMEngine(boundary_tile, [cloud])
         with tempfile.NamedTemporaryFile(suffix='.tif') as tmp_tif:
             engine.getDSM(1.0, tmp_tif.name)
-            lidartile.createTile(tmp_tif)
+            lidartile.save('', tmp_tif)
     lidartile.save()

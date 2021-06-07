@@ -15,7 +15,7 @@ def calculateCoverage(access_point_id: str, user_id: str) -> None:
     for an access point location calculate all the reachable buildings given a viewshed
     """
     access_point = AccessPointLocation.objects.get(uuid=access_point_id, owner=user_id)
-    viewshed = access_point.viewshedmodel
+    viewshed = access_point.viewshed
     # Load Up Coverage
     with tempfile.NamedTemporaryFile(suffix=".tif") as fp:
         viewshed.read_object(fp, tif=True)

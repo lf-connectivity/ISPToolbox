@@ -180,6 +180,10 @@ MAPBOX_ACCOUNT_EMAIL = MAPBOX_SECRETS['MAPBOX_ACCOUNT_EMAIL']
 MAPBOX_PUBLIC_TOKEN = MAPBOX_SECRETS['MAPBOX_PUBLIC_ACCESS_TOKEN_ALLOW_ALL_URL']
 if PROD:
     MAPBOX_PUBLIC_TOKEN = MAPBOX_SECRETS['MAPBOX_PUBLIC_ACCESS_TOKEN_FB_ISPTOOLBOX_URL']
+TILESET_SECRETS = json.loads(get_secret("prod/tileset_jwt_secret",
+                                        aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                        aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+TILESET_LAMBDA_EDGE_SECRET = TILESET_SECRETS['TILESET_LAMBDA_EDGE_SECRET']
 
 # This UID and key are used for the cloudrf API, currently using the 10,000 requests/month plan
 CLOUD_RF = json.loads(get_secret("prod/cloudrf",

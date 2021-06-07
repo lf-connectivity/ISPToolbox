@@ -1,6 +1,6 @@
 from django.test import RequestFactory, TestCase
 from django.contrib.gis.geos import Point
-from workspace.models import ViewshedModel, AccessPointLocation
+from workspace.models import Viewshed, AccessPointLocation
 from IspToolboxAccounts.models import User
 
 
@@ -24,8 +24,6 @@ class TestViewshedSimple(TestCase):
             height=height
         )
         ap.save()
-        vs = ViewshedModel(ap=ap)
+        vs = Viewshed(ap=ap)
         vs.save()
-        self.assertTrue(vs.pk > 0)
-
-        # tasks.renderViewshed(job.uuid)
+        self.assertTrue(len(str(vs.uuid)) > 0)

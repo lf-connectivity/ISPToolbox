@@ -4,6 +4,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from datetime import datetime
 from django.conf import settings
 from IspToolboxApp.util import s3
+from storages.backends.s3boto3 import S3Boto3Storage
 
 
 class EPTLidarPointCloudManager(models.Manager):
@@ -121,7 +122,7 @@ class EPTLidarPointCloud(models.Model):
         return s3.readFromS3(self.get_s3_key_tile(x, y, z, **kwargs), fp)
 
 
-class TileModel(models.Model):
+class TileModel(models.Model, s3.S3PublicExportMixin):
     """
     Slippy Tile that points to binary blob with DSM data
     """
@@ -129,6 +130,20 @@ class TileModel(models.Model):
     x = models.IntegerField()
     y = models.IntegerField()
     created = models.DateTimeField(auto_now_add=True)
+
+    bucket_name = 'isptoolbox-export-file'
+    tile = models.FileField(
+        storage=S3Boto3Storage(bucket_name=bucket_name),
+    )
+
+    def save_tile(self, content, save=True):
+        return self.tile.save(self.get_s3_key(), content, save)
+
+    def getTile(self, fp, **kwargs):
+        return self.read_object(fp)
+
+    def existsTile(self, **kwargs):
+        return self.check_object()
 
     class Meta:
         abstract = True
@@ -140,20 +155,8 @@ class LidarTileModel(TileModel):
     """
     cld = models.ForeignKey(EPTLidarPointCloud, on_delete=models.CASCADE)
 
-    def get_s3_key_tile(self, **kwargs):
+    def get_s3_key(self, **kwargs):
         return self.cld.get_s3_key_tile(self.x, self.y, self.z, **kwargs)
-
-    def getTile(self, fp, **kwargs):
-        return s3.readFromS3(self.get_s3_key_tile(**kwargs), fp)
-
-    def createTile(self, fp, **kwargs):
-        return s3.writeS3Object(self.get_s3_key_tile(**kwargs), fp)
-
-    def deleteTile(self, **kwargs):
-        return s3.deleteS3Object(self.get_s3_key_tile(**kwargs))
-
-    def existsTile(self, **kwargs):
-        return s3.checkObjectExists(self.get_s3_key_tile(**kwargs))
 
 
 class USGSLidarMetaDataModel(models.Model):

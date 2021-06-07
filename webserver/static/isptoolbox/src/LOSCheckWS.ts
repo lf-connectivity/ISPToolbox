@@ -39,6 +39,7 @@ export type TerrainResponse = {
 
 export type ViewShedResponse = {
     type: "ap.viewshed",
+    base_url: string,
     url: string,
     coordinates: GeoJSON.Polygon
 }

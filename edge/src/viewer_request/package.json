@@ -1,0 +1,18 @@
+{
+  "name": "edge-lambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tile_access_check.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "private": "true",
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.922.0"
+  }
+}

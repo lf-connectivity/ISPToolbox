@@ -4,6 +4,9 @@ from mmwave.views import CreateExportDSM
 from IspToolboxAccounts.views import CreateAccountView
 from django.contrib.auth import views as auth_views
 from IspToolboxAccounts import forms
+from django.views.generic import TemplateView
+from rest_framework.schemas import get_schema_view
+
 
 
 urlpatterns = [
@@ -69,6 +72,16 @@ urlpatterns = [
     path('workspace/terms/', views.TermsOfService.as_view(), name="terms"),
     path('workspace/data-policy/', views.DataPolicy.as_view(), name="data_policy"),
     path('workspace/cookie-policy/', views.Cookies.as_view(), name="cookies"),
+    # Browseable API
+    path('swagger-ui/', TemplateView.as_view(
+        template_name='swagger-ui.html',
+        extra_context={'schema_url':'openapi-schema'}
+    ), name='swagger-ui'),
+    path('openapi', get_schema_view(
+        title="ISP Toolbox API",
+        description="ISP Toolbox API to access lidar tools",
+        version="1.0.0"
+    ), name='openapi-schema'),
 
     # Multiplayer
     path('workspace/multiplayer/demo/', views.MultiplayerTestView.as_view(), name='multiplayer_demo'),

@@ -18,6 +18,7 @@ services:
             - django-app
             - websocket-app
             - flower
+            - node-app
         ports:
             - 80:80
 
@@ -42,7 +43,7 @@ services:
         environment:
             - REDIS_BACKEND=redis://redis:6379
 
-    node:
+    node-app:
         image: isptoolbox-node
         build: ./node-webserver
         depends_on:

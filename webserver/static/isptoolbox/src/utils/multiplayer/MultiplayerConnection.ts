@@ -2,7 +2,8 @@ import PubSub from 'pubsub-js';
 const io = require("socket.io-client");
 
 const SOCKET_OPTIONS = {
-    path: '/live'
+    path: '/live',
+    transports: ['websocket'],
 }
 const SOCKET_IO_ENDPOINT = window.location.protocol  === 'http:' ? "ws://localhost:8080" : "wss://isptoolbox.io";
 

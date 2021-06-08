@@ -8,7 +8,6 @@ from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 
 
-
 urlpatterns = [
     path('', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
     path('optional-info/', views.OptionalInfoWorkspaceView.as_view(), name="optional_info"),
@@ -75,7 +74,7 @@ urlpatterns = [
     # Browseable API
     path('swagger-ui/', TemplateView.as_view(
         template_name='swagger-ui.html',
-        extra_context={'schema_url':'openapi-schema'}
+        extra_context={'schema_url': 'openapi-schema'}
     ), name='swagger-ui'),
     path('openapi', get_schema_view(
         title="ISP Toolbox API",

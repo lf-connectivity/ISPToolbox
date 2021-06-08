@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    {% include "workspace/organisms/default_header.html" %}
+    {% block additional_headers %}
+    {% endblock %}
+</head>
+<body>
+    <header>
+        {% block beforenav %}
+        {% endblock %}
+        {% include "workspace/organisms/nav.html" %}
+    </header>
+    {% block content %}
+    <div class="d-flex flex-column min-vh-100">
+    </div>
+    {% endblock %}
+</body>
+</html>

@@ -28,18 +28,6 @@
         "value": "${rds_hostname}"
       },
       {
-        "name": "DB_NAME",
-        "value": "${rds_db_name}"
-      },
-      {
-        "name": "DB_USERNAME",
-        "value": "${rds_db_username}"
-      },
-      {
-        "name": "DB_PASSWORD",
-        "value": "${rds_db_password}"
-      },
-      {
         "name" : "REDIS_BACKEND",
         "value" : "${redis}"
       }
@@ -88,18 +76,6 @@
         "value": "${rds_hostname}"
       },
       {
-        "name": "DB_NAME",
-        "value": "${rds_db_name}"
-      },
-      {
-        "name": "DB_USERNAME",
-        "value": "${rds_db_username}"
-      },
-      {
-        "name": "DB_PASSWORD",
-        "value": "${rds_db_password}"
-      },
-      {
         "name" : "REDIS_BACKEND",
         "value" : "${redis}"
       }
@@ -120,12 +96,46 @@
     }
   },
   {
+    "name": "node-app",
+    "image": "${docker_image_url_node}",
+    "essential": true,
+    "cpu": 512,
+    "memory": 1024,
+    "links": [],
+    "portMappings": [
+      {
+        "containerPort": 8020,
+        "hostPort": 0,
+        "protocol": "tcp"
+      }
+    ],
+    "command": ["npm", "run", "start", "--", "8020"],
+    "environment": [
+      {
+        "name": "NODE_ENV",
+        "value": "production"
+      },
+      {
+        "name" : "REDIS_BACKEND",
+        "value" : "${redis}"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/node-app",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "node-app-log-stream"
+      }
+    }
+  },
+  {
     "name": "nginx",
     "image": "${docker_image_url_nginx}",
     "essential": true,
     "cpu": 512,
     "memory": 2048,
-    "links": ["django-app", "websocket-app", "flower"],
+    "links": ["django-app", "websocket-app", "node-app" , "flower"],
     "portMappings": [
       {
         "containerPort": 80,
@@ -175,18 +185,6 @@
       {
         "name": "POSTGRES_DB",
         "value": "${rds_hostname}"
-      },
-      {
-        "name": "DB_NAME",
-        "value": "${rds_db_name}"
-      },
-      {
-        "name": "DB_USERNAME",
-        "value": "${rds_db_username}"
-      },
-      {
-        "name": "DB_PASSWORD",
-        "value": "${rds_db_password}"
       },
       {
         "name" : "REDIS_BACKEND",

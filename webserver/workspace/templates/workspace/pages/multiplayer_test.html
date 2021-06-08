@@ -1,4 +1,4 @@
-{% extends "workspace/pages/base.html" %}
+{% extends "workspace/pages/map_tool_base.html" %}
 {% load static %}
 
 {% block additional_headers %}
@@ -17,6 +17,26 @@
 {% block content %}
     {% include "workspace/atoms/mapbox_global_public_key.html" %}
     {{ session|json_script:"session_information" }}
+    <div id="map" style = "width: 100%; margin-top: 70px;height: calc(100vh - 70px); background-color: black;"></div>
     <script defer src="{% static "multiplayer_test.min.js" %}"> </script>
-    <div id="map" style = "margin-top: 70px; width: 100%; height: calc(100vh - 70px); background-color: black;"></div>
+    <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="inviteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inviteModalLabel">Invite Co-workers</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>invite other users to your session</p>
+                <label for="session_link">link:</label>
+                <input style="width: 100%" type="text" name="session_link" value="{{ request.build_absolute_uri }}"/>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary isptoolbox-btn" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        </div>
+    </div>
 {% endblock %}

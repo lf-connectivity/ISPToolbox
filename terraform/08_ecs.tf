@@ -69,17 +69,23 @@ resource "aws_ecr_repository" "nginx" {
   }
 }
 
+resource "aws_ecr_repository" "node" {
+  name = "isptoolbox-node"
+  image_tag_mutability = "MUTABLE"
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
 data "template_file" "app" {
   template = file("templates/django_app.json.tpl")
 
   vars = {
     docker_image_url_django = "${aws_ecr_repository.django.repository_url}:latest"
     docker_image_url_nginx  = "${aws_ecr_repository.nginx.repository_url}:latest"
+    docker_image_url_node   = "${aws_ecr_repository.node.repository_url}:latest"
     region                  = var.region
     rds_hostname            = data.aws_db_instance.database.address
-    rds_db_name             = var.POSTGRES_DB_NAME
-    rds_db_username         = var.POSTGRES_DB_USERNAME
-    rds_db_password         = var.POSTGRES_DB_PASSWORD
     redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
     allowed_hosts           = var.allowed_hosts
   }
@@ -122,9 +128,6 @@ data "template_file" "celery_app" {
     docker_image_url_celery = "${aws_ecr_repository.django.repository_url}:latest"
     region                  = var.region
     rds_hostname            = data.aws_db_instance.database.address
-    rds_db_name             = var.POSTGRES_DB_NAME
-    rds_db_username         = var.POSTGRES_DB_USERNAME
-    rds_db_password         = var.POSTGRES_DB_PASSWORD
     redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
   }
 }
@@ -153,9 +156,6 @@ data "template_file" "celery_app_scheduler" {
     docker_image_url_celery = "${aws_ecr_repository.django.repository_url}:latest"
     region                  = var.region
     rds_hostname            = data.aws_db_instance.database.address
-    rds_db_name             = var.POSTGRES_DB_NAME
-    rds_db_username         = var.POSTGRES_DB_USERNAME
-    rds_db_password         = var.POSTGRES_DB_PASSWORD
     redis                   = "redis://${aws_elasticache_replication_group.isptoolbox_redis.primary_endpoint_address}:${aws_elasticache_replication_group.isptoolbox_redis.port}"
   }
 }

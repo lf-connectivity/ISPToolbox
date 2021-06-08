@@ -29,4 +29,6 @@ map.on('load', () => {
   const connection = new MultiplayerConnection(session.token, session.id);
   const multiplayer = new MapboxMultiplayerControl(draw, connection);
   map.addControl(multiplayer, 'top-right');
+  //@ts-ignore
+  $('#inviteModal').modal('show');
 });

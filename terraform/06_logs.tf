@@ -18,6 +18,16 @@ resource "aws_cloudwatch_log_stream" "websocket-log-stream" {
   log_group_name = aws_cloudwatch_log_group.websocket-log-group.name
 }
 
+resource "aws_cloudwatch_log_group" "node-log-group" {
+  name              = "/ecs/node-app"
+  retention_in_days = var.log_retention_in_days
+}
+
+resource "aws_cloudwatch_log_stream" "node-log-stream" {
+  name           = "node-app-log-stream"
+  log_group_name = aws_cloudwatch_log_group.node-log-group.name
+}
+
 resource "aws_cloudwatch_log_group" "nginx-log-group" {
   name              = "/ecs/nginx"
   retention_in_days = var.log_retention_in_days

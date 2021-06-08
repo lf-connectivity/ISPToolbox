@@ -1,3 +1,3 @@
 #!/bin/sh
 npm install
-npm run watch
+npm run watch -- 8080

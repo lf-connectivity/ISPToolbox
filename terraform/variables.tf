@@ -88,17 +88,3 @@ variable "autoscale_desired" {
   description = "Desired autoscale (number of EC2)"
   default     = "2"
 }
-
-# RDS Database Info
-
-variable "POSTGRES_DB_NAME" {
-  description  = "database name in postgres"
-  default      = "django_db"
-}
-variable "POSTGRES_DB_USERNAME" {
-  description  = "database name in postgres"
-  default      = "fbcmasteruser"
-}
-variable "POSTGRES_DB_PASSWORD" {
-  description  = "database name in postgres"
-}

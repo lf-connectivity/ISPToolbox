@@ -1,3 +1,4 @@
+'use strict';
 /**
  * Nodejs Server used for high-throughput websocket connections
  * 
@@ -7,10 +8,12 @@
 import * as socketio from 'socket.io';
 import django_multiplayer_session_auth_middleware from './middleware/django_auth_middleware';
 import { initAutoMergeMap, loadAutoMergeMap, deleteAutoMergeMap, updateAutoMergeMap} from './mapbox-automerge/mapbox-automerge';
-const socketIOPort = 8080;
+const socketIOPort = process.argv[2];
+const production = process.env.NODE_ENV === 'production';
+const development_server_cors = "http://localhost:8000";
 const options = {
     cors: {
-        origin: "http://localhost:8000",
+        origin: !production ? development_server_cors : 'https://isptoolbox.io',
         methods: ["GET", "POST"]
     },
     path: '/live'

@@ -65,5 +65,7 @@ jobs:
         echo $ECR_REPOSITORY
         docker tag isptoolbox-nginx:latest $ECR_REGISTRY/isptoolbox-nginx:latest
         docker tag isptoolbox-django:latest $ECR_REGISTRY/isptoolbox-django:latest
+        docker tag isptoolbox-node:latest $ECR_REGISTRY/isptoolbox-node:latest
         docker push $ECR_REGISTRY/isptoolbox-django:latest
         docker push $ECR_REGISTRY/isptoolbox-nginx:latest
+        docker push $ECR_REGISTRY/isptoolbox-node:latest

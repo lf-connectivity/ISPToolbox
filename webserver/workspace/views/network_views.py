@@ -57,6 +57,7 @@ class EditNetworkView(LoginRequiredMixin, View):
             'beta': True,
             'units': 'US',
             'tower_upload_form': UploadTowerCSVForm,
+            'title': 'LiDAR LOS Check - ISP Toolbox'
         }
         return render(request, 'workspace/pages/network_edit.html', context)
 
@@ -87,5 +88,6 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
             'beta': True,
             'units': 'US',
             'tower_upload_form': UploadTowerCSVForm,
+            'title': 'Market Evaluator - ISP Toolbox'
         }
         return render(request, 'workspace/pages/market_evaluator.html', context)

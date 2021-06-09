@@ -1,25 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  {% include "mmwave/header.html" %}
+  {% include "workspace/molecules/page_header.html" %}
 <body>
-    {% include "workspace/organisms/workspace_nav.html" %}
+    {% include "mmwave/organisms/network_edit_nav.html" %}
     {% include "mmwave/map_view.html" %}
     {% include "workspace/atoms/mapbox_global_public_key.html" %}
     <script async src="{% static "wireless_network.min.js" %}"> </script>
     {% include "mmwave/3d_view.html" %}
     {% include "mmwave/link_view.html" %}
-    <script type="text/javascript"> 
-      var networkID = "{{ session.uuid }}";
-      var ISPTOOLBOX_SESSION_INFO = {
-        {% if session %}
-          initialMapCenter : {{ session.center.json|safe }},
-          initialMapZoom : {{ session.zoom }},
-        {% endif %}
-          units: "{{units}}",
-          networkID: "{{session.uuid}}",
-      };
-    </script>
+    {% include "workspace/molecules/workspace_session_info.html" %}
     {{ geojson|json_script:"isp-map-features" }}
     {{ beta|json_script:"los_beta" }}
     {% include "workspace/organisms/access_point_modal.html" %}

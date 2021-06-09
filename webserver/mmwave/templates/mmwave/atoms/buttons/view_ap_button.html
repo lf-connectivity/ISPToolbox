@@ -1,0 +1,13 @@
+{% extends "workspace/atoms/buttons/view_ap_button_base.html" %}
+
+{% block extra_params %}
+    {% comment %}
+        this tool requires that the user be authenticated
+    {% endcomment %}
+    {% if user.is_authenticated %}
+        data-toggle="modal" data-target="#accessPointModal"
+    {% else %}
+        id="add-ap-noact"
+        data-toggle="modal" data-target="#redirect_workspace_modal"
+    {% endif %}
+{% endblock %}

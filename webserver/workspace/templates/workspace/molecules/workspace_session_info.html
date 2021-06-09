@@ -1,0 +1,11 @@
+<script type="text/javascript"> 
+    var networkID = "{{ session.uuid }}";
+    var ISPTOOLBOX_SESSION_INFO = {
+      {% if session %}
+        initialMapCenter : {{ session.center.json|safe }},
+        initialMapZoom : {{ session.zoom }},
+      {% endif %}
+        units: "{{units}}",
+        networkID: "{{session.uuid}}",
+    };
+  </script>

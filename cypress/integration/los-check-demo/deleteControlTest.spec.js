@@ -13,7 +13,10 @@ context('Test Delete Control', () => {
 
       // Let's add a link to the map
       cy.get('#add-link-btn').click();
-      cy.get('#map').click(500, 200).click(600, 250);
+      cy.wait(500)
+      cy.get('#map').click(500, 200);
+      cy.wait(500)
+      cy.get('#map').click(600, 250);
 
       // Verify that drawing instructions are no longer visible
       cy.get('#drawing_instructions', {timeout: 10000}).should('not.be.visible');

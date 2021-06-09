@@ -1,7 +1,7 @@
 from .login_views import (
     DefaultWorkspaceView, OptionalInfoWorkspaceView, OptionalInfoWorkspaceUpdateView, AccountSettingsView,
 )
-from .network_views import EditNetworkView, BulkUploadTowersView
+from .network_views import EditNetworkView, BulkUploadTowersView, MarketEvaluatorView
 from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
@@ -30,5 +30,5 @@ __all__ = [
     'OptionalInfoWorkspaceView', 'OptionalInfoWorkspaceUpdateView',
     'FBDeauthorizeSocialView', 'FBDataDeletionView',
     'DataPolicy', 'Cookies', 'TermsOfService',
-    'MultiplayerTestView'
+    'MultiplayerTestView', 'MarketEvaluatorView'
 ]

@@ -10,9 +10,14 @@ urlpatterns = [
     path('', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
     path('optional-info/', views.OptionalInfoWorkspaceView.as_view(), name="optional_info"),
     path('optional-info/update/', views.OptionalInfoWorkspaceUpdateView.as_view(), name="optional_info_update"),
+    # LOS
     path('network/edit/<uuid:session_id>/', views.EditNetworkView.as_view()),
     path('network/edit/<uuid:session_id>/<str:name>/', views.EditNetworkView.as_view(), name="edit_network"),
     path('network/edit/', views.EditNetworkView.as_view(), name="edit_account_network"),
+    # Market Evaluator
+    path('market/<uuid:session_id>/', views.MarketEvaluatorView.as_view()),
+    path('market/<uuid:session_id>/<str:name>/', views.MarketEvaluatorView.as_view(), name="market_eval"),
+    path('market/', views.MarketEvaluatorView.as_view(), name="market_eval_entry"),
     path('workspace/api/dsm-export/', CreateExportDSM.as_view()),
     path('workspace/api/dsm-export/<uuid:uuid>/', CreateExportDSM.as_view()),
     path(

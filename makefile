@@ -15,7 +15,7 @@ prod_migrate:
 
 prod_shell:
 	@echo ----------------------------------------------DJANGO SHELL PROD----------------------------------------
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build django-app
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py shell
 
 debug_shell:

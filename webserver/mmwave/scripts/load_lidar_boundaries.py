@@ -8,6 +8,7 @@ from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from isptoolbox_storage.storage import S3ManifestStorage
 from django.core.files.base import ContentFile
 from django.conf import settings
+import logging
 
 
 PT_CLOUD_GEOJSON_S3_PATH = 'pt_clouds.geojson'
@@ -77,6 +78,7 @@ def createInvertedOverlay(
         Gets all the point cloud boundaries from the database, creates an inverted overlay
         uploads to S3
     """
+    logging.info('starting - point cloud overlay geojson creation')
     clouds = EPTLidarPointCloud.objects.all()
     gc = GeometryCollection(
         [
@@ -89,19 +91,38 @@ def createInvertedOverlay(
     overlay = gc
     if invert:
         extent = Polygon.from_bbox(GLOBAL_BOUNDING_BOX)
-        overlay = extent.difference(gc)
+        overlay = extent
+        idx = 0
+        # We iterate over the point clouds taking the difference to avoid a bug in GDAL
+        for boundary, cloud in zip(gc, clouds):
+            idx = idx + 1
+            try:
+                overlay_next = overlay.difference(boundary)
+                overlay = overlay_next
+            except Exception as e:
+                # Don't know why difference operation broke, log to cloudwatch
+                logging.error(str(e))
+                logging.error('overlay')
+                logging.error(overlay.json)
+                logging.error('boundary')
+                logging.error(boundary.json)
+                logging.error(boundary.valid)
 
-    data = json.loads(overlay.json)
-    fc = prepareGeoJSONUploadMapbox(data)
-    contents = json.dumps(fc).encode()
-    file_obj = ContentFile(contents)
-    if settings.PROD:
-        output_path = PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
-        if use_high_resolution_boundaries:
-            output_path = HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
-        s3storage = S3ManifestStorage()
-        s3storage.save(output_path, file_obj)
-    return file_obj
+    try:
+        data = json.loads(overlay.json)
+        fc = prepareGeoJSONUploadMapbox(data)
+
+        contents = json.dumps(fc).encode()
+        file_obj = ContentFile(contents)
+        if settings.PROD:
+            output_path = PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
+            if use_high_resolution_boundaries:
+                output_path = HIGH_RES_PT_CLOUD_AVAILABILITY_OVERLAY_S3_PATH
+            s3storage = S3ManifestStorage()
+            s3storage.save(output_path, file_obj)
+        return file_obj
+    except Exception as e:
+        logging.error(str(e))
 
 
 def getOverlayFromS3(overlay):

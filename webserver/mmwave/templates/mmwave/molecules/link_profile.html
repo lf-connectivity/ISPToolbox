@@ -1,6 +1,6 @@
 <div id="data-container" class="collapse {% if not should_collapse_link_view %}show{% endif %} ">
     <div class="row no-gutters profile-view" id="bottom-row-link-view-container">
-        <div class="col-12 col-lg-6 col-xl-8 profile-view-card">
+        <div class="col-12 col-lg-8 col-xl-8 profile-view-card">
             <div class="card link-profile-card">
                 <div class="card-body">
                     <div id='link-title'>
@@ -19,12 +19,12 @@
         <div class="col-12 radio-spec-label-card">
             <h5 class="radio-toggle-label mx-3 py-2">Radio Specs</h5>
         </div>
-        <div class="col-lg-3 col-xl-2 radio-0-card">
+        <div class="col-lg-2 col-xl-2 radio-0-card">
             {% with radio=tx radio_id='0' radio_name='radio_0' %}
                 {% include "mmwave/radio_view.html" %}
             {% endwith %}
         </div>
-        <div class="col-lg-3 col-xl-2 radio-1-card">
+        <div class="col-lg-2 col-xl-2 radio-1-card">
             {% with radio=rx radio_id='1' radio_name='radio_1' %}
                 {% include "mmwave/radio_view.html" %}
             {% endwith %}

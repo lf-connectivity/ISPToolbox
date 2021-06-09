@@ -20,10 +20,8 @@ context('Test E2E LOS Check', () => {
     it('Manually type radio locations and heights', () => {
       cy.get('#hgt-0').clear().type('60');
       cy.get('#hgt-1').clear().type('57');
-      cy.get('#lat-0').clear().type('38.53362');
-      cy.get('#lng-0').clear().type('-121.75712');
-      cy.get('#lat-1').clear().type('38.53271');
-      cy.get('#lng-1').clear().type('-121.75164{enter}');
+      cy.get('#lat-lng-0').clear().type('38.53362, -121.75712');
+      cy.get('#lat-lng-1').clear().type('38.53271, -121.75164{enter}');
       cy.get('#link_chart', {timeout: 10000}).should('be.visible').should('contain', 'resolution');
       cy.get('.link-status', {timeout: 60000}).should('contain', 'Link Status').should('contain', 'Failed');
       cy.get('#freq-dropdown').click();

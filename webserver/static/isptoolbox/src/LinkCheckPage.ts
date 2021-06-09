@@ -32,6 +32,7 @@ import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTo
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
 import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearchTool";
 import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
+import { parseLatitudeLongitude } from "./utils/LatLngInputUtils";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -287,10 +288,14 @@ export class LinkCheckPage {
         );
         this.link_status = new LinkStatus();
 
-
-        let initial_map_center = {
-            'lon': (this.getCoordinateFromUI('0', 'lng') + this.getCoordinateFromUI('1', 'lng')) / 2.0,
-            'lat': (this.getCoordinateFromUI('0', 'lat') + this.getCoordinateFromUI('1', 'lat')) / 2.0
+        let tx_initial = parseLatitudeLongitude('#lat-lng-0');
+        let rx_initial = parseLatitudeLongitude('#lat-lng-1');
+        let initial_map_center = {'lon': 0, 'lat': 0};
+        if(tx_initial != null && rx_initial != null){
+            initial_map_center = {
+                'lon': (tx_initial[1] + rx_initial[1]) / 2.0,
+                'lat': (tx_initial[0] + rx_initial[0]) / 2.0
+            };
         };
         let initial_zoom = 17;
 
@@ -324,10 +329,11 @@ export class LinkCheckPage {
                 }
             });
 
-            const tx_lat = parseFloat(String($('#lat-0').val()));
-            const tx_lng = parseFloat(String($('#lng-0').val()));
-            const rx_lat = parseFloat(String($('#lat-1').val()));
-            const rx_lng = parseFloat(String($('#lng-1').val()));
+            const tx_coords = parseLatitudeLongitude('#lat-lng-0');
+            const rx_coords = parseLatitudeLongitude('#lat-lng-1');
+            // @ts-ignore
+            const [tx_lat, tx_lng] = tx_coords;
+            const [rx_lat, rx_lng] = rx_coords;
 
             // Direct draw override const
             /**
@@ -658,44 +664,44 @@ export class LinkCheckPage {
                     }
                 }, 500)
             );
-            const createRadioCoordinateChangeCallback = (id: string, coord1: number, coord2: number, validatorFunction: (n: number, id: string) => number) => {
-                let htmlId = `#${id}`;
-                $(htmlId).change(
+            const createRadioCoordinateChangeCallback = (htmlId: string, coord1: number) => {
+                $(htmlId).on('change',
                     _.debounce(() => {
                         if (this.selectedFeatureID != null) {
                             const feat = this.draw.get(this.selectedFeatureID);
-                            const newVal = validatorFunction(parseFloat(String($(htmlId).val())), id);
-                            if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
-                                if (this.workspaceLinkSelected()) {
-                                    // @ts-ignore
-                                    let point = this.workspaceManager.features[coord1 === 0 ? feat.properties.ap : feat.properties.cpe];
+                            let coords = parseLatitudeLongitude(htmlId);
+                            if (coords != null){
+                                coords = [coords[1], coords[0]];
+                                if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
+                                    if (this.workspaceLinkSelected()) {
+                                        // @ts-ignore
+                                        let point = this.workspaceManager.features[coord1 === 0 ? feat.properties.ap : feat.properties.cpe];
 
-                                    // @ts-ignore
-                                    point.featureData.geometry.coordinates[coord2] = newVal;
-                                    this.draw.add(point.featureData);
-                                    this.map.fire('draw.update', { features: [point.featureData]})
-                                }
-                                else {
-                                    //@ts-ignore
-                                    feat.geometry.coordinates[coord1][coord2] = newVal;
-                                    this.draw.add(feat);
-                                    const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
-                                    if (selected_link_source.type === 'geojson') {
-                                        //@ts-ignore
-                                        selected_link_source.setData(feat.geometry);
+                                        // @ts-ignore
+                                        point.featureData.geometry.coordinates = coords;
+                                        this.draw.add(point.featureData);
+                                        this.map.fire('draw.update', { features: [point.featureData]})
                                     }
+                                    else {
+                                        //@ts-ignore
+                                        feat.geometry.coordinates[coord1] = coords;
+                                        this.draw.add(feat);
+                                        const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+                                        if (selected_link_source.type === 'geojson') {
+                                            //@ts-ignore
+                                            selected_link_source.setData(feat.geometry);
+                                        }
+                                    }
+                                    this.updateLinkProfile();
+                                    this.map.setCenter(coords);
                                 }
-                                this.updateLinkProfile();
                             }
                         }
                     }, 500)
                 );
             }
-            createRadioCoordinateChangeCallback('lng-0', 0, 0, validateLng);
-            createRadioCoordinateChangeCallback('lat-0', 0, 1, validateLat);
-            createRadioCoordinateChangeCallback('lng-1', 1, 0, validateLng);
-            createRadioCoordinateChangeCallback('lat-1', 1, 1, validateLat);
-
+            createRadioCoordinateChangeCallback('#lat-lng-0', 0);
+            createRadioCoordinateChangeCallback('#lat-lng-1', 1);
 
             $('#3D-view-btn').click(() => {
                 if (this.currentView === 'map') {
@@ -883,8 +889,7 @@ export class LinkCheckPage {
     }
 
     setInputs(msg: string, data : {radio: number, latitude: number, longitude: number, name: string, height: number}){
-        $(`#lat-${data.radio}`).val(data.latitude.toFixed(6));
-        $(`#lng-${data.radio}`).val(data.longitude.toFixed(6));
+        $(`#lat-lng-${data.radio}`).val(`${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`);
         $(`#hgt-${data.radio}`).val(data.height.toFixed(0));
         $(`#radio_name-${data.radio}`).text(data.name);
     }
@@ -968,10 +973,8 @@ export class LinkCheckPage {
             }
 
             
-            $('#lng-0').val(feat.geometry.coordinates[0][0].toFixed(5));
-            $('#lat-0').val(feat.geometry.coordinates[0][1].toFixed(5));
-            $('#lng-1').val(feat.geometry.coordinates[1][0].toFixed(5));
-            $('#lat-1').val(feat.geometry.coordinates[1][1].toFixed(5));
+            $('#lat-lng-0').val(`${feat.geometry.coordinates[0][1].toFixed(5)}, ${feat.geometry.coordinates[0][0].toFixed(5)}`);
+            $('#lat-lng-1').val(`${feat.geometry.coordinates[1][1].toFixed(5)}, ${feat.geometry.coordinates[1][0].toFixed(5)}`);
             
             const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
             if (selected_link_source.type === 'geojson') {
@@ -1065,10 +1068,13 @@ export class LinkCheckPage {
     };
 
     getRadioLocations() {
-        const tx_lat = parseFloat(String($('#lat-0').val()));
-        const tx_lng = parseFloat(String($('#lng-0').val()));
-        const rx_lat = parseFloat(String($('#lat-1').val()));
-        const rx_lng = parseFloat(String($('#lng-1').val()));
+        const tx_coords = parseLatitudeLongitude('#lat-lng-0');
+        const rx_coords = parseLatitudeLongitude('#lat-lng-1');
+        if (tx_coords == null || rx_coords == null){
+            return null;
+        }
+        const [tx_lat, tx_lng] = tx_coords;
+        const [rx_lat, rx_lng] = rx_coords;
         if([tx_lat, tx_lng, rx_lat, rx_lng].some(Number.isNaN)) {
             return null;
         }
@@ -1576,10 +1582,6 @@ export class LinkCheckPage {
     getRadioHeightFromUI(radio: '0' | '1') {
         const hgt = parseFloat(String($(radio === '0' ? '#hgt-0' : '#hgt-1').val()));
         return this.units === UnitSystems.US ? ft2m(hgt) : hgt;
-    }
-
-    getCoordinateFromUI(radio: '0' | '1', coord: 'lat' | 'lng'): number {
-        return parseFloat(String($(`#${coord}-${radio}`).val()));
     }
 
     clearInputs(): void {

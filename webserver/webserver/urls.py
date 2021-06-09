@@ -79,6 +79,7 @@ urlpatterns = [
     path('demo/los-check/', LOSCheckDemo.as_view(), name='demo-los-check'),
     path('demo/dsm-app/', DSMExportView.as_view(), name="demo-dsm-app"),
     path('demo/latest-gis-data/<int:year>/<int:month>/', LatestLidarView.as_view(), name='demo-latest_gis'),
+    path('demo/latest-gis-data/', LatestLidarView.as_view(), name='demo-latest_gis-nodate'),
     # Redirect
     path('', HomepageRedirect.as_view()),
     # Integration Test Endpoints - be sure to 404 in prod

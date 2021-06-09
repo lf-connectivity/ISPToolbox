@@ -1,6 +1,7 @@
 {% extends "workspace/pages/base.html" %}
 {% load static %}
 {% load i18n %}
+{% load mapbox %}
 
 {% block additional_headers %}
 <!-- Jquery -->
@@ -22,6 +23,7 @@
 {% endblock %}
 
 {% block content %}
+{% include 'workspace/atoms/mapbox_global_public_key.html' %}
 <div class="container wide flex-grow-1 mb-5" style="margin-top: 70px;">
     {{ month|json_script:"month-gis-data" }}
     {{ year|json_script:"year-gis-data" }}

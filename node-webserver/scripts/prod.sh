@@ -1,3 +1,3 @@
 #!/bin/sh
 npm install
-npm run start
+npm run start -- 8020

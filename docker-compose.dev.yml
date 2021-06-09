@@ -29,6 +29,6 @@ services:
       - ./webserver:/usr/src/app
   node-app:
     ports:
-      - 8080:8080
+      - 8020:8020
     volumes:
       - ./node-webserver:/usr/src/app

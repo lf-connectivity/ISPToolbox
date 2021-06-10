@@ -11,6 +11,7 @@ import { BuildingCoverage, BuildingCoverageStatus, updateCoverageStatus } from "
 import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchTool";
 import { ACCESS_POINT_BUILDING_LAYER, WorkspaceManager } from "../../workspace/WorkspaceManager";
 import { BaseWorkspaceFeature } from "../../workspace/BaseWorkspaceFeature";
+import { DEFAULT_RADIUS } from "../APDrawMode";
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
 
@@ -377,9 +378,17 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     }
 
     protected onPlaceTower() {
-        //@ts-ignore
-        this.draw.changeMode('draw_radius', {start: this.lnglat});
-        this.map.fire('draw.modechange', {mode: 'draw_radius'});
+        let newAP = {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: this.lnglat
+            },
+            properties: {
+                radius: DEFAULT_RADIUS
+            }
+        } as Feature<Point, any>
+        this.map.fire('draw.create', {features: [newAP]});
         this.marker.hide();
         this.hide();
     }
@@ -516,8 +525,8 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
 
         this.tooltipAction = true;
         //@ts-ignore
-        this.draw.changeMode('draw_radius', {start: this.lnglat, cpeLngLats: cpeLngLats, ptpLinksToRemove: ptpLinksToRemove});
-        this.map.fire('draw.modechange', {mode: 'draw_radius'});
+        this.draw.changeMode('draw_ap', {start: this.lnglat, cpeLngLats: cpeLngLats, ptpLinksToRemove: ptpLinksToRemove});
+        this.map.fire('draw.modechange', {mode: 'draw_ap'});
         this.marker.hide();
         this.hide();
     }

@@ -10,7 +10,7 @@ import {
     calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,calculateCameraOffsetFromAnimation, updateControlPoints
 } from './LinkOrbitAnimation';
 import { calculateLookVector, calculateLinkProfileFresnelPosition } from './HoverMoveLocation3DView';
-import { LinkMode, OverrideDirect, OverrideSimple, RadiusMode, RadiusDrawStyle, CPEDrawMode, combineStyles, load_custom_icons} from './isptoolbox-mapbox-draw/index';
+import { LinkMode, OverrideDirect, OverrideSimple, CPEDrawMode, combineStyles, load_custom_icons, APDrawMode} from './isptoolbox-mapbox-draw/index';
 import LidarAvailabilityLayer from './availabilityOverlay';
 import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
 import { LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
@@ -52,7 +52,7 @@ const THREE = window.THREE;
 const mapbox_draw_lib = window.MapboxDraw;
 
 //@ts-ignore
-const mapboxdrawstyles = combineStyles(combineStyles(styles, LOSCheckMapboxStyles), RadiusDrawStyle);
+const mapboxdrawstyles = combineStyles(styles, LOSCheckMapboxStyles);
 // @ts-ignore
 const MapboxGeocoder = window.MapboxGeocoder;
 //@ts-ignore
@@ -402,7 +402,7 @@ export class LinkCheckPage {
                             }
                         }
                     }),
-                    draw_radius: RadiusMode(),
+                    draw_ap: APDrawMode(),
                     draw_cpe: CPEDrawMode(),
                 },
                 displayControlsDefault: false,
@@ -607,8 +607,8 @@ export class LinkCheckPage {
             $('#add-ap-btn').click(
                 () => {
                     //@ts-ignore
-                    this.draw.changeMode('draw_radius');
-                    this.map.fire('draw.modechange', {mode: 'draw_radius'}); }
+                    this.draw.changeMode('draw_ap');
+                    this.map.fire('draw.modechange', {mode: 'draw_ap'}); }
             )
             $('#add-cpe-btn').click(
                 () => {

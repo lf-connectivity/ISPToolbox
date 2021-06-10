@@ -417,6 +417,65 @@ export class WorkspaceManager {
 
         WorkspaceManager._instance = this;
     }
+
+    createApFeature(feature: any, mapboxClient: any) {
+        if (feature.geometry.type == 'Point') {
+            const newCircle = {
+                ...feature,
+                properties: {
+                    radius: feature.properties.radius / 1000,
+                    max_radius: feature.properties.radius / 1000,
+                    center: feature.geometry.coordinates,
+                    height: DEFAULT_AP_HEIGHT,
+                    default_cpe_height: DEFAULT_CPE_HEIGHT,
+                    no_check_radius: DEFAULT_NO_CHECK_RADIUS,
+                    name: DEFAULT_AP_NAME
+                },
+                id: feature.id,
+            }
+            let ap = new AccessPoint(this.map, this.draw, newCircle);
+            ap.create((resp) => {
+                const apPopup = LinkCheckTowerPopup.getInstance();
+                apPopup.setAccessPoint(ap);
+                apPopup.show();
+                if (feature.properties.ptpLinksToRemove) {
+                    feature.properties.ptpLinksToRemove.forEach((id: string) => {
+                        let featToDelete = this.draw.get(id);
+                        this.draw.delete(id);
+                        this.map.fire('draw.delete', {features: [featToDelete]});
+                    });
+                }
+
+                if (feature.properties.cpeLngLats) {
+                    feature.properties.cpeLngLats.forEach((lngLat: [number, number]) => {
+                        mapboxClient.reverseGeocode(lngLat, (mapboxResponse: any) => {
+                            let result = mapboxResponse.body.features;
+                            let street = getStreetAndAddressInfo(result[0].place_name);
+                            let newCPE = {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': lngLat
+                                },
+                                'properties': {
+                                    'name': street.street,
+
+                                    // @ts-ignore
+                                    'ap': workspaceFeature.workspaceId,
+                                    'feature_type': WorkspaceFeatureTypes.CPE,
+                                    'height': DEFAULT_CPE_HEIGHT
+                                }
+                            };
+                            this.map.fire('draw.create', {features: [newCPE]});
+                        });
+                    });
+                }
+                // @ts-ignore
+                this.features[ap.workspaceId] = ap;
+            });
+        }
+    }
+
     saveFeatures({ features }: any) {
         const mode = String(this.draw.getMode());
 
@@ -429,65 +488,14 @@ export class WorkspaceManager {
 
         // Determine whether or not we're drawing an AP, CPE, or link
         // based on the mode.
-        // Mode draw_radius: Points are APs.
+        // Mode draw_ap: Points are APs.
         // Mode draw_cpe: Points are CPEs.
         // Mode simple_select: Points are CPEs, LineStrings are links.
         unsavedFeatures.forEach((feature: any) => {
             let workspaceFeature: BaseWorkspaceFeature | undefined = undefined;
             switch(mode) {
-                case 'draw_radius':
-                    if (feature.geometry.type == 'Point') {
-                        const newCircle = {
-                            ...feature,
-                            properties: {
-                                radius: feature.properties.radius / 1000,
-                                max_radius: feature.properties.radius / 1000,
-                                center: feature.geometry.coordinates,
-                                height: DEFAULT_AP_HEIGHT,
-                                default_cpe_height: DEFAULT_CPE_HEIGHT,
-                                no_check_radius: DEFAULT_NO_CHECK_RADIUS,
-                                name: DEFAULT_AP_NAME
-                            },
-                            id: feature.id,
-                        }
-                        workspaceFeature = new AccessPoint(this.map, this.draw, newCircle);
-                        workspaceFeature.create((resp) => {
-                            if (feature.properties.ptpLinksToRemove) {
-                                feature.properties.ptpLinksToRemove.forEach((id: string) => {
-                                    let featToDelete = this.draw.get(id);
-                                    this.draw.delete(id);
-                                    this.map.fire('draw.delete', {features: [featToDelete]});
-                                });
-                            }
-
-                            if (feature.properties.cpeLngLats) {
-                                feature.properties.cpeLngLats.forEach((lngLat: [number, number]) => {
-                                    mapboxClient.reverseGeocode(lngLat, (mapboxResponse: any) => {
-                                        let result = mapboxResponse.body.features;
-                                        let street = getStreetAndAddressInfo(result[0].place_name);
-                                        let newCPE = {
-                                            'type': 'Feature',
-                                            'geometry': {
-                                                'type': 'Point',
-                                                'coordinates': lngLat
-                                            },
-                                            'properties': {
-                                                'name': street.street,
-
-                                                // @ts-ignore
-                                                'ap': workspaceFeature.workspaceId,
-                                                'feature_type': WorkspaceFeatureTypes.CPE,
-                                                'height': DEFAULT_CPE_HEIGHT
-                                            }
-                                        };
-                                        this.map.fire('draw.create', {features: [newCPE]});
-                                    });
-                                });
-                            }
-                            // @ts-ignore
-                            this.features[workspaceFeature.workspaceId] = workspaceFeature;
-                        });
-                    }
+                case 'draw_ap':
+                    this.createApFeature(feature, mapboxClient);
                     break;
 
                 case 'draw_cpe':
@@ -509,8 +517,9 @@ export class WorkspaceManager {
                     break;
 
                 case 'simple_select':
+                    // It is possible to add either an AP or CPE while in simple_select so determine based on feature properties
                     // Adding CPE also adds link from CPE to specified AP (see customer popup)
-                    if(feature.geometry.type == 'Point') {
+                    if(feature.geometry.type == 'Point' && !feature.properties.radius) {
                         workspaceFeature = new CPE(this.map, this.draw, feature);
                         workspaceFeature.create((resp) => {
                             // @ts-ignore
@@ -524,6 +533,8 @@ export class WorkspaceManager {
                                 this.map.fire('draw.create', {features: [link.featureData]})
                             });
                         });
+                    } else if (feature.properties.radius) {
+                        this.createApFeature(feature, mapboxClient);
                     }
                     break;
             }

@@ -251,7 +251,7 @@ class ViewshedTile(TileModel):
 
     tile = models.FileField(
         upload_to=upload_to_path,
-        storage=S3Boto3Storage(bucket_name=bucket_name),
+        storage=S3Boto3Storage(bucket_name=bucket_name, location=''),
     )
 
 

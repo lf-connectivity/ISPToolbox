@@ -11,11 +11,23 @@ export function parseLatitudeLongitude(id: string) : [number, number] | null {
         }
         const lat = parseFloat(coords[0]);
         const lng = parseFloat(coords[1]);
+        if(!validateCoordinates(lat, lng)){
+            setInvalidValue(id, false);
+            return null;
+        }
         setInvalidValue(id, true);
         return [lat, lng];
     } catch(error){
         setInvalidValue(id, false);
         return null;
+    }
+}
+
+function validateCoordinates(lat: number, lng: number){
+    if(lat > 90 || lat < -90 || lng < -180 || lng > 180){
+        return false;
+    } else {
+        return true;
     }
 }
 

@@ -60,7 +60,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker-compose build
+        docker-compose build django-app nginx node-app
         echo $ECR_REGISTRY
         echo $ECR_REPOSITORY
         docker tag isptoolbox-nginx:latest $ECR_REGISTRY/isptoolbox-nginx:latest

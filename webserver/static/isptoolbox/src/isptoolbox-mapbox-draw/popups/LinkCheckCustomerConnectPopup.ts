@@ -378,7 +378,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     }
 
     protected onPlaceTower() {
-        let newAP = {
+        const newAP = {
             type: 'Feature',
             geometry: {
                 type: 'Point',
@@ -524,9 +524,20 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
         });
 
         this.tooltipAction = true;
-        //@ts-ignore
-        this.draw.changeMode('draw_ap', {start: this.lnglat, cpeLngLats: cpeLngLats, ptpLinksToRemove: ptpLinksToRemove});
-        this.map.fire('draw.modechange', {mode: 'draw_ap'});
+
+        const newAP = {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: this.lnglat
+            },
+            properties: {
+                radius: DEFAULT_RADIUS,
+                cpeLngLats: cpeLngLats,
+                ptpLinksToRemove: ptpLinksToRemove,
+            }
+        } as Feature<Point, any>
+        this.map.fire('draw.create', {features: [newAP]});
         this.marker.hide();
         this.hide();
     }

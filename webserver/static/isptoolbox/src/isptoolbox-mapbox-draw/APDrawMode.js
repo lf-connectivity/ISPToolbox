@@ -19,20 +19,7 @@ export function APDrawMode() {
         this.activateUIButton('point');
         this.setActionableState({
             trash: true
-        })
-        // If we already have a location for the AP, automatically create it there.
-        if (opts.start) {
-            point.coordinates = opts.start
-            // Timeout used to ensure map is in APDrawMode before exiting to simple select.
-            setTimeout(() => {
-                console.log("creating new AP")
-                this.map.fire('draw.create', {
-                    features: [point.toGeoJSON()],
-                });
-                console.log("Changing mode back to simplle")
-                this.changeMode('simple_select', {featureIds: [point.id]});
-            }, 50);
-        }
+        });
         return {
             point
         }

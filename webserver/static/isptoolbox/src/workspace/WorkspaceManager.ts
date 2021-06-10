@@ -460,8 +460,7 @@ export class WorkspaceManager {
                                 'properties': {
                                     'name': street.street,
 
-                                    // @ts-ignore
-                                    'ap': workspaceFeature.workspaceId,
+                                    'ap': ap.workspaceId,
                                     'feature_type': WorkspaceFeatureTypes.CPE,
                                     'height': DEFAULT_CPE_HEIGHT
                                 }
@@ -470,7 +469,6 @@ export class WorkspaceManager {
                         });
                     });
                 }
-                // @ts-ignore
                 this.features[ap.workspaceId] = ap;
             });
         }
@@ -534,6 +532,12 @@ export class WorkspaceManager {
                             });
                         });
                     } else if (feature.properties.radius) {
+                        this.createApFeature(feature, mapboxClient);
+                    }
+                    break;
+
+                case 'direct_select':
+                    if (feature.properties.radius) {
                         this.createApFeature(feature, mapboxClient);
                     }
                     break;

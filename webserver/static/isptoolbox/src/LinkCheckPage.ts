@@ -329,12 +329,6 @@ export class LinkCheckPage {
                 }
             });
 
-            const tx_coords = parseLatitudeLongitude('#lat-lng-0');
-            const rx_coords = parseLatitudeLongitude('#lat-lng-1');
-            // @ts-ignore
-            const [tx_lat, tx_lng] = tx_coords;
-            const [rx_lat, rx_lng] = rx_coords;
-
             // Direct draw override const
             /**
              * Returns a function that reverse geocodes the given lngLat 
@@ -494,23 +488,7 @@ export class LinkCheckPage {
             new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
             new LinkCheckTowerPopup(this.map, this.draw);
 
-            const features = this.draw.add({
-                "type": 'Feature',
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
-                },
-                "properties": {
-                    "meta": "radio_link",
-                    'radio_label_0': 'radio_0',
-                    'radio_label_1': 'radio_1',
-                    'radio_color': '#00FF00',
-                    'radio0hgt': parseFloat(String($('#hgt-0').val())),
-                    'radio1hgt': parseFloat(String($('#hgt-1').val())),
-                    'freq': DEFAULT_LINK_FREQ,
-                }
-            });
-            this.selectedFeatureID = features.length ? features[0] : null;
+
             const prioritizeDirectSelect = function ({ features }: any) {
                 if (features.length == 1 && features[0].geometry.type !== 'Point') {
                     this.draw.changeMode('direct_select', {
@@ -540,23 +518,51 @@ export class LinkCheckPage {
 
             this.lidarAvailabilityLayer = new LidarAvailabilityLayer(this.map);
 
+
+            const tx_coords = parseLatitudeLongitude('#lat-lng-0');
+            const rx_coords = parseLatitudeLongitude('#lat-lng-1');
+            if(tx_coords != null && rx_coords != null)
+            {
+                const [tx_lat, tx_lng] = tx_coords;
+                const [rx_lat, rx_lng] = rx_coords;
+                const features = this.draw.add({
+                    "type": 'Feature',
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
+                    },
+                    "properties": {
+                        "meta": "radio_link",
+                        'radio_label_0': 'radio_0',
+                        'radio_label_1': 'radio_1',
+                        'radio_color': '#00FF00',
+                        'radio0hgt': parseFloat(String($('#hgt-0').val())),
+                        'radio1hgt': parseFloat(String($('#hgt-1').val())),
+                        'freq': DEFAULT_LINK_FREQ,
+                    }
+                });
+                this.selectedFeatureID = features.length ? features[0] : null;
+
+                this.map.addSource(SELECTED_LINK_SOURCE, {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                'type': 'Feature',
+                                'properties': {},
+                                'geometry': {
+                                    "type": "LineString",
+                                    "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
+                                },
+                            }
+                        ]
+                    }
+                });
+
+            }
             // Add Data Sources to Help User Understand Map
-            this.map.addSource(SELECTED_LINK_SOURCE, {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': [
-                        {
-                            'type': 'Feature',
-                            'properties': {},
-                            'geometry': {
-                                "type": "LineString",
-                                "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
-                            },
-                        }
-                    ]
-                }
-            });
+
             // Selected Link Layer
             this.map.addLayer({
                 'id': SELECTED_LINK_LAYER,

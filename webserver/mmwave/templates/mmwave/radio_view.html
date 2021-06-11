@@ -15,7 +15,9 @@
                     <input
                     class="form-control"
                     type="text"
-                    value="{{ radio.lat|stringformat:".5f" }}, {{ radio.lng|stringformat:".5f" }}"
+                    {% if radio %}
+                        value="{{ radio.lat|stringformat:".5f" }}, {{ radio.lng|stringformat:".5f" }}"
+                    {% endif %}
                     id="lat-lng-{% firstof radio.id radio_id %}"
                     placeholder="{% translate 'Latitude, Longitude'%}"
                     >
@@ -27,9 +29,12 @@
                     <input
                         class="form-control"
                         type="number"
-                        value="{{radio.hgt}}"
+                        {% if radio %}
+                            value="{{radio.hgt}}"
+                        {% endif %}
                         id="hgt-{% firstof radio.id radio_id %}"
                         min="0" max="10000"
+                        placeholder="{% translate 'Height' %}"
                     >
                     <span class="input-unit">
                         {% if units == 'US' %}

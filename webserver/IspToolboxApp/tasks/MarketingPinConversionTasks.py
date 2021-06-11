@@ -5,8 +5,8 @@ import heapq
 from django.contrib.gis.geos import Point, \
     GeometryCollection, LinearRing, Polygon, MultiPolygon
 from shapely.ops import polylabel
-from shapely import wkt
-
+from shapely import wkb
+import logging
 """
 Converting Polygons to Pins for Ads Manager
 """
@@ -27,7 +27,7 @@ def calcPinCost(coverage_area, center, radius_km):
     try:
         cost = coverage_area.sym_difference(pin).area
     except Exception as e:
-        print(str(e))
+        logging.error(str(e))
         cost = float('inf')
     return (cost, pin, radius_km)
 
@@ -39,10 +39,14 @@ def createPin(radius_km, center):
 
 
 def findNextPinAdd(polygon):
-    center = polylabel(wkt.loads(polygon.buffer(0).wkt), arc_second_degrees)
-    pin_options = [calcPinCost(polygon, center, radius_km) for radius_km in radius_options]
-    _, pin, radius_km = min(pin_options)
-    return pin, radius_km
+    try:
+        center = polylabel(wkb.loads(bytes(polygon.wkb)), arc_second_degrees)
+        pin_options = [calcPinCost(polygon, center, radius_km) for radius_km in radius_options]
+        _, pin, radius_km = min(pin_options)
+        return pin, radius_km
+    except Exception as e:
+        logging.error(e)
+        return None
 
 
 def removeOrConvertGeometry(geom):
@@ -83,9 +87,36 @@ def differenceIncludeExclude(include, exclude):
             try:
                 coverage_area_polygon = coverage_area_polygon.difference(exclude_p)
             except Exception as e:
-                print(str(e))
+                logging.error(str(e))
         coverage_area_polygons.append(coverage_area_polygon)
     return GeometryCollection(filterDifference(coverage_area_polygons))
+
+
+def processPolygonHeapToPins(polygon_heap, num_pins):
+    # create output queue of pins
+    output_pins = []
+    # for each polygon in coverage area sorted by area:
+    while shouldKeepMakingPins(polygon_heap, output_pins, num_pins):
+        largest_polygon = heapq.heappop(polygon_heap)[1]
+        # binary search pin size that produces the smallest pin difference
+        next_pin = findNextPinAdd(largest_polygon)
+        if next_pin is None:
+            continue
+        pin, radius = next_pin
+        if radius == 0:
+            break
+        output_pins.append(next_pin)
+        # subtract differnce and add to priority queue
+        try:
+            diff = largest_polygon.difference(pin)
+        except Exception as e:
+            logging.error(str(e))
+        if len(diff) > 1:
+            for polygon in diff:
+                heapq.heappush(polygon_heap, (-polygon.area, polygon))
+        else:
+            heapq.heappush(polygon_heap, (-diff.area, diff))
+    return output_pins
 
 
 def convertPolygonToPins(include, exclude, num_pins):
@@ -106,30 +137,10 @@ def convertPolygonToPins(include, exclude, num_pins):
             polygon = Polygon(polygon)
         polygon_heap.append((-polygon.area, polygon))
     heapq.heapify(polygon_heap)
-    # create output queue of pins
-    output_pins = []
-    # didPinLimitHit = False
+
     output_msg = None
-    # for each polygon in coverage area sorted by area:
-    while shouldKeepMakingPins(polygon_heap, output_pins, num_pins):
-        largest_polygon = heapq.heappop(polygon_heap)[1]
-        # binary search pin size that produces the smallest pin difference
-        pin, radius = findNextPinAdd(largest_polygon)
-        if radius == 0:
-            break
-        output_pins.append((pin, radius))
-        # subtract differnce and add to priority queue
-        try:
-            diff = largest_polygon.difference(pin)
-        except Exception as e:
-            print(str(e))
-        if len(diff) > 1:
-            for polygon in diff:
-                heapq.heappush(polygon_heap, (-polygon.area, polygon))
-        else:
-            heapq.heappush(polygon_heap, (-diff.area, diff))
+    output_pins = processPolygonHeapToPins(polygon_heap, num_pins)
     if len(output_pins) == num_pins and len(polygon_heap) > 0:
-        # didPinLimitHit = True
         output_msg = 'Pin limit reached'
 
     include_output_pins = GeometryCollection([p[0] for p in output_pins])

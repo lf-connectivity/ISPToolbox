@@ -1,9 +1,9 @@
-<div class="modal fade" id="accessPointModal" tabindex="-1" role="dialog" aria-labelledby="accessPointModalLabel"
+<div class="modal theme-modal fade" id="accessPointModal" tabindex="-1" role="dialog" aria-labelledby="accessPointModalLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="accessPointModalLabel">Tower Locations</h5>
+        <h3 class="modal-title" id="accessPointModalLabel">Tower Locations</h3>
         <div class="d-flex">
           <button type="button" class="btn isptoolbox-btn btn-primary" data-dismiss="modal" data-toggle="modal" data-target="#bulkUploadAccessPoint">Bulk Import</button>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -15,9 +15,6 @@
         {% with spinner_style='height: 75px; width: 100%;' blink=True spinner_classes="mx-auto mb-3" %}
           {% include 'mmwave/atoms/loading_spinner.html' %}
         {% endwith %}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn isptoolbox-btn btn-primary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

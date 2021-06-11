@@ -1,0 +1,86 @@
+@import ../theme
+
+.theme-table 
+    .thead
+        background: $light-gray-color
+    .tr
+        display: flex
+        flex-flow: row
+        justify-content: space-between
+    .thead .tr
+        align-items: flex-end
+        padding: 10px
+    .thead p, 
+    .tbody p
+        margin: 0
+    .tbody .tr
+        padding: 10px
+        border-bottom: solid 1px $light-gray-color
+        display: flex
+        align-items: center
+    .th-column .sort-ap
+        display: inline-flex
+    
+.theme-table.open-workspace
+    .workspace-name
+        width: 60%
+        a:not(.sort-ap)
+            display: block
+    .tower-count
+        width: 10%
+        text-align: center
+    .last-edit
+        width: 20%
+        text-align: right
+    .actions
+        width: 10%
+        text-align: right
+    .session-delete-btn
+        border: 0
+        background: transparent
+        width: 40px
+        height: 40px
+        svg path
+            stroke: $mid-gray-color-2
+            transition: 0.2s all ease-in-out
+        &:focus
+            outline: 0
+        &:hover svg path,
+        &:focus svg path
+            stroke: $error-color
+    .desktop-only
+        display: inline-block
+    .mobile-only
+        display: none
+
+// large screen and smaller
+@media (max-width: $breakpoint-lg)
+    .theme-table.open-workspace
+        .workspace-name
+            width: 45%
+        .tower-count
+            width: 20%
+        .last-edit
+            width: 25%
+        .actions
+            width: 10%
+
+// small screen and smaller
+@media (max-width: $breakpoint-md)
+    .theme-table.open-workspace
+        .tbody .tr
+            display: flex
+            align-items: flex-start
+            flex-flow: column
+        .workspace-name, .tower-count, .last-edit, .actions
+            width: 100%
+            text-align: left
+        .workspace-name
+            margin-bottom: 10px
+        .mobile-only
+            display: inline-block
+        .desktop-only
+            display: none
+        .session-delete-btn
+            padding: 0
+            width: 17px

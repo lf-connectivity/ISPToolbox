@@ -1,19 +1,18 @@
-<div class="modal fade" id="exportKMZModal" tabindex="-1" role="dialog" aria-labelledby="exportKMZModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade theme-modal" id="exportKMZModal" tabindex="-1" role="dialog" aria-labelledby="exportKMZModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
         <div class="modal-header">
-        <h5 class="modal-title" id="exportKMZModalLabel">Export KMZ</h5>
+        <h3 class="modal-title" id="exportKMZModalLabel">Export Session as KMZ</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             {% include "workspace/atoms/isptoolbox_close_icon.html" %}
         </button>
         </div>
         <div class="modal-body">
-        <div class="isptoolbox-form mx-auto" >
-            <a class="btn btn-primary isptoolbox-btn" target="_blank" href="{% url 'session_download'  session.uuid%}"> Download "{{session.name}}"</a>
+        <div class="isptoolbox-form" >
+            <a class="btn btn-primary isptoolbox-btn" target="_blank" href="{% url 'session_download'  session.uuid%}">
+                {% include "workspace/atoms/download_icon.html" %}
+                Download "{{session.name}}"</a>
         </div>
-        </div>
-        <div class="modal-footer">
-        <button type="button" class="btn btn-secondary isptoolbox-btn" data-dismiss="modal">Close</button>
         </div>
     </div>
     </div>

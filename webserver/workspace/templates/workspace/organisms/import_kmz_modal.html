@@ -1,25 +1,55 @@
-<div class="modal fade" id="importKMZModal" tabindex="-1" role="dialog" aria-labelledby="importKMZModalLabel" aria-hidden="true">
-<form action="{% url 'session_create' %}" method="POST">
-    <div class="modal-dialog" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-        <h5 class="modal-title" id="importKMZModalLabel">Import KMZ</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            {% include "workspace/atoms/isptoolbox_close_icon.html" %}
-        </button>
+<div class="modal fade theme-modal" id="importKMZModal" tabindex="-1" role="dialog" aria-labelledby="importKMZModalLabel" aria-hidden="true">
+    <form action="{% url 'session_create' %}" method="POST">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="importKMZModalLabel">Import a File</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Your files must contain outlines of areas. These files can be exported from tools such as Google Earth and Tower Coverage. 
+                    <a href="https://isptoolbox-public-hosted-files.s3-us-west-2.amazonaws.com/ISPToolbox-Sample.kml" style="display: inline-block;">
+                        Download Sample File
+                        <svg
+                        width="19"
+                        height="19"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432"
+                          stroke="#5692d1"
+                          strokeWidth="2px"
+                        />
+                      </svg>
+                    </a> 
+                </p>
+                <div class="isptoolbox-form">
+                    {% csrf_token %}
+                    <ul class="form">
+                    {% for field in workspace_forms.new_session_from_kmz %}
+                        <li class="input-field-group">
+                            {{ field.label_tag }}
+                            
+                            {{ field }}
+                            
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <p class="errors">{{ error|escape }}</p>
+                                {% endfor %}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary isptoolbox-btn" value="Start Session">
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-        <div class="isptoolbox-form mx-auto" >
-            {% csrf_token %}
-            {{ workspace_forms.new_session_from_kmz }}
-        </div>
-        </div>
-        <div class="modal-footer">
-        <button type="button" class="btn btn-secondary isptoolbox-btn" data-dismiss="modal">Close</button>
-        <input type="submit" class="btn btn-primary isptoolbox-btn" value="Submit">
-        </div>
-    </div>
-    </div>
-</form>
+    </form>
 </div>
    

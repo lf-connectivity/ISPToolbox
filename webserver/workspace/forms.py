@@ -16,11 +16,19 @@ class UploadTowerCSVForm(forms.Form):
 
 
 class NewWorkspaceSessionForm(forms.Form):
-    name = forms.CharField(max_length=255)
+    name = forms.CharField(
+        max_length=255,
+        label="Name",
+        label_suffix="",
+        widget=forms.TextInput(attrs={'placeholder': 'Session Name'}))
 
 
 class NewWorkspaceSessionFromKMZForm(forms.Form):
-    name = forms.CharField(max_length=255)
+    name = forms.CharField(
+        max_length=255,
+        label="Save Session as",
+        label_suffix="",
+        widget=forms.TextInput(attrs={'placeholder': 'Session Name'}))
     kmz = forms.FileField(
         widget=CustomFileInput(
             attrs={'accept': 'application/vnd.google-earth.kml+xml, application/vnd.google-earth.kmz, .geojson'},
@@ -30,7 +38,11 @@ class NewWorkspaceSessionFromKMZForm(forms.Form):
 
 
 class SaveAsSessionForm(forms.Form):
-    name = forms.CharField(max_length=255)
+    name = forms.CharField(
+        max_length=255,
+        label="Name",
+        label_suffix="",
+        widget=forms.TextInput(attrs={'placeholder': 'Session Name'}))
     create_copy = forms.BooleanField(required=False)
 
 

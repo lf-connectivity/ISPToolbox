@@ -1,22 +1,19 @@
-<div class="modal fade" id="createNetworkModal" tabindex="-1" role="dialog" aria-labelledby="createNetworkModalLabel" aria-hidden="true">
+<div class="modal fade theme-modal" id="createNetworkModal" tabindex="-1" role="dialog" aria-labelledby="createNetworkModalLabel" aria-hidden="true">
   <form action="{% url 'session_create' %}" method="POST">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="createNetworkModalLabel">Create Workspace</h5>
+          <h3 class="modal-title" id="createNetworkModalLabel">Save New Session as</h3>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             {% include "workspace/atoms/isptoolbox_close_icon.html" %}
           </button>
         </div>
         <div class="modal-body">
-          <div class="isptoolbox-form mx-auto" >
+          <div class="isptoolbox-form inline-field-group">
               {% csrf_token %}
               {{ workspace_forms.new_session }}
+              <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary isptoolbox-btn" data-dismiss="modal">Close</button>
-          <input type="submit" class="btn btn-primary isptoolbox-btn" value="Submit">
         </div>
       </div>
     </div>

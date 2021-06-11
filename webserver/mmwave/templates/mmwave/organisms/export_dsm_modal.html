@@ -1,10 +1,10 @@
-<div class="modal fade" id="DSMExportModal" tabindex="-1" role="dialog" aria-labelledby="DSMExportModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+<div class="modal theme-modal fade" id="DSMExportModal" tabindex="-1" role="dialog" aria-labelledby="DSMExportModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="DSMExportModalLabel">Welcome to DSM Exporter</h5>
+        <h3 class="modal-title" id="DSMExportModalLabel">Welcome to DSM Exporter</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+          {% include "workspace/atoms/isptoolbox_close_icon.html" %}
         </button>
       </div>
       <div class="modal-body">
@@ -34,20 +34,17 @@
             </a>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn isptoolbox-btn btn-primary" data-dismiss="modal">Close</button>
-      </div>
     </div>
   </div>
 </div>
 
 <div class="modal fade" id="DSMUpload" tabindex="-1" role="dialog" aria-labelledby="DSMUploadLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="DSMUploadLabel">Upload a KMZ or GeoJSON File</h5>
+        <h3 class="modal-title" id="DSMUploadLabel">Upload a KMZ or GeoJSON File</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+          {% include "workspace/atoms/isptoolbox_close_icon.html" %}
         </button>
       </div>
       <div class="modal-body">
@@ -58,9 +55,6 @@
         {{ upload_form }}
         <input type="submit" class="btn isptoolbox-btn btn-primary" value="Upload">
       </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn isptoolbox-btn btn-primary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

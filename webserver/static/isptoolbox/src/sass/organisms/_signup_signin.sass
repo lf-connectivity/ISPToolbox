@@ -31,20 +31,6 @@
         .onboarding_container--question
             display: block
             width: 100%
-    label
-        font-family: Basis Grotesque Pro
-        font-size: 1rem
-        font-weight: bold
-        line-height: 135%
-        letter-spacing: 0.01em
-        text-align: left
-        color: $brand-dark-gray-color
-        margin-bottom: 7px
-
-    input
-        line-height: 16px
-    input, select
-        margin-bottom: 5px 
     .survery-form 
         input, select, .checklist--items
             margin-bottom: 10px 
@@ -68,16 +54,15 @@
         -webkit-border-radius: 0px
         appearance: none
         outline-width: 0
+    input
+        line-height: 16px
     ol
         padding-left: 1rem
     .survey-form ol
         padding-left: 0
     br
         display: none
-    &--required
-        color: $brand-secondary-color
-        padding-left: 2px
-    &--errors, .onboarding_container--errors
+    .onboarding_container--errors
         color: $dark-error-color
         font-size: 14px
         margin-bottom: 0

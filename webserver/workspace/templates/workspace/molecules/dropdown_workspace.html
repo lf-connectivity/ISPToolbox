@@ -8,15 +8,18 @@
         <a class="nav-link dropdown-toggle workspace-nav-dropdown-toggle d-flex flex-row" href="#" id="navbarDropdown" role="button"
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="navbar-toggler-icon my-auto mr-3" style="width: 1em !important; height: 1em !important;"></span>
-            <h5 class="my-auto mr-1" id="session_name_workspace">viewing: {{ session.name }}</h5>
+            <h5 class="my-auto mr-1" id="session_name_workspace">Editing: {{ session.name }}</h5>
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#createNetworkModal">New Workspace</a>
+            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#createNetworkModal">New Session</a>
             <div class=""></div>
-            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#importKMZModal" >Import KML/KMZ</a>
-            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#paginationNetworkModal" >Open</a>
-            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#saveAsModal" >Save Session As</a>
-            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#exportKMZModal"> Export Session as KMZ</a>
+            <div class="divider"></div>
+            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#paginationNetworkModal">Open Workspace</a>
+            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#importKMZModal">Import New</a>
+            <div class="divider"></div>
+            <a class="dropdown-item" href="#">Rename Session</a>
+            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#saveAsModal">Save Session as</a>
+            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#exportKMZModal">Export</a>
         </div>
     </div>
     {% endif %}

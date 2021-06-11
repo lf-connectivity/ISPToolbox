@@ -45,7 +45,7 @@
         .dropdown a
             display: flex
             align-items: center
-            &:hover
+            &:hover, &:focus
                 color: $brand-secondary-color
         &--picture
             height: 40px
@@ -60,10 +60,19 @@
     a
         font-family: $brand-font-family-mono
         font-size: 0.875rem
-        padding: 5px 25px 15px 25px
-        &:hover
+        padding: 10px 25px 10px 25px
+        transition: 0.1s all ease-in-out
+        &:hover, 
+        &:focus
             color: $brand-secondary-color
-            background-color: transparent
+            background-color: $light-gray-color
+    .divider
+        height: 1px
+        background: $light-gray-color
+        margin: 0
+    .disabled
+        cursor: unset
+        color: $mid-gray-color
 
 .dropdown-menu
     border: none
@@ -71,6 +80,9 @@
 
 .workspace-nav-dropdown-toggle
     border: 2px solid $brand-primary-color
+    #session_name_workspace
+        max-width: 300px
+        overflow: hidden
 
 .workspace-nav-dropdown-toggle:after
     margin-top: auto

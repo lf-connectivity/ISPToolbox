@@ -1,19 +1,19 @@
 {% load static %}
-<div class="modal fade" id="bulkUploadAccessPoint" tabindex="-1" role="dialog" aria-labelledby="bulkUploadAccessPointLabel"
+<div class="modal theme-modal fade" id="bulkUploadAccessPoint" tabindex="-1" role="dialog" aria-labelledby="bulkUploadAccessPointLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <form action="{% url 'bulk_tower_upload' %}?next={{request.get_full_path}}" method="post" enctype="multipart/form-data">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="bulkUploadAccessPointLabel" >Upload Towers</h5>
+        <h3 class="modal-title" id="bulkUploadAccessPointLabel">Upload Towers</h3>
         <div class="d-flex">
-            <a href="{% static "workspace/tower_sample.csv" %}">
-                <button type="button" class="btn isptoolbox-btn btn-secondary">
-                    Sample File
-                </button>
-            </a> 
+          <a href="{% static "workspace/tower_sample.csv" %}">
+              <button type="button" class="btn isptoolbox-btn btn-secondary">
+                  Sample File
+              </button>
+          </a> 
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+            {% include "workspace/atoms/isptoolbox_close_icon.html" %}
           </button>
         </div>
       </div>
@@ -25,7 +25,6 @@
             {% csrf_token %}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn isptoolbox-btn btn-secondary" data-dismiss="modal">Close</button>
         <input type="submit" class="btn isptoolbox-btn btn-primary" value="Upload">
       </div>
     </div>

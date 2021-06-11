@@ -1,4 +1,8 @@
 {% load static %}
-<img src="{% static 'workspace/fileupload.png' %}" style="width: 200px">
 
-{% include 'django/forms/widgets/file.html' %}
+<div class="file-upload-form">
+    {% include 'django/forms/widgets/file.html' %}
+</div>
+<p class="helptext">
+    Files Accepted: KML, KMZ and Geojson
+</p>

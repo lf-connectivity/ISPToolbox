@@ -17,7 +17,7 @@ class UploadTowerCSVForm(forms.Form):
 
 class NewWorkspaceSessionForm(forms.Form):
     name = forms.CharField(
-        max_length=255,
+        max_length=63,
         label="Name",
         label_suffix="",
         widget=forms.TextInput(attrs={'placeholder': 'Session Name'}))
@@ -25,7 +25,7 @@ class NewWorkspaceSessionForm(forms.Form):
 
 class NewWorkspaceSessionFromKMZForm(forms.Form):
     name = forms.CharField(
-        max_length=255,
+        max_length=63,
         label="Save Session as",
         label_suffix="",
         widget=forms.TextInput(attrs={'placeholder': 'Session Name'}))
@@ -39,7 +39,7 @@ class NewWorkspaceSessionFromKMZForm(forms.Form):
 
 class SaveAsSessionForm(forms.Form):
     name = forms.CharField(
-        max_length=255,
+        max_length=63,
         label="Name",
         label_suffix="",
         widget=forms.TextInput(attrs={'placeholder': 'Session Name'}))

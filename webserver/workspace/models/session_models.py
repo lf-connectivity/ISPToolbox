@@ -18,7 +18,7 @@ class WorkspaceMapSession(models.Model):
     """
     This model represents a workspace map session
     """
-    name = models.CharField(max_length=255, default="untitled workspace")
+    name = models.CharField(max_length=63, default="untitled workspace")
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

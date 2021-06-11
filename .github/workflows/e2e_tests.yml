@@ -26,6 +26,7 @@ jobs:
         run: |
           make setup_dev
           make default_objects
+          make static_test
           docker stop $(docker ps -a -f "name=isptoolbox_" -q)
       - name: Cypress run
         uses: cypress-io/github-action@v2

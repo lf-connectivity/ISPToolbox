@@ -36,6 +36,11 @@ test:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app ./wait-for-postgres.sh python3 manage.py test --noinput
 
+static_test:
+	@echo ----------------------------------------------BUIDLING STATIC FILES FOR INTEGRATION TESTS----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run static ./build_static_prod.sh
+
 static_prod:
 	@echo ----------------------------------------------BUIDLING STATIC FILES \& PUSHING TO PROD \(S3\)----------------------------------------
 	docker-compose -f docker-compose.yml -f webserver/static/docker-compose.static-prod.yml build

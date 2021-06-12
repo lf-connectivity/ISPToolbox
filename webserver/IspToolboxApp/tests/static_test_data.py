@@ -165,5 +165,3 @@ exclude_simple_1 = """{"type":"GeometryCollection","geometries":[{"coordinates":
 [-118.5065856680522,34.326727903427084],
 [-118.55602414461924,34.34317091925482],
 [-118.6205688223498,34.342603972362554]]],"type":"Polygon"}]}"""
-
-exclude_empty = """{"type":"GeometryCollection","geometries":[]}"""

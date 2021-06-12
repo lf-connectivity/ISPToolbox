@@ -5,7 +5,7 @@ from django.contrib.gis.geos import GEOSGeometry
 
 from .static_test_data import exclude_polygon_collection, \
     include_geometry_collection, exclude_simple_1, \
-    include_simple, exclude_simple, exclude_empty
+    include_simple, exclude_simple
 import os
 
 

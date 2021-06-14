@@ -19,7 +19,7 @@
       </div>
       <div class="modal-body bulk-upload-modal" id="ap-upload-modal-body" >
             {% with spinner_style='height: 75px; width: 100%;' blink=False spinner_classes="mx-auto mb-3" %}
-                {% include "mmwave/atoms/loading_spinner.html" %}
+                {% include "workspace/atoms/components/loading_spinner.html" %}
             {% endwith %}
             {{ tower_upload_form }}
             {% csrf_token %}

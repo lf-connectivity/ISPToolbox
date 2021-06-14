@@ -89,7 +89,7 @@ class LOSCheckWS {
     }
 
     setConnectionStatus(connected: boolean){
-        const element = $('#los-check-connection-status');
+        const element = $('#websocket-connection-status');
         const geocoder = $('#geocoder');
         if(connected){
             element.addClass('d-none');

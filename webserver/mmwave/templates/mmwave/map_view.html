@@ -1,14 +1,9 @@
-<div class="map-container-network">
-    <div id='map' class='planner-map'></div>
-    <div class="top-bar-wisp">
-        <div id="isp-draw-controls" class="pl-2">
-            {% include "mmwave/atoms/reconnecting_msg.html" %}
-            <div id="geocoder" class="geocoder"></div>
-            {% if not beta %}
-                {% with width=True%}
-                {% include "mmwave/molecules/draw_controls.html" %}
-                {% endwith %}
-            {% endif %}
-        </div>
-    </div>
-</div>
+{% extends "workspace/organisms/map_view_base.html" %}
+
+{% block draw_controls %}
+    {% if not beta %}
+        {% with width=True %}
+            {% include 'mmwave/molecules/draw_controls.html' %}
+        {% endwith %}
+    {% endif %}
+{% endblock %}

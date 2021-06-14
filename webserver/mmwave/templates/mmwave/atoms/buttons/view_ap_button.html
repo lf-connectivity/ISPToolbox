@@ -1,13 +1,16 @@
-{% extends "workspace/atoms/buttons/view_ap_button_base.html" %}
-
-{% block extra_params %}
+{% comment %}
+    this tool requires that the user be authenticated
+{% endcomment %}
+{% if user.is_authenticated %}
+    {% with extra_params='data-toggle="modal" data-target="#accessPointModal"'%}
+        {% include "workspace/atoms/buttons/view_ap_button_base.html" %}
+    {% endwith %}
+{% else %}
     {% comment %}
-        this tool requires that the user be authenticated
+        we can override id with extra params. Technically illegal, which is the
+        best kind of illegal.
     {% endcomment %}
-    {% if user.is_authenticated %}
-        data-toggle="modal" data-target="#accessPointModal"
-    {% else %}
-        id="add-ap-noact"
-        data-toggle="modal" data-target="#redirect_workspace_modal"
-    {% endif %}
-{% endblock %}
+    {% with extra_params='id="add-ap-noact" data-toggle="modal" data-target="#redirect_workspace_modal"'%}
+        {% include "workspace/atoms/buttons/view_ap_button_base.html" %}
+    {% endwith %}
+{% endif %}

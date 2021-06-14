@@ -1,13 +1,14 @@
-{% extends "workspace/atoms/buttons/place_tower_button_base.html" %}
-
-{% block extra_params %}
+{% comment %}
+    this tool requires that the user be authenticated
+{% endcomment %}
+{% if user.is_authenticated %}
+    {% include "workspace/atoms/buttons/place_tower_button_base.html" %}
+{% else %}
     {% comment %}
-        this tool requires that the user be authenticated
+        we can override id with extra params. Technically illegal, which is the
+        best kind of illegal.
     {% endcomment %}
-    {% if user.is_authenticated %}
-        id="add-ap-btn"
-    {% else %}
-        id="add-ap-noact"
-        data-toggle="modal" data-target="#redirect_workspace_modal"
-    {% endif %}
-{% endblock %}
+    {% with extra_params='id="add-ap-noact" data-toggle="modal" data-target="#redirect_workspace_modal"'%}
+        {% include "workspace/atoms/buttons/place_tower_button_base.html" %}
+    {% endwith %}
+{% endif %}

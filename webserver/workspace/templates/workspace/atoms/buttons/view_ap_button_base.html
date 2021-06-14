@@ -1,6 +1,3 @@
-<button type="button" class="btn isptoolbox-btn btn-secondary btn-large my-1 isp-draw-mode-btn {%if width %} w-100{%endif%}"
-    {% block extra_params%}
-    {% endblock %}
->
-    View Access Points
-</button>
+{% with button_id="view-ap-btn" button_text="View Access Points" %}
+    {% include "workspace/atoms/buttons/base_button.html" %}
+{% endwith %}

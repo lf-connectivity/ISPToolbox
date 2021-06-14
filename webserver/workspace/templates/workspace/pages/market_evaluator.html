@@ -1,7 +1,16 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+  {% include "workspace/molecules/page_header.html" %}
 <body>
-<p>HELLO WORLD!</p> 
+    {% with draw_controls="market_evaluator/molecules/draw_controls.html" %}
+        {% include 'workspace/organisms/workspace_nav.html' %}
+    {% endwith %}
+    {% include "workspace/organisms/map_view_base.html" %}
+    {% include "workspace/atoms/mapbox_global_public_key.html" %}
+    <script async src="{% static "wireless_network.min.js" %}"> </script>
+    {% include "workspace/molecules/workspace_session_info.html" %}
+    {{ geojson|json_script:"isp-map-features" }}
+    {{ beta|json_script:"los_beta" }}
 </body>
 </html>

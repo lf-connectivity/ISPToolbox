@@ -1,5 +1,3 @@
-{% extends 'workspace/organisms/workspace_nav.html' %}
-
-{% block draw_controls %}
-    {% include 'mmwave/molecules/draw_controls.html' %}
-{% endblock %}
+{% with draw_controls="mmwave/molecules/draw_controls.html" %}
+    {% include 'workspace/organisms/workspace_nav.html' %}
+{% endwith %}

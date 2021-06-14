@@ -1,7 +1,3 @@
-<button type="button" class="btn isptoolbox-btn btn-secondary btn-large my-1 isp-draw-mode-btn {%if width %} w-100{%endif%}" draw_mode="draw_radius"
-    {% block extra_params %}
-    {% endblock %}
->
-    {% include "workspace/atoms/icons/ap_icon.html" %}
-    Place Tower
-</button>
+{% with button_id="add-ap-btn" button_draw_mode="draw_ap" button_icon="workspace/atoms/icons/ap_icon.html" button_text="Place Tower" %}
+    {% include "workspace/atoms/buttons/base_button.html" %}
+{% endwith %}

@@ -583,7 +583,14 @@ export class LinkCheckPage {
                         ]
                     }
                 });
-
+            } else {
+                this.map.addSource(SELECTED_LINK_SOURCE, {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'FeatureCollection',
+                        'features': []
+                    }
+                });
             }
             // Add Data Sources to Help User Understand Map
 

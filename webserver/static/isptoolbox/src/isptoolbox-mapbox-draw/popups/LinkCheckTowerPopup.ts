@@ -13,7 +13,7 @@ import { MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT,
 import { sanitizeString } from "../../molecules/InputValidator";
 import { WorkspaceEvents } from "../../workspace/WorkspaceConstants";
 import { EMPTY_BUILDING_COVERAGE } from "../../workspace/BuildingCoverage";
-import { parseLatitudeLongitude } from "../../utils/LatLngInputUtils";
+import { parseFormLatitudeLongitude } from "../../utils/LatLngInputUtils";
 
 var _ = require('lodash');
 
@@ -70,7 +70,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
             popup.setEventHandlers();
             // Adjust lat/lng/height if they have been changed from bottom bar
             let coord = popup.accessPoint.featureData.geometry.coordinates;
-            let coord_input = parseLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
+            let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
             if(coord_input != null){
                 if (String(coord_input[0]) !== coord[1].toFixed(5) ||
                     String(coord_input[1]) !== coord[0].toFixed(5)) {
@@ -129,7 +129,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
             let htmlID = `#${id}`;
             $(htmlID).on('change',
                 _.debounce((e: any) => {
-                    let newVal = parseLatitudeLongitude(htmlID);
+                    let newVal = parseFormLatitudeLongitude(htmlID);
                     if(newVal != null && this.accessPoint){
                         newVal = [newVal[1], newVal[0]];
                         this.accessPoint.featureData.geometry.coordinates = newVal;

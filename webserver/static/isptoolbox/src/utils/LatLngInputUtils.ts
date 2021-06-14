@@ -1,26 +1,43 @@
-export function parseLatitudeLongitude(id: string) : [number, number] | null {
-    const val = String($(id).val())
+export function parseLatitudeLongitude(val: string): [number, number] | null {
     try{
         let coords = val.split(',');
         if(coords.length !== 2){
             coords = val.split(' ');
         }
         if(coords.length !== 2){
-            setInvalidValue(id, false);
             return null;
         }
-        const lat = parseFloat(coords[0]);
-        const lng = parseFloat(coords[1]);
+
+        const lat = parseFloat($.trim(coords[0]));
+        const lng = parseFloat($.trim(coords[1]));
         if(!validateCoordinates(lat, lng)){
-            setInvalidValue(id, false);
             return null;
         }
-        setInvalidValue(id, true);
         return [lat, lng];
     } catch(error){
-        setInvalidValue(id, false);
         return null;
     }
+}
+
+export function parseSearchBarLatitudeLongitude(query: string): [number, number] | null {
+    if (query.charAt(0) == '(' && query.charAt(query.length - 1) == ')' ) {
+        return parseLatitudeLongitude(query.slice(1, -1));
+    }
+    else {
+        return parseLatitudeLongitude(query);
+    }
+}
+
+export function parseFormLatitudeLongitude(id: string) : [number, number] | null {
+    const val = String($(id).val());
+    const result = parseLatitudeLongitude(val);
+    if (result === null) {
+        setInvalidValue(id, false);
+    }
+    else {
+        setInvalidValue(id, true);
+    }
+    return result;
 }
 
 function validateCoordinates(lat: number, lng: number){

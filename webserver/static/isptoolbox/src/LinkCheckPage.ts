@@ -26,13 +26,14 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
-import { isBeta, validateHeight, validateLat, validateLng } from './LinkCheckUtils';
+import { getStreetAndAddressInfo, isBeta, validateHeight, validateLat, validateLng } from './LinkCheckUtils';
 import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup, LinkCheckVertexClickCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
 import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearchTool";
 import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
-import { parseLatitudeLongitude } from "./utils/LatLngInputUtils";
+import { parseFormLatitudeLongitude, parseSearchBarLatitudeLongitude } from "./utils/LatLngInputUtils";
+import { createSupplementaryPointsForCircle } from "./isptoolbox-mapbox-draw/RadiusModeUtils.js";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -288,8 +289,8 @@ export class LinkCheckPage {
         );
         this.link_status = new LinkStatus();
 
-        let tx_initial = parseLatitudeLongitude('#lat-lng-0');
-        let rx_initial = parseLatitudeLongitude('#lat-lng-1');
+        let tx_initial = parseFormLatitudeLongitude('#lat-lng-0');
+        let rx_initial = parseFormLatitudeLongitude('#lat-lng-1');
         let initial_map_center = {'lon': 0, 'lat': 0};
         if(tx_initial != null && rx_initial != null){
             initial_map_center = {
@@ -411,11 +412,34 @@ export class LinkCheckPage {
                 styles: mapboxdrawstyles
             });
 
+            let latLngMatcher = (query: string) => {
+                let latLngMatch = parseSearchBarLatitudeLongitude(query);
+                if (latLngMatch == null) {
+                    return null;
+                }
+                let lngLatMatch = [latLngMatch[1], latLngMatch[0]];
+
+                return [
+                    {
+                        center: lngLatMatch,
+                        geometry: {
+                            type: 'Point',
+                            coordinates: lngLatMatch
+                        },
+                        place_name: `Coordinate Match, (${lngLatMatch[1]}, ${lngLatMatch[0]})`,
+                        place_type: ['coordinate'],
+                        properties: {},
+                        type: 'Feature'
+                    }
+                ]
+            };
+
             this.geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
                 mapboxgl: mapboxgl,
                 marker: isBeta() ? false : true,
                 countries: 'us, pr',
+                localGeocoder: latLngMatcher,
                 placeholder: 'Search for an address'
             });
 
@@ -519,8 +543,8 @@ export class LinkCheckPage {
             this.lidarAvailabilityLayer = new LidarAvailabilityLayer(this.map);
 
 
-            const tx_coords = parseLatitudeLongitude('#lat-lng-0');
-            const rx_coords = parseLatitudeLongitude('#lat-lng-1');
+            const tx_coords = parseFormLatitudeLongitude('#lat-lng-0');
+            const rx_coords = parseFormLatitudeLongitude('#lat-lng-1');
             if(tx_coords != null && rx_coords != null)
             {
                 const [tx_lat, tx_lng] = tx_coords;
@@ -675,7 +699,7 @@ export class LinkCheckPage {
                     _.debounce(() => {
                         if (this.selectedFeatureID != null) {
                             const feat = this.draw.get(this.selectedFeatureID);
-                            let coords = parseLatitudeLongitude(htmlId);
+                            let coords = parseFormLatitudeLongitude(htmlId);
                             if (coords != null){
                                 coords = [coords[1], coords[0]];
                                 if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
@@ -1074,8 +1098,8 @@ export class LinkCheckPage {
     };
 
     getRadioLocations() {
-        const tx_coords = parseLatitudeLongitude('#lat-lng-0');
-        const rx_coords = parseLatitudeLongitude('#lat-lng-1');
+        const tx_coords = parseFormLatitudeLongitude('#lat-lng-0');
+        const rx_coords = parseFormLatitudeLongitude('#lat-lng-1');
         if (tx_coords == null || rx_coords == null){
             return null;
         }

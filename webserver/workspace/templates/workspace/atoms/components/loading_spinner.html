@@ -1,0 +1,27 @@
+<svg
+viewBox="0 0 157 120"
+fill="none"
+xmlns="http://www.w3.org/2000/svg"
+class="{{ spinner_classes }}"
+style="{{ spinner_style }}">
+<rect
+    width="23.9455"
+    height="119.727"
+    transform="matrix(-1 0 0 1 90.5199 0)"
+    fill="#A8B0B7"
+/>
+<path
+{% if blink %}
+    class="WispLoadingIcon_animatingRectangle"
+{% endif %}
+    d="M0.124794 0H46.7554V35.288L0.124794 0Z"
+    fill="#687B8B"
+/>
+<path
+{% if blink %}
+    class="WispLoadingIcon_animatingRectangle"
+{% endif %}
+    d="M156.97 0H110.339V35.288L156.97 0Z"
+    fill="#687B8B"
+/>
+</svg>

@@ -1,0 +1,8 @@
+<div class="reconnecting-status d-none" id="websocket-connection-status">
+    <div class="p-2 d-flex">
+        {% with spinner_style='height: 10px;' blink=True spinner_classes="mx-1 my-2" %}
+            {% include "workspace/atoms/components/loading_spinner.html" %}
+        {% endwith %}
+        <h5 class="mb-0">Attempting to Reconnect...</h5>
+    </div>
+</div>

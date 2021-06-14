@@ -321,6 +321,11 @@ DATABASES = {
 DATABASE_ROUTERS = ['gis_data.models.GISDataRouter']
 AUTH_USER_MODEL = "IspToolboxAccounts.User"
 
+# Change session cookie samesite attribute to None for iframe functionality
+if PROD:
+    SESSION_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SECURE = True
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

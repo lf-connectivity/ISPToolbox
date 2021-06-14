@@ -4,7 +4,7 @@
   {% include "workspace/molecules/page_header.html" %}
 <body class="los-body">
     {% if beta and request.user.is_authenticated %}
-      {% include 'workspace/organisms/tool_suggest_workspace_overlay.html' %}
+        {% include 'workspace/organisms/tool_suggest_workspace_overlay.html' %}
     {% endif %}
     {% include "workspace/atoms/mapbox_global_public_key.html" %}
     {% include "./map_view.html" %}

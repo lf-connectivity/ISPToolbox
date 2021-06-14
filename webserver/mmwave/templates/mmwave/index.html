@@ -7,6 +7,9 @@
         {% include 'workspace/organisms/tool_suggest_workspace_overlay.html' %}
     {% endif %}
     {% include "workspace/atoms/mapbox_global_public_key.html" %}
+    {% if beta %}
+      {% include "mmwave/organisms/network_edit_nav.html" %}
+    {% endif %}
     {% include "./map_view.html" %}
     <script async src="{% static "wireless_network.min.js" %}"> </script>
     {% include "./3d_view.html" %}

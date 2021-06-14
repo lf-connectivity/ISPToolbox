@@ -6,9 +6,14 @@
     {% if beta %}
     <div class="nav-item dropdown">
         <a class="nav-link dropdown-toggle workspace-nav-dropdown-toggle d-flex flex-row" href="#" id="navbarDropdown" role="button"
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {% if beta and not request.user.is_authenticated %}
+            data-toggle="modal" data-target="#redirect_workspace_modal"
+        {% else %}
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+        {% endif %}
+        >
             <span class="navbar-toggler-icon my-auto mr-3" style="width: 1em !important; height: 1em !important;"></span>
-            <h5 class="my-auto mr-1" id="session_name_workspace">Editing: {{ session.name }}</h5>
+            <h5 class="my-auto mr-1" id="session_name_workspace">Editing: {% firstof session.name 'untitled session' %}</h5>
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#createNetworkModal">New Session</a>

@@ -1,0 +1,59 @@
+{% load i18n %}
+<div>
+    <h2>
+        {% translate 'Market Sizing' %}
+    </h2>
+</div>
+<div class="m-3 p-3 market-eval-section">
+    <div class="d-flex justify-content-between">
+        <p role="text" tabindex="">
+            {% translate 'Buildings inside Coverage Area' %}<sup>
+                <span>
+                    [</span>
+                1<span>
+                    ]</span>
+            </sup>
+        </p>
+        <div class="d-flex flex-row">
+            <h3>
+                <span style="color: rgb(162, 162, 162);">
+                    000</span>
+            </h3>
+            {% with title='Buildings inside Coverage Area' body='This is a count of rooftops identified in your selected area; rooftops may include homes, businesses, unoccupied structures, etc.' link='https://github.com/Microsoft/USBuildingFootprints' link_desc='See Data Source' %}
+            {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
+            {% endwith %}
+        </div>
+    </div>
+    <div class="market-eval-divider"></div>
+    <div class="d-flex justify-content-between">
+        <p>
+            {% translate 'Potential Market Penetration'%}</p>
+        <div class="d-flex flex-row">
+            <h3>
+                <span style="display: flex;">
+                    <input type="number" id="market_penetration_percent" name="market_penetration_percent" min="0"
+                        max="100" disabled="" value="15" style="color: rgb(162, 162, 162);">
+                    <div>
+                        %</div>
+                </span>
+            </h3>
+            {% with title='Potential Market Penetration' body='This number represents the percentage of buildings (i.e. rooftops) that you forecast may subscribe to your service. You can change the percentage based on your determined estimated market penetration and existing market conditions.' link='https://github.com/Microsoft/USBuildingFootprints' link_desc='See Data Source' %}
+            {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
+            {% endwith %}
+        </div>
+    </div>
+    <div class="market-eval-divider"></div>
+    <div class="d-flex justify-content-between">
+        <p role="text" tabindex="">
+            {% translate 'Potential Leads'%}</p>
+        <div class="d-flex flex-row">
+            <h3>
+                <span style="color: rgb(162, 162, 162);">
+                    000</span>
+            </h3>
+            {% with title='Potential Market Penetration' body='This number represents the percentage of buildings (i.e. rooftops) that you forecast may subscribe to your service. You can change the percentage based on your determined estimated market penetration and existing market conditions.' link='https://github.com/Microsoft/USBuildingFootprints' link_desc='See Data Source' %}
+            {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
+            {% endwith %}
+        </div>
+    </div>
+</div>

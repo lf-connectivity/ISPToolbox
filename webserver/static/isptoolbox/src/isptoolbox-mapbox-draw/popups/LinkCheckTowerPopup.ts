@@ -177,20 +177,20 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                 feat.properties?.unserviceable != null &&
                 feat.properties.unknown === 0){
                 return `
-                    <li class="ap-stat">
+                    <div class="ap-stat">
                         <p class="ap-stat--label">Clear LOS Rooftops</p>
                         <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
                             <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
                             ${feat.properties?.serviceable}
                         </p>
-                    </li>
-                    <li class="ap-stat">
+                    </div>
+                    <div class="ap-stat">
                         <p class="ap-stat--label">Obstructed Rooftops</p>
                         <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
                             <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
                             ${feat.properties?.unserviceable}
                         </p>
-                    </li>
+                    </div>
                     <div class="node-edits">
                         <a id="tower-delete-btn" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
                         <p>Last edited ${feat.properties?.last_updated}</p>

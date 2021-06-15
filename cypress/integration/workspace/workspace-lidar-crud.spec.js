@@ -35,4 +35,8 @@ describe('Test Workspace Features for LiDAR Tool', () => {
     it('Check Simple Network CRUD Operations', function () {
         cy.visit('/pro/network/edit/');
     });
+
+    it('Check Market Evaluator', function () {
+      cy.visit('/pro/market/');
+  });
   })

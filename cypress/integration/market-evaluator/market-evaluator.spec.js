@@ -2,7 +2,7 @@
 
 context('Test Market Evaluator Functionality', () => {
     beforeEach(() => {
-      cy.visit('/market-evaluator/test/')
+      cy.visit('/pro/market/')
     })
 
     const fields_to_check = [

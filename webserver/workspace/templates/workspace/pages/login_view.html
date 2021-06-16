@@ -10,14 +10,14 @@
 {% endblock %}
 
 {% block content %}
-<div class="container flex-grow-1" style="margin-top: 70px;">
-{% if user.is_authenticated %}
+<div style="margin-top: 70px;">
+    {% if user.is_authenticated %}
     {% include "workspace/organisms/landing_page_container.html" %}
-{% else %}
+    {% else %}
     {% include "workspace/organisms/signup_container.html" %}
     {% include "workspace/organisms/signin_container.html" %}
     {% include "workspace/organisms/signup_email_container.html" %}
     <script src="{% static "login_signup.min.js" %}"> </script>
-{% endif %}
+    {% endif %}
 </div>
 {% endblock %}

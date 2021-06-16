@@ -1,64 +1,64 @@
 {% load static %}
 
-<div class="container pt-3">
-    <div class="row d-flex justify-content-around">
-        <div class="card" style="width: 18rem;">
+<div class="p-5" style="
+display: grid;
+gap: 1rem;
+grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr))">
+    <div class="card" style="width: 18rem;">
+        <a href="{% url 'edit_account_network' %}">
+            <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
+        </a>
+        <div class="card-body">
             <a href="{% url 'edit_account_network' %}">
-                <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
+                <h5 class="card-title">Network</h5>
             </a>
-            <div class="card-body">
-                <a href="{% url 'edit_account_network' %}">
-                    <h5 class="card-title">Network</h5>
-                </a>
-                <p class="card-text">Evaluate PtP Links using LiDAR Data</p>
-            </div>
+            <p class="card-text">Evaluate PtP Links using LiDAR Data</p>
         </div>
-        <div class="card" style="width: 18rem;">
+    </div>
+    <div class="card" style="width: 18rem;">
+        <a href="{% url 'market_eval_entry' %}">
+            <img class="card-img-top" src='{% static "mmwave/market_isptoolboxpro.gif" %}' alt="Card image cap">
+        </a>
+        <div class="card-body">
             <a href="{% url 'market_eval_entry' %}">
-                <img class="card-img-top" src='{% static "mmwave/market_isptoolboxpro.gif" %}' alt="Card image cap">
+                <h5 class="card-title">Market</h5>
             </a>
-            <div class="card-body">
-                <a href="{% url 'market_eval_entry' %}">
-                    <h5 class="card-title">Market</h5>
-                </a>
-                <p class="card-text">Evaluate new or existing markets and determine which technologies are most applicable.</p>
-            </div>
+            <p class="card-text">Evaluate new or existing markets and determine which technologies are most
+                applicable.</p>
         </div>
-        <div class="card" style="width: 18rem;">
+    </div>
+    <div class="card" style="width: 18rem;">
+        <a href="{% url 'multiplayer_demo' %}">
+            <img class="card-img-top" src='{% static "mmwave/multiplayer.gif" %}' alt="Card Multiplayer Cap">
+        </a>
+        <div class="card-body">
             <a href="{% url 'multiplayer_demo' %}">
-                <img class="card-img-top" src='{% static "mmwave/multiplayer.gif" %}' alt="Card Multiplayer Cap">
+                <h5 class="card-title">Multiplayer</h5>
             </a>
-            <div class="card-body">
-                <a href="{% url 'multiplayer_demo' %}">
-                    <h5 class="card-title">Multiplayer</h5>
-                </a>
-                <p class="card-text">Collaborate with your co-workers in real-time.</p>
-            </div>
+            <p class="card-text">Collaborate with your co-workers in real-time.</p>
         </div>
-        <div class="card" style="width: 18rem;">
+    </div>
+    <div class="card" style="width: 18rem;">
+        <a href="{% url 'swagger-ui' %}">
+            <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
+        </a>
+        <div class="card-body">
             <a href="{% url 'swagger-ui' %}">
-                <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
+                <h5 class="card-title">APIs</h5>
             </a>
-            <div class="card-body">
-                <a href="{% url 'swagger-ui' %}">
-                    <h5 class="card-title">APIs</h5>
-                </a>
-                <p class="card-text">Integrate and automate your business processes with ISP Toolbox's APIs.</p>
-            </div>
+            <p class="card-text">Integrate and automate your business processes with ISP Toolbox's APIs.</p>
         </div>
     </div>
 </div>
-<div class="container pt-3 text-center"> 
+<div class="container pt-3 text-center">
     {% if showSurvey %}
-        <div class="alert alert-primary" role="alert">
-            <a href="{% url 'optional_info' %}"
-            >Take a quick survey to help us make ISP Toolbox better</a>
-        </div>
+    <div class="alert alert-primary" role="alert">
+        <a href="{% url 'optional_info' %}">Take a quick survey to help us make ISP Toolbox better</a>
+    </div>
     {% endif %}
     <div class="alert alert-primary" role="alert">
         {% now "Y" as current_year %}
         {% now "m" as current_month %}
-        <a href="{% url 'demo-latest_gis' year=current_year month=current_month %}"
-        >See the latest GIS data</a>
+        <a href="{% url 'demo-latest_gis' year=current_year month=current_month %}">See the latest GIS data</a>
     </div>
 </div>

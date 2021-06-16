@@ -12,6 +12,7 @@
     <div id='map' class='planner-map col-md-8 order-1 order-md-2' style="min-height: 500px"></div>
   </div>
   {% include "workspace/organisms/map_view_base.html" %}
+  {% include "workspace/organisms/market_eval_competitors.html" %}
   {% include "workspace/atoms/mapbox_global_public_key.html" %}
   <script async src="{% static "market_evaluator.min.js" %}"> </script>
   {% include "workspace/molecules/workspace_session_info.html" %}

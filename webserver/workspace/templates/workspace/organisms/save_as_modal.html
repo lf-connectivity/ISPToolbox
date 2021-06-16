@@ -1,23 +1,45 @@
-<div class="modal theme-modal fade" id="saveAsModal" tabindex="-1" role="dialog" aria-labelledby="saveAsModalLabel" aria-hidden="true">
-    <form action="{% url 'session_saveas' %}" method="POST">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h3 class="modal-title" id="saveAsModalLabel">Save Session As</h3>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              {% include "workspace/atoms/isptoolbox_close_icon.html" %}
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="isptoolbox-form mx-auto inline-field-group">
-                {% csrf_token %}
-                {{ workspace_forms.save_as_session }}
-                <input type="text" value="{{session.uuid}}" hidden name="session">
-                <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
-            </div>
+{% load i18n %}
+<div class="modal theme-modal fade" id="saveAsModal" tabindex="-1" role="dialog" aria-labelledby="saveAsModalLabel"
+  aria-hidden="true">
+  <form action="{% url 'session_saveas' %}" method="POST" id="workspace_session_save_form">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="saveAsModalLabel">{% translate "Save Session As"%}</h3>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="isptoolbox-form mx-auto">
+            {% csrf_token %}
+            {{ workspace_forms.save_as_session }}
+            <p class="onboarding_container--errors error d-none" style="color: red;"></p>
+            <input type="text" value="{{session.uuid}}" hidden name="session">
+            <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
           </div>
         </div>
       </div>
-    </form>
-  </div>
-   
+    </div>
+  </form>
+</div>
+
+<script>
+  $(() => {
+    $('#workspace_session_save_form').on('submit', function (event) {
+      event.preventDefault();
+      $.ajax({
+        data: $(this).serialize(),
+        type: "POST",
+        dataType: "json",
+        url: "{% url 'session_saveas' %}?format=json",
+        success: function (response) {
+          window.location.replace(response.url);
+        },
+        error: (response) => {
+          $(this).find('.error').removeClass('d-none').html(response.responseJSON.error);
+        }
+      })
+    });
+  })
+</script>

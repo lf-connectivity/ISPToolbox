@@ -10,8 +10,7 @@ from .rest_views import (
     CoverageAreaGet
 )
 from .session_views import (
-    SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView,
-    SessionDuplicateRename,
+    SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView, SessionSaveAsView,
 )
 from .error_views import Error500View, Error404View, Error403View
 from .social_views import FBDeauthorizeSocialView, FBDataDeletionView
@@ -26,7 +25,7 @@ __all__ = [
     'CoverageAreaCreate', 'CoverageAreaGet', 'APCoverageAreaGet', 'APCoverageAreaCreate',
     'AccessPointCoverageResults', 'NetworkMapPreferencesView', 'AccessPointCoverageStatsView',
     'SessionCreateUpdateView', 'SessionListView', 'SessionDeleteView', 'SessionDownloadView',
-    'SessionDuplicateRename',
+    'SessionSaveAsView',
     'Error500View', 'Error404View', 'Error403View',
     'OptionalInfoWorkspaceView', 'OptionalInfoWorkspaceUpdateView',
     'FBDeauthorizeSocialView', 'FBDataDeletionView',

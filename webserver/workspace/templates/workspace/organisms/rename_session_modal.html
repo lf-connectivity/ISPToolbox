@@ -1,20 +1,21 @@
 {% load i18n %}
-<div class="modal fade theme-modal" id="createNetworkModal" tabindex="-1" role="dialog"
-  aria-labelledby="createNetworkModalLabel" aria-hidden="true">
-  <form action="{% url 'session_create' %}" method="POST" id="workspace_create_session_form">
+<div class="modal theme-modal fade" id="renameSessionModal" tabindex="-1" role="dialog"
+  aria-labelledby="renameSessionModalLabel" aria-hidden="true">
+  <form action="{% url 'session_create' %}" method="POST" id="workspace_rename_session_form">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 class="modal-title" id="createNetworkModalLabel">{% translate "Create New Session as"%}</h3>
+          <h3 class="modal-title" id="renameSessionModalLabel">{% translate "Rename Session"%}</h3>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             {% include "workspace/atoms/isptoolbox_close_icon.html" %}
           </button>
         </div>
         <div class="modal-body">
-          <div class="isptoolbox-form">
+          <div class="isptoolbox-form mx-auto">
             {% csrf_token %}
-            {{ workspace_forms.new_session }}
+            {{ workspace_forms.rename_session }}
             <p class="onboarding_container--errors error d-none" style="color: red;">></p>
+            <input type="text" value="{{session.uuid}}" hidden name="session">
             <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
           </div>
         </div>
@@ -22,10 +23,9 @@
     </div>
   </form>
 </div>
-
 <script>
   $(() => {
-    $('#workspace_create_session_form').on('submit', function (event) {
+    $('#workspace_rename_session_form').on('submit', function (event) {
       event.preventDefault();
       $.ajax({
         data: $(this).serialize(),

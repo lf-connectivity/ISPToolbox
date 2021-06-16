@@ -28,7 +28,7 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
         context = {
             'session': session,
             'geojson': geojson,
-            'workspace_forms': WorkspaceForms(request),
+            'workspace_forms': WorkspaceForms(request, session),
             'beta': True,
             'units': 'US',
             'tower_upload_form': UploadTowerCSVForm,

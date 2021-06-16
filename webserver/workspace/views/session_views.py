@@ -1,6 +1,8 @@
+from django.http.response import JsonResponse
 from workspace.models import (
     WorkspaceMapSession, WorkspaceMapSessionSerializer
 )
+from django.urls import reverse
 from django.views import View
 from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -10,6 +12,7 @@ from workspace import pagination
 import json
 from uuid import UUID
 from workspace.forms import SaveAsSessionForm
+from django.db.utils import IntegrityError
 
 
 class SessionCreateUpdateView(
@@ -21,7 +24,7 @@ class SessionCreateUpdateView(
 
     def post(self, request, *args, **kwargs):
         response = self.create(request, *args, **kwargs)
-        if kwargs.get('format') == 'json':
+        if request.query_params.get('format') == 'json':
             return response
         return redirect('edit_network', response.data['uuid'], response.data['name'])
 
@@ -85,14 +88,15 @@ class SessionDownloadView(LoginRequiredMixin, View):
         return response
 
 
-class SessionDuplicateRename(LoginRequiredMixin, View):
+class SessionSaveAsView(LoginRequiredMixin, View):
     def post(self, request):
         saveas_form = SaveAsSessionForm(request.POST)
         if saveas_form.is_valid():
             session = get_object_or_404(WorkspaceMapSession, owner=request.user, uuid=request.POST.get('session'))
-            if saveas_form.cleaned_data['create_copy']:
-                session = session.duplicate(saveas_form.cleaned_data['name'])
-            else:
-                session.name = saveas_form.cleaned_data['name']
-                session.save()
-            return redirect('edit_network', session.uuid, session.name)
+            try:
+                session = session.duplicate(saveas_form.cleaned_data['save_as_session_name'])
+                return JsonResponse({'url': reverse('edit_network', args=[session.uuid, session.name])})
+            except IntegrityError:
+                return JsonResponse({'error': WorkspaceMapSession.UNIQUE_TOGETHER_ERROR}, status=400)
+            except Exception:
+                return JsonResponse({'error': 'Unknown Error Occured'}, status=400)

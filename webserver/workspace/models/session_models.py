@@ -12,6 +12,8 @@ from workspace import geojson_utils
 from .network_models import (
     AccessPointLocation, CPELocation, APToCPELink
 )
+from rest_framework.validators import UniqueTogetherValidator
+from django.utils.translation import gettext as _
 
 
 class WorkspaceMapSession(models.Model):
@@ -30,6 +32,10 @@ class WorkspaceMapSession(models.Model):
     zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
 
     duplicate_fks = [AccessPointLocation, CPELocation, APToCPELink]
+    UNIQUE_TOGETHER_ERROR = _("You already have a workspace with that name, please select a different name.")
+
+    class Meta:
+        unique_together = [["owner", "name"]]
 
     @property
     def number_of_towers(self):
@@ -93,6 +99,13 @@ class WorkspaceMapSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkspaceMapSession
         exclude = []
+        validators = [
+            UniqueTogetherValidator(
+                queryset=WorkspaceMapSession.objects.all(),
+                fields=["owner", "name"],
+                message=WorkspaceMapSession.UNIQUE_TOGETHER_ERROR
+            )
+        ]
 
 
 class NetworkMapPreferences(models.Model):

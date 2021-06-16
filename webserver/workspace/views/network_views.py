@@ -52,7 +52,7 @@ class EditNetworkView(LoginRequiredMixin, View):
         context = {
             'session': session,
             'geojson': geojson,
-            'workspace_forms': WorkspaceForms(request),
+            'workspace_forms': WorkspaceForms(request, session),
             'should_collapse_link_view': True,
             'beta': True,
             'units': 'US',

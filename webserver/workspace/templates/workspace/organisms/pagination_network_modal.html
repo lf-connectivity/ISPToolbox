@@ -1,4 +1,5 @@
-<div class="modal fade theme-modal open-workspace" id="paginationNetworkModal" tabindex="-1" role="dialog" aria-labelledby="paginationNetworkModalLabel" aria-hidden="true">
+<div class="modal fade theme-modal open-workspace" id="paginationNetworkModal" tabindex="-1" role="dialog"
+  aria-labelledby="paginationNetworkModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -13,36 +14,35 @@
   </div>
 </div>
 <script>
-function showModalCallback() {
-  $.get('{% url "session_list" %}', '', (result) => {
-          $('#session-list-modal-body').html(result);
-      }, 'html').done(() => {
-        $('.session-delete-btn').on('click', (event) => {
-            const uuid = event.currentTarget.getAttribute('data-target');
-            if (typeof uuid === 'string') {
-              console.log('uuid');
-              $.ajax({
-                url: `{% url 'session_delete' %}${uuid}/`,
-                method: "POST",
-                headers: {
-                    'X-CSRFToken': "{{ csrf_token }}",
-                    'Accept': 'application/json'
-                }
-              }).done(() => {
-                 if(uuid === "{{session.uuid}}") {
-                  window.location.replace("{% url 'edit_account_network' %}");
-                 } else {
-                   showModalCallback();
-                 }
-              });
+  function showModalCallback() {
+    $.get('{% url "session_list" %}', '', (result) => {
+      $('#session-list-modal-body').html(result);
+    }, 'html').done(() => {
+      $('.session-delete-btn').on('click', (event) => {
+        const uuid = event.currentTarget.getAttribute('data-target');
+        if (typeof uuid === 'string') {
+          $.ajax({
+            url: `{% url 'session_delete' %}${uuid}/`,
+            method: "POST",
+            headers: {
+              'X-CSRFToken': "{{ csrf_token }}",
+              'Accept': 'application/json'
             }
-        });
+          }).done(() => {
+            if (uuid === "{{session.uuid}}") {
+              window.location.replace("{% url 'edit_account_network' %}");
+            } else {
+              showModalCallback();
+            }
+          });
+        }
       });
-}
-$(() => {
-  $('#paginationNetworkModal').on(
-    'shown.bs.modal',
-    showModalCallback
-  );
-})
+    });
+  }
+  $(() => {
+    $('#paginationNetworkModal').on(
+      'shown.bs.modal',
+      showModalCallback
+    );
+  })
 </script>

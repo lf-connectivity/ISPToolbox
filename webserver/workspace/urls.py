@@ -20,8 +20,10 @@ urlpatterns = [
     path('market/<uuid:session_id>/', views.MarketEvaluatorView.as_view()),
     path('market/<uuid:session_id>/<str:name>/', views.MarketEvaluatorView.as_view(), name="market_eval"),
     path('market/', views.MarketEvaluatorView.as_view(), name="market_eval_entry"),
+    # DSM Export
     path('workspace/api/dsm-export/', CreateExportDSM.as_view()),
     path('workspace/api/dsm-export/<uuid:uuid>/', CreateExportDSM.as_view()),
+    # Account Creation and Management
     path(
         'accounts/sign-in/',
         auth_views.LoginView.as_view(
@@ -59,7 +61,7 @@ urlpatterns = [
     path('workspace/api/session/<uuid:uuid>/', views.SessionCreateUpdateView.as_view(), name="session_update"),
     path('workspace/api/session/', views.SessionCreateUpdateView.as_view(), name="session_create"),
     path('workspace/api/session/download/<uuid:session_uuid>', views.SessionDownloadView.as_view(), name="session_download"),
-    path('workspace/api/session/duplicate-rename/', views.SessionDuplicateRename.as_view(), name="session_saveas"),
+    path('workspace/api/session/save-as/', views.SessionSaveAsView.as_view(), name="session_saveas"),
     path('workspace/api/session/list/', views.SessionListView.as_view(), name="session_list"),
     path('workspace/api/session/delete/<uuid:uuid>/', views.SessionDeleteView.as_view()),
     path('workspace/api/session/delete/', views.SessionDeleteView.as_view(), name="session_delete"),

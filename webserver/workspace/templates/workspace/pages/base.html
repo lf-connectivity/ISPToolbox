@@ -1,23 +1,30 @@
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
+
 <head>
     {% include "workspace/organisms/default_header.html" %}
     {% block additional_headers %}
     {% endblock %}
 </head>
+
 <body>
     <div class="d-flex flex-column min-vh-100">
         <header>
             {% block beforenav %}
             {% endblock %}
+            {% block nav %}
             {% include "workspace/organisms/nav.html" %}
+            {% endblock %}
         </header>
         {% block content %}
         {% endblock %}
         <footer>
+            {%block footer%}
             {% include "workspace/organisms/footer.html" %}
+            {% endblock %}
         </footer>
-      </div>
+    </div>
 </body>
+
 </html>

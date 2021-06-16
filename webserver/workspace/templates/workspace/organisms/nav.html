@@ -1,10 +1,13 @@
 <div class="workspace-nav fixed-top">
-  <div class="empty"><!--empty-div--></div>
-    {% include "workspace/atoms/isptoolbox_logo.html" %}
-    {% include "workspace/atoms/account_dropdown.html" %}
+  <div class="empty">
+    <!--empty-div-->
+  </div>
+  {% include "workspace/atoms/isptoolbox_logo.html" %}
+  {% block right_section_nav %}
+  {% include "workspace/atoms/account_dropdown.html" %}
+  {% endblock %}
 </div>
 
-{% if user.is_authenticated %}
-{% else %}
-  {% include "workspace/molecules/login_modal.html" %}
+{% if not user.is_authenticated %}
+{% include "workspace/molecules/login_modal.html" %}
 {% endif %}

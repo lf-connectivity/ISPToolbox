@@ -1,7 +1,8 @@
 from .login_views import (
     DefaultWorkspaceView, OptionalInfoWorkspaceView, OptionalInfoWorkspaceUpdateView, AccountSettingsView,
 )
-from .network_views import EditNetworkView, BulkUploadTowersView, MarketEvaluatorView
+from .network_views import EditNetworkView, BulkUploadTowersView
+from .market_views import MarketEvaluatorView
 from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,

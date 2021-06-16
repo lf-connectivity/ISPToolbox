@@ -1,2 +1,10 @@
 @use '../organisms/_market-eval-stats.sass'
 @use '../atoms/_tooltip.sass'
+@import ../theme
+
+
+@media (max-width: $breakpoint-md) 
+    .market-eval-container
+        flex-flow: column
+    #map
+        min-height: 500px

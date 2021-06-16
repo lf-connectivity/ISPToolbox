@@ -5,11 +5,11 @@
         <p role="text" tabindex="">
             {% translate 'Building Density' %}</p>
         <div class="d-flex flex-row">
-            <h3>
-                <span style="color: rgb(162, 162, 162);">
+            <h3 class="my-auto">
+                <span style="color: rgb(162, 162, 162);" id="me-out-density">
                     0</span>
             </h3>
-            {% with title='Building Density' body='The number of buildings in your selected area as buildings per mile squared.' link='https://github.com/Microsoft/USBuildingFootprints' link_desc='See Data Source' %}
+            {% with tooltips.density as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
@@ -25,11 +25,11 @@
             </sup>
         </p>
         <div class="d-flex flex-row">
-            <h3>
-                <span style="color: rgb(162, 162, 162);">
+            <h3 class="my-auto">
+                <span style="color: rgb(162, 162, 162);" id="me-out-providers">
                     0</span>
             </h3>
-            {% with title='Service Providers' body='This is the number of Service Providers in the selected coverage area. Service Providers are listed in the order of their advertised speeds if available.' link='https://www.fcc.gov/general/broadband-deployment-data-fcc-form-477' link_desc='See Data Source' %}
+            {% with tooltips.providers as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
@@ -45,11 +45,11 @@
             </sup>
         </p>
         <div class="d-flex flex-row">
-            <h3>
-                <span style="color: rgb(162, 162, 162);">
+            <h3 class="my-auto">
+                <span style="color: rgb(162, 162, 162);" id="me-out-income">
                     $000K</span>
             </h3>
-            {% with title='Avg. Household Income' body='The average household income in the selected area, weighted by the total of buildings. Data does not reflect the income of individual households.' link='https://www.census.gov/programs-surveys/acs' link_desc='See Data Source' %}
+            {% with tooltips.income as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
@@ -65,11 +65,11 @@
             </sup>
         </p>
         <div class="d-flex flex-row">
-            <h3>
-                <span style="color: rgb(162, 162, 162);">
+            <h3 class="my-auto">
+                <span style="color: rgb(162, 162, 162);" id="me-out-speeds">
                     0/0</span>
             </h3>
-            {% with title='Median Speeds' body='The data presented is download/upload Mbps. Speed test results are a weighted average over zipcode medians if multiple zip/postal codes are selected.' link='https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information' link_desc='See Data Source' %}
+            {% with tooltips.speeds as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>

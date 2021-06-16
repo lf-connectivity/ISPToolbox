@@ -15,11 +15,11 @@
             </sup>
         </p>
         <div class="d-flex flex-row">
-            <h3>
-                <span style="color: rgb(162, 162, 162);">
+            <h3 class="my-auto">
+                <span style="color: rgb(162, 162, 162);" id="me-out-buildings">
                     000</span>
             </h3>
-            {% with title='Buildings inside Coverage Area' body='This is a count of rooftops identified in your selected area; rooftops may include homes, businesses, unoccupied structures, etc.' link='https://github.com/Microsoft/USBuildingFootprints' link_desc='See Data Source' %}
+            {% with tooltips.buildings as tooltip%}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
@@ -29,7 +29,7 @@
         <p>
             {% translate 'Potential Market Penetration'%}</p>
         <div class="d-flex flex-row">
-            <h3>
+            <h3 class="my-auto">
                 <span style="display: flex;">
                     <input type="number" id="market_penetration_percent" name="market_penetration_percent" min="0"
                         max="100" disabled="" value="15" style="color: rgb(162, 162, 162);">
@@ -37,7 +37,7 @@
                         %</div>
                 </span>
             </h3>
-            {% with title='Potential Market Penetration' body='This number represents the percentage of buildings (i.e. rooftops) that you forecast may subscribe to your service. You can change the percentage based on your determined estimated market penetration and existing market conditions.' link='https://github.com/Microsoft/USBuildingFootprints' link_desc='See Data Source' %}
+            {% with tooltips.market_pen as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
@@ -47,11 +47,11 @@
         <p role="text" tabindex="">
             {% translate 'Potential Leads'%}</p>
         <div class="d-flex flex-row">
-            <h3>
-                <span style="color: rgb(162, 162, 162);">
+            <h3 class="my-auto">
+                <span style="color: rgb(162, 162, 162);" id="me-out-leads">
                     000</span>
             </h3>
-            {% with title='Potential Market Penetration' body='This number represents the percentage of buildings (i.e. rooftops) that you forecast may subscribe to your service. You can change the percentage based on your determined estimated market penetration and existing market conditions.' link='https://github.com/Microsoft/USBuildingFootprints' link_desc='See Data Source' %}
+            {% with tooltips.leads as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>

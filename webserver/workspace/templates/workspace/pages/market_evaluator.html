@@ -7,9 +7,9 @@
   {% with draw_controls="market_evaluator/molecules/draw_controls.html" %}
   {% include 'workspace/organisms/workspace_nav.html' %}
   {% endwith %}
-  <div class="row">
+  <div class="d-flex market-eval-container" style="height: calc(100vh - 71px);">
     {% include "market_evaluator/organisms/market_stats_column.html" %}
-    <div id='map' class='planner-map col-md-8' style="min-height: 500px"></div>
+    <div id='map' class='planner-map col-md-8 order-1 order-md-2' style="min-height: 500px"></div>
   </div>
   {% include "workspace/organisms/map_view_base.html" %}
   {% include "workspace/atoms/mapbox_global_public_key.html" %}

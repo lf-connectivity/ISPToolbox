@@ -79,7 +79,6 @@ INSTALLED_APPS = [
     'isptoolbox_storage',
     'workspace',
     'gis_data',
-    'market_evaluator',
     # S3 Static File Storage
     'storages',
     # Social Auth

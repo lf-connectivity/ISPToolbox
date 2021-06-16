@@ -1,10 +1,10 @@
 import { MarketEvaluatorPage } from '../MarketEvaluatorPage'
-import { ToolTipManager } from '../organisms/ToolTipManager';
+import { MarketEvaluatorSidebarManager } from '../organisms/MarketEvaluatorSidebarManager';
 $(
     () => {
         //@ts-ignore
         window.mapboxgl.accessToken = window.mapbox_access_token;
-        ToolTipManager.getInstance().initializePopovers();
+        MarketEvaluatorSidebarManager.getInstance().initializePopovers();
 
         new MarketEvaluatorPage();
     }

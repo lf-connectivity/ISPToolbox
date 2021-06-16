@@ -1,13 +1,13 @@
-export class ToolTipManager {
-    private static instance: ToolTipManager;
+export class MarketEvaluatorSidebarManager {
+    private static instance: MarketEvaluatorSidebarManager;
 
     private constructor() { }
 
-    public static getInstance(): ToolTipManager {
-        if (!ToolTipManager.instance) {
-            ToolTipManager.instance = new ToolTipManager();
+    public static getInstance(): MarketEvaluatorSidebarManager {
+        if (!MarketEvaluatorSidebarManager.instance) {
+            MarketEvaluatorSidebarManager.instance = new MarketEvaluatorSidebarManager();
         }
-        return ToolTipManager.instance;
+        return MarketEvaluatorSidebarManager.instance;
     }
 
     public initializePopovers() {

@@ -1,15 +1,25 @@
 import LidarAvailabilityLayer from '../availabilityOverlay';
-import * as MapboxGL from "mapbox-gl";
+import mapboxgl, * as MapboxGL from "mapbox-gl";
 const NEW_GIS_DATA_SOURCE = 'new-gis-source';
 const NEW_GIS_DATA_LAYER = 'new-gis-layer';
 const GIS_LAYER_PATH = 'https://static.isptoolbox.io/static/';
 
+const SVG_ARROW = `<svg width="25" height="26" viewBox="0 0 25 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.94922 19.9369L18.4658 7.42039M9.27442 6.71337L18.9371 6.94904L19.1728 16.6117" stroke="white" stroke-width="1.5"/>
+</svg>`;
 class NewGISDataLayer {
     popup : mapboxgl.Popup;
+    popupCTA: mapboxgl.Popup;
+
     constructor(private map: mapboxgl.Map, private month: string, private year: string){
         this.popup = new window.mapboxgl.Popup({
             closeButton: false,
             closeOnClick: false,
+            className: "lidar-availability-popup"
+        });
+        this.popupCTA = new window.mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: true,
             className: "lidar-availability-popup"
         });
         map.addSource(NEW_GIS_DATA_SOURCE, {
@@ -44,6 +54,15 @@ class NewGISDataLayer {
         this.map.on('mouseleave', NEW_GIS_DATA_LAYER, (e : any)=> {
             this.map.getCanvas().style.cursor = '';
             this.popup.remove();
+        });
+
+        this.map.on('click', NEW_GIS_DATA_LAYER, (e: any) => {
+            const params = new URLSearchParams({
+                lat: e.lngLat.lat,
+                lon: e.lngLat.lng,
+            });
+            var description = `<a target="_parent" href="/demo/los-check/?${params.toString()}">Explore Region in LiDAR LOS Tool ${SVG_ARROW}</a>`
+            this.popupCTA.setLngLat(e.lngLat).setHTML(description).addTo(this.map);
         });
         const geojson_filename = `${year}-${month}-01-latest-added-pt-clouds.geojson`;
         const url = GIS_LAYER_PATH  + geojson_filename;

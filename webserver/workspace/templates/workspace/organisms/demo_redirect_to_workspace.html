@@ -1,29 +1,30 @@
 {% load i18n %}
 <!-- Modal -->
-<div class="modal theme-modal fade" id="redirect_workspace_modal" tabindex="-1" role="dialog" aria-labelledby="suggest create account" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content onboarding_container">
-        <div class="modal-header">
-            <h3 class="modal-title" id="paginationNetworkModalLabel">Save your work</h3>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            {% include "workspace/atoms/isptoolbox_close_icon.html" %}
-            </button>
-        </div>
-        <div class="modal-body">
-            <p class="onboarding_container--intro-copy large-paragraph">Signing up for Workspace gives you the ability to save and reuse files across ISP Toolbox</p>
-            {% include 'workspace/organisms/value_props.html' %}
-        </div>
-        <div class="modal-footer d-flex flex-column">
-            <a href="{% url 'isptoolbox_pro_home' %}" target="_parent" class="btn btn-primary isptoolbox-btn w-100">
-                {% translate "Sign Up" %}
-            </a>
-            {% with style_background='background: white' %}
+<div class="modal theme-modal fade" id="redirect_workspace_modal" tabindex="-1" role="dialog"
+    aria-labelledby="suggest create account" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content onboarding_container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="paginationNetworkModalLabel">Save your work</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="onboarding_container--intro-copy large-paragraph">Signing up for Workspace gives you the
+                    ability to save and reuse files across ISP Toolbox</p>
+                {% include 'workspace/organisms/value_props.html' %}
+            </div>
+            <div class="modal-footer d-flex flex-column">
+                <a href="{% url 'isptoolbox_pro_home' %}" target="_parent" class="btn btn-primary isptoolbox-btn w-100">
+                    {% translate "Sign Up" %}
+                </a>
+                {% with style_background='background: white' %}
                 {% include 'workspace/atoms/content_break.html'%}
-            {% endwith %}
-            <div>
-                <p>Already have an account? <a href="#" class="dy_have_account">Sign in</a></p>
+                {% endwith %}
+                <p class="mb-0">Already have an account? <a href="{% url "login_view" %}" class="dy_have_account">Sign
+                        in</a></p>
             </div>
         </div>
     </div>
-</div>
 </div>

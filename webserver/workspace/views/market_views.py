@@ -3,7 +3,7 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from workspace import models as workspace_models
 from workspace.forms import UploadTowerCSVForm, WorkspaceForms
-from IspToolboxApp.models.MarketEvaluatorTooltips import TOOLTIPS
+from IspToolboxApp.views.MarketEvaluatorTooltips import TOOLTIPS
 
 
 class MarketEvaluatorView(LoginRequiredMixin, View):

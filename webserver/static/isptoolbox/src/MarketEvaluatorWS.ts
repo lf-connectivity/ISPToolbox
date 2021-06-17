@@ -170,6 +170,9 @@ class MarketEvaluatorWS {
 
         this.ws.onmessage = (e) => {
             const response = JSON.parse(e.data) as MarketEvaluatorWSResponse;
+            this.message_handlers.forEach((handler) => {
+                handler(response);
+            });
             // For now, only one active request at a time
             if (response.uuid !== this.currentRequestUUID) {
                 return;

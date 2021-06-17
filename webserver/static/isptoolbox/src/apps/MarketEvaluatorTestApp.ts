@@ -1,6 +1,5 @@
 import MarketEvaluatorWS, {MedianSpeedResponse, MarketEvalWSEvents, MedianIncomeResponse, BroadbandNowResponse, ServiceProvidersResponse, BuildingOverlaysResponse} from '../MarketEvaluatorWS';
 import PubSub from 'pubsub-js';
-import { over } from 'lodash';
 $(document).ready(function () {
 
     let num_buildings = 0;

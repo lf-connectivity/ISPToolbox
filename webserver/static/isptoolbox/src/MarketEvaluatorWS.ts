@@ -168,22 +168,12 @@ class MarketEvaluatorWS {
 
         this.ws.onopen = (e) => {
             this.setConnectionStatus(true);
-            // TODO: Do we want authentication on the websocket layer? 
-            // If not, need to remove this code on FE and BE sides the way it currently is setup
-            const authJson = {
-                credentials: 'default',
-            };
-            this.ws.send(JSON.stringify(authJson));
         };
 
         this.ws.onmessage = (e) => {
             const response = JSON.parse(e.data) as MarketEvaluatorWSResponse;
             // For now, only one active request at a time
             if (response.uuid !== this.currentRequestUUID) {
-                return;
-            }
-            // Abstract away mock auth for now
-            if (response.type === 'auth.token') {
                 return;
             }
             switch (response.type) {

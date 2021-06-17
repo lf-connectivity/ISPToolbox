@@ -4,6 +4,23 @@
  *
  **/
 
+import PubSub from 'pubsub-js';
+
+export enum MarketEvalWSEvents {
+    BUILDING_OVERLAYS_MSG = 'ws.building_overlays',
+    INCOME_MSG = 'ws.area_income',
+    SERVICE_PROV_MSG = 'ws.area_service_providers',
+    BROADBAND_NOW_MSG = 'ws.area_bbn',
+    SPEEDS_MSG = 'ws.area_speeds',
+    POLY_AREA_MSG = 'ws.area_size',
+    RDOF_GEOG_MSG = 'ws.geog_rdof',
+    ZIP_GEOG_MSG = 'ws.geog_zip',
+    COUNTY_GEOG_MSG = 'ws.geog_county',
+    CENSUSBLOCK_GEOG_MSG = 'ws.geog_censusblock',
+    CLOUDRF_VIEWSHED_MSG = 'ws.viewshed_cloudrf',
+    MKT_EVAL_WS_ERR = 'ws.mkt_eval_err',
+}
+
 export type RDOFGeojsonResponse = {
     error: number,
     cbgid?: string,
@@ -107,17 +124,18 @@ export type UUID = string;
  * http://stackoverflow.com/questions/105034
  */
 export function uuid(): UUID {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = (Math.random() * 16) | 0;
-    const v = c == 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = (Math.random() * 16) | 0;
+        const v = c == 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+    });
 }
 
 class MarketEvaluatorWS {
     ws: WebSocket;
     message_handlers: Array<MarketEvaluatorWSCallback>;
-    hash: string = '';
+    currentRequestUUID: UUID;
+
     constructor(message_handlers: Array<MarketEvaluatorWSCallback>) {
         this.message_handlers = message_handlers;
         this.connect();
@@ -159,14 +177,76 @@ class MarketEvaluatorWS {
         };
 
         this.ws.onmessage = (e) => {
-            const resp = JSON.parse(e.data) as MarketEvaluatorWSResponse;
-            // Abstract away mock auth for now
-            if (resp.type === 'auth.token') {
+            const response = JSON.parse(e.data) as MarketEvaluatorWSResponse;
+            // For now, only one active request at a time
+            if (response.uuid !== this.currentRequestUUID) {
                 return;
             }
-            this.message_handlers.forEach((handler) => {
-                handler(resp);
-            });
+            // Abstract away mock auth for now
+            if (response.type === 'auth.token') {
+                return;
+            }
+            switch (response.type) {
+                case 'building.overlays':
+                    const buildings: BuildingOverlaysResponse = response.value as BuildingOverlaysResponse;
+                    PubSub.publish(MarketEvalWSEvents.BUILDING_OVERLAYS_MSG, buildings);
+                    break;
+
+                case 'median.income':
+                    const medianIncome: MedianIncomeResponse = response.value as MedianIncomeResponse;
+                    PubSub.publish(MarketEvalWSEvents.INCOME_MSG, medianIncome);
+                    break;
+
+                case 'service.providers':
+                    const serviceProviders: ServiceProvidersResponse = response.value as ServiceProvidersResponse;
+                    PubSub.publish(MarketEvalWSEvents.SERVICE_PROV_MSG, serviceProviders);
+                    break;
+
+                case 'broadband.now':
+                    const broadBandNow: BroadbandNowResponse = response.value as BroadbandNowResponse;
+                    PubSub.publish(MarketEvalWSEvents.BROADBAND_NOW_MSG, broadBandNow);
+                    break;
+
+                case 'median.speeds':
+                    const medianSpeeds: MedianSpeedResponse = response.value as MedianSpeedResponse;
+                    PubSub.publish(MarketEvalWSEvents.SPEEDS_MSG, medianSpeeds);
+                    break;
+
+                case 'polygon.area':
+                    const polygonArea: number = parseFloat(response.value as string);
+                    PubSub.publish(MarketEvalWSEvents.POLY_AREA_MSG, polygonArea);
+                    break;
+
+                case 'grant.geog':
+                    const grantGeog: RDOFGeojsonResponse = response.value as RDOFGeojsonResponse;
+                    PubSub.publish(MarketEvalWSEvents.RDOF_GEOG_MSG, grantGeog);
+                    break;
+
+                case 'zip.geog':
+                    const zipGeog: ZipGeojsonResponse = response.value as ZipGeojsonResponse;
+                    PubSub.publish(MarketEvalWSEvents.ZIP_GEOG_MSG, zipGeog);
+                    break;
+
+                case 'county.geog':
+                    const countyGeog: CountyGeojsonResponse = response.value as CountyGeojsonResponse;
+                    PubSub.publish(MarketEvalWSEvents.COUNTY_GEOG_MSG, countyGeog);
+                    break;
+
+                case 'censusblock.geog':
+                    const censusBlockGeog: CensusBlockGeojsonResponse = response.value as CensusBlockGeojsonResponse;
+                    PubSub.publish(MarketEvalWSEvents.CENSUSBLOCK_GEOG_MSG, censusBlockGeog);
+                    break;
+
+                case 'tower.viewshed':
+                    const viewshed: ViewshedGeojsonResponse = response.value as ViewshedGeojsonResponse;
+                    PubSub.publish(MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG, viewshed);
+                    break;
+
+                case 'error':
+                    const err: string = response.value as string;
+                    PubSub.publish(MarketEvalWSEvents.MKT_EVAL_WS_ERR, err);
+                    break;
+            }
         };
     }
 
@@ -177,12 +257,21 @@ class MarketEvaluatorWS {
      */
     private sendJson(req: Object): UUID {
         const reqUUID: UUID = uuid();
+        this.currentRequestUUID = reqUUID;
         const reqWithUUID = {
             ...req,
             uuid: reqUUID,
-        }
+        };
         this.ws.send(JSON.stringify(reqWithUUID));
         return reqUUID;
+    }
+
+    /**
+     * Cancels the current websocket request by resetting the current uuid
+     * so the resulting event does not get fired. 
+     */
+    cancelCurrentRequest(): void {
+        this.currentRequestUUID = uuid();
     }
 
     /**

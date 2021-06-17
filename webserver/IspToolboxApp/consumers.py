@@ -1,12 +1,10 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
-from datetime import datetime
-import pytz
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from .tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
     genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getCensusBlockGeog, getTowerViewShed
 from NetworkComparison.tasks import genPolySize
-from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline, WebsocketToken
+from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from celery.task.control import revoke
 from asgiref.sync import sync_to_async
 from IspToolboxApp.util.validate_user_input import (
@@ -31,62 +29,11 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         pass
 
-    async def authenticate(self, content):
-        '''
-            Should be called by client onopen event as the first request after connecting to the websocket.
-            Attempts to connect via either a pre-existing token or credentials.
-            Params:
-                content: {
-                    token?<String>: A pre-existing token that the client is providing (they are probably reconnecting)
-                    credentials?<String>: Authentication credentials (will be implemented with Workspace
-                        as we currently don't require user authentication)
-                }
-        '''
-        if 'token' in content:
-            tokens = await sync_to_async(WebsocketToken.objects.filter)(token=content['token'])
-            # Check if token exists
-            if await sync_to_async(tokens.count)():
-                tokenObject = await sync_to_async(WebsocketToken.objects.get)(token=content['token'])
-                # Check if token is not expired
-                now = datetime.now()
-                expiry = tokenObject.expiry
-                now = pytz.UTC.localize(now)
-                if now < expiry:
-                    self.authenticated = True
-                    response = {
-                        'type': 'auth.token',
-                        'value': {
-                            'token': tokenObject.token,
-                        }
-                    }
-                else:
-                    response = {
-                        'type': 'auth.token',
-                        'value': {
-                            'error': "TokenExpired"
-                        }
-                    }
-                await self.send_json(response)
-
-        elif 'credentials' in content:
-            # TODO: Validate credentials before assigning a token when ISPToolbox Workspace is implemented
-            tokenObject = await sync_to_async(WebsocketToken.objects.create)()
-            self.authenticated = True
-            response = {
-                'type': 'auth.token',
-                'value': {
-                    'token': tokenObject.token,
-                }
-            }
-            await self.send_json(response)
-
     async def receive_json(self, content):
         '''
             Handles incoming json on the websocket and routes requests based on request_type param in JSON
         '''
-        if not self.authenticated:
-            await self.authenticate(content)
-        elif 'request_type' in content and 'uuid' in content:
+        if 'request_type' in content and 'uuid' in content:
             await self.funcSwitch[content['request_type']](content, content['uuid'])
 
     async def standard_polygon_request(self, content, uuid):

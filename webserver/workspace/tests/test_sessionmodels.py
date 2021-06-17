@@ -7,7 +7,7 @@ class WorkspaceSessionTestCase(WorkspaceBaseTestCase):
         """
         Test duplication method on workspace session
         """
-        new_session = self.test_session.duplicate()
+        new_session = self.test_session.duplicate(new_name="session dup")
         self.assertNotEqual(new_session.uuid, self.test_session.uuid)
         self.assertGreater(new_session.accesspointlocation_set.count(), 0)
         self.assertGreater(new_session.cpelocation_set.count(), 0)

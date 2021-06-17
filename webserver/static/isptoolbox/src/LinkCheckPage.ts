@@ -12,18 +12,13 @@ import {
 import { calculateLookVector, calculateLinkProfileFresnelPosition } from './HoverMoveLocation3DView';
 import { LinkMode, OverrideDirect, OverrideSimple, CPEDrawMode, combineStyles, load_custom_icons, APDrawMode} from './isptoolbox-mapbox-draw/index';
 import LidarAvailabilityLayer from './availabilityOverlay';
-import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
-import { LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
 import { Potree } from "./Potree.js";
 import { hasCookie } from "./utils/Cookie";
 import {getInitialFeatures} from './utils/MapDefaults';
-import {isUnitsUS, setCenterZoomPreferences} from './utils/MapPreferences';
+import {isUnitsUS} from './utils/MapPreferences';
 import PubSub from 'pubsub-js';
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
-//@ts-ignore
-import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
 import { getStreetAndAddressInfo, isBeta, validateHeight, validateLat, validateLng } from './LinkCheckUtils';
@@ -32,8 +27,8 @@ import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTo
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
 import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearchTool";
 import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
-import { parseFormLatitudeLongitude, parseSearchBarLatitudeLongitude } from "./utils/LatLngInputUtils";
-import { createSupplementaryPointsForCircle } from "./isptoolbox-mapbox-draw/RadiusModeUtils.js";
+import { parseFormLatitudeLongitude } from "./utils/LatLngInputUtils";
+import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -51,20 +46,13 @@ let potree = (window as any).Potree as null | typeof Potree;
 // @ts-ignore
 const THREE = window.THREE;
 
-const mapbox_draw_lib = window.MapboxDraw;
-
-//@ts-ignore
-const mapboxdrawstyles = combineStyles(styles, LOSCheckMapboxStyles);
 // @ts-ignore
 const MapboxGeocoder = window.MapboxGeocoder;
-//@ts-ignore
-const mapboxgl = window.mapboxgl;
 
 const HOVER_POINT_SOURCE = 'hover-point-link-source';
 const HOVER_POINT_LAYER = 'hover-point-link-layer';
 const SELECTED_LINK_SOURCE = 'selected-link-source';
 const SELECTED_LINK_LAYER = 'selected-link-layer';
-const LOWEST_LAYER_SOURCE = 'lowest_layer_source';
 export const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
 
 const center_freq_values: { [key: string]: number } = {
@@ -100,9 +88,44 @@ export enum UnitSystems {
     SI = 'SI',
 }
 
-export class LinkCheckPage {
-    map: MapboxGL.Map;
-    draw: MapboxDraw;
+// Direct draw override const
+/**
+ * Returns a function that reverse geocodes the given lngLat 
+ * and displays a popup at that location with the result 
+ * of the reverse geocode. Also queries for ptp links (non workspace)
+ * that share a vertex, to convert those ptp links to tower/customer
+ * 
+ * @param state mapbox state
+ * @param e event e
+ * @returns A function that calls reverseGeocode and displays the popup at the given coordinates.
+ */
+    const createPopupFromVertexEvent = function (state: any, e: any) {
+    return () => {
+        // Find which vertex the user has clicked. Works differently for drag and click vertex.
+        let selectedCoord: number;
+        if (e.featureTarget) {
+            selectedCoord = e.featureTarget.properties.coord_path;
+        }
+        else {
+            // Selected coordinate is the last item in selectedCoordPaths
+            selectedCoord = Number(state.selectedCoordPaths[state.selectedCoordPaths.length - 1])
+        }
+        let vertexLngLat = state.feature.coordinates[selectedCoord];
+        let mapboxClient = MapboxSDKClient.getInstance();
+        mapboxClient.reverseGeocode(vertexLngLat, (response: any) => {
+            let popup =
+                LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckVertexClickCustomerConnectPopup, vertexLngLat, response);
+            popup.setSelectedFeatureId(state.feature.id);
+            popup.setSelectedVertex(selectedCoord);
+            popup.show();
+        });
+    }
+}
+
+// Abort controller used abort showing popup 
+let popupAbortController: any = null;
+
+export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     selected_feature: any;
     link_chart: any;
     locationMarker: LinkCheckLocationSearchTool;
@@ -161,6 +184,42 @@ export class LinkCheckPage {
     geocoder: typeof MapboxGeocoder;
 
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
+        super({
+            draw_link: LinkMode(),
+            simple_select: OverrideSimple(),
+            direct_select: OverrideDirect({
+                onVertex: (state: any, e: any) => {
+                    // If it's a PtP link, open a popup if the user clicks on a vertex. This
+                    // is the only way I could think of of implementing this at a granular
+                    // sub-feature level.
+                    if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
+                        // onVertex is called onMouseDown. We need to wait until mouseup to show the popup
+                        // otherwise there will be a race condition with the reverseGeocode callback and the
+                        // time when the user releases the mouse.
+                        popupAbortController = new AbortController();
+
+                        // @ts-ignore
+                        window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
+                    }
+                },
+                dragVertex: (state: any, e: any) => {
+                    // Abort and replace popup event listener if we are still dragging.
+                    if (popupAbortController !== null && isBeta()) {
+                        popupAbortController.abort();
+                        popupAbortController = new AbortController();
+
+                        // @ts-ignore
+                        window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
+                    }
+                    if (!state.feature.properties.radius) {
+                        LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
+                    }
+                }
+            }),
+            draw_ap: APDrawMode(),
+            draw_cpe: CPEDrawMode()
+        });
+
         if (!(window as any).webgl2support) {
             potree = null;
         }
@@ -275,517 +334,7 @@ export class LinkCheckPage {
             });
         }
 
-        this.link_chart = createLinkChart(
-            this.link_chart,
-            this.highLightPointOnGround.bind(this),
-            this.moveLocation3DView.bind(this),
-            this.mouseLeave.bind(this),
-            this.setExtremes.bind(this),
-        );
-
-        this.profileWS = new LOSCheckWS(
-            this.networkID,
-            [this.ws_message_handler.bind(this)]
-        );
         this.link_status = new LinkStatus();
-
-        let tx_initial = parseFormLatitudeLongitude('#lat-lng-0');
-        let rx_initial = parseFormLatitudeLongitude('#lat-lng-1');
-        let initial_map_center = {'lon': 0, 'lat': 0};
-        if(tx_initial != null && rx_initial != null){
-            initial_map_center = {
-                'lon': (tx_initial[1] + rx_initial[1]) / 2.0,
-                'lat': (tx_initial[0] + rx_initial[0]) / 2.0
-            };
-        };
-        let initial_zoom = 17;
-
-        try {
-            // @ts-ignore
-            initial_map_center = window.ISPTOOLBOX_SESSION_INFO.initialMapCenter.coordinates;
-            // @ts-ignore
-            initial_zoom = window.ISPTOOLBOX_SESSION_INFO.initialMapZoom;
-        } catch (err) { }
-
-        this.map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
-            center: initial_map_center, // starting position [lng, lat]
-            zoom: initial_zoom, // starting zoom
-        });
-
-        this.map.on('load', () => {
-            // When map movement ends save where the user is looking
-            setCenterZoomPreferences(this.map);
-            load_custom_icons(this.map);
-
-            this.map.addSource(LOWEST_LAYER_SOURCE, {type: 'geojson', data : {type: 'FeatureCollection', features: []}});
-            this.map.addLayer({
-                'id': LOWEST_LAYER_LAYER,
-                'type': 'line',
-                'source': LOWEST_LAYER_SOURCE,
-                'layout': {
-                },
-                'paint': {
-                }
-            });
-
-            // Direct draw override const
-            /**
-             * Returns a function that reverse geocodes the given lngLat 
-             * and displays a popup at that location with the result 
-             * of the reverse geocode. Also queries for ptp links (non workspace)
-             * that share a vertex, to convert those ptp links to tower/customer
-             * 
-             * @param state mapbox state
-             * @param e event e
-             * @returns A function that calls reverseGeocode and displays the popup at the given coordinates.
-             */
-            const createPopupFromVertexEvent = function (state: any, e: any) {
-                return () => {
-                    // Find which vertex the user has clicked. Works differently for drag and click vertex.
-                    let selectedCoord: number;
-                    if (e.featureTarget) {
-                        selectedCoord = e.featureTarget.properties.coord_path;
-                    }
-                    else {
-                        // Selected coordinate is the last item in selectedCoordPaths
-                        selectedCoord = Number(state.selectedCoordPaths[state.selectedCoordPaths.length - 1])
-                    }
-                    let vertexLngLat = state.feature.coordinates[selectedCoord];
-                    let mapboxClient = MapboxSDKClient.getInstance();
-                    mapboxClient.reverseGeocode(vertexLngLat, (response: any) => {
-                        let popup =
-                            LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckVertexClickCustomerConnectPopup, vertexLngLat, response);
-                        popup.setSelectedFeatureId(state.feature.id);
-                        popup.setSelectedVertex(selectedCoord);
-                        popup.show();
-                    });
-                }
-            }
-
-            // Abort controller used abort showing popup 
-            let popupAbortController: any = null;
-
-            // Add a modified drawing control       
-            this.draw = new mapbox_draw_lib({
-                userProperties: true,
-                //@ts-ignore
-                modes: {...MapboxDraw.modes,
-                    draw_link: LinkMode(),
-                    simple_select: OverrideSimple(),
-                    direct_select: OverrideDirect({
-                        onVertex: (state: any, e: any) => {
-                            // If it's a PtP link, open a popup if the user clicks on a vertex. This
-                            // is the only way I could think of of implementing this at a granular
-                            // sub-feature level.
-                            if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
-                                // onVertex is called onMouseDown. We need to wait until mouseup to show the popup
-                                // otherwise there will be a race condition with the reverseGeocode callback and the
-                                // time when the user releases the mouse.
-                                popupAbortController = new AbortController();
-
-                                // @ts-ignore
-                                window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
-                            }
-                        },
-                        dragVertex: (state: any, e: any) => {
-                            // Abort and replace popup event listener if we are still dragging.
-                            if (popupAbortController !== null && isBeta()) {
-                                popupAbortController.abort();
-                                popupAbortController = new AbortController();
-
-                                // @ts-ignore
-                                window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
-                            }
-                            if (!state.feature.properties.radius) {
-                                LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
-                            }
-                        }
-                    }),
-                    draw_ap: APDrawMode(),
-                    draw_cpe: CPEDrawMode(),
-                },
-                displayControlsDefault: false,
-                controls: {
-                },
-                styles: mapboxdrawstyles
-            });
-
-            let latLngMatcher = (query: string) => {
-                let latLngMatch = parseSearchBarLatitudeLongitude(query);
-                if (latLngMatch == null) {
-                    return null;
-                }
-                let lngLatMatch = [latLngMatch[1], latLngMatch[0]];
-
-                return [
-                    {
-                        center: lngLatMatch,
-                        geometry: {
-                            type: 'Point',
-                            coordinates: lngLatMatch
-                        },
-                        place_name: `Coordinate Match, (${lngLatMatch[1]}, ${lngLatMatch[0]})`,
-                        place_type: ['coordinate'],
-                        properties: {},
-                        type: 'Feature'
-                    }
-                ]
-            };
-
-            this.geocoder = new MapboxGeocoder({
-                accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl,
-                marker: isBeta() ? false : true,
-                countries: 'us, pr',
-                localGeocoder: latLngMatcher,
-                placeholder: 'Search for an address'
-            });
-
-            // Popups
-            if (isBeta()) {
-                // Long press -> show popup on mobile
-                let onLongPress: any = undefined;
-                this.map.on('touchstart', (e: any) => {
-                    if (onLongPress) {
-                        clearTimeout(onLongPress);
-                    }
-                    onLongPress = setTimeout(() => {
-                        let mapboxClient = MapboxSDKClient.getInstance();
-                        let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
-                        mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                            let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
-                            popup.show();
-                        });
-                    }, 1000)
-                });
-
-                this.map.on('touchend', (e) => {
-                    if (onLongPress) {
-                        clearTimeout(onLongPress);
-                    }
-                });
-
-                this.map.on('touchcancel', (e) => {
-                    if (onLongPress) {
-                        clearTimeout(onLongPress);
-                    }
-                });
-
-                this.map.on('touchmove', (e) => {
-                    if (onLongPress) {
-                        clearTimeout(onLongPress);
-                    }
-                });
-            }
-
-            document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
-
-            this.map.addControl(this.draw, 'bottom-right');
-            const deleteControl = new MapboxCustomDeleteControl({
-                map: this.map,
-                draw: this.draw,
-            });
-
-            this.map.addControl(deleteControl, 'bottom-right');
-            this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
-
-
-            // Doesn't play nicely with mapbox draw yet mapboxjs v2.0.1
-            // this.map.addSource('mapbox-dem', {
-            //     "type": "raster-dem",
-            //     "url": "mapbox://mapbox.mapbox-terrain-dem-v1",
-            // });
-            // this.map.setTerrain({"source": "mapbox-dem"});
-
-            this.map.on('draw.update', this.updateRadioLocation.bind(this));
-            this.map.on('draw.create', this.updateRadioLocation.bind(this));
-
-            this.workspaceManager = new WorkspaceManager('#accessPointModal', this.map, this.draw, this.profileWS, getInitialFeatures());
-            this.locationMarker = new LinkCheckLocationSearchTool(this.map, this.workspaceManager, this.geocoder);
-
-            // instantiate singletons
-            new MapboxSDKClient(mapboxgl.accessToken);
-            new LinkCheckCustomerConnectPopup(this.map, this.draw, this.locationMarker);
-            new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
-            new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
-            new LinkCheckTowerPopup(this.map, this.draw);
-
-
-            const prioritizeDirectSelect = function ({ features }: any) {
-                if (features.length == 1 && features[0].geometry.type !== 'Point') {
-                    this.draw.changeMode('direct_select', {
-                        featureId: features[0].id
-                    });
-                    this.map.fire('draw.modechange', {mode:  'direct_select', featureId: features[0].id});
-                }
-            }
-            this.map.on('draw.selectionchange', this.updateRadioLocation.bind(this));
-            this.map.on('draw.selectionchange', prioritizeDirectSelect.bind(this));
-            this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
-            this.map.on('draw.selectionchange', this.showInputs.bind(this));
-            this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
-            this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
-            PubSub.subscribe(WorkspaceEvents.AP_SELECTED, this.showLinkCheckProfile.bind(this));
-            PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
-            PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
-            PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));
-
-            window.addEventListener('keydown', (event) => {
-                const featureCollection = this.draw.getSelected();
-                if (event.target === this.map.getCanvas() && (event.key === "Backspace" || event.key === "Delete")) {
-                    featureCollection.features.forEach((feat:any) => {this.draw.delete(feat.id)});
-                    this.map.fire('draw.delete', {features: featureCollection.features});
-                }
-            });
-
-            this.lidarAvailabilityLayer = new LidarAvailabilityLayer(this.map);
-
-
-            const tx_coords = parseFormLatitudeLongitude('#lat-lng-0');
-            const rx_coords = parseFormLatitudeLongitude('#lat-lng-1');
-            if(tx_coords != null && rx_coords != null)
-            {
-                const [tx_lat, tx_lng] = tx_coords;
-                const [rx_lat, rx_lng] = rx_coords;
-                const features = this.draw.add({
-                    "type": 'Feature',
-                    "geometry": {
-                        "type": "LineString",
-                        "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
-                    },
-                    "properties": {
-                        "meta": "radio_link",
-                        'radio_label_0': 'radio_0',
-                        'radio_label_1': 'radio_1',
-                        'radio_color': '#00FF00',
-                        'radio0hgt': parseFloat(String($('#hgt-0').val())),
-                        'radio1hgt': parseFloat(String($('#hgt-1').val())),
-                        'freq': DEFAULT_LINK_FREQ,
-                    }
-                });
-                this.selectedFeatureID = features.length ? features[0] : null;
-
-                this.map.addSource(SELECTED_LINK_SOURCE, {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': [
-                            {
-                                'type': 'Feature',
-                                'properties': {},
-                                'geometry': {
-                                    "type": "LineString",
-                                    "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
-                                },
-                            }
-                        ]
-                    }
-                });
-            } else {
-                this.map.addSource(SELECTED_LINK_SOURCE, {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'FeatureCollection',
-                        'features': []
-                    }
-                });
-            }
-            // Add Data Sources to Help User Understand Map
-
-            // Selected Link Layer
-            this.map.addLayer({
-                'id': SELECTED_LINK_LAYER,
-                'type': 'line',
-                'source': SELECTED_LINK_SOURCE,
-                'layout': {
-                    'line-cap': 'round'
-                },
-                'paint': {
-                    'line-color': '#FFFFFF',
-                    'line-width': 7
-                }
-            }, LOWEST_LAYER_LAYER);
-            this.map.addSource(HOVER_POINT_SOURCE, {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': []
-                }
-            });
-
-            // HOVER POINT MAP LAYERS
-            this.map.addLayer({
-                'id': `${HOVER_POINT_LAYER}_halo`,
-                'type': 'circle',
-                'source': HOVER_POINT_SOURCE,
-                'paint': {
-                    'circle-radius': 7,
-                    'circle-color': '#FFFFFF'
-                }
-            }, LOWEST_LAYER_LAYER);
-
-            this.map.addLayer({
-                'id': HOVER_POINT_LAYER,
-                'type': 'circle',
-                'source': HOVER_POINT_SOURCE,
-                'paint': {
-                    'circle-radius': 5,
-                    'circle-color': '#3887be'
-                }
-            }, LOWEST_LAYER_LAYER);
-
-
-            this.updateLinkProfile();
-            this.link_chart.redraw();
-
-
-            $('#add-link-btn').click(
-                () => {
-                    //@ts-ignore
-                    this.draw.changeMode('draw_link');
-                    this.map.fire('draw.modechange', {mode: 'draw_link'}); }
-            )
-            $('#add-ap-btn').click(
-                () => {
-                    //@ts-ignore
-                    this.draw.changeMode('draw_ap');
-                    this.map.fire('draw.modechange', {mode: 'draw_ap'}); }
-            )
-            $('#add-cpe-btn').click(
-                () => {
-                    //@ts-ignore
-                    this.draw.changeMode('draw_cpe');
-                    this.map.fire('draw.modechange', {mode: 'draw_cpe'}); }
-            )
-
-            // Update Callbacks for Radio Heights
-            $('#hgt-0').change(
-                _.debounce((e: any) => {
-                    let height = validateHeight(parseFloat(String($('#hgt-0').val())), 'hgt-0');
-                    this.updateLinkChart(true);
-                    if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
-                        if (this.workspaceLinkSelected()) {
-                            // @ts-ignore
-                            let link = this.draw.get(this.selectedFeatureID);
-                            let ap = this.workspaceManager.features[link?.properties?.ap];
-                            ap.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
-                            ap.update(ap.featureData, (resp: any) => {
-                                this.map.fire('draw.update', {features: [ap.featureData]});
-                            });
-                        }
-                        else {
-                            this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height)
-                        }
-                    }
-                }, 500)
-            );
-            $('#hgt-1').change(
-                _.debounce((e: any) => {
-                    let height = validateHeight(parseFloat(String($('#hgt-1').val())), 'hgt-1');
-                    this.updateLinkChart(true);
-                    if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
-                        if (this.workspaceLinkSelected()) {
-                            // @ts-ignore
-                            let link = this.draw.get(this.selectedFeatureID);
-                            let cpe = this.workspaceManager.features[link?.properties?.cpe];
-                            cpe.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
-                            cpe.update(cpe.featureData, (resp: any) => {
-                                this.map.fire('draw.update', {features: [cpe.featureData]});
-                            });
-                        }
-                        else {
-                            this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height)
-                        }
-                    }
-                }, 500)
-            );
-            const createRadioCoordinateChangeCallback = (htmlId: string, coord1: number) => {
-                $(htmlId).on('change',
-                    _.debounce(() => {
-                        if (this.selectedFeatureID != null) {
-                            const feat = this.draw.get(this.selectedFeatureID);
-                            let coords = parseFormLatitudeLongitude(htmlId);
-                            if (coords != null){
-                                coords = [coords[1], coords[0]];
-                                if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
-                                    if (this.workspaceLinkSelected()) {
-                                        // @ts-ignore
-                                        let point = this.workspaceManager.features[coord1 === 0 ? feat.properties.ap : feat.properties.cpe];
-
-                                        // @ts-ignore
-                                        point.featureData.geometry.coordinates = coords;
-                                        this.draw.add(point.featureData);
-                                        this.map.fire('draw.update', { features: [point.featureData]})
-                                    }
-                                    else {
-                                        //@ts-ignore
-                                        feat.geometry.coordinates[coord1] = coords;
-                                        this.draw.add(feat);
-                                        const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
-                                        if (selected_link_source.type === 'geojson') {
-                                            //@ts-ignore
-                                            selected_link_source.setData(feat.geometry);
-                                        }
-                                    }
-                                    this.updateLinkProfile();
-                                    this.map.setCenter(coords);
-                                }
-                            }
-                        }
-                    }, 500)
-                );
-            }
-            createRadioCoordinateChangeCallback('#lat-lng-0', 0);
-            createRadioCoordinateChangeCallback('#lat-lng-1', 1);
-
-            $('#3D-view-btn').click(() => {
-                if (this.currentView === 'map') {
-                    $('#3D-view-btn').addClass('btn-primary');
-                    $('#3D-view-btn').removeClass('btn-secondary');
-                    $('#map-view-btn').addClass('btn-secondary');
-                    $('#map-view-btn').removeClass('btn-primary');
-                    $('#3d-view-container').removeClass('d-none');
-                    $('#map').addClass('d-none');
-                    $('#3d-controls').removeClass('d-none');
-                    this.currentView = '3d';
-
-                    if (!this.animationPlaying) {
-                        this.highlightCurrentPosition(true);
-                    }
-                    // If they haven't seen the tooltip yet, expand it by default for 30 seconds
-                    if (!hasCookie("losHelpSeen")) {
-                        // Set cookie so tooltip is closed next time they visit
-                        const now = new Date();
-                        const exp = now.getTime() + 365*24*60*60*1000;
-                        now.setTime(exp);
-                        document.cookie = "losHelpSeen=true; Expires=" + now.toUTCString() + '; SameSite=None; Secure; path=/;';
-                        // Set the tooltip copy to visible, hide after 10s
-                        $('.help-3D-copy').css({"opacity": "1", "visibility": "visible"});
-                        setTimeout(() => {
-                            $('.help-3D-copy').css({"opacity": "0", "visibility": "hidden"})
-                        }, 10000);
-                    }
-                }
-            });
-            $('#map-view-btn').click(() => {
-                if (this.currentView === '3d') {
-                    $('#3D-view-btn').addClass('btn-secondary');
-                    $('#3D-view-btn').removeClass('btn-primary');
-                    $('#map-view-btn').addClass('btn-primary');
-                    $('#map-view-btn').removeClass('btn-secondary');
-                    $('#3d-view-container').addClass('d-none');
-                    $('#map').removeClass('d-none');
-                    if (this.map != null) {
-                        this.map.resize();
-                    }
-                    $('#3d-controls').addClass('d-none');
-                    this.currentView = 'map';
-                    this.highlightCurrentPosition(false);
-                }
-            });
-        });
 
         // Add an event listener to handle camera updates.
         // @ts-ignore
@@ -904,6 +453,349 @@ export class LinkCheckPage {
             }
         });
     };
+
+    initMapCenterAndZoom() {
+        let tx_initial = parseFormLatitudeLongitude('#lat-lng-0');
+        let rx_initial = parseFormLatitudeLongitude('#lat-lng-1');
+        let initial_map_center = {'lon': 0, 'lat': 0};
+        if(tx_initial != null && rx_initial != null){
+            return {
+                initial_map_center: {
+                    'lon': (tx_initial[1] + rx_initial[1]) / 2.0,
+                    'lat': (tx_initial[0] + rx_initial[0]) / 2.0
+                },
+                initial_zoom: 17
+            }
+        }
+        else {
+            return super.initMapCenterAndZoom();
+        }
+    }
+
+    onMapLoad() {
+        // Popups
+        if (isBeta()) {
+            // Long press -> show popup on mobile
+            let onLongPress: any = undefined;
+            this.map.on('touchstart', (e: any) => {
+                if (onLongPress) {
+                    clearTimeout(onLongPress);
+                }
+                onLongPress = setTimeout(() => {
+                    let mapboxClient = MapboxSDKClient.getInstance();
+                    let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+                    mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
+                        popup.show();
+                    });
+                }, 1000)
+            });
+
+            this.map.on('touchend', (e) => {
+                if (onLongPress) {
+                    clearTimeout(onLongPress);
+                }
+            });
+
+            this.map.on('touchcancel', (e) => {
+                if (onLongPress) {
+                    clearTimeout(onLongPress);
+                }
+            });
+
+            this.map.on('touchmove', (e) => {
+                if (onLongPress) {
+                    clearTimeout(onLongPress);
+                }
+            });
+        }
+
+        // Doesn't play nicely with mapbox draw yet mapboxjs v2.0.1
+        // this.map.addSource('mapbox-dem', {
+        //     "type": "raster-dem",
+        //     "url": "mapbox://mapbox.mapbox-terrain-dem-v1",
+        // });
+        // this.map.setTerrain({"source": "mapbox-dem"});
+
+        this.map.on('draw.update', this.updateRadioLocation.bind(this));
+        this.map.on('draw.create', this.updateRadioLocation.bind(this));
+
+        this.profileWS = new LOSCheckWS(
+            this.networkID,
+            [this.ws_message_handler.bind(this)]
+        );
+
+        this.link_chart = createLinkChart(
+            this.link_chart,
+            this.highLightPointOnGround.bind(this),
+            this.moveLocation3DView.bind(this),
+            this.mouseLeave.bind(this),
+            this.setExtremes.bind(this),
+        );
+
+        this.workspaceManager = new WorkspaceManager('#accessPointModal', this.map, this.draw, this.profileWS, getInitialFeatures());
+        this.locationMarker = new LinkCheckLocationSearchTool(this.map, this.workspaceManager, this.geocoder);
+
+        // instantiate singletons
+        new LinkCheckCustomerConnectPopup(this.map, this.draw, this.locationMarker);
+        new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
+        new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
+        new LinkCheckTowerPopup(this.map, this.draw);
+
+
+        const prioritizeDirectSelect = function ({ features }: any) {
+            if (features.length == 1 && features[0].geometry.type !== 'Point') {
+                this.draw.changeMode('direct_select', {
+                    featureId: features[0].id
+                });
+                this.map.fire('draw.modechange', {mode:  'direct_select', featureId: features[0].id});
+            }
+        }
+        this.map.on('draw.selectionchange', this.updateRadioLocation.bind(this));
+        this.map.on('draw.selectionchange', prioritizeDirectSelect.bind(this));
+        this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
+        this.map.on('draw.selectionchange', this.showInputs.bind(this));
+        this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
+        this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
+        PubSub.subscribe(WorkspaceEvents.AP_SELECTED, this.showLinkCheckProfile.bind(this));
+        PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
+        PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
+        PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));
+
+        window.addEventListener('keydown', (event) => {
+            const featureCollection = this.draw.getSelected();
+            if (event.target === this.map.getCanvas() && (event.key === "Backspace" || event.key === "Delete")) {
+                featureCollection.features.forEach((feat:any) => {this.draw.delete(feat.id)});
+                this.map.fire('draw.delete', {features: featureCollection.features});
+            }
+        });
+
+        this.lidarAvailabilityLayer = new LidarAvailabilityLayer(this.map);
+
+
+        const tx_coords = parseFormLatitudeLongitude('#lat-lng-0');
+        const rx_coords = parseFormLatitudeLongitude('#lat-lng-1');
+        if(tx_coords != null && rx_coords != null)
+        {
+            const [tx_lat, tx_lng] = tx_coords;
+            const [rx_lat, rx_lng] = rx_coords;
+            const features = this.draw.add({
+                "type": 'Feature',
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
+                },
+                "properties": {
+                    "meta": "radio_link",
+                    'radio_label_0': 'radio_0',
+                    'radio_label_1': 'radio_1',
+                    'radio_color': '#00FF00',
+                    'radio0hgt': parseFloat(String($('#hgt-0').val())),
+                    'radio1hgt': parseFloat(String($('#hgt-1').val())),
+                    'freq': DEFAULT_LINK_FREQ,
+                }
+            });
+            this.selectedFeatureID = features.length ? features[0] : null;
+
+            this.map.addSource(SELECTED_LINK_SOURCE, {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'properties': {},
+                            'geometry': {
+                                "type": "LineString",
+                                "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
+                            },
+                        }
+                    ]
+                }
+            });
+        } else {
+            this.map.addSource(SELECTED_LINK_SOURCE, {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            });
+        }
+        // Add Data Sources to Help User Understand Map
+
+        // Selected Link Layer
+        this.map.addLayer({
+            'id': SELECTED_LINK_LAYER,
+            'type': 'line',
+            'source': SELECTED_LINK_SOURCE,
+            'layout': {
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-color': '#FFFFFF',
+                'line-width': 7
+            }
+        }, LOWEST_LAYER_LAYER);
+        this.map.addSource(HOVER_POINT_SOURCE, {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': []
+            }
+        });
+
+        // HOVER POINT MAP LAYERS
+        this.map.addLayer({
+            'id': `${HOVER_POINT_LAYER}_halo`,
+            'type': 'circle',
+            'source': HOVER_POINT_SOURCE,
+            'paint': {
+                'circle-radius': 7,
+                'circle-color': '#FFFFFF'
+            }
+        }, LOWEST_LAYER_LAYER);
+
+        this.map.addLayer({
+            'id': HOVER_POINT_LAYER,
+            'type': 'circle',
+            'source': HOVER_POINT_SOURCE,
+            'paint': {
+                'circle-radius': 5,
+                'circle-color': '#3887be'
+            }
+        }, LOWEST_LAYER_LAYER);
+
+
+        this.updateLinkProfile();
+        this.link_chart.redraw();
+
+        // Update Callbacks for Radio Heights
+        $('#hgt-0').change(
+            _.debounce((e: any) => {
+                let height = validateHeight(parseFloat(String($('#hgt-0').val())), 'hgt-0');
+                this.updateLinkChart(true);
+                if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
+                    if (this.workspaceLinkSelected()) {
+                        // @ts-ignore
+                        let link = this.draw.get(this.selectedFeatureID);
+                        let ap = this.workspaceManager.features[link?.properties?.ap];
+                        ap.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
+                        ap.update(ap.featureData, (resp: any) => {
+                            this.map.fire('draw.update', {features: [ap.featureData]});
+                        });
+                    }
+                    else {
+                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height)
+                    }
+                }
+            }, 500)
+        );
+        $('#hgt-1').change(
+            _.debounce((e: any) => {
+                let height = validateHeight(parseFloat(String($('#hgt-1').val())), 'hgt-1');
+                this.updateLinkChart(true);
+                if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
+                    if (this.workspaceLinkSelected()) {
+                        // @ts-ignore
+                        let link = this.draw.get(this.selectedFeatureID);
+                        let cpe = this.workspaceManager.features[link?.properties?.cpe];
+                        cpe.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
+                        cpe.update(cpe.featureData, (resp: any) => {
+                            this.map.fire('draw.update', {features: [cpe.featureData]});
+                        });
+                    }
+                    else {
+                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height)
+                    }
+                }
+            }, 500)
+        );
+        const createRadioCoordinateChangeCallback = (htmlId: string, coord1: number) => {
+            $(htmlId).on('change',
+                _.debounce(() => {
+                    if (this.selectedFeatureID != null) {
+                        const feat = this.draw.get(this.selectedFeatureID);
+                        let coords = parseFormLatitudeLongitude(htmlId);
+                        if (coords != null){
+                            coords = [coords[1], coords[0]];
+                            if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
+                                if (this.workspaceLinkSelected()) {
+                                    // @ts-ignore
+                                    let point = this.workspaceManager.features[coord1 === 0 ? feat.properties.ap : feat.properties.cpe];
+
+                                    // @ts-ignore
+                                    point.featureData.geometry.coordinates = coords;
+                                    this.draw.add(point.featureData);
+                                    this.map.fire('draw.update', { features: [point.featureData]})
+                                }
+                                else {
+                                    //@ts-ignore
+                                    feat.geometry.coordinates[coord1] = coords;
+                                    this.draw.add(feat);
+                                    const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+                                    if (selected_link_source.type === 'geojson') {
+                                        //@ts-ignore
+                                        selected_link_source.setData(feat.geometry);
+                                    }
+                                }
+                                this.updateLinkProfile();
+                                this.map.setCenter(coords);
+                            }
+                        }
+                    }
+                }, 500)
+            );
+        }
+        createRadioCoordinateChangeCallback('#lat-lng-0', 0);
+        createRadioCoordinateChangeCallback('#lat-lng-1', 1);
+
+        $('#3D-view-btn').click(() => {
+            if (this.currentView === 'map') {
+                $('#3D-view-btn').addClass('btn-primary');
+                $('#3D-view-btn').removeClass('btn-secondary');
+                $('#map-view-btn').addClass('btn-secondary');
+                $('#map-view-btn').removeClass('btn-primary');
+                $('#3d-view-container').removeClass('d-none');
+                $('#map').addClass('d-none');
+                $('#3d-controls').removeClass('d-none');
+                this.currentView = '3d';
+
+                if (!this.animationPlaying) {
+                    this.highlightCurrentPosition(true);
+                }
+                // If they haven't seen the tooltip yet, expand it by default for 30 seconds
+                if (!hasCookie("losHelpSeen")) {
+                    // Set cookie so tooltip is closed next time they visit
+                    const now = new Date();
+                    const exp = now.getTime() + 365*24*60*60*1000;
+                    now.setTime(exp);
+                    document.cookie = "losHelpSeen=true; Expires=" + now.toUTCString() + '; SameSite=None; Secure; path=/;';
+                    // Set the tooltip copy to visible, hide after 10s
+                    $('.help-3D-copy').css({"opacity": "1", "visibility": "visible"});
+                    setTimeout(() => {
+                        $('.help-3D-copy').css({"opacity": "0", "visibility": "hidden"})
+                    }, 10000);
+                }
+            }
+        });
+        $('#map-view-btn').click(() => {
+            if (this.currentView === '3d') {
+                $('#3D-view-btn').addClass('btn-secondary');
+                $('#3D-view-btn').removeClass('btn-primary');
+                $('#map-view-btn').addClass('btn-primary');
+                $('#map-view-btn').removeClass('btn-secondary');
+                $('#3d-view-container').addClass('d-none');
+                $('#map').removeClass('d-none');
+                if (this.map != null) {
+                    this.map.resize();
+                }
+                $('#3d-controls').addClass('d-none');
+                this.currentView = 'map';
+                this.highlightCurrentPosition(false);
+            }
+        });
+    }
 
     workspaceLinkSelected(): boolean {
         if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {

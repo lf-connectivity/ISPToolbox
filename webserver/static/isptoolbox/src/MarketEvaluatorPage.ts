@@ -1,37 +1,28 @@
 // Create new mapbox Map
 import * as MapboxGL from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
-//@ts-ignore
-import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
+import { MarketEvaluatorSidebarManager } from './organisms/MarketEvaluatorSidebarManager';
 
-//@ts-ignore
-const mapboxgl = window.mapboxgl;
+import { LinkMode, OverrideDirect, OverrideSimple, APDrawMode, OverrideDrawPolygon } from './isptoolbox-mapbox-draw/index';
+import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
 
-const mapbox_draw_lib = window.MapboxDraw;
-
-export class MarketEvaluatorPage {
+export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
     draw: MapboxDraw;
 
     constructor() {
-        let initial_map_center = {'lon': 0, 'lat': 0};
-        let initial_zoom = 17;
-
-        try {
-            // @ts-ignore
-            initial_map_center = window.ISPTOOLBOX_SESSION_INFO.initialMapCenter.coordinates;
-            // @ts-ignore
-            initial_zoom = window.ISPTOOLBOX_SESSION_INFO.initialMapZoom;
-        } catch (err) { }
-
-        this.map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
-            center: initial_map_center, // starting position [lng, lat]
-            zoom: initial_zoom, // starting zoom
+        super({
+            draw_link: LinkMode(),
+            simple_select: OverrideSimple(),
+            direct_select: OverrideDirect(),
+            draw_ap: APDrawMode(),
+            draw_polygon: OverrideDrawPolygon()
         });
 
-        this.map.on('load', () => {
-        });
+        MarketEvaluatorSidebarManager.getInstance().initializePopovers();
+    }
+
+    onMapLoad() {
+        // stuff might go here later
     }
 }

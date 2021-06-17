@@ -14,25 +14,17 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     marketEvalWS: MarketEvaluatorWS;
 
     constructor() {
-        let initial_map_center = { 'lon': 0, 'lat': 0 };
-        let initial_zoom = 17;
-
-        try {
-            // @ts-ignore
-            initial_map_center = window.ISPTOOLBOX_SESSION_INFO.initialMapCenter.coordinates;
-            // @ts-ignore
-            initial_zoom = window.ISPTOOLBOX_SESSION_INFO.initialMapZoom;
-        } catch (err) { }
-
-        this.map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
-            center: initial_map_center, // starting position [lng, lat]
-            zoom: initial_zoom, // starting zoom
+        super({
+            draw_link: LinkMode(),
+            simple_select: OverrideSimple(),
+            direct_select: OverrideDirect(),
+            draw_ap: APDrawMode(),
+            draw_polygon: OverrideDrawPolygon()
         });
 
-        this.map.on('load', () => {
-        });
+        this.marketEvalWS = new MarketEvaluatorWS([]);
+        MarketEvaluatorSidebarManager.getInstance().initializePopovers();
+    }
 
         this.marketEvalWS = new MarketEvaluatorWS([]);
     }

@@ -4,7 +4,6 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
 //@ts-ignore
 import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
-import { initButtons } from "./molecules/InitChangeDrawModeButtons";
 import { LinkMode, OverrideDirect, OverrideSimple, CPEDrawMode, combineStyles, load_custom_icons, APDrawMode} from './isptoolbox-mapbox-draw/index';
 import { LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
 import MapboxCustomDeleteControl from "./MapboxCustomDeleteControl";

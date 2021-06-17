@@ -1,64 +1,71 @@
+{% load i18n %}
 {% load static %}
 
 <div class="p-5" style="
 display: grid;
 gap: 1rem;
-grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr))">
+grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  justify-content: space-evenly;
+  justify-items: center;
+  align-content: space-evenly;">
     <div class="card" style="width: 18rem;">
         <a href="{% url 'edit_account_network' %}">
-            <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
+            <img class="card-img-top" src='{% static "mmwave/card_network.jpg" %}' alt="Card image cap">
         </a>
-        <div class="card-body">
-            <a href="{% url 'edit_account_network' %}">
-                <h5 class="card-title">Network</h5>
+        <div class="card-body justify-content-between d-flex flex-column">
+            <p class="card-text">{% translate "Evaluate PtP Links and tower coverage using LiDAR Data"%}</p>
+            <a href="{% url 'edit_account_network' %}" class="btn btn-primary isptoolbox-btn">
+                {% translate "Launch Network Tool"%}
             </a>
-            <p class="card-text">Evaluate PtP Links using LiDAR Data</p>
         </div>
     </div>
     <div class="card" style="width: 18rem;">
         <a href="{% url 'market_eval_entry' %}">
-            <img class="card-img-top" src='{% static "mmwave/market_isptoolboxpro.gif" %}' alt="Card image cap">
+            <img class="card-img-top" src='{% static "mmwave/card_market.jpg" %}' alt="Card image cap">
         </a>
-        <div class="card-body">
-            <a href="{% url 'market_eval_entry' %}">
-                <h5 class="card-title">Market</h5>
+        <div class="card-body justify-content-between d-flex flex-column">
+            <p class="card-text">
+                {% translate "Evaluate new or existing markets and determine which technologies are most applicable."%}
+            </p>
+            <a href="{% url 'market_eval_entry' %}" class="btn btn-primary isptoolbox-btn">
+                {% translate "Launch Market Sizing Tool"%}
             </a>
-            <p class="card-text">Evaluate new or existing markets and determine which technologies are most
-                applicable.</p>
         </div>
     </div>
     <div class="card" style="width: 18rem;">
         <a href="{% url 'multiplayer_demo' %}">
             <img class="card-img-top" src='{% static "mmwave/multiplayer.gif" %}' alt="Card Multiplayer Cap">
         </a>
-        <div class="card-body">
-            <a href="{% url 'multiplayer_demo' %}">
-                <h5 class="card-title">Multiplayer</h5>
+        <div class="card-body justify-content-between d-flex flex-column">
+            <p class="card-text">{% translate "Collaborate with your co-workers in real-time."%}</p>
+            <a href="{% url 'multiplayer_demo' %}"
+                class="btn btn-primary isptoolbox-btn">{% translate "Launch Multiplayer"%}
             </a>
-            <p class="card-text">Collaborate with your co-workers in real-time.</p>
         </div>
     </div>
     <div class="card" style="width: 18rem;">
         <a href="{% url 'swagger-ui' %}">
             <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
         </a>
-        <div class="card-body">
-            <a href="{% url 'swagger-ui' %}">
-                <h5 class="card-title">APIs</h5>
+        <div class="card-body justify-content-between d-flex flex-column">
+            <p class="card-text">
+                {% translate "Integrate and automate your business processes with ISP Toolbox's APIs."%}</p>
+            <a href="{% url 'swagger-ui' %}" class="btn btn-primary isptoolbox-btn">
+                {% translate "Launch API Browser"%}
             </a>
-            <p class="card-text">Integrate and automate your business processes with ISP Toolbox's APIs.</p>
         </div>
     </div>
 </div>
 <div class="container pt-3 text-center">
     {% if showSurvey %}
     <div class="alert alert-primary" role="alert">
-        <a href="{% url 'optional_info' %}">Take a quick survey to help us make ISP Toolbox better</a>
+        <a href="{% url 'optional_info' %}">{% translate "Take a quick survey to help us make ISP Toolbox better"%}</a>
     </div>
     {% endif %}
     <div class="alert alert-primary" role="alert">
         {% now "Y" as current_year %}
         {% now "m" as current_month %}
-        <a href="{% url 'demo-latest_gis' year=current_year month=current_month %}">See the latest GIS data</a>
+        <a
+            href="{% url 'demo-latest_gis' year=current_year month=current_month %}">{% translate "See the latest GIS data"%}</a>
     </div>
 </div>

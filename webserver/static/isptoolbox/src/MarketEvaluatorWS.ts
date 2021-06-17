@@ -7,6 +7,7 @@
 import PubSub from 'pubsub-js';
 
 export enum MarketEvalWSEvents {
+    MKT_EVAL_WS_CONNECTED = 'ws.mkt_eval_connected',
     BUILDING_OVERLAYS_MSG = 'ws.building_overlays',
     INCOME_MSG = 'ws.area_income',
     SERVICE_PROV_MSG = 'ws.area_service_providers',
@@ -56,7 +57,7 @@ type MedianSpeed = {
     'Download (Mbit/s)': string,
     'Upload (Mbit/s)': string,
     Zipcode: string,
-    pct_area?: string,
+    pct_area: string,
 };
 
 export type MedianSpeedResponse = Array<MedianSpeed>;
@@ -87,11 +88,6 @@ export type MedianIncomeResponse = {
     error?: string,
 };
 
-type AuthenticationResponse = {
-    token?: string,
-    error?: string,
-};
-
 type MarketEvaluatorWSValue =
     | MedianSpeedResponse
     | ServiceProvidersResponse
@@ -102,8 +98,9 @@ type MarketEvaluatorWSValue =
     | ZipGeojsonResponse
     | CountyGeojsonResponse
     | ViewshedGeojsonResponse
-    | AuthenticationResponse
     | string;
+
+type GeoArea = GeoJSON.FeatureCollection | GeoJSON.Feature | GeoJSON.GeometryObject;
 
 export type MarketEvaluatorWSResponse = {
     type: string,
@@ -168,6 +165,7 @@ class MarketEvaluatorWS {
 
         this.ws.onopen = (e) => {
             this.setConnectionStatus(true);
+            PubSub.publish(MarketEvalWSEvents.MKT_EVAL_WS_CONNECTED);
         };
 
         this.ws.onmessage = (e) => {
@@ -241,6 +239,29 @@ class MarketEvaluatorWS {
     }
 
     /**
+     * Converts a geo area to a Geometry Object
+     * @param obj The object to convert to GeometryObject
+     * @returns Geometry Object
+     */
+    convertGeoJSONObject(obj: GeoArea): GeoJSON.GeometryObject {
+        if (obj.type === 'FeatureCollection') {
+            const geometries = obj.features
+                .map(f => {
+                    return f.geometry;
+                })
+                .filter(Boolean);
+            return {
+                type: 'GeometryCollection',
+                geometries,
+            };
+        } else if (obj.type === 'Feature') {
+            return obj.geometry;
+        } else {
+            return obj;
+        }
+    }
+
+    /**
      * Sends JSON object on the websocket, attaching an appropriate UUID to the request and returning it.
      * @param req Json Object
      * @returns The request-identifying UUID sent with the request
@@ -269,10 +290,10 @@ class MarketEvaluatorWS {
      * @param include GeoJSON area of interest
      * @returns The request-identifying UUID
      */
-    sendPolygonRequest(include: GeoJSON.FeatureCollection): UUID {
+    sendPolygonRequest(include: GeoArea): UUID {
         return this.sendJson({
             request_type: 'standard_polygon',
-            include,
+            include: this.convertGeoJSONObject(include),
         });
     }
 

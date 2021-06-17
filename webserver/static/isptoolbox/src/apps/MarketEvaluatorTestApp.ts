@@ -1,132 +1,70 @@
-$(document).ready(function() {
-    const sample_websocket = new WebSocket("ws://localhost:8000/ws/market-evaluator/");
-    
-    sample_websocket.onopen = (event: Event) => {
-        authenticate();
-    }
-    sample_websocket.onmessage = (event: MessageEvent) => {
-        const response = (JSON.parse(event.data) as MarketEvaluatorEvent);
-        console.log(response);
-        handle_event(response);
-    }
-    
-    let token = '';
+import MarketEvaluatorWS, {MedianSpeedResponse, MarketEvalWSEvents, MedianIncomeResponse, BroadbandNowResponse, ServiceProvidersResponse, BuildingOverlaysResponse} from '../MarketEvaluatorWS';
+import PubSub from 'pubsub-js';
+import { over } from 'lodash';
+$(document).ready(function () {
+
     let num_buildings = 0;
-    
-    type MarketEvaluatorEvent = AuthenticationEvent | BuildingEvent | AreaEvent | IncomeEvent | SpeedsEvent | ProvidersEvent | BroadbandNowEvent;
-    
-    type AuthenticationEvent = {
-        type: 'auth.token';
-        value: {
-            token: string,
-        }
-    }
-    
-    type BuildingEvent = {
-        type: 'building.overlays';
-        value: {
-            gc: {
-                geometries: Array<{}>
-            }
-        }
-    }
-    type AreaEvent = {
-        type: 'polygon.area';
-        value: string;
-    }
-    
-    type IncomeEvent = {
-        type: 'median.income';
-        value: {
-            averageMedianIncome: number,
-        }
-    }
-    type SpeedsEvent = {
-        type: 'median.speeds';
-        value: Array<{
-            Zipcode: string,
-            "Download (Mbit/s)": string,
-            "Upload (Mbit/s)": string,
-            pct_area : string
-        }>;
-    }
-    
-    type ProvidersEvent = {
-        type: 'service.providers';
-        value: {
-            error: number;
-            competitors: Array<string>;
-            down_ad_speed: Array<number>;
-            up_ad_speed: Array<number>,
-            tech_used: Array<Array<number>>
-        }
-    }
-    
-    type BroadbandNowEvent = {
-        type: 'broadband.now';
-        value: {
-            bbnPriceRange: [string, string]
-        }
-    }
-    
-    
+
     const send_example_request = () => {
         num_buildings = 0;
-        sample_websocket.send(JSON.stringify(request_json));
-    }
-    
-    function averageMedianSpeeds(resp : SpeedsEvent){
+        ws.sendPolygonRequest(request_area);
+    };
+
+    function averageMedianSpeeds(resp: MedianSpeedResponse) {
         let speeds = [0, 0];
-        resp.value.forEach(v => {
+        resp.forEach(v => {
             speeds[0] += parseFloat(v.pct_area) * parseFloat(v["Download (Mbit/s)"]);
             speeds[1] += parseFloat(v.pct_area) * parseFloat(v["Upload (Mbit/s)"]);
         });
         return speeds;
     }
-    
-    const handle_event = (meResponse: MarketEvaluatorEvent) => {
-        switch(meResponse.type) {
-            case('auth.token'):
-                token = meResponse.value.token;
-                send_example_request();
-                break;
-            case('polygon.area'):
-                $(`#${meResponse.type.replace('.','_')}`).text(meResponse.value);
-                break;
-    
-            case('median.income'):
-                $(`#${meResponse.type.replace('.','_')}`).text(meResponse.value.averageMedianIncome);
-                break;
-            
-            case('broadband.now'):
-                $(`#${meResponse.type.replace('.','_')}`).text(JSON.stringify(meResponse.value.bbnPriceRange));
-                break;
-    
-            case('median.speeds'):
-                $(`#${meResponse.type.replace('.','_')}`).text(JSON.stringify(averageMedianSpeeds(meResponse)));
-                break;
-    
-            case('service.providers'):
-                $(`#${meResponse.type.replace('.','_')}`).text(meResponse.value.competitors.length);
-                break;
-    
-            case('building.overlays'):
-                num_buildings += meResponse.value.gc.geometries.length
-                $(`#${meResponse.type.replace('.','_')}`).text(num_buildings);
-                break;
-        }
+
+    const handle_poly_area = (msg: string, polyArea: number) => {
+        console.log(polyArea);
+        $(`#polygon_area`).text(polyArea);
     }
-    
-    const authenticate = () => sample_websocket.send(
-        JSON.stringify({'credentials': 'default'})
-    );
-    
-    
-    const request_json = {
-        "request_type": "standard_polygon",
-        "include": {
-            "coordinates": [
-                [
+
+    const handle_median_income = (msg: string, medianIncome: MedianIncomeResponse) => {
+        console.log(medianIncome);
+        $(`#median_income`).text(medianIncome.averageMedianIncome);
+    }
+
+    const handle_bbn = (msg: string, bbn: BroadbandNowResponse) => {
+        console.log(bbn);
+        $(`#broadband_now`).text(JSON.stringify(bbn.bbnPriceRange));
+    }
+
+    const handle_median_speeds = (msg: string, medianSpeeds: MedianSpeedResponse) => {
+        console.log(medianSpeeds);
+        $(`#median_speeds`).text(JSON.stringify(averageMedianSpeeds(medianSpeeds)));
+    }
+
+    const handle_service_providers = (msg: string, serviceProviders: ServiceProvidersResponse) => {
+        console.log(serviceProviders);
+        $(`#service_providers`).text(serviceProviders.competitors.length);
+    }
+
+    const handle_building_overlays = (msg: string, overlays: BuildingOverlaysResponse) => {
+        console.log(overlays);
+        num_buildings += overlays.gc.geometries.length;
+        $(`#building_overlays`).text(num_buildings);
+    }
+
+    const ws = new MarketEvaluatorWS([]);
+
+    // Subscriptions
+    PubSub.subscribe(MarketEvalWSEvents.MKT_EVAL_WS_CONNECTED, send_example_request);
+    PubSub.subscribe(MarketEvalWSEvents.POLY_AREA_MSG, handle_poly_area);
+    PubSub.subscribe(MarketEvalWSEvents.INCOME_MSG, handle_median_income);
+    PubSub.subscribe(MarketEvalWSEvents.BROADBAND_NOW_MSG, handle_bbn);
+    PubSub.subscribe(MarketEvalWSEvents.SPEEDS_MSG, handle_median_speeds);
+    PubSub.subscribe(MarketEvalWSEvents.SERVICE_PROV_MSG, handle_service_providers);
+    PubSub.subscribe(MarketEvalWSEvents.BUILDING_OVERLAYS_MSG, handle_building_overlays);
+
+    const request_area: GeoJSON.FeatureCollection = {
+        "features": [{
+            "geometry": {
+                "coordinates": [[
                     [
                         -122.20547665022926,
                         37.46172253164244
@@ -143,10 +81,12 @@ $(document).ready(function() {
                         -122.20547665022926,
                         37.46172253164244
                     ]
-                ]
-            ],
-            "type": "Polygon"
-        },
-        "uuid": "5ee3e557-a3a2-4f08-bd87-a4952e354c63"
+                ]],
+                "type": "Polygon",
+            },
+            "type": "Feature",
+            "properties": null,
+        }],
+        "type": "FeatureCollection"
     };
-    });
+});

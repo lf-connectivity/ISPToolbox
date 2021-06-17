@@ -2,7 +2,7 @@ $(document).ready(function() {
     const sample_websocket = new WebSocket("ws://localhost:8000/ws/market-evaluator/");
     
     sample_websocket.onopen = (event: Event) => {
-        send_example_request();
+        authenticate();
     }
     sample_websocket.onmessage = (event: MessageEvent) => {
         const response = (JSON.parse(event.data) as MarketEvaluatorEvent);
@@ -10,9 +10,17 @@ $(document).ready(function() {
         handle_event(response);
     }
     
+    let token = '';
     let num_buildings = 0;
     
-    type MarketEvaluatorEvent =  BuildingEvent | AreaEvent | IncomeEvent | SpeedsEvent | ProvidersEvent | BroadbandNowEvent;
+    type MarketEvaluatorEvent = AuthenticationEvent | BuildingEvent | AreaEvent | IncomeEvent | SpeedsEvent | ProvidersEvent | BroadbandNowEvent;
+    
+    type AuthenticationEvent = {
+        type: 'auth.token';
+        value: {
+            token: string,
+        }
+    }
     
     type BuildingEvent = {
         type: 'building.overlays';
@@ -78,6 +86,10 @@ $(document).ready(function() {
     
     const handle_event = (meResponse: MarketEvaluatorEvent) => {
         switch(meResponse.type) {
+            case('auth.token'):
+                token = meResponse.value.token;
+                send_example_request();
+                break;
             case('polygon.area'):
                 $(`#${meResponse.type.replace('.','_')}`).text(meResponse.value);
                 break;
@@ -104,6 +116,10 @@ $(document).ready(function() {
                 break;
         }
     }
+    
+    const authenticate = () => sample_websocket.send(
+        JSON.stringify({'credentials': 'default'})
+    );
     
     
     const request_json = {

@@ -1,77 +1,80 @@
 {% load i18n %}
-<h2>{% translate 'Market Data' %}</h2>
-<div class="m-3 p-3 market-eval-section">
-    <div class="d-flex justify-content-between">
-        <p role="text" tabindex="">
-            {% translate 'Building Density' %}</p>
-        <div class="d-flex flex-row">
-            <h3 class="my-auto">
-                <span style="color: rgb(162, 162, 162);" id="me-out-density">
-                    0</span>
-            </h3>
+<div class="mt-4">
+    <h5 class="mx-3 market_stats_column--section-header">
+        {% translate 'Market Data' %}
+    </h5>
+</div>
+<div class="mx-3 my-2 market-eval-section">
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
+            {% translate 'Building Density' %}
+        </p>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <h4 class="market-eval-section--value">
+                <span id="me-out-density">
+                    0
+                </span>
+            </h4>
             {% with tooltips.density as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
     </div>
-    <div class="market-eval-divider"></div>
-    <div class="d-flex justify-content-between">
-        <p role="text" tabindex="">
-            {% translate 'Service Providers'%}<sup>
-                <span>
-                    [</span>
-                2<span>
-                    ]</span>
+
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
+            {% translate 'Service Providers'%}
+            <sup>
+                <span class="footnote--bracket">[</span>2<span class="footnote--bracket">]</span>
             </sup>
         </p>
-        <div class="d-flex flex-row">
-            <h3 class="my-auto">
-                <span style="color: rgb(162, 162, 162);" id="me-out-providers">
-                    0</span>
-            </h3>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <h4 class="market-eval-section--value">
+                <span id="me-out-providers">
+                    0
+                </span>
+            </h4>
             {% with tooltips.providers as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
     </div>
+
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#showCompetitorsModal">
         Launch competitor modal
     </button>
-    <div class="market-eval-divider"></div>
-    <div class="d-flex justify-content-between">
-        <p role="text" tabindex="">
-            {% translate 'Avg. Household Income'%}<sup>
-                <span>
-                    [</span>
-                3<span>
-                    ]</span>
+    
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
+            {% translate 'Avg. Household Income'%}
+            <sup>
+                <span class="footnote--bracket">[</span>3<span class="footnote--bracket">]</span>
             </sup>
         </p>
-        <div class="d-flex flex-row">
-            <h3 class="my-auto">
-                <span style="color: rgb(162, 162, 162);" id="me-out-income">
-                    $000K</span>
-            </h3>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <h4 class="market-eval-section--value">
+                <span id="me-out-income">
+                    $000K
+                </span>
+            </h4>
             {% with tooltips.income as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
     </div>
-    <div class="market-eval-divider"></div>
-    <div class="d-flex justify-content-between">
-        <p role="text" tabindex="">
+
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
             {% translate 'Median Speeds'%}<sup>
-                <span>
-                    [</span>
-                5<span>
-                    ]</span>
+                <span class="footnote--bracket">[</span>5<span class="footnote--bracket">]</span>
             </sup>
         </p>
-        <div class="d-flex flex-row">
-            <h3 class="my-auto">
-                <span style="color: rgb(162, 162, 162);" id="me-out-speeds">
-                    0/0</span>
-            </h3>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <h4 class="market-eval-section--value">
+                <span id="me-out-speeds">
+                    0/0
+                </span>
+            </h4>
             {% with tooltips.speeds as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}

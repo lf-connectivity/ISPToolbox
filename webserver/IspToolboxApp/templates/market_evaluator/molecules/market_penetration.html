@@ -1,56 +1,58 @@
 {% load i18n %}
-<div>
-    <h2>
+<div class="mt-3">
+    <h5 class="mx-3 market_stats_column--section-header">
         {% translate 'Market Sizing' %}
-    </h2>
+    </h5>
 </div>
-<div class="m-3 p-3 market-eval-section">
-    <div class="d-flex justify-content-between">
-        <p role="text" tabindex="">
-            {% translate 'Buildings inside Coverage Area' %}<sup>
-                <span>
-                    [</span>
-                1<span>
-                    ]</span>
+<div class="mx-3 my-2 market-eval-section">
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
+            {% translate 'Buildings inside Coverage Area' %}
+            <sup>
+                <span class="footnote--bracket">[</span>1<span class="footnote--bracket">]</span>
             </sup>
         </p>
-        <div class="d-flex flex-row">
-            <h3 class="my-auto">
-                <span style="color: rgb(162, 162, 162);" id="me-out-buildings">
-                    000</span>
-            </h3>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <h4 class="market-eval-section--value">
+                <span id="me-out-buildings">
+                    000
+                </span>
+            </h4>
             {% with tooltips.buildings as tooltip%}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
     </div>
-    <div class="market-eval-divider"></div>
-    <div class="d-flex justify-content-between">
-        <p>
-            {% translate 'Potential Market Penetration'%}</p>
-        <div class="d-flex flex-row">
-            <h3 class="my-auto">
+
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p class="market-eval-section--label">
+            {% translate 'Potential Market Penetration'%}
+        </p>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <h4 class="market-eval-section--value">
                 <span style="display: flex;">
                     <input type="number" id="market_penetration_percent" name="market_penetration_percent" min="0"
-                        max="100" disabled="" value="15" style="color: rgb(162, 162, 162);">
-                    <div>
-                        %</div>
+                        max="100" disabled="" value="15" class="market-eval-section--inputtextarea">
+                    <p class="market-eval-section--inputtextarea-percent">
+                        %
+                    </p>
                 </span>
-            </h3>
+            </h4>
             {% with tooltips.market_pen as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
     </div>
-    <div class="market-eval-divider"></div>
-    <div class="d-flex justify-content-between">
-        <p role="text" tabindex="">
+
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
             {% translate 'Potential Leads'%}</p>
-        <div class="d-flex flex-row">
-            <h3 class="my-auto">
-                <span style="color: rgb(162, 162, 162);" id="me-out-leads">
-                    000</span>
-            </h3>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <h4 class="market-eval-section--value">
+                <span id="me-out-leads">
+                    000
+                </span>
+            </h4>
             {% with tooltips.leads as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}

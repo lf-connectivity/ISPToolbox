@@ -3,14 +3,91 @@
 .market_stats_column
     background-color: $brand-theme-color
 
-.market-eval-section
-    background-color: $white-color
-    border-bottom: 2px solid $brand-primary-color
-
-.market-eval-divider
-    border-bottom: 1px solid $alex-special-gray
-    width: 100%
-
 .metric-tooltip
     display: flex
     flex-direction: row
+
+.market_stats_column
+    &--section-header
+        font-size: 16px
+        font-style: normal
+        font-weight: bold
+        letter-spacing: 0.4px
+        line-height: 27px
+        padding: 0
+        margin-bottom: 0
+    
+.market-eval-section
+    background-color: $white-color
+    border-bottom: 2px solid $brand-primary-color
+    padding: 0.6rem 1rem
+    &--row
+        padding: 0.6rem 0
+        border-bottom: 1px solid $light-gray-color-2
+        align-items: center
+    &--row:first-child
+        padding-top: 0
+    &--row:last-child
+        padding-bottom: 0
+        border-bottom: 0
+    &--label
+        margin-bottom: 0
+        max-width: 60%
+    &--value-section
+        align-items: center
+    &--value
+        font-size: 19px
+        margin: 0
+        color: $light-gray-color-2
+        font-family: $brand-font-family-mono
+
+.market-eval-section--inputtextarea
+    align-items: center
+    -moz-appearance: textfield
+    -webkit-appearance: none
+    background: $light-gray-color
+    border-bottom: 2px solid $brand-primary-color
+    border-left: 0
+    border-radius: 0
+    border-right: 0
+    border-style: none
+    border-top: 0
+    display: flex
+    font-family: $brand-font-family-mono
+    font-size: 19px
+    font-weight: 300
+    line-height: 20px
+    margin: 0
+    max-width: 45px
+    padding: 0px 1px 0 5px
+    text-align: center
+    &:focus
+        outline: none
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button
+        -webkit-appearance: none
+        border-bottom: 2px solid $brand-primary-color
+        border-left: 0px
+        border-right: 0px
+        border-top: 0px
+        margin: 0
+    &--inputtextarea:invalid,
+    &:invalid + .market-eval-section--inputtextarea-percent
+        border-bottom: 2px solid $error-color
+        box-shadow: none
+
+.market-eval-section--inputtextarea[type='number']
+    -moz-appearance: textfield
+    border-bottom: 2px solid $brand-primary-color
+ 
+.market-eval-section--inputtextarea[type="number"][disabled]
+    color: $light-gray-color-2
+
+.market-eval-section--inputtextarea-percent
+  background-color: $light-gray-color
+  border-bottom: 2px solid $brand-primary-color
+  height: 100%
+  line-height: 40px
+  padding-right: 5px
+  margin: 0
+

@@ -1,26 +1,20 @@
-<a tabindex="0" role="button" data-toggle="popover" class="btn info-tooltip-button my-auto" data-popover-content="<div class='popover-content'>
-    <div class='tooltip_contents'>
-      <p>
-        {{ tooltip.body }}
-      </p>
-    </div>
+<a tabindex="0" role="button" data-toggle="popover" class="btn info-tooltip-button my-auto" data-popover-content="
+    <p>
+      {{ tooltip.body }}
+    </p>
     {% if tooltip.link %}
-    <div class='tooltip_link'>
-      <a href='{{ tooltip.link }}'' target=' _blank'>
-        {{ tooltip.linkDesc }}
-        <div class='tooltip_svg'>
-          <svg width='19' height='19' fill='none' xmlns='http://www.w3.org/2000/svg'>
-            <path d='M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432' stroke='#FEFEFE' strokeWidth='1.5px' />
-          </svg>
-        </div>
-      </a>
-    </div>
-    {% endif %}
-</div>" data-popover-title="<div class='popover-title'>
-    <h5>
-      {{ tooltip.title }}
-    </h5>
-  </div>">
+      <div class='popover-link'>
+        <a href='{{ tooltip.link }}'' target=' _blank'>
+          {{ tooltip.linkDesc }}
+          <div class='tooltip_svg'>
+            <svg width='19' height='19' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              <path d='M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432' stroke='#FEFEFE' strokeWidth='1.5px' />
+            </svg>
+          </div>
+        </a>
+      </div>
+    {% endif %}" 
+    data-popover-title="{{ tooltip.title }}">
   <svg xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 18.2 18.3">
     <path
       d="M9.1 18.2c-5 0-9-4-9-9s4-9 9-9 9 4 9 9-4 9-9 9zm0-16.5C5 1.7 1.6 5.1 1.6 9.2s3.4 7.5 7.5 7.5 7.5-3.4 7.5-7.5-3.4-7.5-7.5-7.5z"

@@ -1,9 +1,9 @@
 <div class="map-container-network">
     <div id='map' class='planner-map'></div>
-    <div class="top-bar-wisp">
-        <div id="isp-draw-controls" class="pl-2">
+    <div class="on-map-controls">
+        <div class="pl-2">
             {% include "workspace/atoms/components/reconnecting_msg.html" %}
-            <div id="geocoder" class="geocoder"></div>
+            <div id="geocoder" class="geocoder-container"></div>
             {% block draw_controls %}
             {% endblock %}
         </div>

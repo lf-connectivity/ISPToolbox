@@ -1,37 +1,50 @@
 @import ../theme
-.planner-map
-    width: 100%
-    min-height: 400px
 
-.bottom-bar-wisp
-    position: fixed
-    bottom: 0px
-    width: 100%
-
-
-.top-bar-wisp
+.on-map-controls
     position: absolute !important
     top: 20px
 
-
-.geocoder
+.geocoder-container
     display: block
 
-@media screen and (min-width: $breakpoint-lg) and ( min-height: 800px)
-    .planner-map
-        position: fixed !important
+.mapboxgl-ctrl-geocoder
+    border-radius: 0
+    border-bottom: 2px solid $brand-primary-color
+    &--input
+        font-family: $brand-font-family-mono
+        padding-right: 14px
+        font-size: 14px
+    &--suggestion-title
+        font-weight: bold
+        letter-spacing: 0.02em !important
+    &--suggestion-title, &--suggestion-address 
+        font-family: $brand-font-family-sans-serif
+        letter-spacing: 0.01em
+        color: $brand-dark-gray-color
+    &--suggestion-address
+        color: lighten($brand-dark-gray-color, 20%)
+    .suggestions
+        border-radius: 0
 
-@media screen and ( max-height: 800px)
-    .planner-map
-        position: relative !important
-        
+.mapboxgl-ctrl-group
+    border-radius: 0
+    box-shadow: none !important
 
+@media (max-width: 640px)
+    .mapboxgl-ctrl-geocoder
+        &--input
+            height: 36px
+            padding: 6px 35px
+            font-size: 14px
+        &--icon
+            top: 8px
+        &--icon-search
+            left: 7px
+            width: 20px
+            height: 20px
 
 @media (max-width: 767px)
-    .bottom-bar-wisp
-        position: relative !important
-    
-    .top-bar-wisp
+    .on-map-controls
         position: absolute !important
         top: 15px
 
@@ -42,5 +55,5 @@
 
 .map-container-network
     position: relative
-    @media screen and (min-width: $breakpoint-lg) and ( min-height: 800px)
-        position: absolute
+    // @media screen and (min-width: $breakpoint-lg) and ( min-height: 800px)
+    //     position: absolute

@@ -1,5 +1,5 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
-import { createSupplementaryPointsForCircle, createGeoJSONCircle, lineDistance } from './RadiusModeUtils.js';
+import { createSupplementaryPointsForGeojson, createSupplementaryPointsForCircle, createGeoJSONCircle, lineDistance } from './DrawModeUtils.js';
 import * as Constants from '@mapbox/mapbox-gl-draw/src/constants';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_feature_movement';
@@ -24,12 +24,19 @@ export function OverrideDirect(additionalFunctionality = {}) {
             geojson.properties.active = Constants.activeStates.ACTIVE;
             renderLinkEnds(geojson, push);
             push(geojson);
-            const supplementaryPoints = geojson.properties.user_radius ? createSupplementaryPointsForCircle(geojson)
-              : createSupplementaryPoints(geojson, {
-                map: this.map,
-                midpoints: true,
-                selectedPaths: state.selectedCoordPaths
-              });
+            let supplementaryPoints;
+            if (geojson.properties.user_radius) {
+                supplementaryPoints = createSupplementaryPointsForCircle(geojson);
+            }
+            else {
+                // no rendering midpoints for lines but for polygons and other things yes
+                supplementaryPoints = createSupplementaryPointsForGeojson(geojson, {
+                    map: this.map,
+                    midpoints: (geojson.geometry.type !== Constants.geojsonTypes.LINE_STRING),
+                    selectedPaths: state.selectedCoordPaths
+                });
+            }
+
             // Add a center point to geojson circle
             if(geojson.properties.user_radius){
                 const center_vertex = createVertex(geojson.properties.id, geojson.properties.user_center, "0.4", false);
@@ -165,3 +172,5 @@ export function OverrideDirect(additionalFunctionality = {}) {
     };
     return direct_select;
 }
+
+

@@ -1,16 +1,7 @@
 import {WorkspaceFeatureTypes} from './workspace/WorkspaceConstants';
 
 export const LOSCheckMapboxStyles = [
-    {
-        'id': 'gl-draw-polygon-midpoint',
-        'type': 'circle',
-        'filter': ['all',
-          ["literal", false]],
-        'paint': {
-          'circle-radius': 3,
-          'circle-color': '#fbb03b'
-        }
-      },
+
     // Standard Link Styling - unselected
     {
         'id': 'gl-draw-line-inactive-link',
@@ -72,6 +63,36 @@ export const LOSCheckMapboxStyles = [
             "circle-color": "#3bb2d0"
         }
     },
+    // vertex point halos
+    {
+        id: 'gl-draw-polygon-and-line-vertex-halo-active',
+        type: 'circle',
+        filter: [
+            'all',
+            ['==', 'meta', 'vertex'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static'],
+        ],
+        paint: {
+            'circle-radius': 7,
+            'circle-color': '#FFF',
+        },
+    },
+    // vertex points
+    {
+        id: 'gl-draw-polygon-and-line-vertex-active',
+        type: 'circle',
+        filter: [
+            'all',
+            ['==', 'meta', 'vertex'],
+            ['==', '$type', 'Point'],
+            ['!=', 'mode', 'static'],
+        ],
+        paint: {
+            'circle-radius': 6,
+            'circle-color': '#C2D8EC',
+        },
+    },
     // Radio styling 
     {
         'id': 'selected_radio_render',
@@ -83,6 +104,37 @@ export const LOSCheckMapboxStyles = [
         'paint': {
             'circle-radius': 5,
             'circle-color': ['get', "color"],
+        },
+    },
+    // Polygon line and fill
+    {
+        id: 'gl-draw-polygon-fill-inactive',
+        type: 'fill',
+        filter: [
+            'all',
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static'],
+            ['==', 'active', 'false'],
+        ],
+        paint: {
+            'fill-color': '#1172A9',
+            'fill-outline-color': '#1172A9',
+            'fill-opacity': 0.4,
+        },
+    },
+    {
+        id: 'gl-draw-polygon-fill-active',
+        type: 'fill',
+        filter: [
+            'all',
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static'],
+            ['==', 'active', 'true'],
+        ],
+        paint: {
+            'fill-color': '#5692d1',
+            'fill-outline-color': '#5692d1',
+            'fill-opacity': 0.4,
         },
     },
     // Default AP Appearance
@@ -267,7 +319,6 @@ export const LOSCheckMapboxStyles = [
             'icon-size': 0.3
         },
     },
-
     // polygon outline stroke
     // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
     {
@@ -291,7 +342,7 @@ export const LOSCheckMapboxStyles = [
     {
         id: 'gl-draw-instructions',
         type: 'symbol',
-        filter: ['all', ['==', '$type', 'Point'], ['has', 'draw_guide']],
+        filter: ['all', ['==', '$type', 'Point'], ['has', 'user_draw_guide']],
         paint: {
             'text-halo-width': 1,
             'text-halo-color': 'rgba(0,0,0,1)',
@@ -306,4 +357,14 @@ export const LOSCheckMapboxStyles = [
             'text-letter-spacing': 0.03,
         },
     },
+        // Polygon midpoints
+        {
+            id: 'gl-draw-polygon-midpoint',
+            type: 'circle',
+            filter: ['all', ['==', '$type', 'Point'], ['==', 'meta', 'midpoint']],
+            paint: {
+                'circle-radius': 6,
+                'circle-color': '#fbb03b',
+            },
+        },
 ];

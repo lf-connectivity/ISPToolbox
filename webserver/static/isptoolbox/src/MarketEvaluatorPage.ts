@@ -15,7 +15,6 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
 
     constructor() {
         super({
-            draw_link: LinkMode(),
             simple_select: OverrideSimple(),
             direct_select: OverrideDirect(),
             draw_ap: APDrawMode(),

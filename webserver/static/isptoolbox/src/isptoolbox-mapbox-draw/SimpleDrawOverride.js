@@ -1,5 +1,5 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
-import { createSupplementaryPointsForCircle } from './RadiusModeUtils.js';
+import { createSupplementaryPointsForCircle } from './DrawModeUtils.js';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 

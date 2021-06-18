@@ -1,7 +1,7 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
 import * as _ from "lodash";
 import { Geometry, GeoJsonProperties }  from 'geojson';
-import { createGeoJSONCircle } from "../isptoolbox-mapbox-draw/RadiusModeUtils.js";
+import { createGeoJSONCircle } from "../isptoolbox-mapbox-draw/DrawModeUtils.js";
 import { getCookie } from '../utils/Cookie';
 import LOSCheckWS from '../LOSCheckWS';
 import type { AccessPointCoverageResponse } from '../LOSCheckWS';

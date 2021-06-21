@@ -78,7 +78,7 @@ class NewGISDataLayer {
             lat: event.lngLat.lat,
             lon: event.lngLat.lng,
         });
-        var description = `<a target="_parent" href="https://www.facebook.com/isptoolbox/line-of-sight-check/?${params.toString()}">Explore Region in LiDAR LOS Tool ${SVG_ARROW}</a>`
+        var description = `<a target="_parent" href="https://www.facebook.com/isptoolbox/line-of-sight-check/?${params.toString()}" style="color: white">Explore Region in<br>LiDAR LOS Tool ${SVG_ARROW}</a>`
         // var description = `Newly Added Data for ${this.month}/${this.year}`
         // Populate the popup and set its coordinates
         // based on the feature found.

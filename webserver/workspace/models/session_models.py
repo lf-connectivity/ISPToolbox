@@ -32,7 +32,7 @@ class WorkspaceMapSession(models.Model):
     zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
 
     duplicate_fks = [AccessPointLocation, CPELocation, APToCPELink]
-    UNIQUE_TOGETHER_ERROR = _("You already have a workspace with that name, please select a different name.")
+    UNIQUE_TOGETHER_ERROR = _("You already have a session with that name, please select a different name.")
 
     class Meta:
         unique_together = [["owner", "name"]]

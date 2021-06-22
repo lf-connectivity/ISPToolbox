@@ -48,7 +48,6 @@ class SaveAsSessionForm(forms.Form):
         max_length=63,
         label="Name",
         label_suffix="",
-        help_text="A copy of the session will be created",
         widget=forms.TextInput(attrs={'placeholder': 'Session Name'}))
 
 

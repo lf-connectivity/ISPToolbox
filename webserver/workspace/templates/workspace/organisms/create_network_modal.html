@@ -11,12 +11,12 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="isptoolbox-form">
+          <div class="isptoolbox-form inline-field-group">
             {% csrf_token %}
             {{ workspace_forms.new_session }}
-            <p class="onboarding_container--errors error d-none" style="color: red;">></p>
             <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
           </div>
+          <p class="error d-none"></p>
         </div>
       </div>
     </div>

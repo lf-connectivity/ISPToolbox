@@ -11,13 +11,14 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="isptoolbox-form mx-auto">
+          <p>A copy of the session will be created</p>
+          <div class="isptoolbox-form inline-field-group mx-auto">
             {% csrf_token %}
             {{ workspace_forms.save_as_session }}
-            <p class="onboarding_container--errors error d-none" style="color: red;"></p>
             <input type="text" value="{{session.uuid}}" hidden name="session">
             <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
           </div>
+          <p class="error d-none"></p>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 {% load rest_framework %}
+{% load i18n %}
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
 <table class="table">
@@ -69,33 +70,33 @@
 <input class="d-none" id="ap-modal-ordering" value="{{ordering}}">
 <input class="d-none" id="ap-modal-page-num" value="{{current}}">
 <nav class="d-flex">
-<ul class="pagination">
-  {% if previous or next %}
-  {% if previous %}
+  <ul class="pagination">
+    {% if previous or next %}
+    {% if previous %}
     <li class="page-item previous ap-modal-page-change" page-target="{{previous}}">
       <a class="page-link" href="#">&laquo; Previous</a>
     </li>
-  {% else %}
+    {% else %}
     <li class="page-item previous disabled">
       <span class="page-link">
         &laquo; Previous
-    </span>
+      </span>
     </li>
-  {% endif %}
+    {% endif %}
 
-  {% if next %}
-    <li class="page-item next ap-modal-page-change" page-target="{{next}}" >
+    {% if next %}
+    <li class="page-item next ap-modal-page-change" page-target="{{next}}">
       <a class="page-link" href="#">Next &raquo;</a>
     </li>
-  {% else %}
+    {% else %}
     <li class="page-item next disabled">
       <span class="page-link">
         Next &raquo;
       </span>
     </li>
-  {% endif %}
-  {% endif %}
-</ul>
+    {% endif %}
+    {% endif %}
+  </ul>
 </nav>
 
 
@@ -103,7 +104,7 @@
 {% else %}
 <div class="text-center">
   {% include 'workspace/atoms/missing_icon.html' %}
-  <h3>No access points</h3>
-  <p>To get started: place an access point on the map or select bulk import.</p>
+  <h3>{% translate "No access points"%}</h3>
+  <p>{% translate "To get started: place an access point on the map or select bulk import."%}</p>
 </div>
 {% endif %}

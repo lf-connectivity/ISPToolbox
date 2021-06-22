@@ -43,7 +43,7 @@ urlpatterns = [
     path('accounts/create/', CreateAccountView.as_view(), name="create_account_view"),
     # Workspace Object Persistence
     path('workspace/api/ap-los/', views.AccessPointLocationListCreate.as_view()),
-    path('workspace/api/ap-los/<uuid:uuid>/', views.AccessPointLocationGet.as_view()),
+    path('workspace/api/ap-los/<uuid:uuid>/', views.AccessPointLocationGet.as_view(), name="get_ap_network"),
     path('workspace/api/cpe/', views.CPELocationCreate.as_view()),
     path('workspace/api/cpe/<uuid:uuid>/', views.CPELocationGet.as_view()),
     path('workspace/api/ap-cpe-link/', views.APToCPELinkCreate.as_view()),

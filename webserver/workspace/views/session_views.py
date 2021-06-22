@@ -10,9 +10,11 @@ from django.shortcuts import redirect, get_object_or_404
 from rest_framework import generics, mixins, renderers, filters
 from workspace import pagination
 import json
+import logging
 from uuid import UUID
 from workspace.forms import SaveAsSessionForm
 from django.db.utils import IntegrityError
+from rest_framework.permissions import AllowAny
 
 
 class SessionCreateUpdateView(
@@ -21,6 +23,7 @@ class SessionCreateUpdateView(
                         generics.RetrieveAPIView):
     serializer_class = WorkspaceMapSessionSerializer
     lookup_field = 'uuid'
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         response = self.create(request, *args, **kwargs)
@@ -29,8 +32,7 @@ class SessionCreateUpdateView(
         return redirect('edit_network', response.data['uuid'], response.data['name'])
 
     def get_queryset(self):
-        user = self.request.user
-        return WorkspaceMapSession.objects.filter(owner=user)
+        return WorkspaceMapSession.get_rest_queryset(self.request)
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
@@ -43,6 +45,7 @@ class SessionListView(
     template_name = "workspace/molecules/workspace_session_pagination.html"
     renderer_classes = [renderers.TemplateHTMLRenderer, renderers.JSONRenderer]
     pagination_class = pagination.IspToolboxCustomAjaxPagination
+    permission_classes = [AllowAny]
 
     filter_backends = [filters.OrderingFilter]
 
@@ -50,8 +53,7 @@ class SessionListView(
     ordering = ['-last_updated']
 
     def get_queryset(self):
-        user = self.request.user
-        return WorkspaceMapSession.objects.filter(owner=user)
+        return WorkspaceMapSession.get_rest_queryset(self.request)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -69,10 +71,10 @@ class SessionDeleteView(
                     generics.RetrieveAPIView):
     serializer_class = WorkspaceMapSessionSerializer
     lookup_field = 'uuid'
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
-        user = self.request.user
-        return WorkspaceMapSession.objects.filter(owner=user)
+        return WorkspaceMapSession.get_rest_queryset(self.request)
 
     def post(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
@@ -98,5 +100,6 @@ class SessionSaveAsView(LoginRequiredMixin, View):
                 return JsonResponse({'url': reverse('edit_network', args=[session.uuid, session.name])})
             except IntegrityError:
                 return JsonResponse({'error': WorkspaceMapSession.UNIQUE_TOGETHER_ERROR}, status=400)
-            except Exception:
+            except Exception as unknown_error:
+                logging.error(str(unknown_error))
                 return JsonResponse({'error': 'Unknown Error Occured'}, status=400)

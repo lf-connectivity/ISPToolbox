@@ -3,21 +3,33 @@ from django.conf import settings
 from rest_framework import serializers
 import uuid
 from django.contrib.gis.db import models as geo_models
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, LineString
 import json
 from workspace.utils.geojson_circle import createGeoJSONCircle
 from .model_constants import FeatureType
 from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
+from django.contrib.sessions.models import Session
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
 
 class WorkspaceFeature(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    session = models.ForeignKey(
+        Session,
+        on_delete=models.SET_NULL, null=True,
+        help_text="This is a django session - different than map session",
+    )
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    session = models.ForeignKey('workspace.WorkspaceMapSession', on_delete=models.CASCADE, null=True, default=None)
+    map_session = models.ForeignKey(
+        'workspace.WorkspaceMapSession',
+        on_delete=models.CASCADE,
+        null=True,
+        default=None,
+        db_column="session"
+    )
     geojson = geo_models.PointField()
     uuid = models.UUIDField(
         primary_key=True,
@@ -27,36 +39,33 @@ class WorkspaceFeature(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
-    @classmethod
-    def get_features_for_session(cls, user, session, serializer=None):
-        objects = cls.objects.filter(owner=user, session=session).all()
-        return {
-            'type': 'FeatureCollection',
-            'features': [
-                {
-                    'type': 'Feature',
-                    'geometry': json.loads(obj.geojson.json),
-                    'properties': {k: v for k, v in serializer(obj).data.items() if k != 'geojson'} if serializer else None
-                } for obj in objects
-            ]
-        }
-
-    @classmethod
-    def get_features_for_user(cls, user, serializer=None):
-        objects = cls.objects.filter(owner=user).all()
-        return {
-            'type': 'FeatureCollection',
-            'features': [
-                {
-                    'type': 'Feature',
-                    'geometry': json.loads(obj.geojson.json),
-                    'properties': {k: v for k, v in serializer(obj).data.items() if k != 'geojson'} if serializer else None
-                } for obj in objects
-            ]
-        }
-
     class Meta:
         abstract = True
+
+    @classmethod
+    def get_rest_queryset(cls, request):
+        user = request.user
+        if request.user.is_anonymous:
+            user = None
+        return (
+            cls.objects.filter(owner=user) | cls.objects.filter(session=request.session)
+        )
+
+
+class AbstractWorkspaceModelSerializer:
+    @classmethod
+    def get_features_for_session(serializer, session):
+        objects = serializer.Meta.model.objects.filter(map_session=session).all()
+        return {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'geometry': json.loads(obj.geojson.json),
+                    'properties': {k: v for k, v in serializer(obj).data.items() if k != 'geojson'} if serializer else None
+                } for obj in objects
+            ]
+        }
 
 
 class AccessPointLocation(WorkspaceFeature):
@@ -99,8 +108,7 @@ class AccessPointLocation(WorkspaceFeature):
         return aoi.envelope
 
 
-class AccessPointSerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class AccessPointSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     height_ft = serializers.FloatField(read_only=True)
@@ -110,7 +118,7 @@ class AccessPointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccessPointLocation
-        exclude = ['created']
+        exclude = ['owner', 'session', 'created']
 
 
 class CPELocation(WorkspaceFeature):
@@ -140,8 +148,7 @@ class CPELocation(WorkspaceFeature):
         return FeatureType.CPE.value
 
 
-class CPESerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class CPESerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     height_ft = serializers.FloatField(read_only=True)
@@ -149,29 +156,24 @@ class CPESerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CPELocation
-        exclude = ['created']
-
-
-# @receiver(pre_save, sender=CPELocation)
-# def modify_height(sender, instance, **kwargs):
-#     # we are creating the cpe for the first time
-#     if instance.created is None:
-#         instance.height = instance.convert_to_dtm_height()
+        exclude = ['owner', 'session', 'created']
 
 
 class APToCPELink(WorkspaceFeature):
     frequency = models.FloatField(default=2.437)
-    geojson = geo_models.LineStringField()
     ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, editable=False)
     cpe = models.ForeignKey(CPELocation, on_delete=models.CASCADE, editable=False)
+
+    @property
+    def geojson(self):
+        return LineString(self.ap.geojson, self.cpe.geojson)
 
     @property
     def feature_type(self):
         return FeatureType.AP_CPE_LINK.value
 
 
-class APToCPELinkSerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class APToCPELinkSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
@@ -186,7 +188,7 @@ class APToCPELinkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = APToCPELink
-        exclude = ['created']
+        exclude = ['owner', 'session', 'created']
 
 
 class CoverageArea(WorkspaceFeature):
@@ -198,15 +200,14 @@ class CoverageArea(WorkspaceFeature):
         return FeatureType.COVERAGE_AREA.value
 
 
-class CoverageAreaSerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class CoverageAreaSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
 
     class Meta:
         model = CoverageArea
-        exclude = ['created']
+        exclude = ['owner', 'session', 'created']
 
 
 class AccessPointBasedCoverageArea(WorkspaceFeature):
@@ -218,8 +219,7 @@ class AccessPointBasedCoverageArea(WorkspaceFeature):
         return FeatureType.AP_COVERAGE_AREA.value
 
 
-class APCoverageAreaSerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+class APCoverageAreaSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
@@ -229,7 +229,7 @@ class APCoverageAreaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccessPointBasedCoverageArea
-        exclude = ['created']
+        exclude = ['owner', 'session', 'created']
 
 
 class BuildingCoverage(models.Model):
@@ -304,7 +304,7 @@ class Radio(models.Model):
     installation_height = models.FloatField(default=10)
 
 
-class RadioSerializer(serializers.ModelSerializer):
+class RadioSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
     class Meta:
         model = Radio
         fields = '__all__'
@@ -321,7 +321,7 @@ class PTPLink(models.Model):
     radios = models.ManyToManyField(Radio)
 
 
-class PTPLinkSerializer(serializers.ModelSerializer):
+class PTPLinkSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
     radios = RadioSerializer(many=True)
 
     class Meta:

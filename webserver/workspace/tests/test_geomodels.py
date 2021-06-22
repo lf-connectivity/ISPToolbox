@@ -45,12 +45,12 @@ DEFAULT_TEST_LINESTRING = {
     "type": "LineString",
     "coordinates": [
         [
-            -121.23687744140624,
-            38.929502416386605
+            -121.75872802734375,
+            38.923092265981779
         ],
         [
-            -121.30828857421875,
-            38.45573955865588
+            -121.75872802734375,
+            38.923092265981779
         ]
     ]
 }
@@ -310,7 +310,7 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_ap = AccessPointLocation(
             owner=self.testuser,
             name=DEFAULT_NAME,
-            session=self.test_session,
+            map_session=self.test_session,
             geojson=DEFAULT_TEST_POINT,
             height=DEFAULT_HEIGHT,
             max_radius=DEFAULT_MAX_RADIUS
@@ -320,7 +320,7 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_cpe = CPELocation(
             owner=self.testuser,
             name=DEFAULT_NAME,
-            session=self.test_session,
+            map_session=self.test_session,
             geojson=DEFAULT_TEST_POINT,
             height=DEFAULT_HEIGHT
         )
@@ -329,8 +329,7 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_ap_cpe_link = APToCPELink(
             owner=self.testuser,
             frequency=DEFAULT_FREQUENCY,
-            session=self.test_session,
-            geojson=DEFAULT_TEST_LINESTRING,
+            map_session=self.test_session,
             ap=self.test_ap,
             cpe=self.test_cpe
         )
@@ -338,7 +337,7 @@ class WorkspaceBaseTestCase(TestCase):
 
         self.test_coverage_area = CoverageArea(
             owner=self.testuser,
-            session=self.test_session,
+            map_session=self.test_session,
             geojson=DEFAULT_TEST_POLYGON,
             uneditable=DEFAULT_UNEDITABLE
         )
@@ -346,7 +345,7 @@ class WorkspaceBaseTestCase(TestCase):
 
         self.test_ap_coverage_area = AccessPointBasedCoverageArea(
             owner=self.testuser,
-            session=self.test_session,
+            map_session=self.test_session,
             geojson=DEFAULT_TEST_GEO_COLLECTION,
             ap=self.test_ap
         )
@@ -371,8 +370,8 @@ class WorkspaceBaseTestCase(TestCase):
 
 
 class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
-    def get_feature_collection_flow(self, model_cls, serializer, expected_features):
-        feature_collection = model_cls.get_features_for_user(self.testuser, serializer)
+    def get_feature_collection_flow(self, serializer, expected_features):
+        feature_collection = serializer.get_features_for_session(self.test_session)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(
             json.dumps(self.build_feature_collection(expected_features)),
@@ -386,7 +385,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         self.assertTrue(self.test_coverage_area.feature_type, FeatureType.COVERAGE_AREA.value)
         self.assertTrue(self.test_ap_coverage_area, FeatureType.AP_COVERAGE_AREA.value)
 
-    def test_get_features_for_user_ap(self):
+    def test_get_features_for_session_ap(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
         expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
@@ -397,7 +396,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
                 'uuid': str(self.test_ap.uuid),
-                'session': str(self.test_session.uuid),
+                'map_session': str(self.test_session.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
                 'feature_type': FeatureType.AP.value,
@@ -407,9 +406,9 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'max_radius_miles': expected_max_radius_miles
             }
         }
-        self.get_feature_collection_flow(AccessPointLocation, AccessPointSerializer, [expected_ap])
+        self.get_feature_collection_flow(AccessPointSerializer, [expected_ap])
 
-    def test_get_features_for_user_cpe(self):
+    def test_get_features_for_session_cpe(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_cpe = {
             'type': 'Feature',
@@ -418,14 +417,14 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
                 'uuid': str(self.test_cpe.uuid),
-                'session': str(self.test_session.uuid),
+                'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
             }
         }
-        self.get_feature_collection_flow(CPELocation, CPESerializer, [expected_cpe])
+        self.get_feature_collection_flow(CPESerializer, [expected_cpe])
 
-    def test_get_features_for_user_ap_cpe_link(self):
+    def test_get_features_for_session_ap_cpe_link(self):
         expected_link = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_LINESTRING),
@@ -434,11 +433,11 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'ap': str(self.test_ap.uuid),
                 'cpe': str(self.test_cpe.uuid),
                 'uuid': str(self.test_ap_cpe_link.uuid),
-                'session': str(self.test_session.uuid),
+                'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.AP_CPE_LINK.value
             }
         }
-        self.get_feature_collection_flow(APToCPELink, APToCPELinkSerializer, [expected_link])
+        self.get_feature_collection_flow(APToCPELinkSerializer, [expected_link])
 
     def test_get_features_for_user_coverage_area(self):
         expected_area = {
@@ -446,25 +445,25 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
             'geometry': json.loads(DEFAULT_TEST_POLYGON),
             'properties': {
                 'uuid': str(self.test_coverage_area.uuid),
-                'session': str(self.test_session.uuid),
+                'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.COVERAGE_AREA.value,
                 'uneditable': DEFAULT_UNEDITABLE
             }
         }
         self.get_feature_collection_flow(CoverageArea, CoverageAreaSerializer, [expected_area])
 
-    def test_get_features_for_user_ap_coverage_area(self):
+    def test_get_features_for_session_ap_coverage_area(self):
         expected_link = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_GEO_COLLECTION),
             'properties': {
                 'ap': str(self.test_ap.uuid),
                 'uuid': str(self.test_ap_coverage_area.uuid),
-                'session': str(self.test_session.uuid),
+                'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.AP_COVERAGE_AREA.value
             }
         }
-        self.get_feature_collection_flow(AccessPointBasedCoverageArea, APCoverageAreaSerializer, [expected_link])
+        self.get_feature_collection_flow(APCoverageAreaSerializer, [expected_link])
 
 
 class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
@@ -599,12 +598,10 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         link_id = self.test_ap_cpe_link.uuid
         updated_link = {
             'frequency': UPDATED_FREQUENCY,
-            'geojson': UPDATED_TEST_LINESTRING
         }
         link = self.update_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, link_id, updated_link)
         self.assertEqual(link.owner, self.testuser)
         self.assertEqual(link.frequency, UPDATED_FREQUENCY)
-        self.assertJSONEqual(link.geojson.json, UPDATED_TEST_LINESTRING)
         self.assertEqual(link.ap, self.test_ap)
         self.assertEqual(link.cpe, self.test_cpe)
 
@@ -646,7 +643,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
-                'session': str(self.test_session.uuid),
+                'map_session': str(self.test_session.uuid),
                 'uuid': str(self.test_ap.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
@@ -663,7 +660,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
-                'session': str(self.test_session.uuid),
+                'map_session': str(self.test_session.uuid),
                 'uuid': str(self.test_cpe.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
@@ -671,8 +668,8 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         }
         expected_feature_collection = self.build_feature_collection([expected_ap, expected_cpe])
 
-        aps = AccessPointLocation.get_features_for_user(self.testuser, AccessPointSerializer)
-        cpes = CPELocation.get_features_for_user(self.testuser, CPESerializer)
+        aps = AccessPointSerializer.get_features_for_session(self.test_session)
+        cpes = CPESerializer.get_features_for_session(self.test_session)
         feature_collection = geojson_utils.merge_feature_collections(aps, cpes)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
@@ -688,7 +685,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
-                'session': str(self.test_session.uuid),
+                'map_session': str(self.test_session.uuid),
                 'uuid': str(self.test_ap.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
@@ -701,7 +698,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         }
         expected_feature_collection = self.build_feature_collection([expected_ap])
 
-        aps = AccessPointLocation.get_features_for_user(self.testuser, AccessPointSerializer)
+        aps = AccessPointSerializer.get_features_for_session(self.test_session)
         empty_feature_collection = {
             'type': 'FeatureCollection',
             'features': []

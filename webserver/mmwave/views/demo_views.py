@@ -19,10 +19,28 @@ from mmwave.forms import DSMExportAOIFileForm
 from celery import states
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from workspace.models import NetworkMapPreferences, AccessPointLocation, CPELocation, APToCPELink
-from workspace.models import AccessPointSerializer, CPESerializer, APToCPELinkSerializer
-from workspace import geojson_utils
+from workspace.models import WorkspaceMapSession
 from django.utils.translation import gettext as _
+
+
+# @method_decorator(xframe_options_exempt, name='dispatch')
+class NetworkDemoView(View):
+    """
+    Demo view for LOS check, allows iframing, Access Points - All Foreign Key'd on
+    Django Session
+    """
+    def get(self, request):
+        map_session, created = WorkspaceMapSession.get_or_create_demo_view(request)
+        context = {
+            'session': map_session,
+            'geojson': map_session.get_session_geojson(),
+            'units': map_session.units_old,
+            'beta': True,
+            'title': 'LiDAR LOS Check - ISP Toolbox',
+            'demo': True,
+            'should_collapse_link_view': True,
+        }
+        return render(request, 'workspace/pages/demo_network.index.html', context)
 
 
 @method_decorator(xframe_options_exempt, name='dispatch')
@@ -66,17 +84,6 @@ class LOSCheckDemo(View):
         if request.user.is_anonymous:
             context['sign_up_form'] = UserCreationForm
             context['authentication_form'] = AuthenticationForm
-        else:
-            # TODO achong: remove this once workspace is built
-            map_preferences, _ = NetworkMapPreferences.objects.get_or_create(owner=request.user)
-            aps = AccessPointLocation.get_features_for_user(request.user, AccessPointSerializer)
-            cpes = CPELocation.get_features_for_user(request.user, CPESerializer)
-            links = APToCPELink.get_features_for_user(request.user, APToCPELinkSerializer)
-            geojson = geojson_utils.merge_feature_collections(aps, cpes, links)
-            context.update({
-                'map_preferences': map_preferences,
-                'geojson': geojson,
-            })
 
         return render(request, 'mmwave/index.html', context)
 

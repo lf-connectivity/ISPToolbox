@@ -40,6 +40,8 @@ from django.conf.urls import (
     handler404, handler500
 )
 
+from mmwave.views.demo_views import NetworkDemoView
+
 # REST API Router
 router = routers.DefaultRouter()
 
@@ -77,6 +79,7 @@ urlpatterns = [
     path('pro/', include('workspace.urls')),
     # Demo Views
     path('demo/los-check/', LOSCheckDemo.as_view(), name='demo-los-check'),
+    path('demo/network-app/', NetworkDemoView.as_view(), name='demo-network-app'),
     path('demo/dsm-app/', DSMExportView.as_view(), name="demo-dsm-app"),
     path('demo/latest-gis-data/<int:year>/<int:month>/', LatestLidarView.as_view(), name='demo-latest_gis'),
     path('demo/latest-gis-data/', LatestLidarView.as_view(), name='demo-latest_gis-nodate'),

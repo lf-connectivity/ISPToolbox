@@ -1,20 +1,30 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  {% include "workspace/molecules/page_header.html" %}
+{% include "workspace/molecules/page_header.html" %}
+
 <body>
-    {% include "mmwave/organisms/network_edit_nav.html" %}
-    {% include "mmwave/map_view.html" %}
-    {% include "workspace/atoms/mapbox_global_public_key.html" %}
-    <script async src="{% static "wireless_network.min.js" %}"> </script>
-    {% include "mmwave/3d_view.html" %}
-    {% include "mmwave/link_view.html" %}
-    {% include "workspace/molecules/workspace_session_info.html" %}
-    {{ geojson|json_script:"isp-map-features" }}
-    {{ beta|json_script:"los_beta" }}
-    {% include "workspace/organisms/access_point_modal.html" %}
-    {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
-    {% include "workspace/organisms/workspace_session_modals.html" %}
-    {% include "workspace/organisms/confirmation_modals.html" %}
+  {% if demo and beta and request.user.is_authenticated %}
+  {% include 'workspace/organisms/tool_suggest_workspace_overlay.html' %}
+  {% endif %}
+  {% if beta %}
+  {% include "mmwave/organisms/network_edit_nav.html" %}
+  {% endif %}
+  {% include "mmwave/map_view.html" %}
+  {% include "workspace/atoms/mapbox_global_public_key.html" %}
+  <script async src="{% static "wireless_network.min.js" %}"> </script>
+  {% include "mmwave/3d_view.html" %}
+  {% include "mmwave/link_view.html" %}
+  {% include "workspace/molecules/workspace_session_info.html" %}
+  {{ geojson|json_script:"isp-map-features" }}
+  {{ beta|json_script:"los_beta" }}
+  {% include "workspace/organisms/access_point_modal.html" %}
+  {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
+  {% if demo and beta %}
+  {% include "workspace/organisms/demo_redirect_to_workspace.html" %}
+  {% endif %}
+  {% include "workspace/organisms/workspace_session_modals.html" %}
+  {% include "workspace/organisms/confirmation_modals.html" %}
 </body>
+
 </html>

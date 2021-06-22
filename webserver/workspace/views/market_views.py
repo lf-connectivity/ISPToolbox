@@ -24,10 +24,9 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
             uuid=session_id
         ).get()
 
-        geojson = session.get_session_geojson(request)
         context = {
             'session': session,
-            'geojson': geojson,
+            'geojson': session.get_session_geojson(),
             'workspace_forms': WorkspaceForms(request, session),
             'beta': True,
             'units': 'US',

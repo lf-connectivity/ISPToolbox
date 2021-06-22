@@ -3,6 +3,8 @@ from django.views import View
 from django.http import JsonResponse
 from django.contrib.gis.geos import Point
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
+
 import csv
 
 from workspace.models import AccessPointLocation
@@ -43,19 +45,19 @@ class EditNetworkView(LoginRequiredMixin, View):
                 session.save()
                 return redirect("edit_network", session.uuid, session.name)
 
-        session = workspace_models.WorkspaceMapSession.objects.filter(
+        session = get_object_or_404(
+            workspace_models.WorkspaceMapSession,
             owner=request.user,
             uuid=session_id
-        ).get()
+        )
 
-        geojson = session.get_session_geojson(request)
         context = {
             'session': session,
-            'geojson': geojson,
+            'geojson': session.get_session_geojson(),
             'workspace_forms': WorkspaceForms(request, session),
             'should_collapse_link_view': True,
             'beta': True,
-            'units': 'US',
+            'units': session.units_old,
             'tower_upload_form': UploadTowerCSVForm,
             'title': 'LiDAR LOS Check - ISP Toolbox'
         }

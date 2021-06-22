@@ -192,8 +192,7 @@ export abstract class BaseWorkspaceFeature{
                 serialization[field] = feature.properties[field];
             }
         });
-        // @ts-ignore
-        serialization.geojson = JSON.stringify(feature.geometry);
+        serialization.geojson = JSON.stringify(this.featureData.geometry);
         serialization.map_session = getSessionID();
         return serialization;
     }

@@ -12,8 +12,8 @@
     <div id='map' class='planner-map col order-1 order-lg-2' style="min-height: 500px">
       <div class="on-map-controls">
         <div>
-            {% include "workspace/atoms/components/reconnecting_msg.html" %}
-            <div id="geocoder" class="geocoder-container"></div>
+          {% include "workspace/atoms/components/reconnecting_msg.html" %}
+          <div id="geocoder" class="geocoder-container"></div>
         </div>
       </div>
     </div>
@@ -24,6 +24,8 @@
   {% include "workspace/molecules/workspace_session_info.html" %}
   {{ geojson|json_script:"isp-map-features" }}
   {{ beta|json_script:"los_beta" }}
+  {% include "workspace/organisms/workspace_session_modals.html" %}
+  {% include "workspace/organisms/confirmation_modals.html" %}
 </body>
 
 </html>

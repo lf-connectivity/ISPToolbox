@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="modal theme-modal fade" id="renameSessionModal" tabindex="-1" role="dialog"
   aria-labelledby="renameSessionModalLabel" aria-hidden="true">
-  <form action="{% url 'session_create' %}" method="POST" id="workspace_rename_session_form">
+  <form action="{% url 'session_update' session.uuid %}" method="PATCH" id="workspace_rename_session_form">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -14,7 +14,7 @@
           <div class="isptoolbox-form inline-field-group mx-auto">
             {% csrf_token %}
             {{ workspace_forms.rename_session }}
-            <input type="text" value="{{session.uuid}}" hidden name="session">
+            <input type="text" value="{{session.uuid}}" hidden name="uuid">
             <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
           </div>
           <p class="error d-none"></p>
@@ -27,11 +27,15 @@
   $(() => {
     $('#workspace_rename_session_form').on('submit', function (event) {
       event.preventDefault();
+      var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
       $.ajax({
         data: $(this).serialize(),
-        type: "POST",
+        type: "PATCH",
         dataType: "json",
-        url: "{% url 'session_create' %}?format=json",
+        headers: {
+          "X-CSRFToken": $crf_token
+        },
+        url: "{% url 'session_update' session.uuid %}?format=json",
         success: function (response) {
           window.location.replace(
             `{% url 'edit_account_network' %}${response.uuid}/${response.name}/`

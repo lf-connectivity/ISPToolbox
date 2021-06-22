@@ -149,6 +149,7 @@ class WorkspaceMapSession(models.Model):
 
 
 class WorkspaceMapSessionSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     created = serializers.DateTimeField(format="%D %I:%M %p", read_only=True)
     last_updated = serializers.DateTimeField(format="%D", read_only=True)
 
@@ -156,7 +157,7 @@ class WorkspaceMapSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WorkspaceMapSession
-        exclude = []
+        exclude = ['session']
         validators = [
             UniqueTogetherValidator(
                 queryset=WorkspaceMapSession.objects.all(),

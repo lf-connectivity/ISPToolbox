@@ -6,7 +6,7 @@ from django.contrib.gis.geos import Point
 from .validators import validate_zoom_level
 import uuid
 from .network_models import (
-    AccessPointSerializer, CPESerializer, APToCPELinkSerializer
+    AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageArea, CoverageAreaSerializer
 )
 from workspace import geojson_utils
 from .network_models import (
@@ -45,7 +45,8 @@ class WorkspaceMapSession(models.Model):
         aps = AccessPointLocation.get_features_for_session(request.user, self, AccessPointSerializer)
         cpes = CPELocation.get_features_for_session(request.user, self, CPESerializer)
         links = APToCPELink.get_features_for_session(request.user, self, APToCPELinkSerializer)
-        return geojson_utils.merge_feature_collections(aps, cpes, links)
+        coverage_areas = CoverageArea.get_features_for_session(request.user, self, CoverageAreaSerializer)
+        return geojson_utils.merge_feature_collections(aps, cpes, links, coverage_areas)
 
     def duplicate(self, new_name=None):
         """

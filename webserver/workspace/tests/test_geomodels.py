@@ -175,6 +175,7 @@ DEFAULT_MAX_RADIUS = 14.2
 DEFAULT_NO_CHECK_RADIUS = 0.01
 DEFAULT_CPE_HEIGHT = 2.0
 DEFAULT_FREQUENCY = 2.4
+DEFAULT_UNEDITABLE = False
 
 
 ################################################################################
@@ -338,7 +339,8 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_coverage_area = CoverageArea(
             owner=self.testuser,
             session=self.test_session,
-            geojson=DEFAULT_TEST_POLYGON
+            geojson=DEFAULT_TEST_POLYGON,
+            uneditable=DEFAULT_UNEDITABLE
         )
         self.test_coverage_area.save()
 
@@ -439,16 +441,17 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         self.get_feature_collection_flow(APToCPELink, APToCPELinkSerializer, [expected_link])
 
     def test_get_features_for_user_coverage_area(self):
-        expected_link = {
+        expected_area = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_POLYGON),
             'properties': {
                 'uuid': str(self.test_coverage_area.uuid),
                 'session': str(self.test_session.uuid),
-                'feature_type': FeatureType.COVERAGE_AREA.value
+                'feature_type': FeatureType.COVERAGE_AREA.value,
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
-        self.get_feature_collection_flow(CoverageArea, CoverageAreaSerializer, [expected_link])
+        self.get_feature_collection_flow(CoverageArea, CoverageAreaSerializer, [expected_area])
 
     def test_get_features_for_user_ap_coverage_area(self):
         expected_link = {
@@ -547,9 +550,11 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
     def test_create_coverage_area(self):
         new_area = {
             'geojson': DEFAULT_TEST_POLYGON,
+            'uneditable': DEFAULT_UNEDITABLE
         }
         area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
+        self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
         self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_POLYGON)
 
     def test_create_ap_coverage_area(self):

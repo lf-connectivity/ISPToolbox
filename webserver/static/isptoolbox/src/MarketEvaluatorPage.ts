@@ -7,6 +7,7 @@ import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
 
 import { LinkMode, OverrideDirect, OverrideSimple, APDrawMode, OverrideDrawPolygon } from './isptoolbox-mapbox-draw/index';
 import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
+import { MarketEvaluatorWorkspaceManager } from "./workspace/MarketEvaluatorWorkspaceManager";
 
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
@@ -25,6 +26,8 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
         MarketEvaluatorSidebarManager.getInstance().initializePopovers();
     }
 
-        this.marketEvalWS = new MarketEvaluatorWS([]);
+    onMapLoad() {
+        // stuff might go here later
+        new MarketEvaluatorWorkspaceManager(this.map, this.draw);
     }
 }

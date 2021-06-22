@@ -1,6 +1,6 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { Feature, Geometry, Point, LineString, GeoJsonProperties }  from 'geojson';
+import { Feature, Geometry, Point, LineString, GeoJsonProperties, Polygon }  from 'geojson';
 import { WorkspaceEvents } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
@@ -225,4 +225,11 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
             this.map.fire('draw.update', {features: [newFeatureData], action: 'move'});
         }
     }
+}
+
+/**
+ * Abstract class containing polygon-specific functions for Workspace objects.
+ */
+ export abstract class WorkspacePolygonFeature extends BaseWorkspaceFeature {
+    featureData: Feature<Polygon, GeoJsonProperties>;
 }

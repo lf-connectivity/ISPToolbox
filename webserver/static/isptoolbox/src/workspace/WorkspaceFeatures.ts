@@ -1,6 +1,6 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
-import { Feature, Geometry, Point, LineString, GeoJsonProperties, Position }  from 'geojson';
-import { BaseWorkspaceFeature, WorkspaceLineStringFeature, WorkspacePointFeature } from './BaseWorkspaceFeature';
+import { Feature, Geometry, Point, LineString, Polygon }  from 'geojson';
+import { BaseWorkspaceFeature, WorkspaceLineStringFeature, WorkspacePointFeature, WorkspacePolygonFeature } from './BaseWorkspaceFeature';
 import { isUnitsUS } from '../utils/MapPreferences';
 import { LinkCheckEvents } from '../LinkCheckPage';
 import { WorkspaceEvents } from './WorkspaceConstants'
@@ -20,6 +20,9 @@ const CPE_SERIALIZER_FIELDS = ['name', 'height'];
 
 const AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link';
 const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe'];
+
+const COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/coverage-area';
+const COVERAGE_AREA_FIELDS = ['uneditable'];
 
 const LINK_AP_INDEX = 0;
 const LINK_CPE_INDEX = 1;
@@ -188,6 +191,7 @@ export class CPE extends WorkspacePointFeature {
     }
 }
 
+
 export class APToCPELink extends WorkspaceLineStringFeature {
     ap: AccessPoint
     cpe: CPE
@@ -263,5 +267,29 @@ export class APToCPELink extends WorkspaceLineStringFeature {
             this.draw.add(this.featureData);
             this.map.fire('draw.update', {features: [this.featureData]});
         }
+    }
+}
+
+
+export class CoverageArea extends WorkspacePolygonFeature {
+    coverage: BuildingCoverage;
+    awaitingCoverage: boolean;
+
+    constructor(map: MapboxGL.Map,
+        draw: MapboxDraw,
+        featureData: Feature<Polygon, any>) {
+        super(map, draw, featureData, COVERAGE_AREA_ENDPOINT, COVERAGE_AREA_FIELDS, COVERAGE_AREA_FIELDS);
+        this.coverage = EMPTY_BUILDING_COVERAGE;
+        this.awaitingCoverage = false;
+    }
+
+    awaitNewCoverage() {
+        this.coverage = EMPTY_BUILDING_COVERAGE;
+        this.awaitingCoverage = true;
+    }
+
+    setCoverage(coverage: Array<any>) {
+        this.coverage = new BuildingCoverage(coverage);
+        this.awaitingCoverage = false;
     }
 }

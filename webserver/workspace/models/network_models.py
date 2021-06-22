@@ -191,6 +191,7 @@ class APToCPELinkSerializer(serializers.ModelSerializer):
 
 class CoverageArea(WorkspaceFeature):
     geojson = geo_models.PolygonField()
+    uneditable = models.BooleanField(default=False)
 
     @property
     def feature_type(self):

@@ -6,7 +6,8 @@ from django.contrib.gis.geos import Point
 from .validators import validate_zoom_level
 import uuid
 from .network_models import (
-    AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageArea, CoverageAreaSerializer
+    AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
+    CoverageAreaSerializer
 )
 from workspace import geojson_utils
 from .network_models import (
@@ -34,8 +35,9 @@ class WorkspaceMapSession(models.Model):
     center = geo_models.PointField(default=Point(-97.03125, 36.59789))
     zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
 
-    fks_serializers = [AccessPointSerializer, CPESerializer, APToCPELinkSerializer]
+    fks_serializers = [AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageAreaSerializer]
     UNIQUE_TOGETHER_ERROR = _("You already have a session with that name, please select a different name.")
+
     class UnitPreferences(models.TextChoices):
         METRIC = "METRIC"
         IMPERIAL = "IMPERIAL"
@@ -64,16 +66,6 @@ class WorkspaceMapSession(models.Model):
 
     @property
     def number_of_towers(self):
-<<<<<<< HEAD
-        return AccessPointLocation.objects.filter(session=self).count()
-
-    def get_session_geojson(self, request):
-        aps = AccessPointLocation.get_features_for_session(request.user, self, AccessPointSerializer)
-        cpes = CPELocation.get_features_for_session(request.user, self, CPESerializer)
-        links = APToCPELink.get_features_for_session(request.user, self, APToCPELinkSerializer)
-        coverage_areas = CoverageArea.get_features_for_session(request.user, self, CoverageAreaSerializer)
-        return geojson_utils.merge_feature_collections(aps, cpes, links, coverage_areas)
-=======
         return AccessPointLocation.objects.filter(map_session=self).count()
 
     @classmethod
@@ -104,7 +96,6 @@ class WorkspaceMapSession(models.Model):
         session.save()
 
         return session, created
->>>>>>> add ability to build network on session foreign key instead of user
 
     def duplicate(self, new_name=None):
         """

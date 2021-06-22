@@ -52,7 +52,7 @@ class WorkspaceFeature(models.Model):
         )
 
 
-class AbstractWorkspaceModelSerializer:
+class SessionWorkspaceModelMixin:
     @classmethod
     def get_features_for_session(serializer, session):
         objects = serializer.Meta.model.objects.filter(map_session=session).all()
@@ -108,7 +108,7 @@ class AccessPointLocation(WorkspaceFeature):
         return aoi.envelope
 
 
-class AccessPointSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
+class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     height_ft = serializers.FloatField(read_only=True)
@@ -148,7 +148,7 @@ class CPELocation(WorkspaceFeature):
         return FeatureType.CPE.value
 
 
-class CPESerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
+class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     height_ft = serializers.FloatField(read_only=True)
@@ -173,7 +173,7 @@ class APToCPELink(WorkspaceFeature):
         return FeatureType.AP_CPE_LINK.value
 
 
-class APToCPELinkSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
+class APToCPELinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
@@ -200,7 +200,7 @@ class CoverageArea(WorkspaceFeature):
         return FeatureType.COVERAGE_AREA.value
 
 
-class CoverageAreaSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
+class CoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
@@ -219,7 +219,7 @@ class AccessPointBasedCoverageArea(WorkspaceFeature):
         return FeatureType.AP_COVERAGE_AREA.value
 
 
-class APCoverageAreaSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
+class APCoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
@@ -304,7 +304,7 @@ class Radio(models.Model):
     installation_height = models.FloatField(default=10)
 
 
-class RadioSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
+class RadioSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     class Meta:
         model = Radio
         fields = '__all__'
@@ -321,7 +321,7 @@ class PTPLink(models.Model):
     radios = models.ManyToManyField(Radio)
 
 
-class PTPLinkSerializer(serializers.ModelSerializer, AbstractWorkspaceModelSerializer):
+class PTPLinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     radios = RadioSerializer(many=True)
 
     class Meta:

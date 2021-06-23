@@ -21,6 +21,7 @@ class WorkspaceFeature(models.Model):
         Session,
         on_delete=models.SET_NULL, null=True,
         help_text="This is a django session - different than map session",
+        db_column="django_session"
     )
 
     map_session = models.ForeignKey(

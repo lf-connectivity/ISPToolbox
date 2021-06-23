@@ -317,7 +317,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         // Filter APs by whether or not the lat long is in each AP's radius, or building in coverage area.
         let customerPt = point(this.lnglat);
         accessPoints.forEach((ap: AccessPoint) => {
-            let distFromCustomer = distance(customerPt, ap.getFeatureData().geometry);
+            let distFromCustomer = distance(customerPt, ap.getFeatureGeometry());
             if (distFromCustomer <= ap.getFeatureProperty('max_radius') || ap.coverage.includes(this.buildingId)) {
                 this.accessPoints.push(ap);
                 this.apDistances.set(ap, isUnitsUS() ? km2miles(distFromCustomer) : distFromCustomer);

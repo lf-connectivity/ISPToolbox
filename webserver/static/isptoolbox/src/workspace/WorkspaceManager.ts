@@ -376,7 +376,7 @@ export class WorkspaceManager {
             if (selectedCPEs.length === 1) {
                 let cpe = this.features[selectedCPEs[0].properties.uuid] as CPE;
                 let mapboxClient = MapboxSDKClient.getInstance();
-                let lngLat = cpe.featureData.geometry.coordinates as [number, number];
+                let lngLat = cpe.getFeatureGeometry().coordinates as [number, number];
                 mapboxClient.reverseGeocode(lngLat, (resp: any) => {
                     cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCPEClickCustomerConnectPopup, lngLat, resp);
                     cpePopup.hide();
@@ -528,7 +528,7 @@ export class WorkspaceManager {
                             let link = cpe.linkAP(ap);
                             link.create((resp) => {
                                 this.features[link.workspaceId] = link;
-                                this.map.fire('draw.create', {features: [link.featureData]})
+                                this.map.fire('draw.create', {features: [link.getFeatureData()]})
                             });
                         });
                     } else if (feature.properties.radius) {
@@ -623,8 +623,8 @@ export class WorkspaceManager {
             if (currentPopupAp &&
                 apFeature.properties.uuid == currentPopupAp.workspaceId &&
                 (
-                    apFeature.geometry.coordinates[0] !== currentPopupAp.featureData.geometry.coordinates[0] ||
-                    apFeature.geometry.coordinates[1] !== currentPopupAp.featureData.geometry.coordinates[1]
+                    apFeature.geometry.coordinates[0] !== currentPopupAp.getFeatureGeometry().coordinates[0] ||
+                    apFeature.geometry.coordinates[1] !== currentPopupAp.getFeatureGeometry().coordinates[1]
                 )
                 ) {
                 apPopup.hide();
@@ -643,14 +643,12 @@ export class WorkspaceManager {
                 switch(feature.properties.feature_type) {
                     case WorkspaceFeatureTypes.AP:
                         let ap = this.features[feature.properties.uuid] as AccessPoint;
-                        ap.move(feature.geometry.coordinates as [number, number], () => {
-                            ap.update(feature, () => {
-                                Object.keys(BuildingCoverageStatus).forEach((status: string) => {
-                                    this.draw.setFeatureProperty(ap.mapboxId, status, null);
-                                });
-                                ap.coverage = EMPTY_BUILDING_COVERAGE;
-                                LinkCheckTowerPopup.onAPUpdate(ap);
+                        ap.update(() => {
+                            Object.keys(BuildingCoverageStatus).forEach((status: string) => {
+                                ap.setFeatureProperty(status, null);
                             });
+                            ap.coverage = EMPTY_BUILDING_COVERAGE;
+                            LinkCheckTowerPopup.onAPUpdate(ap);
                         });
                         break;
                     case WorkspaceFeatureTypes.CPE:
@@ -659,16 +657,14 @@ export class WorkspaceManager {
                         mapboxClient.reverseGeocode(feature.geometry.coordinates, (response: any) => {
                             let result = response.body.features;
                             feature.properties.name = getStreetAndAddressInfo(result[0].place_name).street;
-                            cpe.move(feature.geometry.coordinates as [number, number], () => {
-                                cpe.update(feature);
-
+                            cpe.update(() => {
                                 // I hate this hack
                                 $(`#radio_name-1`).text(feature.properties.name);
                             });
                         });
                         break;
                     default:
-                        this.features[feature.properties.uuid].update(feature);
+                        this.features[feature.properties.uuid].update();
                         break;
                 }
             }

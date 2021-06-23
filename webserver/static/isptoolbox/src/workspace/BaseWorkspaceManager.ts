@@ -1,4 +1,5 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
+import { Feature, Geometry, Point, LineString, GeoJsonProperties, Polygon }  from 'geojson';
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { getInitialFeatures } from "../utils/MapDefaults";
@@ -16,7 +17,7 @@ export abstract class BaseWorkspaceManager {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
-    readonly features: { [workspaceId: string] : BaseWorkspaceFeature }; // Map from workspace UUID to feature
+    readonly features: { [workspaceId: string] : BaseWorkspaceFeature}; // Map from workspace UUID to feature
 
     // Event handlers for specific workspace feature types
     protected readonly saveFeatureDrawModeHandlers: {[mode: string]: (feature: any) => void};
@@ -228,19 +229,7 @@ export abstract class BaseWorkspaceManager {
             if (feature.properties.uuid) {
                 let workspaceFeature = this.features[feature.properties.uuid];
                 switch(feature.properties.feature_type) {
-                    // Need to process APs and CPEs differently
-                    case WorkspaceFeatureTypes.AP:
-                        if (this.isSupportedFeatureType(WorkspaceFeatureTypes.AP)) {
-                            this.updateFeatureAjaxHandlers[WorkspaceFeatureTypes.AP].pre_update(workspaceFeature);
-                            let ap = this.features[feature.properties.uuid] as AccessPoint;
-                            ap.move(feature.geometry.coordinates as [number, number], () => {
-                                ap.update(feature, () => {
-                                    this.updateFeatureAjaxHandlers[WorkspaceFeatureTypes.AP].post_update(workspaceFeature);
-                                });
-                            });
-                        }
-                        break;
-
+                    // Need to process CPEs differently
                     case WorkspaceFeatureTypes.CPE:
                         if (this.isSupportedFeatureType(WorkspaceFeatureTypes.CPE)) {
                             // Need to do this otherwise name change won't work.
@@ -251,10 +240,8 @@ export abstract class BaseWorkspaceManager {
                                 feature.properties.name = getStreetAndAddressInfo(result[0].place_name).street;
 
                                 this.updateFeatureAjaxHandlers[WorkspaceFeatureTypes.CPE].pre_update(workspaceFeature);
-                                cpe.move(feature.geometry.coordinates as [number, number], () => {
-                                    cpe.update(feature, () => {
-                                        this.updateFeatureAjaxHandlers[WorkspaceFeatureTypes.CPE].post_update(workspaceFeature);
-                                    });
+                                cpe.update(() => {
+                                    this.updateFeatureAjaxHandlers[WorkspaceFeatureTypes.CPE].post_update(workspaceFeature);
                                 });
                             });
                         }
@@ -264,7 +251,7 @@ export abstract class BaseWorkspaceManager {
                         if (this.isSupportedFeatureType(feature.properties.feature_type)) {
                             // @ts-ignore
                             this.updateFeatureAjaxHandlers[feature.properties.feature_type].pre_update(workspaceFeature);
-                            workspaceFeature.update(feature, () => {
+                            workspaceFeature.update(() => {
                                 // @ts-ignore
                                 this.updateFeatureAjaxHandlers[feature.properties.feature_type].post_update(workspaceFeature);
                             })

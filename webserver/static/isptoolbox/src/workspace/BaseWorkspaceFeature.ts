@@ -11,12 +11,11 @@ const BASE_WORKSPACE_RESPONSE_FIELDS = ['uuid', 'feature_type', 'last_updated']
  * Abstract class for organizing and defining interactions between UI components
  * to be saved in Workspace and the backend
  */
-export abstract class BaseWorkspaceFeature {
-    mapboxId: string
-    workspaceId: string
-    map: MapboxGL.Map
-    draw: MapboxDraw
-    featureData: Feature<Geometry, any>
+export abstract class BaseWorkspaceFeature{
+    mapboxId: string;
+    workspaceId: string;
+    map: MapboxGL.Map;
+    draw: MapboxDraw;
 
     private readonly responseFields: Array<string>
     private readonly serializerFields: Array<string>
@@ -33,25 +32,31 @@ export abstract class BaseWorkspaceFeature {
      * @param responseFields Fields to be saved to feature properties from the create/update responses.
      * @param serializedFields Fields to be serialized by the serialiser. This should
      *  be defined as a constant in the subclass's constructor
-     * @param featureData Feature data for an object
+     * @param featureData Feature data for an object, or a mapbox id
      */
     constructor(map: MapboxGL.Map,
                 draw: MapboxDraw,
-                featureData: Feature<Geometry, any>,
+                featureData: Feature<Geometry, any> | string,
                 apiEndpoint: string,
                 responseFields: Array<string>,
                 serializedFields: Array<string>) {
         this.map = map;
         this.draw = draw;
-        this.mapboxId = String(this.draw.add(featureData)[0]);
+        if (typeof featureData == 'number') {
+            this.mapboxId = featureData;
+        }
+        else {
+            // @ts-ignore
+            this.mapboxId = String(this.draw.add(featureData)[0]);
+        }
         this.apiEndpoint = apiEndpoint;
         this.responseFields = responseFields.concat(BASE_WORKSPACE_RESPONSE_FIELDS);
         this.serializerFields = serializedFields;
 
+        let feature = this.draw.get(this.mapboxId);
         // @ts-ignore
-        this.featureData = this.draw.get(this.mapboxId);
-        if ('uuid' in this.featureData.properties) {
-            this.workspaceId = this.featureData.properties.uuid;
+        if ('uuid' in feature.properties) {
+            this.workspaceId = feature?.properties.uuid;
         }
     }
 
@@ -89,11 +94,10 @@ export abstract class BaseWorkspaceFeature {
      * @returns A list of BaseWorkspaceFeature objects other than this one deleted by this function,
      * intended to fire additional Mapbox events.
      */
-    update(newFeatureData: any,
-           successFollowup?: (resp: any) => void) {
-        this.featureData = newFeatureData;
+    update(successFollowup?: (resp: any) => void) {
+        let feature = this.draw.get(this.mapboxId);
         $.ajax({
-            url: `${this.apiEndpoint}/${this.featureData.properties.uuid}/`,
+            url: `${this.apiEndpoint}/${feature?.properties?.uuid}/`,
             method: 'PATCH',
             data: this.serialize(),
             headers: {
@@ -117,9 +121,9 @@ export abstract class BaseWorkspaceFeature {
      * intended to fire additional Mapbox events.
      */
     delete(successFollowup?: (resp: any) => void) {
-        this.draw.delete(this.mapboxId);
+        let removedFeature = this.removeFeatureFromMap(this.mapboxId);
         $.ajax({
-            url: `${this.apiEndpoint}/${this.featureData.properties.uuid}/`,
+            url: `${this.apiEndpoint}/${removedFeature?.properties?.uuid}/`,
             method: 'DELETE',
             data: this.serialize(),
             headers: {
@@ -140,28 +144,56 @@ export abstract class BaseWorkspaceFeature {
      * @returns A string indicating this feature's feature type
      */
     getFeatureType(): string {
-        return this.featureData.properties.feature_type;
+        return this.getFeatureData()?.properties?.feature_type;
+    }
+
+    getFeatureData(): Feature<Geometry, any> {
+        return this.draw.get(this.mapboxId) as Feature<Geometry, any>;
+    }
+
+    getFeatureGeometry(): Geometry {
+        return this.getFeatureData().geometry;
+    }
+
+    /**
+     * Sets the feature property of the feature underlying this workspace object.
+     * @param key Key
+     * @param value Value
+     */
+    setFeatureProperty(key: string, value: any) {
+        this.draw.setFeatureProperty(this.mapboxId, key, value);
+    }
+
+    getFeatureProperty(key: string) {
+        return this.getFeatureData()?.properties[key];
+    }
+
+    protected removeFeatureFromMap(mapboxId: string) {
+        let feature = this.getFeatureData();
+        this.draw.delete(mapboxId);
+        return feature;
     }
 
     protected updateFeatureProperties(response: any) {
         this.responseFields.forEach(field => {
             if (field in response) {
-                this.draw.setFeatureProperty(this.mapboxId, field, response[field]);
+                this.setFeatureProperty(field, response[field]);
             }
         });
-
-        // @ts-ignore
-        this.featureData = this.draw.get(this.mapboxId);
     }
 
     protected serialize() {
         const serialization: any = {}
+        let feature = this.draw.get(this.mapboxId);
         this.serializerFields.forEach(field => {
-            if (field in this.featureData.properties) {
-                serialization[field] = this.featureData.properties[field];
+            // @ts-ignore
+            if (field in feature.properties) {
+                // @ts-ignore
+                serialization[field] = feature.properties[field];
             }
         });
-        serialization.geojson = JSON.stringify(this.featureData.geometry);
+        // @ts-ignore
+        serialization.geojson = JSON.stringify(feature.geometry);
         serialization.session = getSessionID();
         return serialization;
     }
@@ -171,29 +203,33 @@ export abstract class BaseWorkspaceFeature {
  * Abstract class containing point-specific functions for Workspace objects.
  */
 export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
-    featureData: Feature<Point, GeoJsonProperties>
-
     /**
      * Moves the selected feature to the specified lat/long coordinates. To be
      * used by other Workspace feature classes for programatically moving objects
      * in response to other things moving, not as an extension for the Mapbox API.
-     * 
-     * Calls successFollowup if defined, presumably for updating other objects.
-     * 
+     *
      * @param newCoords New coordinates (lat/long)
-     * @param successFollowup Function to execute after successfully moving object
-     * @returns A list of other BaseWorkspaceFeature objects affected by this move.
      */
-    move(newCoords: [number, number],
-         successFollowup ?: (resp: any) => void) {
-        this.featureData.geometry.coordinates = newCoords;
-        this.draw.add(this.featureData);
-        this.update(this.featureData, (resp) => {
-            this.draw.add(this.featureData);
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        });
+    move(newCoords: [number, number]) {
+        let feature = this.draw.get(this.mapboxId);
+
+        // @ts-ignore
+        feature.geometry.coordinates = newCoords;
+        // @ts-ignore
+        this.draw.add(feature);
+        this.map.fire('draw.update', {features: [feature], action: 'move'})
+    }
+
+    getFeatureData(): Feature<Point, any> {
+        return super.getFeatureData() as Feature<Point, any>;
+    }
+
+    getFeatureGeometry(): Point {
+        return super.getFeatureGeometry() as Point;
+    }
+
+    getFeatureGeometryCoordinates() {
+        return this.getFeatureGeometry().coordinates;
     }
 }
 
@@ -201,7 +237,6 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
  * Abstract class containing point-specific functions for Workspace objects.
  */
  export abstract class WorkspaceLineStringFeature extends BaseWorkspaceFeature {
-    featureData: Feature<LineString, GeoJsonProperties>
 
     /**
      * Moves the selected vertex to the specified lat/long coordinates. To be
@@ -216,14 +251,26 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
      * @returns A list of other BaseWorkspaceFeature objects affected by this move.
      */
     moveVertex(index: number,
-               newCoords: [number, number],
-               successFollowup ?: (resp: any) => void) {
-        if (index >= 0 && index < this.featureData.geometry.coordinates.length) {
-            let newFeatureData = {...this.featureData};
-            newFeatureData.geometry.coordinates[index] = newCoords;
-            this.draw.add(newFeatureData);
-            this.map.fire('draw.update', {features: [newFeatureData], action: 'move'});
+               newCoords: [number, number]) {
+        let feature = this.getFeatureData();
+        if (index >= 0 && index < feature.geometry.coordinates.length) {
+            let newFeature = {...feature};
+            newFeature.geometry.coordinates[index] = newCoords;
+            this.draw.add(newFeature);
+            this.map.fire('draw.update', {features: [newFeature], action: 'move'});
         }
+    }
+
+    getFeatureData(): Feature<LineString, any> {
+        return super.getFeatureData() as Feature<LineString, any>;
+    }
+
+    getFeatureGeometry(): LineString {
+        return super.getFeatureGeometry() as LineString;
+    }
+
+    getFeatureGeometryCoordinates() {
+        return this.getFeatureGeometry().coordinates;
     }
 }
 
@@ -231,5 +278,11 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
  * Abstract class containing polygon-specific functions for Workspace objects.
  */
  export abstract class WorkspacePolygonFeature extends BaseWorkspaceFeature {
-    featureData: Feature<Polygon, GeoJsonProperties>;
+    getFeatureData(): Feature<Polygon, any> {
+        return super.getFeatureData() as Feature<Polygon, any>;
+    }
+
+    getFeatureGeometry(): Polygon {
+        return super.getFeatureGeometry() as Polygon;
+    }
 }

@@ -29,6 +29,7 @@ import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearch
 import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { parseFormLatitudeLongitude } from "./utils/LatLngInputUtils";
 import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
+import { WorkspacePointFeature } from "./workspace/BaseWorkspaceFeature.js";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -680,10 +681,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         // @ts-ignore
                         let link = this.draw.get(this.selectedFeatureID);
                         let ap = this.workspaceManager.features[link?.properties?.ap];
-                        ap.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
-                        ap.update(ap.featureData, (resp: any) => {
-                            this.map.fire('draw.update', {features: [ap.featureData]});
-                        });
+                        ap.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
+                        this.map.fire('draw.update', {features: [ap.getFeatureData()]});
                     }
                     else {
                         this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height)
@@ -700,10 +699,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         // @ts-ignore
                         let link = this.draw.get(this.selectedFeatureID);
                         let cpe = this.workspaceManager.features[link?.properties?.cpe];
-                        cpe.featureData.properties.height = isUnitsUS() ? ft2m(height) : height;
-                        cpe.update(cpe.featureData, (resp: any) => {
-                            this.map.fire('draw.update', {features: [cpe.featureData]});
-                        });
+                        cpe.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
+                        this.map.fire('draw.update', {features: [cpe.getFeatureData()]});
                     }
                     else {
                         this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height)
@@ -722,12 +719,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                             if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
                                 if (this.workspaceLinkSelected()) {
                                     // @ts-ignore
-                                    let point = this.workspaceManager.features[coord1 === 0 ? feat.properties.ap : feat.properties.cpe];
+                                    let point = this.workspaceManager.features[coord1 === 0 ? feat.properties.ap : feat.properties.cpe] as WorkspacePointFeature;
 
                                     // @ts-ignore
-                                    point.featureData.geometry.coordinates = coords;
-                                    this.draw.add(point.featureData);
-                                    this.map.fire('draw.update', { features: [point.featureData]})
+                                    point.move(coords);
                                 }
                                 else {
                                     //@ts-ignore
@@ -862,16 +857,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 let cpe = this.workspaceManager.features[feat.properties.cpe];
 
                 $('#hgt-0').val(
-                    Math.round(isUnitsUS() ? ap.featureData.properties?.height_ft : ap.featureData.properties?.height)
+                    Math.round(isUnitsUS() ? ap.getFeatureProperty('height_ft') : ap.getFeatureProperty('height'))
                 );
                 $('#hgt-1').val(
-                    Math.round(isUnitsUS() ? cpe.featureData.properties?.height_ft : cpe.featureData.properties?.height)
+                    Math.round(isUnitsUS() ? cpe.getFeatureProperty('height_ft') : cpe.getFeatureProperty('height'))
                 );
 
-                $('#radio_name-0').text(ap.featureData.properties?.name);
-                $('#radio_name-1').text(cpe.featureData.properties?.name);
-                this.radio_names[0] = ap.featureData.properties?.name
-                this.radio_names[1] = cpe.featureData.properties?.name
+                $('#radio_name-0').text(ap.getFeatureProperty('name'));
+                $('#radio_name-1').text(cpe.getFeatureProperty('name'));
+                this.radio_names[0] = ap.getFeatureProperty('name')
+                this.radio_names[1] = cpe.getFeatureProperty('name')
                 this.updateAnimationTitles();
             }
             else {

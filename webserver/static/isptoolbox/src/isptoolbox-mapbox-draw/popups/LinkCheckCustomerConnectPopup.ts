@@ -158,7 +158,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     }
 
     protected getInCoverageAreaMainPageHTML() {
-        let apName = this.accessPoints[this.apConnectIndex].featureData.properties?.name;
+        let apName = this.accessPoints[this.apConnectIndex].getFeatureProperty('name');
         let apDist = this.apDistances.get(this.accessPoints[this.apConnectIndex]);
         let statusElements = this.getStatusHTMLElements(this.losStatus);
         return `
@@ -212,7 +212,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     protected getAccessPointsSwitchTowerHTML() {
         let retval = '';
         this.accessPoints.forEach((ap: AccessPoint, i: number) => {
-            let apName = ap.featureData.properties?.name;
+            let apName = ap.getFeatureData().properties?.name;
             let apDist = this.apDistances.get(ap);
             let apStatus = ap.coverage.getCoverageStatus(this.buildingId);
             let statusIcon = this.getStatusHTMLElements(apStatus).icon;
@@ -317,8 +317,8 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         // Filter APs by whether or not the lat long is in each AP's radius, or building in coverage area.
         let customerPt = point(this.lnglat);
         accessPoints.forEach((ap: AccessPoint) => {
-            let distFromCustomer = distance(customerPt, ap.featureData.geometry);
-            if (distFromCustomer <= ap.featureData?.properties?.max_radius || ap.coverage.includes(this.buildingId)) {
+            let distFromCustomer = distance(customerPt, ap.getFeatureData().geometry);
+            if (distFromCustomer <= ap.getFeatureProperty('max_radius') || ap.coverage.includes(this.buildingId)) {
                 this.accessPoints.push(ap);
                 this.apDistances.set(ap, isUnitsUS() ? km2miles(distFromCustomer) : distFromCustomer);
             }
@@ -369,7 +369,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 'name': this.street,
                 'ap': ap.workspaceId,
                 'feature_type': WorkspaceFeatureTypes.CPE,
-                'height': ap.featureData.properties?.default_cpe_height
+                'height': ap.getFeatureProperty('default_cpe_height')
             }
         } as Feature<Point, any>;
         this.map.fire('draw.create', {features: [newCPE]});
@@ -402,7 +402,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                     $(`#${CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID}-${i}`).html(`<img src="${statusIcon}"/>`);
 
                     this.calculateAPConnectIndex();
-                    let apName = this.accessPoints[this.apConnectIndex].featureData.properties?.name;
+                    let apName = this.accessPoints[this.apConnectIndex].getFeatureProperty('name');
                     let apDist = this.apDistances.get(this.accessPoints[this.apConnectIndex]);
                     let statusElements = this.getStatusHTMLElements(this.losStatus);
 
@@ -444,7 +444,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     }
 
     protected highlightFeatures(aps: Array<BaseWorkspaceFeature>) {
-        const features = aps.map(f => {return f.featureData})
+        const features = aps.map(f => {return f.getFeatureData()})
         PubSub.publish(WorkspaceEvents.AP_RENDER_GIVEN, {features});
     }
 }
@@ -567,7 +567,7 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
 
     setCPE(cpe: CPE) {
         this.cpe = cpe;
-        this.setLngLat(cpe.featureData.geometry.coordinates as [number, number]);
+        this.setLngLat(cpe.getFeatureGeometryCoordinates() as [number, number]);
     }
 
     show() {

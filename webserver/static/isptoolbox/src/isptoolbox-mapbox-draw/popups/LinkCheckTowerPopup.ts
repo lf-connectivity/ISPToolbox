@@ -60,7 +60,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         this.accessPoint = accessPoint;
 
         // @ts-ignore
-        this.setLngLat(accessPoint.featureData.geometry.coordinates);
+        this.setLngLat(accessPoint.getFeatureGeometryCoordinates());
     }
 
     static onAPUpdate(ap: AccessPoint) {
@@ -69,7 +69,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
             $(`#${STATS_LI_ID}`).html(popup.getStatsHTML());
             popup.setEventHandlers();
             // Adjust lat/lng/height if they have been changed from bottom bar
-            let coord = popup.accessPoint.featureData.geometry.coordinates;
+            let coord = popup.accessPoint.getFeatureGeometryCoordinates();
             let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
             if(coord_input != null){
                 if (String(coord_input[0]) !== coord[1].toFixed(5) ||
@@ -102,11 +102,8 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
     protected setEventHandlers() {
         const updateAP = () => {
             if (this.accessPoint) {
-                let feat = this.accessPoint.featureData;
-                this.accessPoint.update(feat, (resp: any) => {
-                    // @ts-ignore
-                    this.map.fire('draw.update', {features: [feat]});
-                });
+                let feat = this.accessPoint.getFeatureData();
+                this.map.fire('draw.update', {features: [feat]});
             }
         };
 
@@ -119,7 +116,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                     let transformedValue = (CONVERSION_FORMULAS.get(conversionFormula) as any)(inputValue);
 
                     // @ts-ignore
-                    this.accessPoint.featureData.properties[property] = transformedValue;
+                    this.accessPoint?.setFeatureProperty(property, transformedValue);
                     updateAP();
                 }, DEBOUNCE_TIME)
             );
@@ -132,13 +129,9 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                     let newVal = parseFormLatitudeLongitude(htmlID);
                     if(newVal != null && this.accessPoint){
                         newVal = [newVal[1], newVal[0]];
-                        this.accessPoint.featureData.geometry.coordinates = newVal;
-
-                        this.draw.add(this.accessPoint.featureData);
                         this.lnglat = newVal;
                         this.popup.setLngLat(this.lnglat);
-
-                        this.map.fire('draw.update', { features: [this.accessPoint.featureData]})
+                        this.accessPoint.move(newVal);
                     }
                 }, DEBOUNCE_TIME)
             );
@@ -146,7 +139,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
 
         $(`#tower-delete-btn`).off().on('click', () => {
             $(`#ap-delete-confirm-btn`).off().on('click', () => {
-                this.map.fire('draw.delete', {features: [this.accessPoint?.featureData]});
+                this.map.fire('draw.delete', {features: [this.accessPoint?.getFeatureData()]});
                 PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
             });
         });
@@ -155,8 +148,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
             _.debounce((e: any) => {
                 let name = validateName(String($(`#${NAME_INPUT_ID}`).val()), NAME_INPUT_ID);
 
-                // @ts-ignore
-                this.accessPoint.featureData.properties.name = name;
+                this.accessPoint?.setFeatureProperty('name', name);
                 updateAP();
             }, DEBOUNCE_TIME)
         );
@@ -169,31 +161,29 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
     }
 
     protected getStatsHTML() {
-        if (this.accessPoint?.featureData.id){
-            const feat = this.draw.get(this.accessPoint?.featureData.id as string);
-            if(feat &&
-                feat.properties?.serviceable != null &&
-                feat.properties?.unknown != null && 
-                feat.properties?.unserviceable != null &&
-                feat.properties.unknown === 0){
+        if (this.accessPoint){
+            if(this.accessPoint.getFeatureProperty('serviceable') != null &&
+                this.accessPoint.getFeatureProperty('unserviceable') != null &&
+                this.accessPoint.getFeatureProperty('unknown') != null && 
+                this.accessPoint.getFeatureProperty('unknown') === 0){
                 return `
                     <div class="ap-stat">
                         <p class="ap-stat--label">Clear LOS Rooftops</p>
                         <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
                             <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
-                            ${feat.properties?.serviceable}
+                            ${this.accessPoint.getFeatureProperty('serviceable')}
                         </p>
                     </div>
                     <div class="ap-stat">
                         <p class="ap-stat--label">Obstructed Rooftops</p>
                         <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
                             <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
-                            ${feat.properties?.unserviceable}
+                            ${this.accessPoint.getFeatureProperty('unserviceable')}
                         </p>
                     </div>
                     <div class="node-edits">
                         <a id="tower-delete-btn" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
-                        <p>Last edited ${feat.properties?.last_updated}</p>
+                        <p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>
                     </div>
             `;
             }
@@ -213,8 +203,8 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
     protected getHeightValue() {
         return Math.round(
             isUnitsUS() ?
-            this.accessPoint?.featureData.properties?.height_ft :
-            this.accessPoint?.featureData.properties?.height
+            this.accessPoint?.getFeatureProperty('height_ft') :
+            this.accessPoint?.getFeatureProperty('height')
        )
     }
 
@@ -230,12 +220,12 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                             <input type='text' 
                                 class="input--tower-name" 
                                 id='${NAME_INPUT_ID}' 
-                                value='${sanitizeString(this.accessPoint?.featureData.properties?.name)}' 
+                                value='${sanitizeString(this.accessPoint?.getFeatureProperty('name'))}' 
                                 placeholder='Tower Name'>
                             <div class="coordinates">
                                 <div class="data-with-unit">
                                     <input type='text'
-                                            value='${this.accessPoint?.featureData.geometry.coordinates[1].toFixed(5)}, ${this.accessPoint?.featureData.geometry.coordinates[0].toFixed(5)}'
+                                            value='${this.accessPoint?.getFeatureGeometryCoordinates()[1].toFixed(5)}, ${this.accessPoint?.getFeatureGeometryCoordinates()[0].toFixed(5)}'
                                             id='${LAT_LNG_INPUT_ID}'
                                             placeholder='latitude, longitude'
                                             class="input--value"
@@ -261,8 +251,8 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                                 <input type='number'
                                        value='${Math.round(
                                             isUnitsUS() ?
-                                            this.accessPoint?.featureData.properties?.default_cpe_height_ft :
-                                            this.accessPoint?.featureData.properties?.default_cpe_height
+                                            this.accessPoint?.getFeatureProperty('default_cpe_height_ft') :
+                                            this.accessPoint?.getFeatureProperty('default_cpe_height')
                                        )}'
                                        id='${CPE_HGT_INPUT_ID}'
                                        min='${MIN_HEIGHT}' max='${MAX_HEIGHT}'
@@ -277,8 +267,8 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                                 <input type='number'
                                        value='${
                                             isUnitsUS() ?
-                                            this.accessPoint?.featureData.properties?.max_radius_miles.toFixed(2) :
-                                            this.accessPoint?.featureData.properties?.max_radius.toFixed(2)
+                                            this.accessPoint?.getFeatureProperty('max_radius_miles').toFixed(2) :
+                                            this.accessPoint?.getFeatureProperty('max_radius').toFixed(2)
                                        }'
                                        id='${RADIUS_INPUT_ID}'
                                        min='${MIN_RADIUS}' max='${MAX_RADIUS}' step='0.01'

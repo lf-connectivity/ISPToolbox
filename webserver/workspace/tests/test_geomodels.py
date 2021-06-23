@@ -459,7 +459,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'uneditable': DEFAULT_UNEDITABLE
             }
         }
-        self.get_feature_collection_flow(CoverageArea, CoverageAreaSerializer, [expected_area])
+        self.get_feature_collection_flow(CoverageAreaSerializer, [expected_area])
 
     def test_get_features_for_session_ap_coverage_area(self):
         expected_link = {

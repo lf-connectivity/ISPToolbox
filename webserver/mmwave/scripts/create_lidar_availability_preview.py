@@ -8,7 +8,6 @@ from PIL import Image
 import tempfile
 import os
 from storages.backends.s3boto3 import S3Boto3Storage
-import traceback
 from datetime import date, timedelta
 
 
@@ -54,16 +53,15 @@ def createOpenGraphPreviewImage(requested_date: date):
             dir_path = os.path.dirname(os.path.realpath(__file__))
             logo = Image.open(dir_path + LOGO_RELATIVE_PATH)
             preview_image.paste(logo)
-            try:
-                tmp_output = io.BytesIO()
-                preview_image.save(tmp_output, format="jpeg")
-                s3storage = S3Boto3Storage(bucket_name=OUTPUT_BUCKET, location='static/open-graph/')
-                month = "{:02d}".format(current_month_first_day.month)
-                path = f"{current_month_first_day.year}-{month}-latest-lidar-open-graph-preview.jpg"
-                s3storage.save(path, tmp_output)
-            except Exception as e:
-                traceback.print_exc()
-                logging.error(str(e))
+
+            # Output Image to S3
+            tmp_output = io.BytesIO()
+            preview_image.save(tmp_output, format="jpeg")
+            s3storage = S3Boto3Storage(bucket_name=OUTPUT_BUCKET, location='static/open-graph/')
+            month = "{:02d}".format(current_month_first_day.month)
+            path = f"{current_month_first_day.year}-{month}-latest-lidar-open-graph-preview.jpg"
+            s3storage.save(path, tmp_output)
+
     else:
         logging.error(str(response.status_code))
         logging.error(str(response.content))

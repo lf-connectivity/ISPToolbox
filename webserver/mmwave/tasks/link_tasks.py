@@ -6,6 +6,8 @@ from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
 
 from celery import shared_task
+from mmwave.scripts.create_lidar_availability_preview import createOpenGraphPreviewImage
+from datetime import date
 from webserver.celery import celery_app as app
 
 from asgiref.sync import async_to_sync
@@ -331,6 +333,7 @@ def uploadBoundaryTilesetMapbox():
                 f"""Failed to update overlay: {overlay_name}\n
                 exception: {str(e)}\n
                 traceback:\n{traceback.format_exc()}""")
+    createOpenGraphPreviewImage(date.today())
 
 
 @app.task

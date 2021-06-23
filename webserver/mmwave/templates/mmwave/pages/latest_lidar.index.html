@@ -2,6 +2,7 @@
 {% load static %}
 {% load i18n %}
 {% load mapbox %}
+{% load static %}
 
 {% block additional_headers %}
 <!-- Jquery -->
@@ -14,6 +15,13 @@
 <script src="{% static "latest_lidar.min.js" %}"> </script>
 <link href='{% static "stylesheets/pages/new-gis.css" %}' rel='stylesheet' />
 <title>{% translate 'Latest LiDAR Data - ISP Toolbox'%}</title>
+<!-- Open Graph-->
+<meta property="og:title" content="{%translate 'ISP Toolbox - Latest LiDAR Data'%} {{month_name}} {{year}}" />
+<meta property="og:type" content="website" />
+<meta property="og:description" content="{%translate 'See what areas have new LiDAR coverage'%}" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
+<meta property="og:image"
+    content="https://static.isptoolbox.io/static/open-graph/{{year}}-{{month}}-latest-lidar-open-graph-preview.jpg" />
 {% endblock %}
 
 {% block beforenav %}
@@ -33,12 +41,12 @@
     <div class="container wide mt-5">
         <div class="row">
             <div class="col-lg-8 col-xl-6">
-                <h1 class="heading-1 mb-4">Lidar Data Updates</h1>
+                <h1 class="heading-1 mb-4">{% translate "LiDAR Data Updates"%}</h1>
                 <p class="large-paragraph">
-                    {% translate "Lidar data is updated once a week and is obtained via"%}
+                    {% translate "Lidar data is updated once a week and is obtained via "%}
                     <a href="https://www.usgs.gov/news/usgs-3dep-lidar-point-cloud-now-available-amazon-public-dataset"
-                        target="_blank"> USGS 3DEP</a>.
-                    {%translate "The purple regions on this map show where new data has been. Check back at the beginning of the month for new data updates." %}
+                        target="_blank">USGS 3DEP</a>.
+                    {%translate "The purple regions on this map show where new data have been added. Check back at the beginning of the month for new data updates." %}
                 </p>
             </div>
         </div>

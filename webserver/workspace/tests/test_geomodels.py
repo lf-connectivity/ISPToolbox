@@ -32,25 +32,34 @@ DEFAULT_EMAIL = 'testuser@test.com'
 DEFAULT_FIRST_NAME = 'Test'
 DEFAULT_LAST_NAME = 'User'
 
-DEFAULT_TEST_POINT = {
+DEFAULT_AP_POINT = {
     "type": "Point",
     "coordinates": [
-        -121.75872802734375,
-        38.923092265981779
+        -121.777777777777,
+        38.98777777777777
     ]
 }
-DEFAULT_TEST_POINT = json.dumps(DEFAULT_TEST_POINT)
+DEFAULT_AP_POINT = json.dumps(DEFAULT_AP_POINT)
+
+DEFAULT_CPE_POINT = {
+    "type": "Point",
+    "coordinates": [
+        -121.811111111111111,
+        38.92222222222222,
+    ]
+}
+DEFAULT_CPE_POINT = json.dumps(DEFAULT_CPE_POINT)
 
 DEFAULT_TEST_LINESTRING = {
     "type": "LineString",
     "coordinates": [
         [
-            -121.75872802734375,
-            38.923092265981779
+            -121.777777777777,
+            38.98777777777777
         ],
         [
-            -121.75872802734375,
-            38.923092265981779
+            -121.811111111111111,
+            38.92222222222222
         ]
     ]
 }
@@ -311,7 +320,7 @@ class WorkspaceBaseTestCase(TestCase):
             owner=self.testuser,
             name=DEFAULT_NAME,
             map_session=self.test_session,
-            geojson=DEFAULT_TEST_POINT,
+            geojson=DEFAULT_AP_POINT,
             height=DEFAULT_HEIGHT,
             max_radius=DEFAULT_MAX_RADIUS
         )
@@ -321,7 +330,7 @@ class WorkspaceBaseTestCase(TestCase):
             owner=self.testuser,
             name=DEFAULT_NAME,
             map_session=self.test_session,
-            geojson=DEFAULT_TEST_POINT,
+            geojson=DEFAULT_CPE_POINT,
             height=DEFAULT_HEIGHT
         )
         self.test_cpe.save()
@@ -391,7 +400,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
         expected_ap = {
             'type': 'Feature',
-            'geometry': json.loads(DEFAULT_TEST_POINT),
+            'geometry': json.loads(DEFAULT_AP_POINT),
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
@@ -412,7 +421,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_cpe = {
             'type': 'Feature',
-            'geometry': json.loads(DEFAULT_TEST_POINT),
+            'geometry': json.loads(DEFAULT_CPE_POINT),
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
@@ -509,27 +518,27 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
     def test_create_ap(self):
         new_ap = {
             'name': DEFAULT_NAME,
-            'geojson': DEFAULT_TEST_POINT,
+            'geojson': DEFAULT_AP_POINT,
             'height': DEFAULT_HEIGHT,
             'max_radius': DEFAULT_MAX_RADIUS
         }
         ap = self.create_geojson_model(AccessPointLocation, AP_ENDPOINT, new_ap)
         self.assertEqual(ap.owner, self.testuser)
         self.assertEqual(ap.name, DEFAULT_NAME)
-        self.assertJSONEqual(ap.geojson.json, DEFAULT_TEST_POINT)
+        self.assertJSONEqual(ap.geojson.json, DEFAULT_AP_POINT)
         self.assertEqual(ap.height, DEFAULT_HEIGHT)
         self.assertEqual(ap.max_radius, DEFAULT_MAX_RADIUS)
 
     def test_create_cpe(self):
         new_cpe = {
             'name': DEFAULT_NAME,
-            'geojson': DEFAULT_TEST_POINT,
+            'geojson': DEFAULT_CPE_POINT,
             'height': DEFAULT_HEIGHT
         }
         cpe = self.create_geojson_model(CPELocation, CPE_ENDPOINT, new_cpe)
         self.assertEqual(cpe.owner, self.testuser)
         self.assertEqual(cpe.name, DEFAULT_NAME)
-        self.assertJSONEqual(cpe.geojson.json, DEFAULT_TEST_POINT)
+        self.assertJSONEqual(cpe.geojson.json, DEFAULT_CPE_POINT)
         self.assertEqual(cpe.height, DEFAULT_HEIGHT)
 
     def test_create_ap_cpe_link(self):
@@ -639,7 +648,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
         expected_ap = {
             'type': 'Feature',
-            'geometry': json.loads(DEFAULT_TEST_POINT),
+            'geometry': json.loads(DEFAULT_AP_POINT),
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
@@ -656,7 +665,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         }
         expected_cpe = {
             'type': 'Feature',
-            'geometry': json.loads(DEFAULT_TEST_POINT),
+            'geometry': json.loads(DEFAULT_CPE_POINT),
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
@@ -681,7 +690,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
         expected_ap = {
             'type': 'Feature',
-            'geometry': json.loads(DEFAULT_TEST_POINT),
+            'geometry': json.loads(DEFAULT_AP_POINT),
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,

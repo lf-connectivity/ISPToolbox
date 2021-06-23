@@ -8,7 +8,6 @@ from PIL import Image
 import tempfile
 import os
 from storages.backends.s3boto3 import S3Boto3Storage
-from django.core.files.base import ContentFile
 import traceback
 from datetime import date, timedelta
 
@@ -38,7 +37,7 @@ def createOpenGraphPreviewImage(requested_date: date):
         },
         "geometry": {
             "type": "MultiPoint",
-            "coordinates": [ [cloud.boundary.centroid.x, cloud.boundary.centroid.y ]for cloud in new_clouds] 
+            "coordinates": [[cloud.boundary.centroid.x, cloud.boundary.centroid.y]for cloud in new_clouds]
         }
     }
     geojson = requests.utils.quote(json.dumps(centroids))

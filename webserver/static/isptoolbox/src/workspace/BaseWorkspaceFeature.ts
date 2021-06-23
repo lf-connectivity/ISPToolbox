@@ -194,7 +194,7 @@ export abstract class BaseWorkspaceFeature{
         });
         // @ts-ignore
         serialization.geojson = JSON.stringify(feature.geometry);
-        serialization.session = getSessionID();
+        serialization.map_session = getSessionID();
         return serialization;
     }
 }

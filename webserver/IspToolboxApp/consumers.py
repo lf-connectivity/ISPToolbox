@@ -2,7 +2,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from .tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
-    genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getCensusBlockGeog, getTowerViewShed
+    genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getCensusBlockGeog, getTowerViewShed, getTribalGeog
 from NetworkComparison.tasks import genPolySize
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from celery.task.control import revoke
@@ -23,6 +23,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
             'county': self.county_geography_request,
             'viewshed': self.viewshed_request,
             'census_block': self.census_block_geography_request,
+            'tribal': self.tribal_geography_request
         }
         await self.accept()
 
@@ -91,6 +92,10 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         blockcode = content['blockcode']
         getCensusBlockGeog.delay(blockcode, self.channel_name, uuid)
 
+    async def tribal_geography_request(self, content, uuid):
+        geoid = content['geoid']
+        getTribalGeog.delay(geoid, self.channel_name, uuid)
+
     async def viewshed_request(self, content, uuid):
         lat = content['lat']
         lon = content['lon']
@@ -124,6 +129,9 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(event)
 
     async def censusblock_geog(self, event):
+        await self.send_json(event)
+
+    async def tribal_geog(self, event):
         await self.send_json(event)
 
     async def tower_viewshed(self, event):

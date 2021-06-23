@@ -18,6 +18,7 @@ export enum MarketEvalWSEvents {
     ZIP_GEOG_MSG = 'ws.geog_zip',
     COUNTY_GEOG_MSG = 'ws.geog_county',
     CENSUSBLOCK_GEOG_MSG = 'ws.geog_censusblock',
+    TRIBAL_GEOG_MSG = 'ws.geog_tribal',
     CLOUDRF_VIEWSHED_MSG = 'ws.viewshed_cloudrf',
     MKT_EVAL_WS_ERR = 'ws.mkt_eval_err',
 }
@@ -31,6 +32,12 @@ export type RDOFGeojsonResponse = {
 export type ZipGeojsonResponse = {
     error: number,
     zip?: string,
+    geojson?: string,
+};
+
+export type TribalGeojsonResponse = {
+    error: number,
+    geoid?: string,
     geojson?: string,
 };
 
@@ -227,6 +234,10 @@ class MarketEvaluatorWS {
                     const censusBlockGeog: CensusBlockGeojsonResponse = response.value as CensusBlockGeojsonResponse;
                     PubSub.publish(MarketEvalWSEvents.CENSUSBLOCK_GEOG_MSG, censusBlockGeog);
                     break;
+
+                case 'tribal.geog':
+                    const tribalGeog: TribalGeojsonResponse = response.value as TribalGeojsonResponse;
+                    PubSub.publish(MarketEvalWSEvents.TRIBAL_GEOG_MSG, tribalGeog)
 
                 case 'tower.viewshed':
                     const viewshed: ViewshedGeojsonResponse = response.value as ViewshedGeojsonResponse;

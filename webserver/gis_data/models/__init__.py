@@ -4,9 +4,9 @@ from .CensusShapes import (
     Tl2019UsCounty,
     Tl2019UsZcta510,
     Tl2020UsCensusBlocks,
+    TribalLands,
 )
 from .MsftBuildingOutlines import MsftBuildingOutlines
-
 
 __all__ = [
     "GISDataRouter",
@@ -15,4 +15,5 @@ __all__ = [
     "Tl2019UsCounty",
     "Tl2019UsZcta510",
     "Tl2020UsCensusBlocks",
+    "TribalLands",
 ]

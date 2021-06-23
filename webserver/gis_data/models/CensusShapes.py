@@ -142,3 +142,40 @@ class Tl2019UsZcta510(models.Model):
             cursor.execute(query_skeleton, [zipcode])
             result = cursor.fetchone()
             return result[0]
+
+
+class TribalLands(models.Model):
+    gid = models.AutoField(primary_key=True)
+    aiannhce = models.CharField(max_length=4, blank=True, null=True)
+    aiannhns = models.CharField(max_length=8, blank=True, null=True)
+    geoid = models.CharField(max_length=5, blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    namelsad = models.CharField(max_length=100, blank=True, null=True)
+    lsad = models.CharField(max_length=2, blank=True, null=True)
+    classfp = models.CharField(max_length=2, blank=True, null=True)
+    comptyp = models.CharField(max_length=1, blank=True, null=True)
+    aiannhr = models.CharField(max_length=1, blank=True, null=True)
+    mtfcc = models.CharField(max_length=5, blank=True, null=True)
+    funcstat = models.CharField(max_length=1, blank=True, null=True)
+    aland = models.FloatField(blank=True, null=True)
+    awater = models.FloatField(blank=True, null=True)
+    intptlat = models.CharField(max_length=11, blank=True, null=True)
+    intptlon = models.CharField(max_length=12, blank=True, null=True)
+    geom = models.MultiPolygonField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'tribal_lands'
+
+    @staticmethod
+    def getTribalGeog(geoid):
+        '''
+            Returns geojson for provided tribal geoid.
+        '''
+        query_skeleton = \
+            f"""SELECT ST_asgeojson(geom)
+            FROM {TribalLands._meta.db_table} WHERE geoid = %s"""
+        with connections['gis_data'].cursor() as cursor:
+            cursor.execute(query_skeleton, [geoid])
+            result = cursor.fetchone()
+            return result[0]

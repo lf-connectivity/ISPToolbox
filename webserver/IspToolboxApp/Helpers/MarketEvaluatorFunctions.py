@@ -1,7 +1,7 @@
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode, \
     checkIfPrecomputedIncomeAvailable, select_gis_database
 from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlab, StandardizedPostal
-from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty, Tl2020UsCensusBlocks
+from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty, Tl2020UsCensusBlocks, TribalLands
 from django.db import connections
 
 
@@ -207,6 +207,18 @@ def censusBlockGeog(blockcode):
     try:
         resp['geojson'] = Tl2020UsCensusBlocks.getBlockGeog(blockcode)
         resp['blockcode'] = blockcode
+    except BaseException:
+        resp = {'error': -2}
+    return resp
+
+def tribalGeog(geoid):
+    '''
+        Returns tribal area geojson for provided geoid.
+    '''
+    resp = {'error': 0}
+    try:
+        resp['geojson'] = TribalLands.getTribalGeog(geoid)
+        resp['geoid'] = geoid
     except BaseException:
         resp = {'error': -2}
     return resp

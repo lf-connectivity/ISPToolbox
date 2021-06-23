@@ -1,8 +1,7 @@
 from django.contrib.sessions.models import Session
 from django.views import View
 from workspace.models import (
-    AccessPointLocation, AccessPointCoverageBuildings,
-    CPELocation, APToCPELink, CoverageArea, AccessPointBasedCoverageArea
+    AccessPointLocation, AccessPointCoverageBuildings
 )
 from workspace import pagination
 from gis_data.models import MsftBuildingOutlines
@@ -18,6 +17,10 @@ import json
 
 
 class WorkspacePerformCreateMixin:
+    """
+    Mixin for REST Views to create new workspace models with foreign keys to the
+    reuqest session or request user
+    """
     def perform_create(self, serializer):
         session = None
         if self.request.session and self.request.session.session_key is not None:
@@ -27,6 +30,16 @@ class WorkspacePerformCreateMixin:
             user = None
         serializer.save(owner=user, session=session)
         return super(WorkspacePerformCreateMixin, self).perform_create(serializer)
+
+
+class WorkspaceFeatureGetQuerySetMixin:
+    """
+    Mixin for REST Views to get the appropriate query set for the model
+    using the request's user or session
+    """
+    def get_queryset(self):
+        model = self.serializer_class.Meta.model
+        return model.get_rest_queryset(self.request)
 
 
 # REST Views
@@ -57,6 +70,7 @@ class NetworkDetail(WorkspacePerformCreateMixin,
 class AccessPointLocationListCreate(mixins.ListModelMixin,
                                     WorkspacePerformCreateMixin,
                                     mixins.CreateModelMixin,
+                                    WorkspaceFeatureGetQuerySetMixin,
                                     generics.GenericAPIView):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
@@ -70,9 +84,6 @@ class AccessPointLocationListCreate(mixins.ListModelMixin,
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['name', 'last_updated', 'height', 'max_radius']
     ordering = ['-last_updated']
-
-    def get_queryset(self):
-        return AccessPointLocation.get_rest_queryset(self.request)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -91,13 +102,11 @@ class AccessPointLocationListCreate(mixins.ListModelMixin,
 class AccessPointLocationGet(mixins.RetrieveModelMixin,
                              mixins.DestroyModelMixin,
                              mixins.UpdateModelMixin,
+                             WorkspaceFeatureGetQuerySetMixin,
                              generics.GenericAPIView):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
     lookup_field = 'uuid'
-
-    def get_queryset(self):
-        return AccessPointLocation.get_rest_queryset(self.request)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -122,13 +131,11 @@ class CPELocationCreate(WorkspacePerformCreateMixin,
 class CPELocationGet(mixins.RetrieveModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
+                     WorkspaceFeatureGetQuerySetMixin,
                      generics.GenericAPIView):
     serializer_class = CPESerializer
     permission_classes = [AllowAny]
     lookup_field = 'uuid'
-
-    def get_queryset(self):
-        return CPELocation.get_rest_queryset(self.request)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -154,13 +161,11 @@ class APToCPELinkGet(WorkspacePerformCreateMixin,
                      mixins.RetrieveModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.UpdateModelMixin,
+                     WorkspaceFeatureGetQuerySetMixin,
                      generics.GenericAPIView):
     serializer_class = APToCPELinkSerializer
     lookup_field = 'uuid'
     permission_classes = [AllowAny]
-
-    def get_queryset(self):
-        return APToCPELink.get_rest_queryset(self.request)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -188,13 +193,11 @@ class CoverageAreaCreate(WorkspacePerformCreateMixin,
 class CoverageAreaGet(mixins.RetrieveModelMixin,
                       mixins.DestroyModelMixin,
                       mixins.UpdateModelMixin,
+                      WorkspaceFeatureGetQuerySetMixin,
                       generics.GenericAPIView):
     serializer_class = CoverageAreaSerializer
     permission_classes = [AllowAny]
     lookup_field = 'uuid'
-
-    def get_queryset(self):
-        return CoverageArea.get_rest_queryset(self.request)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -223,13 +226,11 @@ class APCoverageAreaGet(WorkspacePerformCreateMixin,
                         mixins.RetrieveModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.UpdateModelMixin,
+                        WorkspaceFeatureGetQuerySetMixin,
                         generics.GenericAPIView):
     serializer_class = APCoverageAreaSerializer
     permission_classes = [AllowAny]
     lookup_field = 'uuid'
-
-    def get_queryset(self):
-        return AccessPointBasedCoverageArea.get_rest_queryset(self.request)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)

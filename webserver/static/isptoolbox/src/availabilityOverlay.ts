@@ -43,7 +43,7 @@ export default class LidarAvailabilityLayer{
         this.map.on('mouseenter', HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER, (e: any) => {
             // Change the cursor style as a UI indicator.
             this.map.getCanvas().style.cursor = 'pointer';
-            var description = 'LiDAR Data Not Available Here'
+            var description = 'LiDAR Data Not<br>Available Here'
 
              
             // Populate the popup and set its coordinates

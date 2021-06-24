@@ -7,6 +7,6 @@ context('Test Latest Lidar View', () => {
   
     it('Check that latest gis view loads without errors', () => {
       // Page should load without any errors
-      cy.contains('United States').should('be.visible');
+      cy.contains('USGS').should('be.visible');
     });
 })

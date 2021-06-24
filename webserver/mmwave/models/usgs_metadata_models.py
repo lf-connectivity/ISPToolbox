@@ -3,6 +3,8 @@ from django.contrib.gis.db import models as gis_models
 from django.contrib.gis.geos import GEOSGeometry
 from datetime import datetime
 from django.conf import settings
+from django.db.models.signals import post_delete
+from django.dispatch.dispatcher import receiver
 from IspToolboxApp.util import s3
 from storages.backends.s3boto3 import S3Boto3Storage
 
@@ -68,7 +70,7 @@ class EPTLidarPointCloud(models.Model):
 
     @property
     def number_of_tiles(self):
-        return LidarTileModel.objects.filter(cld=self).count()
+        return LidarDSMTileModel.objects.filter(cld=self).count()
 
     @classmethod
     def query_intersect_aoi(cls, aoi: GEOSGeometry):
@@ -113,7 +115,7 @@ class EPTLidarPointCloud(models.Model):
     def existsTile(self, x, y, z, **kwargs):
         # Use or statement to allow development machines to get tiles
         return (
-            LidarTileModel.objects.filter(cld=self, x=x, y=y, zoom=z).exists() or
+            LidarDSMTileModel.objects.filter(cld=self, x=x, y=y, zoom=z).exists() or
             s3.checkObjectExists(self.get_s3_key_tile(x, y, z, **kwargs))
         )
 
@@ -149,14 +151,35 @@ class TileModel(models.Model, s3.S3PublicExportMixin):
         abstract = True
 
 
-class LidarTileModel(TileModel):
+class LidarDSMTileModel(TileModel):
     """
     Slippy Tile that is associated with Lidar point cloud
     """
     cld = models.ForeignKey(EPTLidarPointCloud, on_delete=models.CASCADE)
+    bucket_name = 'isptoolbox-export-file'
+
+    def upload_to_path(instance, filename):
+        prefix = "dsm/tiles_test"
+        if settings.PROD:
+            prefix = "dsm/tiles"
+        cloud_name = f"{instance.cld.pk}-{instance.cld.name}"
+        return f"{prefix}/{cloud_name}/{instance.zoom}/{instance.x}/{instance.y}.tif"
+
+    tile = models.FileField(
+        upload_to=upload_to_path,
+        storage=S3Boto3Storage(bucket_name=bucket_name, location=''),
+    )
 
     def get_s3_key(self, **kwargs):
         return self.cld.get_s3_key_tile(self.x, self.y, self.z, **kwargs)
+
+
+@receiver(post_delete, sender=LidarDSMTileModel)
+def cleanup_tile(sender, instance, using, **kwargs):
+    """
+    Delete file in S3 if we delete the model in the database
+    """
+    instance.tile.delete(save=False)
 
 
 class USGSLidarMetaDataModel(models.Model):

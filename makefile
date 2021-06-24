@@ -20,7 +20,7 @@ prod_shell:
 
 debug_shell:
 	@echo ----------------------------------------------STARTING DEBUG SHELL----------------------------------------
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build django-app
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py shell
 
 default_objects:

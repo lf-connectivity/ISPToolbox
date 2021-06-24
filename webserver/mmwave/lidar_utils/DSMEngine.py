@@ -1,9 +1,11 @@
 import subprocess
 import shlex
+import shutil
 import tempfile
 from typing import Iterator
 
 from django.contrib.gis.geos.geometry import GEOSGeometry
+from mmwave.lidar_utils.SlippyTiles import addBufferToPolygon
 from mmwave.models import EPTLidarPointCloud
 
 
@@ -16,7 +18,8 @@ class DSMEngine:
         clouds: str - List of EPT Paths
     """
     def __init__(self, polygon: GEOSGeometry, clouds: Iterator[EPTLidarPointCloud], projection=3857):
-        self.polygon = polygon.transform(projection, clone=True)
+        self.original_polygon = polygon
+        self.transformed_polygon = polygon.transform(projection, clone=True)
         self.clouds = clouds
 
     def getDSM(self, resolution, filepath, filter_outliers=False):
@@ -38,7 +41,7 @@ class DSMEngine:
             for cloud in self.clouds:
                 with tempfile.NamedTemporaryFile(suffix=".tif", delete=False, dir=tmp_dir) as tmp_tif:
                     files.append(tmp_tif.name)
-                    query_json = self.__createQueryPipeline(resolution, tmp_tif.name, cloud.url, cloud.noisy_data)
+                    query_json = self.__createQueryPipeline(resolution, tmp_tif.name, cloud)
                     command = shlex.split(
                         'pdal pipeline --stdin'
                     )
@@ -46,9 +49,12 @@ class DSMEngine:
                     process.stdin.write(query_json.encode())
                     process.stdin.close()
                     process.wait()
-            # Combine clouds together
-            process = self.__combineTifs(files, filepath)
-            process.wait()
+            if len(files) == 1:
+                shutil.copy(files[0], filepath)
+            else:
+                # Combine clouds together
+                process = self.__combineTifs(files, filepath)
+                process.wait()
             return process
 
     def __combineTifs(self, files, output_filepath):
@@ -58,16 +64,20 @@ class DSMEngine:
         process = subprocess.Popen(cmd)
         return process
 
-    def __createQueryPipeline(self, resolution, outputfilepath, source, filter_outliers: bool):
+    def __createQueryPipeline(self, resolution: float, outputfilepath : str, cloud: EPTLidarPointCloud):
         """
         Creates the json string that pdal uses as a pipeline
         pdal docs: https://pdal.io/project/docs.html
 
         (has a statistical filter for outlier points )
-        TODO achong: check LAS version to use classifications of high noise
-        points
-        TODO achong: combine multiple clouds together
         """
+        source = cloud.url
+        filter_outliers = cloud.noisy_data
+        
+        # If we are going to filter outlilers we should load data a little outside the boundary
+        source_bounding_box = self.transformed_polygon
+        if filter_outliers:
+            source_bounding_box = addBufferToPolygon(self.transformed_polygon)
         outlier_filter = f"""
         {{
             "class": 18,
@@ -87,14 +97,14 @@ class DSMEngine:
                 "type":"readers.ept",
                 "filename": "{source}",
                 "bounds": "{
-                    [self.polygon.extent[0], self.polygon.extent[2]],
-                    [self.polygon.extent[1], self.polygon.extent[3]]}",
+                    [source_bounding_box.extent[0], source_bounding_box.extent[2]],
+                    [source_bounding_box.extent[1], source_bounding_box.extent[3]]}",
                 "resolution" : {resolution}
             }},
             {outlier_filter if filter_outliers else ''}
             {{
                 "type":"filters.crop",
-                "polygon":"{self.polygon.wkt}"
+                "polygon":"{self.transformed_polygon.wkt}"
             }},
             {{
                 "type":"writers.gdal",

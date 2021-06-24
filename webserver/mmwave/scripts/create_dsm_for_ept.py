@@ -1,7 +1,7 @@
 from mmwave.lidar_utils.SlippyTiles import getTiles, getBoundaryofTile, DEFAULT_OUTPUT_ZOOM
 from mmwave.lidar_utils.DSMEngine import DSMEngine
 from webserver.celery import celery_app as app
-from mmwave.models import EPTLidarPointCloud, LidarTileModel
+from mmwave.models import EPTLidarPointCloud, LidarDSMTileModel
 import tempfile
 
 
@@ -28,14 +28,15 @@ def createTileDSM(tile: tuple, z: int, pk: int):
     # Load the Tile and the Point Cloud
     x, y = tile
     cloud = EPTLidarPointCloud.objects.get(pk=pk)
-    lidartile, created = LidarTileModel.objects.get_or_create(
-        cloud=cloud, zoom=z, x=x, y=y
+    lidartile, created = LidarDSMTileModel.objects.get_or_create(
+        cld=cloud, zoom=z, x=x, y=y
     )
     boundary_tile = getBoundaryofTile(x, y, DEFAULT_OUTPUT_ZOOM)
     # If tile is valid run computation
-    if created:
+    if created or not lidartile.tile.name:
         engine = DSMEngine(boundary_tile, [cloud])
         with tempfile.NamedTemporaryFile(suffix='.tif') as tmp_tif:
             engine.getDSM(1.0, tmp_tif.name)
-            lidartile.save('', tmp_tif)
+            lidartile.tile.save(f'{lidartile.pk}', tmp_tif)
     lidartile.save()
+    return lidartile.pk

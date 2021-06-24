@@ -38,5 +38,10 @@ def getBoundaryofTile(x: int, y: int, z: int) -> Polygon:
     lat_min, lng_max = num2deg(x+1, y+1, z)
     polygon = Polygon.from_bbox((lng_min, lat_min, lng_max, lat_max))
     polygon.srid = 4326
-    polygon = polygon.buffer(BUFFER_TILE)
     return polygon
+
+
+def addBufferToPolygon(polygon: Polygon, buffer=BUFFER_TILE) -> Polygon:
+    if polygon.srid != 4236:
+        return polygon.transform(4236, clone=True).buffer(buffer).transform(polygon.srid, clone=True)
+    return polygon.buffer(buffer)

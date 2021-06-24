@@ -23,6 +23,7 @@
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
 <meta property="og:image"
     content="https://static.isptoolbox.io/static/open-graph/{{year}}-{{month}}-latest-lidar-open-graph-preview.jpg" />
+<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{% url 'demo-latest_gis-nodate' %}" />
 {% endblock %}
 
 {% block beforenav %}

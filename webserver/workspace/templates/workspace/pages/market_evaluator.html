@@ -11,10 +11,8 @@
     {% include "market_evaluator/organisms/market_stats_column.html" %}
     <div id='map' class='planner-map col order-1 order-lg-2' style="min-height: 500px">
       <div class="on-map-controls">
-        <div>
-          {% include "workspace/atoms/components/reconnecting_msg.html" %}
-          <div id="geocoder" class="geocoder-container"></div>
-        </div>
+        {% include "workspace/atoms/components/reconnecting_msg.html" %}
+        <div id="geocoder" class="geocoder-container"></div>
       </div>
     </div>
   </div>

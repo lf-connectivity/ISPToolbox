@@ -280,7 +280,7 @@ class MarketEvaluatorWS {
      * @param req Json Object
      * @returns The request-identifying UUID sent with the request
      */
-    private sendJson(req: Object): UUID {
+    private sendJsonWithUUID(req: Object): UUID {
         const reqUUID: UUID = uuid();
         this.currentRequestUUID = reqUUID;
         const reqWithUUID = {
@@ -305,7 +305,7 @@ class MarketEvaluatorWS {
      * @returns The request-identifying UUID
      */
     sendPolygonRequest(include: GeoArea): UUID {
-        return this.sendJson({
+        return this.sendJsonWithUUID({
             request_type: 'standard_polygon',
             include: this.convertGeoJSONObject(include),
         });
@@ -317,7 +317,7 @@ class MarketEvaluatorWS {
      * @returns The request-identifying UUID
      */
     sendRDOFRequest(cbgid: string): UUID {
-        return this.sendJson({
+        return this.sendJsonWithUUID({
             request_type: 'grant',
             cbgid,
         });
@@ -329,7 +329,7 @@ class MarketEvaluatorWS {
      * @returns The request-identifying UUID
      */
     sendZipRequest(zip: string): UUID {
-        return this.sendJson({
+        return this.sendJsonWithUUID({
             request_type: 'zip',
             zip,
         });
@@ -342,7 +342,7 @@ class MarketEvaluatorWS {
      * @returns The request-identifying UUID
      */
     sendCountyRequest(countycode: string, statecode: string): UUID {
-        return this.sendJson({
+        return this.sendJsonWithUUID({
             request_type: 'county',
             countycode,
             statecode,
@@ -355,9 +355,16 @@ class MarketEvaluatorWS {
      * @returns The request-identifying UUID
      */
     sendCensusBlockRequest(blockcode: string): UUID {
-        return this.sendJson({
+        return this.sendJsonWithUUID({
             request_type: 'census_block',
             blockcode,
+        });
+    }
+
+    sendTribalRequest(geoid: string): UUID {
+        return this.sendJsonWithUUID({
+            request_type: 'tribal',
+            geoid,
         });
     }
 
@@ -371,7 +378,7 @@ class MarketEvaluatorWS {
      * @returns The request-identifying UUID
      */
     sendViewshedRequest(customerHeight: number, height: number, lat: number, lon: number, radius: number): UUID {
-        return this.sendJson({
+        return this.sendJsonWithUUID({
             request_type: 'viewshed',
             customerHeight,
             height,

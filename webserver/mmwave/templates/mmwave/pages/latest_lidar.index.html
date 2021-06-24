@@ -16,9 +16,10 @@
 <link href='{% static "stylesheets/pages/new-gis.css" %}' rel='stylesheet' />
 <title>{% translate 'Latest LiDAR Data - ISP Toolbox'%}</title>
 <!-- Open Graph-->
-<meta property="og:title" content="{%translate 'ISP Toolbox - Latest LiDAR Data'%} {{month_name}} {{year}}" />
+<meta property="og:title"
+    content="{%translate 'ISP Toolbox - Latest LiDAR Data for LOS Check'%} ({{month_name}} {{year}})" />
 <meta property="og:type" content="website" />
-<meta property="og:description" content="{%translate 'See what areas have new LiDAR coverage'%}" />
+<meta property="og:description" content="{%translate 'See newly released areas that have LiDAR Coverage'%}" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
 <meta property="og:image"
     content="https://static.isptoolbox.io/static/open-graph/{{year}}-{{month}}-latest-lidar-open-graph-preview.jpg" />

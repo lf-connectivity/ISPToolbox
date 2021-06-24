@@ -48,6 +48,7 @@ export abstract class BaseWorkspaceFeature{
         else {
             // @ts-ignore
             this.mapboxId = String(this.draw.add(featureData)[0]);
+            this.formatLastUpdated();
         }
         this.apiEndpoint = apiEndpoint;
         this.responseFields = responseFields.concat(BASE_WORKSPACE_RESPONSE_FIELDS);
@@ -164,6 +165,17 @@ export abstract class BaseWorkspaceFeature{
         this.draw.setFeatureProperty(this.mapboxId, key, value);
     }
 
+    formatLastUpdated() {
+        if (this.getFeatureProperty('last_updated')) {
+            let date = this.getFeatureProperty('last_updated');
+
+            // Match mm/dd/yyyy + stuff (serializer format) and turn it into mm/dd/yy
+            const dateRegex = /^([0-9]{2})\/([0-9]{2})\/[0-9]{2}([0-9]{2}).*$/;
+            const matches = date.match(dateRegex);
+            this.setFeatureProperty('last_updated', `${matches[1]}/${matches[2]}/${matches[3]}`)
+        }
+    }
+
     getFeatureProperty(key: string) {
         return this.getFeatureData()?.properties[key];
     }
@@ -180,6 +192,7 @@ export abstract class BaseWorkspaceFeature{
                 this.setFeatureProperty(field, response[field]);
             }
         });
+        this.formatLastUpdated();
     }
 
     protected serialize() {

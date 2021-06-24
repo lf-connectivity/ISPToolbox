@@ -23,6 +23,10 @@ const HGT_INPUT_ID = 'hgt-input-tower-popup';
 const CPE_HGT_INPUT_ID = 'cpe-hgt-input-tower-popup';
 const RADIUS_INPUT_ID = 'radius-input-tower-popup';
 const STATS_LI_ID = 'stats-li-tower-popup';
+const PLOT_COVERAGE_BUTTON_ID = 'plot-estimated-coverage-button-tower-popup';
+const COVERAGE_LI_ID = 'coverage-li-tower-popup';
+const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
+const DELETE_ROW_DIV_ID = 'delete-tower-row-tower-popup';
 
 enum ImperialToMetricConversion {
     FT_TO_M = 'ft2m',
@@ -39,17 +43,11 @@ CONVERSION_FORMULAS.set(ImperialToMetricConversion.MI_TO_KM, (input: number) => 
     return isUnitsUS() ? miles2km(input) : input
 });
 
-export class LinkCheckTowerPopup extends LinkCheckBasePopup {
-    private accessPoint?: AccessPoint;
-    private accessPointMoving: boolean;
-    private static _instance: LinkCheckTowerPopup;
+export abstract class BaseTowerPopup extends LinkCheckBasePopup {
+    protected accessPoint?: AccessPoint;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
-        if (LinkCheckTowerPopup._instance) {
-            return LinkCheckTowerPopup._instance;
-        }
         super(map, draw);
-        LinkCheckTowerPopup._instance = this;
     }
 
     getAccessPoint(): AccessPoint | undefined {
@@ -63,40 +61,35 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         this.setLngLat(accessPoint.getFeatureGeometryCoordinates());
     }
 
-    static onAPUpdate(ap: AccessPoint) {
-        const popup = LinkCheckTowerPopup.getInstance();
-        if (popup.accessPoint === ap) {
-            $(`#${STATS_LI_ID}`).html(popup.getStatsHTML());
-            popup.setEventHandlers();
+    onAPUpdate(ap: AccessPoint) {
+        if (this.accessPoint === ap) {
+            this.refreshPopup();
             // Adjust lat/lng/height if they have been changed from bottom bar
-            let coord = popup.accessPoint.getFeatureGeometryCoordinates();
+            let coord = this.accessPoint.getFeatureGeometryCoordinates();
             let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
             if(coord_input != null){
                 if (String(coord_input[0]) !== coord[1].toFixed(5) ||
                     String(coord_input[1]) !== coord[0].toFixed(5)) {
                         $(`#${LAT_LNG_INPUT_ID}`).val(`${coord[1].toFixed(5)}, ${coord[0].toFixed(5)}`);
-                        popup.lnglat = [coord[0], coord[1]];
-                        popup.popup.setLngLat(popup.lnglat);
+                        this.setLngLat([coord[0], coord[1]]);
+                        this.popup.setLngLat(this.lnglat);
                 }
             }
 
-            $(`#${HGT_INPUT_ID}`).val(popup.getHeightValue());
+            $(`#${HGT_INPUT_ID}`).val(this.getHeightValue());
+            $(`#${DELETE_ROW_DIV_ID}`).html(this.getDeleteRow());
+            this.setEventHandlers();
         }
     }
 
-    static getInstance() {
-        if (LinkCheckTowerPopup._instance) {
-            return LinkCheckTowerPopup._instance;
-        }
-        else {
-            throw new Error('No instance of LinkCheckTowerPopup instantiated.')
-        }
-    }
+    protected cleanup() {}
 
-    protected cleanup() {
-        if (!this.accessPointMoving) {
-            this.accessPoint = undefined;
-        }
+    protected getHeightValue() {
+        return Math.round(
+            isUnitsUS() ?
+            this.accessPoint?.getFeatureProperty('height_ft') :
+            this.accessPoint?.getFeatureProperty('height')
+       )
     }
 
     protected setEventHandlers() {
@@ -137,7 +130,7 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
             );
         }
 
-        $(`#tower-delete-btn`).off().on('click', () => {
+        $(`#${TOWER_DELETE_BUTTON_ID}`).off().on('click', () => {
             $(`#ap-delete-confirm-btn`).off().on('click', () => {
                 this.map.fire('draw.delete', {features: [this.accessPoint?.getFeatureData()]});
                 PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
@@ -158,54 +151,6 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
         createNumberChangeCallback(CPE_HGT_INPUT_ID, 'default_cpe_height', ImperialToMetricConversion.FT_TO_M, validateHeight);
 
         createCoordinateChangeCallback(LAT_LNG_INPUT_ID);
-    }
-
-    protected getStatsHTML() {
-        if (this.accessPoint){
-            if(this.accessPoint.getFeatureProperty('serviceable') != null &&
-                this.accessPoint.getFeatureProperty('unserviceable') != null &&
-                this.accessPoint.getFeatureProperty('unknown') != null && 
-                this.accessPoint.getFeatureProperty('unknown') === 0){
-                return `
-                    <div class="ap-stat">
-                        <p class="ap-stat--label">Clear LOS Rooftops</p>
-                        <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
-                            <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
-                            ${this.accessPoint.getFeatureProperty('serviceable')}
-                        </p>
-                    </div>
-                    <div class="ap-stat">
-                        <p class="ap-stat--label">Obstructed Rooftops</p>
-                        <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
-                            <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
-                            ${this.accessPoint.getFeatureProperty('unserviceable')}
-                        </p>
-                    </div>
-                    <div class="node-edits">
-                        <a id="tower-delete-btn" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
-                        <p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>
-                    </div>
-            `;
-            }
-        }
-        return `
-            <div align="center">
-                <img src="${ap_icon}" height="35" width="35">
-                <p align="center"><b>Plotting Lidar Coverage</p>
-                <p align="center">This may take several minutes</p>
-            </div>
-            <div class="node-edits">
-                <a id="tower-delete-btn" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
-            </div>
-        `;
-    }
-
-    protected getHeightValue() {
-        return Math.round(
-            isUnitsUS() ?
-            this.accessPoint?.getFeatureProperty('height_ft') :
-            this.accessPoint?.getFeatureProperty('height')
-       )
     }
 
     protected getHTML() {
@@ -277,12 +222,133 @@ export class LinkCheckTowerPopup extends LinkCheckBasePopup {
                                 <span>${isUnitsUS() ? 'mi' : 'km'}</span>
                             </div>
                         </li>
-                        <li class="stat-row" id=${STATS_LI_ID}>
-                            ${this.getStatsHTML()}
-                        </li>
+                        ${this.getAdditionalInfo()}
+                        <div class="node-edits" id="${DELETE_ROW_DIV_ID}">
+                            ${this.getDeleteRow()}
+                        </div>
                     </ul>
                 </div>
             </div>
         `;
+    }
+
+    protected getAdditionalInfo(): string {
+        return '';
+    }
+
+    protected refreshPopup(): void {
+    }
+
+    protected getDeleteRow() {
+        if (this.accessPoint) {
+            console.log(this.accessPoint.getFeatureProperty('last_updated'));
+        }
+        return `
+            <a id="${TOWER_DELETE_BUTTON_ID}" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
+            ${this.accessPoint && this.accessPoint.getFeatureProperty('last_updated') ? 
+                `<p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>` : ''
+            }
+        `;
+    }
+}
+
+export class LinkCheckTowerPopup extends BaseTowerPopup {
+    private static _instance: LinkCheckTowerPopup;
+
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        if (LinkCheckTowerPopup._instance) {
+            return LinkCheckTowerPopup._instance;
+        }
+        super(map, draw);
+        LinkCheckTowerPopup._instance = this;
+    }
+
+    static getInstance() {
+        if (LinkCheckTowerPopup._instance) {
+            return LinkCheckTowerPopup._instance;
+        }
+        else {
+            throw new Error('No instance of LinkCheckTowerPopup instantiated.')
+        }
+    }
+
+    protected getAdditionalInfo() {
+        return `
+            <li class="stat-row" id='${STATS_LI_ID}'>
+                ${this.getStatsHTML()}
+            </li>
+        `;
+    }
+
+    protected getStatsHTML() {
+        if (this.accessPoint){
+            if(this.accessPoint.getFeatureProperty('serviceable') != null &&
+                this.accessPoint.getFeatureProperty('unserviceable') != null &&
+                this.accessPoint.getFeatureProperty('unknown') != null && 
+                this.accessPoint.getFeatureProperty('unknown') === 0){
+                return `
+                    <div class="ap-stat">
+                        <p class="ap-stat--label">Clear LOS Rooftops</p>
+                        <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
+                            <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
+                            ${this.accessPoint.getFeatureProperty('serviceable')}
+                        </p>
+                    </div>
+                    <div class="ap-stat">
+                        <p class="ap-stat--label">Obstructed Rooftops</p>
+                        <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
+                            <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
+                            ${this.accessPoint.getFeatureProperty('unserviceable')}
+                        </p>
+                    </div>
+            `;
+            }
+        }
+        return `
+            <div align="center">
+                <img src="${ap_icon}" height="35" width="35">
+                <p align="center"><b>Plotting Lidar Coverage</p>
+                <p align="center">This may take several minutes</p>
+            </div>
+        `;
+    }
+
+    protected refreshPopup() {
+        $(`#${STATS_LI_ID}`).html(this.getStatsHTML());
+    }
+}
+
+export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
+    private static _instance: MarketEvaluatorTowerPopup;
+
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        if (MarketEvaluatorTowerPopup._instance) {
+            return MarketEvaluatorTowerPopup._instance;
+        }
+        super(map, draw);
+        MarketEvaluatorTowerPopup._instance = this;
+    }
+
+    static getInstance() {
+        if (MarketEvaluatorTowerPopup._instance) {
+            return MarketEvaluatorTowerPopup._instance;
+        }
+        else {
+            throw new Error('No instance of MarketEvaluatorTowerPopup instantiated.')
+        }
+    }
+
+    protected getAdditionalInfo() {
+        return `
+            <li class="button-row" id='${COVERAGE_LI_ID}'>
+                ${this.getButtonHTML()}
+            </li>
+        `
+    }
+
+    protected getButtonHTML() {
+        return `
+            <button class='btn btn-primary isptoolbox-btn' id='${PLOT_COVERAGE_BUTTON_ID}'>Plot Estimated Coverage</button>
+        `
     }
 }

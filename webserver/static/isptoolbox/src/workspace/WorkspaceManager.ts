@@ -15,7 +15,7 @@ import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { ViewshedTool } from "../organisms/ViewshedTool";
 import { BuildingCoverage, BuildingCoverageStatus, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
-import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
+import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/TowerPopups";
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { FeatureCollection } from "@turf/turf";
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
@@ -648,7 +648,7 @@ export class WorkspaceManager {
                                 ap.setFeatureProperty(status, null);
                             });
                             ap.coverage = EMPTY_BUILDING_COVERAGE;
-                            LinkCheckTowerPopup.onAPUpdate(ap);
+                            LinkCheckTowerPopup.getInstance().onAPUpdate(ap);
                         });
                         break;
                     case WorkspaceFeatureTypes.CPE:
@@ -778,7 +778,7 @@ export class WorkspaceManager {
                     }
                     this.draw.setFeatureProperty((feat.id as string), 'last_updated', now);
                 });
-                LinkCheckTowerPopup.onAPUpdate(this.features[message.uuid] as AccessPoint);
+                LinkCheckTowerPopup.getInstance().onAPUpdate(this.features[message.uuid] as AccessPoint);
             },
             "method": "GET",
             "headers": {

@@ -23,7 +23,7 @@ import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
 import { getStreetAndAddressInfo, isBeta, validateHeight, validateLat, validateLng } from './LinkCheckUtils';
 import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup, LinkCheckVertexClickCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
-import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckTowerPopup";
+import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/TowerPopups";
 import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
 import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearchTool";
 import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";

@@ -1,0 +1,15 @@
+<div class="market_overlay--row">
+	<p class="market_overlay--label">
+		{% include "workspace/atoms/icons/swatch.html" with swatchType=swatchType %}
+		<span>
+			{{ layerName }}
+		</span>
+	</p>
+	<div class="market_overlay--controls">
+		{% include "workspace/atoms/toggle_switch.html" with id=layerId %}
+
+		{% with tooltipDesc as tooltip %}
+			{% include 'workspace/atoms/info_tooltip_and_marker.html' %}
+		{% endwith %}
+	</div>
+</div>

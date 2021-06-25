@@ -139,10 +139,24 @@ class MarketEvaluatorWS {
     ws: WebSocket;
     message_handlers: Array<MarketEvaluatorWSCallback>;
     currentRequestUUID: UUID;
+    private static _instance: MarketEvaluatorWS;
 
     constructor(message_handlers: Array<MarketEvaluatorWSCallback>) {
+        if (MarketEvaluatorWS._instance) {
+            throw Error("This singleton has already been instantiated, use getInstance.");
+        }
         this.message_handlers = message_handlers;
         this.connect();
+        MarketEvaluatorWS._instance = this;
+    }
+
+    static getInstance(): MarketEvaluatorWS {
+        if (MarketEvaluatorWS._instance) {
+            return MarketEvaluatorWS._instance;
+        }
+        else {
+            throw new Error('No Instance of MarketEvaluatorWS instantiated.');
+        }
     }
 
     protected setConnectionStatus(connected: boolean) {

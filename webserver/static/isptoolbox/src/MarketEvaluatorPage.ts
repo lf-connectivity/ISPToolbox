@@ -2,8 +2,8 @@
 import * as MapboxGL from "mapbox-gl";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import MarketEvaluatorWS from "./MarketEvaluatorWS";
-//@ts-ignore
-import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
+import { MarketEvaluatorSidebarManager } from './organisms/MarketEvaluatorSidebarManager';
+import MarketEvaluatorOverlayManager from "./MarketEvaluatorOverlayManager";
 
 import { OverrideDirect, OverrideSimple, APDrawMode, OverrideDrawPolygon } from './isptoolbox-mapbox-draw/index';
 import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
@@ -14,6 +14,7 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     marketEvalWS: MarketEvaluatorWS;
+    overlayManager: MarketEvaluatorOverlayManager;
 
     constructor() {
         super({
@@ -23,12 +24,13 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
             draw_polygon: OverrideDrawPolygon()
         });
 
-        this.marketEvalWS = new MarketEvaluatorWS([]);
+        new MarketEvaluatorWS([]);
         MarketEvaluatorSidebarManager.getInstance().initializePopovers();
     }
 
     onMapLoad() {
         // stuff might go here later
+        new MarketEvaluatorOverlayManager(this.map);
         new MarketEvaluatorWorkspaceManager(this.map, this.draw);
 
         // Tooltips

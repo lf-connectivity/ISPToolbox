@@ -1,0 +1,55 @@
+@import ../theme
+
+.market_overlay
+    &--column
+        background-color: $light-gray-color
+            
+    &--section-header
+        border-bottom: solid 2px $brand-secondary-color
+        h5
+            margin: 0
+            font-style: normal
+            font-weight: bold
+            font-size: 16px
+            line-height: 27px
+            letter-spacing: 0.01em
+            padding-bottom: 5px
+
+    &--row
+        align-items: center
+        border-bottom: 1px solid $light-gray-color-2
+        display: flex
+        justify-content: space-between
+        margin: 0
+        padding: 0.8rem 0
+        position: relative
+        &:last-of-type
+            border-bottom: 0
+            padding-bottom: 0
+
+    &--label
+        font-size: 15px
+        font-style: normal
+        font-weight: normal
+        letter-spacing: 0.04em
+        margin: 0 10px 0 0
+        max-width: 158px
+        display: flex
+        flex-flow: row
+        align-items: center
+
+    &--controls
+        display: flex
+        align-items: center
+
+@media (max-width: $breakpoint-xl)
+    .market_overlay
+        &--row
+            flex-flow: column
+            align-items: unset
+        &--controls
+            justify-content: space-between
+            margin-left: 18px
+            margin-top: 3px
+
+    

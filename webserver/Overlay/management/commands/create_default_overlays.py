@@ -34,6 +34,12 @@ def create_sample_overlays():
             source_layer='censusblocks'
         )
         censusBlocks[0].save()
+        tribal = Overlay.objects.get_or_create(
+            type='tribal',
+            source_url='mapbox://isptoolbox.414dhikj',
+            source_layer='tl_2020_us_aiannh-4pkmr1'
+        )
+        tribal[0].save()
         return True
     except Exception:
         return False

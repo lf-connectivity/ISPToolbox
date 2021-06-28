@@ -1,7 +1,7 @@
 import mapboxgl, * as MapboxGL from "mapbox-gl";
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Point, LineString, GeoJsonProperties, Polygon }  from 'geojson';
-import { WorkspaceEvents } from './WorkspaceConstants';
+import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
 
@@ -17,9 +17,10 @@ export abstract class BaseWorkspaceFeature{
     map: MapboxGL.Map;
     draw: MapboxDraw;
 
-    private readonly responseFields: Array<string>
-    private readonly serializerFields: Array<string>
-    private readonly apiEndpoint: string
+    private readonly featureType: WorkspaceFeatureTypes;
+    private readonly responseFields: Array<string>;
+    private readonly serializerFields: Array<string>;
+    private readonly apiEndpoint: string;
 
     /**
      * Base constructor for a workspace feature. Sets parameters that will be
@@ -39,7 +40,8 @@ export abstract class BaseWorkspaceFeature{
                 featureData: Feature<Geometry, any> | string,
                 apiEndpoint: string,
                 responseFields: Array<string>,
-                serializedFields: Array<string>) {
+                serializedFields: Array<string>,
+                featureType: WorkspaceFeatureTypes) {
         this.map = map;
         this.draw = draw;
         if (typeof featureData == 'number') {
@@ -53,6 +55,7 @@ export abstract class BaseWorkspaceFeature{
         this.apiEndpoint = apiEndpoint;
         this.responseFields = responseFields.concat(BASE_WORKSPACE_RESPONSE_FIELDS);
         this.serializerFields = serializedFields;
+        this.featureType = featureType;
 
         let feature = this.draw.get(this.mapboxId);
         // @ts-ignore
@@ -96,9 +99,8 @@ export abstract class BaseWorkspaceFeature{
      * intended to fire additional Mapbox events.
      */
     update(successFollowup?: (resp: any) => void) {
-        let feature = this.draw.get(this.mapboxId);
         $.ajax({
-            url: `${this.apiEndpoint}/${feature?.properties?.uuid}/`,
+            url: `${this.apiEndpoint}/${this.workspaceId}/`,
             method: 'PATCH',
             data: this.serialize(),
             headers: {
@@ -122,11 +124,10 @@ export abstract class BaseWorkspaceFeature{
      * intended to fire additional Mapbox events.
      */
     delete(successFollowup?: (resp: any) => void) {
-        let removedFeature = this.removeFeatureFromMap(this.mapboxId);
+        this.removeFeatureFromMap(this.mapboxId);
         $.ajax({
-            url: `${this.apiEndpoint}/${removedFeature?.properties?.uuid}/`,
+            url: `${this.apiEndpoint}/${this.workspaceId}/`,
             method: 'DELETE',
-            data: this.serialize(),
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),
                 'Accept': 'application/json'
@@ -145,7 +146,7 @@ export abstract class BaseWorkspaceFeature{
      * @returns A string indicating this feature's feature type
      */
     getFeatureType(): string {
-        return this.getFeatureData()?.properties?.feature_type;
+        return this.featureType;
     }
 
     getFeatureData(): Feature<Geometry, any> {
@@ -181,9 +182,7 @@ export abstract class BaseWorkspaceFeature{
     }
 
     protected removeFeatureFromMap(mapboxId: string) {
-        let feature = this.getFeatureData();
         this.draw.delete(mapboxId);
-        return feature;
     }
 
     protected updateFeatureProperties(response: any) {

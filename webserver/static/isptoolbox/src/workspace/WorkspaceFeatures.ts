@@ -3,7 +3,7 @@ import { Feature, Geometry, Point, LineString, Polygon }  from 'geojson';
 import { BaseWorkspaceFeature, WorkspaceLineStringFeature, WorkspacePointFeature, WorkspacePolygonFeature } from './BaseWorkspaceFeature';
 import { isUnitsUS } from '../utils/MapPreferences';
 import { LinkCheckEvents } from '../LinkCheckPage';
-import { WorkspaceEvents } from './WorkspaceConstants'
+import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants'
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 
@@ -35,7 +35,7 @@ export class AccessPoint extends WorkspacePointFeature {
     constructor(map: mapboxgl.Map,
                 draw: MapboxDraw,
                 featureData: Feature<Geometry, any> | string) {
-        super(map, draw, featureData, AP_API_ENDPOINT, AP_RESPONSE_FIELDS, AP_SERIALIZER_FIELDS);
+        super(map, draw, featureData, AP_API_ENDPOINT, AP_RESPONSE_FIELDS, AP_SERIALIZER_FIELDS, WorkspaceFeatureTypes.AP);
         this.links = new Map();
         this.coverage = EMPTY_BUILDING_COVERAGE
         this.awaitingCoverage = false;
@@ -73,8 +73,11 @@ export class AccessPoint extends WorkspacePointFeature {
                 cpe.ap = undefined;
 
                 // Link is already deleted in backend because of cascading delete
-                let deletedLink = this.removeFeatureFromMap(link.mapboxId);
-                let deletedCPE = this.removeFeatureFromMap(cpe.mapboxId);
+                let deletedLink = link.getFeatureData();
+                this.removeFeatureFromMap(link.mapboxId);
+                let deletedCPE = cpe.getFeatureData();
+                this.removeFeatureFromMap(cpe.mapboxId);
+                console.log(`${cpe.mapboxId} ${deletedCPE}\t${link.mapboxId} ${deletedLink}`)
                 this.map.fire('draw.delete', {features: [deletedLink, deletedCPE]});
             });
             this.links.clear();
@@ -144,7 +147,7 @@ export class CPE extends WorkspacePointFeature {
     constructor(map: MapboxGL.Map,
                 draw: MapboxDraw,
                 featureData: Feature<Geometry, any>) {
-        super(map, draw, featureData, CPE_ENDPOINT, CPE_RESPONSE_FIELDS, CPE_SERIALIZER_FIELDS);
+        super(map, draw, featureData, CPE_ENDPOINT, CPE_RESPONSE_FIELDS, CPE_SERIALIZER_FIELDS, WorkspaceFeatureTypes.CPE);
     }
 
     /**
@@ -176,8 +179,11 @@ export class CPE extends WorkspacePointFeature {
             if (this.ap) {
                 let link = this.ap.links.get(this) as APToCPELink;
                 this.ap.links.delete(this);
-                let removedLink = this.removeFeatureFromMap(link.mapboxId);
-                this.map.fire('draw.delete', {features: [removedLink]});
+                let removedLink = link.getFeatureData();
+                this.removeFeatureFromMap(link.mapboxId);
+                if (removedLink) {
+                    this.map.fire('draw.delete', {features: [removedLink]});
+                }
                 this.ap = undefined;
             }
 
@@ -205,7 +211,7 @@ export class APToCPELink extends WorkspaceLineStringFeature {
                 featureData: Feature<LineString, any> | string,
                 ap: AccessPoint,
                 cpe: CPE) {
-        super(map, draw, featureData, AP_CPE_LINK_ENDPOINT, AP_CPE_LINK_FIELDS, AP_CPE_LINK_FIELDS);
+        super(map, draw, featureData, AP_CPE_LINK_ENDPOINT, AP_CPE_LINK_FIELDS, AP_CPE_LINK_FIELDS, WorkspaceFeatureTypes.AP_CPE_LINK);
         this.ap = ap;
         this.cpe = cpe;
         this.setFeatureProperty('ap', this.ap.workspaceId);
@@ -244,8 +250,11 @@ export class APToCPELink extends WorkspaceLineStringFeature {
         super.delete((resp) => {
             this.cpe.ap = undefined;
             this.ap.links.delete(this.cpe);
-            let cpeData = this.removeFeatureFromMap(this.cpe.mapboxId);
-            this.map.fire('draw.delete', {features: [cpeData]});
+            let cpeData = this.cpe.getFeatureData();
+            this.removeFeatureFromMap(this.cpe.mapboxId);
+            if (cpeData) {
+                this.map.fire('draw.delete', {features: [cpeData]});
+            }
 
             if (successFollowup) {
                 successFollowup(resp);
@@ -276,7 +285,7 @@ export class CoverageArea extends WorkspacePolygonFeature {
     constructor(map: MapboxGL.Map,
         draw: MapboxDraw,
         featureData: Feature<Polygon, any>) {
-        super(map, draw, featureData, COVERAGE_AREA_ENDPOINT, COVERAGE_AREA_FIELDS, COVERAGE_AREA_FIELDS);
+        super(map, draw, featureData, COVERAGE_AREA_ENDPOINT, COVERAGE_AREA_FIELDS, COVERAGE_AREA_FIELDS, WorkspaceFeatureTypes.COVERAGE_AREA);
         this.coverage = EMPTY_BUILDING_COVERAGE;
         this.awaitingCoverage = false;
     }

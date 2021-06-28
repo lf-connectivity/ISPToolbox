@@ -1,7 +1,7 @@
 import mapboxgl from "mapbox-gl";
 import * as _ from "lodash";
 import { createGeoJSONCircle } from "../isptoolbox-mapbox-draw/DrawModeUtils";
-import { Geometry, GeoJsonProperties, FeatureCollection }  from 'geojson';
+import { Geometry, GeoJsonProperties, FeatureCollection, Feature }  from 'geojson';
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "../workspace/BuildingCoverage";
 import { WorkspaceEvents, WorkspaceFeatureTypes } from "../workspace/WorkspaceConstants";
@@ -28,6 +28,9 @@ const BUILDING_OUTLINE_LAYER = 'building_outline_layer';
 const EMPTY_SOURCE_AFTER_BUILDING = 'empty_building_source';
 export const EMPTY_LAYER_AFTER_BUILDING = "empty_building_layer";
 
+const IS_ACTIVE_AP = 'active_ap';
+const ACTIVE_AP = 'true';
+const INACTIVE_AP = 'false';
 
 abstract class RadiusAndBuildingCoverageRenderer {
     map: mapboxgl.Map;
@@ -51,19 +54,37 @@ abstract class RadiusAndBuildingCoverageRenderer {
             'source': ACCESS_POINT_RADIUS_VIS_DATA,
             'layout': {},
             'paint': {
-            'fill-color': '#1172a9',
-            'fill-opacity': 0.4,
-        }}, BUILDING_LAYER);
+                'fill-color': [
+                    'match',
+                    ['get', IS_ACTIVE_AP],
+                    ACTIVE_AP,
+                    '#5692d1',
+                    INACTIVE_AP,
+                    '#1172a9',
+                    '#1172a9'
+                ],
+                'fill-opacity': 0.4,
+            }
+        }, BUILDING_LAYER);
         this.map.addLayer({
             'id': ACCESS_POINT_RADIUS_VIS_LAYER_LINE,
             'type': 'line',
             'source': ACCESS_POINT_RADIUS_VIS_DATA,
             'layout': {},
             'paint': {
-            'line-color': '#1172a9',
-            'line-dasharray': [0.2, 2],
-            'line-width': 2
-        }}, BUILDING_LAYER);
+                'line-color': [
+                    'match',
+                    ['get', IS_ACTIVE_AP],
+                    ACTIVE_AP,
+                    '#5692d1',
+                    INACTIVE_AP,
+                    '#1172a9',
+                    '#1172a9'
+                ],
+                'line-dasharray': [0.2, 2],
+                'line-width': 2
+            }
+        }, BUILDING_LAYER);
 
         this.map.addSource(EMPTY_SOURCE_AFTER_BUILDING, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
         this.map.addLayer({
@@ -111,6 +132,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
             this.map.getStyle().layers?.forEach((layer: any) => {
                 if (layer.id.includes('gl-draw-point-ap')) {
                     this.map.on('click', layer.id, onClickAP);
+                    this.renderAPRadiusAndBuildings(this.draw.getSelected());
                     this.map.off('idle', loadOnClick);
                 }
             });
@@ -153,11 +175,11 @@ abstract class RadiusAndBuildingCoverageRenderer {
     renderSelectedAccessPoints(msg: string, data: any){
         // If there are selected APs or coverage areas, only render circles/buildings for those, otherwise render all.
         let fc = this.draw.getSelected();
-        let selectedAPs = this.workspaceManager.filterByType(fc.features, WorkspaceFeatureTypes.AP);
-        let selectedCoverageAreas = this.workspaceManager.filterByType(fc.features, WorkspaceFeatureTypes.COVERAGE_AREA);
-        if (selectedAPs.length === 0 && selectedCoverageAreas.length == 0) {
-            fc = this.draw.getAll();
-        }
+        // let selectedAPs = this.workspaceManager.filterByType(fc.features, WorkspaceFeatureTypes.AP);
+        // let selectedCoverageAreas = this.workspaceManager.filterByType(fc.features, WorkspaceFeatureTypes.COVERAGE_AREA);
+        // if (selectedAPs.length === 0 && selectedCoverageAreas.length == 0) {
+        //     fc = this.draw.getAll();
+        // }
         this.debouncedRenderAPRadius(fc);
     }
 
@@ -170,24 +192,42 @@ abstract class RadiusAndBuildingCoverageRenderer {
      * @param fc - FeatureCollection of features to select and render APs from.
      */
     renderAPRadiusAndBuildings(fc: FeatureCollection<Geometry, GeoJsonProperties>){
-        const circle_feats : Array<any> = [];
+        const circle_feats: {[id: string]: Feature<Geometry, GeoJsonProperties>} = {};
         const coverageToRender : Array<AccessPoint | CoverageArea> = [];
-        fc.features.forEach((feat: any) => {
-            if(feat.properties.radius){
+        const allFeats = this.draw.getAll();
+
+
+        // Render all APs.
+        allFeats.features.forEach((feat: any) => {
+            if (feat && feat.properties.radius) {
                 if(feat.geometry.type === 'Point'){
                     const new_feat = createGeoJSONCircle(
                             feat.geometry,
                             feat.properties.radius,
                             feat.id);
-                    circle_feats.push(new_feat);
+                    
+                    // @ts-ignore
+                    new_feat.properties[IS_ACTIVE_AP] = INACTIVE_AP; 
+                    circle_feats[feat.id] = new_feat;
+                }
+            }
+        });
+
+        fc.features.forEach((feat: any) => {
+            if(feat.properties.radius){
+                if(feat.geometry.type === 'Point'){
+                    // @ts-ignore
+                    circle_feats[feat.id].properties[IS_ACTIVE_AP] = ACTIVE_AP; 
 
                     // render coverage
                     if (feat.properties.uuid) {
                         let ap = this.workspaceManager.features[feat.properties.uuid] as AccessPoint;
-                        if (!ap.awaitingCoverage && ap.coverage === EMPTY_BUILDING_COVERAGE) {
-                            this.sendCoverageRequest(feat);
+                        if (ap) {
+                            if (!ap.awaitingCoverage && ap.coverage === EMPTY_BUILDING_COVERAGE) {
+                                this.sendCoverageRequest(feat);
+                            }
+                            coverageToRender.push(ap);
                         }
-                        coverageToRender.push(ap);
                     }
                 }
             }
@@ -204,7 +244,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
         // Replace radius features with selected
         const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
         if(radiusSource.type ==='geojson'){
-            radiusSource.setData({type: 'FeatureCollection', features: circle_feats});
+            radiusSource.setData({type: 'FeatureCollection', features: Object.values(circle_feats)});
         }
 
         // Replace building features with selected

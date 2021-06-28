@@ -31,6 +31,7 @@ NOISY_POLYGON = """{
     ]
 }"""
 
+
 class TestLidarDSMTileCreation(TestCase):
     """
     Test Tasks and functions to generate DSM Tiles from LiDAR Point Clouds
@@ -58,7 +59,7 @@ class TestLidarDSMTileCreation(TestCase):
                     pk=new_tiles[-1])
             self.assertTrue(new_tile.tile.name)
         self.assertTrue(len(new_tiles) > 0)
-    
+
     def test_noisy_point_clouds(self):
         """
         Test DSM Tile generation from noisy point cloud data

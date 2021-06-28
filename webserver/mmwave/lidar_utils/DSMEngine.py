@@ -64,7 +64,7 @@ class DSMEngine:
         process = subprocess.Popen(cmd)
         return process
 
-    def __createQueryPipeline(self, resolution: float, outputfilepath : str, cloud: EPTLidarPointCloud):
+    def __createQueryPipeline(self, resolution: float, outputfilepath: str, cloud: EPTLidarPointCloud):
         """
         Creates the json string that pdal uses as a pipeline
         pdal docs: https://pdal.io/project/docs.html
@@ -73,7 +73,7 @@ class DSMEngine:
         """
         source = cloud.url
         filter_outliers = cloud.noisy_data
-        
+
         # If we are going to filter outlilers we should load data a little outside the boundary
         source_bounding_box = self.transformed_polygon
         if filter_outliers:

@@ -175,11 +175,6 @@ abstract class RadiusAndBuildingCoverageRenderer {
     renderSelectedAccessPoints(msg: string, data: any){
         // If there are selected APs or coverage areas, only render circles/buildings for those, otherwise render all.
         let fc = this.draw.getSelected();
-        // let selectedAPs = this.workspaceManager.filterByType(fc.features, WorkspaceFeatureTypes.AP);
-        // let selectedCoverageAreas = this.workspaceManager.filterByType(fc.features, WorkspaceFeatureTypes.COVERAGE_AREA);
-        // if (selectedAPs.length === 0 && selectedCoverageAreas.length == 0) {
-        //     fc = this.draw.getAll();
-        // }
         this.debouncedRenderAPRadius(fc);
     }
 

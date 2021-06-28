@@ -9,6 +9,7 @@ import { OverrideDirect, OverrideSimple, APDrawMode, OverrideDrawPolygon } from 
 import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
 import { MarketEvaluatorWorkspaceManager } from "./workspace/MarketEvaluatorWorkspaceManager";
 import { MarketEvaluatorTowerPopup } from "./isptoolbox-mapbox-draw/popups/TowerPopups";
+import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from "./organisms/APCoverageRenderer";
 
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
@@ -36,17 +37,6 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
         // Tooltips
         new MarketEvaluatorTowerPopup(this.map, this.draw);
 
-        let prevLayers: any[] = [];
-
-        this.map.on('idle', () => {
-            let currLayers = this.map.getStyle().layers?.map((layer: any) => layer.id);
-            currLayers?.forEach((id: any) => {
-                if (prevLayers.indexOf(id) === -1) {
-                    console.log(id);
-                }
-            });
-            console.log('\n\n\n\n\n\n\n');
-            prevLayers = currLayers as any[];
-        });
+        new MarketEvaluatorRadiusAndBuildingCoverageRenderer(this.map, this.draw);
     }
 }

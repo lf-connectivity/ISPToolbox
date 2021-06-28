@@ -30,6 +30,7 @@ import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBas
 import { parseFormLatitudeLongitude } from "./utils/LatLngInputUtils";
 import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
 import { WorkspacePointFeature } from "./workspace/BaseWorkspaceFeature.js";
+import { LinkCheckRadiusAndBuildingCoverageRenderer } from "./organisms/APCoverageRenderer";
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -534,7 +535,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             this.setExtremes.bind(this),
         );
 
-        this.workspaceManager = new WorkspaceManager('#accessPointModal', this.map, this.draw, this.profileWS, getInitialFeatures());
+        this.workspaceManager = new WorkspaceManager('#accessPointModal', this.map, this.draw, getInitialFeatures());
         this.locationMarker = new LinkCheckLocationSearchTool(this.map, this.workspaceManager, this.geocoder);
 
         // instantiate singletons
@@ -542,7 +543,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
         new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
         new LinkCheckTowerPopup(this.map, this.draw);
-
+        new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
 
         const prioritizeDirectSelect = function ({ features }: any) {
             if (features.length == 1 && features[0].geometry.type !== 'Point') {

@@ -35,5 +35,18 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
 
         // Tooltips
         new MarketEvaluatorTowerPopup(this.map, this.draw);
+
+        let prevLayers: any[] = [];
+
+        this.map.on('idle', () => {
+            let currLayers = this.map.getStyle().layers?.map((layer: any) => layer.id);
+            currLayers?.forEach((id: any) => {
+                if (prevLayers.indexOf(id) === -1) {
+                    console.log(id);
+                }
+            });
+            console.log('\n\n\n\n\n\n\n');
+            prevLayers = currLayers as any[];
+        });
     }
 }

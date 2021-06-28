@@ -281,6 +281,16 @@ export class CoverageArea extends WorkspacePolygonFeature {
         this.awaitingCoverage = false;
     }
 
+    update(successFollowup?: (resp: any) => void) {
+        super.update((resp: any) => {
+            PubSub.publish(WorkspaceEvents.AP_UPDATE, {features: [this.getFeatureData()]});
+
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        });
+    }
+
     awaitNewCoverage() {
         this.coverage = EMPTY_BUILDING_COVERAGE;
         this.awaitingCoverage = true;

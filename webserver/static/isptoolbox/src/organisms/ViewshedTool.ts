@@ -2,7 +2,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl from 'mapbox-gl';
 import PubSub from 'pubsub-js';
 import { LOSWSEvents, ViewShedResponse } from '../LOSCheckWS';
-import { EMPTY_LAYER_AFTER_BUILDING } from '../workspace/WorkspaceManager';
+import { EMPTY_LAYER_AFTER_BUILDING } from './APCoverageRenderer';
 
 export enum ViewshedEvents {
     VS_REQUEST = 'vs.request',

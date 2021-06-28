@@ -61,6 +61,14 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         this.setLngLat(accessPoint.getFeatureGeometryCoordinates());
     }
 
+    isAPMoving() {
+        if (!this.accessPoint) {
+            return false;
+        }
+        let coords = this.accessPoint.getFeatureGeometryCoordinates();
+        return (coords[0] !== this.lnglat[0] || coords[1] !== this.lnglat[1]); 
+    }
+
     onAPUpdate(ap: AccessPoint) {
         if (this.accessPoint === ap) {
             this.refreshPopup();
@@ -240,9 +248,6 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
     }
 
     protected getDeleteRow() {
-        if (this.accessPoint) {
-            console.log(this.accessPoint.getFeatureProperty('last_updated'));
-        }
         return `
             <a id="${TOWER_DELETE_BUTTON_ID}" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
             ${this.accessPoint && this.accessPoint.getFeatureProperty('last_updated') ? 

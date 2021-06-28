@@ -9,11 +9,12 @@ import { AccessPoint, CPE } from '../../workspace/WorkspaceFeatures';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from "../../workspace/WorkspaceConstants";
 import { BuildingCoverage, BuildingCoverageStatus, updateCoverageStatus } from "../../workspace/BuildingCoverage";
 import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchTool";
-import { ACCESS_POINT_BUILDING_LAYER, WorkspaceManager } from "../../workspace/WorkspaceManager";
+import { WorkspaceManager } from "../../workspace/WorkspaceManager";
 import { BaseWorkspaceFeature } from "../../workspace/BaseWorkspaceFeature";
 import { DEFAULT_RADIUS } from "../APDrawMode";
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
+import { BUILDING_LAYER } from "../../organisms/APCoverageRenderer";
 
 const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-customer-popup';
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
@@ -576,7 +577,7 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
             // We set a delay on showing tooltip to allow time for building coverage to render.
             this.changeSelection([]);
             setTimeout(() => {
-                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
+                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [BUILDING_LAYER]})[0];
                 if (building) {
                     this.setBuildingId(building.properties?.msftid);
                 }
@@ -627,7 +628,7 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
     protected onCoverageUpdate(msg: string, data: any) {
         if (this.popup.isOpen()) {
             if (this.buildingId === EMPTY_BUILDING_ID) {
-                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [ACCESS_POINT_BUILDING_LAYER]})[0];
+                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [BUILDING_LAYER]})[0];
                 if (building) {
                     this.setBuildingId(building.properties?.msftid);
                 }

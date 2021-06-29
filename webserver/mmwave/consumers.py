@@ -119,5 +119,11 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
     async def ap_viewshed(self, event):
         await self.send_json(event)
 
+    async def ap_viewshed_progress(self, event):
+        await self.send_json(event)
+
+    async def ap_unexpected_error(self, event):
+        await self.send_json(event)
+
     async def default_msg_handler(self):
         await self.send_json({'error': 'Invalid request'})

@@ -11,6 +11,17 @@ export enum LOSWSEvents {
     LINK_MSG = 'ws.link_msg',
     VIEWSHED_MSG = 'ws.viewshed_msg',
     AP_MSG = 'ws.ap_msg',
+    VIEWSHED_PROGRESS_MSG = 'ws.viewshed_progress_msg',
+    VIEWSHED_UNEXPECTED_ERROR_MSG = 'ws.viewshed_unexpected_err_msg',
+}
+
+export enum WS_AP_Events {
+    STD_MSG = "standard.message",
+    AP_VIEWSHED = "ap.viewshed",
+    AP_STATUS = "ap.status",
+    AP_UNEXPECTED_ERROR = "ap.unexpected_error",
+    AP_ERROR = "ap.error",
+    AP_VIEWSHED_PROGRESS = "ap.viewshed_progress",
 }
 
 export enum LOSWSHandlers {
@@ -39,10 +50,22 @@ export type TerrainResponse = {
 }
 
 export type ViewShedResponse = {
-    type: "ap.viewshed",
+    type: WS_AP_Events.AP_VIEWSHED,
     base_url: string,
-    url: string,
     uuid: string
+}
+
+export type ViewshedUnexpectedError = {
+    type: WS_AP_Events.AP_UNEXPECTED_ERROR,
+    msg: string,
+    uuid: string,
+}
+
+export type ViewshedProgressResponse = {
+    type: WS_AP_Events.AP_VIEWSHED_PROGRESS,
+    progress: string | null,
+    time_remaining: number | null,
+    uuid: string,
 }
 
 export type LidarResponse = {
@@ -62,12 +85,12 @@ export type LidarResponse = {
     still_loading: boolean,
 }
 export type AccessPointCoverageResponse = {
-    type: "ap.status",
+    type: WS_AP_Events.AP_STATUS,
     uuid: string
 }
 
 export type LOSCheckResponse =  LinkResponse | TerrainResponse | LidarResponse;
-export type WSResponse = LOSCheckResponse | AccessPointCoverageResponse | ViewShedResponse;
+export type WSResponse = LOSCheckResponse | AccessPointCoverageResponse | ViewShedResponse | ViewshedProgressResponse | ViewshedUnexpectedError;
 
 interface LOSCheckWSCallbacks {
     (message : LOSCheckResponse) : void
@@ -128,19 +151,24 @@ class LOSCheckWS {
         this.ws.onmessage = (e) => {
             const resp = JSON.parse(e.data) as WSResponse;
             switch(resp.type){
-                case "standard.message":
+                case WS_AP_Events.STD_MSG:
                     if(resp.hash === this.hash){
                         this.message_handlers.forEach((handler)=>{
                             handler(resp);
                         });
                     }
                     break;
-                case "ap.status":
+                case WS_AP_Events.AP_STATUS:
                     PubSub.publish(LOSWSEvents.AP_MSG, resp);
                     break;
-                case "ap.viewshed":
+                case WS_AP_Events.AP_VIEWSHED:
                     PubSub.publish(LOSWSEvents.VIEWSHED_MSG, resp);
                     break;
+                case WS_AP_Events.AP_VIEWSHED_PROGRESS:
+                    PubSub.publish(LOSWSEvents.VIEWSHED_PROGRESS_MSG, resp);
+                    break;
+                case WS_AP_Events.AP_UNEXPECTED_ERROR:
+                    PubSub.publish(LOSWSEvents.VIEWSHED_UNEXPECTED_ERROR_MSG, resp);
                 default:
                     break;
             }

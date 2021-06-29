@@ -8,11 +8,13 @@ import * as StyleConstants from '../styles/StyleConstants';
 import ap_icon from '../styles/ap-icon.svg';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
-import { MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT, MIN_HEIGHT,
-    validateName, validateLat, validateLng, validateRadius, validateHeight } from '../../LinkCheckUtils';
+import {
+    MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT, MIN_HEIGHT,
+    validateName, validateLat, validateLng, validateRadius, validateHeight
+} from '../../LinkCheckUtils';
 import { sanitizeString } from "../../molecules/InputValidator";
-import { WorkspaceEvents } from "../../workspace/WorkspaceConstants";
 import { parseFormLatitudeLongitude } from "../../utils/LatLngInputUtils";
+import { LOSWSEvents, ViewshedProgressResponse, ViewshedUnexpectedError } from "../../LOSCheckWS";
 
 var _ = require('lodash');
 
@@ -65,7 +67,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             return false;
         }
         let coords = this.accessPoint.getFeatureGeometryCoordinates();
-        return (coords[0] !== this.lnglat[0] || coords[1] !== this.lnglat[1]); 
+        return (coords[0] !== this.lnglat[0] || coords[1] !== this.lnglat[1]);
     }
 
     onAPUpdate(ap: AccessPoint) {
@@ -74,12 +76,12 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             // Adjust lat/lng/height if they have been changed from bottom bar
             let coord = this.accessPoint.getFeatureGeometryCoordinates();
             let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
-            if(coord_input != null){
+            if (coord_input != null) {
                 if (String(coord_input[0]) !== coord[1].toFixed(5) ||
                     String(coord_input[1]) !== coord[0].toFixed(5)) {
-                        $(`#${LAT_LNG_INPUT_ID}`).val(`${coord[1].toFixed(5)}, ${coord[0].toFixed(5)}`);
-                        this.setLngLat([coord[0], coord[1]]);
-                        this.popup.setLngLat(this.lnglat);
+                    $(`#${LAT_LNG_INPUT_ID}`).val(`${coord[1].toFixed(5)}, ${coord[0].toFixed(5)}`);
+                    this.setLngLat([coord[0], coord[1]]);
+                    this.popup.setLngLat(this.lnglat);
                 }
             }
 
@@ -89,21 +91,21 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         }
     }
 
-    protected cleanup() {}
+    protected cleanup() { }
 
     protected getHeightValue() {
         return Math.round(
             isUnitsUS() ?
-            this.accessPoint?.getFeatureProperty('height_ft') :
-            this.accessPoint?.getFeatureProperty('height')
-       )
+                this.accessPoint?.getFeatureProperty('height_ft') :
+                this.accessPoint?.getFeatureProperty('height')
+        )
     }
 
     protected setEventHandlers() {
         const updateAP = () => {
             if (this.accessPoint) {
                 let feat = this.accessPoint.getFeatureData();
-                this.map.fire('draw.update', {features: [feat]});
+                this.map.fire('draw.update', { features: [feat] });
             }
         };
 
@@ -112,7 +114,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             let htmlID = `#${id}`;
             $(htmlID).on('change',
                 _.debounce((e: any) => {
-                    let inputValue = validatorFunction(parseFloat(String($(htmlID).val())), id);       
+                    let inputValue = validatorFunction(parseFloat(String($(htmlID).val())), id);
                     let transformedValue = (CONVERSION_FORMULAS.get(conversionFormula) as any)(inputValue);
 
                     // @ts-ignore
@@ -127,7 +129,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             $(htmlID).on('change',
                 _.debounce((e: any) => {
                     let newVal = parseFormLatitudeLongitude(htmlID);
-                    if(newVal != null && this.accessPoint){
+                    if (newVal != null && this.accessPoint) {
                         newVal = [newVal[1], newVal[0]];
                         this.lnglat = newVal;
                         this.popup.setLngLat(this.lnglat);
@@ -201,10 +203,10 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(
-                                            isUnitsUS() ?
-                                            this.accessPoint?.getFeatureProperty('default_cpe_height_ft') :
-                                            this.accessPoint?.getFeatureProperty('default_cpe_height')
-                                       )}'
+            isUnitsUS() ?
+                this.accessPoint?.getFeatureProperty('default_cpe_height_ft') :
+                this.accessPoint?.getFeatureProperty('default_cpe_height')
+        )}'
                                        id='${CPE_HGT_INPUT_ID}'
                                        min='${MIN_HEIGHT}' max='${MAX_HEIGHT}'
                                        class="input--value"
@@ -216,11 +218,10 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <p class="label">Radius</p>
                             <div class="data-with-unit">
                                 <input type='number'
-                                       value='${
-                                            isUnitsUS() ?
-                                            this.accessPoint?.getFeatureProperty('max_radius_miles').toFixed(2) :
-                                            this.accessPoint?.getFeatureProperty('max_radius').toFixed(2)
-                                       }'
+                                       value='${isUnitsUS() ?
+                this.accessPoint?.getFeatureProperty('max_radius_miles').toFixed(2) :
+                this.accessPoint?.getFeatureProperty('max_radius').toFixed(2)
+            }'
                                        id='${RADIUS_INPUT_ID}'
                                        min='${MIN_RADIUS}' max='${MAX_RADIUS}' step='0.01'
                                        class="input--value"
@@ -248,7 +249,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
     protected getDeleteRow() {
         return `
             <a id="${TOWER_DELETE_BUTTON_ID}" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
-            ${this.accessPoint && this.accessPoint.getFeatureProperty('last_updated') ? 
+            ${this.accessPoint && this.accessPoint.getFeatureProperty('last_updated') ?
                 `<p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>` : ''
             }
         `;
@@ -257,6 +258,10 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
 
 export class LinkCheckTowerPopup extends BaseTowerPopup {
     private static _instance: LinkCheckTowerPopup;
+    private progress_message: string | null;
+    private time_remaining: number | null;
+    private error: string | null;
+    private interval: NodeJS.Timeout | null;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         if (LinkCheckTowerPopup._instance) {
@@ -264,6 +269,12 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
         }
         super(map, draw);
         LinkCheckTowerPopup._instance = this;
+        this.progress_message = null;
+        this.time_remaining = null;
+        this.error = null;
+        this.interval = null;
+        PubSub.subscribe(LOSWSEvents.VIEWSHED_PROGRESS_MSG, this.updateProgressStatus.bind(this));
+        PubSub.subscribe(LOSWSEvents.VIEWSHED_UNEXPECTED_ERROR_MSG, this.updateErrorStatus.bind(this));
     }
 
     static getInstance() {
@@ -284,11 +295,11 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
     }
 
     protected getStatsHTML() {
-        if (this.accessPoint){
-            if(this.accessPoint.getFeatureProperty('serviceable') != null &&
+        if (this.accessPoint) {
+            if (this.accessPoint.getFeatureProperty('serviceable') != null &&
                 this.accessPoint.getFeatureProperty('unserviceable') != null &&
-                this.accessPoint.getFeatureProperty('unknown') != null && 
-                this.accessPoint.getFeatureProperty('unknown') === 0){
+                this.accessPoint.getFeatureProperty('unknown') != null &&
+                this.accessPoint.getFeatureProperty('unknown') === 0) {
                 return `
                     <div class="ap-stat">
                         <p class="ap-stat--label">Clear LOS Rooftops</p>
@@ -307,17 +318,79 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
             `;
             }
         }
-        return `
+        if (this.error === null) {
+            return `
             <div align="center">
                 <img src="${ap_icon}" height="35" width="35">
-                <p align="center"><b>Plotting Lidar Coverage</p>
-                <p align="center">This may take several minutes</p>
+                <p align="center"><b>${this.progress_message ? this.progress_message : 'Starting Computation'}</p>
+                <p align="center">${this.formatTimeRemaining()}</p>
             </div>
         `;
+        } else {
+            return `<div align="center"><img src="${ap_icon}" height="35" width="35">
+            <p align="center"><b>${this.error}</p></div>`;
+        }
+
     }
 
     protected refreshPopup() {
         $(`#${STATS_LI_ID}`).html(this.getStatsHTML());
+    }
+
+    /**
+     * Update current status of computation in tooltip
+     */
+    protected updateProgressStatus(msg: string, data: ViewshedProgressResponse) {
+        if (data.uuid === this.accessPoint?.workspaceId) {
+            this.error = null;
+            this.progress_message = data.progress;
+            this.time_remaining = data.time_remaining;
+            this.refreshPopup();
+            this.startTimer();
+        }
+    }
+
+    protected updateErrorStatus(msg: string, data: ViewshedUnexpectedError) {
+        if (data.uuid === this.accessPoint?.workspaceId) {
+            this.error = data.msg;
+            this.stopTimer();
+        }
+    }
+
+    /**
+     * Create interval callback to count down the remaining time
+     */
+    protected startTimer() {
+        this.stopTimer();
+        this.interval = setInterval(() => {
+            if (this.time_remaining != null) {
+                this.time_remaining -= 1;
+                this.time_remaining = Math.max(this.time_remaining, 0);
+                this.refreshPopup();
+            }
+        }, 1000);
+    }
+
+    protected stopTimer() {
+        if (this.interval != null) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+    }
+
+    /**
+     * @returns formatted version of time remaining - must be less than 1 hr to display properly
+     */
+    protected formatTimeRemaining(): string {
+        if (this.time_remaining != null) {
+            if (this.time_remaining === 0) {
+                return "Hold tight, almost there!"
+            }
+            var date = new Date(0);
+            date.setSeconds(this.time_remaining);
+            return "Time Remaining: " + date.toISOString().substr(14, 5);
+        }
+        return "This may take several minutes";
     }
 }
 

@@ -14,12 +14,34 @@ DEFAULT_OBSTRUCTED_COLOR = [0, 0, 0, 128]
 @app.task
 def computeViewshedCoverage(network_id, data, user_id):
     ap_uuid = data['uuid']
-    # Calculate Viewshed for Coverage Area
-    computeViewshed(network_id, ap_uuid, user_id)
-    # Calculate Buildings that Are Serviceable
-    calculateCoverage(ap_uuid, user_id)
-    # Update the Client
-    updateClientAPStatus(network_id, ap_uuid, user_id)
+    try:
+        # Calculate Viewshed for Coverage Area
+        computeViewshed(network_id, ap_uuid, user_id)
+        # Calculate Buildings that Are Serviceable
+        calculateCoverage(ap_uuid, user_id)
+        # Update the Client
+        updateClientAPStatus(network_id, ap_uuid, user_id)
+    except Exception as e:
+        # Log this scheisse to cloudwatch
+        logging.error(str(e))
+        resp = {
+            'type': 'ap.unexpected_error',
+            'msg': 'An unexpected error occurred, please try again later.',
+            'uuid': ap_uuid,
+        }
+        sendMessageToChannel(network_id, resp)
+
+
+def create_progress_status_callback(network_id: str, ap_uuid: str):
+    def progress_status_callback(msg, time_remaining):
+        resp = {
+            'type': 'ap.viewshed_progress',
+            'progress': msg,
+            'time_remaining': time_remaining,
+            'uuid': ap_uuid,
+        }
+        sendMessageToChannel(network_id, resp)
+    return progress_status_callback
 
 
 def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
@@ -34,7 +56,8 @@ def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
         logging.info('viewshed result not cached!')
         ap.viewshed.delete()
         Viewshed(ap=ap).save()
-        ap.viewshed.calculateViewshed()
+        callback = create_progress_status_callback(network_id, ap_uuid)
+        ap.viewshed.calculateViewshed(callback)
     else:
         logging.info('cache hit on viewshed result')
 
@@ -43,8 +66,6 @@ def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
     coordinates = swapCoordinates(coordinates)
     resp = {
         'type': 'ap.viewshed',
-        'url': ap.viewshed.create_presigned_url(),
-        'token': ap.viewshed.createJWT(),
         'base_url': ap.viewshed.getBaseTileSetUrl(),
         'uuid': ap_uuid,
     }

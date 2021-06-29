@@ -27,6 +27,7 @@ import time
 import logging
 import os
 import re
+from numpy import polyfit, polyval
 
 
 DEFAULT_PROJECTION = 3857
@@ -110,7 +111,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
         dsm = tile_engine.getSurfaceHeight(point)
         return self.ap.height + dtm - dsm
 
-    def calculateViewshed(self) -> None:
+    def calculateViewshed(self, status_callback=None) -> None:
         """
         Compute Viewshed of Access Point
         """
@@ -119,13 +120,32 @@ class Viewshed(models.Model, S3PublicExportMixin):
         dsm_engine = DSMTileEngine(aoi, EPTLidarPointCloud.query_intersect_aoi(aoi))
         with tempfile.NamedTemporaryFile(mode='w+b', suffix=".tif") as dsm_file:
             start = time.time()
+            if status_callback is not None:
+                status_callback("Loading DSM Data", self.__timeRemainingViewshed(0))
             dsm_engine.getDSM(dsm_file.name)
             logging.info(f'dsm download: {time.time() - start}')
-            start = time.time()
-            self.__renderViewshed(dsm_file=dsm_file)
-            logging.info(f'compute viewshed and upload: {time.time() - start}')
+            if status_callback is not None:
+                status_callback("Computing coverage", self.__timeRemainingViewshed(1))
+            self.__renderViewshed(dsm_file=dsm_file, status_callback=status_callback)
+        if status_callback is not None:
+            status_callback(None, None)
         self.hash = self.calculate_hash()
         self.save(update_fields=['hash'])
+
+    def __timeRemainingViewshed(self, step: int) -> float:
+        # DSM download polyfit 1,2,3 Mile - 3.5, 10, 23 sec
+        # Compute Viewshed polyfit - 25, 82, 173 sec
+        # Compute Tiling and Upload polyfit - 8.5, 10, 28 sec
+        samples = [1, 2, 3]
+        polynomials = [
+            polyfit(samples, [3, 10, 23], 2),  # get dsm tiles
+            polyfit(samples, [0.5, 1, 2], 2),  # compute viewshed
+            polyfit(samples, [22, 81, 210], 2),  # tile results
+        ]
+        time_remaining = 0
+        for i in range(step, len(polynomials)):
+            time_remaining = time_remaining + polyval(polynomials[i], self.ap.max_radius_miles)
+        return time_remaining
 
     def __createRawGDALViewshedCommand(self, dsm_filepath, output_filepath, dsm_projection):
         """
@@ -153,16 +173,28 @@ class Viewshed(models.Model, S3PublicExportMixin):
         res = res.transform(DEFAULT_PROJECTION, clone=True)
         return math.sqrt((src.x - res.x) * (src.x - res.x) + (src.y - res.y) * (src.y - res.y))
 
-    def __renderViewshed(self, dsm_file):
+    def __renderViewshed(self, dsm_file, status_callback=None):
         with tempfile.NamedTemporaryFile(suffix=".tif") as output_temp:
+            start = time.time()
             raw_command = self.__createRawGDALViewshedCommand(dsm_file.name, output_temp.name, DEFAULT_PROJECTION)
             filtered_command = shlex.split(raw_command)
             subprocess.check_output(filtered_command, encoding="UTF-8")
+            logging.info(f'compute viewshed: {time.time() - start}')
+            start_tiling = time.time()
+
+            if status_callback is not None:
+                status_callback("Processing and Uploading Result", self.__timeRemainingViewshed(2))
 
             with tempfile.NamedTemporaryFile(suffix=".tif") as colorized_temp:
                 self.__colorizeOutputViewshed(output_temp, colorized_temp)
+                logging.info(f'colorizing: {time.time() - start_tiling}')
+                start = time.time()
                 self.__reprojectViewshed(output_temp)
+                logging.info(f'reproject: {time.time() - start}')
+                start = time.time()
                 self.__createTileset(colorized_temp)
+                logging.info(f'tileset: {time.time() - start}')
+            logging.info(f'tiling: {time.time() - start_tiling}')
 
     def __createTileset(self, tif_tempfile):
         with tempfile.TemporaryDirectory() as tmp_dir:

@@ -69,7 +69,6 @@ export abstract class BaseWorkspaceManager {
         this.initDeleteFeatureHandlers();
 
         let initialFeatures = getInitialFeatures().features;
-        console.log(getInitialFeatures());
 
         const addType = (featureType: WorkspaceFeatureTypes,
                          featureClass: new (map: MapboxGL.Map, draw: MapboxDraw, feature: any) => BaseWorkspaceFeature,
@@ -112,8 +111,6 @@ export abstract class BaseWorkspaceManager {
             if (WorkspaceFeatureTypes.AP in supportedFeatureTypes) {
                 PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
             }
-
-            console.log(this.map.getStyle().layers);
 
         }
 

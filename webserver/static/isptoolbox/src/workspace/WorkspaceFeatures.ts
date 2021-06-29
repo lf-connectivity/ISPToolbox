@@ -54,6 +54,7 @@ export class AccessPoint extends WorkspacePointFeature {
     update(successFollowup?: (resp: any) => void) {
         super.update((resp: any) => {
             let feature = this.draw.get(this.mapboxId);
+            this.coverage = EMPTY_BUILDING_COVERAGE;
 
             // @ts-ignore
             this.draw.setFeatureProperty(this.mapboxId, 'radius', feature?.properties.max_radius);
@@ -77,7 +78,6 @@ export class AccessPoint extends WorkspacePointFeature {
                 this.removeFeatureFromMap(link.mapboxId);
                 let deletedCPE = cpe.getFeatureData();
                 this.removeFeatureFromMap(cpe.mapboxId);
-                console.log(`${cpe.mapboxId} ${deletedCPE}\t${link.mapboxId} ${deletedLink}`)
                 this.map.fire('draw.delete', {features: [deletedLink, deletedCPE]});
             });
             this.links.clear();
@@ -87,7 +87,6 @@ export class AccessPoint extends WorkspacePointFeature {
             }
         });
     }
-
 
     move(newCoords: [number, number]) {
         super.move(newCoords);

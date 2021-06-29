@@ -451,7 +451,6 @@ export class WorkspaceManager {
                             Object.keys(BuildingCoverageStatus).forEach((status: string) => {
                                 ap.setFeatureProperty(status, null);
                             });
-                            ap.coverage = EMPTY_BUILDING_COVERAGE;
                             LinkCheckTowerPopup.getInstance().onAPUpdate(ap);
                         });
                         break;

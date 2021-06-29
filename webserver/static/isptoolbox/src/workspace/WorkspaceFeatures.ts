@@ -59,7 +59,6 @@ export class AccessPoint extends WorkspacePointFeature {
             // @ts-ignore
             this.draw.setFeatureProperty(this.mapboxId, 'radius', feature?.properties.max_radius);
             this.moveLinks(this.getFeatureGeometryCoordinates() as [number, number]);
-            PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
             PubSub.publish(WorkspaceEvents.AP_UPDATE, {features: [this.getFeatureData()]});
 
             if (successFollowup) {

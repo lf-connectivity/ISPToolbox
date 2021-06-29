@@ -44,9 +44,9 @@ def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
     resp = {
         'type': 'ap.viewshed',
         'url': ap.viewshed.create_presigned_url(),
-        'coordinates': coordinates,
         'token': ap.viewshed.createJWT(),
         'base_url': ap.viewshed.getBaseTileSetUrl(),
+        'uuid': ap_uuid,
     }
     sendMessageToChannel(network_id, resp)
 

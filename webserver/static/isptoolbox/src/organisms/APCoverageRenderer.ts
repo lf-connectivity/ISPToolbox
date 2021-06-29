@@ -6,14 +6,13 @@ import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "../workspace/BuildingCoverage";
 import { WorkspaceEvents, WorkspaceFeatureTypes } from "../workspace/WorkspaceConstants";
 import { AccessPoint, CoverageArea, CPE } from "../workspace/WorkspaceFeatures";
-import LOSCheckWS, { AccessPointCoverageResponse } from "../LOSCheckWS";
+import LOSCheckWS, { AccessPointCoverageResponse, LOSWSEvents } from "../LOSCheckWS";
 import { WorkspaceManager } from "../workspace/WorkspaceManager";
 import { LinkCheckTowerPopup, MarketEvaluatorTowerPopup } from "../isptoolbox-mapbox-draw/popups/TowerPopups";
 import { MarketEvaluatorWorkspaceManager } from "../workspace/MarketEvaluatorWorkspaceManager";
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup";
-import { BaseWorkspaceFeature } from "../workspace/BaseWorkspaceFeature";
 import { getCookie } from "../utils/Cookie";
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
@@ -37,6 +36,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
     draw: MapboxDraw;
     workspaceManager: any;
     apPopup: any;
+    last_selection: string = '';
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw, workspaceManagerClass: any, apPopupClass: any) {
         this.map = map;
@@ -96,11 +96,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
         }, BUILDING_LAYER);
 
         this.map.on('draw.selectionchange', this.drawSelectionChangeCallback.bind(this));
-        this.map.on('draw.delete', this.deleteAPRender.bind(this));
-
-        PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.updateBuildingCoverage.bind(this));
-        PubSub.subscribe(WorkspaceEvents.AP_RENDER_SELECTED, this.renderSelectedAccessPoints.bind(this));
-        PubSub.subscribe(WorkspaceEvents.AP_RENDER_GIVEN, this.renderGivenApFeatures.bind(this));
+        PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.AP_updateCallback.bind(this));
 
         // Add building layer callbacks
         const hideLinkCheckProfile = () => {
@@ -133,7 +129,8 @@ abstract class RadiusAndBuildingCoverageRenderer {
             this.map.getStyle().layers?.forEach((layer: any) => {
                 if (layer.id.includes('gl-draw-point-ap')) {
                     this.map.on('click', layer.id, onClickAP);
-                    this.renderAPRadiusAndBuildings(this.draw.getSelected());
+                    this.renderBuildings();
+                    this.renderAPRadius();
                     this.map.off('idle', loadOnClick);
                 }
             });
@@ -147,54 +144,33 @@ abstract class RadiusAndBuildingCoverageRenderer {
      */
     abstract addBuildingLayer(): void;
 
-    abstract sendCoverageRequest(f: any): void; 
+    abstract sendCoverageRequest({features}: any): void; 
 
-    drawSelectionChangeCallback({features}: {features: Array<any>}){
-        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
-        const aps = this.workspaceManager.filterByType(features, WorkspaceFeatureTypes.AP);
-        const currentPopupAp = this.apPopup.getAccessPoint();
+    drawSelectionChangeCallback({features}: {features: Array<any>}){}
 
-        aps.forEach((apFeature: any) => {
-            // Hide AP tooltip if user is dragging AP.
-            if (currentPopupAp &&
-                apFeature.properties.uuid == currentPopupAp.workspaceId &&
-                this.apPopup.isAPMoving()) {
-                this.apPopup.hide();
-            }
-        });
-    }
+    AP_updateCallback(msg: string, {features}: {features: Array<any>}){}
 
     updateBuildingCoverage(msg: string, data: {features: Array<GeoJSON.Feature>}){
         data.features.forEach((f: GeoJSON.Feature) => {
             if(f.properties){
                 this.sendCoverageRequest(f);
-                PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
             }
         });
     }
-
-    renderSelectedAccessPoints(msg: string, data: any){
-        // If there are selected APs or coverage areas, only render circles/buildings for those, otherwise render all.
-        let fc = this.draw.getSelected();
-        this.debouncedRenderAPRadius(fc);
-    }
-
-    renderGivenApFeatures(msg: string, data: any){
-        this.debouncedRenderAPRadius(data);
-    }
     
     /**
-     * Renders access point circles and buildings from the given features.
-     * @param fc - FeatureCollection of features to select and render APs from.
+     * Renders access point circles
      */
-    renderAPRadiusAndBuildings(fc: FeatureCollection<Geometry, GeoJsonProperties>){
+    renderAPRadius(){
         const circle_feats: {[id: string]: Feature<Geometry, GeoJsonProperties>} = {};
-        const coverageToRender : Array<AccessPoint | CoverageArea> = [];
-        const allFeats = this.draw.getAll();
-
-
+        let fc = this.draw.getSelected();
+        let aps = fc.features.filter((f)=> f.properties?.feature_type === WorkspaceFeatureTypes.AP);
+        if (aps.length === 0) {
+            fc = this.draw.getAll();
+        }
+        aps = fc.features.filter((f)=> f.properties?.feature_type === WorkspaceFeatureTypes.AP);
         // Render all APs.
-        allFeats.features.forEach((feat: any) => {
+        aps.forEach((feat: any) => {
             if (feat && feat.properties.radius) {
                 if(feat.geometry.type === 'Point'){
                     const new_feat = createGeoJSONCircle(
@@ -208,56 +184,33 @@ abstract class RadiusAndBuildingCoverageRenderer {
                 }
             }
         });
-
-        fc.features.forEach((feat: any) => {
-            if(feat.properties.radius){
-                if(feat.geometry.type === 'Point'){
-                    // @ts-ignore
-                    circle_feats[feat.id].properties[IS_ACTIVE_AP] = ACTIVE_AP; 
-
-                    // render coverage
-                    if (feat.properties.uuid) {
-                        let ap = this.workspaceManager.features[feat.properties.uuid] as AccessPoint;
-                        if (ap) {
-                            if (!ap.awaitingCoverage && ap.coverage === EMPTY_BUILDING_COVERAGE) {
-                                this.sendCoverageRequest(feat);
-                            }
-                            coverageToRender.push(ap);
-                        }
-                    }
-                }
-            }
-            else if (feat.geometry.type === 'Polygon') {
-                if (feat.properties.uuid) {
-                    let polygon = this.workspaceManager.features[feat.properties.uuid] as CoverageArea;
-                    if (!polygon.awaitingCoverage && polygon.coverage === EMPTY_BUILDING_COVERAGE) {
-                        this.sendCoverageRequest(feat);
-                    }
-                    coverageToRender.push(polygon);
-                }
-            }
-        });
         // Replace radius features with selected
         const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
         if(radiusSource.type ==='geojson'){
             radiusSource.setData({type: 'FeatureCollection', features: Object.values(circle_feats)});
         }
+    }
 
+    /**
+     * Renders building layer
+     */
+    renderBuildings(){
+        let fc = this.draw.getSelected();
+        let aps = fc.features.filter((f)=> f.properties?.feature_type === WorkspaceFeatureTypes.AP || f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA);
+        if (aps.length === 0) {
+            fc = this.draw.getAll();
+        }
+        const renderFeatures = fc.features.filter((f)=> f.properties?.feature_type === WorkspaceFeatureTypes.AP || f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA);
         // Replace building features with selected
+
         const buildingSource = this.map.getSource(BUILDING_DATA_SOURCE);
         if(buildingSource.type ==='geojson'){
-            const coverage = BuildingCoverage.union(coverageToRender.map(workspaceFeature => {
-                return workspaceFeature.coverage;
+            const coverage = BuildingCoverage.union(renderFeatures.map(feat => {
+                let coverage_object = this.workspaceManager.features[feat.properties?.uuid] as AccessPoint;
+                return coverage_object.coverage;
             }));
             buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
         }
-    }
-
-    debouncedRenderAPRadius = _.debounce(this.renderAPRadiusAndBuildings, 50);
-
-    deleteAPRender({ features }: { features: Array<any> }) {
-        // rerender AP radii.
-        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
     }
 }
 
@@ -268,7 +221,6 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
     constructor(map: mapboxgl.Map, draw: MapboxDraw, ws: LOSCheckWS) {
         super(map, draw, WorkspaceManager, LinkCheckTowerPopup);
         this.ws = ws;
-        this.ws.setAccessPointCallback(this.accessPointStatusCallback.bind(this));
 
         // Building Layer click callback
         this.map.on('click', BUILDING_LAYER, (e: any) => {
@@ -291,6 +243,8 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                 }
             }
         });
+
+        PubSub.subscribe(LOSWSEvents.AP_MSG, this.accessPointStatusCallback.bind(this));
 
         // Change the cursor to a pointer when the mouse is over the states layer.
         this.map.on('mouseenter', BUILDING_LAYER, () => {
@@ -367,13 +321,52 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         },BUILDING_OUTLINE_LAYER);
     }
 
-    sendCoverageRequest(f: any) {
-        let ap = this.workspaceManager.features[f.properties.uuid] as AccessPoint;
-        ap.awaitNewCoverage();
-        this.ws.sendAPRequest(f.properties.uuid, f.properties.height);
+    drawSelectionChangeCallback({features}: {features: Array<any>}){
+        // Mapbox will count dragging a point features as a selection change event
+        // Use this to determine if we are dragging or just selected a new feature
+        let dragging = false;
+        if(features.length === 1) {
+            if(features[0].id === this.last_selection){
+                dragging = true;
+            } else {
+                this.last_selection = features[0].id;
+            }
+        }
+        
+        // Hide AP tooltip if user is dragging AP.
+        if(dragging){
+            LinkCheckTowerPopup.getInstance().hide();
+        } else {
+            this.sendCoverageRequest({features});
+            this.renderAPRadius();
+            this.renderBuildings();
+        }
     }
 
-    accessPointStatusCallback(message: AccessPointCoverageResponse) {
+    AP_updateCallback(msg: string, {features}: {features: Array<any>}){
+        this.sendCoverageRequest({features});
+        this.renderAPRadius();
+        this.renderBuildings();
+        if(features.length === 1 && features[0].properties?.feature_type === WorkspaceFeatureTypes.AP)
+        {
+            let ap = this.workspaceManager.features[features[0].properties.uuid] as AccessPoint;
+            this.apPopup.hide();
+            this.apPopup.setAccessPoint(ap);
+            this.apPopup.show();
+        }
+
+    }
+
+
+    sendCoverageRequest({features}: {features: Array<any>}){
+        features.forEach((f: GeoJSON.Feature) => {
+            if(f.properties && f.properties.feature_type === WorkspaceFeatureTypes.AP){
+                this.ws.sendAPRequest(f.properties.uuid, f.properties.height);
+            }
+        });
+    }
+
+    accessPointStatusCallback(msg: string, message: AccessPointCoverageResponse) {
         $.ajax({
             url: `/pro/workspace/api/ap-los/coverage/${message.uuid}/`,
             success: (resp) => { this.updateCoverageFromAjaxResponse(resp, message.uuid) },
@@ -419,7 +412,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
     updateCoverageFromAjaxResponse(resp: any, uuid: string) {
         const ap = this.workspaceManager.features[uuid] as AccessPoint;
         ap.setCoverage(resp.features);
-        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
+        this.renderBuildings();
         PubSub.publish(WorkspaceEvents.AP_COVERAGE_UPDATED, {'uuid': uuid});
     }
 }

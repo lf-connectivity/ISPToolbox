@@ -3,7 +3,7 @@ import * as _ from "lodash";
 import { Geometry, GeoJsonProperties, FeatureCollection }  from 'geojson';
 import { createGeoJSONCircle } from "../isptoolbox-mapbox-draw/DrawModeUtils";
 import { getCookie } from '../utils/Cookie';
-import LOSCheckWS from '../LOSCheckWS';
+import LOSCheckWS, { LOSWSEvents } from '../LOSCheckWS';
 import type { AccessPointCoverageResponse } from '../LOSCheckWS';
 import PubSub from 'pubsub-js';
 import {isUnitsUS} from '../utils/MapPreferences';
@@ -19,13 +19,7 @@ import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/TowerPopup
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
 import { getSessionID } from '../utils/MapPreferences';
-import { debounce } from "lodash";
 import { DEFAULT_AP_HEIGHT, DEFAULT_AP_NAME, DEFAULT_CPE_HEIGHT, DEFAULT_CPE_NAME, DEFAULT_NO_CHECK_RADIUS } from "./BaseWorkspaceManager";
-
-const DEFAULT_LINK_FREQUENCY = 5.4925;
-const DEBOUNCE_VIEWSHED_S = 2000;
-
-
 export class LOSModal {
     selector: string;
     map: mapboxgl.Map;
@@ -172,6 +166,7 @@ export class WorkspaceManager {
     readonly features: { [workspaceId: string] : BaseWorkspaceFeature }; // Map from workspace UUID to feature
     view: LOSModal;
     viewshed: ViewshedTool;
+    private last_selection : string = '';
     private static _instance: WorkspaceManager;
 
     constructor(selector: string, map: MapboxGL.Map, draw: MapboxDraw, initialFeatures: any) {
@@ -423,8 +418,6 @@ export class WorkspaceManager {
     }
 
     updateFeatures({ features, action }: { features: Array<any>, action: 'move' | 'change_coordinates' }) {
-        const apPopup = LinkCheckTowerPopup.getInstance();
-
         features.forEach((feature: any) => {
             if (feature.properties.uuid) {
                 switch(feature.properties.feature_type) {
@@ -435,6 +428,7 @@ export class WorkspaceManager {
                                 ap.setFeatureProperty(status, null);
                             });
                             LinkCheckTowerPopup.getInstance().onAPUpdate(ap);
+                            LinkCheckTowerPopup.getInstance().show();
                         });
                         break;
                     case WorkspaceFeatureTypes.CPE:
@@ -457,7 +451,6 @@ export class WorkspaceManager {
         });
 
         const aps = this.filterByType(features, WorkspaceFeatureTypes.AP);
-        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
     }
 
     static getInstance() {

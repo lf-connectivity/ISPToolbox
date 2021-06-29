@@ -10,6 +10,7 @@ export enum LOSWSEvents {
     TERRAIN_MSG = 'ws.terrain_msg',
     LINK_MSG = 'ws.link_msg',
     VIEWSHED_MSG = 'ws.viewshed_msg',
+    AP_MSG = 'ws.ap_msg',
 }
 
 export enum LOSWSHandlers {
@@ -41,7 +42,7 @@ export type ViewShedResponse = {
     type: "ap.viewshed",
     base_url: string,
     url: string,
-    coordinates: GeoJSON.Polygon
+    uuid: string
 }
 
 export type LidarResponse = {
@@ -135,7 +136,7 @@ class LOSCheckWS {
                     }
                     break;
                 case "ap.status":
-                    this.ap_callback(resp);
+                    PubSub.publish(LOSWSEvents.AP_MSG, resp);
                     break;
                 case "ap.viewshed":
                     PubSub.publish(LOSWSEvents.VIEWSHED_MSG, resp);
@@ -144,10 +145,6 @@ class LOSCheckWS {
                     break;
             }
         }
-    }
-
-    setAccessPointCallback(callback: AccesPointWSCallback){
-        this.ap_callback = callback;
     }
 
     sendRequest(tx: [number, number], rx: [number, number], fbid: string, freq: number = 0, aoi : [number ,number] = [0, 1]) {

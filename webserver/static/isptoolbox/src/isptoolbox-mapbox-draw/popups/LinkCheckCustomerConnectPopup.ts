@@ -437,7 +437,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         let feats = features.map((f: BaseWorkspaceFeature) => f.mapboxId);
         this.draw.changeMode('simple_select', {featureIds: feats});
         this.map.fire('draw.modechange', { mode: 'simple_select'});
-        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
+        this.map.fire('draw.selectionchange', {features: features.map((f) => f.getFeatureData())});
     }
 
     protected highlightAllAPFeatures() {

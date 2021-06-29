@@ -140,7 +140,6 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         $(`#${TOWER_DELETE_BUTTON_ID}`).off().on('click', () => {
             $(`#ap-delete-confirm-btn`).off().on('click', () => {
                 this.map.fire('draw.delete', {features: [this.accessPoint?.getFeatureData()]});
-                PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
             });
         });
 

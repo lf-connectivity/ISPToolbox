@@ -1,10 +1,9 @@
-import mapboxgl, * as MapboxGL from "mapbox-gl";
-import { Feature, Geometry, Point, LineString, GeoJsonProperties, Polygon }  from 'geojson';
+import * as MapboxGL from "mapbox-gl";
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
 import { MapboxSDKClient } from "../MapboxSDKClient";
 import { getInitialFeatures } from "../utils/MapDefaults";
 import { BaseWorkspaceFeature } from "./BaseWorkspaceFeature";
-import { WorkspaceEvents, WorkspaceFeatureTypes } from "./WorkspaceConstants";
+import { WorkspaceFeatureTypes } from "./WorkspaceConstants";
 import { AccessPoint, CPE, APToCPELink, CoverageArea } from "./WorkspaceFeatures";
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void;
@@ -113,11 +112,6 @@ export abstract class BaseWorkspaceManager {
                     this.features[workspaceFeature.workspaceId] = workspaceFeature;
                 });
             }
-
-            if (WorkspaceFeatureTypes.AP in supportedFeatureTypes) {
-                PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED);
-            }
-
         }
 
         // Instantiate CRUD

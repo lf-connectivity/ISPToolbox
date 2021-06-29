@@ -89,6 +89,8 @@ TOOLTIPS = {
         """),
         'link': _('https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information'),
         'linkDesc':  _('See M-Lab Source'),
+        'link2': _('https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html'),
+        'link2Desc':  _('See Census Source'),
     },
     'cbrs': {
         'title': _('CBRS PAL Holders'),

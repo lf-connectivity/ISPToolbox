@@ -3,7 +3,7 @@
       {{ tooltip.body }}
     </p>
     {% if tooltip.link %}
-      <div class='popover-link'>
+      <div class='popover-links'>
         <a href='{{ tooltip.link }}'' target=' _blank'>
           {{ tooltip.linkDesc }}
           <div class='tooltip_svg'>
@@ -12,6 +12,16 @@
             </svg>
           </div>
         </a>
+        {% if tooltip.link2 %}
+          <a href='{{ tooltip.link2 }}'' target=' _blank'>
+            {{ tooltip.link2Desc }}
+            <div class='tooltip_svg'>
+              <svg width='19' height='19' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                <path d='M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432' stroke='#FEFEFE' strokeWidth='1.5px' />
+              </svg>
+            </div>
+          </a>
+        {% endif %}
       </div>
     {% endif %}" 
     data-popover-title="{{ tooltip.title }}">

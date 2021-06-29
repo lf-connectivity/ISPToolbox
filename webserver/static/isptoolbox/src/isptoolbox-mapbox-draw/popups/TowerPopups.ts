@@ -5,7 +5,6 @@ import { AccessPoint } from "../../workspace/WorkspaceFeatures";
 import { isUnitsUS } from '../../utils/MapPreferences';
 import { ft2m, miles2km } from "../../LinkCalcUtils";
 import * as StyleConstants from '../styles/StyleConstants';
-import ap_icon from '../styles/ap-icon.svg';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
 import { MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT, MIN_HEIGHT,

@@ -36,7 +36,7 @@ class WorkspaceMapSession(models.Model):
     zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
 
     fks_serializers = [AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageAreaSerializer]
-    UNIQUE_TOGETHER_ERROR = _("You already have a session with that name, please select a different name.")
+    UNIQUE_TOGETHER_ERROR = _("You already have a session with that name, please write a different name.")
 
     class UnitPreferences(models.TextChoices):
         METRIC = "METRIC"

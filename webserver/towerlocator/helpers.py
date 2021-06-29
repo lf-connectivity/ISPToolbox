@@ -79,7 +79,7 @@ def getViewShed(lat, lon, height, customerHeight, radius):
     try:
         while retries > 0 and resp.get('kmz') is None:
             retries -= 1
-            response = requests.post('https://cloudrf.com/API/area', data=request_body, headers=headers)
+            response = requests.post('https://api.cloudrf.com/API/area', data=request_body, headers=headers)
             resp = response.json()
         # else request KMZ file, add geometry collection to pipeline and run market evaluator pipeline
         kmz_response = requests.get(resp['kmz'])

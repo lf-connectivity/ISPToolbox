@@ -12,7 +12,6 @@ import { MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT,
     validateName, validateLat, validateLng, validateRadius, validateHeight } from '../../LinkCheckUtils';
 import { sanitizeString } from "../../molecules/InputValidator";
 import { WorkspaceEvents } from "../../workspace/WorkspaceConstants";
-import { EMPTY_BUILDING_COVERAGE } from "../../workspace/BuildingCoverage";
 import { parseFormLatitudeLongitude } from "../../utils/LatLngInputUtils";
 
 var _ = require('lodash');

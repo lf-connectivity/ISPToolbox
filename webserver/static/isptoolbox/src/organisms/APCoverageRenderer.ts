@@ -256,17 +256,6 @@ abstract class RadiusAndBuildingCoverageRenderer {
     debouncedRenderAPRadius = _.debounce(this.renderAPRadiusAndBuildings, 50);
 
     deleteAPRender({ features }: { features: Array<any> }) {
-        features.forEach((feature) => {
-            if (feature.properties.uuid) {
-                if (this.map.getLayer(feature.properties.uuid)) {
-                    this.map.removeLayer(feature.properties.uuid);
-                }
-                if (this.map.getSource(feature.properties.layer)) {
-                    this.map.removeSource(feature.properties.uuid);
-                }
-            }
-        });
-
         // rerender AP radii.
         PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
     }

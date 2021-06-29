@@ -20,12 +20,8 @@ import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
 import { getSessionID } from '../utils/MapPreferences';
 import { debounce } from "lodash";
+import { DEFAULT_AP_HEIGHT, DEFAULT_AP_NAME, DEFAULT_CPE_HEIGHT, DEFAULT_CPE_NAME, DEFAULT_NO_CHECK_RADIUS } from "./BaseWorkspaceManager";
 
-const DEFAULT_AP_HEIGHT = 30.48;
-const DEFAULT_CPE_HEIGHT = 1.0;
-const DEFAULT_NO_CHECK_RADIUS = 0.01;
-const DEFAULT_AP_NAME = 'Unnamed AP';
-const DEFAULT_CPE_NAME = 'Unnamed CPE';
 const DEFAULT_LINK_FREQUENCY = 5.4925;
 const DEBOUNCE_VIEWSHED_S = 2000;
 
@@ -376,17 +372,6 @@ export class WorkspaceManager {
     deleteFeatures({ features }: { features: Array<any> }) {
         features.forEach((feature) => {
             if (feature.properties.uuid) {
-                if (this.map.getLayer(feature.properties.uuid)) {
-                    this.map.removeLayer(feature.properties.uuid);
-                }
-                if (this.map.getSource(feature.properties.layer)) {
-                    this.map.removeSource(feature.properties.uuid);
-                }
-            }
-        });
-
-        features.forEach((feature) => {
-            if (feature.properties.uuid) {
                 let workspaceFeature = this.features[feature.properties.uuid];
                 let featureType = workspaceFeature.getFeatureType();
 
@@ -425,8 +410,6 @@ export class WorkspaceManager {
                 }
             }
         });
-
-        PubSub.publish(WorkspaceEvents.AP_RENDER_SELECTED, {});
     }
 
     filterByType(list: Array<any>, feat_type: WorkspaceFeatureTypes) {

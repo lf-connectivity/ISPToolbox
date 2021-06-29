@@ -13,6 +13,12 @@ function doNothingProcessor(): UpdateDeleteFeatureProcessor {
     return (workspaceFeature: BaseWorkspaceFeature) => {};
 }
 
+export const DEFAULT_AP_HEIGHT = 30.48;
+export const DEFAULT_CPE_HEIGHT = 1.0;
+export const DEFAULT_NO_CHECK_RADIUS = 0.01;
+export const DEFAULT_AP_NAME = 'Unnamed AP';
+export const DEFAULT_CPE_NAME = 'Unnamed CPE';
+
 export abstract class BaseWorkspaceManager {
     map: MapboxGL.Map;
     draw: MapboxDraw;

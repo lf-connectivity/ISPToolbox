@@ -7,11 +7,13 @@ from uuid import UUID
 
 from workspace import geojson_utils
 from workspace.models import (
-    AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession, PolygonCoverageArea, AccessPointBasedCoverageArea, MultipolygonCoverageArea
+    AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession,
+    PolygonCoverageArea, AccessPointBasedCoverageArea, MultipolygonCoverageArea
 )
 from workspace.models.model_constants import FeatureType
 from workspace.models import (
-    AccessPointSerializer, CPESerializer, APToCPELinkSerializer, PolygonCoverageAreaSerializer, APCoverageAreaSerializer, MultipolygonCoverageAreaSerializer
+    AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
+    PolygonCoverageAreaSerializer, APCoverageAreaSerializer, MultipolygonCoverageAreaSerializer
 )
 
 
@@ -844,8 +846,10 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.delete_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, self.test_ap_coverage_area.uuid)
         self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
-        self.delete_geojson_model(PolygonCoverageArea, POLYGON_COVERAGE_AREA_ENDPOINT, self.test_polygon_coverage_area.uuid)
-        self.delete_geojson_model(MultipolygonCoverageArea, MULTIPOLYGON_COVERAGE_AREA_ENDPOINT, self.test_multipolygon_coverage_area.uuid)
+        self.delete_geojson_model(PolygonCoverageArea, POLYGON_COVERAGE_AREA_ENDPOINT,
+                                  self.test_polygon_coverage_area.uuid)
+        self.delete_geojson_model(MultipolygonCoverageArea, MULTIPOLYGON_COVERAGE_AREA_ENDPOINT,
+                                  self.test_multipolygon_coverage_area.uuid)
 
 
 class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):

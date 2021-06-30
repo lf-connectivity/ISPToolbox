@@ -6,6 +6,7 @@
  */
 
 
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import MapboxGL from 'mapbox-gl';
 import { CbrsOverlayPopup, CensusBlocksOverlayPopup, CommunityConnectOverlayPopup, RdofOverlayPopup, TribalOverlayPopup } from './isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
 import MapboxGeoOverlay, {GeoOverlay} from './molecules/MapboxGeoOverlay';
@@ -159,23 +160,25 @@ const overlay = {
 
 export default class MarketEvaluatorOverlayManager {
     map: MapboxGL.Map;
+    draw: MapboxDraw;
     sources: OverlaySourceLayer;
     activeGeoSource: GeoLayerString | null;
     overlays:  {[key in GeoLayerString]: MapboxOverlay};
     static _instance: MarketEvaluatorOverlayManager;
 
-    constructor(map: MapboxGL.Map) {
+    constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         if (MarketEvaluatorOverlayManager._instance) {
             throw Error("This singleton has already been instantiated, use getInstance.");
         }
         this.map = map;
+        this.draw = draw;
         this.sources = overlay.sourceLayerInit;
         this.activeGeoSource = null;
-        new RdofOverlayPopup(this.map);
-        new CommunityConnectOverlayPopup(this.map);
-        new CbrsOverlayPopup(this.map);
-        new CensusBlocksOverlayPopup(this.map);
-        new TribalOverlayPopup(this.map);
+        new RdofOverlayPopup(this.map, this.draw);
+        new CommunityConnectOverlayPopup(this.map, this.draw);
+        new CbrsOverlayPopup(this.map, this.draw);
+        new CensusBlocksOverlayPopup(this.map, this.draw);
+        new TribalOverlayPopup(this.map, this.draw);
 
         this.populateOverlays();
 
@@ -237,6 +240,7 @@ export default class MarketEvaluatorOverlayManager {
             this.overlays = {
                 'rdof': new MapboxGeoOverlay(
                     this.map,
+                    this.draw,
                     geoOverlays.rdof,
                     this.sources.rdof.sourceUrl,
                     this.sources.rdof.sourceLayer,
@@ -244,6 +248,7 @@ export default class MarketEvaluatorOverlayManager {
                 ),
                 'communityConnect': new MapboxGeoOverlay(
                     this.map,
+                    this.draw,
                     geoOverlays.communityConnect,
                     this.sources.communityConnect.sourceUrl,
                     this.sources.communityConnect.sourceLayer,
@@ -251,6 +256,7 @@ export default class MarketEvaluatorOverlayManager {
                 ),
                 'cbrs': new MapboxGeoOverlay(
                     this.map,
+                    this.draw,
                     geoOverlays.cbrs,
                     this.sources.cbrs.sourceUrl,
                     this.sources.cbrs.sourceLayer,
@@ -258,6 +264,7 @@ export default class MarketEvaluatorOverlayManager {
                 ),
                 'censusBlocks': new MapboxGeoOverlay(
                     this.map,
+                    this.draw,
                     geoOverlays.censusBlocks,
                     this.sources.censusBlocks.sourceUrl,
                     this.sources.censusBlocks.sourceLayer,
@@ -265,6 +272,7 @@ export default class MarketEvaluatorOverlayManager {
                 ),
                 'tribal': new MapboxGeoOverlay(
                     this.map,
+                    this.draw,
                     geoOverlays.tribal,
                     this.sources.tribal.sourceUrl,
                     this.sources.tribal.sourceLayer,

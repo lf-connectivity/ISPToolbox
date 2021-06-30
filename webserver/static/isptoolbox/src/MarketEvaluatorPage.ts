@@ -31,7 +31,7 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
 
     onMapLoad() {
         // stuff might go here later
-        new MarketEvaluatorOverlayManager(this.map);
+        new MarketEvaluatorOverlayManager(this.map, this.draw);
         new MarketEvaluatorWorkspaceManager(this.map, this.draw);
 
         // Tooltips

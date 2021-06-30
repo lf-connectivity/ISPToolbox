@@ -1,11 +1,11 @@
 import mapboxgl from "mapbox-gl";
-import { ISPToolboxBasePopup } from "./LinkCheckBasePopup";
+import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
 
-abstract class MarketEvaluatorBaseOverlayPopup extends ISPToolboxBasePopup {
+abstract class MarketEvaluatorBaseOverlayPopup extends LinkCheckBasePopup {
     protected featureProperties: any | undefined
 
-    constructor(map: mapboxgl.Map) {
-        super(map);
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        super(map, draw);
     }
 
     setFeature(feature: any) {
@@ -22,11 +22,11 @@ abstract class MarketEvaluatorBaseOverlayPopup extends ISPToolboxBasePopup {
 export class RdofOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: RdofOverlayPopup;
 
-    constructor(map: mapboxgl.Map) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         if (RdofOverlayPopup._instance) {
             return RdofOverlayPopup._instance;
         }
-        super(map);
+        super(map, draw);
         RdofOverlayPopup._instance = this;
     }
 
@@ -92,11 +92,11 @@ export class RdofOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
 export class CommunityConnectOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: CommunityConnectOverlayPopup;
 
-    constructor(map: mapboxgl.Map) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         if (CommunityConnectOverlayPopup._instance) {
             return CommunityConnectOverlayPopup._instance;
         }
-        super(map);
+        super(map, draw);
         CommunityConnectOverlayPopup._instance = this;
     }
 
@@ -162,11 +162,11 @@ export class CommunityConnectOverlayPopup extends MarketEvaluatorBaseOverlayPopu
 export class CbrsOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: CbrsOverlayPopup;
 
-    constructor(map: mapboxgl.Map) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         if (CbrsOverlayPopup._instance) {
             return CbrsOverlayPopup._instance;
         }
-        super(map);
+        super(map, draw);
         CbrsOverlayPopup._instance = this;
     }
 
@@ -239,11 +239,11 @@ export class CbrsOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
 export class CensusBlocksOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: CensusBlocksOverlayPopup;
 
-    constructor(map: mapboxgl.Map) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         if (CensusBlocksOverlayPopup._instance) {
             return CensusBlocksOverlayPopup._instance;
         }
-        super(map);
+        super(map, draw);
         CensusBlocksOverlayPopup._instance = this;
     }
 
@@ -295,11 +295,11 @@ export class CensusBlocksOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
 export class TribalOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: TribalOverlayPopup;
 
-    constructor(map: mapboxgl.Map) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         if (TribalOverlayPopup._instance) {
             return TribalOverlayPopup._instance;
         }
-        super(map);
+        super(map, draw);
         TribalOverlayPopup._instance = this;
     }
 

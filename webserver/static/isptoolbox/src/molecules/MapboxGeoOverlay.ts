@@ -1,3 +1,4 @@
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl from 'mapbox-gl';
 import MapboxOverlay from './MapboxOverlay';
 
@@ -12,6 +13,7 @@ export type GeoOverlay = {
 
 export default class MapboxGeoOverlay implements MapboxOverlay {
     map: mapboxgl.Map;
+    draw: MapboxDraw;
     sourceId: string;
     fillsId: string;
     bordersId: string;
@@ -22,8 +24,9 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
     hoverFeature: string | number | undefined;
     popup: any;
     
-    constructor(map: mapboxgl.Map, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string, popupClass: any) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string, popupClass: any) {
         this.map = map;
+        this.draw = draw;
         this.sourceId = overlay.sourceId;
         this.fillsId = overlay.fills;
         this.bordersId = overlay.borders;
@@ -32,7 +35,6 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
         this.color = overlay.color;
         this.outlineOnly = overlay.outlineOnly;
         this.popup = popupClass.getInstance();
-
     }
 
     mousemoveCallback(e: any) {
@@ -89,6 +91,9 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
         this.popup.hide();
     }
 
+    mouseClickCallback(e: any) {
+    }
+
     show() {
         this.map.addSource(this.sourceId, {
             type: 'vector',
@@ -141,6 +146,7 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
 
         this.map.on('mousemove', this.fillsId, this.mousemoveCallback.bind(this));
         this.map.on('mouseleave', this.fillsId, this.mouseleaveCallback.bind(this));
+        this.map.on('click', this.fillsId, this.mouseClickCallback.bind(this));
     }
     
     remove() {
@@ -152,5 +158,6 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
         this.map.removeSource(this.sourceId);
         this.map.off('mousemove', this.fillsId, this.mousemoveCallback.bind(this));
         this.map.off('mouseleave', this.fillsId, this.mouseleaveCallback.bind(this));
+        this.map.on('click', this.fillsId, this.mouseClickCallback.bind(this));
     }
 }

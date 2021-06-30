@@ -48,6 +48,11 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
                 });
             }
         }
+
+        // Get polygons from simple select mode overlays
+        this.saveFeatureDrawModeHandlers.simple_select = (feature: any) => {
+            // Will implement multipolygon support later.
+        }
     }
 
     initUpdateFeatureHandlers() {

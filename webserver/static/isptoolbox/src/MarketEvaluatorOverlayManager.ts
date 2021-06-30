@@ -9,7 +9,7 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import MapboxGL from 'mapbox-gl';
 import { CbrsOverlayPopup, CensusBlocksOverlayPopup, CommunityConnectOverlayPopup, RdofOverlayPopup, TribalOverlayPopup } from './isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
-import MapboxGeoOverlay, {GeoOverlay} from './molecules/MapboxGeoOverlay';
+import {CbrsGeoOverlay, CensusBlocksGeoOverlay, CommunityConnectGeoOverlay, GeoOverlay, RdofGeoOverlay, TribalGeoOverlay} from './molecules/MapboxGeoOverlay';
 import MapboxOverlay from './molecules/MapboxOverlay';
 
 type GeoLayerString = 'rdof' | 'communityConnect' | 'cbrs' | 'censusBlocks' | 'tribal';
@@ -238,45 +238,40 @@ export default class MarketEvaluatorOverlayManager {
         }
         Promise.all(sourcePromises).then(() => {
             this.overlays = {
-                'rdof': new MapboxGeoOverlay(
+                'rdof': new RdofGeoOverlay(
                     this.map,
                     this.draw,
                     geoOverlays.rdof,
                     this.sources.rdof.sourceUrl,
-                    this.sources.rdof.sourceLayer,
-                    RdofOverlayPopup
+                    this.sources.rdof.sourceLayer
                 ),
-                'communityConnect': new MapboxGeoOverlay(
+                'communityConnect': new CommunityConnectGeoOverlay(
                     this.map,
                     this.draw,
                     geoOverlays.communityConnect,
                     this.sources.communityConnect.sourceUrl,
-                    this.sources.communityConnect.sourceLayer,
-                    CommunityConnectOverlayPopup
+                    this.sources.communityConnect.sourceLayer
                 ),
-                'cbrs': new MapboxGeoOverlay(
+                'cbrs': new CbrsGeoOverlay(
                     this.map,
                     this.draw,
                     geoOverlays.cbrs,
                     this.sources.cbrs.sourceUrl,
-                    this.sources.cbrs.sourceLayer,
-                    CbrsOverlayPopup
+                    this.sources.cbrs.sourceLayer
                 ),
-                'censusBlocks': new MapboxGeoOverlay(
+                'censusBlocks': new CensusBlocksGeoOverlay(
                     this.map,
                     this.draw,
                     geoOverlays.censusBlocks,
                     this.sources.censusBlocks.sourceUrl,
-                    this.sources.censusBlocks.sourceLayer,
-                    CensusBlocksOverlayPopup
+                    this.sources.censusBlocks.sourceLayer
                 ),
-                'tribal': new MapboxGeoOverlay(
+                'tribal': new TribalGeoOverlay(
                     this.map,
                     this.draw,
                     geoOverlays.tribal,
                     this.sources.tribal.sourceUrl,
-                    this.sources.tribal.sourceLayer,
-                    TribalOverlayPopup
+                    this.sources.tribal.sourceLayer
                 )
             }
         })

@@ -1,4 +1,4 @@
-import MapboxGL from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl';
 import MapboxOverlay from './MapboxOverlay';
 
 const towerZoomThreshold: number = 12;
@@ -9,6 +9,7 @@ const EMPTY_SOURCE: GeoJSON.FeatureCollection = {
 };
 
 export default class MapboxTowerOverlay implements MapboxOverlay {
+    map: mapboxgl.Map;
     sourceId: string;
     selectedSourceId: string;
     labelsId: string;
@@ -18,7 +19,8 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
     sourceLayer: string;
 
 
-    constructor(sourceId: string, selectedSourceId: string, labelsId: string, selectedLayerId: string, hover: boolean, sourceUrl: string, sourceLayer: string) {
+    constructor(map: mapboxgl.Map, sourceId: string, selectedSourceId: string, labelsId: string, selectedLayerId: string, hover: boolean, sourceUrl: string, sourceLayer: string) {
+        this.map = map;
         this.sourceId = sourceId;
         this.selectedSourceId = selectedSourceId;
         this.labelsId = labelsId;
@@ -28,12 +30,12 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
         this.sourceLayer = sourceLayer;
     }
 
-    show(map: MapboxGL.Map) {
-        map.addSource(this.sourceId, {
+    show() {
+        this.map.addSource(this.sourceId, {
             type: 'vector',
             url: `${this.sourceUrl}?optimize=true`,
         });
-        map.addLayer({
+        this.map.addLayer({
             id: this.labelsId,
             source: this.sourceId,
             'source-layer': this.sourceLayer,
@@ -99,11 +101,11 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
             },
         });
         // Create a separate layer just for tower overlay
-        map.addSource(this.selectedSourceId, {
+        this.map.addSource(this.selectedSourceId, {
             type: 'geojson',
             data: EMPTY_SOURCE,
         });
-        map.addLayer({
+        this.map.addLayer({
             id: this.selectedLayerId,
             source: this.selectedSourceId,
             type: 'symbol',
@@ -169,15 +171,15 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
         });
     }
 
-    remove(map: MapboxGL.Map) {
-        map.getLayer(this.labelsId) &&
-            map.removeLayer(this.labelsId);
-        map.getSource(this.sourceId) &&
-            map.removeSource(this.sourceId);
+    remove() {
+        this.map.getLayer(this.labelsId) &&
+            this.map.removeLayer(this.labelsId);
+        this.map.getSource(this.sourceId) &&
+            this.map.removeSource(this.sourceId);
         // Remove Selected Tower
-        map.getLayer(this.selectedLayerId) &&
-            map.removeLayer(this.selectedLayerId);
-        map.getSource(this.selectedSourceId) &&
-            map.removeSource(this.selectedSourceId);
+        this.map.getLayer(this.selectedLayerId) &&
+            this.map.removeLayer(this.selectedLayerId);
+        this.map.getSource(this.selectedSourceId) &&
+            this.map.removeSource(this.selectedSourceId);
     }
 }

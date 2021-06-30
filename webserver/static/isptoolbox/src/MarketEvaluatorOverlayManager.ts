@@ -7,6 +7,7 @@
 
 
 import MapboxGL from 'mapbox-gl';
+import { CbrsOverlayPopup, CensusBlocksOverlayPopup, CommunityConnectOverlayPopup, RdofOverlayPopup, TribalOverlayPopup } from './isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
 import MapboxGeoOverlay, {GeoOverlay} from './molecules/MapboxGeoOverlay';
 import MapboxOverlay from './molecules/MapboxOverlay';
 
@@ -169,7 +170,13 @@ export default class MarketEvaluatorOverlayManager {
         }
         this.map = map;
         this.sources = overlay.sourceLayerInit;
-        this.activeGeoSource = null; 
+        this.activeGeoSource = null;
+        new RdofOverlayPopup(this.map);
+        new CommunityConnectOverlayPopup(this.map);
+        new CbrsOverlayPopup(this.map);
+        new CensusBlocksOverlayPopup(this.map);
+        new TribalOverlayPopup(this.map);
+
         this.populateOverlays();
 
         $(`#map-layers-btn`).on('click', (event) => {
@@ -183,17 +190,17 @@ export default class MarketEvaluatorOverlayManager {
             $(`#switch-${layerKey}`).on('click', () => {
                 if (this.activeGeoSource === layerKey){
                     // Toggled off, remove source
-                    this.overlays[layerKey].remove(map);
+                    this.overlays[layerKey].remove();
                     this.activeGeoSource = null;
                 } else {
                     // Remove mutually exclusive sources
                     if (this.activeGeoSource){
-                        this.overlays[this.activeGeoSource].remove(map);
+                        this.overlays[this.activeGeoSource].remove();
                         $(`#switch-${this.activeGeoSource}`).prop("checked", false);
                         this.activeGeoSource = null
                     }
                     // Toggled on, add source
-                    this.overlays[layerKey].show(map);
+                    this.overlays[layerKey].show();
                     this.activeGeoSource = layerKey;
                 }
             })
@@ -229,29 +236,39 @@ export default class MarketEvaluatorOverlayManager {
         Promise.all(sourcePromises).then(() => {
             this.overlays = {
                 'rdof': new MapboxGeoOverlay(
+                    this.map,
                     geoOverlays.rdof,
                     this.sources.rdof.sourceUrl,
                     this.sources.rdof.sourceLayer,
+                    RdofOverlayPopup
                 ),
                 'communityConnect': new MapboxGeoOverlay(
+                    this.map,
                     geoOverlays.communityConnect,
                     this.sources.communityConnect.sourceUrl,
                     this.sources.communityConnect.sourceLayer,
+                    CommunityConnectOverlayPopup
                 ),
                 'cbrs': new MapboxGeoOverlay(
+                    this.map,
                     geoOverlays.cbrs,
                     this.sources.cbrs.sourceUrl,
                     this.sources.cbrs.sourceLayer,
+                    CbrsOverlayPopup
                 ),
                 'censusBlocks': new MapboxGeoOverlay(
+                    this.map,
                     geoOverlays.censusBlocks,
                     this.sources.censusBlocks.sourceUrl,
                     this.sources.censusBlocks.sourceLayer,
+                    CensusBlocksOverlayPopup
                 ),
                 'tribal': new MapboxGeoOverlay(
+                    this.map,
                     geoOverlays.tribal,
                     this.sources.tribal.sourceUrl,
                     this.sources.tribal.sourceLayer,
+                    TribalOverlayPopup
                 )
             }
         })

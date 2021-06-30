@@ -1,4 +1,4 @@
-import MapboxGL from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl';
 import MapboxOverlay from './MapboxOverlay';
 
 export type GeoOverlay = {
@@ -11,65 +11,38 @@ export type GeoOverlay = {
 }
 
 export default class MapboxGeoOverlay implements MapboxOverlay {
+    map: mapboxgl.Map;
     sourceId: string;
     fillsId: string;
     bordersId: string;
-    hover: boolean;
     sourceUrl: string;
     sourceLayer: string;
     color: string;
     outlineOnly: boolean;
     hoverFeature: string | number | undefined;
+    popup: any;
     
-    constructor(overlay: GeoOverlay, sourceUrl: string, sourceLayer: string) {
+    constructor(map: mapboxgl.Map, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string, popupClass: any) {
+        this.map = map;
         this.sourceId = overlay.sourceId;
         this.fillsId = overlay.fills;
         this.bordersId = overlay.borders;
-        this.hover = overlay.hover;
         this.sourceUrl = sourceUrl;
         this.sourceLayer = sourceLayer;
         this.color = overlay.color;
         this.outlineOnly = overlay.outlineOnly;
+        this.popup = popupClass.getInstance();
+
     }
 
-    mousemoveCallback(map: MapboxGL.Map) {
-        return (event : MapboxGL.EventData) => {
-            const features = event.features
-            const canvas = map.getCanvas();
-            if (canvas) {
-                canvas.style.cursor = 'pointer';
-            }
-            if (this.hoverFeature !== null) {
-                map.setFeatureState(
-                    {
-                        source: this.sourceId,
-                        sourceLayer: this.sourceLayer,
-                        id: this.hoverFeature,
-                    },
-                    {hover: false}
-                );
-            }
-            this.hoverFeature = undefined;
-            if (features && features.length) {
-                this.hoverFeature = features[0].id;
-                map.setFeatureState(
-                    {
-                        source: this.sourceId,
-                        sourceLayer: this.sourceLayer,
-                        id: this.hoverFeature,
-                    },
-                    {hover: true}
-                );
-            }
+    mousemoveCallback(e: any) {
+        const features = e.features
+        const canvas = this.map.getCanvas();
+        if (canvas) {
+            canvas.style.cursor = 'pointer';
         }
-    }
-
-    mouseleaveCallback(map: MapboxGL.Map) {
-        return () => {
-            if (!this.hoverFeature) {
-                return;
-            }
-            map.setFeatureState(
+        if (this.hoverFeature !== undefined) {
+            this.map.setFeatureState(
                 {
                     source: this.sourceId,
                     sourceLayer: this.sourceLayer,
@@ -77,20 +50,52 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
                 },
                 {hover: false}
             );
-            const canvas = map.getCanvas();
-            if (canvas) {
-                canvas.style.cursor = '';
-            }
+            this.popup.hide();
+        }
+        this.hoverFeature = undefined;
+        if (features && features.length) {
+            this.hoverFeature = features[0].id;
+            this.map.setFeatureState(
+                {
+                    source: this.sourceId,
+                    sourceLayer: this.sourceLayer,
+                    id: this.hoverFeature,
+                },
+                {hover: true}
+            );
+            
+            this.popup.setFeature(features[0]);
+            this.popup.setLngLat(e.lngLat);
+            this.popup.show();
         }
     }
 
-    show(map: MapboxGL.Map) {
-        map.addSource(this.sourceId, {
+    mouseleaveCallback() {
+        if (!this.hoverFeature) {
+            return;
+        }
+        this.map.setFeatureState(
+            {
+                source: this.sourceId,
+                sourceLayer: this.sourceLayer,
+                id: this.hoverFeature,
+            },
+            {hover: false}
+        );
+        const canvas = this.map.getCanvas();
+        if (canvas) {
+            canvas.style.cursor = '';
+        }
+        this.popup.hide();
+    }
+
+    show() {
+        this.map.addSource(this.sourceId, {
             type: 'vector',
             url: `${this.sourceUrl}?optimize=true`,
         });
         if (this.outlineOnly) {
-            map.addLayer({
+            this.map.addLayer({
                 id: this.fillsId,
                 type: 'fill',
                 source: this.sourceId,
@@ -105,7 +110,7 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
                 },
             });
         } else {
-            map.addLayer({
+            this.map.addLayer({
                 id: this.fillsId,
                 type: 'fill',
                 source: this.sourceId,
@@ -117,7 +122,7 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
                 },
             });
         }
-        map.addLayer({
+        this.map.addLayer({
             id: this.bordersId,
             type: 'line',
             source: this.sourceId,
@@ -134,18 +139,18 @@ export default class MapboxGeoOverlay implements MapboxOverlay {
             },
         });
 
-        map.on('mousemove', this.fillsId, this.mousemoveCallback(map));
-        map.on('mouseleave', this.fillsId, this.mouseleaveCallback(map));
+        this.map.on('mousemove', this.fillsId, this.mousemoveCallback.bind(this));
+        this.map.on('mouseleave', this.fillsId, this.mouseleaveCallback.bind(this));
     }
     
-    remove(map: MapboxGL.Map) {
-        map.getLayer(this.fillsId) &&
-        map.removeLayer(this.fillsId);
-        map.getLayer(this.bordersId) &&
-        map.removeLayer(this.bordersId);
-        map.getSource(this.sourceId) &&
-        map.removeSource(this.sourceId);
-        map.off('mousemove', this.fillsId, this.mousemoveCallback(map));
-        map.off('mouseleave', this.fillsId, this.mouseleaveCallback(map));
+    remove() {
+        this.map.getLayer(this.fillsId) &&
+        this.map.removeLayer(this.fillsId);
+        this.map.getLayer(this.bordersId) &&
+        this.map.removeLayer(this.bordersId);
+        this.map.getSource(this.sourceId) &&
+        this.map.removeSource(this.sourceId);
+        this.map.off('mousemove', this.fillsId, this.mousemoveCallback.bind(this));
+        this.map.off('mouseleave', this.fillsId, this.mouseleaveCallback.bind(this));
     }
 }

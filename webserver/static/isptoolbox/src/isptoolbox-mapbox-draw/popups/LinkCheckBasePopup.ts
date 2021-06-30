@@ -4,17 +4,15 @@ import { getStreetAndAddressInfo } from "../../LinkCheckUtils";
 
 const DEFAULT_LNGLAT: [number, number] = [0.00000, 0.00000];
 
-export abstract class LinkCheckBasePopup {
+export abstract class ISPToolboxBasePopup {
     protected map: mapboxgl.Map;
-    protected draw: MapboxDraw;
     protected street: string;
     protected city: string;
     protected lnglat: [number, number];
     protected popup: mapboxgl.Popup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+    constructor(map: mapboxgl.Map) {
         this.map = map;
-        this.draw = draw;
         this.street = '';
         this.city = '';
         this.lnglat = DEFAULT_LNGLAT;
@@ -55,7 +53,20 @@ export abstract class LinkCheckBasePopup {
         return `${this.lnglat[1].toFixed(5)}&deg;, ${this.lnglat[0].toFixed(5)}&deg;`
     }
 
-    /**
+    protected abstract getHTML(): string;
+    protected abstract cleanup(): void;
+    protected abstract setEventHandlers(): void;
+}
+
+export abstract class LinkCheckBasePopup extends ISPToolboxBasePopup {
+    protected draw: MapboxDraw;
+
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        super(map);
+        this.draw = draw;
+    }
+
+     /**
      * Creates a popup of the type class (must be singleton) at the specified lat/long
      * with the given mapbox reverse geocode response. Must be done from within the success
      * callback of a mapbox sdk reverse geocode call.
@@ -65,18 +76,14 @@ export abstract class LinkCheckBasePopup {
      * @param response Mapbox Reverse Geocode response
      * @returns A popup instance of the specified class, set to the correct address and coordinates.
      */
-    static createPopupFromReverseGeocodeResponse(cls: any, lngLat: [number, number], response: any) {
-        let result = response.body.features;
-        let popup = cls.getInstance();
-        popup.setLngLat(lngLat);
-
-        // Choose the best fitting/most granular result. Might not have
-        // a street address in all cases though.
-        popup.setAddress(result[0].place_name);
-        return popup;
-    }
-
-    protected abstract getHTML(): string;
-    protected abstract cleanup(): void;
-    protected abstract setEventHandlers(): void;
+         static createPopupFromReverseGeocodeResponse(cls: any, lngLat: [number, number], response: any) {
+            let result = response.body.features;
+            let popup = cls.getInstance();
+            popup.setLngLat(lngLat);
+    
+            // Choose the best fitting/most granular result. Might not have
+            // a street address in all cases though.
+            popup.setAddress(result[0].place_name);
+            return popup;
+        }
 }

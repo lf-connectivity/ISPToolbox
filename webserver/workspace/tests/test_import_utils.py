@@ -1,10 +1,10 @@
 import django.test
 
 from workspace.models import (
-    AccessPointLocation, CPELocation, APToCPELink    # flake8: noqa
+    AccessPointLocation, CPELocation, APToCPELink    # noqa: F401
 )
 from workspace.views import (
-    MarketEvaluatorView, PolygonCoverageAreaCreate   # flake8: noqa
+    MarketEvaluatorView, PolygonCoverageAreaCreate   # noqa: F401
 )
 from workspace.utils.import_utils import get_imported_classnames
 

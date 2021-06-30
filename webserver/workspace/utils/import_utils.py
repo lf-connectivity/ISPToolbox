@@ -9,11 +9,8 @@ def get_imported_classnames(module_name):
     To get all imported classes in the current module, do:
     ```
     from workspace.utils.import_utils import get_imported_classnames
-
-
     get_imported_classnames(__name__)
     ```
-
     This is written to replace the `__all__ = [# stuff]` __init__.py
     files we have lying around.
     """

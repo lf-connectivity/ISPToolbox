@@ -25,7 +25,7 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         echo "if you're seeing this, your code is ugly ( ͡ಥ ͜ʖ ͡ಥ)"
-        flake8 . --count --max-complexity=11 --max-line-length=127 --statistics --exclude *migrations*,*__init__.py,*test_import_utils.py
+        flake8 . --count --max-complexity=11 --max-line-length=127 --statistics --exclude *migrations*,*__init__.py
     - name: Log into Docker Hub
       uses: docker/login-action@v1
       with:

@@ -1,7 +1,7 @@
 <div id="signup_container" class="{% if not showSignUp or not showEmailSignUp %}d-none{% endif %}">
 <div class="container signup_container onboarding_container">
     <h1 class="heading-2">Let's get you set up</h1>
-    <p class="onboarding_container--intro-copy large-paragraph">Creating a workspace will allow you to save and reuse files across ISP Toolbox.</p>
+    <p class="onboarding_container--intro-copy large-paragraph">Creating an account will give you the ability to save and reuse files across ISP Toolbox.</p>
 
     <div class="isp-signupform mx-auto">
         <form action="{% url 'create_account_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form pb-3">

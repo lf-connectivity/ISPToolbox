@@ -19,7 +19,7 @@ export abstract class LinkCheckBasePopup {
         this.city = '';
         this.lnglat = DEFAULT_LNGLAT;
         this.popup = new window.mapboxgl.Popup({
-            className: "lineofsight-tooltip"
+            className: "map-tooltip"
         });
         this.popup.on('close', () => {
             this.cleanup();

@@ -32,6 +32,7 @@ class WorkspaceFeature(models.Model):
         db_column="session"
     )
     geojson = geo_models.PointField()
+    uneditable = models.BooleanField(default=False)
     uuid = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -192,22 +193,39 @@ class APToCPELinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
         exclude = ['owner', 'session', 'created']
 
 
-class CoverageArea(WorkspaceFeature):
+class PolygonCoverageArea(WorkspaceFeature):
     geojson = geo_models.PolygonField()
-    uneditable = models.BooleanField(default=False)
 
     @property
     def feature_type(self):
-        return FeatureType.COVERAGE_AREA.value
+        return FeatureType.POLYGON_COVERAGE_AREA.value
 
 
-class CoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
+class PolygonCoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
 
     class Meta:
-        model = CoverageArea
+        model = PolygonCoverageArea
+        exclude = ['owner', 'session', 'created']
+
+
+class MultipolygonCoverageArea(WorkspaceFeature):
+    geojson = geo_models.MultiPolygonField()
+
+    @property
+    def feature_type(self):
+        return FeatureType.MULTIPOLYGON_COVERAGE_AREA.value
+
+
+class MultipolygonCoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
+    lookup_field = 'uuid'
+    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    feature_type = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = MultipolygonCoverageArea
         exclude = ['owner', 'session', 'created']
 
 

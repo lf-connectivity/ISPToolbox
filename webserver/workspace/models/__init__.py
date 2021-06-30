@@ -2,7 +2,9 @@ from .workspace_models import ISPCompany, Employee
 from .network_models import (
     AccessPointLocation, BuildingCoverage,
     AccessPointCoverageBuildings, Radio, PTPLink, CPELocation, APToCPELink,
-    CoverageArea, CoverageAreaSerializer, AccessPointBasedCoverageArea, APCoverageAreaSerializer,
+    PolygonCoverageArea, PolygonCoverageAreaSerializer,
+    MultipolygonCoverageArea, MultipolygonCoverageAreaSerializer,
+    AccessPointBasedCoverageArea, APCoverageAreaSerializer,
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
 )
 from .viewshed_models import Viewshed, ViewshedTile
@@ -13,14 +15,6 @@ from .session_models import (
     WorkspaceMapSessionSerializer
 )
 
+import workspace.utils.import_utils
 
-__all__ = [
-    'ISPCompany', 'Employee', 'NetworkMapPreferences', 'AccessPointLocation',
-    'BuildingCoverage', 'AccessPointCoverageBuildings', 'Radio', 'PTPLink', 'CPELocation',
-    'APToCPELink',
-    'Viewshed', 'ViewshedTile', 'WorkspaceMapSession',
-    'AccessPointSerializer', 'CPESerializer', 'APToCPELinkSerializer',
-    'CoverageArea', 'CoverageAreaSerializer', 'AccessPointBasedCoverageArea', 'APCoverageAreaSerializer',
-    'NetworkMapPreferencesSerializer', 'WorkspaceMapSessionSerializer',
-    'MultiplayerSession',
-]
+__all__ = workspace.utils.import_utils.get_imported_classnames(__name__)

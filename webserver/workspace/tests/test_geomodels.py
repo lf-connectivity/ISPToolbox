@@ -7,11 +7,11 @@ from uuid import UUID
 
 from workspace import geojson_utils
 from workspace.models import (
-    AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession, CoverageArea, AccessPointBasedCoverageArea
+    AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession, PolygonCoverageArea, AccessPointBasedCoverageArea, MultipolygonCoverageArea
 )
 from workspace.models.model_constants import FeatureType
 from workspace.models import (
-    AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageAreaSerializer, APCoverageAreaSerializer
+    AccessPointSerializer, CPESerializer, APToCPELinkSerializer, PolygonCoverageAreaSerializer, APCoverageAreaSerializer, MultipolygonCoverageAreaSerializer
 )
 
 
@@ -89,6 +89,84 @@ DEFAULT_TEST_POLYGON = {
     ]
 }
 DEFAULT_TEST_POLYGON = json.dumps(DEFAULT_TEST_POLYGON)
+
+DEFAULT_TEST_MULTIPOLYGON = {
+    "type": "MultiPolygon",
+    "coordinates": [
+        [
+            [
+                [
+                    102.0,
+                    2.0
+                ],
+                [
+                    103.0,
+                    2.0
+                ],
+                [
+                    103.0,
+                    3.0
+                ],
+                [
+                    102.0,
+                    3.0
+                ],
+                [
+                    102.0,
+                    2.0
+                ]
+            ]
+        ],
+        [
+            [
+                [
+                    100.0,
+                    0.0
+                ],
+                [
+                    101.0,
+                    0.0
+                ],
+                [
+                    101.0,
+                    1.0
+                ],
+                [
+                    100.0,
+                    1.0
+                ],
+                [
+                    100.0,
+                    0.0
+                ]
+            ],
+            [
+                [
+                    100.2,
+                    0.2
+                ],
+                [
+                    100.8,
+                    0.2
+                ],
+                [
+                    100.8,
+                    0.8
+                ],
+                [
+                    100.2,
+                    0.8
+                ],
+                [
+                    100.2,
+                    0.2
+                ]
+            ]
+        ]
+    ]
+}
+DEFAULT_TEST_MULTIPOLYGON = json.dumps(DEFAULT_TEST_MULTIPOLYGON)
+
 
 DEFAULT_TEST_GEO_COLLECTION = {
     "type": "GeometryCollection",
@@ -244,6 +322,83 @@ UPDATED_TEST_POLYGON = {
 }
 UPDATED_TEST_POLYGON = json.dumps(UPDATED_TEST_POLYGON)
 
+UPDATED_TEST_MULTIPOLYGON = {
+    "type": "MultiPolygon",
+    "coordinates": [
+        [
+            [
+                [
+                    102.0,
+                    12.0
+                ],
+                [
+                    103.0,
+                    12.0
+                ],
+                [
+                    103.0,
+                    13.0
+                ],
+                [
+                    102.0,
+                    13.0
+                ],
+                [
+                    102.0,
+                    12.0
+                ]
+            ]
+        ],
+        [
+            [
+                [
+                    100.0,
+                    10.0
+                ],
+                [
+                    101.0,
+                    10.0
+                ],
+                [
+                    101.0,
+                    11.0
+                ],
+                [
+                    100.0,
+                    11.0
+                ],
+                [
+                    100.0,
+                    10.0
+                ]
+            ],
+            [
+                [
+                    100.2,
+                    10.2
+                ],
+                [
+                    100.8,
+                    10.2
+                ],
+                [
+                    100.8,
+                    10.8
+                ],
+                [
+                    100.2,
+                    10.8
+                ],
+                [
+                    100.2,
+                    10.2
+                ]
+            ]
+        ]
+    ]
+}
+UPDATED_TEST_MULTIPOLYGON = json.dumps(UPDATED_TEST_MULTIPOLYGON)
+
 UPDATED_TEST_GEO_COLLECTION = {
     "type": "GeometryCollection",
     "geometries": [
@@ -291,7 +446,8 @@ UPDATED_FREQUENCY = 5
 AP_ENDPOINT = '/pro/workspace/api/ap-los'
 CPE_ENDPOINT = '/pro/workspace/api/cpe'
 AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link'
-COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/coverage-area'
+POLYGON_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/polygon-coverage-area'
+MULTIPOLYGON_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/multipolygon-coverage-area'
 AP_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/ap-coverage-area'
 
 
@@ -307,7 +463,8 @@ class WorkspaceBaseTestCase(TestCase):
             password=DEFAULT_PASSWORD,
             email=DEFAULT_EMAIL,
             first_name=DEFAULT_FIRST_NAME,
-            last_name=DEFAULT_LAST_NAME
+            last_name=DEFAULT_LAST_NAME,
+            uneditable=DEFAULT_UNEDITABLE
         )
         self.testuser.save()
 
@@ -322,7 +479,8 @@ class WorkspaceBaseTestCase(TestCase):
             map_session=self.test_session,
             geojson=DEFAULT_AP_POINT,
             height=DEFAULT_HEIGHT,
-            max_radius=DEFAULT_MAX_RADIUS
+            max_radius=DEFAULT_MAX_RADIUS,
+            uneditable=DEFAULT_UNEDITABLE
         )
         self.test_ap.save()
 
@@ -331,7 +489,8 @@ class WorkspaceBaseTestCase(TestCase):
             name=DEFAULT_NAME,
             map_session=self.test_session,
             geojson=DEFAULT_CPE_POINT,
-            height=DEFAULT_HEIGHT
+            height=DEFAULT_HEIGHT,
+            uneditable=DEFAULT_UNEDITABLE
         )
         self.test_cpe.save()
 
@@ -340,23 +499,33 @@ class WorkspaceBaseTestCase(TestCase):
             frequency=DEFAULT_FREQUENCY,
             map_session=self.test_session,
             ap=self.test_ap,
-            cpe=self.test_cpe
+            cpe=self.test_cpe,
+            uneditable=DEFAULT_UNEDITABLE
         )
         self.test_ap_cpe_link.save()
 
-        self.test_coverage_area = CoverageArea(
+        self.test_polygon_coverage_area = PolygonCoverageArea(
             owner=self.testuser,
             map_session=self.test_session,
             geojson=DEFAULT_TEST_POLYGON,
             uneditable=DEFAULT_UNEDITABLE
         )
-        self.test_coverage_area.save()
+        self.test_polygon_coverage_area.save()
+
+        self.test_multipolygon_coverage_area = MultipolygonCoverageArea(
+            owner=self.testuser,
+            map_session=self.test_session,
+            geojson=DEFAULT_TEST_MULTIPOLYGON,
+            uneditable=DEFAULT_UNEDITABLE
+        )
+        self.test_multipolygon_coverage_area.save()
 
         self.test_ap_coverage_area = AccessPointBasedCoverageArea(
             owner=self.testuser,
             map_session=self.test_session,
             geojson=DEFAULT_TEST_GEO_COLLECTION,
-            ap=self.test_ap
+            ap=self.test_ap,
+            uneditable=DEFAULT_UNEDITABLE
         )
         self.test_ap_coverage_area.save()
 
@@ -391,7 +560,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         self.assertTrue(self.test_ap.feature_type, FeatureType.AP.value)
         self.assertTrue(self.test_cpe.feature_type, FeatureType.CPE.value)
         self.assertTrue(self.test_ap_cpe_link.feature_type, FeatureType.AP_CPE_LINK.value)
-        self.assertTrue(self.test_coverage_area.feature_type, FeatureType.COVERAGE_AREA.value)
+        self.assertTrue(self.test_polygon_coverage_area.feature_type, FeatureType.POLYGON_COVERAGE_AREA.value)
+        self.assertTrue(self.test_multipolygon_coverage_area.feature_type, FeatureType.MULTIPOLYGON_COVERAGE_AREA.value)
         self.assertTrue(self.test_ap_coverage_area, FeatureType.AP_COVERAGE_AREA.value)
 
     def test_get_features_for_session_ap(self):
@@ -412,7 +582,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'max_radius': DEFAULT_MAX_RADIUS,
                 'height_ft': expected_height_ft,
                 'default_cpe_height_ft': expected_default_cpe_height_ft,
-                'max_radius_miles': expected_max_radius_miles
+                'max_radius_miles': expected_max_radius_miles,
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
         self.get_feature_collection_flow(AccessPointSerializer, [expected_ap])
@@ -429,6 +600,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
         self.get_feature_collection_flow(CPESerializer, [expected_cpe])
@@ -443,23 +615,37 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'cpe': str(self.test_cpe.uuid),
                 'uuid': str(self.test_ap_cpe_link.uuid),
                 'map_session': str(self.test_session.uuid),
-                'feature_type': FeatureType.AP_CPE_LINK.value
+                'feature_type': FeatureType.AP_CPE_LINK.value,
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
         self.get_feature_collection_flow(APToCPELinkSerializer, [expected_link])
 
-    def test_get_features_for_user_coverage_area(self):
+    def test_get_features_for_user_polygon_coverage_area(self):
         expected_area = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_POLYGON),
             'properties': {
-                'uuid': str(self.test_coverage_area.uuid),
+                'uuid': str(self.test_polygon_coverage_area.uuid),
                 'map_session': str(self.test_session.uuid),
-                'feature_type': FeatureType.COVERAGE_AREA.value,
+                'feature_type': FeatureType.POLYGON_COVERAGE_AREA.value,
                 'uneditable': DEFAULT_UNEDITABLE
             }
         }
-        self.get_feature_collection_flow(CoverageAreaSerializer, [expected_area])
+        self.get_feature_collection_flow(PolygonCoverageAreaSerializer, [expected_area])
+
+    def test_get_features_for_user_multipolygon_coverage_area(self):
+        expected_area = {
+            'type': 'Feature',
+            'geometry': json.loads(DEFAULT_TEST_MULTIPOLYGON),
+            'properties': {
+                'uuid': str(self.test_multipolygon_coverage_area.uuid),
+                'map_session': str(self.test_session.uuid),
+                'feature_type': FeatureType.MULTIPOLYGON_COVERAGE_AREA.value,
+                'uneditable': DEFAULT_UNEDITABLE
+            }
+        }
+        self.get_feature_collection_flow(MultipolygonCoverageAreaSerializer, [expected_area])
 
     def test_get_features_for_session_ap_coverage_area(self):
         expected_link = {
@@ -469,7 +655,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'ap': str(self.test_ap.uuid),
                 'uuid': str(self.test_ap_coverage_area.uuid),
                 'map_session': str(self.test_session.uuid),
-                'feature_type': FeatureType.AP_COVERAGE_AREA.value
+                'feature_type': FeatureType.AP_COVERAGE_AREA.value,
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
         self.get_feature_collection_flow(APCoverageAreaSerializer, [expected_link])
@@ -555,15 +742,25 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(link.ap, self.test_ap)
         self.assertEqual(link.cpe, self.test_cpe)
 
-    def test_create_coverage_area(self):
+    def test_create_polygon_coverage_area(self):
         new_area = {
             'geojson': DEFAULT_TEST_POLYGON,
             'uneditable': DEFAULT_UNEDITABLE
         }
-        area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
+        area = self.create_geojson_model(PolygonCoverageArea, POLYGON_COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
         self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_POLYGON)
+
+    def test_create_multipolygon_coverage_area(self):
+        new_area = {
+            'geojson': DEFAULT_TEST_MULTIPOLYGON,
+            'uneditable': DEFAULT_UNEDITABLE
+        }
+        area = self.create_geojson_model(MultipolygonCoverageArea, MULTIPOLYGON_COVERAGE_AREA_ENDPOINT, new_area)
+        self.assertEqual(area.owner, self.testuser)
+        self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
+        self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_MULTIPOLYGON)
 
     def test_create_ap_coverage_area(self):
         new_area = {
@@ -614,14 +811,23 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(link.ap, self.test_ap)
         self.assertEqual(link.cpe, self.test_cpe)
 
-    def test_update_coverage_area(self):
-        area_id = self.test_coverage_area.uuid
+    def test_update_polygon_coverage_area(self):
+        area_id = self.test_polygon_coverage_area.uuid
         updated_area = {
             'geojson': UPDATED_TEST_POLYGON
         }
-        area = self.update_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
+        area = self.update_geojson_model(PolygonCoverageArea, POLYGON_COVERAGE_AREA_ENDPOINT, area_id, updated_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertJSONEqual(area.geojson.json, UPDATED_TEST_POLYGON)
+
+    def test_update_multipolygon_coverage_area(self):
+        area_id = self.test_multipolygon_coverage_area.uuid
+        updated_area = {
+            'geojson': UPDATED_TEST_MULTIPOLYGON
+        }
+        area = self.update_geojson_model(MultipolygonCoverageArea, MULTIPOLYGON_COVERAGE_AREA_ENDPOINT, area_id, updated_area)
+        self.assertEqual(area.owner, self.testuser)
+        self.assertJSONEqual(area.geojson.json, UPDATED_TEST_MULTIPOLYGON)
 
     def test_update_ap_coverage_area(self):
         area_id = self.test_ap_coverage_area.uuid
@@ -638,7 +844,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.delete_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, self.test_ap_coverage_area.uuid)
         self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
-        self.delete_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, self.test_coverage_area.uuid)
+        self.delete_geojson_model(PolygonCoverageArea, POLYGON_COVERAGE_AREA_ENDPOINT, self.test_polygon_coverage_area.uuid)
+        self.delete_geojson_model(MultipolygonCoverageArea, MULTIPOLYGON_COVERAGE_AREA_ENDPOINT, self.test_multipolygon_coverage_area.uuid)
 
 
 class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
@@ -660,7 +867,8 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'max_radius': DEFAULT_MAX_RADIUS,
                 'height_ft': expected_height_ft,
                 'default_cpe_height_ft': expected_default_cpe_height_ft,
-                'max_radius_miles': expected_max_radius_miles
+                'max_radius_miles': expected_max_radius_miles,
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
         expected_cpe = {
@@ -673,6 +881,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'uuid': str(self.test_cpe.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
         expected_feature_collection = self.build_feature_collection([expected_ap, expected_cpe])
@@ -702,7 +911,8 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'max_radius': DEFAULT_MAX_RADIUS,
                 'height_ft': expected_height_ft,
                 'default_cpe_height_ft': expected_default_cpe_height_ft,
-                'max_radius_miles': expected_max_radius_miles
+                'max_radius_miles': expected_max_radius_miles,
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
         expected_feature_collection = self.build_feature_collection([expected_ap])

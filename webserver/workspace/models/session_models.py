@@ -7,7 +7,7 @@ from .validators import validate_zoom_level
 import uuid
 from .network_models import (
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
-    CoverageAreaSerializer
+    PolygonCoverageAreaSerializer
 )
 from workspace import geojson_utils
 from .network_models import (
@@ -35,7 +35,7 @@ class WorkspaceMapSession(models.Model):
     center = geo_models.PointField(default=Point(-97.03125, 36.59789))
     zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
 
-    fks_serializers = [AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageAreaSerializer]
+    fks_serializers = [AccessPointSerializer, CPESerializer, APToCPELinkSerializer, PolygonCoverageAreaSerializer]
     UNIQUE_TOGETHER_ERROR = _("You already have a session with that name, please write a different name.")
 
     class UnitPreferences(models.TextChoices):

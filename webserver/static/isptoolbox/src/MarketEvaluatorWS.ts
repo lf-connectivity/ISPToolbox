@@ -251,7 +251,6 @@ class MarketEvaluatorWS {
 
                 case 'tribal.geog':
                     const tribalGeog: TribalGeojsonResponse = response.value as TribalGeojsonResponse;
-                    console.log(tribalGeog)
                     PubSub.publish(MarketEvalWSEvents.TRIBAL_GEOG_MSG, tribalGeog)
 
                 case 'tower.viewshed':
@@ -302,7 +301,6 @@ class MarketEvaluatorWS {
             ...req,
             uuid: reqUUID,
         };
-        console.log(reqWithUUID);
         this.ws.send(JSON.stringify(reqWithUUID));
         return reqUUID;
     }

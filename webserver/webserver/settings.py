@@ -90,6 +90,8 @@ INSTALLED_APPS = [
     # REST API
     'rest_framework',
     'django.contrib.humanize',
+    # Django Hijack
+    'hijack',
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_collect')

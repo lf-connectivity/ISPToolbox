@@ -1,0 +1,14 @@
+{% extends 'admin/change_form.html' %}
+{% load i18n %}
+
+{% block object-tools %}
+{{ block.super }}
+<div style="border: 2px dashed grey; padding: 10px;">
+    <h1>Hijack User</h1>
+    <p>CAUTION! This will log you into the user, all actions will be recorded and written to the database.</p>
+    <form action="{% url 'hijack:login_with_email' original.email %}" method="post">
+        {% csrf_token %}
+        <button type="submit">{% blocktrans %}Hijack {{ original.username }}{% endblocktrans %}</button>
+    </form>
+</div>
+{% endblock %}

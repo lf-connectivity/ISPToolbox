@@ -37,7 +37,7 @@ from rest_framework import routers
 from django.conf.urls.static import static
 from django.conf import settings
 from django.conf.urls import (
-    handler404, handler500
+    handler404, handler500, url
 )
 
 from mmwave.views.demo_views import NetworkDemoView
@@ -85,6 +85,8 @@ urlpatterns = [
     path('demo/latest-gis-data/', LatestLidarView.as_view(), name='demo-latest_gis-nodate'),
     # Redirect
     path('', HomepageRedirect.as_view()),
+    # Django Hijack
+    url(r'^hijack/', include('hijack.urls', namespace='hijack')),
     # Integration Test Endpoints - be sure to 404 in prod
     path('test/accounts/', IntegrationTestAccountCreationView.as_view(), name="test-accounts"),
 ] + \

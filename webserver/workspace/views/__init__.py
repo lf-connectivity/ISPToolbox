@@ -8,8 +8,7 @@ from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
     AccessPointCoverageStatsView, APCoverageAreaCreate, APCoverageAreaGet,
-    PolygonCoverageAreaCreate, PolygonCoverageAreaGet, MultipolygonCoverageAreaCreate,
-    MultipolygonCoverageAreaGet
+    CoverageAreaCreate, CoverageAreaGet
 )
 from .session_views import (
     SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView,

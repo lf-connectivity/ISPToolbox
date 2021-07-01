@@ -21,8 +21,8 @@ const CPE_SERIALIZER_FIELDS = ['name', 'height'];
 const AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link';
 const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe'];
 
-const POLYGON_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/polygon-coverage-area';
-const POLYGON_COVERAGE_AREA_FIELDS: string[] = [];
+const COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/coverage-area';
+const COVERAGE_AREA_FIELDS: string[] = [];
 
 const LINK_AP_INDEX = 0;
 const LINK_CPE_INDEX = 1;
@@ -276,14 +276,14 @@ export class APToCPELink extends WorkspaceLineStringFeature {
 }
 
 
-export class CoverageArea extends WorkspacePolygonFeature {
+export class CoverageArea extends BaseWorkspaceFeature {
     coverage: BuildingCoverage;
     awaitingCoverage: boolean;
 
     constructor(map: MapboxGL.Map,
         draw: MapboxDraw,
-        featureData: Feature<Polygon, any>) {
-        super(map, draw, featureData, POLYGON_COVERAGE_AREA_ENDPOINT, POLYGON_COVERAGE_AREA_FIELDS, POLYGON_COVERAGE_AREA_FIELDS, WorkspaceFeatureTypes.COVERAGE_AREA);
+        featureData: Feature<Geometry, any>) {
+        super(map, draw, featureData, COVERAGE_AREA_ENDPOINT, COVERAGE_AREA_FIELDS, COVERAGE_AREA_FIELDS, WorkspaceFeatureTypes.COVERAGE_AREA);
         this.coverage = EMPTY_BUILDING_COVERAGE;
         this.awaitingCoverage = false;
     }

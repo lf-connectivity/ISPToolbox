@@ -8,12 +8,12 @@ from uuid import UUID
 from workspace import geojson_utils
 from workspace.models import (
     AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession,
-    PolygonCoverageArea, AccessPointBasedCoverageArea, MultipolygonCoverageArea
+    CoverageArea, AccessPointBasedCoverageArea
 )
 from workspace.models.model_constants import FeatureType
 from workspace.models import (
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
-    PolygonCoverageAreaSerializer, APCoverageAreaSerializer, MultipolygonCoverageAreaSerializer
+    CoverageAreaSerializer, APCoverageAreaSerializer
 )
 
 
@@ -448,8 +448,7 @@ UPDATED_FREQUENCY = 5
 AP_ENDPOINT = '/pro/workspace/api/ap-los'
 CPE_ENDPOINT = '/pro/workspace/api/cpe'
 AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link'
-POLYGON_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/polygon-coverage-area'
-MULTIPOLYGON_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/multipolygon-coverage-area'
+COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/coverage-area'
 AP_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/ap-coverage-area'
 
 
@@ -506,7 +505,7 @@ class WorkspaceBaseTestCase(TestCase):
         )
         self.test_ap_cpe_link.save()
 
-        self.test_polygon_coverage_area = PolygonCoverageArea(
+        self.test_polygon_coverage_area = CoverageArea(
             owner=self.testuser,
             map_session=self.test_session,
             geojson=DEFAULT_TEST_POLYGON,
@@ -514,7 +513,7 @@ class WorkspaceBaseTestCase(TestCase):
         )
         self.test_polygon_coverage_area.save()
 
-        self.test_multipolygon_coverage_area = MultipolygonCoverageArea(
+        self.test_multipolygon_coverage_area = CoverageArea(
             owner=self.testuser,
             map_session=self.test_session,
             geojson=DEFAULT_TEST_MULTIPOLYGON,
@@ -562,8 +561,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         self.assertTrue(self.test_ap.feature_type, FeatureType.AP.value)
         self.assertTrue(self.test_cpe.feature_type, FeatureType.CPE.value)
         self.assertTrue(self.test_ap_cpe_link.feature_type, FeatureType.AP_CPE_LINK.value)
-        self.assertTrue(self.test_polygon_coverage_area.feature_type, FeatureType.POLYGON_COVERAGE_AREA.value)
-        self.assertTrue(self.test_multipolygon_coverage_area.feature_type, FeatureType.MULTIPOLYGON_COVERAGE_AREA.value)
+        self.assertTrue(self.test_polygon_coverage_area.feature_type, FeatureType.COVERAGE_AREA.value)
+        self.assertTrue(self.test_multipolygon_coverage_area.feature_type, FeatureType.COVERAGE_AREA.value)
         self.assertTrue(self.test_ap_coverage_area, FeatureType.AP_COVERAGE_AREA.value)
 
     def test_get_features_for_session_ap(self):
@@ -623,31 +622,28 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         }
         self.get_feature_collection_flow(APToCPELinkSerializer, [expected_link])
 
-    def test_get_features_for_user_polygon_coverage_area(self):
-        expected_area = {
+    def test_get_features_for_session_coverage_area(self):
+        expected_polygon = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_POLYGON),
             'properties': {
                 'uuid': str(self.test_polygon_coverage_area.uuid),
                 'map_session': str(self.test_session.uuid),
-                'feature_type': FeatureType.POLYGON_COVERAGE_AREA.value,
+                'feature_type': FeatureType.COVERAGE_AREA.value,
                 'uneditable': DEFAULT_UNEDITABLE
             }
         }
-        self.get_feature_collection_flow(PolygonCoverageAreaSerializer, [expected_area])
-
-    def test_get_features_for_user_multipolygon_coverage_area(self):
-        expected_area = {
+        expected_multipolygon = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_MULTIPOLYGON),
             'properties': {
                 'uuid': str(self.test_multipolygon_coverage_area.uuid),
                 'map_session': str(self.test_session.uuid),
-                'feature_type': FeatureType.MULTIPOLYGON_COVERAGE_AREA.value,
+                'feature_type': FeatureType.COVERAGE_AREA.value,
                 'uneditable': DEFAULT_UNEDITABLE
             }
         }
-        self.get_feature_collection_flow(MultipolygonCoverageAreaSerializer, [expected_area])
+        self.get_feature_collection_flow(CoverageAreaSerializer, [expected_polygon, expected_multipolygon])
 
     def test_get_features_for_session_ap_coverage_area(self):
         expected_link = {
@@ -749,7 +745,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'geojson': DEFAULT_TEST_POLYGON,
             'uneditable': DEFAULT_UNEDITABLE
         }
-        area = self.create_geojson_model(PolygonCoverageArea, POLYGON_COVERAGE_AREA_ENDPOINT, new_area)
+        area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
         self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_POLYGON)
@@ -759,7 +755,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'geojson': DEFAULT_TEST_MULTIPOLYGON,
             'uneditable': DEFAULT_UNEDITABLE
         }
-        area = self.create_geojson_model(MultipolygonCoverageArea, MULTIPOLYGON_COVERAGE_AREA_ENDPOINT, new_area)
+        area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
         self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_MULTIPOLYGON)
@@ -818,7 +814,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         updated_area = {
             'geojson': UPDATED_TEST_POLYGON
         }
-        area = self.update_geojson_model(PolygonCoverageArea, POLYGON_COVERAGE_AREA_ENDPOINT, area_id, updated_area)
+        area = self.update_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertJSONEqual(area.geojson.json, UPDATED_TEST_POLYGON)
 
@@ -827,7 +823,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         updated_area = {
             'geojson': UPDATED_TEST_MULTIPOLYGON
         }
-        area = self.update_geojson_model(MultipolygonCoverageArea, MULTIPOLYGON_COVERAGE_AREA_ENDPOINT, area_id, updated_area)
+        area = self.update_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertJSONEqual(area.geojson.json, UPDATED_TEST_MULTIPOLYGON)
 
@@ -846,9 +842,9 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.delete_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, self.test_ap_coverage_area.uuid)
         self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
-        self.delete_geojson_model(PolygonCoverageArea, POLYGON_COVERAGE_AREA_ENDPOINT,
+        self.delete_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT,
                                   self.test_polygon_coverage_area.uuid)
-        self.delete_geojson_model(MultipolygonCoverageArea, MULTIPOLYGON_COVERAGE_AREA_ENDPOINT,
+        self.delete_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT,
                                   self.test_multipolygon_coverage_area.uuid)
 
 

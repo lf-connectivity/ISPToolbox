@@ -48,10 +48,8 @@ urlpatterns = [
     path('workspace/api/cpe/<uuid:uuid>/', views.CPELocationGet.as_view()),
     path('workspace/api/ap-cpe-link/', views.APToCPELinkCreate.as_view()),
     path('workspace/api/ap-cpe-link/<uuid:uuid>/', views.APToCPELinkGet.as_view()),
-    path('workspace/api/polygon-coverage-area/', views.PolygonCoverageAreaCreate.as_view()),
-    path('workspace/api/polygon-coverage-area/<uuid:uuid>/', views.PolygonCoverageAreaGet.as_view()),
-    path('workspace/api/multipolygon-coverage-area/', views.MultipolygonCoverageAreaCreate.as_view()),
-    path('workspace/api/multipolygon-coverage-area/<uuid:uuid>/', views.MultipolygonCoverageAreaGet.as_view()),
+    path('workspace/api/coverage-area/', views.CoverageAreaCreate.as_view()),
+    path('workspace/api/coverage-area/<uuid:uuid>/', views.CoverageAreaGet.as_view()),
     path('workspace/api/ap-coverage-area/', views.APCoverageAreaCreate.as_view()),
     path('workspace/api/ap-coverage-area/<uuid:uuid>/', views.APCoverageAreaGet.as_view()),
     # Workspace

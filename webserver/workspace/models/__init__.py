@@ -2,8 +2,7 @@ from .workspace_models import ISPCompany, Employee
 from .network_models import (
     AccessPointLocation, BuildingCoverage,
     AccessPointCoverageBuildings, Radio, PTPLink, CPELocation, APToCPELink,
-    PolygonCoverageArea, PolygonCoverageAreaSerializer,
-    MultipolygonCoverageArea, MultipolygonCoverageAreaSerializer,
+    CoverageArea, CoverageAreaSerializer,
     AccessPointBasedCoverageArea, APCoverageAreaSerializer,
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
 )

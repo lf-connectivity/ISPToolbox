@@ -105,7 +105,6 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
 
     mouseClickCallback(e: any) {
         if (e.features && e.features.length) {
-            console.log(e.features[0]);
             this.sendGeojsonRequest(e.features[0].properties);
         }
     }

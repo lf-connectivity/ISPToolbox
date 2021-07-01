@@ -8,7 +8,7 @@ from gis_data.models import MsftBuildingOutlines
 from workspace.models import (
     AccessPointSerializer,
     CPESerializer, APToCPELinkSerializer, WorkspaceMapSessionSerializer,
-    WorkspaceMapSession, PolygonCoverageAreaSerializer, APCoverageAreaSerializer, MultipolygonCoverageAreaSerializer
+    WorkspaceMapSession, CoverageAreaSerializer, APCoverageAreaSerializer
 )
 from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters
@@ -180,54 +180,22 @@ class APToCPELinkGet(WorkspacePerformCreateMixin,
         return self.destroy(request, *args, **kwargs)
 
 
-class PolygonCoverageAreaCreate(WorkspacePerformCreateMixin,
-                                mixins.CreateModelMixin,
-                                generics.GenericAPIView):
-    serializer_class = PolygonCoverageAreaSerializer
+class CoverageAreaCreate(WorkspacePerformCreateMixin,
+                         mixins.CreateModelMixin,
+                         generics.GenericAPIView):
+    serializer_class = CoverageAreaSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
 
-class PolygonCoverageAreaGet(mixins.RetrieveModelMixin,
-                             mixins.DestroyModelMixin,
-                             mixins.UpdateModelMixin,
-                             WorkspaceFeatureGetQuerySetMixin,
-                             generics.GenericAPIView):
-    serializer_class = PolygonCoverageAreaSerializer
-    permission_classes = [AllowAny]
-    lookup_field = 'uuid'
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
-
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
-
-
-class MultipolygonCoverageAreaCreate(WorkspacePerformCreateMixin,
-                                     mixins.CreateModelMixin,
-                                     generics.GenericAPIView):
-    serializer_class = MultipolygonCoverageAreaSerializer
-    permission_classes = [AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-
-class MultipolygonCoverageAreaGet(mixins.RetrieveModelMixin,
-                                  mixins.DestroyModelMixin,
-                                  mixins.UpdateModelMixin,
-                                  WorkspaceFeatureGetQuerySetMixin,
-                                  generics.GenericAPIView):
-    serializer_class = MultipolygonCoverageAreaSerializer
+class CoverageAreaGet(mixins.RetrieveModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.UpdateModelMixin,
+                      WorkspaceFeatureGetQuerySetMixin,
+                      generics.GenericAPIView):
+    serializer_class = CoverageAreaSerializer
     permission_classes = [AllowAny]
     lookup_field = 'uuid'
 

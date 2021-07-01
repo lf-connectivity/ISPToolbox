@@ -4,7 +4,7 @@ from workspace.models import (                       # noqa: F401
     AccessPointLocation, CPELocation, APToCPELink    # noqa: F401
 )
 from workspace.views import (                        # noqa: F401
-    MarketEvaluatorView, PolygonCoverageAreaCreate   # noqa: F401
+    MarketEvaluatorView, CoverageAreaCreate          # noqa: F401
 )
 from workspace.utils.import_utils import get_imported_classnames
 

@@ -20,10 +20,12 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
     }
 
     initSaveFeatureHandlers() {
-        this.saveFeatureDrawModeHandlers.draw_polygon = (feature: any) => {
+        const saveCoverageArea = (feature: any) => {
             let polygon = new CoverageArea(this.map, this.draw, feature);
             this.saveWorkspaceFeature(polygon);
         }
+
+        this.saveFeatureDrawModeHandlers.draw_polygon = saveCoverageArea;
 
         this.saveFeatureDrawModeHandlers.draw_ap = (feature: any) => {
             if (feature.geometry.type == 'Point') {
@@ -49,10 +51,7 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
             }
         }
 
-        // Get polygons from simple select mode overlays
-        this.saveFeatureDrawModeHandlers.simple_select = (feature: any) => {
-            // Will implement multipolygon support later.
-        }
+        this.saveFeatureDrawModeHandlers.simple_select = saveCoverageArea;
     }
 
     initUpdateFeatureHandlers() {

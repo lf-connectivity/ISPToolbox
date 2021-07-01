@@ -147,11 +147,46 @@ abstract class RadiusAndBuildingCoverageRenderer {
 
     abstract sendCoverageRequest({features}: any): void; 
 
-    drawDeleteCallback({features}: {features: Array<any>}){}
-    drawSelectionChangeCallback({features}: {features: Array<any>}){}
+    drawDeleteCallback({features}: {features: Array<any>}){
+        this.renderAPRadius();
+        this.renderBuildings();
+    }
 
-    AP_updateCallback(msg: string, {features}: {features: Array<any>}){}
+    drawSelectionChangeCallback({features}: {features: Array<any>}){
+        // Mapbox will count dragging a point features as a selection change event
+        // Use this to determine if we are dragging or just selected a new feature
+        let dragging = false;
+        if(features.length === 1) {
+            if(features[0].id === this.last_selection){
+                dragging = true;
+            } else {
+                this.last_selection = features[0].id;
+            }
+        } else {
+            this.last_selection = '';
+        }
+        // Hide AP tooltip if user is dragging AP.
+        if(dragging){
+            this.apPopup.hide();
+        } else {
+            this.sendCoverageRequest({features});
+            this.renderAPRadius();
+            this.renderBuildings();
+        }
+    }
 
+    AP_updateCallback(msg: string, {features}: {features: Array<any>}){
+        this.sendCoverageRequest({features});
+        this.renderAPRadius();
+        this.renderBuildings();
+        if(features.length === 1 && features[0].properties?.feature_type === WorkspaceFeatureTypes.AP)
+        {
+            let ap = this.workspaceManager.features[features[0].properties.uuid] as AccessPoint;
+            this.apPopup.hide();
+            this.apPopup.setAccessPoint(ap);
+            this.apPopup.show();
+        }
+    }
     updateBuildingCoverage(msg: string, data: {features: Array<GeoJSON.Feature>}){
         data.features.forEach((f: GeoJSON.Feature) => {
             if(f.properties){
@@ -176,9 +211,9 @@ abstract class RadiusAndBuildingCoverageRenderer {
             if (feat && feat.properties.radius) {
                 if(feat.geometry.type === 'Point'){
                     const new_feat = createGeoJSONCircle(
-                            feat.geometry,
-                            feat.properties.radius,
-                            feat.id);
+                        feat.geometry,
+                        feat.properties.radius,
+                        feat.id);
                     
                     // @ts-ignore
                     new_feat.properties[IS_ACTIVE_AP] = INACTIVE_AP; 
@@ -192,7 +227,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
             radiusSource.setData({type: 'FeatureCollection', features: Object.values(circle_feats)});
         }
     }
-
+        
     /**
      * Renders building layer
      */
@@ -322,50 +357,6 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             }
         },BUILDING_OUTLINE_LAYER);
     }
-
-    drawDeleteCallback({features} : {features: Array<any>}) {
-        this.renderAPRadius();
-        this.renderBuildings();
-    }
-
-    drawSelectionChangeCallback({features}: {features: Array<any>}){
-        // Mapbox will count dragging a point features as a selection change event
-        // Use this to determine if we are dragging or just selected a new feature
-        let dragging = false;
-        if(features.length === 1) {
-            if(features[0].id === this.last_selection){
-                dragging = true;
-            } else {
-                this.last_selection = features[0].id;
-            }
-        } else {
-            this.last_selection = '';
-        }
-        
-        // Hide AP tooltip if user is dragging AP.
-        if(dragging){
-            LinkCheckTowerPopup.getInstance().hide();
-        } else {
-            this.sendCoverageRequest({features});
-            this.renderAPRadius();
-            this.renderBuildings();
-        }
-    }
-
-    AP_updateCallback(msg: string, {features}: {features: Array<any>}){
-        this.sendCoverageRequest({features});
-        this.renderAPRadius();
-        this.renderBuildings();
-        if(features.length === 1 && features[0].properties?.feature_type === WorkspaceFeatureTypes.AP)
-        {
-            let ap = this.workspaceManager.features[features[0].properties.uuid] as AccessPoint;
-            this.apPopup.hide();
-            this.apPopup.setAccessPoint(ap);
-            this.apPopup.show();
-        }
-
-    }
-
 
     sendCoverageRequest({features}: {features: Array<any>}){
         features.forEach((f: GeoJSON.Feature) => {

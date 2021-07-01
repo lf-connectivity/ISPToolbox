@@ -95,6 +95,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
             'paint': {}
         }, BUILDING_LAYER);
 
+        this.map.on('draw.delete', this.drawDeleteCallback.bind(this));
         this.map.on('draw.selectionchange', this.drawSelectionChangeCallback.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.AP_updateCallback.bind(this));
 
@@ -146,6 +147,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
 
     abstract sendCoverageRequest({features}: any): void; 
 
+    drawDeleteCallback({features}: {features: Array<any>}){}
     drawSelectionChangeCallback({features}: {features: Array<any>}){}
 
     AP_updateCallback(msg: string, {features}: {features: Array<any>}){}
@@ -321,6 +323,11 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         },BUILDING_OUTLINE_LAYER);
     }
 
+    drawDeleteCallback({features} : {features: Array<any>}) {
+        this.renderAPRadius();
+        this.renderBuildings();
+    }
+
     drawSelectionChangeCallback({features}: {features: Array<any>}){
         // Mapbox will count dragging a point features as a selection change event
         // Use this to determine if we are dragging or just selected a new feature
@@ -331,6 +338,8 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             } else {
                 this.last_selection = features[0].id;
             }
+        } else {
+            this.last_selection = '';
         }
         
         // Hide AP tooltip if user is dragging AP.

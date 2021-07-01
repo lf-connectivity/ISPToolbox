@@ -214,6 +214,7 @@ export class APToCPELink extends WorkspaceLineStringFeature {
         this.cpe = cpe;
         this.setFeatureProperty('ap', this.ap.workspaceId);
         this.setFeatureProperty('cpe', this.cpe.workspaceId);
+        this.setFeatureProperty('uneditable', true);
     }
 
     create(successFollowup ?: (resp: any) => void) {

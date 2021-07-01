@@ -265,6 +265,7 @@ DEFAULT_NO_CHECK_RADIUS = 0.01
 DEFAULT_CPE_HEIGHT = 2.0
 DEFAULT_FREQUENCY = 2.4
 DEFAULT_UNEDITABLE = False
+DEFAULT_AP_CPE_LINK_UNEDITABLE = True
 
 
 ################################################################################
@@ -501,7 +502,7 @@ class WorkspaceBaseTestCase(TestCase):
             map_session=self.test_session,
             ap=self.test_ap,
             cpe=self.test_cpe,
-            uneditable=DEFAULT_UNEDITABLE
+            uneditable=DEFAULT_AP_CPE_LINK_UNEDITABLE
         )
         self.test_ap_cpe_link.save()
 
@@ -617,7 +618,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'uuid': str(self.test_ap_cpe_link.uuid),
                 'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.AP_CPE_LINK.value,
-                'uneditable': DEFAULT_UNEDITABLE
+                'uneditable': DEFAULT_AP_CPE_LINK_UNEDITABLE
             }
         }
         self.get_feature_collection_flow(APToCPELinkSerializer, [expected_link])
@@ -713,6 +714,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertJSONEqual(ap.geojson.json, DEFAULT_AP_POINT)
         self.assertEqual(ap.height, DEFAULT_HEIGHT)
         self.assertEqual(ap.max_radius, DEFAULT_MAX_RADIUS)
+        self.assertEqual(ap.uneditable, DEFAULT_UNEDITABLE)
 
     def test_create_cpe(self):
         new_cpe = {
@@ -725,13 +727,15 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(cpe.name, DEFAULT_NAME)
         self.assertJSONEqual(cpe.geojson.json, DEFAULT_CPE_POINT)
         self.assertEqual(cpe.height, DEFAULT_HEIGHT)
+        self.assertEqual(cpe.uneditable, DEFAULT_UNEDITABLE)
 
     def test_create_ap_cpe_link(self):
         new_link = {
             'frequency': DEFAULT_FREQUENCY,
             'geojson': DEFAULT_TEST_LINESTRING,
             'ap': self.test_ap.uuid,
-            'cpe': self.test_cpe.uuid
+            'cpe': self.test_cpe.uuid,
+            'uneditable': DEFAULT_AP_CPE_LINK_UNEDITABLE
         }
         link = self.create_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, new_link)
         self.assertEqual(link.owner, self.testuser)
@@ -739,6 +743,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertJSONEqual(link.geojson.json, DEFAULT_TEST_LINESTRING)
         self.assertEqual(link.ap, self.test_ap)
         self.assertEqual(link.cpe, self.test_cpe)
+        self.assertEqual(link.uneditable, DEFAULT_AP_CPE_LINK_UNEDITABLE)
 
     def test_create_polygon_coverage_area(self):
         new_area = {
@@ -749,6 +754,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
         self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_POLYGON)
+        self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
 
     def test_create_multipolygon_coverage_area(self):
         new_area = {
@@ -759,6 +765,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
         self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_MULTIPOLYGON)
+        self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
 
     def test_create_ap_coverage_area(self):
         new_area = {

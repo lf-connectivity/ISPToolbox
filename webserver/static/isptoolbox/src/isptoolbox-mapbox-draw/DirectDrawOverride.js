@@ -1,5 +1,5 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
-import { createSupplementaryPointsForGeojson, createSupplementaryPointsForCircle, createGeoJSONCircle, lineDistance } from './DrawModeUtils.js';
+import { createSupplementaryPointsForGeojson, createSupplementaryPointsForCircle, createGeoJSONCircle, lineDistance, isUneditable } from './DrawModeUtils.js';
 import * as Constants from '@mapbox/mapbox-gl-draw/src/constants';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_feature_movement';
@@ -33,7 +33,8 @@ export function OverrideDirect(additionalFunctionality = {}) {
                 supplementaryPoints = createSupplementaryPointsForGeojson(geojson, {
                     map: this.map,
                     midpoints: (geojson.geometry.type !== Constants.geojsonTypes.LINE_STRING),
-                    selectedPaths: state.selectedCoordPaths
+                    selectedPaths: state.selectedCoordPaths,
+                    uneditable: isUneditable(this.getFeature(geojson.properties.id))
                 });
             }
 
@@ -73,12 +74,9 @@ export function OverrideDirect(additionalFunctionality = {}) {
             additionalFunctionality.dragVertex(state, e);
         }
         
-        // Only allow editing of vertices that are not from associated AP/CPE links.
+        // Only allow editing of vertices that are editable.
         // This would include user draw PtP links.
-        if (
-            ('feature_type' in state.feature.properties) &&
-            state.feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
-        ) {
+        if (isUneditable(state.feature)) {
             // Clear vertices and go back to simple select mode
             this.clearSelectedFeatures();
             this.clearSelectedCoordinates();
@@ -144,10 +142,7 @@ export function OverrideDirect(additionalFunctionality = {}) {
         // Links are uneditable; users should move APs and CPEs instead.
         const selected = this.getSelected();
         const editableFeatures = this.getSelected().filter(
-            feature => {
-                return (!('feature_type' in feature.properties)) ||
-                       (feature.properties.feature_type !== WorkspaceFeatureTypes.AP_CPE_LINK)
-            }
+            feature => !isUneditable(feature)
         );
         this.clearSelectedFeatures();
         this.clearSelectedCoordinates();
@@ -172,5 +167,3 @@ export function OverrideDirect(additionalFunctionality = {}) {
     };
     return direct_select;
 }
-
-

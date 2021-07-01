@@ -1,7 +1,6 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
-import { createSupplementaryPointsForCircle } from './DrawModeUtils.js';
+import { createSupplementaryPointsForCircle, createSupplementaryPointsForGeojson, isUneditable } from './DrawModeUtils.js';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
-import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
 export function OverrideSimple() {
   const simple_select = MapboxDraw.modes.simple_select;
@@ -27,25 +26,23 @@ export function OverrideSimple() {
     }
 
     if (
-      geojson.properties.active !== 'active' ||
+      geojson.properties.active !== 'true' ||
       geojson.geometry.type === 'Point'
     ) {
       return;
     }
     const supplementaryPoints = geojson.properties.user_radius
       ? createSupplementaryPointsForCircle(geojson)
-      : [];
+      : createSupplementaryPointsForGeojson(geojson, {
+        uneditable: isUneditable(this.getFeature(geojson.properties.id)),
+      });
     supplementaryPoints.forEach(display);
   };
 
   simple_select.dragMove = function (state, e) {
     // deselect uneditable features, and only move those that are editable.
-    // Links are uneditable; users should move APs and CPEs instead.
     const editableFeatures = this.getSelected().filter(
-      feature => {
-        return (!('feature_type' in feature.properties)) ||
-               (feature.properties.feature_type !== WorkspaceFeatureTypes.AP_CPE_LINK);
-      }
+      feature => !isUneditable(feature)
     );
     this.clearSelectedFeatures();
     this.getSelected().forEach(feature => this.doRender(feature.id));

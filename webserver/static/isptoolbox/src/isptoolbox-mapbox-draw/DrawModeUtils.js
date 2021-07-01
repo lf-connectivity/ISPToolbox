@@ -217,3 +217,7 @@ function createMidpoint(parent, startVertex, endVertex, map) {
     },
   };
 }
+
+export function isUneditable(feature) {
+  return 'uneditable' in feature.properties && feature.properties.uneditable;
+}

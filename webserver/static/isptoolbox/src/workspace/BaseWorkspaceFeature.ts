@@ -5,6 +5,7 @@ import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
 
+const BASE_WORKSPACE_SERIALIZED_FIELDS = ['uneditable']
 const BASE_WORKSPACE_RESPONSE_FIELDS = ['uuid', 'feature_type', 'last_updated', 'uneditable']
 
 /**
@@ -54,7 +55,7 @@ export abstract class BaseWorkspaceFeature{
         }
         this.apiEndpoint = apiEndpoint;
         this.responseFields = responseFields.concat(BASE_WORKSPACE_RESPONSE_FIELDS);
-        this.serializerFields = serializedFields;
+        this.serializerFields = [...BASE_WORKSPACE_SERIALIZED_FIELDS, ...serializedFields];
         this.featureType = featureType;
 
         let feature = this.draw.get(this.mapboxId);

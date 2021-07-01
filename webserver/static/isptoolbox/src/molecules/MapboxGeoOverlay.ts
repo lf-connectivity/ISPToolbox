@@ -112,12 +112,12 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
     receiveGeojsonCallback(msg: string, response: any) {
         if (response.error == 0) {
             const newFeature = {
-                ...JSON.parse(response.geojson),
+                type: 'Feature',
+                geometry: JSON.parse(response.geojson),
                 properties: {
                     uneditable: true
                 }
             }
-            this.draw.add(newFeature);
             this.map.fire('draw.create', {features: [newFeature]});
         }
     }

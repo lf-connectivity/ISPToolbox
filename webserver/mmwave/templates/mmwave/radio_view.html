@@ -2,40 +2,37 @@
 <div class="card radio-card">
     <div class="card-body radio-card-body">
         <div class="card-title d-flex" style="align-items: center;">
+            {% if not beta %}
             <span style="display: block;
             width: 14px;
             height: 7px;
             background: {% firstof radio.color 'purple' %};"></span>
-            <h5 style="padding-left: 10px; margin-bottom: 0;" id="radio_name-{% firstof radio.id radio_id %}" >{% firstof radio.name radio_name %}</h5>
+            {% else %}
+            {% if radio_id == "0"  %}
+            {% include 'mmwave/atoms/ap-icon.svg'%}
+            {% else %}
+            {% include 'mmwave/atoms/cpe-icon.svg'%}
+            {% endif %}
+            {% endif %}
+            <h5 style="padding-left: 10px; margin-bottom: 0;" id="radio_name-{% firstof radio.id radio_id %}">
+                {% firstof radio.name radio_name %}</h5>
         </div>
         <div class="card-text">
             <div class="w-100">
-                <label for="example-number-input" class="col-form-label input-label">{% translate 'Coordinates'%}</label>
+                <label for="example-number-input"
+                    class="col-form-label input-label">{% translate 'Coordinates'%}</label>
                 <div class="input-with-unit d-flex px-2">
-                    <input
-                    class="form-control"
-                    type="text"
-                    {% if radio %}
-                        value="{{ radio.lat|stringformat:".5f" }}, {{ radio.lng|stringformat:".5f" }}"
-                    {% endif %}
-                    id="lat-lng-{% firstof radio.id radio_id %}"
-                    placeholder="{% translate 'Latitude, Longitude'%}"
-                    >
+                    <input class="form-control" type="text" {% if radio %}
+                        value="{{ radio.lat|stringformat:".5f" }}, {{ radio.lng|stringformat:".5f" }}" {% endif %}
+                        id="lat-lng-{% firstof radio.id radio_id %}" placeholder="{% translate 'Latitude, Longitude'%}">
                 </div>
             </div>
             <div class="w-100">
                 <label for="example-number-input" class="col-form-label input-label">Height above Ground</label>
                 <div class="input-with-unit d-flex px-2">
-                    <input
-                        class="form-control"
-                        type="number"
-                        {% if radio %}
-                            value="{{radio.hgt}}"
-                        {% endif %}
-                        id="hgt-{% firstof radio.id radio_id %}"
-                        min="0" max="10000"
-                        placeholder="{% translate 'Height' %}"
-                    >
+                    <input class="form-control" type="number" {% if radio %} value="{{radio.hgt}}" {% endif %}
+                        id="hgt-{% firstof radio.id radio_id %}" min="0" max="10000"
+                        placeholder="{% translate 'Height' %}">
                     <span class="input-unit">
                         {% if units == 'US' %}
                         ft

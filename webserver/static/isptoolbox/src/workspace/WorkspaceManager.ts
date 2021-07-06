@@ -381,6 +381,11 @@ export class WorkspaceManager {
                         }
                         workspaceFeature.delete((resp) => {
                             delete this.features[feature.properties.uuid];
+
+                            ap.links.forEach((link, cpe) => {
+                                delete this.features[link.workspaceId];
+                                delete this.features[cpe.workspaceId];
+                            });
                         });
                         break;
                     case WorkspaceFeatureTypes.CPE:

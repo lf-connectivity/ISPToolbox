@@ -15,8 +15,8 @@ const AP_SERIALIZER_FIELDS = ['name', 'height', 'max_radius', 'no_check_radius',
 
 
 const CPE_ENDPOINT = '/pro/workspace/api/cpe';
-const CPE_RESPONSE_FIELDS = ['name', 'height', 'height_ft'];
-const CPE_SERIALIZER_FIELDS = ['name', 'height'];
+const CPE_RESPONSE_FIELDS = ['name', 'height', 'height_ft', 'ap'];
+const CPE_SERIALIZER_FIELDS = ['name', 'height', 'ap'];
 
 const AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link';
 const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe'];
@@ -77,13 +77,13 @@ export class AccessPoint extends WorkspacePointFeature {
                 this.removeFeatureFromMap(link.mapboxId);
                 let deletedCPE = cpe.getFeatureData();
                 this.removeFeatureFromMap(cpe.mapboxId);
-                this.map.fire('draw.delete', {features: [deletedLink, deletedCPE]});
             });
-            this.links.clear();
 
             if (successFollowup) {
                 successFollowup(resp);
             }
+
+            this.links.clear();
         });
     }
 
@@ -154,7 +154,10 @@ export class CPE extends WorkspacePointFeature {
      * @returns The AP to CPE link object created, or undefined if link already exists.
      */
     linkAP(ap: AccessPoint): APToCPELink {
-        return ap.linkCPE(this);
+        this.setFeatureProperty('ap', ap.workspaceId);
+        let retval = ap.linkCPE(this);
+        this.map.fire('draw.update', {features: [this.getFeatureData()]});
+        return retval;
     }
 
     update(successFollowup?: (resp: any) => void) {
@@ -270,7 +273,9 @@ export class APToCPELink extends WorkspaceLineStringFeature {
             this.ap = newAP;
             this.ap.links.set(this.cpe, this);
             this.cpe.ap = newAP;
+            this.cpe.setFeatureProperty('ap', newAP.workspaceId);
             this.setFeatureProperty('ap', newAP.workspaceId);
+            this.map.fire('draw.update', {features: [this.getFeatureData()], action: 'move'});
             this.moveVertex(LINK_AP_INDEX, newAP.getFeatureGeometryCoordinates() as [number, number]);
         }
     }

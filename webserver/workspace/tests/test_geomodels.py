@@ -492,7 +492,8 @@ class WorkspaceBaseTestCase(TestCase):
             map_session=self.test_session,
             geojson=DEFAULT_CPE_POINT,
             height=DEFAULT_HEIGHT,
-            uneditable=DEFAULT_UNEDITABLE
+            uneditable=DEFAULT_UNEDITABLE,
+            ap=self.test_ap
         )
         self.test_cpe.save()
 
@@ -602,7 +603,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
-                'uneditable': DEFAULT_UNEDITABLE
+                'uneditable': DEFAULT_UNEDITABLE,
+                'ap': str(self.test_ap.uuid)
             }
         }
         self.get_feature_collection_flow(CPESerializer, [expected_cpe])
@@ -720,7 +722,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         new_cpe = {
             'name': DEFAULT_NAME,
             'geojson': DEFAULT_CPE_POINT,
-            'height': DEFAULT_HEIGHT
+            'height': DEFAULT_HEIGHT,
+            'ap': self.test_ap.uuid
         }
         cpe = self.create_geojson_model(CPELocation, CPE_ENDPOINT, new_cpe)
         self.assertEqual(cpe.owner, self.testuser)
@@ -728,6 +731,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertJSONEqual(cpe.geojson.json, DEFAULT_CPE_POINT)
         self.assertEqual(cpe.height, DEFAULT_HEIGHT)
         self.assertEqual(cpe.uneditable, DEFAULT_UNEDITABLE)
+        self.assertEqual(cpe.ap, self.test_ap)
 
     def test_create_ap_cpe_link(self):
         new_link = {
@@ -847,12 +851,16 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         # have to delete the AP CPE link and AP Coverage area first
         self.delete_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, self.test_ap_cpe_link.uuid)
         self.delete_geojson_model(AccessPointBasedCoverageArea, AP_COVERAGE_AREA_ENDPOINT, self.test_ap_coverage_area.uuid)
-        self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
+        self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT,
                                   self.test_polygon_coverage_area.uuid)
         self.delete_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT,
                                   self.test_multipolygon_coverage_area.uuid)
+
+    def test_delete_cpe(self):
+        self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
+        self.assertFalse(CPELocation.objects.filter(uuid=self.test_cpe.uuid).exists())
 
 
 class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
@@ -888,7 +896,8 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'uuid': str(self.test_cpe.uuid),
                 'feature_type': FeatureType.CPE.value,
                 'height_ft': expected_height_ft,
-                'uneditable': DEFAULT_UNEDITABLE
+                'uneditable': DEFAULT_UNEDITABLE,
+                'ap': str(self.test_ap.uuid)
             }
         }
         expected_feature_collection = self.build_feature_collection([expected_ap, expected_cpe])

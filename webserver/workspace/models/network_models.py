@@ -125,6 +125,7 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
 
 class CPELocation(WorkspaceFeature):
     name = models.CharField(max_length=100)
+    ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, null=True)
     height = models.FloatField(
         help_text="""
         This height value is relative to the terrain
@@ -151,10 +152,14 @@ class CPELocation(WorkspaceFeature):
 
 
 class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
-    lookup_field = 'uuid'
+    lookup_field = 'uuid'  
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     height_ft = serializers.FloatField(read_only=True)
     feature_type = serializers.CharField(read_only=True)
+    ap = serializers.PrimaryKeyRelatedField(
+        queryset=AccessPointLocation.objects.all(),
+        pk_field=serializers.UUIDField()
+    )
 
     class Meta:
         model = CPELocation

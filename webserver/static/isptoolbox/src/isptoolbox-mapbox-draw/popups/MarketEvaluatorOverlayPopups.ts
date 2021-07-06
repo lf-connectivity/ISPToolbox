@@ -42,7 +42,7 @@ export class RdofOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     getHTML() {
         return `
             <h1 class="mapboxgl-popup-header">
-                RDOF Census Group (${this.featureProperties.cbgid})
+                RDOF Census Group (${this.featureProperties.cbg_id})
             </h1>
 
             <div class="mapboxgl-popup-row">

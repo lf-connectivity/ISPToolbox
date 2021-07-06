@@ -755,6 +755,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 $('#3d-view-container').removeClass('d-none');
                 $('#map').addClass('d-none');
                 $('#3d-controls').removeClass('d-none');
+                $('#map-controls').addClass('d-none');
                 this.currentView = '3d';
 
                 if (!this.animationPlaying) {
@@ -783,6 +784,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 $('#map-view-btn').removeClass('btn-secondary');
                 $('#3d-view-container').addClass('d-none');
                 $('#map').removeClass('d-none');
+                $('#map-controls').removeClass('d-none');
                 if (this.map != null) {
                     this.map.resize();
                 }

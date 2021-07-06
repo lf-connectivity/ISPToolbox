@@ -32,6 +32,7 @@ from Overlay.views import OverlaySource
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView
 from mmwave.views import LOSCheckDemo, DSMExportView, LatestLidarView
 from IspToolboxAccounts.views import IntegrationTestAccountCreationView
+from solar_sizing_tool.views import SolarSizingToolView
 
 from rest_framework import routers
 from django.conf.urls.static import static
@@ -78,6 +79,7 @@ urlpatterns = [
     # Workspace
     path('pro/', include('workspace.urls')),
     # Demo Views
+    path('demo/solar-sizing-tool/', SolarSizingToolView.as_view(), name="demo-solar-sizing"),
     path('demo/los-check/', LOSCheckDemo.as_view(), name='demo-los-check'),
     path('demo/network-app/', NetworkDemoView.as_view(), name='demo-network-app'),
     path('demo/dsm-app/', DSMExportView.as_view(), name="demo-dsm-app"),

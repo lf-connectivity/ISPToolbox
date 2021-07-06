@@ -8,7 +8,8 @@ module.exports = {
         login_signup: '/src/login/login_signin.ts',
         latest_lidar: '/src/apps/LatestLiDARApp.ts',
         multiplayer_test: '/src/apps/MultiplayerDemoApp.ts',
-        market_eval_test: '/src/apps/MarketEvaluatorTestApp.ts'
+        market_eval_test: '/src/apps/MarketEvaluatorTestApp.ts',
+        solar_sizing: '/src/apps/SolarSizingApp.ts'
     },
     module : {
         rules : [

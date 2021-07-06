@@ -9,14 +9,16 @@ export function setCenterZoomPreferences(map: mapboxgl.Map) {
         const zoom = map.getZoom();
         // @ts-ignore
         const session_id = window.ISPTOOLBOX_SESSION_INFO.networkID;
-        $.ajax({
-            url: `/pro/workspace/api/session/${session_id}/`,
-            data: { center: `SRID=4326;POINT (${center.lng} ${center.lat})`, zoom: zoom },
-            method: "PATCH",
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        });
+        if(session_id !== undefined){
+            $.ajax({
+                url: `/pro/workspace/api/session/${session_id}/`,
+                data: { center: `SRID=4326;POINT (${center.lng} ${center.lat})`, zoom: zoom },
+                method: "PATCH",
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+        }
     }
     map.on('moveend', _.debounce(requestChangeMapPreferences, 1000));
 }

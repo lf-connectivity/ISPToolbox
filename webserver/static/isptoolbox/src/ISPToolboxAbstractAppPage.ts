@@ -88,10 +88,11 @@ export abstract class ISPToolboxAbstractAppPage {
             });
 
             this.map.addControl(this.draw, 'bottom-right');
-            const deleteControl = new MapboxCustomDeleteControl({
-                map: this.map,
-                draw: this.draw,
-            });
+            const deleteControl = new MapboxCustomDeleteControl(
+                this.map,
+                this.draw,
+                true
+            );
 
             this.map.addControl(deleteControl, 'bottom-right');
             this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');

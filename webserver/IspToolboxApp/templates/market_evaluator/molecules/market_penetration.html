@@ -13,11 +13,16 @@
             </sup>
         </p>
         <div class="d-flex flex-row market-eval-section--value-section">
-            <h4 class="market-eval-section--value">
-                <span id="me-out-buildings">
+            <div class="market-eval-section--value">
+                <div id="me-out-buildings-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                        {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-buildings">
                     000
-                </span>
-            </h4>
+                </h4>
+            </div>
             {% with tooltips.buildings as tooltip%}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
@@ -29,7 +34,7 @@
             {% translate 'Potential Market Penetration'%}
         </p>
         <div class="d-flex flex-row market-eval-section--value-section">
-            <h4 class="market-eval-section--value">
+            <div class="market-eval-section--value">
                 <span style="display: flex;">
                     <input type="number" id="market_penetration_percent" name="market_penetration_percent" min="0"
                         max="100" disabled="" value="15" class="market-eval-section--inputtextarea">
@@ -37,7 +42,7 @@
                         %
                     </p>
                 </span>
-            </h4>
+            </div>
             {% with tooltips.market_pen as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
@@ -48,11 +53,16 @@
         <p role="text" tabindex="" class="market-eval-section--label">
             {% translate 'Potential Leads'%}</p>
         <div class="d-flex flex-row market-eval-section--value-section">
-            <h4 class="market-eval-section--value">
-                <span id="me-out-leads">
+            <div class="market-eval-section--value">
+                <div id="me-out-leads-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                        {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-leads">
                     000
-                </span>
-            </h4>
+                </h4>
+            </div>
             {% with tooltips.leads as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}

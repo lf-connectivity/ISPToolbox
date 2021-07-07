@@ -36,10 +36,18 @@
     &--value-section
         align-items: center
     &--value
+        display: flex
+        align-items: center
+    &--value h4
         font-size: 19px
         margin: 0
         color: $light-gray-color-2
         font-family: $brand-font-family-mono
+    &--value.loaded h4
+        color: $brand-dark-gray-color
+    &--spinner-container
+        display: flex
+        align-items: center
 
 .market-eval-section--inputtextarea
     align-items: center

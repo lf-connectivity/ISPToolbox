@@ -10,11 +10,16 @@
             {% translate 'Building Density' %}
         </p>
         <div class="d-flex flex-row market-eval-section--value-section">
-            <h4 class="market-eval-section--value">
-                <span id="me-out-density">
+            <div class="market-eval-section--value">
+                <div id="me-out-density-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                        {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-density">
                     0
-                </span>
-            </h4>
+                </h4>
+            </div>
             {% with tooltips.density as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
@@ -22,27 +27,38 @@
     </div>
 
     <div class="d-flex justify-content-between market-eval-section--row">
-        <p role="text" tabindex="" class="market-eval-section--label">
+        <a tabindex="" id="me-competitor-modal-loaded" class="market-eval-section--label d-none" data-toggle="modal" data-target="#showCompetitorsModal">
+            {% translate 'Service Providers (View List)'%}
+            <sup>
+                <span class="footnote--bracket">[</span>2<span class="footnote--bracket">]</span>
+            </sup>
+        </a>
+        <p role="text" tabindex="" id="me-competitor-modal-not-loaded" class="market-eval-section--label">
             {% translate 'Service Providers'%}
             <sup>
                 <span class="footnote--bracket">[</span>2<span class="footnote--bracket">]</span>
             </sup>
         </p>
         <div class="d-flex flex-row market-eval-section--value-section">
-            <h4 class="market-eval-section--value">
-                <span id="me-out-providers">
+            <div class="market-eval-section--value">
+                <div id="me-out-providers-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                        {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-providers">
                     0
-                </span>
-            </h4>
+                </h4>
+            </div>
             {% with tooltips.providers as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>
     </div>
 
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#showCompetitorsModal">
+    {% comment %} <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#showCompetitorsModal">
         Launch competitor modal
-    </button>
+    </button> {% endcomment %}
     
     <div class="d-flex justify-content-between market-eval-section--row">
         <p role="text" tabindex="" class="market-eval-section--label">
@@ -52,11 +68,16 @@
             </sup>
         </p>
         <div class="d-flex flex-row market-eval-section--value-section">
-            <h4 class="market-eval-section--value">
-                <span id="me-out-income">
+            <div class="market-eval-section--value">
+                <div id="me-out-income-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                        {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-income">
                     $000K
-                </span>
-            </h4>
+                </h4>
+            </div>
             {% with tooltips.income as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
@@ -70,11 +91,16 @@
             </sup>
         </p>
         <div class="d-flex flex-row market-eval-section--value-section">
-            <h4 class="market-eval-section--value">
-                <span id="me-out-speeds">
+            <div class="market-eval-section--value">
+                <div id="me-out-speeds-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                        {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-speeds">
                     0/0
-                </span>
-            </h4>
+                </h4>
+            </div>
             {% with tooltips.speeds as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}

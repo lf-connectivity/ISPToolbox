@@ -21,6 +21,7 @@ export enum MarketEvalWSEvents {
     TRIBAL_GEOG_MSG = 'ws.geog_tribal',
     CLOUDRF_VIEWSHED_MSG = 'ws.viewshed_cloudrf',
     MKT_EVAL_WS_ERR = 'ws.mkt_eval_err',
+    SEND_POLYGON_REQUEST = 'ws.send_polygon_request'
 }
 
 export type RDOFGeojsonResponse = {
@@ -60,7 +61,7 @@ export type ViewshedGeojsonResponse = {
     uuid: string,
 };
 
-type MedianSpeed = {
+export type MedianSpeed = {
     'Download (Mbit/s)': string,
     'Upload (Mbit/s)': string,
     Zipcode: string,
@@ -319,10 +320,12 @@ class MarketEvaluatorWS {
      * @returns The request-identifying UUID
      */
     sendPolygonRequest(include: GeoArea): UUID {
-        return this.sendJsonWithUUID({
+        let uuid = this.sendJsonWithUUID({
             request_type: 'standard_polygon',
             include: this.convertGeoJSONObject(include),
         });
+        PubSub.publish(MarketEvalWSEvents.SEND_POLYGON_REQUEST, include);
+        return uuid;
     }
 
     /**

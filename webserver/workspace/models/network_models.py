@@ -152,7 +152,7 @@ class CPELocation(WorkspaceFeature):
 
 
 class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
-    lookup_field = 'uuid'  
+    lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     height_ft = serializers.FloatField(read_only=True)
     feature_type = serializers.CharField(read_only=True)

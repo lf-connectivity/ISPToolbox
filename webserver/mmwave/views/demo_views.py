@@ -23,7 +23,7 @@ from workspace.models import WorkspaceMapSession
 from django.utils.translation import gettext as _
 
 
-# @method_decorator(xframe_options_exempt, name='dispatch')
+@method_decorator(xframe_options_exempt, name='dispatch')
 class NetworkDemoView(View):
     """
     Demo view for LOS check, allows iframing, Access Points - All Foreign Key'd on

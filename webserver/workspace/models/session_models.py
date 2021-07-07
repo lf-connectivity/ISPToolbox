@@ -91,7 +91,7 @@ class WorkspaceMapSession(models.Model):
         lat = request.GET.get('lat', None)
         lon = request.GET.get('lon', None)
         if lat is not None and lon is not None:
-            session.center = Point(lon, lat)
+            session.center = Point(x=float(lon), y=float(lat))
             session.zoom = 14
         session.save()
 

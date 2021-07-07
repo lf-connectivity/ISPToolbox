@@ -5,13 +5,15 @@
     top: 20px
     z-index: 2
     padding: 0 20px
-
-.geocoder-container
-    display: block
-
-.on-map-controls.layer-button-container
-    right: 15px
-    z-index: 2
+    display: flex
+    justify-content: space-between
+    width: 100%
+    .geocoder-container
+        display: block
+    .search-container
+        left: 15px 
+    .layer-button-container
+        right: 15px
 
 .mapboxgl-ctrl-geocoder
     border-radius: 0

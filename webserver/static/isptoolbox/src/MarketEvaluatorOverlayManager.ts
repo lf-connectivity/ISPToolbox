@@ -182,11 +182,22 @@ export default class MarketEvaluatorOverlayManager {
 
         this.populateOverlays();
 
-        $(`#map-layers-btn`).on('click', (event) => {
-            $(`#map`).toggleClass(["col-md-6", "col-md-9"]);
-            $(`#map`).toggleClass(["col-lg-7", "col-lg-9"]);
-            this.map.resize();
-        });
+        const loadMapCallback = () => {
+            this.map.getStyle().layers?.every((layer: any) => {
+                if (layer.id.includes('gl-draw')) {
+                    $(`#map-layers-btn`).on('click', (event) => {
+                        $(`#map`).toggleClass(["col-md-6", "col-md-9"]);
+                        $(`#map`).toggleClass(["col-lg-7", "col-lg-9"]);
+                        $(`#map-layer-sidebar`).toggleClass(["hide", "show"]);
+                        this.map.resize();
+                    });
+                    this.map.off('idle', loadMapCallback);
+                    return false;
+                }
+                return true;
+            });
+        }
+        this.map.on('idle', loadMapCallback);
 
         for (const lString in this.sources) {
             const layerKey: GeoLayerString = lString as GeoLayerString;

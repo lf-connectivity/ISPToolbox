@@ -10,12 +10,14 @@
   <div class="d-flex market-eval-container" style="height: calc(100vh - 71px);">
     {% include "market_evaluator/organisms/market_stats_column.html" %}
     <div id='map' class='planner-map col-lg-9 col-md-9 order-1 order-md-2 px-0' style="min-height: 500px">
-      <div class="on-map-controls search-container">
-        {% include "workspace/atoms/components/reconnecting_msg.html" %}
-        <div id="geocoder" class="geocoder-container"></div>
-      </div>
-      <div class="on-map-controls layer-button-container">
-        {% include "workspace/atoms/buttons/map_layers_button.html" %}
+      <div class="on-map-controls">
+        <div class="search-container">
+          {% include "workspace/atoms/components/reconnecting_msg.html" %}
+          <div id="geocoder" class="geocoder-container"></div>
+        </div>
+        <div class="layer-button-container">
+          {% include "workspace/atoms/buttons/map_layers_button.html" %}
+        </div>
       </div>
     </div>
     {% include "workspace/molecules/map_layer_sidebar.html" %}

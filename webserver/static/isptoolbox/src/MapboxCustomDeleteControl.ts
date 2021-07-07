@@ -8,6 +8,7 @@ export default class MapboxCustomDeleteControl {
     private map: MapboxGL.Map,
     private draw: MapboxDraw, private confirmation: boolean = false
   ) {
+    // Listen for Backspace or Delete on the Map Canvas Element
     this.map.getCanvas().addEventListener(
       'keydown',
       (e) => {

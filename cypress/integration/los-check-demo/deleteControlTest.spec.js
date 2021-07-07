@@ -6,6 +6,7 @@ context('Test Delete Control', () => {
   })
 
   it('Delete Link Using the Delete Button, proceed to add a new link by drawing on map', () => {
+    cy.contains('resolution', {timeout: 10000}).should('exist');
     cy.get('.mapbox-gl-draw_trash').click();
     cy.get('#drawing_instructions', {timeout: 10000}).should('be.visible');
     cy.get('#loading_spinner').should('not.be.visible');

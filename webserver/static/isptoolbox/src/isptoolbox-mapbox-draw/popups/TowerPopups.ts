@@ -5,7 +5,6 @@ import { AccessPoint } from "../../workspace/WorkspaceFeatures";
 import { isUnitsUS } from '../../utils/MapPreferences';
 import { ft2m, miles2km } from "../../LinkCalcUtils";
 import * as StyleConstants from '../styles/StyleConstants';
-import ap_icon from '../styles/ap-icon.svg';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
 import {
@@ -321,14 +320,42 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
         if (this.error === null) {
             return `
             <div align="center">
-                <img src="${ap_icon}" height="35" width="35">
-                <p align="center"><b>${this.progress_message ? this.progress_message : 'Starting Computation'}</p>
+                <svg
+                class="loader-logo" 
+                width="25"
+                height="25"
+                viewBox="0 0 157 120"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <rect
+                    width="23.9455"
+                    height="119.727"
+                    transform="matrix(-1 0 0 1 90.5199 0)"
+                    fill="#A8B0B7"
+                />
+                <path
+                    class="WispLoadingIcon_animatingRectangle"
+                    d="M0.124794 0H46.7554V35.288L0.124794 0Z"
+                    fill="#A8B0B7"
+                />
+                <path
+                    class="WispLoadingIcon_animatingRectangle"
+                    d="M156.97 0H110.339V35.288L156.97 0Z"
+                    fill="#A8B0B7"
+                />
+                </svg>
+                <p align="center bold">${this.progress_message ? this.progress_message : 'Starting Computation'}</p>
                 <p align="center">${this.formatTimeRemaining()}</p>
             </div>
         `;
         } else {
-            return `<div align="center"><img src="${ap_icon}" height="35" width="35">
-            <p align="center"><b>${this.error}</p></div>`;
+            return `<div align="center">
+            <svg class="loader-error" width="25" height="25" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 13C8.55228 13 9 12.5523 9 12C9 11.4477 8.55228 11 8 11C7.44772 11 7 11.4477 7 12C7 12.5523 7.44772 13 8 13Z" fill="#F23E3E"/>
+                <path d="M8 4.5V9.5" stroke="#F23E3E" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M0.741037 12.776L6.97004 1.20799C7.07022 1.02206 7.21887 0.866707 7.40021 0.758426C7.58156 0.650145 7.78883 0.592972 8.00004 0.592972C8.21125 0.592972 8.41852 0.650145 8.59986 0.758426C8.7812 0.866707 8.92985 1.02206 9.03004 1.20799L15.259 12.776C15.3548 12.9542 15.4028 13.1542 15.3982 13.3565C15.3936 13.5588 15.3367 13.7564 15.2329 13.9301C15.1291 14.1038 14.9821 14.2476 14.8062 14.3475C14.6302 14.4473 14.4314 14.4999 14.229 14.5H1.77104C1.56871 14.4999 1.36987 14.4473 1.19392 14.3475C1.01797 14.2476 0.870936 14.1038 0.767167 13.9301C0.663397 13.7564 0.606442 13.5588 0.601862 13.3565C0.597283 13.1542 0.645235 12.9542 0.741037 12.776V12.776Z" stroke="#F23E3E" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p align="center">${this.error}</p></div>`;
         }
 
     }

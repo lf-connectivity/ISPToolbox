@@ -125,7 +125,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
             dsm_engine.getDSM(dsm_file.name)
             logging.info(f'dsm download: {time.time() - start}')
             if status_callback is not None:
-                status_callback("Computing coverage", self.__timeRemainingViewshed(1))
+                status_callback("Computing Coverage", self.__timeRemainingViewshed(1))
             self.__renderViewshed(dsm_file=dsm_file, status_callback=status_callback)
         if status_callback is not None:
             status_callback(None, None)

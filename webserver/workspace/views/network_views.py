@@ -21,10 +21,10 @@ class BulkUploadTowersView(LoginRequiredMixin, View):
                 for row in csv.DictReader(decoded_file, delimiter=','):
                     _, created = AccessPointLocation.objects.update_or_create(
                         owner=request.user,
-                        name=row['name'],
-                        location=Point(y=float(row['latitude']), x=float(row['longitude'])),
-                        height=float(row['height']),
-                        max_radius=float(row['radius']),
+                        name=row['Name'],
+                        location=Point(y=float(row['Latitude']), x=float(row['Longitude'])),
+                        height=float(row['Height(ft)']),
+                        max_radius=float(row['Radius(mi)']),
                     )
                 return redirect(request.GET.get('next', '/pro'))
             except Exception as e:

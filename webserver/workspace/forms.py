@@ -13,7 +13,10 @@ class UploadTowerCSVForm(forms.Form):
         widget=CustomFileInput(
             attrs={'accept': '.csv'},
         ),
-        validators=[validators.FileExtensionValidator(['csv'])]
+        validators=[validators.FileExtensionValidator(['csv'])],
+        label="Upload",
+        label_suffix="",
+        help_text="Files Accepted: CSV and KMZ"
     )
 
 
@@ -39,6 +42,7 @@ class NewWorkspaceSessionFromKMZForm(forms.Form):
         widget=CustomFileInput(
             attrs={'accept': 'application/vnd.google-earth.kml+xml, application/vnd.google-earth.kmz, .geojson'},
         ),
+        help_text="Files Accepted: KML, KMZ and Geojson. Max Upload Size: 1MB",
         validators=[validators.FileExtensionValidator(['geojson', 'kml', 'kmz'])]
     )
 

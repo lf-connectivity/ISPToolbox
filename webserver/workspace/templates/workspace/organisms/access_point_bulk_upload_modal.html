@@ -6,23 +6,45 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="bulkUploadAccessPointLabel">Upload Towers</h3>
-        <div class="d-flex">
-          <a href="{% static "workspace/tower_sample.csv" %}">
-              <button type="button" class="btn isptoolbox-btn btn-secondary">
-                  Sample File
-              </button>
-          </a> 
+          
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             {% include "workspace/atoms/isptoolbox_close_icon.html" %}
           </button>
-        </div>
       </div>
       <div class="modal-body bulk-upload-modal" id="ap-upload-modal-body" >
-            {% with spinner_style='height: 75px; width: 100%;' blink=False spinner_classes="mx-auto mb-3" %}
-                {% include "workspace/atoms/components/loading_spinner.html" %}
-            {% endwith %}
-            {{ tower_upload_form }}
-            {% csrf_token %}
+        <p>
+          Your file must contain a list of simple tower details.
+          <a href="{% static "workspace/tower_sample.csv" %}"
+              style="display: inline-block;">
+              Download Template File
+              <svg width="19" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432" stroke="#5692d1"
+                      strokeWidth="2px" />
+              </svg>
+          </a>
+        </p>
+        <div class="isptoolbox-form">
+          {% csrf_token %}
+          <ul class="form">
+              {% for field in tower_upload_form %}
+              <li class="input-field-group">
+                  {{ field.label_tag }}
+
+                  {{ field }}
+
+                  {% if field.help_text %}
+                    <p class="helptext">{{ field.help_text|safe }}</p>
+                  {% endif %}
+
+                  {% if field.errors %}
+                  {% for error in field.errors %}
+                  <p class="errors">{{ error|escape }}</p>
+                  {% endfor %}
+                  {% endif %}
+              </li>
+              {% endfor %}
+          </ul>
+        </div>
       </div>
       <div class="modal-footer">
         <input type="submit" class="btn isptoolbox-btn btn-primary" value="Upload">

@@ -30,6 +30,10 @@
 
                                 {{ field }}
 
+                                {% if field.help_text %}
+                                    <p class="helptext">{{ field.help_text|safe }}</p>
+                                {% endif %}
+
                                 {% if field.errors %}
                                 {% for error in field.errors %}
                                 <p class="errors">{{ error|escape }}</p>

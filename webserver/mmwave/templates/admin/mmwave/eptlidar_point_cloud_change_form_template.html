@@ -1,8 +1,8 @@
 {% extends 'admin/change_form.html' %}
-
+{% load admin_urls %}
 {% block object-tools %}
-    {{ block.super }}
-    <div style="border: 2px dashed grey; padding: 10px;">
+{{ block.super }}
+<div style="border: 2px dashed grey; padding: 10px;">
     <h1>Start Tiling Job</h1>
     <p>Tile this point cloud into dsm tiles, stored in s3. Converts EPT file format to DSM using PDAL</p>
     <p>Existing Tiles: {{original.number_of_tiles}}</p>
@@ -11,8 +11,8 @@
     <form action={% url 'admin-tiling' %} method="POST">
         {% csrf_token %}
         <input name="cloud" type="text" value="{{object_id}}" hidden></input>
-        <input name="next" type="text" value="{{ request.get_full_path }}" hidden></input>
+        <input name="next" type="text" value="{% url opts|admin_urlname:'changelist' %}" hidden></input>
         <input type="submit" value="Start Job"></input>
     </form>
-    </div>
+</div>
 {% endblock %}

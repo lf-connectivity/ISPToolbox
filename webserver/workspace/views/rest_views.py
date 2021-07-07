@@ -67,10 +67,10 @@ class NetworkDetail(WorkspacePerformCreateMixin,
         return self.create(request, *args, **kwargs)
 
 
-class AccessPointLocationListCreate(mixins.ListModelMixin,
+class AccessPointLocationListCreate(WorkspaceFeatureGetQuerySetMixin,
                                     WorkspacePerformCreateMixin,
+                                    mixins.ListModelMixin,
                                     mixins.CreateModelMixin,
-                                    WorkspaceFeatureGetQuerySetMixin,
                                     generics.GenericAPIView):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]

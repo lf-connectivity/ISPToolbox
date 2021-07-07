@@ -48,10 +48,11 @@ class WorkspaceFeature(models.Model):
     def get_rest_queryset(cls, request):
         user = request.user
         if request.user.is_anonymous:
-            user = None
-        return (
-            cls.objects.filter(owner=user) | cls.objects.filter(session=request.session)
-        )
+            return cls.objects.filter(session=request.session.session_key)
+        else:
+            return (
+                cls.objects.filter(owner=user) | cls.objects.filter(session=request.session.session_key)
+            )
 
 
 class SessionWorkspaceModelMixin:

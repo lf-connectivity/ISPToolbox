@@ -1,4 +1,5 @@
 from django.contrib.auth import login, authenticate
+from django.urls.base import reverse
 from django.views import View
 from IspToolboxAccounts.forms import IspToolboxUserCreationForm
 from IspToolboxAccounts.models import User
@@ -32,6 +33,8 @@ class CreateAccountView(View):
             )
             if next_url is not None and url_is_safe:
                 return redirect(next_url)
+            else:
+                return redirect(reverse("optional_info"))
         return render(
             request,
             'workspace/pages/login_view.html',

@@ -1,0 +1,133 @@
+<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Service Providers in the Area</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="container_intro">
+                <p>
+                    The data below is based on census blocks. The selected area may
+                    include multiple census blocks. For a more granular view, we
+                    suggest drawing a smaller area.
+                </p>
+            </div>
+
+            <div class="table-header">
+                <div class="table-header--competitors">
+                    <h4>
+                        {{ service_providers|length }} Service Providers from FCC Form 477&nbsp;
+                        <sup>
+                            <span class="footnote--bracket">[</span>1<span class="footnote--bracket">]</span>
+                        </sup>
+                    </h4>
+                </div>
+
+                <div class="table-header--tech">
+                    <h4>Tech</h4>
+                </div>
+
+                <!-- add conditional for optional advertised speeds -->
+                <div class="table-header--speeds">
+                    <h4>Top Advertised Speeds</h4>
+                </div>
+                <!-- ^^ wrap conditional -->
+            </div>
+
+            <div class="table-data">
+                <!-- vv  IF there are competitors, loop below -->
+                {% if service_providers.items %}
+                    {% for isp_name, isp_values in service_providers.items %}
+                        <div class="table-data--row" key="REPLACE">
+                            <div class="table-data--competitors">
+                                <h5>{{ isp_name }}</h5>
+                            </div>
+                            <div class="table-data--tech">
+                                <h5>{{ isp_values.tech_used }}</h5>
+                            </div>
+                            <!-- vv  add conditional for optional advertised speeds -->
+                            <div class="table-data--speeds">
+                                <h5>
+                                    <!-- add conditional for Down else it says "none" -->
+                                    {{ isp_values.down_ad_speed }}
+                                    /
+                                    <!-- add conditional for Up else it says "none" -->
+                                    {{ isp_values.up_ad_speed }}
+                                    Mbps
+                                    <br />
+                                    (down/up)
+                                </h5>
+                            </div>
+                            <!-- ^^ wrap conditional -->
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- ELSE show below -->
+                    <div class="table-data--row">
+                        <h5>
+                            Based on FCC Form 477 data, there are no Service Providers in
+                            the area.
+                        </h5>
+                    </div>
+                    <!-- end if else -->
+                {% endif %}
+            </div>
+
+            <div class="table-header">
+                <div class="table-header--competitors">
+                    <h4>
+                        Lowest Price from BroadbandNow Data&nbsp;
+                        <sup>
+                            <span class="footnote--bracket">[</span>2<span class="footnote--bracket">]</span>
+                        </sup>
+                    </h4>
+                </div>
+                <div class="table-header--tech">
+                    <h4>Tech</h4>
+                </div>
+                <div class="table-header--speeds">
+                    <h4>Speeds</h4>
+                </div>
+            </div>
+
+            <div class="table-data">
+                {% if broadband_now %}
+                    <div class="table-data--row">
+                        <div class="table-data--competitors">
+                            <h5>
+                                {% if broadband_now.0 == broadband_now.1 %}
+                                    ${{ broadband_now.0 }}
+                                {% else %}
+                                    ${{ broadband_now.0 }} - ${{ broadband_now.1}}
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="table-data--tech">
+                            <h5>
+                                Terrestrial<br />Broadband
+                                <sup>
+                                    <span class="footnote--bracket">[</span>3<span class="footnote--bracket">]</span>
+                                </sup>
+                            </h5>
+                        </div>
+                        <div class="table-data--speeds">
+                            <h5>25/3 Mbps or better<br />(down/up)</h5>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="table-data--row">
+                        <h5>
+                            Based on BroadbandNow data, there are no Service Providers
+                            offering 25/3 Mbps or better.
+                        </h5>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ADD sources here -->
+            <!-- How are we doing sources? -->
+        </div>
+    </div>
+</div>

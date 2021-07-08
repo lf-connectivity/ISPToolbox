@@ -7,6 +7,8 @@ from IspToolboxAccounts import forms
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 
+from workspace.views.market_views import MarketEvaluatorCompetitorModalView
+
 
 urlpatterns = [
     path('', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
@@ -87,4 +89,6 @@ urlpatterns = [
     # Multiplayer
     path('workspace/multiplayer/demo/', views.MultiplayerTestView.as_view(), name='multiplayer_demo'),
     path('workspace/multiplayer/demo/<uuid:session_id>/', views.MultiplayerTestView.as_view(), name='multiplayer_demo_uuid'),
+    # Modals
+    path('modals/market-eval-competitor-modal/', views.MarketEvaluatorCompetitorModalView.as_view(), name="market_eval_competitor_modal"),
 ]

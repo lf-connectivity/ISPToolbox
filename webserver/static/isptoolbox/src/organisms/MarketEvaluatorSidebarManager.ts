@@ -1,4 +1,5 @@
-import { BuildingOverlaysResponse, MarketEvalWSEvents, MedianIncomeResponse, MedianSpeed, MedianSpeedResponse, ServiceProvidersResponse } from "../MarketEvaluatorWS";
+import { BroadbandNowResponse, BuildingOverlaysResponse, MarketEvalWSEvents, MedianIncomeResponse, MedianSpeed, MedianSpeedResponse, ServiceProvidersResponse } from "../MarketEvaluatorWS";
+import { getCookie } from "../utils/Cookie";
 
 const BUILDING_COUNT_BASE_ID = 'me-out-buildings';
 const BUILDING_DENSITY_BASE_ID = 'me-out-density';
@@ -29,35 +30,15 @@ const LOADING_ENDING: {[elt: string]: string} = {
     [SERVICE_PROVIDERS_BASE_ID]: '+',
 }
 
-const TECH_CODE_MAPPING: {[techCode: number]: string} = {
-    10: 'DSL',
-    11: 'DSL',
-    12: 'DSL',
-    20: 'DSL',
-    30: 'Other Copper Wireline',
-    40: 'Cable',
-    41: 'Cable',
-    42: 'Cable',
-    43: 'Cable',
-    50: 'Fiber',
-    60: 'Satellite',
-    70: 'Fixed Wireless',
-    90: 'Power Line',
-    0: 'Other'
-};
+const MODAL_AJAX_URL = '/pro/modals/market-eval-competitor-modal/';
 
 export class MarketEvaluatorSidebarManager {
     private buildingCount: number;
     private polygonArea: number;
     private marketPenetrationPct: number;
     private buildingOverlaysLoading: boolean;
-    private serviceProviders: {
-        [isp: string]: {
-            down_ad_speed: number,
-            tech_used: Array<string>,
-            up_ad_speed: number
-        }
-    }
+    private serviceProvidersResponse: ServiceProvidersResponse | undefined;
+    private bbnResponse: BroadbandNowResponse | undefined;
 
     private static instance: MarketEvaluatorSidebarManager;
 
@@ -66,6 +47,7 @@ export class MarketEvaluatorSidebarManager {
         PubSub.subscribe(MarketEvalWSEvents.BUILDING_OVERLAYS_MSG, this.onBuildingOverlayMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.POLY_AREA_MSG, this.onPolygonAreaMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.SERVICE_PROV_MSG, this.onServiceProviderMsg.bind(this));
+        PubSub.subscribe(MarketEvalWSEvents.BROADBAND_NOW_MSG, this.onBbnMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.INCOME_MSG, this.onIncomeMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.SPEEDS_MSG, this.onSpeedsMsg.bind(this));
 
@@ -131,7 +113,7 @@ export class MarketEvaluatorSidebarManager {
         this.setIDValue(BUILDING_DENSITY_BASE_ID, 0, this.buildingOverlaysLoading);
         this.setIDValue(POTENTIAL_LEADS_BASE_ID, 0, this.buildingOverlaysLoading);
         this.setIDValue(AVG_INCOME_BASE_ID, '$000K', true);
-        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, Object.keys(this.serviceProviders).length, true);
+        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, 0, true);
         this.setIDValue(MEDIAN_SPEEDS_BASE_ID, '0/0', true);
         this.updateCompetitorModalLink(true);
 
@@ -141,7 +123,8 @@ export class MarketEvaluatorSidebarManager {
     private resetStats() {
         this.buildingCount = 0;
         this.polygonArea = 0;
-        this.serviceProviders = {};
+        this.serviceProvidersResponse = undefined;
+        this.bbnResponse = undefined;
         this.buildingOverlaysLoading = false;
         this.updateMarketPenetrationPct();
     }
@@ -175,21 +158,13 @@ export class MarketEvaluatorSidebarManager {
     }
 
     private onServiceProviderMsg(msg: any, response: ServiceProvidersResponse) {
-        for (let i = 0; i < response.competitors.length; i++) {
-            let competitor = response.competitors[i];
-            let downloadSpeed = response.down_ad_speed[i];
-            let uploadSpeed = response.up_ad_speed[i];
-            let techUsed = response.tech_used[i].map((tech: number) => TECH_CODE_MAPPING[tech] || 'unknown');
-            let uniqueTechUsed = Array.from(new Set(techUsed));
+        this.serviceProvidersResponse = response;
+        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, response.competitors.length, false);
+        this.updateCompetitorModalLink(false);
+    }
 
-            this.serviceProviders[competitor] = {
-                tech_used: uniqueTechUsed,
-                down_ad_speed: downloadSpeed,
-                up_ad_speed: uploadSpeed
-            }
-        }
-
-        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, Object.keys(this.serviceProviders).length, false);
+    private onBbnMsg(msg: any, response: BroadbandNowResponse) {
+        this.bbnResponse = response;
         this.updateCompetitorModalLink(false);
     }
 
@@ -243,8 +218,30 @@ export class MarketEvaluatorSidebarManager {
     }
 
     private updateCompetitorModalLink(isLoading: boolean) {
-        this.toggleShowElement(COMPETITOR_MODAL_LOADED_ID, !isLoading);
-        this.toggleShowElement(COMPETITOR_MODAL_NOT_LOADED_ID, isLoading);
+        if (isLoading) {
+            this.toggleShowElement(COMPETITOR_MODAL_LOADED_ID, false);
+            this.toggleShowElement(COMPETITOR_MODAL_NOT_LOADED_ID, true);
+        }
+        else {
+            if (this.serviceProvidersResponse !== undefined && this.bbnResponse !== undefined) {
+                $.ajax({
+                    url: MODAL_AJAX_URL,
+                    method: 'POST',
+                    data: JSON.stringify({
+                        serviceProvidersResponse: this.serviceProvidersResponse,
+                        broadbandNowResponse: this.bbnResponse
+                    }),
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Accept': 'application/json'
+                    }
+                }).done((result) => {
+                    $('#showCompetitorsModal').html(result);
+                    this.toggleShowElement(COMPETITOR_MODAL_LOADED_ID, true);
+                    this.toggleShowElement(COMPETITOR_MODAL_NOT_LOADED_ID, false);
+                });
+            }
+        }
     }
 
     private setIDValue(element: string, value: any, isLoading: boolean) {

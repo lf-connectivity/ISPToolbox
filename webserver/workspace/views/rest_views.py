@@ -78,6 +78,7 @@ class SessionFilter(filters.BaseFilterBackend):
         else:
             return queryset
 
+
 class AccessPointLocationListCreate(WorkspaceFeatureGetQuerySetMixin,
                                     WorkspacePerformCreateMixin,
                                     mixins.ListModelMixin,

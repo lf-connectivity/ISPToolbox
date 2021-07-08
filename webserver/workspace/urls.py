@@ -7,8 +7,6 @@ from IspToolboxAccounts import forms
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 
-from workspace.views.market_views import MarketEvaluatorCompetitorModalView
-
 
 urlpatterns = [
     path('', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),

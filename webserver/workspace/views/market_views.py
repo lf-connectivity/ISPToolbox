@@ -24,16 +24,17 @@ TECH_CODE_MAPPING = {
     0: 'Other'
 }
 
+
 class MarketEvaluatorCompetitorModalView(View):
     def post(self, request):
         request_json = json.loads(request.body)
 
         # Convert the service provider response to something that's more meaningful,
-        # aka a list of objects like this: 
+        # aka a list of objects like this:
         # <isp name>: {
         #    down_ad_speed: <speed>,
         #    tech_used: <array of strings>,
-        #    up_ad_speed: <speed> 
+        #    up_ad_speed: <speed>
         # }
         service_providers = {}
         service_providers_response = request_json['serviceProvidersResponse']
@@ -50,7 +51,7 @@ class MarketEvaluatorCompetitorModalView(View):
                 'tech_used': tech_used,
                 'up_ad_speed': up_ad_speed
             }
-        
+
         context = {
             'service_providers': service_providers,
             'broadband_now': request_json['broadbandNowResponse']['bbnPriceRange']

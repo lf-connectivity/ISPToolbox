@@ -88,5 +88,5 @@ urlpatterns = [
     path('workspace/multiplayer/demo/', views.MultiplayerTestView.as_view(), name='multiplayer_demo'),
     path('workspace/multiplayer/demo/<uuid:session_id>/', views.MultiplayerTestView.as_view(), name='multiplayer_demo_uuid'),
     # Modals
-    path('modals/market-eval-competitor-modal/', views.MarketEvaluatorCompetitorModalView.as_view(), name="market_eval_competitor_modal"),
+    path('modals/market-eval-competitor-modal/', views.MarketEvaluatorCompetitorModalView.as_view()),
 ]

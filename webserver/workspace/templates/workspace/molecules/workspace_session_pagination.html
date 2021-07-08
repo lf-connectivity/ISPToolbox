@@ -59,30 +59,10 @@
 
 <input class="d-none" id="session-modal-ordering" value="{{ordering}}">
 <input class="d-none" id="session-modal-page-num" value="{{current}}">
-<nav class="d-flex">
-  <ul class="pagination">
-    {% if previous or next %}
-    {% if previous %}
-    <li class="page-item previous session-modal-page-change" page-target="{{previous}}">
-      <a class="page-link" href="#" id="session-prev-link">&laquo; Previous</a>
-    </li>
-    {% endif %}
 
-    <li class="page-item previous disabled">
-      <span class="page-link">
-        {{current}}
-      </span>
-    </li>
-
-    {% if next %}
-    <li class="page-item next session-modal-page-change" id="session-next-link" page-target="{{next}}">
-      <a class="page-link" href="#">Next &raquo;</a>
-    </li>
-    {% endif %}
-    {% endif %}
-  </ul>
-</nav>
-
+{% with "session-modal-page-change" as pagination_class_css %}
+{% include 'workspace/atoms/pagination_page_nav.html' %}
+{% endwith %}
 
 {% endwith %}
 {% else %}

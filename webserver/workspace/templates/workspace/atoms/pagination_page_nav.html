@@ -1,0 +1,29 @@
+<nav class="d-flex mt-3">
+    <ul class="pagination">
+        {% if previous or next %}
+        {% if previous %}
+        <li class="page-item previous {{pagination_class_css}}" page-target="{{previous}}">
+            <a class="page-link" href="#">{% include "workspace/atoms/icons/arrow_left_paginate.html"%} Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item previous disabled">
+            <span class="page-link">
+                {% include "workspace/atoms/icons/arrow_left_paginate.html"%} Previous
+            </span>
+        </li>
+        {% endif %}
+
+        {% if next %}
+        <li class="page-item next {{pagination_class_css}}" page-target="{{next}}">
+            <a class="page-link" href="#">Next {% include "workspace/atoms/icons/arrow_right_paginate.html"%}</a>
+        </li>
+        {% else %}
+        <li class="page-item next disabled">
+            <span class="page-link">
+                Next {% include "workspace/atoms/icons/arrow_right_paginate.html"%}
+            </span>
+        </li>
+        {% endif %}
+        {% endif %}
+    </ul>
+</nav>

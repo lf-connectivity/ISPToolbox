@@ -69,36 +69,10 @@
 </table>
 <input class="d-none" id="ap-modal-ordering" value="{{ordering}}">
 <input class="d-none" id="ap-modal-page-num" value="{{current}}">
-<nav class="d-flex">
-  <ul class="pagination">
-    {% if previous or next %}
-    {% if previous %}
-    <li class="page-item previous ap-modal-page-change" page-target="{{previous}}">
-      <a class="page-link" href="#">&laquo; Previous</a>
-    </li>
-    {% else %}
-    <li class="page-item previous disabled">
-      <span class="page-link">
-        &laquo; Previous
-      </span>
-    </li>
-    {% endif %}
 
-    {% if next %}
-    <li class="page-item next ap-modal-page-change" page-target="{{next}}">
-      <a class="page-link" href="#">Next &raquo;</a>
-    </li>
-    {% else %}
-    <li class="page-item next disabled">
-      <span class="page-link">
-        Next &raquo;
-      </span>
-    </li>
-    {% endif %}
-    {% endif %}
-  </ul>
-</nav>
-
+{% with "ap-modal-page-change" as pagination_class_css %}
+{% include 'workspace/atoms/pagination_page_nav.html' %}
+{% endwith %}
 
 {% endwith %}
 {% else %}

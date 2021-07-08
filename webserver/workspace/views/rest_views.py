@@ -67,6 +67,17 @@ class NetworkDetail(WorkspacePerformCreateMixin,
         return self.create(request, *args, **kwargs)
 
 
+class SessionFilter(filters.BaseFilterBackend):
+    """
+    This filter allows LIST endpoints to filter based on map_session id
+    """
+    def filter_queryset(self, request, queryset, view):
+        session = request.GET.get('session', None)
+        if session is not None:
+            return queryset.filter(map_session=session)
+        else:
+            return queryset
+
 class AccessPointLocationListCreate(WorkspaceFeatureGetQuerySetMixin,
                                     WorkspacePerformCreateMixin,
                                     mixins.ListModelMixin,
@@ -74,14 +85,13 @@ class AccessPointLocationListCreate(WorkspaceFeatureGetQuerySetMixin,
                                     generics.GenericAPIView):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
-    lookup_field = 'uuid'
 
     renderer_classes = [renderers.TemplateHTMLRenderer, renderers.JSONRenderer, renderers.BrowsableAPIRenderer]
     template_name = "workspace/molecules/access_point_pagination.html"
 
     pagination_class = pagination.IspToolboxCustomAjaxPagination
 
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [filters.OrderingFilter, SessionFilter]
     ordering_fields = ['name', 'last_updated', 'height', 'max_radius']
     ordering = ['-last_updated']
 

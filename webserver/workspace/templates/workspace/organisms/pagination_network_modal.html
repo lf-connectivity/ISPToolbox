@@ -14,10 +14,17 @@
   </div>
 </div>
 <script>
-  function showModalCallback() {
-    $.get('{% url "session_list" %}', '', (result) => {
+  function showModalCallback(e, page) {
+    $.get('{% url "session_list" %}' + (page ? `?page=${page}` : ''), '', (result) => {
       $('#session-list-modal-body').html(result);
     }, 'html').done(() => {
+      // Pagination Callback
+      $('.session-modal-page-change').one('click', (e) => {
+        const page = e.currentTarget.getAttribute("page-target");
+        showModalCallback({}, page);
+      });
+
+      // Delete Button Callback
       $('.session-delete-btn').on('click', (event) => {
         const uuid = event.currentTarget.getAttribute('data-target');
         if (typeof uuid === 'string') {

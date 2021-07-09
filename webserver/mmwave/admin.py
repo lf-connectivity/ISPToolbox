@@ -30,8 +30,9 @@ class EPTLidarPointCloudAdmin(admin.ModelAdmin):
     potree_inspect_cloud_url.short_description = 'Potree inspection link'
     potree_inspect_cloud_url.allow_tags = True
 
-    readonly_fields = ['potree_inspect_cloud_url', 'number_of_tiles']
-    list_display = ['pk', 'name', 'potree_inspect_cloud_url', 'number_of_tiles', 'noisy_data', 'inspected']
+    list_per_page = 20
+    readonly_fields = ['potree_inspect_cloud_url', 'tiled']
+    list_display = ['pk', 'name', 'potree_inspect_cloud_url', 'tiled', 'noisy_data', 'inspected']
 
     change_form_template = 'admin/mmwave/eptlidar_point_cloud_change_form_template.html'
 

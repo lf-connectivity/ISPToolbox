@@ -69,6 +69,10 @@ class EPTLidarPointCloud(models.Model):
     )
 
     @property
+    def tiled(self):
+        return LidarDSMTileModel.objects.filter(cld=self).exists()
+
+    @property
     def number_of_tiles(self):
         return LidarDSMTileModel.objects.filter(cld=self).count()
 

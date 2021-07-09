@@ -1,64 +1,68 @@
 {% load rest_framework %}
+
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
-<div class="theme-table open-workspace">
-  <div class="thead">
-    <div class="tr">
-      <p class="th-column workspace-name">Workspace Name
-        {% if ordering == "name"%}
-        <a name="" class="sort-ap" ordering-target="-name">
-          {% include 'workspace/atoms/arrow_icon.html' %}
-        </a>
-        {% else %}
-        <a name="" class="sort-ap" ordering-target="name">
-          {% with flip=True %}
-          {% include 'workspace/atoms/arrow_icon.html' %}
-          {% endwith %}
-        </a>
-        {% endif %}
-      </p>
+<div class="modal-body">
+  <div class="theme-table open-workspace">
+    <div class="thead">
+      <div class="tr">
+        <p class="th-column workspace-name">Workspace Name
+          {% if ordering == "name"%}
+          <a name="" class="sort-ap" ordering-target="-name">
+            {% include 'workspace/atoms/arrow_icon.html' %}
+          </a>
+          {% else %}
+          <a name="" class="sort-ap" ordering-target="name">
+            {% with flip=True %}
+            {% include 'workspace/atoms/arrow_icon.html' %}
+            {% endwith %}
+          </a>
+          {% endif %}
+        </p>
 
-      <p class="th-column tower-count desktop-only">Towers
-        {% if ordering == "number_of_towers"%}
-        <a name="" class="sort-ap" ordering-target="-number_of_towers">
-          {% include 'workspace/atoms/arrow_icon.html' %}
-        </a>
-        {% else %}
-        <a name="" class="sort-ap" ordering-target="number_of_towers">
-          {% with flip=True %}
-          {% include 'workspace/atoms/arrow_icon.html' %}
-          {% endwith %}
-        </a>
-        {% endif %}
-      </p>
+        <p class="th-column tower-count desktop-only">Towers
+          {% if ordering == "number_of_towers"%}
+          <a name="" class="sort-ap" ordering-target="-number_of_towers">
+            {% include 'workspace/atoms/arrow_icon.html' %}
+          </a>
+          {% else %}
+          <a name="" class="sort-ap" ordering-target="number_of_towers">
+            {% with flip=True %}
+            {% include 'workspace/atoms/arrow_icon.html' %}
+            {% endwith %}
+          </a>
+          {% endif %}
+        </p>
 
-      <p class="th-column last-edit desktop-only">Last Edited
-        {% if ordering == "last_updated"%}
-        <a class="sort-ap" ordering-target="-last_updated">
-          {% include 'workspace/atoms/arrow_icon.html' %}
-        </a>
-        {% else %}
-        <a class="sort-ap" ordering-target="last_updated">
-          {% with flip=True %}
-          {% include 'workspace/atoms/arrow_icon.html' %}
-          {% endwith %}
-        </a>
-        {% endif %}
-      </p>
+        <p class="th-column last-edit desktop-only">Last Edited
+          {% if ordering == "last_updated"%}
+          <a class="sort-ap" ordering-target="-last_updated">
+            {% include 'workspace/atoms/arrow_icon.html' %}
+          </a>
+          {% else %}
+          <a class="sort-ap" ordering-target="last_updated">
+            {% with flip=True %}
+            {% include 'workspace/atoms/arrow_icon.html' %}
+            {% endwith %}
+          </a>
+          {% endif %}
+        </p>
 
-      <div class="th-column actions desktop-only">
+        <div class="th-column actions desktop-only">
+        </div>
       </div>
     </div>
+    <div class="tbody">
+      {% for session in results %}
+      {% include 'workspace/atoms/workspace_session_row.html' %}
+      {% endfor %}
+    </div>
   </div>
-  <div class="tbody">
-    {% for session in results %}
-    {% include 'workspace/atoms/workspace_session_row.html' %}
-    {% endfor %}
-  </div>
+
+  <input class="d-none" id="session-modal-ordering" value="{{ordering}}">
+  <input class="d-none" id="session-modal-page-num" value="{{current}}">
 </div>
 
-<input class="d-none" id="session-modal-ordering" value="{{ordering}}">
-<input class="d-none" id="session-modal-page-num" value="{{current}}">
 
 {% with "session-modal-page-change" as pagination_class_css %}
 {% include 'workspace/atoms/pagination_page_nav.html' %}
@@ -66,8 +70,10 @@
 
 {% endwith %}
 {% else %}
-<div class="text-center empty-placeholder">
-  {% include 'workspace/atoms/missing_icon.html' %}
-  <h5>No Saved Sessions</h5>
+<div class="modal-body">
+  <div class="text-center empty-placeholder">
+    {% include 'workspace/atoms/missing_icon.html' %}
+    <h5>No Saved Sessions</h5>
+  </div>
 </div>
 {% endif %}

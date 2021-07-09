@@ -1,10 +1,18 @@
 @import ../theme
 
 .pagination
+    display: grid
+    grid-template-columns: 1fr 1fr
     .page-link
         border-radius: 0 !important
         font-weight: normal
         color: $brand-secondary-color
+        font-size: 0.8125rem
+        &:hover
+            background-color:$light-gray-color
+            border-color: $light-gray-color
     .page-item
+        .page-link
+            border-color: $light-gray-color
         &:disabled
             color: $disabled-gray

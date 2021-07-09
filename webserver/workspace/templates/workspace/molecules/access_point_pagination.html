@@ -2,83 +2,86 @@
 {% load i18n %}
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Access Point Name
-        {% if ordering == "name"%}
-        <a name="" class="sort-ap" ordering-target="-name">
-          {% include 'workspace/atoms/arrow_icon.html' %}
-        </a>
-        {% else %}
-        <a name="" class="sort-ap" ordering-target="name">
-          {% with flip=True %}
-          {% include 'workspace/atoms/arrow_icon.html' %}
-          {% endwith %}
-        </a>
-        {% endif %}
-      </th>
-      <th scope="col">Radius
-        {% if ordering == "max_radius"%}
-        <a class="sort-ap" ordering-target="-max_radius">
-          {% include 'workspace/atoms/arrow_icon.html' %}
-        </a>
-        {% else %}
-        <a class="sort-ap" ordering-target="max_radius">
-          {% with flip=True %}
-          {% include 'workspace/atoms/arrow_icon.html' %}
-          {% endwith %}
-        </a>
-        {% endif %}
-      </th>
-      <th scope="col">Height
-        {% if ordering == "height"%}
-        <a class="sort-ap" ordering-target="-height">
-          {% include 'workspace/atoms/arrow_icon.html' %}
-        </a>
-        {% else %}
-        <a class="sort-ap" ordering-target="height">
-          {% with flip=True %}
-          {% include 'workspace/atoms/arrow_icon.html' %}
-          {% endwith %}
-        </a>
-        {% endif %}
-      </th>
-      <th scope="col">Last Modified
-        {% if ordering == "last_updated"%}
-        <a class="sort-ap" ordering-target="-last_updated">
-          {% include 'workspace/atoms/arrow_icon.html' %}
-        </a>
-        {% else %}
-        <a class="sort-ap" ordering-target="last_updated">
-          {% with flip=True %}
-          {% include 'workspace/atoms/arrow_icon.html' %}
-          {% endwith %}
-        </a>
-        {% endif %}
-      </th>
-      <th scope="col"></th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for ap in results %}
-    {% include 'workspace/atoms/access_point_row.html' %}
-    {% endfor %}
-  </tbody>
-</table>
-<input class="d-none" id="ap-modal-ordering" value="{{ordering}}">
-<input class="d-none" id="ap-modal-page-num" value="{{current}}">
-
+<div class="modal-body">
+  <table class="table" style="display: block; overflow-x: scroll">
+    <thead class="thead-modal">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Access Point Name
+          {% if ordering == "name"%}
+          <a name="" class="sort-ap" ordering-target="-name">
+            {% include 'workspace/atoms/arrow_icon.html' %}
+          </a>
+          {% else %}
+          <a name="" class="sort-ap" ordering-target="name">
+            {% with flip=True %}
+            {% include 'workspace/atoms/arrow_icon.html' %}
+            {% endwith %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Radius
+          {% if ordering == "max_radius"%}
+          <a class="sort-ap" ordering-target="-max_radius">
+            {% include 'workspace/atoms/arrow_icon.html' %}
+          </a>
+          {% else %}
+          <a class="sort-ap" ordering-target="max_radius">
+            {% with flip=True %}
+            {% include 'workspace/atoms/arrow_icon.html' %}
+            {% endwith %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Height
+          {% if ordering == "height"%}
+          <a class="sort-ap" ordering-target="-height">
+            {% include 'workspace/atoms/arrow_icon.html' %}
+          </a>
+          {% else %}
+          <a class="sort-ap" ordering-target="height">
+            {% with flip=True %}
+            {% include 'workspace/atoms/arrow_icon.html' %}
+            {% endwith %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">Last Modified
+          {% if ordering == "last_updated"%}
+          <a class="sort-ap" ordering-target="-last_updated">
+            {% include 'workspace/atoms/arrow_icon.html' %}
+          </a>
+          {% else %}
+          <a class="sort-ap" ordering-target="last_updated">
+            {% with flip=True %}
+            {% include 'workspace/atoms/arrow_icon.html' %}
+            {% endwith %}
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ap in results %}
+      {% include 'workspace/atoms/access_point_row.html' %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <input class="d-none" id="ap-modal-ordering" value="{{ordering}}">
+  <input class="d-none" id="ap-modal-page-num" value="{{current}}">
+</div>
 {% with "ap-modal-page-change" as pagination_class_css %}
 {% include 'workspace/atoms/pagination_page_nav.html' %}
 {% endwith %}
 
 {% endwith %}
 {% else %}
-<div class="text-center">
-  {% include 'workspace/atoms/missing_icon.html' %}
-  <h3>{% translate "No access points"%}</h3>
-  <p>{% translate "To get started: place an access point on the map or select bulk import."%}</p>
+<div class="modal-body">
+  <div class="text-center">
+    {% include 'workspace/atoms/missing_icon.html' %}
+    <h3>{% translate "No access points"%}</h3>
+    <p>{% translate "To get started: place an access point on the map or select bulk import."%}</p>
+  </div>
 </div>
 {% endif %}

@@ -42,7 +42,7 @@ _ISP_TOOLBOX_US_SOURCES = {
         last_updated='Apr 2021'
     ),
     'MLAB': ISPToolboxSource(
-        link='https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information', # noqa: E501
+        link='https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information',  # noqa: E501
         title='M-Lab.',
         last_updated='Oct 2020'
     ),

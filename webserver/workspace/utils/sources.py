@@ -6,7 +6,6 @@
 # }
 
 from dataclasses import dataclass
-from typing import OrderedDict
 
 
 @dataclass
@@ -43,7 +42,7 @@ _ISP_TOOLBOX_US_SOURCES = {
         last_updated='Apr 2021'
     ),
     'MLAB': ISPToolboxSource(
-        link='https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information',
+        link='https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information', # noqa: E501
         title='M-Lab.',
         last_updated='Oct 2020'
     ),
@@ -93,7 +92,7 @@ def get_source(country, source_id):
         raise ValueError(f'No sources for {country} exist.')
     if source_id not in _ISP_TOOLBOX_SOURCES[country]:
         raise ValueError(f'No source with id {source_id} in country {country}')
-    
+
     return _ISP_TOOLBOX_SOURCES[country][source_id]
 
 # TODO: Support Canada!!!

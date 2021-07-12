@@ -22,7 +22,7 @@ class _CitationNode(template.Node):
         self.nodelist = nodelist
         self.sources = sources
         self.id = id
-    
+
     def render(self, context):
         # Simple id resolver, variable names or quoted strings only!!!
         if (self.id[0] == '"' and self.id[-1] == '"') or (self.id[0] == self.id[-1] and self.id[0] == '\''):
@@ -46,6 +46,7 @@ def new_sources_list():
     """
     return OrderedDict()
 
+
 @register.tag
 def citation(parser, token):
     """
@@ -66,13 +67,14 @@ def citation(parser, token):
     """
     # Find the id.
     try:
-        tag_name, sources, id = token.split_contents()
+        _, sources, id = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError(f'{token.split_contents()[0]} requires two arguments')
 
     nodelist = parser.parse(('endcitation',))
     parser.delete_first_token()
     return _CitationNode(nodelist, sources, id)
+
 
 @register.inclusion_tag('workspace/atoms/components/citation.html')
 def existing_citation(sources, id):
@@ -81,11 +83,12 @@ def existing_citation(sources, id):
     """
     if id not in sources:
         raise template.TemplateSyntaxError(f'{id} not in sources.')
-    
+
     index = list(sources).index(id) + 1
     return {
         'index': index
     }
+
 
 @register.simple_tag
 def source_link(country, source_id):
@@ -100,6 +103,7 @@ def source_link(country, source_id):
         f'<a href="{link_href}">{link_text}</a>'
     )
 
+
 @register.simple_tag
 def source_last_updated(country, source_id):
     """
@@ -109,6 +113,7 @@ def source_last_updated(country, source_id):
     source_info = get_source(country, source_id)
     return f'[Last Updated {source_info.last_updated}]'
 
+
 @register.inclusion_tag('workspace/atoms/components/footnote_section.html')
 def footnote_section(sources, **kwargs):
     """
@@ -116,7 +121,7 @@ def footnote_section(sources, **kwargs):
 
     Parameters:
         - `sources`: List of sources
-    
+
     Optional Parameters:
         - `ol_classes`: Class attribute for the `<ol>` element
         - `ol_style`: Style attribute for the `<ol>` element

@@ -37,7 +37,7 @@
 
 {% block content %}
 {% include 'workspace/atoms/mapbox_global_public_key.html' %}
-<div class="container wide flex-grow-1 mb-5" style="margin-top: 70px;">
+<div class="container d-flex wide mb-5" style="margin-top: 70px; flex-flow:column;">
     {{ month|json_script:"month-gis-data" }}
     {{ year|json_script:"year-gis-data" }}
     <div class="container wide mt-5">

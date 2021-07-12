@@ -17,8 +17,10 @@
             {% include "workspace/organisms/nav.html" %}
             {% endblock %}
         </header>
-        {% block content %}
-        {% endblock %}
+        <div class="flex-grow-1">
+            {% block content %}
+            {% endblock %}
+        </div>
         <footer>
             {%block footer%}
             {% include "workspace/organisms/footer.html" %}
@@ -26,5 +28,4 @@
         </footer>
     </div>
 </body>
-
 </html>

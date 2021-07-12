@@ -4,6 +4,7 @@
  *
  **/
 import PubSub from 'pubsub-js';
+import { ViewshedTool } from './organisms/ViewshedTool';
 
 export enum LOSWSEvents {
     LIDAR_MSG = 'ws.lidar_msg',
@@ -205,6 +206,7 @@ class LOSCheckWS {
         } else {
             this.ws.send(request);
         }
+        ViewshedTool.getInstance().setVisibleLayer(false);
     }
 }
 

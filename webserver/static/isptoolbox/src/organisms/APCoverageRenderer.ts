@@ -15,7 +15,7 @@ import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBa
 import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup";
 import { getCookie } from "../utils/Cookie";
 import MarketEvaluatorWS, { BuildingOverlaysResponse, MarketEvalWSEvents } from "../MarketEvaluatorWS";
-import { geometry, GeometryCollection } from "@turf/helpers";
+import { GeometryCollection } from "@turf/helpers";
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';

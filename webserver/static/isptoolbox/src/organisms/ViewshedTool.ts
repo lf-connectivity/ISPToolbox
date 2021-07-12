@@ -28,7 +28,6 @@ export class ViewshedTool {
         this.draw = draw;
         PubSub.subscribe(LOSWSEvents.VIEWSHED_MSG, this.updateViewshedImage.bind(this));
         this.map.on('draw.selectionchange', this.drawSelectionChangeCallback.bind(this));
-        this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
         this.map.on('draw.delete', this.drawDeleteCallback.bind(this));
         this.map.on('sourcedata', (e) => {
             if (e.isSourceLoaded && e.source.type === 'raster' && e.sourceId === VIEWSHED_TILE_OVERLAY_SOURCE) {
@@ -54,10 +53,6 @@ export class ViewshedTool {
         }) && features.some((f) => {return f.properties?.feature_type === WorkspaceFeatureTypes.AP})) {
             this.setVisibleLayer(false);
         }
-    }
-
-    drawModeChangeCallback({ mode }: { mode: string }): void {
-        // this.setVisibleLayer(false);
     }
 
     drawDeleteCallback({ features }: { features: Array<GeoJSON.Feature> }): void {

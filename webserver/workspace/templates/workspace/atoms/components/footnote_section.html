@@ -1,0 +1,14 @@
+{% load isp_toolbox_sources %}
+<ol
+ {% if ol_classes %} class="{{ol_classes}}" {% endif %}
+ {% if ol_style %} style="{{ol_style}}" {% endif %}
+>
+    {% for source in sources %}
+        <li
+         {% if li_classes %} class="{{li_classes}}" {% endif %}
+         {% if li_style %} style="{{li_style}}" {% endif %}
+        >
+        {{ source }}
+        </li> 
+    {% endfor %}
+</ol>

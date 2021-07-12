@@ -1,3 +1,5 @@
+{% load isp_toolbox_sources %}
+{% new_sources_list as sources %}
 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
@@ -18,10 +20,10 @@
             <div class="table-header">
                 <div class="table-header--competitors">
                     <h4>
-                        {{ service_providers|length }} Service Provider{{ service_providers|length|pluralize }} from FCC Form 477&nbsp;
-                        <sup>
-                            <span class="footnote--bracket">[</span>1<span class="footnote--bracket">]</span>
-                        </sup>
+                        {{ service_providers|length }} Service Provider{{ service_providers|length|pluralize }} from FCC Form 477
+                        {% citation sources "SOURCE_PROVIDERS" %}
+                            Service Provider data is obtained via {% source_link "US" "SERVICE_PROVIDERS" %} {% source_last_updated "US" "SERVICE_PROVIDERS" %}
+                        {% endcitation %}
                     </h4>
                 </div>
 
@@ -78,10 +80,14 @@
             <div class="table-header">
                 <div class="table-header--competitors">
                     <h4>
-                        Lowest Price from BroadbandNow Data&nbsp;
-                        <sup>
-                            <span class="footnote--bracket">[</span>2<span class="footnote--bracket">]</span>
-                        </sup>
+                        Lowest Price from BroadbandNow Data
+                        {% citation sources "bbn" %}
+                            The selected area may include multiple census blocks, and as a result, the lowest price maybe represented as a range.
+                            The lowest price option may be offered in a portion of the census block not covered by the selected area/polygon.
+                            For complete data, open the Census Block map layer on the map.
+                            Lowest Price data was obtained via {% source_link "US" "BROADBAND_PRICING" %}
+                            {% source_last_updated "US" "BROADBAND_PRICING" %}
+                        {% endcitation %}
                     </h4>
                 </div>
                 <div class="table-header--tech">
@@ -100,16 +106,16 @@
                                 {% if broadband_now.0 == broadband_now.1 %}
                                     ${{ broadband_now.0 }}
                                 {% else %}
-                                    ${{ broadband_now.0 }} - ${{ broadband_now.1}}
+                                    ${{ broadband_now.0 }} - ${{ broadband_now.1 }}
                                 {% endif %}
                             </h5>
                         </div>
                         <div class="table-data--tech">
                             <h5>
                                 Terrestrial<br />Broadband
-                                <sup>
-                                    <span class="footnote--bracket">[</span>3<span class="footnote--bracket">]</span>
-                                </sup>
+                                {% citation sources "terrestrial_broadband" %}
+                                    Terrestrial Broadband excludes satellite and mobile.
+                                {% endcitation %}
                             </h5>
                         </div>
                         <div class="table-data--speeds">
@@ -125,9 +131,9 @@
                     </div>
                 {% endif %}
             </div>
-
-            <!-- ADD sources here -->
-            <!-- How are we doing sources? -->
+        </div>
+        <div class="modal-footer" style="text-align: left;">
+            {% footnote_section sources %}
         </div>
     </div>
 </div>

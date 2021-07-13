@@ -5,8 +5,10 @@ import uuid
 from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import GEOSGeometry, LineString
 import json
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from workspace.utils.geojson_circle import createGeoJSONCircle
-from .model_constants import FeatureType
+from .model_constants import FeatureType, M_2_FT
 from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
@@ -76,7 +78,7 @@ class AccessPointLocation(WorkspaceFeature):
     height = models.FloatField()
     max_radius = models.FloatField()
     no_check_radius = models.FloatField(default=0.01)
-    default_cpe_height = models.FloatField(default=2)
+    default_cpe_height = models.FloatField(default=1)
 
     @property
     def max_radius_miles(self):
@@ -84,11 +86,11 @@ class AccessPointLocation(WorkspaceFeature):
 
     @property
     def height_ft(self):
-        return self.height * 3.28084
+        return self.height * M_2_FT
 
     @property
     def default_cpe_height_ft(self):
-        return self.default_cpe_height * 3.28084
+        return self.default_cpe_height * M_2_FT
 
     @property
     def feature_type(self):
@@ -129,33 +131,52 @@ class CPELocation(WorkspaceFeature):
     ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, null=True)
     height = models.FloatField(
         help_text="""
-        This height value is relative to the terrain
+        This height value is relative to the terrain in meters. When object is first created the height field
+        is taken from the AP "default_cpe_height", it is then converted to DTM height. The following
+        saves are all relative to terrain.
         """
     )
-
-    def convert_to_dtm_height(self) -> float:
-        """
-        this converts current height - relative to dsm, to relative to dsm
-        """
-        point = self.geojson
-        dtm = getDTMPoint(point)
-        tile_engine = DSMTileEngine(point, EPTLidarPointCloud.query_intersect_aoi(point))
-        dsm = tile_engine.getSurfaceHeight(point)
-        return self.height + dsm - dtm
-
-    @property
-    def height_ft(self):
-        return self.height * 3.28084
 
     @property
     def feature_type(self):
         return FeatureType.CPE.value
 
+    def get_dsm_height(self) -> float:
+        point = self.geojson
+        tile_engine = DSMTileEngine(point, EPTLidarPointCloud.query_intersect_aoi(point))
+        dsm = tile_engine.getSurfaceHeight(point)
+        return dsm
+
+    def get_dtm_height(self) -> float:
+        return getDTMPoint(self.geojson)
+
+    @property
+    def height_ft(self):
+        return self.height * M_2_FT
+
+    @height_ft.setter
+    def height_ft(self, value):
+        self.height = value / M_2_FT
+
+
+@receiver(pre_save, sender=CPELocation)
+def _modify_height(sender, instance, **kwargs):
+    """
+    Modify the height when initially created to be relative to terrain.
+    """
+    if instance.created is None:
+        if instance.height is None:
+            instance.height = instance.ap.default_cpe_height_ft
+        instance.height = (
+            instance.get_dsm_height() - instance.get_dtm_height() + instance.height
+        )
+
 
 class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
-    height_ft = serializers.FloatField(read_only=True)
+    height = serializers.FloatField(required=False)
+    height_ft = serializers.FloatField(required=False)
     feature_type = serializers.CharField(read_only=True)
     ap = serializers.PrimaryKeyRelatedField(
         queryset=AccessPointLocation.objects.all(),

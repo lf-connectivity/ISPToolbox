@@ -29,7 +29,6 @@ class WorkspacePerformCreateMixin:
         if self.request.user.is_anonymous:
             user = None
         serializer.save(owner=user, session=session)
-        return super(WorkspacePerformCreateMixin, self).perform_create(serializer)
 
 
 class WorkspaceFeatureGetQuerySetMixin:
@@ -132,6 +131,9 @@ class AccessPointLocationGet(mixins.RetrieveModelMixin,
 class CPELocationCreate(WorkspacePerformCreateMixin,
                         mixins.CreateModelMixin,
                         generics.GenericAPIView):
+    """
+    On creation the height is modified to be relative to dsm
+    """
     serializer_class = CPESerializer
     permission_classes = [AllowAny]
 

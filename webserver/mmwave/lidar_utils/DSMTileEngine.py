@@ -9,7 +9,6 @@ import time
 import logging
 from IspToolboxApp.util.s3 import readMultipleS3Objects
 import rasterio
-import math
 
 
 USE_OLD_TILES = "/tile"
@@ -60,5 +59,5 @@ class DSMTileEngine:
                     py, px = dataset.index(transformed_pt.x, transformed_pt.y)
                     return dataset.read(1)[py, px]
             else:
-                return math.nan
-        return math.nan
+                return 0
+        return 0

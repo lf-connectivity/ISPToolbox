@@ -370,7 +370,6 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 'name': this.street,
                 'ap': ap.workspaceId,
                 'feature_type': WorkspaceFeatureTypes.CPE,
-                'height': ap.getFeatureProperty('default_cpe_height')
             }
         } as Feature<Point, any>;
         this.map.fire('draw.create', {features: [newCPE]});

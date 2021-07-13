@@ -10,7 +10,7 @@ from workspace.models import (
     AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession,
     CoverageArea, AccessPointBasedCoverageArea
 )
-from workspace.models.model_constants import FeatureType
+from workspace.models.model_constants import FeatureType, M_2_FT
 from workspace.models import (
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
     CoverageAreaSerializer, APCoverageAreaSerializer
@@ -458,6 +458,8 @@ AP_COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/ap-coverage-area'
 ################################################################################
 
 class WorkspaceBaseTestCase(TestCase):
+    maxDiff = None
+
     def setUp(self):
         """Set-up test user and test objects."""
         self.testuser = get_user_model().objects.create_superuser(
@@ -496,6 +498,9 @@ class WorkspaceBaseTestCase(TestCase):
             ap=self.test_ap
         )
         self.test_cpe.save()
+        # Post Save will modify CPE height to be relative to terrain
+        self.test_cpe.height = DEFAULT_HEIGHT
+        self.test_cpe.save(update_fields=['height'])
 
         self.test_ap_cpe_link = APToCPELink(
             owner=self.testuser,
@@ -592,17 +597,16 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         self.get_feature_collection_flow(AccessPointSerializer, [expected_ap])
 
     def test_get_features_for_session_cpe(self):
-        expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_cpe = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_CPE_POINT),
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
+                'height_ft': DEFAULT_HEIGHT * M_2_FT,
                 'uuid': str(self.test_cpe.uuid),
                 'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.CPE.value,
-                'height_ft': expected_height_ft,
                 'uneditable': DEFAULT_UNEDITABLE,
                 'ap': str(self.test_ap.uuid)
             }
@@ -729,7 +733,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(cpe.owner, self.testuser)
         self.assertEqual(cpe.name, DEFAULT_NAME)
         self.assertJSONEqual(cpe.geojson.json, DEFAULT_CPE_POINT)
-        self.assertEqual(cpe.height, DEFAULT_HEIGHT)
+        self.assertAlmostEqual(cpe.height, cpe.get_dsm_height() - cpe.get_dtm_height() + DEFAULT_HEIGHT, 8)
         self.assertEqual(cpe.uneditable, DEFAULT_UNEDITABLE)
         self.assertEqual(cpe.ap, self.test_ap)
 
@@ -865,22 +869,21 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
 
 class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
     def test_merge_two_feature_collections(self):
-        expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
-        expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
+        expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * M_2_FT
         expected_ap = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_AP_POINT),
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
+                'height_ft': DEFAULT_HEIGHT * M_2_FT,
                 'map_session': str(self.test_session.uuid),
                 'uuid': str(self.test_ap.uuid),
                 'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
                 'default_cpe_height': DEFAULT_CPE_HEIGHT,
                 'feature_type': FeatureType.AP.value,
                 'max_radius': DEFAULT_MAX_RADIUS,
-                'height_ft': expected_height_ft,
                 'default_cpe_height_ft': expected_default_cpe_height_ft,
                 'max_radius_miles': expected_max_radius_miles,
                 'uneditable': DEFAULT_UNEDITABLE
@@ -892,10 +895,10 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             'properties': {
                 'name': DEFAULT_NAME,
                 'height': DEFAULT_HEIGHT,
+                'height_ft': DEFAULT_HEIGHT * M_2_FT,
                 'map_session': str(self.test_session.uuid),
                 'uuid': str(self.test_cpe.uuid),
                 'feature_type': FeatureType.CPE.value,
-                'height_ft': expected_height_ft,
                 'uneditable': DEFAULT_UNEDITABLE,
                 'ap': str(self.test_ap.uuid)
             }

@@ -19,7 +19,7 @@ import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/TowerPopup
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { getStreetAndAddressInfo } from "../LinkCheckUtils";
 import { getSessionID } from '../utils/MapPreferences';
-import { DEFAULT_AP_HEIGHT, DEFAULT_AP_NAME, DEFAULT_CPE_HEIGHT, DEFAULT_CPE_NAME, DEFAULT_NO_CHECK_RADIUS } from "./BaseWorkspaceManager";
+import { DEFAULT_AP_HEIGHT, DEFAULT_AP_NAME, DEFAULT_CPE_NAME, DEFAULT_NO_CHECK_RADIUS } from "./BaseWorkspaceManager";
 export class LOSModal {
     selector: string;
     map: mapboxgl.Map;
@@ -242,7 +242,6 @@ export class WorkspaceManager {
                     max_radius: feature.properties.radius / 1000,
                     center: feature.geometry.coordinates,
                     height: DEFAULT_AP_HEIGHT,
-                    default_cpe_height: DEFAULT_CPE_HEIGHT,
                     no_check_radius: DEFAULT_NO_CHECK_RADIUS,
                     name: DEFAULT_AP_NAME
                 },
@@ -274,10 +273,8 @@ export class WorkspaceManager {
                                 },
                                 'properties': {
                                     'name': street.street,
-
                                     'ap': ap.workspaceId,
                                     'feature_type': WorkspaceFeatureTypes.CPE,
-                                    'height': DEFAULT_CPE_HEIGHT
                                 }
                             };
                             this.map.fire('draw.create', {features: [newCPE]});
@@ -318,7 +315,6 @@ export class WorkspaceManager {
                             id: feature.id,
                             properties: {
                                 name: feature.properties.name ? feature.properties.name : DEFAULT_CPE_NAME,
-                                height: feature.properties.height ? feature.properties.height : DEFAULT_CPE_HEIGHT
                             }
                         }
                         workspaceFeature = new CPE(this.map, this.draw, newFeature);

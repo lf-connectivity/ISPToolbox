@@ -41,7 +41,7 @@ export function parseFormLatitudeLongitude(id: string) : [number, number] | null
 }
 
 function validateCoordinates(lat: number, lng: number){
-    if(lat > 90 || lat < -90 || lng < -180 || lng > 180){
+    if(lat > 90 || lat < -90 || lng < -180 || lng > 180 || isNaN(lat) || isNaN(lng)){
         return false;
     } else {
         return true;

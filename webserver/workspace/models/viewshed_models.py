@@ -161,8 +161,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
             {dsm_filepath} {output_filepath}
         """
 
-    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath):
-        return f"""gdal2tiles.py {viewshed_filepath} {output_folderpath}"""
+    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath, zoom_min=14, zoom_max=19):
+        return f"""gdal2tiles.py --zoom={zoom_min}-{zoom_max} {viewshed_filepath} {output_folderpath}"""
 
     def __calculateRadiusViewshed(self) -> float:
         # Calculate how far viewshed should extend

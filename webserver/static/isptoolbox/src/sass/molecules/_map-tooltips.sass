@@ -142,21 +142,6 @@
             span
                 display: block
                 font-size: 12px
-        ul
-            margin: 0
-            padding: 0
-        li
-            align-items: center
-            border-bottom: $mid-gray-color-2 solid 1px
-            display: flex
-            flex-flow: row
-            justify-content: space-between
-            padding: .5rem 0
-        li:first-child
-            padding-top: 0
-        li:last-of-type
-            border-bottom: 0
-            padding-bottom: 0
         .coordinates
             display: flex
             margin-top: 10px
@@ -211,6 +196,32 @@
             border-bottom: solid 2px transparent
     .loader-logo, .loader-error
         margin: 8px 0
+
+.mapboxgl-popup.map-tooltip
+    .overlay-tooltip, .tooltip--tower-summary
+        ul
+            margin: 0
+            padding: 0
+        li
+            align-items: center
+            border-bottom: $mid-gray-color-2 solid 1px
+            display: flex
+            flex-flow: row
+            justify-content: space-between
+            padding: .5rem 0
+        li:first-child
+            padding-top: 0
+        li:last-of-type
+            border-bottom: 0
+            padding-bottom: 0
+    .overlay-tooltip 
+        .mapboxgl-popup-label
+            margin-right: 8px
+        .mapboxgl-popup-row-header
+            background-color: $mid-gray-color-2
+            padding: 0.5rem 0.3rem 0.5rem 0.3rem !important
+            &--mapboxgl-popup-header-label:last-of-type
+                text-align: right
 
 
 .map-tooltip .mapboxgl-popup-content

@@ -188,7 +188,6 @@ export default class MarketEvaluatorOverlayManager {
                     $(`#map-layers-btn`).on('click', (event) => {
                         $(`#map`).toggleClass(["col-md-6", "col-md-9"]);
                         $(`#map`).toggleClass(["col-lg-7", "col-lg-9"]);
-                        $(`#map-layer-sidebar`).toggleClass(["hide", "show"]);
                         this.map.resize();
                     });
                     this.map.off('idle', loadMapCallback);

@@ -301,14 +301,14 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
                 this.accessPoint.getFeatureProperty('unknown') === 0) {
                 return `
                     <div class="ap-stat">
-                        <p class="ap-stat--label">Clear LOS Rooftops</p>
+                        <p class="ap-stat--label">Est. Clear LOS<span>at least 1 point on rooftop</span></p>
                         <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
                             <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('serviceable')}
                         </p>
                     </div>
                     <div class="ap-stat">
-                        <p class="ap-stat--label">Obstructed Rooftops</p>
+                        <p class="ap-stat--label">Est. Obstructed LOS</p>
                         <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
                             <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('unserviceable')}

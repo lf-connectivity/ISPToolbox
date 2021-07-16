@@ -1,9 +1,11 @@
 {% extends "workspace/organisms/map_view_base.html" %}
 
 {% block draw_controls %}
-    {% if not beta %}
-        {% with width=True %}
-            {% include 'mmwave/molecules/draw_controls.html' %}
-        {% endwith %}
-    {% endif %}
+{% if not beta %}
+{% with width=True %}
+<div class="mt-1">
+    {% include 'mmwave/molecules/draw_controls.html' %}
+</div>
+{% endwith %}
+{% endif %}
 {% endblock %}

@@ -2,22 +2,18 @@
 @import ../theme
     
 .homepage-logo
-    align-items: center
-    display: flex
-    margin: auto
-
     .wordmark
         align-items: center
         display: flex
         p
             color: #677b8c
             font-size: 14px
-            line-height: 0
-            margin: 5px 10px 0 15px
+            line-height: 14px
+            margin: 0 10px 0 15px
         svg
             height: auto
             width: 100px
-            margin-top: 6px
+            margin-top: 0
     
     @media (max-width: $breakpoint-xl)
         .wordmark
@@ -25,7 +21,7 @@
 
     .logo-container
         display: block
-        width: 185px
+        width: 170px
 
 
     
@@ -34,9 +30,8 @@
     background-color: #fff
     display: grid 
     grid-template-columns: repeat(3, 1fr)
-    height: 70px
+    height: 50px
     width: 100%
-    padding: 0 30px
 
     .account-dropdown
         display: flex
@@ -55,8 +50,9 @@
             font-family: $brand-font-family-mono
             font-size: 0.875rem
 
-.dropdown-menu
+.file-menu, .account-menu
     padding-bottom: 10px
+    min-width: 14rem
     a
         font-family: $brand-font-family-mono
         font-size: 0.875rem
@@ -68,26 +64,120 @@
             background-color: $light-gray-color
     .divider
         height: 1px
-        background: $light-gray-color
+        background: darken($light-gray-color, 4%)
         margin: 0
     .disabled
         cursor: unset
         color: $mid-gray-color
 
+.file-menu
+    left: 50%
+    transform: translateX(-50%)
+
+.account-menu
+    z-index: 2001
+
 .dropdown-menu
     border: none
     border-radius: 0px
+    box-shadow: 0px 4px 4px 2px rgba(0, 0, 0, 0.125)
+    .dropdown-submenu
+        position: relative
+    .import-menu
+        min-width: 10rem    
+    .dropdown-submenu:hover .dropdown-menu, 
+    .dropdown-submenu:focus .dropdown-menu
+        display: flex
+        flex-direction: column
+        position: absolute !important
+        margin-top: -30px
+        left: 100% !important
+        top: 0 !important
+        margin-top: -1px
+    .dropdown-toggle::after
+        display: none
 
 .workspace-nav-dropdown-toggle
-    border: 2px solid $brand-primary-color
     #session_name_workspace
+        font-family: $brand-font-family-mono
         max-width: 300px
         overflow: hidden
+        font-size: 0.875rem
+        line-height: 27px
+    &:after
+        display: none
 
-.workspace-nav-dropdown-toggle:after
-    margin-top: auto
-    margin-bottom: auto
-    margin-left: .5em
+.hamburger-pullout
+    left: 0px
+    top: 50px
+    position: fixed
+    z-index: 2001
+    width: 375px
+    height: calc(100vh - 50px)
+    display: flex
+    flex-flow: column
+    justify-content: space-between
+    .btn-link
+        margin: 0
+        padding: 0
+        font-size: 1rem
+        align-items: center
+        font-weight: 300
+        font-family: $brand-font-family-mono
+        display: flex
+        flex-flow: row
+        color: $brand-dark-gray-color
+        text-decoration: none
+        &:hover
+            text-decoration: none
+    &--footer
+        background: $brand-dark-gray-color
+        h5
+            color: $mid-gray-color
+            padding: 2px 0
+        a, p
+            font-size: 0.875rem
+            font-weight: 300
+            font-family: $brand-font-family-mono
+            color: $mid-gray-color
+            margin-bottom: 0
+        a
+            padding: 5px 0
+            transition: 0.2s all ease-in-out
+            &:hover, &:active, &:focus
+                color: $brand-primary-color
+
+.hamburger-pullout .nested-options
+    display: flex
+    flex-flow: column 
+    a
+        padding: 5px 0
+        font-size: 1rem
+        font-weight: 300
+        font-family: $brand-font-family-mono
+        color: $brand-secondary-color
+        transition: 0.2s all ease-in-out
+        display: flex
+        align-items: center
+        &:hover, &:active, &:focus
+            .link-arrow
+                visibility: visible
+                animation: 0.6s fadeIn
+                animation-fill-mode: forwards
+    .link-arrow
+        visibility: hidden
+        margin-left: 7px
+    .tool-description
+        font-size: 0.875rem
+        color: $mid-gray-color
+        margin: 0
+        letter-spacing: 0.008rem
+
+@keyframes fadeIn
+    0%
+        opacity: 0
+    100%
+        opacity: 1
 
 @media (max-width: $breakpoint-sm)
     .workspace-nav
@@ -97,3 +187,9 @@
             margin: 0
         .empty
             display: none
+
+@media (max-width: $breakpoint-md)
+    .file-dropdown-section
+        display: none !important
+    .workspace-nav
+        grid-template-columns: repeat(2, 1fr)

@@ -8,4 +8,9 @@
             {% endblock %}
         </div>
     </div>
+    {% if beta %}
+    <div class="on-map-controls" style="right: 0px">
+        {% include "mmwave/molecules/draw_controls.html" %}
+    </div>
+    {% endif %}
 </div>

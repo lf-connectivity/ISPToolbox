@@ -1,19 +1,17 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white d-flex justify-content-between" id="workspacenavelem">
-    {% include 'workspace/molecules/dropdown_workspace.html' %}
-
-    {% block right_nav %}
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#drawToolsMenu"
-        aria-controls="drawToolsMenu" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="navbar-collapse collapse" id="drawToolsMenu">
-        <div class="mr-auto"></div>
-        <div class="d-flex flex-row">
-            {% if draw_controls %}
-            {% include draw_controls %}
-            {% endif %}
+{% load static %}
+<nav class="workspace-nav navbar navbar-expand-lg navbar-light bg-white px-4 py-0" id="workspacenavelem">
+    <div class="d-flex">
+        <a href="#" data-toggle="collapse" data-target="#drawer_isptoolbox_menu">
+            <span class="navbar-toggler-icon my-auto mr-3"
+                style="width: 1.5em !important; height: 1.5em !important;"></span>
+        </a>
+        <div class="homepage-logo align-items-center d-flex mx-1">
+            {% include "workspace/atoms/isptoolbox_logo.html"%}
         </div>
     </div>
+    {% include 'workspace/molecules/dropdown_workspace.html' %}
+    {% block right_nav %}
+
+    {% include "workspace/atoms/account_dropdown.html" %}
     {% endblock %}
 </nav>

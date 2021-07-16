@@ -1,13 +1,8 @@
-<button type="button"
-class="btn isptoolbox-btn btn-secondary btn-large my-1 isp-draw-mode-btn{%if width %} w-100{%endif%}"
-{{extra_params|default:''}}
-id="{{button_id}}"
-{% if button_draw_mode %}
-    draw_mode="{{button_draw_mode}}"
-{% endif %}
->
+<button type="button" class="btn isptoolbox-btn btn-secondary btn-large isp-draw-mode-btn{%if width %} w-100{%endif%}"
+    {{extra_params|default:''}} id="{{button_id}}" {% if button_draw_mode %} draw_mode="{{button_draw_mode}}"
+    {% endif %}>
     {% if button_icon %}
-        {% include button_icon %}
+    {% include button_icon %}
     {% endif %}
     {{button_text}}
 </button>

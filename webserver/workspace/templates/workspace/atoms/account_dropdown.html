@@ -1,38 +1,49 @@
 <div class="account-dropdown">
-{% if user.is_authenticated %}
+    {% if user.is_authenticated %}
     <div class="dropdown show">
-        <a href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">
             {% if user.socialaccount_set.all.0.get_avatar_url %}
             <img class="account-dropdown--picture mr-3" src="{{ user.socialaccount_set.all.0.get_avatar_url }}" />
             {% else %}
-            <svg class="mr-3 my-auto" width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="15.5" cy="15.5" r="15.5" fill="#C2D8EC"/>
-                <path d="M9.73682 21.0482C9.73682 17.9575 12.2422 15.4521 15.3329 15.4521H16.4521C19.5428 15.4521 22.0482 17.9575 22.0482 21.0482" stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15.8924 15.4521C17.7468 15.4521 19.2501 13.9489 19.2501 12.0945C19.2501 10.2401 17.7468 8.73682 15.8924 8.73682C14.0381 8.73682 12.5348 10.2401 12.5348 12.0945C12.5348 13.9489 14.0381 15.4521 15.8924 15.4521Z" stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg class="mr-3 my-auto" width="31" height="31" viewBox="0 0 31 31" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <circle cx="15.5" cy="15.5" r="15.5" fill="#C2D8EC" />
+                <path
+                    d="M9.73682 21.0482C9.73682 17.9575 12.2422 15.4521 15.3329 15.4521H16.4521C19.5428 15.4521 22.0482 17.9575 22.0482 21.0482"
+                    stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path
+                    d="M15.8924 15.4521C17.7468 15.4521 19.2501 13.9489 19.2501 12.0945C19.2501 10.2401 17.7468 8.73682 15.8924 8.73682C14.0381 8.73682 12.5348 10.2401 12.5348 12.0945C12.5348 13.9489 14.0381 15.4521 15.8924 15.4521Z"
+                    stroke="#1172A9" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round"
+                    stroke-linejoin="round" />
             </svg>
             {% endif %}
             <h6 class="nav-item mr-2 my-auto account-dropdown--name">
                 {% firstof user.first_name user.email user.username %}
             </h6>
             <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1.35355 0.646447L1 0.292893L0.292893 1L0.646447 1.35355L1.35355 0.646447ZM4 4L3.64645 4.35355L4 4.70711L4.35355 4.35355L4 4ZM7.35355 1.35355L7.70711 1L7 0.292893L6.64645 0.646447L7.35355 1.35355ZM0.646447 1.35355L3.64645 4.35355L4.35355 3.64645L1.35355 0.646447L0.646447 1.35355ZM4.35355 4.35355L7.35355 1.35355L6.64645 0.646447L3.64645 3.64645L4.35355 4.35355Z" fill="black"/>
-            </svg>                
+                <path
+                    d="M1.35355 0.646447L1 0.292893L0.292893 1L0.646447 1.35355L1.35355 0.646447ZM4 4L3.64645 4.35355L4 4.70711L4.35355 4.35355L4 4ZM7.35355 1.35355L7.70711 1L7 0.292893L6.64645 0.646447L7.35355 1.35355ZM0.646447 1.35355L3.64645 4.35355L4.35355 3.64645L1.35355 0.646447L0.646447 1.35355ZM4.35355 4.35355L7.35355 1.35355L6.64645 0.646447L3.64645 3.64645L4.35355 4.35355Z"
+                    fill="black" />
+            </svg>
         </a>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink" style="margin-top: 1rem!important;">
+        <div class="dropdown-menu account-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
             <a class="dropdown-item" href="{% url 'account_view' %}">Manage Account</a>
             <a class="dropdown-item" href="#">Privacy/Terms</a>
             <a class="dropdown-item" href="{% url 'logout_view' %}?next={% url 'isptoolbox_pro_home'%}">Logout</a>
         </div>
     </div>
-{% else %}
+    {% else %}
     {% if not authentication_form %}
     <a href="{% url 'login_view' %}">
-    {% endif %}
-    <button type="button" class="btn btn-primary isptoolbox-btn" data-toggle="modal" data-target="#loginModal" id="login-btn-nav">
-        Login
-    </button>
-    {% if not authentication_form %}
+        {% endif %}
+        <button type="button" class="btn btn-primary isptoolbox-btn" data-toggle="modal" data-target="#loginModal"
+            id="login-btn-nav">
+            Login
+        </button>
+        {% if not authentication_form %}
     </a>
     {% endif %}
-{% endif %}
+    {% endif %}
 </div>

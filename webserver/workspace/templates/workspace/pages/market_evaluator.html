@@ -6,13 +6,16 @@
 <body>
   {% with draw_controls="market_evaluator/molecules/draw_controls.html" %}
   {% include 'workspace/organisms/workspace_nav.html' %}
+  {% with tool="business" %}
+  {% include "workspace/organisms/tool_drawer_menu.html" %}
+  {% endwith %}
   {% endwith %}
   <div class="mobile-overlay-lock">
     {% block overlay%}
     {% include "workspace/organisms/disable_mobile_use.html" %}
     {% endblock %}
   </div>
-  <div class="d-flex market-eval-container website-content" style="height: calc(100vh - 71px);">
+  <div class="d-flex market-eval-container website-content">
     {% include "market_evaluator/organisms/market_stats_column.html" %}
     <div id='map' class='planner-map col-lg-9 col-md-9 order-1 order-md-2 px-0' style="min-height: 500px">
       <div class="on-map-controls">
@@ -26,7 +29,7 @@
       </div>
     </div>
     {% include "workspace/molecules/map_layer_sidebar.html" %}
-    </div>
+  </div>
   </div>
   {% include "workspace/organisms/market_eval_competitors.html" %}
   {% include "workspace/atoms/mapbox_global_public_key.html" %}

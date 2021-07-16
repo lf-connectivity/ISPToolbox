@@ -10,6 +10,9 @@
 
   {% if beta %}
   {% include "mmwave/organisms/network_edit_nav.html" %}
+  {% with tool="network" %}
+  {% include "workspace/organisms/tool_drawer_menu.html" %}
+  {% endwith %}
   {% endif %}
   <div>
     <div class="mobile-overlay-lock">
@@ -17,7 +20,7 @@
       {% include "workspace/organisms/disable_mobile_use.html" %}
       {% endblock %}
     </div>
-  
+
     <div class="website-content">
       {% include "mmwave/map_view.html" %}
       {% include "workspace/atoms/mapbox_global_public_key.html" %}
@@ -27,11 +30,10 @@
       {% include "workspace/molecules/workspace_session_info.html" %}
       {{ geojson|json_script:"isp-map-features" }}
       {{ beta|json_script:"los_beta" }}
-      {% include "workspace/organisms/access_point_modal.html" %}
       {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
     </div>
   </div>
-  
+
   {% if demo and beta %}
   {% include "workspace/organisms/demo_redirect_to_workspace.html" %}
   {% endif %}

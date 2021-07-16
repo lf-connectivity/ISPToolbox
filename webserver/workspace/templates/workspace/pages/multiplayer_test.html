@@ -17,7 +17,7 @@
 {% block content %}
     {% include "workspace/atoms/mapbox_global_public_key.html" %}
     {{ session|json_script:"session_information" }}
-    <div id="map" style = "width: 100%; margin-top: 70px;height: calc(100vh - 70px); background-color: black;"></div>
+    <div id="map" style = "width: 100%; margin-top: 50px;height: calc(100vh - 50px); background-color: black;"></div>
     <script defer src="{% static "multiplayer_test.min.js" %}"> </script>
     <div class="modal fade" id="inviteModal" tabindex="-1" role="dialog" aria-labelledby="inviteModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">

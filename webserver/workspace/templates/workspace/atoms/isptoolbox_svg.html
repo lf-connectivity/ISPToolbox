@@ -1,7 +1,7 @@
 <a {% block  link_logo %} {% if not link_back_fb %} href="{% url 'isptoolbox_pro_home' %}" {% else %}
     href="https://www.facebook.com/isptoolbox/" {% endif %} {% endblock %} aria-label="ISP Toolbox">
     <div class="logo-container">
-        <div style="display: block; {{ logo_style }}" class="mx-auto">
+        <div style="display: flex; align-items: center; {{ logo_style }}" class="logo">
             <svg viewBox="0 0 185 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <title>ISP Toolbox</title>
                 <path d="M0 16.8094V1.19031H2.95484V16.8094H0Z" fill="#2D2D2D"></path>

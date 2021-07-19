@@ -18,8 +18,8 @@ def create_sample_overlays():
         tower[0].save()
         communityConnect = Overlay.objects.get_or_create(
             type='communityConnect',
-            source_url="mapbox://alexychong.bp1lmhp5",
-            source_layer="calculated-cc-speeds-shp-casfao"
+            source_url="mapbox://isptoolbox.non_urban_overlay_MTS",
+            source_layer="original"
         )
         communityConnect[0].save()
         cbrs = Overlay.objects.get_or_create(

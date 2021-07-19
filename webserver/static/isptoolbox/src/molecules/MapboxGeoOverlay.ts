@@ -210,7 +210,7 @@ export class CommunityConnectGeoOverlay extends MapboxGeoOverlay {
     }
 
     sendGeojsonRequest(properties: any) {
-        MarketEvaluatorWS.getInstance().sendZipRequest(properties.ZIPCODE);
+        MarketEvaluatorWS.getInstance().sendZipRequest(properties.zipcode);
     }
 }
 

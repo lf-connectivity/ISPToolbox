@@ -122,21 +122,21 @@ export class CommunityConnectOverlayPopup extends MarketEvaluatorBaseOverlayPopu
                     <li class="mapboxgl-popup-row">
                         <p class="mapboxgl-popup-label">Zipcode</p>
                         <p class="mapboxgl-popup-data">
-                        ${this.featureProperties.ZIPCODE}
+                        ${this.featureProperties.zipcode}
                         </p>
                     </li>
 
                     <li class="mapboxgl-popup-row">
                         <p class="mapboxgl-popup-label">Download (Mbit/s)</p>
                         <p class="mapboxgl-popup-data">
-                        ${this.featureProperties.DOWNLOAD.toFixed(2)}
+                        ${this.featureProperties.download.toFixed(2)}
                         </p>
                     </li>
 
                     <li class="mapboxgl-popup-row">
                         <p class="mapboxgl-popup-label">Upload (Mbit/s)</p>
                         <p class="mapboxgl-popup-data">
-                        ${this.featureProperties.UPLOAD.toFixed(2)}
+                        ${this.featureProperties.upload.toFixed(2)}
                         </p>
                     </li>
 

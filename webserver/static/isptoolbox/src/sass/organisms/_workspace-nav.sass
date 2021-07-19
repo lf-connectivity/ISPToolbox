@@ -108,15 +108,13 @@
         display: none
 
 .hamburger-pullout
-    left: 0px
-    top: 50px
-    position: fixed
+    position: absolute
     z-index: 1031
     width: 375px
-    height: calc(100vh - 50px)
     display: flex
     flex-flow: column
     justify-content: space-between
+
     .btn-link
         margin: 0
         padding: 0
@@ -191,5 +189,3 @@
 @media (max-width: $breakpoint-md)
     .file-dropdown-section
         display: none !important
-    .workspace-nav
-        grid-template-columns: repeat(2, 1fr)

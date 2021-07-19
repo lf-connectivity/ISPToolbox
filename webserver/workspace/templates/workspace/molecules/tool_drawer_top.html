@@ -1,0 +1,129 @@
+{% load static i18n %}
+
+<div class="py-4 pl-4 pr-5">
+    <div class="accordion" id="accordionExample">
+        <div role="dropdown" aria-label="Business Tools Dropdown" class="mb-4">
+            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                data-target="#collapseBusinessTools" aria-expanded="true" aria-controls="collapseBusinessTools">
+                {% translate "Business Tools"%}
+                <svg width="8" height="5" style="margin-left: 6px;" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M1.354.646L1 .293.293 1l.353.354.708-.708zM4 4l-.354.354.354.353.354-.353L4 4zm3.354-2.646L7.707 1 7 .293l-.354.353.708.708zm-6.708 0l3 3 .708-.708-3-3-.708.708zm3.708 3l3-3-.708-.708-3 3 .708.708z"
+                        fill="#000"></path>
+                </svg>
+            </button>
+            <div id="collapseBusinessTools" class="collapse {% if tool == 'business' %}show{% endif %}"
+                aria-labelledby="headingOne" data-parent="#accordionExample">
+                <div class="ml-5 mt-2 nested-options">
+                    <div class="mb-3">
+                        <a href="https://www.facebook.com/isptoolbox/roi-estimator/">
+                            {% translate "ROI Estimator"%}
+                            <svg class="link-arrow" width="15" height="11" viewBox="0 0 15 11" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0 5.5H13.6216M10.2162 1L14 5.5L10.2162 10" stroke="#1172A9" />
+                            </svg>
+                        </a>
+                        <p class="tool-description">
+                            {% translate "View Potential return on investment"%}
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{% url 'market_eval_entry' %}">
+                            {% translate "Market Evaluator"%}
+                            <svg class="link-arrow" width="15" height="11" viewBox="0 0 15 11" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0 5.5H13.6216M10.2162 1L14 5.5L10.2162 10" stroke="#1172A9" />
+                            </svg>
+                        </a>
+                        <p class="tool-description">
+                            {% translate "Evaluate how many customers are in a service area"%}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div role="dropdown" aria-label="Network Tools Dropdown" class="my-4">
+            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                data-target="#collapseNetworkTools" aria-expanded="true" aria-controls="collapseNetworkTools">
+                {% translate "Network Tools"%}
+                <svg width="8" height="5" style="margin-left: 6px;" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M1.354.646L1 .293.293 1l.353.354.708-.708zM4 4l-.354.354.354.353.354-.353L4 4zm3.354-2.646L7.707 1 7 .293l-.354.353.708.708zm-6.708 0l3 3 .708-.708-3-3-.708.708zm3.708 3l3-3-.708-.708-3 3 .708.708z"
+                        fill="#000"></path>
+                </svg>
+            </button>
+            <div id="collapseNetworkTools" class="collapse {% if tool == 'network' %}show{% endif %}"
+                aria-labelledby="headingOne" data-parent="#accordionExample">
+                <div class="ml-5 mt-2 nested-options">
+                    <div>
+                        <a href="{% url 'edit_account_network' %}">
+                            {% translate "LiDAR LOS Check"%}
+                            <svg class="link-arrow" width="15" height="11" viewBox="0 0 15 11" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0 5.5H13.6216M10.2162 1L14 5.5L10.2162 10" stroke="#1172A9" />
+                            </svg>
+                        </a>
+                        <p class="tool-description">
+                            {% translate "Use LiDAR data to determine if a customer is serviceable"%}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div role="dropdown" aria-label="Marketing Tools Dropdown" class="my-4">
+            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                data-target="#collapseMarketingTools" aria-expanded="true" aria-controls="collapseMarketingTools">
+                {% translate "Marketing Tools"%}
+                <svg width="8" height="5" style="margin-left: 6px;" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M1.354.646L1 .293.293 1l.353.354.708-.708zM4 4l-.354.354.354.353.354-.353L4 4zm3.354-2.646L7.707 1 7 .293l-.354.353.708.708zm-6.708 0l3 3 .708-.708-3-3-.708.708zm3.708 3l3-3-.708-.708-3 3 .708.708z"
+                        fill="#000"></path>
+                </svg>
+            </button>
+
+            <div id="collapseMarketingTools" class="collapse {% if tool == 'marketing' %}show{% endif %}"
+                aria-labelledby="headingOne" data-parent="#accordionExample">
+                <div class="ml-5 mt-2 nested-options">
+                    <div>
+                        <a href="https://www.facebook.com/isptoolbox/marketing/">
+                            {% translate "Service Area Ads"%}
+                            <svg class="link-arrow" width="15" height="11" viewBox="0 0 15 11" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0 5.5H13.6216M10.2162 1L14 5.5L10.2162 10" stroke="#1172A9" />
+                            </svg>
+                        </a>
+                        <p class="tool-description">
+                            {% translate "Generate Custom Audiences for Facebook Marketing."%}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div role="dropdown" aria-label="Learn &amp; Connect Dropdown" class="my-4">
+            <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse"
+                data-target="#collapseLearnAndConnect" aria-expanded="true" aria-controls="collapseLearnAndConnect">
+                {% translate "Learn &amp; Connect"%}
+                <svg width="8" height="5" style="margin-left: 6px;" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M1.354.646L1 .293.293 1l.353.354.708-.708zM4 4l-.354.354.354.353.354-.353L4 4zm3.354-2.646L7.707 1 7 .293l-.354.353.708.708zm-6.708 0l3 3 .708-.708-3-3-.708.708zm3.708 3l3-3-.708-.708-3 3 .708.708z"
+                        fill="#000"></path>
+                </svg>
+            </button>
+
+            <div id="collapseLearnAndConnect" class="collapse" aria-labelledby="headingOne"
+                data-parent="#accordionExample">
+                <div class="ml-5 mt-2 mr-2 nested-options">
+                    <a target="_blank" href="https://www.facebook.com/fbctoolbox" aria-label="Toolbox Program Link">ISP
+                        Toolbox Program</a>
+                    <a target="_blank" href="https://www.facebook.com/groups/1877902682340586/"
+                        aria-label="WISP Bootcamp Link">WISP Bootcamp</a>
+                    <a target="_blank" href="https://www.facebook.com/groups/3107359779316518/"
+                        aria-label="WISP Jobs Link">WISP Jobs</a>
+                    <a target="_blank" href="https://www.facebook.com/groups/wisptalk/" aria-label="Wisp Talk Link">Wisp
+                        Talk</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

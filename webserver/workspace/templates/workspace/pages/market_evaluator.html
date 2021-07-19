@@ -4,11 +4,9 @@
 {% include "workspace/molecules/page_header_market_eval.html" %}
 
 <body>
-  {% with draw_controls="market_evaluator/molecules/draw_controls.html" %}
   {% include 'workspace/organisms/workspace_nav.html' %}
   {% with tool="business" %}
   {% include "workspace/organisms/tool_drawer_menu.html" %}
-  {% endwith %}
   {% endwith %}
   <div class="mobile-overlay-lock">
     {% block overlay%}
@@ -18,10 +16,13 @@
   <div class="d-flex market-eval-container website-content">
     {% include "market_evaluator/organisms/market_stats_column.html" %}
     <div id='map' class='planner-map col-lg-9 col-md-9 order-1 order-md-2 px-0' style="min-height: 500px">
-      <div class="on-map-controls">
-        <div class="search-container">
-          {% include "workspace/atoms/components/reconnecting_msg.html" %}
-          <div id="geocoder" class="geocoder-container"></div>
+      <div class="search-container on-map-controls">
+        {% include "workspace/atoms/components/reconnecting_msg.html" %}
+        <div id="geocoder" class="geocoder-container"></div>
+      </div>
+      <div class="on-map-controls" style="right: 0;">
+        <div class="draw-contols">
+          {% include "market_evaluator/molecules/draw_controls.html" %}
         </div>
         <div class="layer-button-container">
           {% include "workspace/atoms/buttons/map_layers_button.html" %}

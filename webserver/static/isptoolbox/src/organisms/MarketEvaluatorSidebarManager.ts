@@ -1,5 +1,7 @@
+import { zip } from "lodash";
 import { BroadbandNowResponse, BuildingOverlaysResponse, MarketEvalWSEvents, MedianIncomeResponse, MedianSpeed, MedianSpeedResponse, ServiceProvidersResponse } from "../MarketEvaluatorWS";
 import { getCookie } from "../utils/Cookie";
+import { WorkspaceEvents } from "../workspace/WorkspaceConstants";
 
 const BUILDING_COUNT_BASE_ID = 'me-out-buildings';
 const BUILDING_DENSITY_BASE_ID = 'me-out-density';
@@ -50,6 +52,7 @@ export class MarketEvaluatorSidebarManager {
         PubSub.subscribe(MarketEvalWSEvents.BROADBAND_NOW_MSG, this.onBbnMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.INCOME_MSG, this.onIncomeMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.SPEEDS_MSG, this.onSpeedsMsg.bind(this));
+        PubSub.subscribe(WorkspaceEvents.NO_ITEMS, this.onNoItems.bind(this));
 
         $(`#${MARKET_PENETRATION_INPUT_ID}`).on('change', (e) => {
             this.updateMarketPenetrationPct();
@@ -107,17 +110,17 @@ export class MarketEvaluatorSidebarManager {
         });
     }
 
-    private toggleLoadingState() {
-        this.buildingOverlaysLoading = true;
-        this.setIDValue(BUILDING_COUNT_BASE_ID, this.buildingCount, this.buildingOverlaysLoading);
-        this.setIDValue(BUILDING_DENSITY_BASE_ID, 0, this.buildingOverlaysLoading);
-        this.setIDValue(POTENTIAL_LEADS_BASE_ID, 0, this.buildingOverlaysLoading);
-        this.setIDValue(AVG_INCOME_BASE_ID, '$000K', true);
-        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, 0, true);
-        this.setIDValue(MEDIAN_SPEEDS_BASE_ID, '0/0', true);
+    private resetSidebar(isLoading = true) {
+        this.buildingOverlaysLoading = isLoading;
+        this.setIDValue(BUILDING_COUNT_BASE_ID, this.buildingCount, this.buildingOverlaysLoading, true);
+        this.setIDValue(BUILDING_DENSITY_BASE_ID, 0, this.buildingOverlaysLoading, true);
+        this.setIDValue(POTENTIAL_LEADS_BASE_ID, 0, this.buildingOverlaysLoading, true);
+        this.setIDValue(AVG_INCOME_BASE_ID, '$000K', isLoading, true);
+        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, 0, isLoading, true);
+        this.setIDValue(MEDIAN_SPEEDS_BASE_ID, '0/0', isLoading, true);
         this.updateCompetitorModalLink(true);
 
-        $(`#${MARKET_PENETRATION_INPUT_ID}`).prop('disabled', false);
+        $(`#${MARKET_PENETRATION_INPUT_ID}`).prop('disabled', !isLoading);
     }
 
     private resetStats() {
@@ -135,7 +138,12 @@ export class MarketEvaluatorSidebarManager {
 
     private onSendPolygonRequest() {
         this.resetStats();
-        this.toggleLoadingState();
+        this.resetSidebar();
+    }
+
+    private onNoItems(msg: any, response: any) {
+        this.resetStats();
+        this.resetSidebar(false);    
     }
 
     private onBuildingOverlayMsg(msg: any, response: BuildingOverlaysResponse) {
@@ -159,7 +167,7 @@ export class MarketEvaluatorSidebarManager {
 
     private onServiceProviderMsg(msg: any, response: ServiceProvidersResponse) {
         this.serviceProvidersResponse = response;
-        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, response.competitors.length, false);
+        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, response.competitors.length, false, false);
         this.updateCompetitorModalLink(false);
     }
 
@@ -170,7 +178,7 @@ export class MarketEvaluatorSidebarManager {
 
     private onIncomeMsg(msg: any, response: MedianIncomeResponse) {
         let incomeInThousands = Math.trunc(response.averageMedianIncome / 1000.0);
-        this.setIDValue(AVG_INCOME_BASE_ID, `\$${incomeInThousands}K`, false);
+        this.setIDValue(AVG_INCOME_BASE_ID, `\$${incomeInThousands}K`, false, false);
     }
 
     private onSpeedsMsg(msg: any, response: MedianSpeedResponse) {
@@ -178,18 +186,29 @@ export class MarketEvaluatorSidebarManager {
         let medianUpload = 0;
 
         if (response.length > 0) {
-            response.forEach((zip: MedianSpeed) => {
-                medianDownload += parseFloat(zip['Download (Mbit/s)']) * parseFloat(zip.pct_area);
-                medianUpload += parseFloat(zip['Upload (Mbit/s)']) * parseFloat(zip.pct_area);
-            });
+            // Check if there's a percent area that exists, because
+            // it might not be there, especially with complex polygons.
+            if (response[0].pct_area) {
+                response.forEach((zip: MedianSpeed) => {
+                    medianDownload += parseFloat(zip['Download (Mbit/s)']) * parseFloat(zip.pct_area);
+                    medianUpload += parseFloat(zip['Upload (Mbit/s)']) * parseFloat(zip.pct_area);
+                });
+            }
+            else {
+                response.forEach((zip: MedianSpeed) => {
+                    medianDownload += parseFloat(zip['Download (Mbit/s)']) / response.length;
+                    medianUpload += parseFloat(zip['Upload (Mbit/s)']) / response.length;
+                });
+            }
+            
     
             medianDownload = Math.round(medianDownload);
             medianUpload = Math.round(medianUpload)
     
-            this.setIDValue(MEDIAN_SPEEDS_BASE_ID, `${medianDownload}/${medianUpload}`, false);
+            this.setIDValue(MEDIAN_SPEEDS_BASE_ID, `${medianDownload}/${medianUpload}`, false, false);
         }
         else {
-            this.setIDValue(MEDIAN_SPEEDS_BASE_ID, `N/A`, false);
+            this.setIDValue(MEDIAN_SPEEDS_BASE_ID, `N/A`, false, false);
         }
 
     }
@@ -205,12 +224,12 @@ export class MarketEvaluatorSidebarManager {
         }
 
         let message = buildingDensity.toFixed(2);
-        this.setIDValue(BUILDING_DENSITY_BASE_ID, message, this.buildingOverlaysLoading);
+        this.setIDValue(BUILDING_DENSITY_BASE_ID, message, this.buildingOverlaysLoading, this.buildingOverlaysLoading);
     }
 
     private updatePotentialLeads() {
         let potentialLeads = Math.floor(this.marketPenetrationPct * this.buildingCount);
-        this.setIDValue(POTENTIAL_LEADS_BASE_ID, potentialLeads, this.buildingOverlaysLoading);
+        this.setIDValue(POTENTIAL_LEADS_BASE_ID, potentialLeads, this.buildingOverlaysLoading, this.buildingOverlaysLoading);
     }
 
     private updateMarketPenetrationPct() {
@@ -244,15 +263,15 @@ export class MarketEvaluatorSidebarManager {
         }
     }
 
-    private setIDValue(element: string, value: any, isLoading: boolean) {
+    private setIDValue(element: string, value: any, isLoading: boolean, grayOut: boolean=false) {
         // Get the padding. If the id value is defined in padding, use that,
         // otherwise use the default.
         let padding = PADDING[element] || DEFAULT_PADDING;
 
         let html;
         let parent = $(`#${element}`).parent();
-        // Don't pad if not loading
-        if (!isLoading) {
+        // Don't pad if not graying out.
+        if (!grayOut) {
             html = String(value);
             if (parent.hasClass(SIDEBAR_VALUE_DIV_CLASS)) {
                 parent.addClass(SIDEBAR_VALUE_LOADED_CLASS);

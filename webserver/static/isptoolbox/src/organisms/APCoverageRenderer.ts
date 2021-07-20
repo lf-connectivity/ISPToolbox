@@ -446,6 +446,11 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         });
     }
 
+    drawDeleteCallback({features}: {features: Array<any>}){
+        this.sendCoverageRequest({features: []});
+        super.drawDeleteCallback({features});
+    }
+
     sendCoverageRequest({features}: any) {
         let geometries: Geometry[] = [];
 
@@ -456,26 +461,30 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         else {
             featuresToProcess = features;
         }
-        featuresToProcess.forEach((f: GeoJSON.Feature) => {
-            if (f.properties && f.properties.feature_type) {
-                switch (f.properties.feature_type) {
-                    case WorkspaceFeatureTypes.AP:
-                        const new_feat = createGeoJSONCircle(
-                            f.geometry,
-                            f.properties.radius,
-                            f.id);
-                        geometries.push(new_feat.geometry);
-                    case WorkspaceFeatureTypes.COVERAGE_AREA:
-                        geometries.push(f.geometry);
+
+        if (featuresToProcess.length > 0) {
+            featuresToProcess.forEach((f: GeoJSON.Feature) => {
+                if (f.properties && f.properties.feature_type) {
+                    switch (f.properties.feature_type) {
+                        case WorkspaceFeatureTypes.AP:
+                            const new_feat = createGeoJSONCircle(
+                                f.geometry,
+                                f.properties.radius,
+                                f.id);
+                            geometries.push(new_feat.geometry);
+                        case WorkspaceFeatureTypes.COVERAGE_AREA:
+                            geometries.push(f.geometry);
+                    }
                 }
-            }
-        });
-        MarketEvaluatorWS.getInstance().sendPolygonRequest({
-            type: 'GeometryCollection',
-            geometries: geometries
-        });
-
-
+            });
+            MarketEvaluatorWS.getInstance().sendPolygonRequest({
+                type: 'GeometryCollection',
+                geometries: geometries
+            });
+        }
+        else {
+            PubSub.publish(WorkspaceEvents.NO_ITEMS);
+        }
     }
 
     // This function does nothing

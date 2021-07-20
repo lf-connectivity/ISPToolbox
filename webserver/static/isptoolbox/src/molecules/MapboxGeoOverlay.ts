@@ -2,6 +2,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl, { VideoSource } from 'mapbox-gl';
 import { CbrsOverlayPopup, CensusBlocksOverlayPopup, CommunityConnectOverlayPopup, RdofOverlayPopup, TribalOverlayPopup } from '../isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
 import MarketEvaluatorWS, { MarketEvalWSEvents } from '../MarketEvaluatorWS';
+import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import MapboxOverlay from './MapboxOverlay';
 
 export type GeoOverlay = {
@@ -111,14 +112,26 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
 
     receiveGeojsonCallback(msg: string, response: any) {
         if (response.error == 0) {
+            let properties = {...response};
+            delete properties.error;
+            delete properties.geojson;
+
             const newFeature = {
                 type: 'Feature',
                 geometry: JSON.parse(response.geojson),
                 properties: {
-                    uneditable: true
-                }
+                    ...properties,
+                    uneditable: true,
+                    feature_type: WorkspaceFeatureTypes.COVERAGE_AREA
+                },
+                id: ''
             }
+            // @ts-ignore
+            let id = this.draw.add(newFeature)[0];
+            newFeature.id = id;
             this.map.fire('draw.create', {features: [newFeature]});
+            this.draw.changeMode('simple_select', {featureIds: [id]});
+            this.map.fire('draw.selectionchange', {features: [newFeature]});
         }
     }
 

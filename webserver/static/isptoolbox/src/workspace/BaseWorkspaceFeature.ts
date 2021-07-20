@@ -53,6 +53,7 @@ export abstract class BaseWorkspaceFeature{
             this.mapboxId = String(this.draw.add(featureData)[0]);
             this.formatLastUpdated();
         }
+        this.setFeatureProperty('feature_type', featureType);
         this.apiEndpoint = apiEndpoint;
         this.responseFields = responseFields.concat(BASE_WORKSPACE_RESPONSE_FIELDS);
         this.serializerFields = [...BASE_WORKSPACE_SERIALIZED_FIELDS, ...serializedFields];

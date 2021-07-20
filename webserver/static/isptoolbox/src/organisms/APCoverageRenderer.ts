@@ -464,21 +464,22 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         MarketEvaluatorWS.getInstance().cancelCurrentRequest(MarketEvalWSRequestType.POLYGON);
         this.buildingOverlays.geometries = [];
 
-        if (featuresToProcess.length > 0) {
-            featuresToProcess.forEach((f: GeoJSON.Feature) => {
-                if (f.properties && f.properties.feature_type) {
-                    switch (f.properties.feature_type) {
-                        case WorkspaceFeatureTypes.AP:
-                            const new_feat = createGeoJSONCircle(
-                                f.geometry,
-                                f.properties.radius,
-                                f.id);
-                            geometries.push(new_feat.geometry);
-                        case WorkspaceFeatureTypes.COVERAGE_AREA:
-                            geometries.push(f.geometry);
-                    }
+        featuresToProcess.forEach((f: GeoJSON.Feature) => {
+            if (f.properties && f.properties.feature_type) {
+                switch (f.properties.feature_type) {
+                    case WorkspaceFeatureTypes.AP:
+                        const new_feat = createGeoJSONCircle(
+                            f.geometry,
+                            f.properties.radius,
+                            f.id);
+                        geometries.push(new_feat.geometry);
+                    case WorkspaceFeatureTypes.COVERAGE_AREA:
+                        geometries.push(f.geometry);
                 }
-            });
+            }
+        });
+
+        if (geometries.length > 0) {
             MarketEvaluatorWS.getInstance().sendPolygonRequest({
                 type: 'GeometryCollection',
                 geometries: geometries

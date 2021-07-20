@@ -1,4 +1,3 @@
-import { zip } from "lodash";
 import { BroadbandNowResponse, BuildingOverlaysResponse, MarketEvalWSEvents, MedianIncomeResponse, MedianSpeed, MedianSpeedResponse, ServiceProvidersResponse } from "../MarketEvaluatorWS";
 import { getCookie } from "../utils/Cookie";
 import { WorkspaceEvents } from "../workspace/WorkspaceConstants";

@@ -461,6 +461,7 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         else {
             featuresToProcess = features;
         }
+        this.buildingOverlays.geometries = [];
 
         if (featuresToProcess.length > 0) {
             featuresToProcess.forEach((f: GeoJSON.Feature) => {
@@ -487,8 +488,16 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         }
     }
 
-    // This function does nothing
-    renderBuildings(){}
+    renderBuildings(){
+        const buildingSource = this.map.getSource(BUILDING_DATA_SOURCE);
+        if(buildingSource.type ==='geojson'){
+            buildingSource.setData({
+                type: 'Feature',
+                geometry: this.buildingOverlays,
+                properties: {}
+            });
+        }
+    }
 
     onBuildingOverlayMsg(msg: string, response: BuildingOverlaysResponse) {
         if (response.gc !== null && response.offset !== null) {
@@ -498,14 +507,7 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             this.buildingOverlays.geometries.push(...response.gc.geometries);
         }
 
-        const buildingSource = this.map.getSource(BUILDING_DATA_SOURCE);
-        if(buildingSource.type ==='geojson'){
-            buildingSource.setData({
-                type: 'Feature',
-                geometry: this.buildingOverlays,
-                properties: {}
-            });
-        }
+        this.renderBuildings();
     }
 }
 

@@ -31,7 +31,6 @@ export function APDrawMode() {
             features: [state.point.toGeoJSON()],
         });
         this.changeMode('simple_select', {featureIds: [state.point.id]});
-        $('#draw-coverage-area-btn').removeClass('btn-secondary').addClass('btn-primary');
     }
 
     mode.toDisplayFeatures = function(state, geojson, display) {

@@ -63,7 +63,6 @@ export abstract class ISPToolboxAbstractAppPage {
             setCenterZoomPreferences(this.map);
             load_custom_icons(this.map);
             this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
-
             this.map.addSource(LOWEST_LAYER_SOURCE, {type: 'geojson', data : {type: 'FeatureCollection', features: []}});
             this.map.addLayer({
                 'id': LOWEST_LAYER_LAYER,

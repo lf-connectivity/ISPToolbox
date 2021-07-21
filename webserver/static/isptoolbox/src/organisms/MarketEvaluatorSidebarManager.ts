@@ -1,6 +1,9 @@
+import { GeometryCollection } from "@turf/turf";
 import { BroadbandNowResponse, BuildingOverlaysResponse, MarketEvalWSEvents, MedianIncomeResponse, MedianSpeed, MedianSpeedResponse, ServiceProvidersResponse } from "../MarketEvaluatorWS";
 import { getCookie } from "../utils/Cookie";
 import { WorkspaceEvents } from "../workspace/WorkspaceConstants";
+//@ts-ignore
+import geojsonArea from '@mapbox/geojson-area';
 
 const BUILDING_COUNT_BASE_ID = 'me-out-buildings';
 const BUILDING_DENSITY_BASE_ID = 'me-out-density';
@@ -34,12 +37,14 @@ const LOADING_ENDING: {[elt: string]: string} = {
 const MODAL_AJAX_URL = '/pro/modals/market-eval-competitor-modal/';
 
 export class MarketEvaluatorSidebarManager {
+    private buildingOverlays: GeometryCollection;
     private buildingCount: number;
     private polygonArea: number;
     private marketPenetrationPct: number;
     private buildingOverlaysLoading: boolean;
     private serviceProvidersResponse: ServiceProvidersResponse | undefined;
     private bbnResponse: BroadbandNowResponse | undefined;
+    private buildingFilter: [number, number];
 
     private static instance: MarketEvaluatorSidebarManager;
 
@@ -56,7 +61,7 @@ export class MarketEvaluatorSidebarManager {
         $(`#${MARKET_PENETRATION_INPUT_ID}`).on('change', (e) => {
             this.updateMarketPenetrationPct();
             this.updatePotentialLeads();
-        }) 
+        })
 
         this.resetStats();
     }
@@ -109,6 +114,11 @@ export class MarketEvaluatorSidebarManager {
         });
     }
 
+    public updateBuildingFilter(range: [number, number]){
+        this.buildingFilter = range;
+        this.updateBuildingStats();
+    }
+    
     private resetSidebar(isLoading = true) {
         this.buildingOverlaysLoading = isLoading;
         this.setIDValue(BUILDING_COUNT_BASE_ID, this.buildingCount, this.buildingOverlaysLoading, true);
@@ -148,11 +158,31 @@ export class MarketEvaluatorSidebarManager {
     private onBuildingOverlayMsg(msg: any, response: BuildingOverlaysResponse) {
         if (response.gc !== null && response.offset !== null) {
             this.buildingOverlaysLoading = !response.done;
-            if (response.offset == '0') {
-                this.buildingCount = 0;
+            if (response.offset === '0') {
+                this.buildingOverlays = {
+                    type: 'GeometryCollection',
+                    geometries : []
+                }
             }
+            this.buildingOverlays.geometries.push(...response.gc.geometries);
+            this.updateBuildingStats();
+        }
+    }
 
-            this.buildingCount += response.gc.geometries.length;
+    private updateBuildingStats(){
+        const polygons = [];
+        if(this.buildingOverlays){
+            for (const poly of this.buildingOverlays.geometries) {
+                // Convert sq m to sq ft
+                const area = 10.7639 * geojsonArea.geometry(poly);
+                if (
+                    this.buildingFilter[0] <= area &&
+                    area <= this.buildingFilter[1]
+                ) {
+                    polygons.push(poly);
+                }
+            };
+            this.buildingCount = polygons.length;
             this.setIDValue(BUILDING_COUNT_BASE_ID, this.buildingCount, this.buildingOverlaysLoading);
             this.updateBuildingDensity();
             this.updatePotentialLeads();

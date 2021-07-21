@@ -10,6 +10,8 @@ import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
 import { MarketEvaluatorWorkspaceManager } from "./workspace/MarketEvaluatorWorkspaceManager";
 import { MarketEvaluatorTowerPopup } from "./isptoolbox-mapbox-draw/popups/TowerPopups";
 import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from "./organisms/APCoverageRenderer";
+import { MultiThumbSlider } from "./MultiThumbSlider";
+import PubSub from "pubsub-js";
 
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
@@ -36,6 +38,16 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
 
         // Tooltips
         new MarketEvaluatorTowerPopup(this.map, this.draw);
-        new MarketEvaluatorRadiusAndBuildingCoverageRenderer(this.map, this.draw);
+        const radius_building_render = new MarketEvaluatorRadiusAndBuildingCoverageRenderer(this.map, this.draw);
+
+        // Building Size Filter
+        document.querySelectorAll('[role=multi-thumb-slider]').forEach((slider) => {
+            var filter = new MultiThumbSlider(slider, (range) => {
+                radius_building_render.updateBuildingFilterSize(range);
+                MarketEvaluatorSidebarManager.getInstance().updateBuildingFilter(range);
+            });
+            $('#collapseBuildingFilter').on('shown.bs.collapse', filter.redraw.bind(filter));
+        });
+
     }
 }

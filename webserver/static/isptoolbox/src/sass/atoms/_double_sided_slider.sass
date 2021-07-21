@@ -1,0 +1,44 @@
+@import ../theme
+
+div.aria-middle-area
+    border: 2px solid $brand-primary-color
+    position: relative
+    top: 4px
+
+div.isptoolbox-slider-thumb
+    background: #fff
+    border: 2px solid $brand-primary-color
+    border-radius: 45px
+    box-sizing: border-box
+    cursor: pointer
+    position: absolute
+    font-family: 'Basis Grotesque Pro Mono', 'SFMono-Regular', 'Liberation Mono', Courier, monospace
+    font-style: normal
+    font-weight: 100
+    letter-spacing: .01em
+    text-align: center
+    top: -0.8em
+    font-size: 0.75rem
+
+div.aria-widget-slider
+    clear: both
+    padding-top: 0.5em
+    padding-bottom: 1em
+
+div.rail-label
+    position: relative
+
+div.rail-label.max
+    text-align: left
+
+div.aria-widget-slider .rail
+    border: 2px solid $disabled-gray
+
+div.aria-widget-slider img[role="slider"].focus,
+div.aria-widget-slider img[role="slider"]:hover
+    outline-color: rgb(140, 203, 242)
+    outline-style: solid
+    outline-width: 2px
+    outline-offset: 2px
+div.aria-widget-slider .rail.focus
+    background-color: #aaa

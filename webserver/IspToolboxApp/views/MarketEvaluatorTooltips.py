@@ -58,7 +58,7 @@ TOOLTIPS = {
         'body': _("""The data presented is download/upload Mbps.
         Speed test results are a weighted average over zipcode medians
         if multiple zip/postal codes are selected."""),
-        'link': _('https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information'),
+        'link': 'https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information',
         'linkDesc':  _('See Data Source'),
     },
     'rdof': {
@@ -67,7 +67,7 @@ TOOLTIPS = {
         that are preliminarily determined to be eligible for the Rural 
         Digital Opportunity Fund Phase III auction (Auction 904).
         """),
-        'link': _('https://www.fcc.gov/auction/904'),
+        'link': 'https://www.fcc.gov/auction/904',
         'linkDesc':  _('See Data Source'),
     },
     'census_blocks': {
@@ -79,7 +79,7 @@ TOOLTIPS = {
         school district, and county limits and short line-of-sight 
         extensions of streets and roads. See the data source to learn more.
         """),
-        'link': _('https://www.census.gov/programs-surveys/geography/about/glossary.html#par_textimage_5'),
+        'link': 'https://www.census.gov/programs-surveys/geography/about/glossary.html#par_textimage_5',
         'linkDesc':  _('See Data Source'),
     },
     'non_urban': {
@@ -87,16 +87,16 @@ TOOLTIPS = {
         'body': _("""Zipcode areas not including 'Urban Areas' or 'Urban Clusters' as defined by the
          US Census Bureau with median speed measured at less than 10/1 Mbps (Download/Upload) provided by M-Lab.
         """),
-        'link': _('https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information'),
+        'link': 'https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information',
         'linkDesc':  _('See M-Lab Source'),
-        'link2': _('https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html'),
+        'link2': 'https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html',
         'link2Desc':  _('See Census Source'),
     },
     'cbrs': {
         'title': _('CBRS PAL Holders'),
         'body': _("""US Census counties and companies that hold CBRS Priority Access Licenses from FCC Auction 105
         """),
-        'link': _('https://auctiondata.fcc.gov/public/projects/auction105/reports/results_by_license'),
+        'link': 'https://auctiondata.fcc.gov/public/projects/auction105/reports/results_by_license',
         'linkDesc':  _('See Data Source'),
     },
     'tribal': {
@@ -104,7 +104,13 @@ TOOLTIPS = {
         'body': _("""The Census Bureau conducts the Boundary and Annexation Survey (BAS) yearly to update and maintain
          information about legal boundaries, names and official status of federally recognized American Indian reservations
          and/or off-reservation trust lands, as well as counties, incorporated places and minor civil divisions."""),
-        'link': _('https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2020&layergroup=American+Indian+Area+Geography'),
+        'link': 'https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2020&layergroup=American+Indian+Area+Geography',
+        'linkDesc': _('See Data Source'),
+    },
+    'filter': {
+        'title': _('Filter by Rooftop Size'),
+        'body': _("""Exclude buildings inside the coverage area whose rooftops are outside of the selected range"""),
+        'link': 'https://github.com/Microsoft/USBuildingFootprints',
         'linkDesc': _('See Data Source'),
     }
 }

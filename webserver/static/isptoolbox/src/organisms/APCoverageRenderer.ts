@@ -1,7 +1,7 @@
 import mapboxgl from "mapbox-gl";
 import * as _ from "lodash";
 import { createGeoJSONCircle } from "../isptoolbox-mapbox-draw/DrawModeUtils";
-import { Geometry, GeoJsonProperties, FeatureCollection, Feature }  from 'geojson';
+import { Geometry, GeoJsonProperties, FeatureCollection, Feature } from 'geojson';
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "../workspace/BuildingCoverage";
 import { WorkspaceEvents, WorkspaceFeatureTypes } from "../workspace/WorkspaceConstants";
@@ -16,6 +16,8 @@ import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup } 
 import { getCookie } from "../utils/Cookie";
 import MarketEvaluatorWS, { BuildingOverlaysResponse, MarketEvalWSEvents, MarketEvalWSRequestType } from "../MarketEvaluatorWS";
 import { GeometryCollection } from "@turf/helpers";
+//@ts-ignore
+import geojsonArea from '@mapbox/geojson-area';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -46,10 +48,10 @@ abstract class RadiusAndBuildingCoverageRenderer {
         this.apPopup = apPopupClass.getInstance();
         this.workspaceManager = workspaceManagerClass.getInstance();
 
-        this.map.addSource(BUILDING_DATA_SOURCE, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
+        this.map.addSource(BUILDING_DATA_SOURCE, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         this.addBuildingLayer();
 
-        this.map.addSource(ACCESS_POINT_RADIUS_VIS_DATA, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
+        this.map.addSource(ACCESS_POINT_RADIUS_VIS_DATA, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         this.map.addLayer({
             'id': ACCESS_POINT_RADIUS_VIS_LAYER_FILL,
             'type': 'fill',
@@ -88,7 +90,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
             }
         }, BUILDING_LAYER);
 
-        this.map.addSource(EMPTY_SOURCE_AFTER_BUILDING, {type: 'geojson', data: {type: 'FeatureCollection', features : []}});
+        this.map.addSource(EMPTY_SOURCE_AFTER_BUILDING, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         this.map.addLayer({
             'id': EMPTY_LAYER_AFTER_BUILDING,
             'type': 'fill',
@@ -147,19 +149,19 @@ abstract class RadiusAndBuildingCoverageRenderer {
      */
     abstract addBuildingLayer(): void;
 
-    abstract sendCoverageRequest({features}: any): void; 
+    abstract sendCoverageRequest({ features }: any): void;
 
-    drawDeleteCallback({features}: {features: Array<any>}){
+    drawDeleteCallback({ features }: { features: Array<any> }) {
         this.renderAPRadius();
         this.renderBuildings();
     }
 
-    drawSelectionChangeCallback({features}: {features: Array<any>}){
+    drawSelectionChangeCallback({ features }: { features: Array<any> }) {
         // Mapbox will count dragging a point features as a selection change event
         // Use this to determine if we are dragging or just selected a new feature
         let dragging = false;
-        if(features.length === 1) {
-            if(features[0].id === this.last_selection){
+        if (features.length === 1) {
+            if (features[0].id === this.last_selection) {
                 dragging = true;
             } else {
                 this.last_selection = features[0].id;
@@ -168,57 +170,56 @@ abstract class RadiusAndBuildingCoverageRenderer {
             this.last_selection = '';
         }
         // Hide AP tooltip if user is dragging AP.
-        if(dragging){
+        if (dragging) {
             this.apPopup.hide();
         } else {
-            this.sendCoverageRequest({features});
+            this.sendCoverageRequest({ features });
             this.renderAPRadius();
             this.renderBuildings();
         }
     }
 
-    AP_updateCallback(msg: string, {features}: {features: Array<any>}){
-        this.sendCoverageRequest({features});
+    AP_updateCallback(msg: string, { features }: { features: Array<any> }) {
+        this.sendCoverageRequest({ features });
         this.renderAPRadius();
         this.renderBuildings();
-        if(features.length === 1 && features[0].properties?.feature_type === WorkspaceFeatureTypes.AP)
-        {
+        if (features.length === 1 && features[0].properties?.feature_type === WorkspaceFeatureTypes.AP) {
             let ap = this.workspaceManager.features[features[0].properties.uuid] as AccessPoint;
             this.apPopup.hide();
             this.apPopup.setAccessPoint(ap);
             this.apPopup.show();
         }
     }
-    updateBuildingCoverage(msg: string, data: {features: Array<GeoJSON.Feature>}){
+    updateBuildingCoverage(msg: string, data: { features: Array<GeoJSON.Feature> }) {
         data.features.forEach((f: GeoJSON.Feature) => {
-            if(f.properties){
+            if (f.properties) {
                 this.sendCoverageRequest(f);
             }
         });
     }
-    
+
     /**
      * Renders access point circles
      */
-    renderAPRadius(){
-        const circle_feats: {[id: string]: Feature<Geometry, GeoJsonProperties>} = {};
+    renderAPRadius() {
+        const circle_feats: { [id: string]: Feature<Geometry, GeoJsonProperties> } = {};
         let fc = this.draw.getSelected();
         let selectedAPs = new Set(
-            fc.features.filter((f)=> f.properties?.feature_type === WorkspaceFeatureTypes.AP)
-                       .map((f) => f.id)
+            fc.features.filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP)
+                .map((f) => f.id)
         );
-        let aps = this.draw.getAll().features.filter((f)=> f.properties?.feature_type === WorkspaceFeatureTypes.AP);
+        let aps = this.draw.getAll().features.filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP);
         // Render all APs.
         aps.forEach((feat: any) => {
             if (feat && feat.properties.radius) {
-                if(feat.geometry.type === 'Point'){
+                if (feat.geometry.type === 'Point') {
                     const new_feat = createGeoJSONCircle(
                         feat.geometry,
                         feat.properties.radius,
                         feat.id);
-                    
+
                     // @ts-ignore
-                    new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id) ? ACTIVE_AP : INACTIVE_AP; 
+                    new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id) ? ACTIVE_AP : INACTIVE_AP;
                     circle_feats[feat.id] = new_feat;
                 }
             }
@@ -226,30 +227,30 @@ abstract class RadiusAndBuildingCoverageRenderer {
 
         // Replace radius features with selected
         const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
-        if(radiusSource.type ==='geojson'){
-            radiusSource.setData({type: 'FeatureCollection', features: Object.values(circle_feats)});
+        if (radiusSource.type === 'geojson') {
+            radiusSource.setData({ type: 'FeatureCollection', features: Object.values(circle_feats) });
         }
     }
-        
+
     /**
      * Renders building layer
      */
-    renderBuildings(){
+    renderBuildings() {
         let fc = this.draw.getSelected();
-        let aps = fc.features.filter((f)=> f.properties?.feature_type === WorkspaceFeatureTypes.AP || f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA);
+        let aps = fc.features.filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP || f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA);
         if (aps.length === 0) {
             fc = this.draw.getAll();
         }
-        const renderFeatures = fc.features.filter((f)=> f.properties?.feature_type === WorkspaceFeatureTypes.AP || f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA);
+        const renderFeatures = fc.features.filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP || f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA);
         // Replace building features with selected
 
         const buildingSource = this.map.getSource(BUILDING_DATA_SOURCE);
-        if(buildingSource.type ==='geojson'){
+        if (buildingSource.type === 'geojson') {
             const coverage = BuildingCoverage.union(renderFeatures.map(feat => {
                 let coverage_object = this.workspaceManager.features[feat.properties?.uuid] as AccessPoint;
                 return coverage_object?.coverage || EMPTY_BUILDING_COVERAGE;
             }));
-            buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
+            buildingSource.setData({ type: 'FeatureCollection', features: coverage.toFeatureArray() });
         }
     }
 }
@@ -268,8 +269,8 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             if (this.draw.getMode() == 'simple_select') {
                 // Check if we clicked on a CPE
                 const features = this.map.queryRenderedFeatures(e.point);
-                if (! features.some((feat) => {return feat.source.includes('mapbox-gl-draw')})){
-                    let building = this.map.queryRenderedFeatures(e.point, {layers: [BUILDING_LAYER]})[0];
+                if (!features.some((feat) => { return feat.source.includes('mapbox-gl-draw') })) {
+                    let building = this.map.queryRenderedFeatures(e.point, { layers: [BUILDING_LAYER] })[0];
                     let buildingId = building.properties?.msftid;
                     let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
                     let mapboxClient = MapboxSDKClient.getInstance();
@@ -340,7 +341,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     'match',
                     ['get', 'serviceable'],
                     'unserviceable',
-                    StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR ,
+                    StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR,
                     'serviceable',
                     StyleConstants.SERVICEABLE_BUILDINGS_COLOR,
                 /* other */ StyleConstants.UNKNOWN_BUILDINGS_COLOR
@@ -358,12 +359,12 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             'paint': {
                 'fill-opacity': 0,
             }
-        },BUILDING_OUTLINE_LAYER);
+        }, BUILDING_OUTLINE_LAYER);
     }
 
-    sendCoverageRequest({features}: {features: Array<any>}){
+    sendCoverageRequest({ features }: { features: Array<any> }) {
         features.forEach((f: GeoJSON.Feature) => {
-            if(f.properties && f.properties.feature_type === WorkspaceFeatureTypes.AP){
+            if (f.properties && f.properties.feature_type === WorkspaceFeatureTypes.AP) {
                 this.ws.sendAPRequest(f.properties.uuid, f.properties.height);
             }
         });
@@ -383,9 +384,9 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             success: (resp) => {
                 const features =
                     this.draw.getAll().features.filter(
-                        (f: GeoJSON.Feature) => {return f.properties?.uuid === message.uuid}
+                        (f: GeoJSON.Feature) => { return f.properties?.uuid === message.uuid }
                     );
-                
+
                 // Set last updated time
                 // TODO: non-US formats when we expand internationally with isUnitsUS false
                 const now = Intl.DateTimeFormat('en-US', {
@@ -393,7 +394,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     month: '2-digit',
                     day: '2-digit'
                 }).format(Date.now());
-                
+
                 // Set serviceable, unserviceable, and unknown
                 features.forEach((feat: GeoJSON.Feature) => {
                     for (const [key, value] of Object.entries(resp)) {
@@ -416,13 +417,14 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         const ap = this.workspaceManager.features[uuid] as AccessPoint;
         ap.setCoverage(resp.features);
         this.renderBuildings();
-        PubSub.publish(WorkspaceEvents.AP_COVERAGE_UPDATED, {'uuid': uuid});
+        PubSub.publish(WorkspaceEvents.AP_COVERAGE_UPDATED, { 'uuid': uuid });
     }
 }
 
 
 export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     buildingOverlays: GeometryCollection;
+    buildingFilterSize: [number, number];
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         super(map, draw, MarketEvaluatorWorkspaceManager, MarketEvaluatorTowerPopup);
 
@@ -431,6 +433,11 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             geometries: []
         };
         PubSub.subscribe(MarketEvalWSEvents.BUILDING_OVERLAYS_MSG, this.onBuildingOverlayMsg.bind(this));
+    }
+
+    updateBuildingFilterSize(range: [number, number]) {
+        this.buildingFilterSize = range;
+        this.renderBuildings();
     }
 
     addBuildingLayer() {
@@ -493,9 +500,20 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     renderBuildings(){
         const buildingSource = this.map.getSource(BUILDING_DATA_SOURCE);
         if(buildingSource.type ==='geojson'){
+            const polygons = [];
+            for (const poly of this.buildingOverlays.geometries) {
+                // Convert sq m to sq ft
+                const area = 10.7639 * geojsonArea.geometry(poly);
+                if (
+                    this.buildingFilterSize[0] <= area &&
+                    area <= this.buildingFilterSize[1]
+                ) {
+                    polygons.push(poly);
+                }
+            }
             buildingSource.setData({
                 type: 'Feature',
-                geometry: this.buildingOverlays,
+                geometry: {'type': 'GeometryCollection', geometries: polygons},
                 properties: {}
             });
         }
@@ -508,7 +526,6 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             }
             this.buildingOverlays.geometries.push(...response.gc.geometries);
         }
-
         this.renderBuildings();
     }
 }

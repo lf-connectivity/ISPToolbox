@@ -267,17 +267,19 @@ export class MarketEvaluatorSidebarManager {
         // otherwise use the default.
         let padding = PADDING[element] || DEFAULT_PADDING;
 
-        let html;
+        // Don't pad if not grayed out.
+        let html = grayOut ? String(value).padStart(padding, '0') : String(value);
+        if (isLoading) {
+            html += (LOADING_ENDING[element] || '') 
+        }
         let parent = $(`#${element}`).parent();
-        // Don't pad if not graying out.
+
         if (!grayOut) {
-            html = String(value);
             if (parent.hasClass(SIDEBAR_VALUE_DIV_CLASS)) {
                 parent.addClass(SIDEBAR_VALUE_LOADED_CLASS);
             }
         }
         else {
-            html = String(value).padStart(padding, '0') + (LOADING_ENDING[element] || '');
             if (parent.hasClass(SIDEBAR_VALUE_DIV_CLASS)) {
                 parent.removeClass(SIDEBAR_VALUE_LOADED_CLASS);
             }

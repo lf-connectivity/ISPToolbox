@@ -18,14 +18,14 @@ def create_sample_overlays():
         tower[0].save()
         communityConnect = Overlay.objects.get_or_create(
             type='communityConnect',
-            source_url="mapbox://isptoolbox.non_urban_overlay_MTS",
-            source_layer="original"
+            source_url='mapbox://isptoolbox.non_urban_overlay_MTS',
+            source_layer='original'
         )
         communityConnect[0].save()
         cbrs = Overlay.objects.get_or_create(
             type='cbrs',
-            source_url='mapbox://alexychong.19jj5ryk',
-            source_layer='cbrs_shp-6wi1gs'
+            source_url='mapbox://isptoolbox.cbrs_overlay_MTS',
+            source_layer='original'
         )
         cbrs[0].save()
         censusBlocks = Overlay.objects.get_or_create(

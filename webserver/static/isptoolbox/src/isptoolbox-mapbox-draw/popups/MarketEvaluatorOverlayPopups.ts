@@ -190,9 +190,9 @@ export class CbrsOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
             <div class="overlay-tooltip">
                 <div class="title"> 
                     <h6>
-                        ${this.featureProperties.COUNTY} County, ${this.featureProperties.STATE}
+                        ${this.featureProperties.county} County, ${this.featureProperties.state}
                         <br>
-                        (\$${Number(this.featureProperties.PRICE).toLocaleString()} Gross License Price)
+                        (\$${Number(this.featureProperties.price).toLocaleString()} Gross License Price)
                     </h6>
                 </div>
 
@@ -227,8 +227,8 @@ export class CbrsOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     }
 
     getCompaniesHTML() {
-        let companies = this.featureProperties.COMPANIES.split('|');
-        let licenseCounts = this.featureProperties.LICENSECOU.split('|');
+        let companies = this.featureProperties.companies.split('|');
+        let licenseCounts = this.featureProperties.licensecounts.split('|');
         let companiesHTML = '';
 
         for (let i = 0; i < companies.length; i++) {

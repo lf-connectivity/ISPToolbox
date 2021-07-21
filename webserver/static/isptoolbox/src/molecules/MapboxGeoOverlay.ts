@@ -221,7 +221,7 @@ export class CbrsGeoOverlay extends MapboxGeoOverlay {
     }
 
     sendGeojsonRequest(properties: any) {
-        MarketEvaluatorWS.getInstance().sendCountyRequest(properties.COUNTYCODE, properties.STATECODE);
+        MarketEvaluatorWS.getInstance().sendCountyRequest(properties.countycode, properties.statecode);
     }
 }
 

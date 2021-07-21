@@ -558,7 +558,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
         this.map.on('draw.selectionchange', this.showInputs.bind(this));
         this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
-        this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_SELECTED, this.showLinkCheckProfile.bind(this));
         PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
@@ -916,11 +915,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     deleteDrawingCallback({features} : any) {
         this.removeLinkHalo(features);
         PubSub.publish(LinkCheckEvents.CLEAR_INPUTS);
-    }
-
-    drawModeChangeCallback({mode} : { mode: string}){
-        $('.isp-draw-mode-btn').filter(function(idx) {return $(this).attr('draw_mode') !== mode}).removeClass('btn-primary').addClass('btn-secondary');
-        $('.isp-draw-mode-btn').filter(function(idx) {return $(this).attr('draw_mode') === mode}).addClass('btn-primary').removeClass('btn-secondary');
     }
 
     highLightPointOnGround({ x, y }: { x: number, y: number }) {

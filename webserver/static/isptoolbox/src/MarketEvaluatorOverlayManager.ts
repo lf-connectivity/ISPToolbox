@@ -198,6 +198,7 @@ export default class MarketEvaluatorOverlayManager {
         }
         this.map.on('idle', loadMapCallback);
 
+
         for (const lString in this.sources) {
             const layerKey: GeoLayerString = lString as GeoLayerString;
             $(`#switch-${layerKey}`).on('click', () => {

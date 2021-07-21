@@ -11,6 +11,7 @@ import { MarketEvaluatorWorkspaceManager } from "./workspace/MarketEvaluatorWork
 import { MarketEvaluatorTowerPopup } from "./isptoolbox-mapbox-draw/popups/TowerPopups";
 import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from "./organisms/APCoverageRenderer";
 
+
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
     draw: MapboxDraw;

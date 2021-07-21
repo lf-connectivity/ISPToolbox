@@ -62,6 +62,7 @@ export abstract class ISPToolboxAbstractAppPage {
             // When map movement ends save where the user is looking
             setCenterZoomPreferences(this.map);
             load_custom_icons(this.map);
+            this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
 
             this.map.addSource(LOWEST_LAYER_SOURCE, {type: 'geojson', data : {type: 'FeatureCollection', features: []}});
             this.map.addLayer({
@@ -161,6 +162,11 @@ export abstract class ISPToolboxAbstractAppPage {
             initial_map_center: {lat: 0, lon:0},
             initial_zoom: 17
         };
+    }
+
+    drawModeChangeCallback({mode} : { mode: string}){
+        $('.isp-draw-mode-btn').filter(function(idx) {return $(this).attr('draw_mode') !== mode}).removeClass('btn-primary').addClass('btn-secondary');
+        $('.isp-draw-mode-btn').filter(function(idx) {return $(this).attr('draw_mode') === mode}).addClass('btn-primary').removeClass('btn-secondary');
     }
 
     abstract onMapLoad(): void;

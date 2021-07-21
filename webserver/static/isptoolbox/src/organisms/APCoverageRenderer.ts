@@ -14,7 +14,7 @@ import { MapboxSDKClient } from "../MapboxSDKClient";
 import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
 import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup";
 import { getCookie } from "../utils/Cookie";
-import MarketEvaluatorWS, { BuildingOverlaysResponse, MarketEvalWSEvents } from "../MarketEvaluatorWS";
+import MarketEvaluatorWS, { BuildingOverlaysResponse, MarketEvalWSEvents, MarketEvalWSRequestType } from "../MarketEvaluatorWS";
 import { GeometryCollection } from "@turf/helpers";
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
@@ -461,6 +461,7 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         else {
             featuresToProcess = features;
         }
+        MarketEvaluatorWS.getInstance().cancelCurrentRequest(MarketEvalWSRequestType.POLYGON);
         this.buildingOverlays.geometries = [];
 
         if (featuresToProcess.length > 0) {

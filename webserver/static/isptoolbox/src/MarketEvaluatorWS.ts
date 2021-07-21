@@ -6,6 +6,16 @@
 
 import PubSub from 'pubsub-js';
 
+export enum MarketEvalWSRequestType {
+    POLYGON = 'standard_polygon',
+    RDOF = 'grant',
+    ZIP = 'zip',
+    COUNTY = 'county',
+    CENSUS_BLOCK = 'census_block',
+    TRIBAL = 'tribal',
+    VIEWSHED = 'viewshed'
+}
+
 export enum MarketEvalWSEvents {
     MKT_EVAL_WS_CONNECTED = 'ws.mkt_eval_connected',
     BUILDING_OVERLAYS_MSG = 'ws.building_overlays',
@@ -139,7 +149,9 @@ export function uuid(): UUID {
 class MarketEvaluatorWS {
     ws: WebSocket;
     message_handlers: Array<MarketEvaluatorWSCallback>;
-    currentRequestUUID: UUID;
+    currentRequests: {
+        [request_type in MarketEvalWSRequestType]: UUID
+    }
     private static _instance: MarketEvaluatorWS;
 
     constructor(message_handlers: Array<MarketEvaluatorWSCallback>) {
@@ -147,6 +159,12 @@ class MarketEvaluatorWS {
             throw Error("This singleton has already been instantiated, use getInstance.");
         }
         this.message_handlers = message_handlers;
+        let currentRequests: any = {};
+        Object.values(MarketEvalWSRequestType).forEach((v: string) => {
+            currentRequests[v] = uuid();
+        });
+        this.currentRequests = currentRequests;
+
         this.connect();
         MarketEvaluatorWS._instance = this;
     }
@@ -195,8 +213,8 @@ class MarketEvaluatorWS {
             this.message_handlers.forEach((handler) => {
                 handler(response);
             });
-            // For now, only one active request at a time
-            if (response.uuid !== this.currentRequestUUID) {
+            // One active request per message type.
+            if (!Object.values(this.currentRequests).includes(response.uuid)) {
                 return;
             }
             switch (response.type) {
@@ -295,9 +313,9 @@ class MarketEvaluatorWS {
      * @param req Json Object
      * @returns The request-identifying UUID sent with the request
      */
-    private sendJsonWithUUID(req: Object): UUID {
+    private sendJsonWithUUID(req: {request_type: MarketEvalWSRequestType, [s: string]: any}): UUID {
         const reqUUID: UUID = uuid();
-        this.currentRequestUUID = reqUUID;
+        this.currentRequests[req.request_type] = reqUUID;
         const reqWithUUID = {
             ...req,
             uuid: reqUUID,
@@ -308,10 +326,18 @@ class MarketEvaluatorWS {
 
     /**
      * Cancels the current websocket request by resetting the current uuid
-     * so the resulting event does not get fired. 
+     * so the resulting event does not get fired. Not putting anything resets the entire
+     * object.
      */
-    cancelCurrentRequest(): void {
-        this.currentRequestUUID = uuid();
+    cancelCurrentRequest(request_type: MarketEvalWSRequestType | undefined = undefined): void {
+        if (request_type === undefined) {
+            Object.keys(this.currentRequests).forEach((type: MarketEvalWSRequestType) => {
+                this.currentRequests[type] = uuid();
+            });
+        }
+        else {
+            this.currentRequests[request_type] = uuid();
+        }
     }
 
     /**
@@ -321,7 +347,7 @@ class MarketEvaluatorWS {
      */
     sendPolygonRequest(include: GeoArea): UUID {
         let uuid = this.sendJsonWithUUID({
-            request_type: 'standard_polygon',
+            request_type: MarketEvalWSRequestType.POLYGON,
             include: this.convertGeoJSONObject(include),
         });
         PubSub.publish(MarketEvalWSEvents.SEND_POLYGON_REQUEST, include);
@@ -335,7 +361,7 @@ class MarketEvaluatorWS {
      */
     sendRDOFRequest(cbgid: string): UUID {
         return this.sendJsonWithUUID({
-            request_type: 'grant',
+            request_type: MarketEvalWSRequestType.RDOF,
             cbgid,
         });
     }
@@ -347,7 +373,7 @@ class MarketEvaluatorWS {
      */
     sendZipRequest(zip: string): UUID {
         return this.sendJsonWithUUID({
-            request_type: 'zip',
+            request_type: MarketEvalWSRequestType.ZIP,
             zip,
         });
     }
@@ -360,7 +386,7 @@ class MarketEvaluatorWS {
      */
     sendCountyRequest(countycode: string, statecode: string): UUID {
         return this.sendJsonWithUUID({
-            request_type: 'county',
+            request_type: MarketEvalWSRequestType.COUNTY,
             countycode,
             statecode,
         });
@@ -373,14 +399,14 @@ class MarketEvaluatorWS {
      */
     sendCensusBlockRequest(blockcode: string): UUID {
         return this.sendJsonWithUUID({
-            request_type: 'census_block',
+            request_type: MarketEvalWSRequestType.CENSUS_BLOCK,
             blockcode,
         });
     }
 
     sendTribalRequest(geoid: string): UUID {
         return this.sendJsonWithUUID({
-            request_type: 'tribal',
+            request_type: MarketEvalWSRequestType.TRIBAL,
             geoid,
         });
     }
@@ -396,7 +422,7 @@ class MarketEvaluatorWS {
      */
     sendViewshedRequest(customerHeight: number, height: number, lat: number, lon: number, radius: number): UUID {
         return this.sendJsonWithUUID({
-            request_type: 'viewshed',
+            request_type: MarketEvalWSRequestType.VIEWSHED,
             customerHeight,
             height,
             lat,

@@ -52,13 +52,13 @@ export class AccessPoint extends WorkspacePointFeature {
     }
 
     update(successFollowup?: (resp: any) => void) {
+        this.moveLinks(this.getFeatureGeometryCoordinates() as [number, number]);
         super.update((resp: any) => {
             let feature = this.draw.get(this.mapboxId);
             this.coverage = EMPTY_BUILDING_COVERAGE;
 
             // @ts-ignore
             this.draw.setFeatureProperty(this.mapboxId, 'radius', feature?.properties.max_radius);
-            this.moveLinks(this.getFeatureGeometryCoordinates() as [number, number]);
             PubSub.publish(WorkspaceEvents.AP_UPDATE, {features: [this.getFeatureData()]});
 
             if (successFollowup) {
@@ -68,23 +68,26 @@ export class AccessPoint extends WorkspacePointFeature {
     }
 
     delete(successFollowup ?: (resp: any) => void) {
-        super.delete((resp) => {
-            this.links.forEach((link, cpe) => {
-                cpe.ap = undefined;
+        this.links.forEach((link, cpe) => {
+            cpe.ap = undefined;
 
-                // Link is already deleted in backend because of cascading delete
-                let deletedLink = link.getFeatureData();
-                this.removeFeatureFromMap(link.mapboxId);
-                let deletedCPE = cpe.getFeatureData();
-                this.removeFeatureFromMap(cpe.mapboxId);
-            });
+            // Link is already deleted in backend because of cascading delete
+            let deletedLink = link.getFeatureData();
+            this.removeFeatureFromMap(link.mapboxId);
+            let deletedCPE = cpe.getFeatureData();
+            this.removeFeatureFromMap(cpe.mapboxId);
 
-            if (successFollowup) {
-                successFollowup(resp);
+            // Yes, this should probably be moved into its own function, but when
+            // I do that it doesn't work as intended. ¯\_(ツ)_/¯
+            if (deletedLink) {
+                this.map.fire('draw.delete', {features: [deletedLink]});
             }
-
-            this.links.clear();
+            if (deletedCPE) {
+                this.map.fire('draw.delete', {features: [deletedCPE]});
+            }
         });
+        this.links.clear();
+        super.delete(successFollowup);
     }
 
     move(newCoords: [number, number]) {
@@ -161,9 +164,9 @@ export class CPE extends WorkspacePointFeature {
     }
 
     update(successFollowup?: (resp: any) => void) {
+        this.moveLink(this.getFeatureGeometryCoordinates() as [number, number]);
         super.update((resp: any) => {
             PubSub.publish(WorkspaceEvents.AP_SELECTED, {features: [this.getFeatureData()]});
-            this.moveLink(this.getFeatureGeometryCoordinates() as [number, number]);
             if (successFollowup) {
                 successFollowup(resp);
             }
@@ -175,23 +178,18 @@ export class CPE extends WorkspacePointFeature {
         this.moveLink(newCoords);
     }
 
-   delete(successFollowup ?: (resp: any) => void) {
-        super.delete((resp) => {
-            if (this.ap) {
-                let link = this.ap.links.get(this) as APToCPELink;
-                this.ap.links.delete(this);
-                let removedLink = link.getFeatureData();
-                this.removeFeatureFromMap(link.mapboxId);
-                if (removedLink) {
-                    this.map.fire('draw.delete', {features: [removedLink]});
-                }
-                this.ap = undefined;
+    delete(successFollowup ?: (resp: any) => void) {
+        if (this.ap) {
+            let link = this.ap.links.get(this) as APToCPELink;
+            this.ap.links.delete(this);
+            let removedLink = link.getFeatureData();
+            this.removeFeatureFromMap(link.mapboxId);
+            if (removedLink) {
+                this.map.fire('draw.delete', {features: [removedLink]});
             }
-
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        });
+            this.ap = undefined;
+        }
+        super.delete(successFollowup);
     }
 
     private moveLink(newCoords: [number, number]) {
@@ -249,19 +247,14 @@ export class APToCPELink extends WorkspaceLineStringFeature {
 
     // Delete the CPE when deleting a link
     delete(successFollowup ?: (resp: any) => void) {
-        super.delete((resp) => {
-            this.cpe.ap = undefined;
-            this.ap.links.delete(this.cpe);
-            let cpeData = this.cpe.getFeatureData();
-            this.removeFeatureFromMap(this.cpe.mapboxId);
-            if (cpeData) {
-                this.map.fire('draw.delete', {features: [cpeData]});
-            }
-
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        });
+        this.cpe.ap = undefined;
+        this.ap.links.delete(this.cpe);
+        let cpeData = this.cpe.getFeatureData();
+        this.removeFeatureFromMap(this.cpe.mapboxId);
+        if (cpeData) {
+            this.map.fire('draw.delete', {features: [cpeData]});
+        }
+        super.delete(successFollowup);
     }
 
     switchAP(newAP: AccessPoint) {

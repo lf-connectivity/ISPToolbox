@@ -247,7 +247,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
         if(buildingSource.type ==='geojson'){
             const coverage = BuildingCoverage.union(renderFeatures.map(feat => {
                 let coverage_object = this.workspaceManager.features[feat.properties?.uuid] as AccessPoint;
-                return coverage_object.coverage;
+                return coverage_object?.coverage || EMPTY_BUILDING_COVERAGE;
             }));
             buildingSource.setData({type: 'FeatureCollection', features: coverage.toFeatureArray()});
         }

@@ -82,9 +82,6 @@ export class AccessPoint extends WorkspacePointFeature {
             if (deletedLink) {
                 this.map.fire('draw.delete', {features: [deletedLink]});
             }
-            if (deletedCPE) {
-                this.map.fire('draw.delete', {features: [deletedCPE]});
-            }
         });
         this.links.clear();
         super.delete(successFollowup);
@@ -251,9 +248,6 @@ export class APToCPELink extends WorkspaceLineStringFeature {
         this.ap.links.delete(this.cpe);
         let cpeData = this.cpe.getFeatureData();
         this.removeFeatureFromMap(this.cpe.mapboxId);
-        if (cpeData) {
-            this.map.fire('draw.delete', {features: [cpeData]});
-        }
         super.delete(successFollowup);
     }
 

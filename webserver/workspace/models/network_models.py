@@ -79,6 +79,7 @@ class AccessPointLocation(WorkspaceFeature):
     max_radius = models.FloatField()
     no_check_radius = models.FloatField(default=0.01)
     default_cpe_height = models.FloatField(default=1)
+    cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)
 
     @property
     def max_radius_miles(self):
@@ -235,28 +236,6 @@ class CoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelM
 
     class Meta:
         model = CoverageArea
-        exclude = ['owner', 'session', 'created']
-
-
-class AccessPointBasedCoverageArea(WorkspaceFeature):
-    geojson = geo_models.GeometryCollectionField()
-    ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, editable=False)
-
-    @property
-    def feature_type(self):
-        return FeatureType.AP_COVERAGE_AREA.value
-
-
-class APCoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
-    lookup_field = 'uuid'
-    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
-    feature_type = serializers.CharField(read_only=True)
-    ap = serializers.PrimaryKeyRelatedField(
-        queryset=AccessPointLocation.objects.all(),
-        pk_field=serializers.UUIDField())
-
-    class Meta:
-        model = AccessPointBasedCoverageArea
         exclude = ['owner', 'session', 'created']
 
 

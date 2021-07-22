@@ -3,7 +3,6 @@ from .network_models import (
     AccessPointLocation, BuildingCoverage,
     AccessPointCoverageBuildings, Radio, PTPLink, CPELocation, APToCPELink,
     CoverageArea, CoverageAreaSerializer,
-    AccessPointBasedCoverageArea, APCoverageAreaSerializer,
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
 )
 from .viewshed_models import Viewshed, ViewshedTile

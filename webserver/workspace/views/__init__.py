@@ -7,8 +7,8 @@ from .market_views import MarketEvaluatorView, MarketEvaluatorCompetitorModalVie
 from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
-    AccessPointCoverageStatsView, APCoverageAreaCreate, APCoverageAreaGet,
-    CoverageAreaCreate, CoverageAreaGet
+    AccessPointCoverageStatsView, CoverageAreaCreate, CoverageAreaGet
+    
 )
 from .session_views import (
     SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView,

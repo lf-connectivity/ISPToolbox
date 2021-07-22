@@ -50,8 +50,6 @@ urlpatterns = [
     path('workspace/api/ap-cpe-link/<uuid:uuid>/', views.APToCPELinkGet.as_view()),
     path('workspace/api/coverage-area/', views.CoverageAreaCreate.as_view()),
     path('workspace/api/coverage-area/<uuid:uuid>/', views.CoverageAreaGet.as_view()),
-    path('workspace/api/ap-coverage-area/', views.APCoverageAreaCreate.as_view()),
-    path('workspace/api/ap-coverage-area/<uuid:uuid>/', views.APCoverageAreaGet.as_view()),
     # Workspace
     path('workspace/api/ap-los/coverage/<uuid:uuid>/', views.AccessPointCoverageResults.as_view()),
     path('workspace/api/ap-los/coverage/stats/<uuid:uuid>/', views.AccessPointCoverageStatsView.as_view()),

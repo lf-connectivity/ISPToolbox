@@ -10,8 +10,7 @@ import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
 import { MarketEvaluatorWorkspaceManager } from "./workspace/MarketEvaluatorWorkspaceManager";
 import { MarketEvaluatorTowerPopup } from "./isptoolbox-mapbox-draw/popups/TowerPopups";
 import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from "./organisms/APCoverageRenderer";
-import { MultiThumbSlider } from "./MultiThumbSlider";
-import PubSub from "pubsub-js";
+import { MultiThumbSlider } from "./atoms/MultiThumbSlider";
 
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;

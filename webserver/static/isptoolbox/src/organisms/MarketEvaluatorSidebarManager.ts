@@ -74,7 +74,6 @@ export class MarketEvaluatorSidebarManager {
     }
 
     public initializePopovers() {
-        console.log('initilaize popover');
         // @ts-ignore
         // $('[data-toggle="popover"]').popover();
         // link tooltip button to the contents
@@ -121,6 +120,7 @@ export class MarketEvaluatorSidebarManager {
     
     private resetSidebar(isLoading = true) {
         this.buildingOverlaysLoading = isLoading;
+        
         this.setIDValue(BUILDING_COUNT_BASE_ID, this.buildingCount, this.buildingOverlaysLoading, true);
         this.setIDValue(BUILDING_DENSITY_BASE_ID, 0, this.buildingOverlaysLoading, true);
         this.setIDValue(POTENTIAL_LEADS_BASE_ID, 0, this.buildingOverlaysLoading, true);
@@ -129,6 +129,9 @@ export class MarketEvaluatorSidebarManager {
         this.setIDValue(MEDIAN_SPEEDS_BASE_ID, '0/0', isLoading, true);
         this.updateCompetitorModalLink(true);
 
+        $('#building-filter-btn').addClass('d-none');
+        //@ts-ignore
+        $('#collapseBuildingFilter').collapse('hide');
         $(`#${MARKET_PENETRATION_INPUT_ID}`).prop('disabled', !isLoading);
     }
 
@@ -182,6 +185,7 @@ export class MarketEvaluatorSidebarManager {
                     polygons.push(poly);
                 }
             };
+            $('#building-filter-btn').removeClass('d-none');
             this.buildingCount = polygons.length;
             this.setIDValue(BUILDING_COUNT_BASE_ID, this.buildingCount, this.buildingOverlaysLoading);
             this.updateBuildingDensity();

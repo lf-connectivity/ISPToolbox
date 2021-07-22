@@ -6,6 +6,7 @@ import { WorkspaceEvents } from "../workspace/WorkspaceConstants";
 import geojsonArea from '@mapbox/geojson-area';
 
 const BUILDING_COUNT_BASE_ID = 'me-out-buildings';
+const BUILDING_FILTER_TOGGLE = 'building-filter-btn';
 const BUILDING_DENSITY_BASE_ID = 'me-out-density';
 const MARKET_PENETRATION_INPUT_ID = 'market_penetration_percent';
 const POTENTIAL_LEADS_BASE_ID = 'me-out-leads';
@@ -129,7 +130,7 @@ export class MarketEvaluatorSidebarManager {
         this.setIDValue(MEDIAN_SPEEDS_BASE_ID, '0/0', isLoading, true);
         this.updateCompetitorModalLink(true);
 
-        $('#building-filter-btn').addClass('d-none');
+        this.toggleShowElement(BUILDING_FILTER_TOGGLE, false);
         //@ts-ignore
         $('#collapseBuildingFilter').collapse('hide');
         $(`#${MARKET_PENETRATION_INPUT_ID}`).prop('disabled', !isLoading);
@@ -168,6 +169,7 @@ export class MarketEvaluatorSidebarManager {
                 }
             }
             this.buildingOverlays.geometries.push(...response.gc.geometries);
+            this.toggleShowElement(BUILDING_FILTER_TOGGLE, true);
             this.updateBuildingStats();
         }
     }
@@ -185,7 +187,6 @@ export class MarketEvaluatorSidebarManager {
                     polygons.push(poly);
                 }
             };
-            $('#building-filter-btn').removeClass('d-none');
             this.buildingCount = polygons.length;
             this.setIDValue(BUILDING_COUNT_BASE_ID, this.buildingCount, this.buildingOverlaysLoading);
             this.updateBuildingDensity();

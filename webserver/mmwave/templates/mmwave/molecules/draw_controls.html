@@ -1,6 +1,6 @@
 <div class="btn-group" role="group" aria-label="Drawing Controls">
     {% include "workspace/atoms/buttons/draw_ptp_link_button_base.html" %}
-    {% if beta %}
+    {% if not ptponly %}
     {% include "mmwave/atoms/buttons/place_tower_button.html" %}
     {% endif %}
 </div>

@@ -1,12 +1,9 @@
 {% load static %}
 {% load i18n %}
 <div class="d-flex flex-row justify-content-center file-dropdown-section">
-    {% if beta %}
     <div class="nav-item dropdown">
         <a class="nav-link dropdown-toggle workspace-nav-dropdown-toggle d-flex flex-row align-items-center" href="#"
-            id="navbarDropdown" role="button" {% if beta and not request.user.is_authenticated %} data-toggle="modal"
-            data-target="#redirect_workspace_modal" {% else %} data-toggle="dropdown" aria-haspopup="true"
-            aria-expanded="false" {% endif %}>
+            id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <h5 class="my-auto mr-1" id="session_name_workspace">
                 {% translate 'Editing: '%}{% firstof session.name 'untitled session' %}
             </h5>
@@ -59,5 +56,4 @@
             </li>
         </ul>
     </div>
-    {% endif %}
 </div>

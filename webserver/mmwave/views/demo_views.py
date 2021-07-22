@@ -35,9 +35,8 @@ class NetworkDemoView(View):
             'session': map_session,
             'geojson': map_session.get_session_geojson(),
             'units': map_session.units_old,
-            'beta': True,
+            'workspace_account': False,
             'title': 'LiDAR LOS Check - ISP Toolbox',
-            'demo': True,
             'should_collapse_link_view': True,
         }
         return render(request, 'workspace/pages/demo_network.index.html', context)
@@ -76,8 +75,8 @@ class LOSCheckDemo(View):
             'fbid': fbid,
             'networkID': networkID,
             'units': units,
-            'demo': True,
-            'beta': beta,
+            'workspace_account': False,
+            'ptponly': True,
         }
 
         # we're in demo view: suggest user sign-in or create an account

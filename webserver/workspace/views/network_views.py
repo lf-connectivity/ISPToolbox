@@ -53,10 +53,10 @@ class EditNetworkView(LoginRequiredMixin, View):
 
         context = {
             'session': session,
+            'workspace_account': True,
             'geojson': session.get_session_geojson(),
             'workspace_forms': WorkspaceForms(request, session),
             'should_collapse_link_view': True,
-            'beta': True,
             'units': session.units_old,
             'tower_upload_form': UploadTowerCSVForm,
             'title': 'LiDAR LOS Check - ISP Toolbox'

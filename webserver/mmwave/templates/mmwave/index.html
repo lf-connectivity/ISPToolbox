@@ -4,13 +4,13 @@
 {% include "workspace/molecules/page_header.html" %}
 
 <body class="los-body">
-  {% if beta and request.user.is_authenticated %}
+  {% comment %} {% if request.user.is_authenticated %}
   {% include 'workspace/organisms/tool_suggest_workspace_overlay.html' %}
-  {% endif %}
+  {% endif %} {% endcomment %}
   {% include "workspace/atoms/mapbox_global_public_key.html" %}
-  {% if beta %}
+  {% comment %} {% if workspace and request.user.is_authenticated %}
   {% include "mmwave/organisms/network_edit_nav.html" %}
-  {% endif %}
+  {% endif %} {% endcomment %}
   {% include "./map_view.html" %}
   <script async src="{% static "wireless_network.min.js" %}"> </script>
   {% include "./3d_view.html" %}
@@ -27,15 +27,6 @@
       units: "{{units}}",
     };
   </script>
-  {% if geojson and beta %}
-  {{ geojson|json_script:"isp-map-features" }}
-  {% endif %}
-  {% if not request.user.is_authenticated %}
-  {% include "workspace/organisms/demo_redirect_to_workspace.html" %}
-  {% else %}
-  {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
-  {% endif %}
-  {{ beta|json_script:"los_beta" }}
 </body>
 
 </html>

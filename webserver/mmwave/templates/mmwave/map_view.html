@@ -1,7 +1,7 @@
 {% extends "workspace/organisms/map_view_base.html" %}
 
 {% block draw_controls %}
-{% if not beta %}
+{% if not workspace_account and ptponly %}
 {% with width=True %}
 <div class="mt-1">
     {% include 'mmwave/molecules/draw_controls.html' %}

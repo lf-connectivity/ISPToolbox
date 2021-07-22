@@ -4,11 +4,11 @@
 {% include "workspace/molecules/page_header.html" %}
 
 <body>
-  {% if demo and beta and request.user.is_authenticated %}
+  {% comment %} {% if workspace_account and request.user.is_authenticated %}
   {% include 'workspace/organisms/tool_suggest_workspace_overlay.html' %}
-  {% endif %}
+  {% endif %} {% endcomment %}
 
-  {% if beta %}
+  {% if workspace_account %}
   {% include "mmwave/organisms/network_edit_nav.html" %}
   {% with tool="network" %}
   {% include "workspace/organisms/tool_drawer_menu.html" %}
@@ -29,14 +29,14 @@
       {% include "mmwave/link_view.html" %}
       {% include "workspace/molecules/workspace_session_info.html" %}
       {{ geojson|json_script:"isp-map-features" }}
-      {{ beta|json_script:"los_beta" }}
+      {{ True|json_script:"los_beta" }}
       {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
     </div>
   </div>
 
-  {% if demo and beta %}
+  {% comment %} {% if workspace_account and request.user.is_authenticated %}
   {% include "workspace/organisms/demo_redirect_to_workspace.html" %}
-  {% endif %}
+  {% endif %} {% endcomment %}
 
   {% include "workspace/organisms/workspace_session_modals.html" %}
   {% include "workspace/organisms/confirmation_modals.html" %}

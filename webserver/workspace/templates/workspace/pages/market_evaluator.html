@@ -37,7 +37,6 @@
   <script async src="{% static "market_evaluator.min.js" %}"> </script>
   {% include "workspace/molecules/workspace_session_info.html" %}
   {{ geojson|json_script:"isp-map-features" }}
-  {{ beta|json_script:"los_beta" }}
   {% include "workspace/organisms/workspace_session_modals.html" %}
   {% include "workspace/organisms/confirmation_modals.html" %}
 </body>

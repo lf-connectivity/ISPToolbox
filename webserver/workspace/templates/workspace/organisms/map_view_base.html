@@ -8,7 +8,7 @@
             {% endblock %}
         </div>
     </div>
-    {% if beta %}
+    {% if not ptponly %}
     <div class="on-map-controls" style="right: 0px">
         {% include "mmwave/molecules/draw_controls.html" %}
     </div>

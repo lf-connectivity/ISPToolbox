@@ -966,11 +966,8 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
 
     def test_save_cloudrf_coverage(self):
         ap = AccessPointLocation.objects.get(uuid=self.test_ap.uuid)
-        ap_serializer = AccessPointSerializer(ap, data={
-            'cloudrf_coverage_geojson': DEFAULT_TEST_GEO_COLLECTION
-        }, partial=True)
-        ap_serializer.is_valid()
-        ap_serializer.save()
+        ap.cloudrf_coverage_geojson = DEFAULT_TEST_GEO_COLLECTION
+        ap.save()
 
         self.assertJSONEqual(
             DEFAULT_TEST_GEO_COLLECTION,

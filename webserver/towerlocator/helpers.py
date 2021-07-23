@@ -5,7 +5,7 @@ from IspToolboxApp.Helpers.MarketEvaluatorHelpers import createPipelineFromKMZ
 from bots.github_issues import make_github_issue
 from django.conf import settings
 
-from workspace.models import AccessPointLocation, AccessPointSerializer
+from workspace.models import AccessPointLocation
 
 
 cloud_rf_uid = settings.CLOUDRF_UID
@@ -63,7 +63,7 @@ def createCloudRFRequest(lat, lon, txh, rxh, rad):
     }
 
 
-def getViewShed(lat, lon, height, customerHeight, radius, apUuid):
+def getViewShed(lat, lon, height, customerHeight, radius, apUuid=None):
     '''
         Gets a viewshed (json polygon coverage) from an access point:
 
@@ -95,11 +95,8 @@ def getViewShed(lat, lon, height, customerHeight, radius, apUuid):
 
         if apUuid:
             ap = AccessPointLocation.objects.get(uuid=apUuid)
-            ap_serializer = AccessPointSerializer(ap, data={
-                'cloudrf_coverage_geojson': coverage
-            }, partial=True)
-            ap_serializer.is_valid()
-            ap_serializer.save()
+            ap.cloudrf_coverage_geojson = coverage
+            ap.save()
             response['ap_uuid'] = apUuid
 
         return resp

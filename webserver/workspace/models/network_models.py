@@ -1,3 +1,5 @@
+from django.contrib.gis.db.models.fields import GeometryField
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.conf import settings
 from rest_framework import serializers
@@ -61,15 +63,31 @@ class SessionWorkspaceModelMixin:
     @classmethod
     def get_features_for_session(serializer, session):
         objects = serializer.Meta.model.objects.filter(map_session=session).all()
+
+        # Filter out all geometryfield model properties from properties.
+        features = []
+        for obj in objects:
+            properties = {}
+            for k, v in serializer(obj).data.items():
+
+                # Some keys might be properties, not fields
+                try:
+                    model_field_type = obj._meta.get_field(k)
+                except FieldDoesNotExist:
+                    model_field_type = None
+
+                if not isinstance(model_field_type, GeometryField):
+                    properties[k] = v
+
+            features.append({
+                'type': 'Feature',
+                'geometry': json.loads(obj.geojson.json),
+                'properties': properties
+            })
+
         return {
             'type': 'FeatureCollection',
-            'features': [
-                {
-                    'type': 'Feature',
-                    'geometry': json.loads(obj.geojson.json),
-                    'properties': {k: v for k, v in serializer(obj).data.items() if k != 'geojson'} if serializer else None
-                } for obj in objects
-            ]
+            'features': features
         }
 
 
@@ -97,6 +115,11 @@ class AccessPointLocation(WorkspaceFeature):
     def feature_type(self):
         return FeatureType.AP.value
 
+    @property
+    def cloudrf_coverage_geojson_json(self):
+        return self.cloudrf_coverage_geojson.json if self.cloudrf_coverage_geojson else None
+
+
     def getDSMExtentRequired(self):
         """
         Get the AOI necessary to render AP location
@@ -121,10 +144,34 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     max_radius_miles = serializers.FloatField(read_only=True)
     feature_type = serializers.CharField(read_only=True)
     default_cpe_height_ft = serializers.FloatField(read_only=True)
+    cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
 
     class Meta:
         model = AccessPointLocation
         exclude = ['owner', 'session', 'created']
+
+    def update(self, instance, validated_data):
+        new_height = validated_data.get('height', instance.height)
+        new_radius = validated_data.get('max_radius', instance.max_radius)
+        new_cpe_height = validated_data.get('default_cpe_height', instance.default_cpe_height)
+        new_geojson = validated_data.get('geojson', instance.geojson)
+
+        if new_height != instance.height or \
+           new_radius != instance.max_radius or \
+           new_cpe_height != instance.default_cpe_height or \
+           new_geojson != instance.geojson:
+            new_cloudrf = None
+        else:
+            new_cloudrf = validated_data.get('cloudrf_coverage_geojson', instance.cloudrf_coverage_geojson)
+
+        instance.cloudrf_coverage_geojson = new_cloudrf
+        return super(AccessPointSerializer, self).update(instance, validated_data)
+
+    def get_cloudrf_coverage_geojson_json(self, obj):
+        if obj.cloudrf_coverage_geojson is None:
+            return None
+        else:
+            return obj.cloudrf_coverage_geojson.json
 
 
 class CPELocation(WorkspaceFeature):

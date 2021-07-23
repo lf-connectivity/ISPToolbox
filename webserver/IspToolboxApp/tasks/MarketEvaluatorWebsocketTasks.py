@@ -118,6 +118,6 @@ def getTribalGeog(geoid, channelName, uuid):
 
 
 @shared_task
-def getTowerViewShed(lat, lon, height, customerHeight, radius, channelName, uuid):
-    result = getViewShed(lat, lon, height, customerHeight, radius)
+def getTowerViewShed(lat, lon, height, customerHeight, radius, channelName, uuid, apUuid=None):
+    result = getViewShed(lat, lon, height, customerHeight, radius, apUuid)
     sync_send(channelName, 'tower.viewshed', result, uuid)

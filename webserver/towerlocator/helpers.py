@@ -5,6 +5,8 @@ from IspToolboxApp.Helpers.MarketEvaluatorHelpers import createPipelineFromKMZ
 from bots.github_issues import make_github_issue
 from django.conf import settings
 
+from workspace.models import AccessPointLocation, AccessPointSerializer
+
 
 cloud_rf_uid = settings.CLOUDRF_UID
 cloud_rf_key = settings.CLOUDRF_KEY
@@ -61,7 +63,7 @@ def createCloudRFRequest(lat, lon, txh, rxh, rad):
     }
 
 
-def getViewShed(lat, lon, height, customerHeight, radius):
+def getViewShed(lat, lon, height, customerHeight, radius, apUuid):
     '''
         Gets a viewshed (json polygon coverage) from an access point:
 
@@ -70,6 +72,7 @@ def getViewShed(lat, lon, height, customerHeight, radius):
         lon<Number>: Longitude
         height<Number>: Height of transmitter in meters
         radius<Number>: Radius of coverage in km
+        apUuid<UUID>: UUID of AP
 
         Returns geojson for viewshed
     '''
@@ -84,10 +87,21 @@ def getViewShed(lat, lon, height, customerHeight, radius):
         # else request KMZ file, add geometry collection to pipeline and run market evaluator pipeline
         kmz_response = requests.get(resp['kmz'])
         kmz_file = io.BytesIO(kmz_response.content)
+        coverage = createPipelineFromKMZ(kmz_file)
         resp = {
             'error': 0,
-            'coverage': createPipelineFromKMZ(kmz_file)
+            'coverage': coverage
         }
+
+        if apUuid:
+            ap = AccessPointLocation.objects.get(uuid=apUuid)
+            ap_serializer = AccessPointSerializer(ap, data={
+                'cloudrf_coverage_geojson': coverage
+            }, partial=True)
+            ap_serializer.is_valid()
+            ap_serializer.save()
+            response['ap_uuid'] = apUuid
+
         return resp
 
     except Exception as e:

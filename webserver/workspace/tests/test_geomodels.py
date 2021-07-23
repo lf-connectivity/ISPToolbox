@@ -566,26 +566,30 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
         expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
-        expected_ap = {
-            'type': 'Feature',
-            'geometry': json.loads(DEFAULT_AP_POINT),
-            'properties': {
-                'name': DEFAULT_NAME,
-                'height': DEFAULT_HEIGHT,
-                'uuid': str(self.test_ap.uuid),
-                'map_session': str(self.test_session.uuid),
-                'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
-                'default_cpe_height': DEFAULT_CPE_HEIGHT,
-                'feature_type': FeatureType.AP.value,
-                'max_radius': DEFAULT_MAX_RADIUS,
-                'height_ft': expected_height_ft,
-                'cloudrf_coverage_geojson': None,
-                'default_cpe_height_ft': expected_default_cpe_height_ft,
-                'max_radius_miles': expected_max_radius_miles,
-                'uneditable': DEFAULT_UNEDITABLE
+
+        expected_aps = [
+            {
+                'type': 'Feature',
+                'geometry': json.loads(DEFAULT_AP_POINT),
+                'properties': {
+                    'name': DEFAULT_NAME,
+                    'height': DEFAULT_HEIGHT,
+                    'uuid': str(self.test_ap.uuid),
+                    'map_session': str(self.test_session.uuid),
+                    'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
+                    'default_cpe_height': DEFAULT_CPE_HEIGHT,
+                    'feature_type': FeatureType.AP.value,
+                    'max_radius': DEFAULT_MAX_RADIUS,
+                    'height_ft': expected_height_ft,
+                    'cloudrf_coverage_geojson_json': None,
+                    'default_cpe_height_ft': expected_default_cpe_height_ft,
+                    'max_radius_miles': expected_max_radius_miles,
+                    'uneditable': DEFAULT_UNEDITABLE
+                }
             }
-        }
-        self.get_feature_collection_flow(AccessPointSerializer, [expected_ap])
+        ]
+        self.maxDiff=None
+        self.get_feature_collection_flow(AccessPointSerializer, expected_aps)
 
     def test_get_features_for_session_cpe(self):
         expected_cpe = {
@@ -769,25 +773,6 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(ap.max_radius, UPDATED_MAX_RADIUS)
         self.assertJSONEqual(ap.cloudrf_coverage_geojson.json, DEFAULT_TEST_GEO_COLLECTION)
 
-    def test_update_ap_update_cloudrf_geojson(self):
-        ap_id = self.test_ap.uuid
-        updated_ap = {
-            'cloudrf_coverage_geojson': DEFAULT_TEST_GEO_COLLECTION
-        }
-        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
-        self.assertJSONEqual(ap.cloudrf_coverage_geojson.json, DEFAULT_TEST_GEO_COLLECTION)
-
-        updated_ap = {
-            'cloudrf_coverage_geojson': UPDATED_TEST_GEO_COLLECTION
-        }
-        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
-        self.assertJSONEqual(ap.cloudrf_coverage_geojson.json, UPDATED_TEST_GEO_COLLECTION)
-
-        updated_ap = {
-            'cloudrf_coverage_geojson': None
-        }
-        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
-        self.assertEqual(ap.cloudrf_coverage_geojson, None)
 
     def test_update_cpe(self):
         cpe_id = self.test_cpe.uuid
@@ -848,25 +833,17 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
 
 class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
     def test_merge_two_feature_collections(self):
-        expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
-        expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * M_2_FT
-        expected_ap = {
+        expected_link = {
             'type': 'Feature',
-            'geometry': json.loads(DEFAULT_AP_POINT),
+            'geometry': json.loads(DEFAULT_TEST_LINESTRING),
             'properties': {
-                'name': DEFAULT_NAME,
-                'height': DEFAULT_HEIGHT,
-                'height_ft': DEFAULT_HEIGHT * M_2_FT,
-                'cloudrf_coverage_geojson': None,
+                'frequency': DEFAULT_FREQUENCY,
+                'ap': str(self.test_ap.uuid),
+                'cpe': str(self.test_cpe.uuid),
+                'uuid': str(self.test_ap_cpe_link.uuid),
                 'map_session': str(self.test_session.uuid),
-                'uuid': str(self.test_ap.uuid),
-                'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
-                'default_cpe_height': DEFAULT_CPE_HEIGHT,
-                'feature_type': FeatureType.AP.value,
-                'max_radius': DEFAULT_MAX_RADIUS,
-                'default_cpe_height_ft': expected_default_cpe_height_ft,
-                'max_radius_miles': expected_max_radius_miles,
-                'uneditable': DEFAULT_UNEDITABLE
+                'feature_type': FeatureType.AP_CPE_LINK.value,
+                'uneditable': DEFAULT_AP_CPE_LINK_UNEDITABLE
             }
         }
         expected_cpe = {
@@ -883,46 +860,122 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'ap': str(self.test_ap.uuid)
             }
         }
-        expected_feature_collection = self.build_feature_collection([expected_ap, expected_cpe])
+        expected_feature_collection = self.build_feature_collection([expected_link, expected_cpe])
 
-        aps = AccessPointSerializer.get_features_for_session(self.test_session)
+        links = APToCPELinkSerializer.get_features_for_session(self.test_session)
         cpes = CPESerializer.get_features_for_session(self.test_session)
-        feature_collection = geojson_utils.merge_feature_collections(aps, cpes)
+        feature_collection = geojson_utils.merge_feature_collections(links, cpes)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
                              self.json_dumps(feature_collection))
 
     def test_merge_two_feature_collections_one_empty(self):
-        expected_height_ft = DEFAULT_HEIGHT * 3.28084
-        expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
-        expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
-        expected_ap = {
+        expected_link = {
             'type': 'Feature',
-            'geometry': json.loads(DEFAULT_AP_POINT),
+            'geometry': json.loads(DEFAULT_TEST_LINESTRING),
             'properties': {
-                'name': DEFAULT_NAME,
-                'height': DEFAULT_HEIGHT,
+                'frequency': DEFAULT_FREQUENCY,
+                'ap': str(self.test_ap.uuid),
+                'cpe': str(self.test_cpe.uuid),
+                'uuid': str(self.test_ap_cpe_link.uuid),
                 'map_session': str(self.test_session.uuid),
-                'uuid': str(self.test_ap.uuid),
-                'no_check_radius': DEFAULT_NO_CHECK_RADIUS,
-                'default_cpe_height': DEFAULT_CPE_HEIGHT,
-                'feature_type': FeatureType.AP.value,
-                'max_radius': DEFAULT_MAX_RADIUS,
-                'height_ft': expected_height_ft,
-                'cloudrf_coverage_geojson': None,
-                'default_cpe_height_ft': expected_default_cpe_height_ft,
-                'max_radius_miles': expected_max_radius_miles,
-                'uneditable': DEFAULT_UNEDITABLE
+                'feature_type': FeatureType.AP_CPE_LINK.value,
+                'uneditable': DEFAULT_AP_CPE_LINK_UNEDITABLE
             }
         }
-        expected_feature_collection = self.build_feature_collection([expected_ap])
+        expected_feature_collection = self.build_feature_collection([expected_link])
 
-        aps = AccessPointSerializer.get_features_for_session(self.test_session)
+
+        links = APToCPELinkSerializer.get_features_for_session(self.test_session)
         empty_feature_collection = {
             'type': 'FeatureCollection',
             'features': []
         }
-        feature_collection = geojson_utils.merge_feature_collections(aps, empty_feature_collection)
+        feature_collection = geojson_utils.merge_feature_collections(links, empty_feature_collection)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
                              self.json_dumps(feature_collection))
+
+
+class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
+    def setUp(self):
+        super(WorkspaceCloudRfCoverageTestCase, self).setUp()
+        self.test_ap_with_cloudrf = AccessPointLocation(
+            owner=self.testuser,
+            name=DEFAULT_NAME,
+            map_session=self.test_session,
+            geojson=DEFAULT_AP_POINT,
+            height=DEFAULT_HEIGHT,
+            max_radius=DEFAULT_MAX_RADIUS,
+            uneditable=DEFAULT_UNEDITABLE,
+            cloudrf_coverage_geojson=DEFAULT_TEST_GEO_COLLECTION
+        )
+        self.test_ap_with_cloudrf.save()
+
+    def update_ap_test_delete_cloudrf_flow(self, updated_ap):
+        ap_id = self.test_ap_with_cloudrf.uuid
+        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
+        self.assertEqual(ap.cloudrf_coverage_geojson, None)
+
+    def update_ap_test_no_delete_cloudrf_flow(self, updated_ap, expected_cloudrf=DEFAULT_TEST_GEO_COLLECTION):
+        ap_id = self.test_ap_with_cloudrf.uuid
+        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
+        self.assertJSONEqual(
+            expected_cloudrf,
+            ap.cloudrf_coverage_geojson_json
+        )
+
+    def test_update_ap_location_delete_cloudrf(self):
+        updated_ap = {
+            'geojson': UPDATED_TEST_POINT
+        }
+        self.update_ap_test_delete_cloudrf_flow(updated_ap)
+
+    def test_update_ap_height_delete_cloudrf(self):
+        updated_ap = {
+            'height': UPDATED_HEIGHT
+        }
+        self.update_ap_test_delete_cloudrf_flow(updated_ap)
+
+    def test_update_ap_default_cpe_height_delete_cloudrf(self):
+        updated_ap = {
+            'default_cpe_height': UPDATED_HEIGHT
+        }
+        self.update_ap_test_delete_cloudrf_flow(updated_ap)
+
+    def test_update_ap_max_radius_delete_cloudrf(self):
+        updated_ap = {
+            'max_radius': UPDATED_MAX_RADIUS
+        }
+        self.update_ap_test_delete_cloudrf_flow(updated_ap)
+
+    def test_update_ap_name_no_delete_cloudrf(self):
+        updated_ap = {
+            'name': UPDATED_NAME
+        }
+        self.update_ap_test_no_delete_cloudrf_flow(updated_ap)
+
+    def test_update_ap_cloudrf_coverage(self):
+        updated_ap = {
+            'cloudrf_coverage_geojson': UPDATED_TEST_GEO_COLLECTION
+        }
+        self.update_ap_test_no_delete_cloudrf_flow(updated_ap, UPDATED_TEST_GEO_COLLECTION)
+
+    def test_update_uneditable_cloudrf_coverage(self):
+        updated_ap = {
+            'uneditable': not DEFAULT_UNEDITABLE
+        }
+        self.update_ap_test_no_delete_cloudrf_flow(updated_ap)
+
+    def test_save_cloudrf_coverage(self):
+        ap = AccessPointLocation.objects.get(uuid=self.test_ap.uuid)
+        ap_serializer = AccessPointSerializer(ap, data={
+            'cloudrf_coverage_geojson': DEFAULT_TEST_GEO_COLLECTION
+        }, partial=True)
+        ap_serializer.is_valid()
+        ap_serializer.save()
+
+        self.assertJSONEqual(
+            DEFAULT_TEST_GEO_COLLECTION,
+            ap.cloudrf_coverage_geojson_json
+        )

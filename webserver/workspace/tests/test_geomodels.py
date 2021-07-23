@@ -588,7 +588,6 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 }
             }
         ]
-        self.maxDiff=None
         self.get_feature_collection_flow(AccessPointSerializer, expected_aps)
 
     def test_get_features_for_session_cpe(self):
@@ -773,7 +772,6 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(ap.max_radius, UPDATED_MAX_RADIUS)
         self.assertJSONEqual(ap.cloudrf_coverage_geojson.json, DEFAULT_TEST_GEO_COLLECTION)
 
-
     def test_update_cpe(self):
         cpe_id = self.test_cpe.uuid
         updated_cpe = {
@@ -884,7 +882,6 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
             }
         }
         expected_feature_collection = self.build_feature_collection([expected_link])
-
 
         links = APToCPELinkSerializer.get_features_for_session(self.test_session)
         empty_feature_collection = {

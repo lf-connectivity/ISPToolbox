@@ -101,6 +101,7 @@ export abstract class BaseWorkspaceFeature{
      * intended to fire additional Mapbox events.
      */
     update(successFollowup?: (resp: any) => void) {
+        console.log('updating object')
         $.ajax({
             url: `${this.apiEndpoint}/${this.workspaceId}/`,
             method: 'PATCH',
@@ -110,13 +111,12 @@ export abstract class BaseWorkspaceFeature{
                 'Accept': 'application/json'
             } 
         }).done((resp) => {
+            console.log('success', resp)
             this.updateFeatureProperties(resp);
             PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
+            console.log('success', successFollowup)
             if (successFollowup) {
-                // the update callback was causing the input to reset while it was being used
-                if (resp.feature_type !== 'access_point') {
-                    successFollowup(resp);
-                }
+                // successFollowup(resp);
             }
         });
     }
@@ -191,6 +191,7 @@ export abstract class BaseWorkspaceFeature{
     }
 
     protected updateFeatureProperties(response: any) {
+        console.log
         this.responseFields.forEach(field => {
             if (field in response) {
                 this.setFeatureProperty(field, response[field]);

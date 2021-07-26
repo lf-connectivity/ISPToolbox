@@ -173,7 +173,7 @@ class WorkspaceMapSession(models.Model):
             geo_list.append(towers)
 
         kml = convertKml(geo_list)
-        success = writeS3Object(self.kml_key(), kml)
+        writeS3Object(self.kml_key(), kml)
         url = createPresignedUrl(self.kml_key())
         return url
 

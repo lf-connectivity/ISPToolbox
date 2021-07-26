@@ -11,6 +11,7 @@ class CustomFileInput(forms.FileInput):
 class CustomSliderBooleanInput(forms.widgets.CheckboxInput):
     template_name = "workspace/atoms/toggle_switch.html"
 
+
 class UploadTowerCSVForm(forms.Form):
     file = forms.FileField(
         widget=CustomFileInput(

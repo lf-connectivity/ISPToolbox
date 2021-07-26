@@ -762,7 +762,6 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'geojson': UPDATED_TEST_POINT,
             'height': UPDATED_HEIGHT,
             'max_radius': UPDATED_MAX_RADIUS,
-            'cloudrf_coverage_geojson': DEFAULT_TEST_GEO_COLLECTION
         }
         ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
         self.assertEqual(ap.owner, self.testuser)
@@ -770,7 +769,6 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertJSONEqual(ap.geojson.json, UPDATED_TEST_POINT)
         self.assertEqual(ap.height, UPDATED_HEIGHT)
         self.assertEqual(ap.max_radius, UPDATED_MAX_RADIUS)
-        self.assertJSONEqual(ap.cloudrf_coverage_geojson.json, DEFAULT_TEST_GEO_COLLECTION)
 
     def test_update_cpe(self):
         cpe_id = self.test_cpe.uuid
@@ -911,12 +909,30 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
 
     def update_ap_test_delete_cloudrf_flow(self, updated_ap):
         ap_id = self.test_ap_with_cloudrf.uuid
-        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
+        new_ap = {
+            'name': DEFAULT_NAME,
+            'geojson': DEFAULT_AP_POINT,
+            'height': DEFAULT_HEIGHT,
+            'max_radius': DEFAULT_MAX_RADIUS,
+            'uneditable': DEFAULT_UNEDITABLE,
+            'cloudrf_coverage_geojson': DEFAULT_TEST_GEO_COLLECTION
+        }
+        new_ap.update(updated_ap)
+        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, new_ap)
         self.assertEqual(ap.cloudrf_coverage_geojson, None)
 
     def update_ap_test_no_delete_cloudrf_flow(self, updated_ap, expected_cloudrf=DEFAULT_TEST_GEO_COLLECTION):
         ap_id = self.test_ap_with_cloudrf.uuid
-        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
+        new_ap = {
+            'name': DEFAULT_NAME,
+            'geojson': DEFAULT_AP_POINT,
+            'height': DEFAULT_HEIGHT,
+            'max_radius': DEFAULT_MAX_RADIUS,
+            'uneditable': DEFAULT_UNEDITABLE,
+            'cloudrf_coverage_geojson': DEFAULT_TEST_GEO_COLLECTION
+        }
+        new_ap.update(updated_ap)
+        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, new_ap)
         self.assertJSONEqual(
             expected_cloudrf,
             ap.cloudrf_coverage_geojson_json

@@ -93,11 +93,13 @@ def getViewShed(lat, lon, height, customerHeight, radius, apUuid=None):
             'coverage': coverage
         }
 
+        # .io for Market Eval v2: coverage is stringified json
         if apUuid:
             ap = AccessPointLocation.objects.get(uuid=apUuid)
-            ap.cloudrf_coverage_geojson = coverage
+            ap.cloudrf_coverage_geojson = json.dumps(coverage)
             ap.save()
-            response['ap_uuid'] = apUuid
+            resp['ap_uuid'] = apUuid
+            resp['coverage'] = json.dumps(coverage)
 
         return resp
 

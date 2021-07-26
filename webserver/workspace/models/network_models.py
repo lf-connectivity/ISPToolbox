@@ -15,6 +15,7 @@ from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from django.contrib.sessions.models import Session
+import numpy
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
@@ -153,17 +154,18 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
         new_height = validated_data.get('height', instance.height)
         new_radius = validated_data.get('max_radius', instance.max_radius)
         new_cpe_height = validated_data.get('default_cpe_height', instance.default_cpe_height)
-        new_geojson = validated_data.get('geojson', instance.geojson)
+        new_geojson = json.loads(validated_data.get('geojson', instance.geojson.json))
+        new_point = new_geojson['coordinates']
 
         if new_height != instance.height or \
            new_radius != instance.max_radius or \
            new_cpe_height != instance.default_cpe_height or \
-           new_geojson != instance.geojson:
+           not numpy.allclose(new_point, json.loads(instance.geojson.json)['coordinates']):
             new_cloudrf = None
         else:
             new_cloudrf = validated_data.get('cloudrf_coverage_geojson', instance.cloudrf_coverage_geojson)
 
-        instance.cloudrf_coverage_geojson = new_cloudrf
+        validated_data['cloudrf_coverage_geojson'] = new_cloudrf
         return super(AccessPointSerializer, self).update(instance, validated_data)
 
     def get_cloudrf_coverage_geojson_json(self, obj):

@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="account-dropdown">
     {% if user.is_authenticated %}
     <div class="dropdown show">
@@ -29,9 +30,13 @@
             </svg>
         </a>
         <div class="dropdown-menu account-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
-            <a class="dropdown-item" href="{% url 'account_view' %}">Manage Account</a>
-            <a class="dropdown-item" href="#">Privacy/Terms</a>
-            <a class="dropdown-item" href="{% url 'logout_view' %}?next={% url 'isptoolbox_pro_home'%}">Logout</a>
+            <a class="dropdown-item" href="{% url 'account_view' %}">{% translate "Manage Account"%}</a>
+            <a class="dropdown-item" href="#">{% translate "Privacy/Terms"%}</a>
+            {% if user.is_superuser %}
+            <a class="dropdown-item" href="{% url 'admin:index' %}">{% translate "admin (fb-only)"%}</a>
+            {% endif %}
+            <a class="dropdown-item"
+                href="{% url 'logout_view' %}?next={% url 'isptoolbox_pro_home'%}">{% translate "Logout"%}</a>
         </div>
     </div>
     {% else %}

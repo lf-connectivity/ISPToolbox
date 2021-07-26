@@ -16,6 +16,7 @@ from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from django.contrib.sessions.models import Session
 import numpy
+import math
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
@@ -157,9 +158,9 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
         new_geojson = json.loads(validated_data.get('geojson', instance.geojson.json))
         new_point = new_geojson['coordinates']
 
-        if new_height != instance.height or \
-           new_radius != instance.max_radius or \
-           new_cpe_height != instance.default_cpe_height or \
+        if not math.isclose(new_height, instance.height) or \
+           not math.isclose(new_radius, instance.max_radius) or \
+           not math.isclose(new_cpe_height, instance.default_cpe_height) or \
            not numpy.allclose(new_point, json.loads(instance.geojson.json)['coordinates']):
             new_cloudrf = None
         else:

@@ -9,7 +9,8 @@ import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
 
 const AP_API_ENDPOINT = '/pro/workspace/api/ap-los';
 const AP_RESPONSE_FIELDS = ['name', 'height', 'max_radius', 'no_check_radius',
-    'default_cpe_height', 'max_radius_miles', 'height_ft', 'default_cpe_height_ft'];
+    'default_cpe_height', 'max_radius_miles', 'height_ft', 'default_cpe_height_ft',
+    'cloudrf_coverage_geojson_json'];
 const AP_SERIALIZER_FIELDS = ['name', 'height', 'max_radius', 'no_check_radius',
     'default_cpe_height'];
 

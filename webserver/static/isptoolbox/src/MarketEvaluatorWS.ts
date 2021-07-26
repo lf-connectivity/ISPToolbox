@@ -5,6 +5,7 @@
  **/
 
 import PubSub from 'pubsub-js';
+var _ = require('lodash');
 
 export enum MarketEvalWSRequestType {
     POLYGON = 'standard_polygon',
@@ -31,7 +32,8 @@ export enum MarketEvalWSEvents {
     TRIBAL_GEOG_MSG = 'ws.geog_tribal',
     CLOUDRF_VIEWSHED_MSG = 'ws.viewshed_cloudrf',
     MKT_EVAL_WS_ERR = 'ws.mkt_eval_err',
-    SEND_POLYGON_REQUEST = 'ws.send_polygon_request'
+    SEND_REQUEST = 'ws.send_request',
+    REQUEST_CANCELLED = 'ws.request_cancelled'
 }
 
 export type RDOFGeojsonResponse = {
@@ -67,7 +69,8 @@ export type CensusBlockGeojsonResponse = {
 
 export type ViewshedGeojsonResponse = {
     error: number,
-    coverage?: GeoJSON.GeometryCollection,
+    coverage?: string,
+    ap_uuid: string,
     uuid: string,
 };
 
@@ -150,7 +153,11 @@ class MarketEvaluatorWS {
     ws: WebSocket;
     message_handlers: Array<MarketEvaluatorWSCallback>;
     currentRequests: {
-        [request_type in MarketEvalWSRequestType]: UUID
+        [request_type in MarketEvalWSRequestType]: {
+            uuid: UUID,
+            request_type: MarketEvalWSRequestType,
+            [s: string]: any
+        }
     }
     private static _instance: MarketEvaluatorWS;
 
@@ -161,7 +168,7 @@ class MarketEvaluatorWS {
         this.message_handlers = message_handlers;
         let currentRequests: any = {};
         Object.values(MarketEvalWSRequestType).forEach((v: string) => {
-            currentRequests[v] = uuid();
+            currentRequests[v] = {uuid: uuid()};
         });
         this.currentRequests = currentRequests;
 
@@ -214,7 +221,7 @@ class MarketEvaluatorWS {
                 handler(response);
             });
             // One active request per message type.
-            if (!Object.values(this.currentRequests).includes(response.uuid)) {
+            if (!Object.values(this.currentRequests).map((f: any) => f.uuid).includes(response.uuid)) {
                 return;
             }
             switch (response.type) {
@@ -315,12 +322,13 @@ class MarketEvaluatorWS {
      */
     private sendJsonWithUUID(req: {request_type: MarketEvalWSRequestType, [s: string]: any}): UUID {
         const reqUUID: UUID = uuid();
-        this.currentRequests[req.request_type] = reqUUID;
         const reqWithUUID = {
             ...req,
             uuid: reqUUID,
         };
+        this.currentRequests[req.request_type] = reqWithUUID;
         this.ws.send(JSON.stringify(reqWithUUID));
+        PubSub.publish(MarketEvalWSEvents.SEND_REQUEST, req);
         return reqUUID;
     }
 
@@ -330,14 +338,28 @@ class MarketEvaluatorWS {
      * object.
      */
     cancelCurrentRequest(request_type: MarketEvalWSRequestType | undefined = undefined): void {
+        let oldRequest;
         if (request_type === undefined) {
             Object.keys(this.currentRequests).forEach((type: MarketEvalWSRequestType) => {
-                this.currentRequests[type] = uuid();
+                oldRequest = this.getCurrentRequest(type);
+                this.currentRequests[type] = {request_type: type, uuid: uuid()};
+                PubSub.publish(MarketEvalWSEvents.REQUEST_CANCELLED, oldRequest);
             });
         }
         else {
-            this.currentRequests[request_type] = uuid();
+            oldRequest = this.getCurrentRequest(request_type);
+            this.currentRequests[request_type] = {request_type, uuid: uuid()};
+            PubSub.publish(MarketEvalWSEvents.REQUEST_CANCELLED, oldRequest);
         }
+    }
+    
+    /**
+     * Gets the current request of a certain request type.
+     * @param request_type Request type
+     * @returns 
+     */
+    getCurrentRequest(request_type: MarketEvalWSRequestType) {
+        return _.omit(this.currentRequests[request_type], ['uuid']);
     }
 
     /**
@@ -350,7 +372,6 @@ class MarketEvaluatorWS {
             request_type: MarketEvalWSRequestType.POLYGON,
             include: this.convertGeoJSONObject(include),
         });
-        PubSub.publish(MarketEvalWSEvents.SEND_POLYGON_REQUEST, include);
         return uuid;
     }
 
@@ -417,10 +438,11 @@ class MarketEvaluatorWS {
      * @param height Height in meters
      * @param lat latitude as float
      * @param lon longitude as float
-     * @param radius Radius in meters
+     * @param radius Radius in km
+     * @param apUuid AP UUID
      * @returns The request-identifying UUID
      */
-    sendViewshedRequest(customerHeight: number, height: number, lat: number, lon: number, radius: number): UUID {
+    sendViewshedRequest(customerHeight: number, height: number, lat: number, lon: number, radius: number, apUuid: string): UUID {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.VIEWSHED,
             customerHeight,
@@ -428,6 +450,7 @@ class MarketEvaluatorWS {
             lat,
             lon,
             radius,
+            apUuid
         });
     }
 }

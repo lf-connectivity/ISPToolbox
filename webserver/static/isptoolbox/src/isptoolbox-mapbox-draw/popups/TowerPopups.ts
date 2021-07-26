@@ -14,6 +14,7 @@ import {
 import { sanitizeString } from "../../molecules/InputValidator";
 import { parseFormLatitudeLongitude } from "../../utils/LatLngInputUtils";
 import { LOSWSEvents, ViewshedProgressResponse, ViewshedUnexpectedError } from "../../LOSCheckWS";
+import MarketEvaluatorWS from "../../MarketEvaluatorWS";
 
 var _ = require('lodash');
 
@@ -439,6 +440,25 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
         else {
             throw new Error('No instance of MarketEvaluatorTowerPopup instantiated.')
         }
+    }
+
+    protected setEventHandlers() {
+        super.setEventHandlers();
+        $(`#${PLOT_COVERAGE_BUTTON_ID}`).on('click', () => {
+            let properties = this.accessPoint?.getFeatureData()?.properties;
+            let point = this.accessPoint?.getFeatureData().geometry.coordinates;
+            if (this.accessPoint && properties && point) {
+                MarketEvaluatorWS.getInstance().sendViewshedRequest(
+                    properties.default_cpe_height,
+                    properties.height,
+                    point[1],
+                    point[0],
+                    properties.max_radius,
+                    this.accessPoint.workspaceId
+                );
+            }
+        });
+
     }
 
     protected getAdditionalInfo() {

@@ -40,13 +40,18 @@ abstract class RadiusAndBuildingCoverageRenderer {
     draw: MapboxDraw;
     workspaceManager: any;
     apPopup: any;
+    renderCloudRF: boolean;
     last_selection: string = '';
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, workspaceManagerClass: any, apPopupClass: any) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, workspaceManagerClass: any, apPopupClass: any, options?: {
+        renderCloudRF?: boolean
+    }) {
         this.map = map;
         this.draw = draw;
         this.apPopup = apPopupClass.getInstance();
         this.workspaceManager = workspaceManagerClass.getInstance();
+
+        this.renderCloudRF = options?.renderCloudRF || false;
 
         this.map.addSource(BUILDING_DATA_SOURCE, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
         this.addBuildingLayer();
@@ -213,10 +218,23 @@ abstract class RadiusAndBuildingCoverageRenderer {
         aps.forEach((feat: any) => {
             if (feat && feat.properties.radius) {
                 if (feat.geometry.type === 'Point') {
-                    const new_feat = createGeoJSONCircle(
-                        feat.geometry,
-                        feat.properties.radius,
-                        feat.id);
+                    let new_feat;
+                    if (this.renderCloudRF &&
+                        this.cloudRFExists(feat)) {
+                        // CloudRF coverage is a geometrycollection; turn this into a feature.
+                        let geometryCollection = JSON.parse(feat.properties?.cloudrf_coverage_geojson_json);
+                        new_feat = {
+                            type: 'Feature',
+                            geometry: geometryCollection,
+                            properties: {}
+                        } as Feature<GeometryCollection, GeoJsonProperties>;
+                    }
+                    else {
+                        new_feat = createGeoJSONCircle(
+                            feat.geometry,
+                            feat.properties.radius,
+                            feat.id);
+                    }
 
                     // @ts-ignore
                     new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id) ? ACTIVE_AP : INACTIVE_AP;
@@ -252,6 +270,11 @@ abstract class RadiusAndBuildingCoverageRenderer {
             }));
             buildingSource.setData({ type: 'FeatureCollection', features: coverage.toFeatureArray() });
         }
+    }
+
+    protected cloudRFExists(feat: Feature) {
+        return feat.properties?.cloudrf_coverage_geojson_json &&
+            feat.properties?.cloudrf_coverage_geojson_json !== null
     }
 }
 
@@ -426,7 +449,9 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     buildingOverlays: GeometryCollection;
     buildingFilterSize: [number, number];
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
-        super(map, draw, MarketEvaluatorWorkspaceManager, MarketEvaluatorTowerPopup);
+        super(map, draw, MarketEvaluatorWorkspaceManager, MarketEvaluatorTowerPopup, {
+            renderCloudRF: true
+        });
 
         this.buildingOverlays = {
             type: 'GeometryCollection',
@@ -475,11 +500,17 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             if (f.properties && f.properties.feature_type) {
                 switch (f.properties.feature_type) {
                     case WorkspaceFeatureTypes.AP:
-                        const new_feat = createGeoJSONCircle(
-                            f.geometry,
-                            f.properties.radius,
-                            f.id);
-                        geometries.push(new_feat.geometry);
+                        if (this.cloudRFExists(f)) {
+                            const geometryCollection = JSON.parse(f.properties?.cloudrf_coverage_geojson_json);
+                            geometries.push(...geometryCollection.geometries);
+                        }
+                        else {
+                            const new_feat = createGeoJSONCircle(
+                                f.geometry,
+                                f.properties.radius,
+                                f.id);
+                            geometries.push(new_feat.geometry);
+                        }
                     case WorkspaceFeatureTypes.COVERAGE_AREA:
                         geometries.push(f.geometry);
                 }

@@ -1,5 +1,5 @@
 import { GeometryCollection } from "@turf/turf";
-import { BroadbandNowResponse, BuildingOverlaysResponse, MarketEvalWSEvents, MedianIncomeResponse, MedianSpeed, MedianSpeedResponse, ServiceProvidersResponse } from "../MarketEvaluatorWS";
+import { BroadbandNowResponse, BuildingOverlaysResponse, MarketEvalWSEvents, MarketEvalWSRequestType, MedianIncomeResponse, MedianSpeed, MedianSpeedResponse, ServiceProvidersResponse } from "../MarketEvaluatorWS";
 import { getCookie } from "../utils/Cookie";
 import { WorkspaceEvents } from "../workspace/WorkspaceConstants";
 //@ts-ignore
@@ -50,7 +50,7 @@ export class MarketEvaluatorSidebarManager {
     private static instance: MarketEvaluatorSidebarManager;
 
     private constructor() {
-        PubSub.subscribe(MarketEvalWSEvents.SEND_POLYGON_REQUEST, this.onSendPolygonRequest.bind(this));
+        PubSub.subscribe(MarketEvalWSEvents.SEND_REQUEST, this.onSendPolygonRequest.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.BUILDING_OVERLAYS_MSG, this.onBuildingOverlayMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.POLY_AREA_MSG, this.onPolygonAreaMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.SERVICE_PROV_MSG, this.onServiceProviderMsg.bind(this));
@@ -149,9 +149,11 @@ export class MarketEvaluatorSidebarManager {
     * EVENT HANDLERS
     */
 
-    private onSendPolygonRequest() {
-        this.resetStats();
-        this.resetSidebar();
+    private onSendPolygonRequest(msg: any, request: any) {
+        if (request.request_type === MarketEvalWSRequestType.POLYGON) {
+            this.resetStats();
+            this.resetSidebar();
+        }
     }
 
     private onNoItems(msg: any, response: any) {

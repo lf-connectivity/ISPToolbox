@@ -153,6 +153,8 @@ export abstract class ISPToolboxAbstractAppPage {
             
             $('#map-layers-btn').prop('disabled', false);
 
+            
+
             // Additional loading
             this.onMapLoad();
         });

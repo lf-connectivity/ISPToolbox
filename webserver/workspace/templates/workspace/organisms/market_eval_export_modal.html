@@ -1,0 +1,86 @@
+{% load i18n %}
+<div class="modal fade theme-modal" id="exportMEModal" tabindex="-1" role="dialog" aria-labelledby="exportMEModalLabel"
+    aria-hidden="true">
+    <form action="{% url 'market_eval_export' session.uuid %}" method="POST" id="market-eval-export-frm">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="exportMEModalLabel">{% translate "Export File as KMZ"%}</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="me-hide-on-export">
+                        <p>{%translate "Select layers to export"%}</p>
+                        <div class="p-3 mb-2 isptoolbox-form d-flex flex-row justify-content-between"
+                            style="background: #F5F4F4; border-top: 2px solid #5692D1;">
+                            {% csrf_token %}
+                            {{ workspace_forms.market_eval_export }}
+                        </div>
+                    </div>
+                    <div>
+                        <input type="submit" class="btn btn-primary isptoolbox-btn w-100 me-hide-on-export"
+                            value='{% translate "Export" %}'>
+                        <div class="d-none w-100" id="me-export-load-msg">
+                            <div class="d-flex flex-row">
+                                <div class="ml-3 my-auto">
+                                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                                    {% include "workspace/atoms/components/loading_spinner.html" %}
+                                    {% endwith %}
+                                </div>
+                                <div>
+                                    <p class="my-0" style="font-size: 0.8rem">{% translate "Generating File"%}</p>
+                                    <p class="my-0 text-muted" style="font-size: 0.8rem;">
+                                        {% translate "(deselect buildings for a faster export)"%}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="market-eval-error-msg" class="d-none">
+                            <p>{% translate "An error occurred, try again later."%}</p>
+                        </div>
+                        <a id="me-export-download-link" class="d-none btn btn-primary isptoolbox-btn w-100"
+                            download>{%translate "Download"%}
+                            "{{session.name}}"
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    $(() => {
+        $('#market-eval-export-frm').on('submit', function (event) {
+            event.preventDefault();
+            var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+            $('#me-export-load-msg').removeClass('d-none');
+            $('.me-hide-on-export').addClass('d-none');
+            $.ajax({
+                data: $(this).serialize(),
+                type: "POST",
+                dataType: "json",
+                headers: {
+                    "X-CSRFToken": $crf_token
+                },
+                url: $('#market-eval-export-frm').attr('action'),
+                success: function (response) {
+                    $('#me-export-load-msg').addClass('d-none');
+                    $('#me-export-download-link').removeClass('d-none').attr('href',
+                        response.url);
+                },
+                error: (response) => {
+                    $('#me-export-load-msg').addClass('d-none');
+                    $('#market-eval-error-msg').removeClass('d-none');
+                }
+            })
+        });
+        $('#exportMEModal').on('show.bs.modal', () => {
+            $('#me-export-load-msg, #me-export-download-link, #market-eval-error-msg, #me-export-load-msg')
+                .addClass(
+                    'd-none');
+            $('.me-hide-on-export').removeClass('d-none');
+        });
+    });
+</script>

@@ -1,11 +1,14 @@
+from django.http.response import Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from workspace import models as workspace_models
-from workspace.forms import UploadTowerCSVForm, WorkspaceForms
+from workspace.forms import UploadTowerCSVForm, WorkspaceForms, ExportMarketEvaluatorForm
 from IspToolboxApp.views.MarketEvaluatorTooltips import TOOLTIPS
 
 import json
+
+from workspace.models.session_models import WorkspaceMapSession
 
 TECH_CODE_MAPPING = {
     10: 'DSL',
@@ -60,6 +63,20 @@ class MarketEvaluatorCompetitorModalView(View):
         return render(request, 'workspace/organisms/market_eval_competitor_modal_ajax.html', context)
 
 
+class MarketEvaluatorSessionExportView(LoginRequiredMixin, View):
+    def get(self, request, session_id=None):
+        raise Http404
+
+    def post(self, request, session_id=None):
+        form = ExportMarketEvaluatorForm(request.POST)
+        if form.is_valid():
+            session = WorkspaceMapSession.get_rest_queryset(request).get(uuid=session_id)
+            url = session.exportKMZ(form)
+            return JsonResponse({'url': url}, status=200)
+        else:
+            return JsonResponse({}, status=400)
+
+
 class MarketEvaluatorView(LoginRequiredMixin, View):
     def get(self, request, session_id=None, name=None):
         if session_id is None:
@@ -84,6 +101,7 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
             'workspace_forms': WorkspaceForms(request, session),
             'beta': True,
             'units': 'US',
+            'tool': 'business',
             'tower_upload_form': UploadTowerCSVForm,
             'title': 'Market Evaluator - ISP Toolbox',
             'tooltips': TOOLTIPS

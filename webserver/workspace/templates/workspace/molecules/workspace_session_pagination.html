@@ -1,4 +1,4 @@
-{% load rest_framework %}
+{% load rest_framework i18n %}
 
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
@@ -6,7 +6,7 @@
   <div class="theme-table open-workspace">
     <div class="thead">
       <div class="tr">
-        <p class="th-column workspace-name">Workspace Name
+        <p class="th-column workspace-name">{% translate "Session Name"%}
           {% if ordering == "name"%}
           <a name="" class="sort-ap" ordering-target="-name">
             {% include 'workspace/atoms/arrow_icon.html' %}

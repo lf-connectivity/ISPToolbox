@@ -2,9 +2,13 @@ from django.db import models
 from django.conf import settings
 from rest_framework import serializers
 from django.contrib.gis.db import models as geo_models
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Point, GeometryCollection
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import convertKml, getMicrosoftBuildings
+
 from .validators import validate_zoom_level
 import uuid
+import json
+from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
 from .network_models import (
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
     CoverageAreaSerializer
@@ -138,6 +142,41 @@ class WorkspaceMapSession(models.Model):
 
         return new_instance
 
+    def kml_key(self):
+        return f'kml/ISPTOOLBOX_{self.name}_{self.uuid}.kml'
+
+    def exportKMZ(self, export_format):
+        geo_list = []
+        gc = []
+        coverage_areas = {'layer': 'coverage areas', 'geometries': []}
+        for coverage_area in self.coveragearea_set.all():
+            coverage = json.loads(coverage_area.geojson.json)
+            gc.append(coverage_area.geojson)
+            coverage_areas['geometries'].append(coverage)
+
+        geo_list.append(coverage_areas)
+
+        towers = {'layer': 'towers', 'geometries': []}
+        for ap in self.accesspointlocation_set.all():
+            ap_coverage = ap.getDSMExtentRequired()
+            gc.append(ap_coverage)
+            towers['geometries'].append(json.loads(ap_coverage.json))
+
+        buildings = {'layer': 'buildings', 'geometries': None}
+        buildings['geometries'] = getMicrosoftBuildings(
+            GeometryCollection(gc).json, None
+        )['buildings']['geometries']
+
+        if export_format.cleaned_data['buildings']:
+            geo_list.append(buildings)
+        if export_format.cleaned_data['drawn_area']:
+            geo_list.append(towers)
+
+        kml = convertKml(geo_list)
+        success = writeS3Object(self.kml_key(), kml)
+        url = createPresignedUrl(self.kml_key())
+        return url
+
 
 class WorkspaceMapSessionSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -148,7 +187,7 @@ class WorkspaceMapSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WorkspaceMapSession
-        exclude = ['session']
+        exclude = ['session', 'logging_fbid']
         validators = [
             UniqueTogetherValidator(
                 queryset=WorkspaceMapSession.objects.all(),

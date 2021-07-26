@@ -1,4 +1,5 @@
 from django.urls import path
+from IspToolboxApp.views.MarketEvaluatorView import MarketEvaluatorExport
 from workspace import views
 from mmwave.views import CreateExportDSM
 from IspToolboxAccounts.views import CreateAccountView
@@ -7,16 +8,19 @@ from IspToolboxAccounts import forms
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 
+from workspace.views.market_views import MarketEvaluatorSessionExportView
+
 
 urlpatterns = [
     path('', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
     path('optional-info/', views.OptionalInfoWorkspaceView.as_view(), name="optional_info"),
     path('optional-info/update/', views.OptionalInfoWorkspaceUpdateView.as_view(), name="optional_info_update"),
     # LOS
-    path('network/edit/<uuid:session_id>/', views.EditNetworkView.as_view()),
+    path('network/edit/<uuid:session_id>/', views.EditNetworkView.as_view(), name="edit_network_by_uuid"),
     path('network/edit/<uuid:session_id>/<str:name>/', views.EditNetworkView.as_view(), name="edit_network"),
     path('network/edit/', views.EditNetworkView.as_view(), name="edit_account_network"),
     # Market Evaluator
+    path('market/<uuid:session_id>/export/', views.MarketEvaluatorSessionExportView.as_view(), name="market_eval_export"),
     path('market/<uuid:session_id>/', views.MarketEvaluatorView.as_view()),
     path('market/<uuid:session_id>/<str:name>/', views.MarketEvaluatorView.as_view(), name="market_eval"),
     path('market/', views.MarketEvaluatorView.as_view(), name="market_eval_entry"),

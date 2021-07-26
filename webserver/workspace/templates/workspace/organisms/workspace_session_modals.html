@@ -3,4 +3,9 @@
 {% include "workspace/organisms/import_kmz_modal.html" %}
 {% include "workspace/organisms/rename_session_modal.html"%}
 {% include "workspace/organisms/save_as_modal.html"%}
+{% if tool == "business" %}
+{% include "workspace/organisms/market_eval_export_modal.html"%}
+{% else %}
 {% include "workspace/organisms/export_kmz_modal.html" %}
+{% endif %}
+{% include "workspace/organisms/access_point_modal.html" %}

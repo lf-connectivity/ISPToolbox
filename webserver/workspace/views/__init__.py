@@ -3,7 +3,10 @@ from .login_views import (
     OptionalInfoWorkspaceUpdateView, AccountSettingsView,
 )
 from .network_views import EditNetworkView, BulkUploadTowersView
-from .market_views import MarketEvaluatorView, MarketEvaluatorCompetitorModalView
+from .market_views import (
+    MarketEvaluatorView, MarketEvaluatorCompetitorModalView,
+    MarketEvaluatorSessionExportView
+)
 from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,

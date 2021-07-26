@@ -8,6 +8,9 @@ class CustomFileInput(forms.FileInput):
     template_name = "workspace/atoms/fileupload.html"
 
 
+class CustomSliderBooleanInput(forms.widgets.CheckboxInput):
+    template_name = "workspace/atoms/toggle_switch.html"
+
 class UploadTowerCSVForm(forms.Form):
     file = forms.FileField(
         widget=CustomFileInput(
@@ -17,6 +20,21 @@ class UploadTowerCSVForm(forms.Form):
         label="Upload",
         label_suffix="",
         help_text="Files Accepted: CSV and KMZ"
+    )
+
+
+class ExportMarketEvaluatorForm(forms.Form):
+    drawn_area = forms.BooleanField(
+        widget=CustomSliderBooleanInput,
+        label=_("Drawn Area"),
+        label_suffix="",
+        required=False
+    )
+    buildings = forms.BooleanField(
+        widget=CustomSliderBooleanInput,
+        label=_("Buildings"),
+        label_suffix="",
+        required=False
     )
 
 
@@ -61,4 +79,5 @@ def WorkspaceForms(request, session):
         'new_session_from_kmz': NewWorkspaceSessionFromKMZForm(),
         'save_as_session': SaveAsSessionForm(),
         'rename_session': WorkspaceSessionForm(instance=session, auto_id='id_rename_%s'),
+        'market_eval_export': ExportMarketEvaluatorForm(),
     }

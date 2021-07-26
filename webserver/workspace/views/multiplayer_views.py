@@ -3,10 +3,11 @@ from django.views import View
 from workspace import models
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from workspace.mixnins import SuperuserRequiredMixin
 
 
 @method_decorator(login_required, name='dispatch')
-class MultiplayerTestView(View):
+class MultiplayerTestView(SuperuserRequiredMixin, View):
     def get(self, request, session_id=None):
         session, created = models.MultiplayerSession.objects.get_or_create(
             session_id=session_id

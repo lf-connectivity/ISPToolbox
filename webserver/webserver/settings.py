@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     # ISP Toolbox App
     'IspToolboxApp',
     # Django
-    'django.contrib.admin',
+    'workspace.apps.IspToolboxAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

@@ -41,6 +41,35 @@ admin.site.register(models.EPTLidarPointCloud, EPTLidarPointCloudAdmin)
 admin.site.register(models.USGSLidarMetaDataModel)
 
 
+class LidarDatasets(models.EPTLidarPointCloud):
+    class Meta:
+        proxy = True
+        verbose_name = 'LiDAR Dataset Summary'
+        verbose_name_plural = 'LiDAR Dataset Summary'
+
+
+@admin.register(LidarDatasets)
+class LidarDatasetSummary(admin.ModelAdmin):
+    change_list_template = 'admin/mmwave/lidar_dataset_summary.html'
+    date_hierarchy = 'date_time_added_to_isptoolbox'
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(
+            request,
+            extra_context=extra_context,
+        )
+        try:
+            qs = response.context_data['cl'].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        response.context_data['number_inspected'] = qs.filter(inspected=True).count()
+        response.context_data['number_tiled'] = sum([cld.tiled for cld in qs.all()])
+        response.context_data['total'] = qs.filter().count()
+        response.context_data['noisy'] = qs.filter(noisy_data=True).count()
+        return response
+
+
 @admin.register(models.LOSSummary)
 class LOSSummaryAdmin(admin.ModelAdmin):
     change_list_template = 'admin/mmwave/los_summary_list.html'

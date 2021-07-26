@@ -33,25 +33,26 @@ grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
         </div>
     </div>
     <div class="card" style="width: 18rem;">
-        <a href="{% url 'multiplayer_demo' %}">
-            <img class="card-img-top" src='{% static "mmwave/multiplayer.gif" %}' alt="Card Multiplayer Cap">
-        </a>
-        <div class="card-body justify-content-between d-flex flex-column">
-            <p class="card-text">{% translate "Collaborate with your co-workers in real-time."%}</p>
-            <a href="{% url 'multiplayer_demo' %}"
-                class="btn btn-primary isptoolbox-btn">{% translate "Launch Multiplayer"%}
-            </a>
-        </div>
-    </div>
-    <div class="card" style="width: 18rem;">
-        <a href="{% url 'swagger-ui' %}">
+        <a href="#">
             <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
         </a>
         <div class="card-body justify-content-between d-flex flex-column">
             <p class="card-text">
-                {% translate "Integrate and automate your business processes with ISP Toolbox's APIs."%}</p>
-            <a href="{% url 'swagger-ui' %}" class="btn btn-primary isptoolbox-btn">
-                {% translate "Launch API Browser"%}
+                {% lorem 15 w random %}</p>
+            <a href="#" class="btn btn-primary isptoolbox-btn">
+                {% lorem 2 w random%}
+            </a>
+        </div>
+    </div>
+    <div class="card" style="width: 18rem;">
+        <a href="#">
+            <img class="card-img-top" src='{% static "mmwave/loading_image.gif" %}' alt="Card image cap">
+        </a>
+        <div class="card-body justify-content-between d-flex flex-column">
+            <p class="card-text">
+                {% lorem 15 w random%}</p>
+            <a href="#" class="btn btn-primary isptoolbox-btn">
+                {% lorem 2 w random%}
             </a>
         </div>
     </div>

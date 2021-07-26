@@ -1,0 +1,10 @@
+{% extends 'admin/index.html'%}
+{% load i18n %}
+
+{% block content %}
+<h1>{% translate "Demos"%}</h1>
+<li><a href="{% url 'multiplayer_demo' %}">multiplayer</a></li>
+<li><a href="{% url 'swagger-ui' %}">browseable-api</a></li>
+<h1>{% translate "CRUD for Models"%}</h1>
+{{ block.super }}
+{% endblock %}

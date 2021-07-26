@@ -1,0 +1,41 @@
+{% extends "admin/change_list.html" %}
+{% block content_title %}
+<h1> LiDAR Dataset Summary </h1>
+{% endblock %}
+{% load humanize %}
+{% block result_list %}
+<style>
+    .stat {
+        margin: 3em;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat h1 {
+        font-size: 3em;
+    }
+</style>
+<h1>Summary of LiDAR Datasets</h1>
+<div class=”results”>
+    <div style="display: grid;">
+        <div class="stat">
+            <h1>{{ number_inspected | default:0 }}</h1>
+            <p> number inspected </p>
+        </div>
+        <div class="stat">
+            <h1>{{ number_tiled | default:0 }}</h1>
+            <p> number tiled </p>
+        </div>
+        <div class="stat">
+            <h1>{{ total | default:0 }}</h1>
+            <p> total number of datasets </p>
+        </div>
+        <div class="stat">
+            <h1>{{ noisy | default:0 }}</h1>
+            <p> number of noisy datasets </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block pagination %}{% endblock %}

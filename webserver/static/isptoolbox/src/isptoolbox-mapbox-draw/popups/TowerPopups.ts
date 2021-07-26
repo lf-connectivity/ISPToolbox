@@ -61,7 +61,7 @@ enum ImperialToMetricConversion {
     MI_TO_KM = 'mi2km'
 }
 
-const DEBOUNCE_TIME = 200;
+const DEBOUNCE_TIME = 500;
 
 const CONVERSION_FORMULAS: Map<ImperialToMetricConversion, (input: number) => number> = new Map();
 CONVERSION_FORMULAS.set(ImperialToMetricConversion.FT_TO_M, (input: number) => {
@@ -130,6 +130,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
 
     protected setEventHandlers() {
         const updateAP = () => {
+            console.log('updating ap')
             if (this.accessPoint) {
                 let feat = this.accessPoint.getFeatureData();
                 this.map.fire('draw.update', { features: [feat] });
@@ -174,6 +175,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
 
         $(`#${NAME_INPUT_ID}`).on('input',
             _.debounce((e: any) => {
+                console.log('updating name');
                 let name = validateName(String($(`#${NAME_INPUT_ID}`).val()), NAME_INPUT_ID);
 
                 this.accessPoint?.setFeatureProperty('name', name);
@@ -192,7 +194,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         return `
             <div class="tooltip--tower-summary">
                 <div class="title"> 
-                    <h6>Edit Tower</h6>
+                    <h6>Edit Tower 2</h6>
                 </div>
                 <div>
                     <ul>

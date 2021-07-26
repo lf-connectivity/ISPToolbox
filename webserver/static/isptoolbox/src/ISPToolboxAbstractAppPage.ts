@@ -150,6 +150,10 @@ export abstract class ISPToolboxAbstractAppPage {
             document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
 
             new MapboxSDKClient(mapboxgl.accessToken);
+            
+            $('#map-layers-btn').prop('disabled', false);
+
+            
 
             // Additional loading
             this.onMapLoad();

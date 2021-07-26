@@ -188,6 +188,13 @@ export default class MarketEvaluatorOverlayManager {
                     $(`#map-layers-btn`).on('click', (event) => {
                         $(`#map`).toggleClass(["col-md-6", "col-md-9"]);
                         $(`#map`).toggleClass(["col-lg-7", "col-lg-9"]);
+                        const $sidebar = $('#map-layer-sidebar');
+                        if ( $sidebar.hasClass('show')) {
+                            $sidebar.removeClass('show')
+                        } else {
+                            $sidebar.addClass('show')
+                        }
+                        
                         this.map.resize();
                     });
                     this.map.off('idle', loadMapCallback);
@@ -197,7 +204,7 @@ export default class MarketEvaluatorOverlayManager {
             });
         }
         this.map.on('idle', loadMapCallback);
-
+        
         for (const lString in this.sources) {
             const layerKey: GeoLayerString = lString as GeoLayerString;
             $(`#switch-${layerKey}`).on('click', () => {

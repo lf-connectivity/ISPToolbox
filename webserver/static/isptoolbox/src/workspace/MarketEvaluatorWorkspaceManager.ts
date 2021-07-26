@@ -57,6 +57,14 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
     }
 
     initUpdateFeatureHandlers() {
+        this.updateFeatureAjaxHandlers[WorkspaceFeatureTypes.AP].pre_update = (feat: BaseWorkspaceFeature) => {
+            let ws = MarketEvaluatorWS.getInstance();
+
+            // Cancel Tower Viewshed request if request matches AP.
+            if (ws.getCurrentRequest(MarketEvalWSRequestType.VIEWSHED).apUuid === feat.workspaceId) {
+                ws.cancelCurrentRequest(MarketEvalWSRequestType.VIEWSHED);
+            }
+        }
         this.updateFeatureAjaxHandlers[WorkspaceFeatureTypes.AP].post_update = (feat: BaseWorkspaceFeature) => {
             let ap = feat as AccessPoint
             MarketEvaluatorTowerPopup.getInstance().onAPUpdate(ap);

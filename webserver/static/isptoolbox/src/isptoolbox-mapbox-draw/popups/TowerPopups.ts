@@ -14,7 +14,7 @@ import {
 import { sanitizeString } from "../../molecules/InputValidator";
 import { parseFormLatitudeLongitude } from "../../utils/LatLngInputUtils";
 import { LOSWSEvents, ViewshedProgressResponse, ViewshedUnexpectedError } from "../../LOSCheckWS";
-import MarketEvaluatorWS from "../../MarketEvaluatorWS";
+import MarketEvaluatorWS, { MarketEvalWSEvents, MarketEvalWSRequestType, ViewshedGeojsonResponse } from "../../MarketEvaluatorWS";
 
 var _ = require('lodash');
 
@@ -28,6 +28,33 @@ const PLOT_COVERAGE_BUTTON_ID = 'plot-estimated-coverage-button-tower-popup';
 const COVERAGE_LI_ID = 'coverage-li-tower-popup';
 const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
 const DELETE_ROW_DIV_ID = 'delete-tower-row-tower-popup';
+
+const LOADING_SVG = `
+    <svg
+    class="loader-logo" 
+    width="25"
+    height="25"
+    viewBox="0 0 157 120"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <rect
+        width="23.9455"
+        height="119.727"
+        transform="matrix(-1 0 0 1 90.5199 0)"
+        fill="#A8B0B7"
+    />
+    <path
+        class="WispLoadingIcon_animatingRectangle"
+        d="M0.124794 0H46.7554V35.288L0.124794 0Z"
+        fill="#A8B0B7"
+    />
+    <path
+        class="WispLoadingIcon_animatingRectangle"
+        d="M156.97 0H110.339V35.288L156.97 0Z"
+        fill="#A8B0B7"
+    />
+    </svg>
+`
 
 enum ImperialToMetricConversion {
     FT_TO_M = 'ft2m',
@@ -321,30 +348,7 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
         if (this.error === null) {
             return `
             <div align="center">
-                <svg
-                class="loader-logo" 
-                width="25"
-                height="25"
-                viewBox="0 0 157 120"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <rect
-                    width="23.9455"
-                    height="119.727"
-                    transform="matrix(-1 0 0 1 90.5199 0)"
-                    fill="#A8B0B7"
-                />
-                <path
-                    class="WispLoadingIcon_animatingRectangle"
-                    d="M0.124794 0H46.7554V35.288L0.124794 0Z"
-                    fill="#A8B0B7"
-                />
-                <path
-                    class="WispLoadingIcon_animatingRectangle"
-                    d="M156.97 0H110.339V35.288L156.97 0Z"
-                    fill="#A8B0B7"
-                />
-                </svg>
+                ${LOADING_SVG}
                 <p align="center bold">${this.progress_message ? this.progress_message : 'Starting Computation'}</p>
                 <p align="center">${this.formatTimeRemaining()}</p>
             </div>
@@ -431,6 +435,9 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
         }
         super(map, draw);
         MarketEvaluatorTowerPopup._instance = this;
+        PubSub.subscribe(MarketEvalWSEvents.SEND_REQUEST, this.onWSRequestSendOrCancel.bind(this));
+        PubSub.subscribe(MarketEvalWSEvents.REQUEST_CANCELLED, this.onWSRequestSendOrCancel.bind(this));
+        PubSub.subscribe(MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG, this.onWSViewshedMsg.bind(this));
     }
 
     static getInstance() {
@@ -463,15 +470,75 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
 
     protected getAdditionalInfo() {
         return `
-            <li class="button-row" id='${COVERAGE_LI_ID}'>
+            <li class="stat-row" id='${COVERAGE_LI_ID}'>
                 ${this.getButtonHTML()}
             </li>
         `
     }
 
     protected getButtonHTML() {
-        return `
-            <button class='btn btn-primary isptoolbox-btn' id='${PLOT_COVERAGE_BUTTON_ID}'>Plot Estimated Coverage</button>
-        `
+        // Three states: Plotting lidar coverage, plotted lidar coverage, no lidar coverage.
+        let ws = MarketEvaluatorWS.getInstance();
+
+        // Plotted Lidar Coverage
+        if (
+            this.accessPoint?.getFeatureData().properties.cloudrf_coverage_geojson_json &&
+            this.accessPoint?.getFeatureData().properties.cloudrf_coverage_geojson_json !== null
+        ) {
+            return `
+                <div align="center">
+                    <img src="${pass_svg}" width="25" height="25">
+                    <p align="center bold">Lidar Coverage Plotted</p>>
+                </div>
+            `
+        }
+
+        // Plotting Lidar Coverage 
+        else if (ws.getCurrentRequest(MarketEvalWSRequestType.VIEWSHED)?.apUuid === this.accessPoint?.workspaceId) {
+            return `
+                <div align="center">
+                    ${LOADING_SVG}
+                    <p align="center bold">Plotting Lidar Coverage</p>>
+                </div>
+            `
+        }
+
+        // No lidar coverage and not plotting lidar coverage either
+        else {
+            return `
+                <button class='btn btn-primary isptoolbox-btn' id='${PLOT_COVERAGE_BUTTON_ID}'>Plot Estimated Coverage</button>
+            `
+        }
+    }
+
+    protected refreshPopup() {
+        $(`#${COVERAGE_LI_ID}`).html(this.getButtonHTML());
+        this.setEventHandlers();
+    }
+
+    protected onWSRequestSendOrCancel(msg: string, request: any) {
+        if (
+            request.request_type === MarketEvalWSRequestType.VIEWSHED &&
+            request.apUuid === this.accessPoint?.workspaceId
+            ) {
+            this.refreshPopup();
+        }
+    }
+
+    protected onWSViewshedMsg(msg: string, response: ViewshedGeojsonResponse) {
+        if (response.ap_uuid === this.accessPoint?.workspaceId) {
+            let coords = this.accessPoint.getFeatureGeometryCoordinates() as [number, number];
+
+            // Fly to AP if AP isn't on map. We center the AP horizontally, but place it
+            // 65% of the way down on the screen so the tooltip fits.
+            if (!this.map.getBounds().contains(coords)) {
+                let south = this.map.getBounds().getSouth();
+                let north = this.map.getBounds().getNorth();
+                this.map.flyTo({
+                    center: [coords[0], coords[1] + + 0.15 * (north - south)]
+                });
+            }
+            this.refreshPopup();
+        }
     }
 }

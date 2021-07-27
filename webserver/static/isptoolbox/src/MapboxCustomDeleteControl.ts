@@ -24,6 +24,7 @@ export default class MapboxCustomDeleteControl {
 
   clickCallback: { (event: MouseEvent): void } = (event: MouseEvent) => {
     const selectedFeatures = this.draw.getSelected().features;
+    console.log(selectedFeatures);
     const mode = this.draw.getMode();
     this.draw.changeMode('simple_select');
     const { features } = this.draw.getAll();
@@ -36,7 +37,8 @@ export default class MapboxCustomDeleteControl {
 
     if (selectedFeatures.length) {
       const confirmDeleteCallback = () => {
-        const ids = selectedFeatures.map((f) => f.id).filter((f) => f === undefined);
+        const ids = selectedFeatures.map((f) => f.id).filter((f) => f !== undefined);
+        console.log(ids)
         //@ts-ignore
         this.draw.delete(ids);
         this.map.fire('draw.delete', { features: selectedFeatures });

@@ -190,9 +190,12 @@ abstract class RadiusAndBuildingCoverageRenderer {
         this.renderBuildings();
         if (features.length === 1 && features[0].properties?.feature_type === WorkspaceFeatureTypes.AP) {
             let ap = this.workspaceManager.features[features[0].properties.uuid] as AccessPoint;
-            this.apPopup.hide();
-            this.apPopup.setAccessPoint(ap);
-            this.apPopup.show();
+            if (this.apPopup.getAccessPoint() !== ap) {
+                this.apPopup.hide();
+                this.apPopup.setAccessPoint(ap);
+                this.apPopup.show();
+            };
+            
         }
     }
     updateBuildingCoverage(msg: string, data: { features: Array<GeoJSON.Feature> }) {

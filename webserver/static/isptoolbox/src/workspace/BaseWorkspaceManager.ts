@@ -227,6 +227,7 @@ export abstract class BaseWorkspaceManager {
     }
 
     protected updateFeatures({ features, action }: { features: Array<any>, action: 'move' | 'change_coordinates' }) {
+        console.log('running update features', features)
         // We don't need to do updates by type in a certain order, so a switch
         // statement will do.
         features.forEach((feature: any) => {

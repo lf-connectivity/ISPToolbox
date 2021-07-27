@@ -189,7 +189,7 @@ export default class MarketEvaluatorOverlayManager {
                         $(`#map`).toggleClass(["col-md-6", "col-md-9"]);
                         $(`#map`).toggleClass(["col-lg-7", "col-lg-9"]);
                         const $sidebar = $('#map-layer-sidebar');
-                        if ( $sidebar.hasClass('show')) {
+                        if ($sidebar.hasClass('show')) {
                             $sidebar.removeClass('show')
                         } else {
                             $sidebar.addClass('show')

@@ -3,11 +3,13 @@ from django.views import View
 from workspace import models
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from workspace.mixnins import SuperuserRequiredMixin
+from waffle.mixins import WaffleFlagMixin
 
 
 @method_decorator(login_required, name='dispatch')
-class MultiplayerTestView(SuperuserRequiredMixin, View):
+class MultiplayerTestView(WaffleFlagMixin, View):
+    waffle_flag = 'multiplayer'
+
     def get(self, request, session_id=None):
         session, created = models.MultiplayerSession.objects.get_or_create(
             session_id=session_id
@@ -16,10 +18,10 @@ class MultiplayerTestView(SuperuserRequiredMixin, View):
             return redirect(request.path_info + f'{session.session_id}/')
         token = session.storeUserAuthSession(request.user)
         context = {
-                'session': {
-                    'id': session.session_id,
-                    'token': token
-                }
+            'session': {
+                'id': session.session_id,
+                'token': token
+            }
         }
         return render(
             request,

@@ -91,6 +91,8 @@ urlpatterns = [
     url(r'^hijack/', include('hijack.urls', namespace='hijack')),
     # Integration Test Endpoints - be sure to 404 in prod
     path('test/accounts/', IntegrationTestAccountCreationView.as_view(), name="test-accounts"),
+    # Feature Flipper
+    url(r'^', include('waffle.urls')),
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -69,11 +69,15 @@ export const MAX_NAME_LEN = 50;
 const DEFAULT_STREET = 'Unknown Street Name';
 
 export function isBeta(): boolean {
-    const contents = document.getElementById('los_beta')?.textContent;
-    if (typeof contents !== 'string') {
-        return false;
+    const waffle = (window as any).waffle;
+    if (waffle !== undefined) {
+        try {
+            return waffle.flag_is_active('beta');
+        } catch (e) {
+            return false;
+        }
     }
-    return JSON.parse(contents);
+    return false;
 }
 
 export function getStreetAndAddressInfo(mapboxPlace: string) {

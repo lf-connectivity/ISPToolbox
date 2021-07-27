@@ -138,6 +138,11 @@ export function OverrideDirect(additionalFunctionality = {}) {
         }
     };
     direct_select.dragFeature = function (state, e, delta) {
+        // Don't drag if lockDragging is on
+        if (this.drawConfig.lockDragging) {
+            return;
+        }
+
         // deselect uneditable features, and only move those that are editable.
         // Links are uneditable; users should move APs and CPEs instead.
         const selected = this.getSelected();

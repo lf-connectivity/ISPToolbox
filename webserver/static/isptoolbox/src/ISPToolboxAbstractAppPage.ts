@@ -5,12 +5,12 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 //@ts-ignore
 import styles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import { combineStyles, load_custom_icons } from './isptoolbox-mapbox-draw/index';
-import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
-import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
-import { setCenterZoomPreferences } from './utils/MapPreferences';
-import { MapboxSDKClient } from './MapboxSDKClient';
-import { parseSearchBarLatitudeLongitude } from './utils/LatLngInputUtils';
-import { isBeta } from './LinkCheckUtils';
+import MapboxCustomDeleteControl from "./organisms/controls/MapboxCustomDeleteControl";
+import { setCenterZoomPreferences } from "./utils/MapPreferences";
+import { MapboxSDKClient } from "./MapboxSDKClient";
+import { parseSearchBarLatitudeLongitude } from "./utils/LatLngInputUtils";
+import { isBeta } from "./LinkCheckUtils";
+import MapboxLockDraggingControl from "./organisms/controls/MapboxLockDraggingControl";
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -83,6 +83,9 @@ export abstract class ISPToolboxAbstractAppPage {
                 styles: mapboxdrawstyles
             });
 
+            // @ts-ignore
+            this.draw.options.lockDragging = false;
+
             this.map.addControl(this.draw, 'bottom-right');
             const delete_confirmation = isBeta();
             const deleteControl = new MapboxCustomDeleteControl(
@@ -90,8 +93,13 @@ export abstract class ISPToolboxAbstractAppPage {
                 this.draw,
                 delete_confirmation
             );
+            const lockDragControl = new MapboxLockDraggingControl(
+                this.map,
+                this.draw
+            );
 
             this.map.addControl(deleteControl, 'bottom-right');
+            this.map.addControl(lockDragControl, 'bottom-right');
             this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
             // Add buttons

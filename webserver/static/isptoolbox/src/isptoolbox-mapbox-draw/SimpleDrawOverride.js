@@ -40,6 +40,11 @@ export function OverrideSimple() {
   };
 
   simple_select.dragMove = function (state, e) {
+    // Don't drag if lockDragging is on
+    if (this._ctx.options.lockDragging) {
+      return;
+    }
+
     // deselect uneditable features, and only move those that are editable.
     const editableFeatures = this.getSelected().filter(
       feature => !isUneditable(feature)

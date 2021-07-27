@@ -11,7 +11,6 @@ export abstract class LinkCheckBasePopup {
     protected city: string;
     protected lnglat: [number, number];
     protected popup: mapboxgl.Popup;
-    protected isOpen: boolean;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         this.map = map;
@@ -25,7 +24,6 @@ export abstract class LinkCheckBasePopup {
         this.popup.on('close', () => {
             this.cleanup();
         });
-        this.isOpen = true;
     }
 
     setAddress(address: string) {
@@ -79,8 +77,6 @@ export abstract class LinkCheckBasePopup {
     }
 
     protected abstract getHTML(): string;
-    protected cleanup(): void {
-        this.isOpen = false;
-    };
+    protected abstract cleanup(): void;
     protected abstract setEventHandlers(): void;
 }

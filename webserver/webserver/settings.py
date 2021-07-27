@@ -60,6 +60,13 @@ LOGGING = {
         'handlers': ['console'],
         'level': 'WARNING',
     },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO' if DEBUG else 'ERROR',
+            'propagate': False,
+        },
+    },
 }
 
 # Static files (CSS, JavaScript, Images)

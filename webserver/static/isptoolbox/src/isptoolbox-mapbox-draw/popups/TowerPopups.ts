@@ -130,7 +130,6 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
 
     protected setEventHandlers() {
         const updateAP = () => {
-            console.log('updating ap')
             if (this.accessPoint) {
                 let feat = this.accessPoint.getFeatureData();
                 this.map.fire('draw.update', { features: [feat] });
@@ -175,7 +174,6 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
 
         $(`#${NAME_INPUT_ID}`).on('input',
             _.debounce((e: any) => {
-                console.log('updating name');
                 let name = validateName(String($(`#${NAME_INPUT_ID}`).val()), NAME_INPUT_ID);
                 this.accessPoint?.setFeatureProperty('name', name);
                 updateAP();

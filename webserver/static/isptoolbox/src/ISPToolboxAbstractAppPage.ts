@@ -1,16 +1,16 @@
 // Create new mapbox Map
-import * as MapboxGL from "mapbox-gl";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import * as MapboxGL from 'mapbox-gl';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 //@ts-ignore
-import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
-import { LinkMode, OverrideDirect, OverrideSimple, CPEDrawMode, combineStyles, load_custom_icons, APDrawMode} from './isptoolbox-mapbox-draw/index';
-import { LOSCheckMapboxStyles} from './LOSCheckMapboxStyles';
-import MapboxCustomDeleteControl from "./MapboxCustomDeleteControl";
-import { setCenterZoomPreferences } from "./utils/MapPreferences";
-import { MapboxSDKClient } from "./MapboxSDKClient";
-import { parseSearchBarLatitudeLongitude } from "./utils/LatLngInputUtils";
-import { isBeta } from "./LinkCheckUtils";
+import styles from '@mapbox/mapbox-gl-draw/src/lib/theme';
+import { combineStyles, load_custom_icons } from './isptoolbox-mapbox-draw/index';
+import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
+import MapboxCustomDeleteControl from './MapboxCustomDeleteControl';
+import { setCenterZoomPreferences } from './utils/MapPreferences';
+import { MapboxSDKClient } from './MapboxSDKClient';
+import { parseSearchBarLatitudeLongitude } from './utils/LatLngInputUtils';
+import { isBeta } from './LinkCheckUtils';
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -27,13 +27,11 @@ const LOWEST_LAYER_SOURCE = 'lowest_layer_source';
 export const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
 
 function addEventHandler(map: mapboxgl.Map, draw: MapboxDraw, id: string, mode: string) {
-    $(`#${id}`).click(
-        () => {
-            //@ts-ignore
-            draw.changeMode(mode);
-            map.fire('draw.modechange', {mode: mode});
-        }
-    );
+    $(`#${id}`).click(() => {
+        //@ts-ignore
+        draw.changeMode(mode);
+        map.fire('draw.modechange', { mode: mode });
+    });
 }
 
 export abstract class ISPToolboxAbstractAppPage {
@@ -49,13 +47,13 @@ export abstract class ISPToolboxAbstractAppPage {
             initial_map_center = window.ISPTOOLBOX_SESSION_INFO.initialMapCenter.coordinates;
             // @ts-ignore
             initial_zoom = window.ISPTOOLBOX_SESSION_INFO.initialMapZoom;
-        } catch (err) { }
+        } catch (err) {}
 
         this.map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
             center: initial_map_center, // starting position [lng, lat]
-            zoom: initial_zoom, // starting zoom
+            zoom: initial_zoom // starting zoom
         });
 
         this.map.on('load', () => {
@@ -63,27 +61,25 @@ export abstract class ISPToolboxAbstractAppPage {
             setCenterZoomPreferences(this.map);
             load_custom_icons(this.map);
             this.map.on('draw.modechange', this.drawModeChangeCallback.bind(this));
-            this.map.addSource(LOWEST_LAYER_SOURCE, {type: 'geojson', data : {type: 'FeatureCollection', features: []}});
+            this.map.addSource(LOWEST_LAYER_SOURCE, {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] }
+            });
             this.map.addLayer({
-                'id': LOWEST_LAYER_LAYER,
-                'type': 'line',
-                'source': LOWEST_LAYER_SOURCE,
-                'layout': {
-                },
-                'paint': {
-                }
+                id: LOWEST_LAYER_LAYER,
+                type: 'line',
+                source: LOWEST_LAYER_SOURCE,
+                layout: {},
+                paint: {}
             });
 
-            // Add a modified drawing control       
+            // Add a modified drawing control
             this.draw = new mapbox_draw_lib({
                 userProperties: true,
                 //@ts-ignore
-                modes: {...MapboxDraw.modes,
-                    ...draw_modes
-                },
+                modes: { ...MapboxDraw.modes, ...draw_modes },
                 displayControlsDefault: false,
-                controls: {
-                },
+                controls: {},
                 styles: mapboxdrawstyles
             });
 
@@ -109,9 +105,14 @@ export abstract class ISPToolboxAbstractAppPage {
             // Delete deletes things
             window.addEventListener('keydown', (event) => {
                 const featureCollection = this.draw.getSelected();
-                if (event.target === this.map.getCanvas() && (event.key === "Backspace" || event.key === "Delete")) {
-                    featureCollection.features.forEach((feat:any) => {this.draw.delete(feat.id)});
-                    this.map.fire('draw.delete', {features: featureCollection.features});
+                if (
+                    event.target === this.map.getCanvas() &&
+                    (event.key === 'Backspace' || event.key === 'Delete')
+                ) {
+                    featureCollection.features.forEach((feat: any) => {
+                        this.draw.delete(feat.id);
+                    });
+                    this.map.fire('draw.delete', { features: featureCollection.features });
                 }
             });
 
@@ -122,7 +123,7 @@ export abstract class ISPToolboxAbstractAppPage {
                     return null;
                 }
                 let lngLatMatch = [latLngMatch[1], latLngMatch[0]];
-    
+
                 return [
                     {
                         center: lngLatMatch,
@@ -135,9 +136,9 @@ export abstract class ISPToolboxAbstractAppPage {
                         properties: {},
                         type: 'Feature'
                     }
-                ]
+                ];
             };
-    
+
             this.geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
                 mapboxgl: mapboxgl,
@@ -150,7 +151,7 @@ export abstract class ISPToolboxAbstractAppPage {
             document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
 
             new MapboxSDKClient(mapboxgl.accessToken);
-            
+
             $('#map-layers-btn').prop('disabled', false);
 
             
@@ -160,16 +161,29 @@ export abstract class ISPToolboxAbstractAppPage {
         });
     }
 
-    initMapCenterAndZoom(): {initial_map_center: {'lat': number, 'lon': number}, initial_zoom: number} {
+    initMapCenterAndZoom(): {
+        initial_map_center: { lat: number; lon: number };
+        initial_zoom: number;
+    } {
         return {
-            initial_map_center: {lat: 0, lon:0},
+            initial_map_center: { lat: 0, lon: 0 },
             initial_zoom: 17
         };
     }
 
-    drawModeChangeCallback({mode} : { mode: string}){
-        $('.isp-draw-mode-btn').filter(function(idx) {return $(this).attr('draw_mode') !== mode}).removeClass('btn-primary').addClass('btn-secondary');
-        $('.isp-draw-mode-btn').filter(function(idx) {return $(this).attr('draw_mode') === mode}).addClass('btn-primary').removeClass('btn-secondary');
+    drawModeChangeCallback({ mode }: { mode: string }) {
+        $('.isp-draw-mode-btn')
+            .filter(function (idx) {
+                return $(this).attr('draw_mode') !== mode;
+            })
+            .removeClass('btn-primary')
+            .addClass('btn-secondary');
+        $('.isp-draw-mode-btn')
+            .filter(function (idx) {
+                return $(this).attr('draw_mode') === mode;
+            })
+            .addClass('btn-primary')
+            .removeClass('btn-secondary');
     }
 
     abstract onMapLoad(): void;

@@ -37,76 +37,76 @@ export enum MarketEvalWSEvents {
 }
 
 export type RDOFGeojsonResponse = {
-    error: number,
-    cbgid?: string,
-    geojson?: string,
+    error: number;
+    cbgid?: string;
+    geojson?: string;
 };
 
 export type ZipGeojsonResponse = {
-    error: number,
-    zip?: string,
-    geojson?: string,
+    error: number;
+    zip?: string;
+    geojson?: string;
 };
 
 export type TribalGeojsonResponse = {
-    error: number,
-    geoid?: string,
-    geojson?: string,
+    error: number;
+    geoid?: string;
+    geojson?: string;
 };
 
 export type CountyGeojsonResponse = {
-    error: number,
-    geojson?: string,
-    statecode?: string,
-    countycode?: string,
+    error: number;
+    geojson?: string;
+    statecode?: string;
+    countycode?: string;
 };
 
 export type CensusBlockGeojsonResponse = {
-    error: number,
-    geojson?: string,
-    blockcode?: string,
+    error: number;
+    geojson?: string;
+    blockcode?: string;
 };
 
 export type ViewshedGeojsonResponse = {
-    error: number,
-    coverage?: string,
-    ap_uuid: string,
-    uuid: string,
+    error: number;
+    coverage?: string;
+    ap_uuid: string;
+    uuid: string;
 };
 
 export type MedianSpeed = {
-    'Download (Mbit/s)': string,
-    'Upload (Mbit/s)': string,
-    Zipcode: string,
-    pct_area: string,
+    'Download (Mbit/s)': string;
+    'Upload (Mbit/s)': string;
+    Zipcode: string;
+    pct_area: string;
 };
 
 export type MedianSpeedResponse = Array<MedianSpeed>;
 
 export type ServiceProvidersResponse = {
-    error: number,
-    competitors: Array<string>,
-    down_ad_speed: Array<number>,
-    tech_used: Array<Array<number>>,
-    up_ad_speed: Array<number>,
+    error: number;
+    competitors: Array<string>;
+    down_ad_speed: Array<number>;
+    tech_used: Array<Array<number>>;
+    up_ad_speed: Array<number>;
 };
 
 export type BroadbandNowResponse = {
-    bbnPriceRange: Array<string> | null,
+    bbnPriceRange: Array<string> | null;
 };
 
 export type BuildingOverlaysResponse = {
-    done: boolean,
+    done: boolean;
     gc: {
-        type: string,
-        geometries: Array<GeoJSON.Polygon>,
-    },
-    offset: string,
+        type: string;
+        geometries: Array<GeoJSON.Polygon>;
+    };
+    offset: string;
 };
 
 export type MedianIncomeResponse = {
-    averageMedianIncome: number,
-    error?: string,
+    averageMedianIncome: number;
+    error?: string;
 };
 
 type MarketEvaluatorWSValue =
@@ -124,11 +124,10 @@ type MarketEvaluatorWSValue =
 type GeoArea = GeoJSON.FeatureCollection | GeoJSON.Feature | GeoJSON.GeometryObject;
 
 export type MarketEvaluatorWSResponse = {
-    type: string,
-    uuid: string,
-    value: MarketEvaluatorWSValue,
+    type: string;
+    uuid: string;
+    value: MarketEvaluatorWSValue;
 };
-
 
 interface MarketEvaluatorWSCallback {
     (message: MarketEvaluatorWSResponse): void;
@@ -142,7 +141,7 @@ export type UUID = string;
  * http://stackoverflow.com/questions/105034
  */
 export function uuid(): UUID {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
         const r = (Math.random() * 16) | 0;
         const v = c == 'x' ? r : (r & 0x3) | 0x8;
         return v.toString(16);
@@ -154,21 +153,21 @@ class MarketEvaluatorWS {
     message_handlers: Array<MarketEvaluatorWSCallback>;
     currentRequests: {
         [request_type in MarketEvalWSRequestType]: {
-            uuid: UUID,
-            request_type: MarketEvalWSRequestType,
-            [s: string]: any
-        }
-    }
+            uuid: UUID;
+            request_type: MarketEvalWSRequestType;
+            [s: string]: any;
+        };
+    };
     private static _instance: MarketEvaluatorWS;
 
     constructor(message_handlers: Array<MarketEvaluatorWSCallback>) {
         if (MarketEvaluatorWS._instance) {
-            throw Error("This singleton has already been instantiated, use getInstance.");
+            throw Error('This singleton has already been instantiated, use getInstance.');
         }
         this.message_handlers = message_handlers;
         let currentRequests: any = {};
         Object.values(MarketEvalWSRequestType).forEach((v: string) => {
-            currentRequests[v] = {uuid: uuid()};
+            currentRequests[v] = { uuid: uuid() };
         });
         this.currentRequests = currentRequests;
 
@@ -179,8 +178,7 @@ class MarketEvaluatorWS {
     static getInstance(): MarketEvaluatorWS {
         if (MarketEvaluatorWS._instance) {
             return MarketEvaluatorWS._instance;
-        }
-        else {
+        } else {
             throw new Error('No Instance of MarketEvaluatorWS instantiated.');
         }
     }
@@ -202,7 +200,6 @@ class MarketEvaluatorWS {
         const domain = location.protocol !== 'https:' ? location.host : 'isptoolbox.io';
         this.ws = new WebSocket(protocol + domain + '/ws/market-evaluator/');
 
-
         this.ws.onclose = (e) => {
             this.setConnectionStatus(false);
             setTimeout(() => {
@@ -221,27 +218,35 @@ class MarketEvaluatorWS {
                 handler(response);
             });
             // One active request per message type.
-            if (!Object.values(this.currentRequests).map((f: any) => f.uuid).includes(response.uuid)) {
+            if (
+                !Object.values(this.currentRequests)
+                    .map((f: any) => f.uuid)
+                    .includes(response.uuid)
+            ) {
                 return;
             }
             switch (response.type) {
                 case 'building.overlays':
-                    const buildings: BuildingOverlaysResponse = response.value as BuildingOverlaysResponse;
+                    const buildings: BuildingOverlaysResponse =
+                        response.value as BuildingOverlaysResponse;
                     PubSub.publish(MarketEvalWSEvents.BUILDING_OVERLAYS_MSG, buildings);
                     break;
 
                 case 'median.income':
-                    const medianIncome: MedianIncomeResponse = response.value as MedianIncomeResponse;
+                    const medianIncome: MedianIncomeResponse =
+                        response.value as MedianIncomeResponse;
                     PubSub.publish(MarketEvalWSEvents.INCOME_MSG, medianIncome);
                     break;
 
                 case 'service.providers':
-                    const serviceProviders: ServiceProvidersResponse = response.value as ServiceProvidersResponse;
+                    const serviceProviders: ServiceProvidersResponse =
+                        response.value as ServiceProvidersResponse;
                     PubSub.publish(MarketEvalWSEvents.SERVICE_PROV_MSG, serviceProviders);
                     break;
 
                 case 'broadband.now':
-                    const broadBandNow: BroadbandNowResponse = response.value as BroadbandNowResponse;
+                    const broadBandNow: BroadbandNowResponse =
+                        response.value as BroadbandNowResponse;
                     PubSub.publish(MarketEvalWSEvents.BROADBAND_NOW_MSG, broadBandNow);
                     break;
 
@@ -266,21 +271,25 @@ class MarketEvaluatorWS {
                     break;
 
                 case 'county.geog':
-                    const countyGeog: CountyGeojsonResponse = response.value as CountyGeojsonResponse;
+                    const countyGeog: CountyGeojsonResponse =
+                        response.value as CountyGeojsonResponse;
                     PubSub.publish(MarketEvalWSEvents.COUNTY_GEOG_MSG, countyGeog);
                     break;
 
                 case 'censusblock.geog':
-                    const censusBlockGeog: CensusBlockGeojsonResponse = response.value as CensusBlockGeojsonResponse;
+                    const censusBlockGeog: CensusBlockGeojsonResponse =
+                        response.value as CensusBlockGeojsonResponse;
                     PubSub.publish(MarketEvalWSEvents.CENSUSBLOCK_GEOG_MSG, censusBlockGeog);
                     break;
 
                 case 'tribal.geog':
-                    const tribalGeog: TribalGeojsonResponse = response.value as TribalGeojsonResponse;
-                    PubSub.publish(MarketEvalWSEvents.TRIBAL_GEOG_MSG, tribalGeog)
+                    const tribalGeog: TribalGeojsonResponse =
+                        response.value as TribalGeojsonResponse;
+                    PubSub.publish(MarketEvalWSEvents.TRIBAL_GEOG_MSG, tribalGeog);
 
                 case 'tower.viewshed':
-                    const viewshed: ViewshedGeojsonResponse = response.value as ViewshedGeojsonResponse;
+                    const viewshed: ViewshedGeojsonResponse =
+                        response.value as ViewshedGeojsonResponse;
                     PubSub.publish(MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG, viewshed);
                     break;
 
@@ -300,13 +309,13 @@ class MarketEvaluatorWS {
     convertGeoJSONObject(obj: GeoArea): GeoJSON.GeometryObject {
         if (obj.type === 'FeatureCollection') {
             const geometries = obj.features
-                .map(f => {
+                .map((f) => {
                     return f.geometry;
                 })
                 .filter(Boolean);
             return {
                 type: 'GeometryCollection',
-                geometries,
+                geometries
             };
         } else if (obj.type === 'Feature') {
             return obj.geometry;
@@ -320,11 +329,14 @@ class MarketEvaluatorWS {
      * @param req Json Object
      * @returns The request-identifying UUID sent with the request
      */
-    private sendJsonWithUUID(req: {request_type: MarketEvalWSRequestType, [s: string]: any}): UUID {
+    private sendJsonWithUUID(req: {
+        request_type: MarketEvalWSRequestType;
+        [s: string]: any;
+    }): UUID {
         const reqUUID: UUID = uuid();
         const reqWithUUID = {
             ...req,
-            uuid: reqUUID,
+            uuid: reqUUID
         };
         this.currentRequests[req.request_type] = reqWithUUID;
         this.ws.send(JSON.stringify(reqWithUUID));
@@ -342,21 +354,20 @@ class MarketEvaluatorWS {
         if (request_type === undefined) {
             Object.keys(this.currentRequests).forEach((type: MarketEvalWSRequestType) => {
                 oldRequest = this.getCurrentRequest(type);
-                this.currentRequests[type] = {request_type: type, uuid: uuid()};
+                this.currentRequests[type] = { request_type: type, uuid: uuid() };
                 PubSub.publish(MarketEvalWSEvents.REQUEST_CANCELLED, oldRequest);
             });
-        }
-        else {
+        } else {
             oldRequest = this.getCurrentRequest(request_type);
-            this.currentRequests[request_type] = {request_type, uuid: uuid()};
+            this.currentRequests[request_type] = { request_type, uuid: uuid() };
             PubSub.publish(MarketEvalWSEvents.REQUEST_CANCELLED, oldRequest);
         }
     }
-    
+
     /**
      * Gets the current request of a certain request type.
      * @param request_type Request type
-     * @returns 
+     * @returns
      */
     getCurrentRequest(request_type: MarketEvalWSRequestType) {
         return _.omit(this.currentRequests[request_type], ['uuid']);
@@ -370,7 +381,7 @@ class MarketEvaluatorWS {
     sendPolygonRequest(include: GeoArea): UUID {
         let uuid = this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.POLYGON,
-            include: this.convertGeoJSONObject(include),
+            include: this.convertGeoJSONObject(include)
         });
         return uuid;
     }
@@ -383,7 +394,7 @@ class MarketEvaluatorWS {
     sendRDOFRequest(cbgid: string): UUID {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.RDOF,
-            cbgid,
+            cbgid
         });
     }
 
@@ -395,7 +406,7 @@ class MarketEvaluatorWS {
     sendZipRequest(zip: string): UUID {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.ZIP,
-            zip,
+            zip
         });
     }
 
@@ -409,7 +420,7 @@ class MarketEvaluatorWS {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.COUNTY,
             countycode,
-            statecode,
+            statecode
         });
     }
 
@@ -421,14 +432,14 @@ class MarketEvaluatorWS {
     sendCensusBlockRequest(blockcode: string): UUID {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.CENSUS_BLOCK,
-            blockcode,
+            blockcode
         });
     }
 
     sendTribalRequest(geoid: string): UUID {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.TRIBAL,
-            geoid,
+            geoid
         });
     }
 
@@ -442,7 +453,14 @@ class MarketEvaluatorWS {
      * @param apUuid AP UUID
      * @returns The request-identifying UUID
      */
-    sendViewshedRequest(customerHeight: number, height: number, lat: number, lon: number, radius: number, apUuid: string): UUID {
+    sendViewshedRequest(
+        customerHeight: number,
+        height: number,
+        lat: number,
+        lon: number,
+        radius: number,
+        apUuid: string
+    ): UUID {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.VIEWSHED,
             customerHeight,

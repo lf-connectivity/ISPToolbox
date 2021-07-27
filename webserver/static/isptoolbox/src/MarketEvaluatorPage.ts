@@ -1,16 +1,21 @@
 // Create new mapbox Map
-import * as MapboxGL from "mapbox-gl";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import MarketEvaluatorWS from "./MarketEvaluatorWS";
+import * as MapboxGL from 'mapbox-gl';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import MarketEvaluatorWS from './MarketEvaluatorWS';
 import { MarketEvaluatorSidebarManager } from './organisms/MarketEvaluatorSidebarManager';
-import MarketEvaluatorOverlayManager from "./MarketEvaluatorOverlayManager";
+import MarketEvaluatorOverlayManager from './MarketEvaluatorOverlayManager';
 
-import { OverrideDirect, OverrideSimple, APDrawMode, OverrideDrawPolygon } from './isptoolbox-mapbox-draw/index';
-import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
-import { MarketEvaluatorWorkspaceManager } from "./workspace/MarketEvaluatorWorkspaceManager";
-import { MarketEvaluatorTowerPopup } from "./isptoolbox-mapbox-draw/popups/TowerPopups";
-import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from "./organisms/APCoverageRenderer";
-import { MultiThumbSlider } from "./atoms/MultiThumbSlider";
+import {
+    OverrideDirect,
+    OverrideSimple,
+    APDrawMode,
+    OverrideDrawPolygon
+} from './isptoolbox-mapbox-draw/index';
+import { ISPToolboxAbstractAppPage } from './ISPToolboxAbstractAppPage';
+import { MarketEvaluatorWorkspaceManager } from './workspace/MarketEvaluatorWorkspaceManager';
+import { MarketEvaluatorTowerPopup } from './isptoolbox-mapbox-draw/popups/TowerPopups';
+import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
+import { MultiThumbSlider } from './atoms/MultiThumbSlider';
 
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
@@ -37,7 +42,10 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
 
         // Tooltips
         new MarketEvaluatorTowerPopup(this.map, this.draw);
-        const radius_building_render = new MarketEvaluatorRadiusAndBuildingCoverageRenderer(this.map, this.draw);
+        const radius_building_render = new MarketEvaluatorRadiusAndBuildingCoverageRenderer(
+            this.map,
+            this.draw
+        );
 
         // Building Size Filter
         document.querySelectorAll('[role=multi-thumb-slider]').forEach((slider) => {
@@ -47,6 +55,5 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
             });
             $('#collapseBuildingFilter').on('shown.bs.collapse', filter.redraw.bind(filter));
         });
-
     }
 }

@@ -2,46 +2,50 @@
 const THREE = window.THREE;
 // @ts-ignore
 const Potree = window.Potree;
-import {calculateLookVector} from './HoverMoveLocation3DView';
-
+import { calculateLookVector } from './HoverMoveLocation3DView';
 
 /* Generate a Gerono lemniscate curve for the camera position, and target along the link path */
-export function createOrbitAnimationPath (tx: [number,number], tx_h: number, rx: [number,number], rx_h: number, radius: number, height: number, num_pts=50)
-: {targets: Array<[number,number, number]>, positions: Array<[number,number,number]>}
-{
-    const positions: Array<[number,number,number]> = [];
-    const targets: Array<[number,number,number]>  = [];
-    const xScaling = Math.sqrt((tx[0] - rx[0])*(tx[0] - rx[0]) + (tx[1] - rx[1])*( tx[1] - rx[1])) / (2.0) + radius;
+export function createOrbitAnimationPath(
+    tx: [number, number],
+    tx_h: number,
+    rx: [number, number],
+    rx_h: number,
+    radius: number,
+    height: number,
+    num_pts = 50
+): { targets: Array<[number, number, number]>; positions: Array<[number, number, number]> } {
+    const positions: Array<[number, number, number]> = [];
+    const targets: Array<[number, number, number]> = [];
+    const xScaling =
+        Math.sqrt((tx[0] - rx[0]) * (tx[0] - rx[0]) + (tx[1] - rx[1]) * (tx[1] - rx[1])) / 2.0 +
+        radius;
     const yScaling = radius;
     const offset = [(tx[0] + rx[0]) / 2.0, (tx[1] + rx[1]) / 2.0];
-    const angle = Math.atan2((tx[1] - rx[1]), (tx[0] - rx[0]))
+    const angle = Math.atan2(tx[1] - rx[1], tx[0] - rx[0]);
 
-    for(let i = 0; i <= num_pts; i++)
-    {
-        const t = 2.0 * Math.PI * i / num_pts;
-        const x_8 =  Math.sin(t) * xScaling;
-        const y_8 =  Math.sin(t) * Math.cos(t) * yScaling;
+    for (let i = 0; i <= num_pts; i++) {
+        const t = (2.0 * Math.PI * i) / num_pts;
+        const x_8 = Math.sin(t) * xScaling;
+        const y_8 = Math.sin(t) * Math.cos(t) * yScaling;
 
-        const pos : [number, number, number] = [
+        const pos: [number, number, number] = [
             offset[0] + x_8 * Math.cos(angle) + Math.sin(angle) * y_8,
             offset[1] + x_8 * Math.sin(angle) + Math.cos(angle) * y_8,
             Math.max(tx_h + height, rx_h + height)
         ];
         positions.push(pos);
-        let look : [number, number, number] = [tx[0], tx[1], tx_h];
+        let look: [number, number, number] = [tx[0], tx[1], tx_h];
 
-        if (t <  Math.PI)
-        {
+        if (t < Math.PI) {
             look = look;
-        } else if (t < 2.0 * Math.PI)
-        {
+        } else if (t < 2.0 * Math.PI) {
             look = [rx[0], rx[1], rx_h];
         } else {
             look = [tx[0], tx[1], tx_h];
         }
         targets.push(look);
     }
-    return {targets, positions};
+    return { targets, positions };
 }
 
 /**
@@ -52,19 +56,25 @@ export function createOrbitAnimationPath (tx: [number,number], tx_h: number, rx:
  * @param radius - distance path should be from link
  * @param height - height above link camera should be
  * @param num_pts - number of points in the animation path
- *  
+ *
  * @returns {Array<number>} profile adjusted for Earth's curvature
  */
-export function createTrackShappedOrbitPath(tx: [number,number], tx_h: number, rx: [number,number], rx_h: number, radius: number, height: number, num_pts=50)
-: {targets: Array<[number,number, number]>, positions: Array<[number,number,number]>}
-{
-    const positions: Array<[number,number,number]> = [];
-    const targets: Array<[number,number,number]>  = [];
-    const angle = Math.atan2((tx[1] - rx[1]), (tx[0] - rx[0]))
+export function createTrackShappedOrbitPath(
+    tx: [number, number],
+    tx_h: number,
+    rx: [number, number],
+    rx_h: number,
+    radius: number,
+    height: number,
+    num_pts = 50
+): { targets: Array<[number, number, number]>; positions: Array<[number, number, number]> } {
+    const positions: Array<[number, number, number]> = [];
+    const targets: Array<[number, number, number]> = [];
+    const angle = Math.atan2(tx[1] - rx[1], tx[0] - rx[0]);
 
-    function calculateTransitionArea(t: number): [number,number,number] {
-        if(t < Math.PI) {
-            const norm_t = (t - Math.PI * 3. / 4.) / (Math.PI / 4) * Math.PI + Math.PI / 2.;
+    function calculateTransitionArea(t: number): [number, number, number] {
+        if (t < Math.PI) {
+            const norm_t = ((t - (Math.PI * 3) / 4) / (Math.PI / 4)) * Math.PI + Math.PI / 2;
             const x_8 = radius * Math.cos(norm_t);
             const y_8 = radius * Math.sin(norm_t);
             return [
@@ -73,7 +83,7 @@ export function createTrackShappedOrbitPath(tx: [number,number], tx_h: number, r
                 rx_h + height
             ];
         } else {
-            const norm_t = (t - Math.PI * 7. / 4.) / (Math.PI / 4) * Math.PI +  3. * Math.PI / 2.;
+            const norm_t = ((t - (Math.PI * 7) / 4) / (Math.PI / 4)) * Math.PI + (3 * Math.PI) / 2;
             const x_8 = radius * Math.cos(norm_t);
             const y_8 = radius * Math.sin(norm_t);
             return [
@@ -84,39 +94,39 @@ export function createTrackShappedOrbitPath(tx: [number,number], tx_h: number, r
         }
     }
 
-    function getNormalizedPos(t: number): number{
-        if(t < Math.PI * 3.0 / 4.0){
-            return t * 4.0 / (3.0 * Math.PI);
+    function getNormalizedPos(t: number): number {
+        if (t < (Math.PI * 3.0) / 4.0) {
+            return (t * 4.0) / (3.0 * Math.PI);
         } else if (t < Math.PI) {
             return 1;
-        } else if (t < Math.PI * 7. / 4.) {
-            return -1 + (t - Math.PI) * 4.0 / (3.0 * Math.PI);
+        } else if (t < (Math.PI * 7) / 4) {
+            return -1 + ((t - Math.PI) * 4.0) / (3.0 * Math.PI);
         } else if (t < Math.PI * 2.0) {
             return -0;
         } else {
-            return  getNormalizedPos( t % (2*Math.PI));
+            return getNormalizedPos(t % (2 * Math.PI));
         }
     }
 
-    function inTransitionArea(t: number): boolean{
-        if(t < Math.PI * 3.0 / 4.0){
+    function inTransitionArea(t: number): boolean {
+        if (t < (Math.PI * 3.0) / 4.0) {
             return false;
         } else if (t < Math.PI) {
             return true;
-        } else if (t < Math.PI * 7. / 4.) {
+        } else if (t < (Math.PI * 7) / 4) {
             return false;
-        } else if (t < Math.PI * 2.0){
+        } else if (t < Math.PI * 2.0) {
             return true;
         } else {
-            return inTransitionArea(t % (2. * Math.PI));
+            return inTransitionArea(t % (2 * Math.PI));
         }
     }
 
-    for(let i = 0; i <= num_pts; i++) {
-        const t =  2 * Math.PI * i / num_pts;
-        
+    for (let i = 0; i <= num_pts; i++) {
+        const t = (2 * Math.PI * i) / num_pts;
+
         const norm_pos = getNormalizedPos(t);
-        const {location, lookAt} = calculateLookVector(tx, tx_h, rx, rx_h, norm_pos);
+        const { location, lookAt } = calculateLookVector(tx, tx_h, rx, rx_h, norm_pos);
         if (inTransitionArea(t)) {
             positions.push(calculateTransitionArea(t));
         } else {
@@ -125,26 +135,43 @@ export function createTrackShappedOrbitPath(tx: [number,number], tx_h: number, r
         targets.push(lookAt);
     }
 
-    return {targets, positions};
+    return { targets, positions };
 }
 
-export function createLinkGeometry(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number, max_fresnel_radius: number = 1.0)
-{
+export function createLinkGeometry(
+    tx: [number, number],
+    rx: [number, number],
+    tx_h: number,
+    rx_h: number,
+    max_fresnel_radius: number = 1.0
+) {
     var linkSize = calcLinkLength(tx, rx, tx_h, rx_h);
     var geometry = new THREE.SphereGeometry(1.0, 32, 32);
     geometry.scale(max_fresnel_radius, max_fresnel_radius, linkSize / 2.0);
-    var material = new THREE.MeshBasicMaterial( {color: 0x4ADEFF, opacity: 0.8, transparent: true} );
-    var linkLine = new THREE.Mesh( geometry, material );
-    linkLine.position.set((tx[0] + rx[0] )/ 2.0, (tx[1] + rx[1] )/ 2.0, (tx_h + rx_h)/ 2.0);
+    var material = new THREE.MeshBasicMaterial({
+        color: 0x4adeff,
+        opacity: 0.8,
+        transparent: true
+    });
+    var linkLine = new THREE.Mesh(geometry, material);
+    linkLine.position.set((tx[0] + rx[0]) / 2.0, (tx[1] + rx[1]) / 2.0, (tx_h + rx_h) / 2.0);
     linkLine.lookAt(tx[0], tx[1], tx_h);
     return linkLine;
 }
 
-export function createHoverPoint(location : [number, number, number], lookAt: [number, number, number], obstructed: boolean) 
-{
-    var geometry = new THREE.BoxGeometry(3 , 3, 3);
+export function createHoverPoint(
+    location: [number, number, number],
+    lookAt: [number, number, number],
+    obstructed: boolean
+) {
+    var geometry = new THREE.BoxGeometry(3, 3, 3);
     var color = obstructed ? 0xf23e3e : 0x4e95cf;
-    var material = new THREE.MeshBasicMaterial( {color: color, polygonOffset: true, polygonOffsetFactor: -1000, polygonOffsetUnits: -1000} );
+    var material = new THREE.MeshBasicMaterial({
+        color: color,
+        polygonOffset: true,
+        polygonOffsetFactor: -1000,
+        polygonOffsetUnits: -1000
+    });
     var pt = new THREE.Mesh(geometry, material);
 
     pt.position.set(location[0], location[1], location[2]);
@@ -152,10 +179,13 @@ export function createHoverPoint(location : [number, number, number], lookAt: [n
     return pt;
 }
 
-export function createHoverVoume(location: [number, number, number], scale: [number, number, number], lookAt: [number, number, number])
-{
+export function createHoverVoume(
+    location: [number, number, number],
+    scale: [number, number, number],
+    lookAt: [number, number, number]
+) {
     const hoverVolume = new Potree.BoxVolume();
-    hoverVolume.name = "Visible Clipping Volume";
+    hoverVolume.name = 'Visible Clipping Volume';
     hoverVolume.scale.set(scale[0], scale[1], scale[2]);
     hoverVolume.position.set(location[0], location[1], location[2]);
     hoverVolume.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
@@ -163,24 +193,30 @@ export function createHoverVoume(location: [number, number, number], scale: [num
     return hoverVolume;
 }
 
-export function calcLinkLength(tx: [number, number], rx: [number, number], tx_h : number, rx_h: number) : number {
+export function calcLinkLength(
+    tx: [number, number],
+    rx: [number, number],
+    tx_h: number,
+    rx_h: number
+): number {
     return distance([tx[0], tx[1], tx_h], [rx[0], rx[1], rx_h]);
 }
 
 export function distance(pointOne: [number, number, number], pointTwo: [number, number, number]) {
     return Math.sqrt(
         Math.pow(pointOne[0] - pointTwo[0], 2.0) +
-        Math.pow(pointOne[1] - pointTwo[1], 2.0) +
-        Math.pow(pointOne[2] - pointTwo[2], 2.0)
+            Math.pow(pointOne[1] - pointTwo[1], 2.0) +
+            Math.pow(pointOne[2] - pointTwo[2], 2.0)
     );
 }
 
-export function generateClippingVolume(bb : Array<number>, buffer : number  = 25.) :
-{position: Array<number>, scale : Array<number>, camera : Array<number>} 
-{
+export function generateClippingVolume(
+    bb: Array<number>,
+    buffer: number = 25
+): { position: Array<number>; scale: Array<number>; camera: Array<number> } {
     const position = [(bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
-    const scaleY = Math.sqrt(Math.pow(bb[0]- bb[2], 2.0) + Math.pow(bb[1] - bb[3], 2.0));
-    const scale = [ Math.abs(bb[4] - bb[5]) * 4.0, buffer * 3.0,scaleY + buffer];
+    const scaleY = Math.sqrt(Math.pow(bb[0] - bb[2], 2.0) + Math.pow(bb[1] - bb[3], 2.0));
+    const scale = [Math.abs(bb[4] - bb[5]) * 4.0, buffer * 3.0, scaleY + buffer];
 
     const camera_height = Math.max(scale[0], scale[1]) / (2.0 * Math.tan(Math.PI / 12)) + bb[4];
     const camera = [position[0], position[1], camera_height];
@@ -199,13 +235,13 @@ export function calculateCameraOffsetFromAnimation(
     rx: [number, number],
     tx_h: number,
     rx_h: number,
-    cameraDistance: number = 50) : any {
-
+    cameraDistance: number = 50
+): any {
     // Calculate what the camera would be like from current target
     const lidarXDist = rx[0] - tx[0];
     const targetXDist = target.x - tx[0];
     const pos = targetXDist / lidarXDist;
-    const {location, lookAt} = calculateLookVector(tx, tx_h, rx, rx_h, pos);
+    const { location, lookAt } = calculateLookVector(tx, tx_h, rx, rx_h, pos);
 
     const offset = new THREE.Vector3(
         camera.position.x - location[0],
@@ -222,12 +258,12 @@ export function updateControlPoints(controlPoints: Array<any>, cameraDelta: any,
             controlPoints[i].position.x + cameraDelta.x,
             controlPoints[i].position.y + cameraDelta.y,
             controlPoints[i].position.z + cameraDelta.z
-        ]
+        ];
         let newTarget = [
             controlPoints[i].target.x + targetDelta.x,
             controlPoints[i].target.y + targetDelta.y,
             controlPoints[i].target.z + targetDelta.z
-        ]
+        ];
         controlPoints[i].position.set(...newLocation);
         controlPoints[i].target.set(...newTarget);
     }

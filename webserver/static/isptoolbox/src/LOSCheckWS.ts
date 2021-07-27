@@ -13,16 +13,16 @@ export enum LOSWSEvents {
     VIEWSHED_MSG = 'ws.viewshed_msg',
     AP_MSG = 'ws.ap_msg',
     VIEWSHED_PROGRESS_MSG = 'ws.viewshed_progress_msg',
-    VIEWSHED_UNEXPECTED_ERROR_MSG = 'ws.viewshed_unexpected_err_msg',
+    VIEWSHED_UNEXPECTED_ERROR_MSG = 'ws.viewshed_unexpected_err_msg'
 }
 
 export enum WS_AP_Events {
-    STD_MSG = "standard.message",
-    AP_VIEWSHED = "ap.viewshed",
-    AP_STATUS = "ap.status",
-    AP_UNEXPECTED_ERROR = "ap.unexpected_error",
-    AP_ERROR = "ap.error",
-    AP_VIEWSHED_PROGRESS = "ap.viewshed_progress",
+    STD_MSG = 'standard.message',
+    AP_VIEWSHED = 'ap.viewshed',
+    AP_STATUS = 'ap.status',
+    AP_UNEXPECTED_ERROR = 'ap.unexpected_error',
+    AP_ERROR = 'ap.error',
+    AP_VIEWSHED_PROGRESS = 'ap.viewshed_progress'
 }
 
 export enum LOSWSHandlers {
@@ -32,91 +32,96 @@ export enum LOSWSHandlers {
 }
 
 export type LinkResponse = {
-    type: "standard.message",
-    handler: LOSWSHandlers.LINK,
-    error : string | null,
-    hash: string,
-    dist: number
-}
+    type: 'standard.message';
+    handler: LOSWSHandlers.LINK;
+    error: string | null;
+    hash: string;
+    dist: number;
+};
 
 export type TerrainResponse = {
-    type: "standard.message",
-    handler: LOSWSHandlers.TERRAIN,
-    error: string | null,
-    hash: string,
-    source: string | null,
-    dist: number,
-    aoi: [number, number],
-    terrain_profile: Array<{elevation: number, lat : number, lng: number}>,
-}
+    type: 'standard.message';
+    handler: LOSWSHandlers.TERRAIN;
+    error: string | null;
+    hash: string;
+    source: string | null;
+    dist: number;
+    aoi: [number, number];
+    terrain_profile: Array<{ elevation: number; lat: number; lng: number }>;
+};
 
 export type ViewShedResponse = {
-    type: WS_AP_Events.AP_VIEWSHED,
-    base_url: string,
-    uuid: string
-}
+    type: WS_AP_Events.AP_VIEWSHED;
+    base_url: string;
+    uuid: string;
+};
 
 export type ViewshedUnexpectedError = {
-    type: WS_AP_Events.AP_UNEXPECTED_ERROR,
-    msg: string,
-    uuid: string,
-}
+    type: WS_AP_Events.AP_UNEXPECTED_ERROR;
+    msg: string;
+    uuid: string;
+};
 
 export type ViewshedProgressResponse = {
-    type: WS_AP_Events.AP_VIEWSHED_PROGRESS,
-    progress: string | null,
-    time_remaining: number | null,
-    uuid: string,
-}
+    type: WS_AP_Events.AP_VIEWSHED_PROGRESS;
+    progress: string | null;
+    time_remaining: number | null;
+    uuid: string;
+};
 
 export type LidarResponse = {
-    type: "standard.message",
-    handler: LOSWSHandlers.LIDAR,
-    error: string | null,
-    hash: string,
-    source : Array<string>,
-    lidar_profile: Array<number>
-    dist : number,
-    res: number,
-    url: Array<string>,
-    bb : Array<number>,
-    aoi: [number, number],
-    rx : [number, number],
-    tx : [number, number],
-    still_loading: boolean,
-}
+    type: 'standard.message';
+    handler: LOSWSHandlers.LIDAR;
+    error: string | null;
+    hash: string;
+    source: Array<string>;
+    lidar_profile: Array<number>;
+    dist: number;
+    res: number;
+    url: Array<string>;
+    bb: Array<number>;
+    aoi: [number, number];
+    rx: [number, number];
+    tx: [number, number];
+    still_loading: boolean;
+};
 export type AccessPointCoverageResponse = {
-    type: WS_AP_Events.AP_STATUS,
-    uuid: string
-}
+    type: WS_AP_Events.AP_STATUS;
+    uuid: string;
+};
 
-export type LOSCheckResponse =  LinkResponse | TerrainResponse | LidarResponse;
-export type WSResponse = LOSCheckResponse | AccessPointCoverageResponse | ViewShedResponse | ViewshedProgressResponse | ViewshedUnexpectedError;
+export type LOSCheckResponse = LinkResponse | TerrainResponse | LidarResponse;
+export type WSResponse =
+    | LOSCheckResponse
+    | AccessPointCoverageResponse
+    | ViewShedResponse
+    | ViewshedProgressResponse
+    | ViewshedUnexpectedError;
 
 interface LOSCheckWSCallbacks {
-    (message : LOSCheckResponse) : void
+    (message: LOSCheckResponse): void;
 }
 
 interface AccesPointWSCallback {
-    (message : AccessPointCoverageResponse) : void
+    (message: AccessPointCoverageResponse): void;
 }
 class LOSCheckWS {
-    ws : WebSocket;
-    networkName : string;
-    pendingRequests : Array<string> = [];
+    ws: WebSocket;
+    networkName: string;
+    pendingRequests: Array<string> = [];
     message_handlers: Array<LOSCheckWSCallbacks>;
-    ap_callback : AccesPointWSCallback;
-    hash : string = '';
-    constructor(networkName : string, message_handlers : Array<LOSCheckWSCallbacks>){
+    ap_callback: AccesPointWSCallback;
+    hash: string = '';
+    constructor(networkName: string, message_handlers: Array<LOSCheckWSCallbacks>) {
         this.networkName = networkName;
         this.message_handlers = message_handlers;
         this.connect();
     }
 
-    setConnectionStatus(connected: boolean){
+    setConnectionStatus(connected: boolean) {
         const element = $('#websocket-connection-status');
         const geocoder = $('#geocoder');
-        if(connected){
+        if (connected) {
             element.addClass('d-none');
             geocoder.removeClass('d-none');
         } else {
@@ -125,36 +130,34 @@ class LOSCheckWS {
         }
     }
 
-    connect(){
+    connect() {
         const protocol = location.protocol !== 'https:' ? 'ws://' : 'wss://';
         const domain = location.protocol !== 'https:' ? location.host : 'isptoolbox.io';
         this.ws = new WebSocket(protocol + domain + '/ws/los/' + this.networkName + '/');
 
-
         this.ws.onclose = (e) => {
             this.setConnectionStatus(false);
-            setTimeout(()=> {
+            setTimeout(() => {
                 this.connect();
-            }, 1000)
-        }
+            }, 1000);
+        };
 
         this.ws.onopen = (e) => {
             this.setConnectionStatus(true);
-            while(this.pendingRequests.length > 0) {
+            while (this.pendingRequests.length > 0) {
                 const msg = this.pendingRequests.pop();
-                if (typeof msg === 'string')
-                {
+                if (typeof msg === 'string') {
                     this.ws.send(msg);
                 }
             }
-        }
+        };
 
         this.ws.onmessage = (e) => {
             const resp = JSON.parse(e.data) as WSResponse;
-            switch(resp.type){
+            switch (resp.type) {
                 case WS_AP_Events.STD_MSG:
-                    if(resp.hash === this.hash){
-                        this.message_handlers.forEach((handler)=>{
+                    if (resp.hash === this.hash) {
+                        this.message_handlers.forEach((handler) => {
                             handler(resp);
                         });
                     }
@@ -173,35 +176,41 @@ class LOSCheckWS {
                 default:
                     break;
             }
-        }
+        };
     }
 
-    sendRequest(tx: [number, number], rx: [number, number], fbid: string, freq: number = 0, aoi : [number ,number] = [0, 1]) {
+    sendRequest(
+        tx: [number, number],
+        rx: [number, number],
+        fbid: string,
+        freq: number = 0,
+        aoi: [number, number] = [0, 1]
+    ) {
         const hash = [String(tx), String(rx), fbid, aoi].join(',');
         this.hash = hash;
         const request = JSON.stringify({
-            msg : 'link',
-            tx : tx,
-            rx : rx,
+            msg: 'link',
+            tx: tx,
+            rx: rx,
             fbid: fbid,
             aoi: aoi,
             hash: hash,
-            freq: freq,
+            freq: freq
         });
-        if(this.ws.readyState !== WebSocket.OPEN) {
+        if (this.ws.readyState !== WebSocket.OPEN) {
             this.pendingRequests.push(request);
         } else {
             this.ws.send(request);
         }
     }
 
-    sendAPRequest(uuid: string, height: number){
+    sendAPRequest(uuid: string, height: number) {
         const request = JSON.stringify({
-            msg : 'ap',
+            msg: 'ap',
             ap_hgt: height,
-            uuid: uuid,
+            uuid: uuid
         });
-        if(this.ws.readyState !== WebSocket.OPEN) {
+        if (this.ws.readyState !== WebSocket.OPEN) {
             this.pendingRequests.push(request);
         } else {
             this.ws.send(request);

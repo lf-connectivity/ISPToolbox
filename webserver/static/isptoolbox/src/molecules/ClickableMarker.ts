@@ -7,8 +7,8 @@ export class ClickableMarker extends mapboxgl.Marker {
     private clickHandler: (e: any) => void;
 
     onClick(handleClick: (e: any) => void) {
-      this.clickHandler = handleClick;
-      return this;
+        this.clickHandler = handleClick;
+        return this;
     }
 
     _onMapClick(e: any) {
@@ -17,8 +17,8 @@ export class ClickableMarker extends mapboxgl.Marker {
         // @ts-ignore
         const element = this._element;
 
-        if (this.clickHandler && (targetElement === element || element.contains((targetElement)))) {
+        if (this.clickHandler && (targetElement === element || element.contains(targetElement))) {
             this.clickHandler(e);
         }
     }
-};
+}

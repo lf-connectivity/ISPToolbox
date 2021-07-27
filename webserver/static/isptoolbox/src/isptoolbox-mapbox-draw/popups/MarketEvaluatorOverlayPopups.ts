@@ -1,8 +1,8 @@
-import mapboxgl from "mapbox-gl";
-import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
+import mapboxgl from 'mapbox-gl';
+import { LinkCheckBasePopup } from './LinkCheckBasePopup';
 
 abstract class MarketEvaluatorBaseOverlayPopup extends LinkCheckBasePopup {
-    protected featureProperties: any | undefined
+    protected featureProperties: any | undefined;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         super(map, draw);
@@ -33,8 +33,7 @@ export class RdofOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static getInstance() {
         if (RdofOverlayPopup._instance) {
             return RdofOverlayPopup._instance;
-        }
-        else {
+        } else {
             throw new Error('No Instance of RdofOverlayPopup instantiated.');
         }
     }
@@ -91,7 +90,6 @@ export class RdofOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     }
 }
 
-
 export class CommunityConnectOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: CommunityConnectOverlayPopup;
 
@@ -106,8 +104,7 @@ export class CommunityConnectOverlayPopup extends MarketEvaluatorBaseOverlayPopu
     static getInstance() {
         if (CommunityConnectOverlayPopup._instance) {
             return CommunityConnectOverlayPopup._instance;
-        }
-        else {
+        } else {
             throw new Error('No Instance of CommunityConnectOverlayPopup instantiated.');
         }
     }
@@ -164,7 +161,6 @@ export class CommunityConnectOverlayPopup extends MarketEvaluatorBaseOverlayPopu
     }
 }
 
-
 export class CbrsOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: CbrsOverlayPopup;
 
@@ -179,8 +175,7 @@ export class CbrsOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static getInstance() {
         if (CbrsOverlayPopup._instance) {
             return CbrsOverlayPopup._instance;
-        }
-        else {
+        } else {
             throw new Error('No Instance of CbrsOverlayPopup instantiated.');
         }
     }
@@ -192,7 +187,9 @@ export class CbrsOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
                     <h6>
                         ${this.featureProperties.county} County, ${this.featureProperties.state}
                         <br>
-                        (\$${Number(this.featureProperties.price).toLocaleString()} Gross License Price)
+                        (\$${Number(
+                            this.featureProperties.price
+                        ).toLocaleString()} Gross License Price)
                     </h6>
                 </div>
 
@@ -246,7 +243,6 @@ export class CbrsOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     }
 }
 
-
 export class CensusBlocksOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: CensusBlocksOverlayPopup;
 
@@ -261,8 +257,7 @@ export class CensusBlocksOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static getInstance() {
         if (CensusBlocksOverlayPopup._instance) {
             return CensusBlocksOverlayPopup._instance;
-        }
-        else {
+        } else {
             throw new Error('No Instance of CensusBlocksOverlayPopup instantiated.');
         }
     }
@@ -305,7 +300,6 @@ export class CensusBlocksOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     }
 }
 
-
 export class TribalOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static _instance: TribalOverlayPopup;
 
@@ -320,8 +314,7 @@ export class TribalOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     static getInstance() {
         if (TribalOverlayPopup._instance) {
             return TribalOverlayPopup._instance;
-        }
-        else {
+        } else {
             throw new Error('No Instance of TribalOverlayPopup instantiated.');
         }
     }

@@ -1,5 +1,5 @@
 import LidarAvailabilityLayer from '../availabilityOverlay';
-import mapboxgl, * as MapboxGL from "mapbox-gl";
+import mapboxgl, * as MapboxGL from 'mapbox-gl';
 const NEW_GIS_DATA_SOURCE = 'new-gis-source';
 const NEW_GIS_DATA_LAYER = 'new-gis-layer';
 const GIS_LAYER_PATH = 'https://static.isptoolbox.io/static/';
@@ -15,26 +15,24 @@ class NewGISDataLayer {
         this.popup = new window.mapboxgl.Popup({
             closeButton: false,
             closeOnClick: false,
-            className: "lidar-availability-popup",
-
+            className: 'lidar-availability-popup'
         });
         this.popup.on('close', (e: any) => {
             this.popupFreeze = false;
-        })
+        });
 
         map.addSource(NEW_GIS_DATA_SOURCE, {
             type: 'geojson',
-            data: { type: 'FeatureCollection', 'features': [] }
+            data: { type: 'FeatureCollection', features: [] }
         });
         map.addLayer({
             id: NEW_GIS_DATA_LAYER,
             source: NEW_GIS_DATA_SOURCE,
             type: 'fill',
-            layout: {
-            },
+            layout: {},
             paint: {
-                "fill-color": "#9540ea",
-                "fill-opacity": 0.5,
+                'fill-color': '#9540ea',
+                'fill-opacity': 0.5
             }
         });
 
@@ -76,9 +74,9 @@ class NewGISDataLayer {
     createPopupBody(event: any) {
         const params = new URLSearchParams({
             lat: event.lngLat.lat,
-            lon: event.lngLat.lng,
+            lon: event.lngLat.lng
         });
-        var description = `<a target="_parent" href="https://www.facebook.com/isptoolbox/line-of-sight-check/?${params.toString()}">Explore Region in<br>LiDAR LOS Tool ${SVG_ARROW}</a>`
+        var description = `<a target="_parent" href="https://www.facebook.com/isptoolbox/line-of-sight-check/?${params.toString()}">Explore Region in<br>LiDAR LOS Tool ${SVG_ARROW}</a>`;
         // var description = `Newly Added Data for ${this.month}/${this.year}`
         // Populate the popup and set its coordinates
         // based on the feature found.
@@ -92,9 +90,7 @@ class NewGISDataLayer {
                 source.setData(data);
             }
         }
-    };
-
-
+    }
 }
 
 $(() => {
@@ -105,14 +101,13 @@ $(() => {
         container: 'map',
         style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
         zoom: 3,
-        center: [-98.583333, 39.8333],
-
+        center: [-98.583333, 39.8333]
     });
     map.on('load', () => {
         new LidarAvailabilityLayer(map);
         const { month, year } = getRequestedDateTime();
         new NewGISDataLayer(map, month, year);
-    })
+    });
 });
 
 function getRequestedDateTime() {

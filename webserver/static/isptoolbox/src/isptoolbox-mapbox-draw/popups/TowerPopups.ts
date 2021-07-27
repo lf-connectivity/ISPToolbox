@@ -1,20 +1,35 @@
-import mapboxgl, * as MapboxGL from "mapbox-gl";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
-import { AccessPoint } from "../../workspace/WorkspaceFeatures";
+import mapboxgl, * as MapboxGL from 'mapbox-gl';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { LinkCheckBasePopup } from './LinkCheckBasePopup';
+import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { isUnitsUS } from '../../utils/MapPreferences';
-import { ft2m, miles2km } from "../../LinkCalcUtils";
+import { ft2m, miles2km } from '../../LinkCalcUtils';
 import * as StyleConstants from '../styles/StyleConstants';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
 import {
-    MIN_RADIUS, MAX_RADIUS, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, MAX_HEIGHT, MIN_HEIGHT,
-    validateName, validateLat, validateLng, validateRadius, validateHeight
+    MIN_RADIUS,
+    MAX_RADIUS,
+    MIN_LAT,
+    MAX_LAT,
+    MIN_LNG,
+    MAX_LNG,
+    MAX_HEIGHT,
+    MIN_HEIGHT,
+    validateName,
+    validateLat,
+    validateLng,
+    validateRadius,
+    validateHeight
 } from '../../LinkCheckUtils';
-import { sanitizeString } from "../../molecules/InputValidator";
-import { parseFormLatitudeLongitude } from "../../utils/LatLngInputUtils";
-import { LOSWSEvents, ViewshedProgressResponse, ViewshedUnexpectedError } from "../../LOSCheckWS";
-import MarketEvaluatorWS, { MarketEvalWSEvents, MarketEvalWSRequestType, ViewshedGeojsonResponse } from "../../MarketEvaluatorWS";
+import { sanitizeString } from '../../molecules/InputValidator';
+import { parseFormLatitudeLongitude } from '../../utils/LatLngInputUtils';
+import { LOSWSEvents, ViewshedProgressResponse, ViewshedUnexpectedError } from '../../LOSCheckWS';
+import MarketEvaluatorWS, {
+    MarketEvalWSEvents,
+    MarketEvalWSRequestType,
+    ViewshedGeojsonResponse
+} from '../../MarketEvaluatorWS';
 
 var _ = require('lodash');
 
@@ -54,7 +69,7 @@ const LOADING_SVG = `
         fill="#A8B0B7"
     />
     </svg>
-`
+`;
 
 enum ImperialToMetricConversion {
     FT_TO_M = 'ft2m',
@@ -65,10 +80,10 @@ const DEBOUNCE_TIME = 500;
 
 const CONVERSION_FORMULAS: Map<ImperialToMetricConversion, (input: number) => number> = new Map();
 CONVERSION_FORMULAS.set(ImperialToMetricConversion.FT_TO_M, (input: number) => {
-    return isUnitsUS() ? ft2m(input) : input
+    return isUnitsUS() ? ft2m(input) : input;
 });
 CONVERSION_FORMULAS.set(ImperialToMetricConversion.MI_TO_KM, (input: number) => {
-    return isUnitsUS() ? miles2km(input) : input
+    return isUnitsUS() ? miles2km(input) : input;
 });
 
 export abstract class BaseTowerPopup extends LinkCheckBasePopup {
@@ -94,7 +109,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             return false;
         }
         let coords = this.accessPoint.getFeatureGeometryCoordinates();
-        return (coords[0] !== this.lnglat[0] || coords[1] !== this.lnglat[1]);
+        return coords[0] !== this.lnglat[0] || coords[1] !== this.lnglat[1];
     }
 
     onAPUpdate(ap: AccessPoint) {
@@ -104,8 +119,10 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             let coord = this.accessPoint.getFeatureGeometryCoordinates();
             let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
             if (coord_input != null) {
-                if (String(coord_input[0]) !== coord[1].toFixed(5) ||
-                    String(coord_input[1]) !== coord[0].toFixed(5)) {
+                if (
+                    String(coord_input[0]) !== coord[1].toFixed(5) ||
+                    String(coord_input[1]) !== coord[0].toFixed(5)
+                ) {
                     $(`#${LAT_LNG_INPUT_ID}`).val(`${coord[1].toFixed(5)}, ${coord[0].toFixed(5)}`);
                     this.setLngLat([coord[0], coord[1]]);
                     this.popup.setLngLat(this.lnglat);
@@ -118,14 +135,14 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         }
     }
 
-    protected cleanup() { }
+    protected cleanup() {}
 
     protected getHeightValue() {
         return Math.round(
-            isUnitsUS() ?
-                this.accessPoint?.getFeatureProperty('height_ft') :
-                this.accessPoint?.getFeatureProperty('height')
-        )
+            isUnitsUS()
+                ? this.accessPoint?.getFeatureProperty('height_ft')
+                : this.accessPoint?.getFeatureProperty('height')
+        );
     }
 
     protected setEventHandlers() {
@@ -136,24 +153,32 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             }
         };
 
-        const createNumberChangeCallback = (id: string, property: string, conversionFormula: ImperialToMetricConversion,
-            validatorFunction: (n: number, id: string) => number) => {
+        const createNumberChangeCallback = (
+            id: string,
+            property: string,
+            conversionFormula: ImperialToMetricConversion,
+            validatorFunction: (n: number, id: string) => number
+        ) => {
             let htmlID = `#${id}`;
-            $(htmlID).on('change',
+            $(htmlID).on(
+                'change',
                 _.debounce((e: any) => {
                     let inputValue = validatorFunction(parseFloat(String($(htmlID).val())), id);
-                    let transformedValue = (CONVERSION_FORMULAS.get(conversionFormula) as any)(inputValue);
+                    let transformedValue = (CONVERSION_FORMULAS.get(conversionFormula) as any)(
+                        inputValue
+                    );
 
                     // @ts-ignore
                     this.accessPoint?.setFeatureProperty(property, transformedValue);
                     updateAP();
                 }, DEBOUNCE_TIME)
             );
-        }
+        };
 
         const createCoordinateChangeCallback = (id: string) => {
             let htmlID = `#${id}`;
-            $(htmlID).on('change',
+            $(htmlID).on(
+                'change',
                 _.debounce((e: any) => {
                     let newVal = parseFormLatitudeLongitude(htmlID);
                     if (newVal != null && this.accessPoint) {
@@ -164,15 +189,22 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                     }
                 }, DEBOUNCE_TIME)
             );
-        }
+        };
 
-        $(`#${TOWER_DELETE_BUTTON_ID}`).off().on('click', () => {
-            $(`#ap-delete-confirm-btn`).off().on('click', () => {
-                this.map.fire('draw.delete', {features: [this.accessPoint?.getFeatureData()]});
+        $(`#${TOWER_DELETE_BUTTON_ID}`)
+            .off()
+            .on('click', () => {
+                $(`#ap-delete-confirm-btn`)
+                    .off()
+                    .on('click', () => {
+                        this.map.fire('draw.delete', {
+                            features: [this.accessPoint?.getFeatureData()]
+                        });
+                    });
             });
-        });
 
-        $(`#${NAME_INPUT_ID}`).on('input',
+        $(`#${NAME_INPUT_ID}`).on(
+            'input',
             _.debounce((e: any) => {
                 let name = validateName(String($(`#${NAME_INPUT_ID}`).val()), NAME_INPUT_ID);
                 this.accessPoint?.setFeatureProperty('name', name);
@@ -180,9 +212,24 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             }, DEBOUNCE_TIME)
         );
 
-        createNumberChangeCallback(HGT_INPUT_ID, 'height', ImperialToMetricConversion.FT_TO_M, validateHeight);
-        createNumberChangeCallback(RADIUS_INPUT_ID, 'max_radius', ImperialToMetricConversion.MI_TO_KM, validateRadius);
-        createNumberChangeCallback(CPE_HGT_INPUT_ID, 'default_cpe_height', ImperialToMetricConversion.FT_TO_M, validateHeight);
+        createNumberChangeCallback(
+            HGT_INPUT_ID,
+            'height',
+            ImperialToMetricConversion.FT_TO_M,
+            validateHeight
+        );
+        createNumberChangeCallback(
+            RADIUS_INPUT_ID,
+            'max_radius',
+            ImperialToMetricConversion.MI_TO_KM,
+            validateRadius
+        );
+        createNumberChangeCallback(
+            CPE_HGT_INPUT_ID,
+            'default_cpe_height',
+            ImperialToMetricConversion.FT_TO_M,
+            validateHeight
+        );
 
         createCoordinateChangeCallback(LAT_LNG_INPUT_ID);
     }
@@ -199,12 +246,18 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <input type='text' 
                                 class="input--tower-name" 
                                 id='${NAME_INPUT_ID}' 
-                                value='${sanitizeString(this.accessPoint?.getFeatureProperty('name'))}' 
+                                value='${sanitizeString(
+                                    this.accessPoint?.getFeatureProperty('name')
+                                )}' 
                                 placeholder='Tower Name'>
                             <div class="coordinates">
                                 <div class="data-with-unit">
                                     <input type='text'
-                                            value='${this.accessPoint?.getFeatureGeometryCoordinates()[1].toFixed(5)}, ${this.accessPoint?.getFeatureGeometryCoordinates()[0].toFixed(5)}'
+                                            value='${this.accessPoint
+                                                ?.getFeatureGeometryCoordinates()[1]
+                                                .toFixed(5)}, ${this.accessPoint
+            ?.getFeatureGeometryCoordinates()[0]
+            .toFixed(5)}'
                                             id='${LAT_LNG_INPUT_ID}'
                                             placeholder='latitude, longitude'
                                             class="input--value"
@@ -229,10 +282,14 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(
-            isUnitsUS() ?
-                this.accessPoint?.getFeatureProperty('default_cpe_height_ft') :
-                this.accessPoint?.getFeatureProperty('default_cpe_height')
-        )}'
+                                           isUnitsUS()
+                                               ? this.accessPoint?.getFeatureProperty(
+                                                     'default_cpe_height_ft'
+                                                 )
+                                               : this.accessPoint?.getFeatureProperty(
+                                                     'default_cpe_height'
+                                                 )
+                                       )}'
                                        id='${CPE_HGT_INPUT_ID}'
                                        min='${MIN_HEIGHT}' max='${MAX_HEIGHT}'
                                        class="input--value"
@@ -244,10 +301,15 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <p class="label">Radius</p>
                             <div class="data-with-unit">
                                 <input type='number'
-                                       value='${isUnitsUS() ?
-                this.accessPoint?.getFeatureProperty('max_radius_miles').toFixed(2) :
-                this.accessPoint?.getFeatureProperty('max_radius').toFixed(2)
-            }'
+                                       value='${
+                                           isUnitsUS()
+                                               ? this.accessPoint
+                                                     ?.getFeatureProperty('max_radius_miles')
+                                                     .toFixed(2)
+                                               : this.accessPoint
+                                                     ?.getFeatureProperty('max_radius')
+                                                     .toFixed(2)
+                                       }'
                                        id='${RADIUS_INPUT_ID}'
                                        min='${MIN_RADIUS}' max='${MAX_RADIUS}' step='0.01'
                                        class="input--value"
@@ -269,14 +331,15 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         return '';
     }
 
-    protected refreshPopup(): void {
-    }
+    protected refreshPopup(): void {}
 
     protected getDeleteRow() {
         return `
             <a id="${TOWER_DELETE_BUTTON_ID}" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
-            ${this.accessPoint && this.accessPoint.getFeatureProperty('last_updated') ?
-                `<p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>` : ''
+            ${
+                this.accessPoint && this.accessPoint.getFeatureProperty('last_updated')
+                    ? `<p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>`
+                    : ''
             }
         `;
     }
@@ -300,15 +363,17 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
         this.error = null;
         this.interval = null;
         PubSub.subscribe(LOSWSEvents.VIEWSHED_PROGRESS_MSG, this.updateProgressStatus.bind(this));
-        PubSub.subscribe(LOSWSEvents.VIEWSHED_UNEXPECTED_ERROR_MSG, this.updateErrorStatus.bind(this));
+        PubSub.subscribe(
+            LOSWSEvents.VIEWSHED_UNEXPECTED_ERROR_MSG,
+            this.updateErrorStatus.bind(this)
+        );
     }
 
     static getInstance() {
         if (LinkCheckTowerPopup._instance) {
             return LinkCheckTowerPopup._instance;
-        }
-        else {
-            throw new Error('No instance of LinkCheckTowerPopup instantiated.')
+        } else {
+            throw new Error('No instance of LinkCheckTowerPopup instantiated.');
         }
     }
 
@@ -322,21 +387,27 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
 
     protected getStatsHTML() {
         if (this.accessPoint) {
-            if (this.accessPoint.getFeatureProperty('serviceable') != null &&
+            if (
+                this.accessPoint.getFeatureProperty('serviceable') != null &&
                 this.accessPoint.getFeatureProperty('unserviceable') != null &&
                 this.accessPoint.getFeatureProperty('unknown') != null &&
-                this.accessPoint.getFeatureProperty('unknown') === 0) {
+                this.accessPoint.getFeatureProperty('unknown') === 0
+            ) {
                 return `
                     <div class="ap-stat">
                         <p class="ap-stat--label">Est. Clear LOS<span>at least 1 point on rooftop</span></p>
-                        <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR}">
+                        <p class="ap-stat--value" style="color: ${
+                            StyleConstants.SERVICEABLE_BUILDINGS_COLOR
+                        }">
                             <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('serviceable')}
                         </p>
                     </div>
                     <div class="ap-stat">
                         <p class="ap-stat--label">Est. Obstructed LOS</p>
-                        <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR}">
+                        <p class="ap-stat--value" style="color: ${
+                            StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR
+                        }">
                             <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('unserviceable')}
                         </p>
@@ -348,7 +419,9 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
             return `
             <div align="center">
                 ${LOADING_SVG}
-                <p align="center bold">${this.progress_message ? this.progress_message : 'Starting Computation'}</p>
+                <p align="center bold">${
+                    this.progress_message ? this.progress_message : 'Starting Computation'
+                }</p>
                 <p align="center">${this.formatTimeRemaining()}</p>
             </div>
         `;
@@ -361,7 +434,6 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
             </svg>
             <p align="center">${this.error}</p></div>`;
         }
-
     }
 
     protected refreshPopup() {
@@ -415,13 +487,13 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
     protected formatTimeRemaining(): string {
         if (this.time_remaining != null) {
             if (this.time_remaining === 0) {
-                return "Hold tight, almost there!"
+                return 'Hold tight, almost there!';
             }
             var date = new Date(0);
             date.setSeconds(this.time_remaining);
-            return "Time Remaining: " + date.toISOString().substr(14, 5);
+            return 'Time Remaining: ' + date.toISOString().substr(14, 5);
         }
-        return "This may take several minutes";
+        return 'This may take several minutes';
     }
 }
 
@@ -435,16 +507,18 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
         super(map, draw);
         MarketEvaluatorTowerPopup._instance = this;
         PubSub.subscribe(MarketEvalWSEvents.SEND_REQUEST, this.onWSRequestSendOrCancel.bind(this));
-        PubSub.subscribe(MarketEvalWSEvents.REQUEST_CANCELLED, this.onWSRequestSendOrCancel.bind(this));
+        PubSub.subscribe(
+            MarketEvalWSEvents.REQUEST_CANCELLED,
+            this.onWSRequestSendOrCancel.bind(this)
+        );
         PubSub.subscribe(MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG, this.onWSViewshedMsg.bind(this));
     }
 
     static getInstance() {
         if (MarketEvaluatorTowerPopup._instance) {
             return MarketEvaluatorTowerPopup._instance;
-        }
-        else {
-            throw new Error('No instance of MarketEvaluatorTowerPopup instantiated.')
+        } else {
+            throw new Error('No instance of MarketEvaluatorTowerPopup instantiated.');
         }
     }
 
@@ -464,7 +538,6 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
                 );
             }
         });
-
     }
 
     protected getAdditionalInfo() {
@@ -472,7 +545,7 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
             <li class="stat-row" id='${COVERAGE_LI_ID}'>
                 ${this.getButtonHTML()}
             </li>
-        `
+        `;
     }
 
     protected getButtonHTML() {
@@ -489,24 +562,27 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
                     <img src="${pass_svg}" width="25" height="25">
                     <p align="center bold">Lidar Coverage Plotted</p>>
                 </div>
-            `
+            `;
         }
 
-        // Plotting Lidar Coverage 
-        else if (ws.getCurrentRequest(MarketEvalWSRequestType.VIEWSHED)?.apUuid === this.accessPoint?.workspaceId) {
+        // Plotting Lidar Coverage
+        else if (
+            ws.getCurrentRequest(MarketEvalWSRequestType.VIEWSHED)?.apUuid ===
+            this.accessPoint?.workspaceId
+        ) {
             return `
                 <div align="center">
                     ${LOADING_SVG}
                     <p align="center bold">Plotting Lidar Coverage</p>>
                 </div>
-            `
+            `;
         }
 
         // No lidar coverage and not plotting lidar coverage either
         else {
             return `
                 <button class='btn btn-primary isptoolbox-btn' id='${PLOT_COVERAGE_BUTTON_ID}'>Plot Estimated Coverage</button>
-            `
+            `;
         }
     }
 
@@ -519,7 +595,7 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
         if (
             request.request_type === MarketEvalWSRequestType.VIEWSHED &&
             request.apUuid === this.accessPoint?.workspaceId
-            ) {
+        ) {
             this.refreshPopup();
         }
     }
@@ -534,7 +610,7 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
                 let south = this.map.getBounds().getSouth();
                 let north = this.map.getBounds().getNorth();
                 this.map.flyTo({
-                    center: [coords[0], coords[1] + + 0.15 * (north - south)]
+                    center: [coords[0], coords[1] + +0.15 * (north - south)]
                 });
             }
             this.refreshPopup();

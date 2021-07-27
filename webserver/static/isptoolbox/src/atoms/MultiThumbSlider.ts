@@ -1,11 +1,11 @@
 /*
-    *   This content is licensed according to the W3C Software License at
-    *   https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document
-    *
-    *   File:   slider.js
-    *
-    *   Desc:   Slider widget that implements ARIA Authoring Practices
-    */
+ *   This content is licensed according to the W3C Software License at
+ *   https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document
+ *
+ *   File:   slider.js
+ *
+ *   Desc:   Slider widget that implements ARIA Authoring Practices
+ */
 
 // Create Slider that contains value, valuemin, valuemax, and valuenow
 export class MultiThumbSlider {
@@ -23,10 +23,9 @@ export class MultiThumbSlider {
     thumbWidth: number;
     thumbHeight: number;
     constructor(domNode: Element, private onChangeCallback: (val: [number, number]) => void) {
-
         this.domNode = domNode;
         this.railDomNode = Array.from(domNode.children).find((n) => {
-            return n.classList.contains('rail')
+            return n.classList.contains('rail');
         });
         // Initilaize all the thumbs
         if (this.railDomNode) {
@@ -35,27 +34,43 @@ export class MultiThumbSlider {
             });
             this.sliderNodes.forEach((n) => {
                 if (this.railDomNode) {
-                    this.thumbs.push(new SliderThumb(n, this.railDomNode, this.domNode, this, this.valChangeCallback.bind(this)));
+                    this.thumbs.push(
+                        new SliderThumb(
+                            n,
+                            this.railDomNode,
+                            this.domNode,
+                            this,
+                            this.valChangeCallback.bind(this)
+                        )
+                    );
                 }
             });
         }
     }
 
-    redraw(){
+    redraw() {
         this.renderMiddleArea();
         this.thumbs.forEach((thumb) => {
             thumb.moveSliderTo(thumb.valueNow);
-        })
+        });
     }
 
     renderMiddleArea() {
         let middle_area = Array.from(this.domNode.children).find((n) => {
-            return n.classList.contains('aria-middle-area')
+            return n.classList.contains('aria-middle-area');
         });
         if (middle_area && this.thumbs.length >= 2) {
-            var min_pos = this.thumbs.sort((thumb) => { return thumb.valueNow })[0].getPosition();
+            var min_pos = this.thumbs
+                .sort((thumb) => {
+                    return thumb.valueNow;
+                })[0]
+                .getPosition();
             (middle_area as HTMLElement).style.left = `${min_pos * 100}%`;
-            const width = this.thumbs.sort((thumb) => { return thumb.valueNow })[this.thumbs.length - 1].getPosition();
+            const width = this.thumbs
+                .sort((thumb) => {
+                    return thumb.valueNow;
+                })
+                [this.thumbs.length - 1].getPosition();
             (middle_area as HTMLElement).style.width = `${(width - min_pos) * 100}%`;
         }
     }
@@ -68,9 +83,16 @@ export class MultiThumbSlider {
         if (this.thumbs.length < 2) {
             return [Number.MIN_VALUE, Number.MAX_VALUE];
         }
-        return [this.thumbs.sort((thumb) => { return thumb.valueNow })[0].valueNow, this.thumbs.sort((thumb) => { return thumb.valueNow })[this.thumbs.length - 1].valueNow];
+        return [
+            this.thumbs.sort((thumb) => {
+                return thumb.valueNow;
+            })[0].valueNow,
+            this.thumbs.sort((thumb) => {
+                return thumb.valueNow;
+            })[this.thumbs.length - 1].valueNow
+        ];
     }
-};
+}
 
 export class SliderThumb {
     valueNow: number;
@@ -78,22 +100,27 @@ export class SliderThumb {
     dolValueNow: string;
     keyCode: any;
 
-
-    constructor(public node: Element, private rail: Element, private slider: Element, private multithumbslider: MultiThumbSlider, private callback: () => void) {
+    constructor(
+        public node: Element,
+        private rail: Element,
+        private slider: Element,
+        private multithumbslider: MultiThumbSlider,
+        private callback: () => void
+    ) {
         node.addEventListener('keydown', this.handleKeyDown.bind(this));
         node.addEventListener('mousedown', this.handleMouseDown.bind(this));
         node.addEventListener('focus', this.handleFocus.bind(this));
         node.addEventListener('blur', this.handleBlur.bind(this));
 
         this.keyCode = Object.freeze({
-            'left': 37,
-            'up': 38,
-            'right': 39,
-            'down': 40,
-            'pageUp': 33,
-            'pageDown': 34,
-            'end': 35,
-            'home': 36
+            left: 37,
+            up: 38,
+            right: 39,
+            down: 40,
+            pageUp: 33,
+            pageDown: 34,
+            end: 35,
+            home: 36
         });
         var attr = node.getAttribute('aria-valuenow');
         if (attr) {
@@ -124,10 +151,12 @@ export class SliderThumb {
         return (this.rail as HTMLElement).offsetWidth;
     }
 
-    calculateNewValue(event: MouseEvent) : number{
-        if(this.isLogScale()){
+    calculateNewValue(event: MouseEvent): number {
+        if (this.isLogScale()) {
             var diffX = event.pageX - (this.rail as HTMLElement).offsetLeft;
-            return this.getMin() * Math.pow(this.getMax()/this.getMin(), diffX / this.getRailWidth());
+            return (
+                this.getMin() * Math.pow(this.getMax() / this.getMin(), diffX / this.getRailWidth())
+            );
         } else {
             var diffX = event.pageX - (this.rail as HTMLElement).offsetLeft;
             return this.getMin() + ((this.getMax() - this.getMin()) * diffX) / this.getRailWidth();
@@ -139,28 +168,38 @@ export class SliderThumb {
     }
 
     getPositionLabel(): number {
-        if(this.isLogScale()){
-            var val = Math.log(this.valueNow/this.getMin()) / Math.log(this.getMax()/this.getMin());
-            return val - ((this.node.firstElementChild as HTMLElement).offsetWidth / 2) / (this.node as HTMLElement).offsetWidth;
+        if (this.isLogScale()) {
+            var val =
+                Math.log(this.valueNow / this.getMin()) / Math.log(this.getMax() / this.getMin());
+            return (
+                val -
+                (this.node.firstElementChild as HTMLElement).offsetWidth /
+                    2 /
+                    (this.node as HTMLElement).offsetWidth
+            );
         } else {
-            var val = (this.valueNow / (this.getMax() - this.getMin()));
-            return val - ((this.node.firstElementChild as HTMLElement).offsetWidth / 2) / (this.node as HTMLElement).offsetWidth;
+            var val = this.valueNow / (this.getMax() - this.getMin());
+            return (
+                val -
+                (this.node.firstElementChild as HTMLElement).offsetWidth /
+                    2 /
+                    (this.node as HTMLElement).offsetWidth
+            );
         }
-
     }
     getPosition(): number {
-        if(this.isLogScale()){
-            var val = Math.log(this.valueNow/this.getMin()) / Math.log(this.getMax()/this.getMin());
+        if (this.isLogScale()) {
+            var val =
+                Math.log(this.valueNow / this.getMin()) / Math.log(this.getMax() / this.getMin());
             return val;
         } else {
             var val = this.valueNow;
-            return (val) / (this.getMax() - this.getMin());
+            return val / (this.getMax() - this.getMin());
         }
-
     }
 
     formatValueText(): string {
-        if(this.valueNow > 1000){
+        if (this.valueNow > 1000) {
             return (this.valueNow / 1000).toFixed(1) + 'k';
         } else {
             return this.valueNow.toFixed(0);
@@ -168,7 +207,6 @@ export class SliderThumb {
     }
 
     moveSliderTo(value: number) {
-
         var maxAttr = this.slider.getAttribute('aria-valuemax');
         var minAttr = this.slider.getAttribute('aria-valuemin');
         if (maxAttr && minAttr) {
@@ -182,7 +220,6 @@ export class SliderThumb {
             if (value < valueMin) {
                 value = valueMin;
             }
-
         }
 
         this.valueNow = value;
@@ -198,9 +235,8 @@ export class SliderThumb {
         }
         this.multithumbslider.renderMiddleArea();
         this.callback();
-    };
+    }
     handleKeyDown(event: KeyboardEvent) {
-
         var flag = false;
 
         switch (event.keyCode) {
@@ -244,24 +280,22 @@ export class SliderThumb {
             event.preventDefault();
             event.stopPropagation();
         }
-
-    };
+    }
 
     handleFocus(event: FocusEvent) {
         this.slider.classList.add('focus');
         this.rail.classList.add('focus');
-    };
+    }
 
     handleBlur(event: FocusEvent) {
         this.slider.classList.remove('focus');
         this.rail.classList.remove('focus');
-    };
+    }
 
     handleMouseDown(event: MouseEvent) {
         var self = this;
 
         var handleMouseMove = function (event: MouseEvent) {
-
             self.valueNow = self.calculateNewValue(event);
             self.moveSliderTo(self.valueNow);
 
@@ -285,5 +319,5 @@ export class SliderThumb {
 
         // Set focus to the clicked handle
         (this.node as HTMLElement).focus();
-    };
+    }
 }

@@ -5,7 +5,7 @@ const towerZoomThreshold: number = 12;
 
 const EMPTY_SOURCE: GeoJSON.FeatureCollection = {
     type: 'FeatureCollection',
-    features: [],
+    features: []
 };
 
 export default class MapboxTowerOverlay implements MapboxOverlay {
@@ -18,8 +18,16 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
     sourceUrl: string;
     sourceLayer: string;
 
-
-    constructor(map: mapboxgl.Map, sourceId: string, selectedSourceId: string, labelsId: string, selectedLayerId: string, hover: boolean, sourceUrl: string, sourceLayer: string) {
+    constructor(
+        map: mapboxgl.Map,
+        sourceId: string,
+        selectedSourceId: string,
+        labelsId: string,
+        selectedLayerId: string,
+        hover: boolean,
+        sourceUrl: string,
+        sourceLayer: string
+    ) {
         this.map = map;
         this.sourceId = sourceId;
         this.selectedSourceId = selectedSourceId;
@@ -33,7 +41,7 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
     show() {
         this.map.addSource(this.sourceId, {
             type: 'vector',
-            url: `${this.sourceUrl}?optimize=true`,
+            url: `${this.sourceUrl}?optimize=true`
         });
         this.map.addLayer({
             id: this.labelsId,
@@ -46,17 +54,11 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
                     ['zoom'],
                     'tower-pin-simple',
                     towerZoomThreshold,
-                    'tower-pin',
+                    'tower-pin'
                 ],
                 'icon-allow-overlap': ['step', ['zoom'], false, towerZoomThreshold, true],
                 // @ts-ignore
-                'icon-ignore-placement': [
-                    'step',
-                    ['zoom'],
-                    false,
-                    towerZoomThreshold,
-                    true,
-                ],
+                'icon-ignore-placement': ['step', ['zoom'], false, towerZoomThreshold, true],
                 'icon-anchor': 'bottom',
                 'text-field': [
                     'format',
@@ -64,46 +66,30 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
                         'to-string',
                         [
                             'round',
-                            [
-                                '*',
-                                ['to-number', ['get', 'height_without_appurtenaces']],
-                                3.2808,
-                            ],
-                        ],
+                            ['*', ['to-number', ['get', 'height_without_appurtenaces']], 3.2808]
+                        ]
                     ],
                     { 'min-fraction-digits': 1, 'max-fraction-digits': 1 },
                     "'",
-                    {},
+                    {}
                 ],
                 // @ts-ignore
-                'text-ignore-placement': [
-                    'step',
-                    ['zoom'],
-                    false,
-                    towerZoomThreshold,
-                    true,
-                ],
+                'text-ignore-placement': ['step', ['zoom'], false, towerZoomThreshold, true],
                 'text-anchor': 'bottom',
                 'text-font': ['Roboto Mono Bold', 'Arial Unicode MS Regular'],
                 'text-size': 14,
                 'text-letter-spacing': -0.03,
                 'text-justify': 'right',
-                'text-offset': [0.5, -0.82],
+                'text-offset': [0.5, -0.82]
             },
             paint: {
-                'text-color': [
-                    'step',
-                    ['zoom'],
-                    'transparent',
-                    towerZoomThreshold,
-                    'white',
-                ],
-            },
+                'text-color': ['step', ['zoom'], 'transparent', towerZoomThreshold, 'white']
+            }
         });
         // Create a separate layer just for tower overlay
         this.map.addSource(this.selectedSourceId, {
             type: 'geojson',
-            data: EMPTY_SOURCE,
+            data: EMPTY_SOURCE
         });
         this.map.addLayer({
             id: this.selectedLayerId,
@@ -115,17 +101,11 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
                     ['zoom'],
                     'tower-pin-simple-blue',
                     towerZoomThreshold,
-                    'tower-pin-blue',
+                    'tower-pin-blue'
                 ],
                 'icon-allow-overlap': ['step', ['zoom'], false, towerZoomThreshold, true],
                 // @ts-ignore
-                'icon-ignore-placement': [
-                    'step',
-                    ['zoom'],
-                    false,
-                    towerZoomThreshold,
-                    true,
-                ],
+                'icon-ignore-placement': ['step', ['zoom'], false, towerZoomThreshold, true],
                 'icon-anchor': 'bottom',
                 'text-field': [
                     'format',
@@ -133,53 +113,33 @@ export default class MapboxTowerOverlay implements MapboxOverlay {
                         'to-string',
                         [
                             'round',
-                            [
-                                '*',
-                                ['to-number', ['get', 'height_without_appurtenaces']],
-                                3.2808,
-                            ],
-                        ],
+                            ['*', ['to-number', ['get', 'height_without_appurtenaces']], 3.2808]
+                        ]
                     ],
                     { 'min-fraction-digits': 1, 'max-fraction-digits': 1 },
                     "'",
-                    {},
+                    {}
                 ],
                 // @ts-ignore
-                'text-ignore-placement': [
-                    'step',
-                    ['zoom'],
-                    false,
-                    towerZoomThreshold,
-                    true,
-                ],
+                'text-ignore-placement': ['step', ['zoom'], false, towerZoomThreshold, true],
                 'text-anchor': 'bottom',
                 'text-font': ['Roboto Mono Bold', 'Arial Unicode MS Regular'],
                 'text-size': 14,
                 'text-letter-spacing': -0.03,
                 'text-justify': 'right',
-                'text-offset': [0.5, -0.82],
+                'text-offset': [0.5, -0.82]
             },
             paint: {
-                'text-color': [
-                    'step',
-                    ['zoom'],
-                    'transparent',
-                    towerZoomThreshold,
-                    'white',
-                ],
-            },
+                'text-color': ['step', ['zoom'], 'transparent', towerZoomThreshold, 'white']
+            }
         });
     }
 
     remove() {
-        this.map.getLayer(this.labelsId) &&
-            this.map.removeLayer(this.labelsId);
-        this.map.getSource(this.sourceId) &&
-            this.map.removeSource(this.sourceId);
+        this.map.getLayer(this.labelsId) && this.map.removeLayer(this.labelsId);
+        this.map.getSource(this.sourceId) && this.map.removeSource(this.sourceId);
         // Remove Selected Tower
-        this.map.getLayer(this.selectedLayerId) &&
-            this.map.removeLayer(this.selectedLayerId);
-        this.map.getSource(this.selectedSourceId) &&
-            this.map.removeSource(this.selectedSourceId);
+        this.map.getLayer(this.selectedLayerId) && this.map.removeLayer(this.selectedLayerId);
+        this.map.getSource(this.selectedSourceId) && this.map.removeSource(this.selectedSourceId);
     }
 }

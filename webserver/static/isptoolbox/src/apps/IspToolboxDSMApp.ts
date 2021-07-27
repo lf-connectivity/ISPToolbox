@@ -1,14 +1,12 @@
-import * as MapboxGL from "mapbox-gl";
+import * as MapboxGL from 'mapbox-gl';
 import LidarAvailabilityLayer from '../availabilityOverlay';
 import { getMapDefault } from '../utils/MapDefaults';
 import type { MapDefault } from '../utils/MapDefaults';
 import { LOSCheckMapboxStyles } from '../LOSCheckMapboxStyles';
-import {
-    combineStyles
-} from '../isptoolbox-mapbox-draw/index';
+import { combineStyles } from '../isptoolbox-mapbox-draw/index';
 import PubSub from 'pubsub-js';
 //@ts-ignore
-import styles from "@mapbox/mapbox-gl-draw/src/lib/theme";
+import styles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import { dsmExportStyles } from '../isptoolbox-mapbox-draw/styles/dsm_export_styles';
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -31,7 +29,7 @@ export default class DSMExportApp {
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
             center: map_settings.center, // starting position [lng, lat]
-            zoom: map_settings.zoom, // starting zoom
+            zoom: map_settings.zoom // starting zoom
         });
         // Create Draw
         this.map.on('load', () => {
@@ -53,8 +51,7 @@ export default class DSMExportApp {
                 displayControlsDefault: true,
                 // @ts-ignore
                 styles: combineStyles(combineStyles(styles, LOSCheckMapboxStyles), dsmExportStyles)
-            }
-            );
+            });
             this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
             this.map.addControl(this.draw, 'bottom-right');
             this.draw.changeMode('draw_polygon');
@@ -67,7 +64,7 @@ export default class DSMExportApp {
             this.draw.changeMode('draw_polygon');
             this.map.fire('draw.modechange', { mode: 'draw_polygon' });
         });
-        $("#export-dsm-btn").on("click", this.exportButtonCallback.bind(this));
+        $('#export-dsm-btn').on('click', this.exportButtonCallback.bind(this));
     }
 
     drawChangeModeCallback({ mode }: { mode: string }) {
@@ -78,24 +75,28 @@ export default class DSMExportApp {
         }
     }
 
-    drawCreateCallback({ features }: { features: Array<any> }) {
-    }
+    drawCreateCallback({ features }: { features: Array<any> }) {}
 
     exportButtonCallback() {
         this.setDownloadLink(null);
         const fc = this.draw.getSelected();
-        const gc = { 'type': "GeometryCollection", "geometries": fc.features.map((f: any) => { return f.geometry }) };
+        const gc = {
+            type: 'GeometryCollection',
+            geometries: fc.features.map((f: any) => {
+                return f.geometry;
+            })
+        };
         this.exportArea(gc);
     }
 
     renderErrorMessage(error: string | null) {
         if (error === null) {
-            $("#dsm_export_error").addClass("d-none");
+            $('#dsm_export_error').addClass('d-none');
         } else {
             //@ts-ignore
-            $("#dsm_export_error").removeClass("d-none");
-            $("#dsm_export_status").text("");
-            $("#dsm_export_error").text(error);
+            $('#dsm_export_error').removeClass('d-none');
+            $('#dsm_export_status').text('');
+            $('#dsm_export_error').text(error);
         }
     }
 
@@ -104,26 +105,26 @@ export default class DSMExportApp {
         // @ts-ignore
         const csrf = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         $.ajax({
-            url: "/pro/workspace/api/dsm-export/",
-            method: "POST",
-            data: JSON.stringify(
-                { aoi: polygon }
-            ),
+            url: '/pro/workspace/api/dsm-export/',
+            method: 'POST',
+            data: JSON.stringify({ aoi: polygon }),
             dataType: 'json',
             contentType: 'application/json',
             headers: {
                 'X-CSRFToken': csrf
             }
-        }).done((resp) => {
-            PubSub.publish(DSMExportEvents.UPLOADED, resp);
-        }).fail(
-            () => { this.renderErrorMessage("Failed to create export") }
-        );
+        })
+            .done((resp) => {
+                PubSub.publish(DSMExportEvents.UPLOADED, resp);
+            })
+            .fail(() => {
+                this.renderErrorMessage('Failed to create export');
+            });
     }
 
     uploadReceived(msg: string, resp: any) {
-        $("#dsm_export_instructions").addClass('d-none');
-        $("#dsm_download_section").removeClass("d-none");
+        $('#dsm_export_instructions').addClass('d-none');
+        $('#dsm_download_section').removeClass('d-none');
         //@ts-ignore
         $('#DSMExportModal').modal('show');
         if (resp.error) {
@@ -135,36 +136,44 @@ export default class DSMExportApp {
 
     pollResult(uuid: string, token: string) {
         const checkResult = (uuid: string, token: string) => {
-            $.ajax({ url: `/pro/workspace/api/dsm-export/${uuid}/`, "method": "GET", headers: { 'Authorization': token } }).done((resp) => {
+            $.ajax({
+                url: `/pro/workspace/api/dsm-export/${uuid}/`,
+                method: 'GET',
+                headers: { Authorization: token }
+            }).done((resp) => {
                 switch (resp.status) {
-                    case "SUCCESS":
+                    case 'SUCCESS':
                         this.setDownloadLink(resp.url);
-                        $("#dsm_export_status").text(`status:${resp.status}`);
-                        $('#dsm-export-status-details').text("");
+                        $('#dsm_export_status').text(`status:${resp.status}`);
+                        $('#dsm-export-status-details').text('');
                         break;
-                    case "FAILURE":
+                    case 'FAILURE':
                         this.renderErrorMessage(resp.error);
-                        $("#dsm_export_status").text(`status:${resp.status}`);
+                        $('#dsm_export_status').text(`status:${resp.status}`);
                         $('#dsm-export-status-details').text(resp.error);
                         break;
                     default:
-                        $("#dsm_export_status").text(`status:${resp.status}`);
-                        $('#dsm-export-status-details').text(`${resp.error ?  '- '+resp.error : ''}`);
-                        setTimeout(() => { checkResult(uuid, token) }, 2500);
+                        $('#dsm_export_status').text(`status:${resp.status}`);
+                        $('#dsm-export-status-details').text(
+                            `${resp.error ? '- ' + resp.error : ''}`
+                        );
+                        setTimeout(() => {
+                            checkResult(uuid, token);
+                        }, 2500);
                         break;
                 }
             });
-        }
+        };
         checkResult(uuid, token);
     }
 
     setDownloadLink(url: null | string) {
         if (url) {
-            $("#dsm_download_link").attr("href", url);
-            $("#dsm_download_btn").prop("disabled", false);
+            $('#dsm_download_link').attr('href', url);
+            $('#dsm_download_btn').prop('disabled', false);
         } else {
-            $("#dsm_download_link").removeAttr("href");
-            $("#dsm_download_btn").prop("disabled", true);
+            $('#dsm_download_link').removeAttr('href');
+            $('#dsm_download_btn').prop('disabled', true);
         }
     }
 }
@@ -205,16 +214,14 @@ class DSMUploadAOIForm {
                 processData: false,
                 headers: {
                     'X-CSRFToken': csrf
-                },
-            }
-            ).done(function (data) {
+                }
+            }).done(function (data) {
                 // @ts-ignore
                 $('#DSMUpload').modal('hide');
                 PubSub.publish(DSMExportEvents.UPLOADED, data);
             });
         }
     }
-
 }
 
 $(() => {
@@ -222,6 +229,7 @@ $(() => {
     $('#DSMExportModal').modal('show');
     const mapDefault = getMapDefault();
     // Create Map Object
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
+    mapboxgl.accessToken =
+        'pk.eyJ1IjoiZmJtYXBzIiwiYSI6ImNqOGFmamkxdTBmbzUyd28xY3lybnEwamIifQ.oabgbuGc81ENlOJoPhv4OQ';
     new DSMExportApp(mapDefault);
 });

@@ -1,48 +1,81 @@
 // Create new mapbox Map
-import * as MapboxGL from "mapbox-gl";
+import * as MapboxGL from 'mapbox-gl';
 import { MapboxSDKClient } from './MapboxSDKClient.js';
 import { createLinkChart } from './link_profile.js';
 import LOSCheckWS from './LOSCheckWS';
-import { createLinkProfile, findLidarObstructions, km2miles, m2ft, ft2m, calculateMaximumFresnelRadius } from './LinkCalcUtils';
+import {
+    createLinkProfile,
+    findLidarObstructions,
+    km2miles,
+    m2ft,
+    ft2m,
+    calculateMaximumFresnelRadius
+} from './LinkCalcUtils';
 import { LinkStatus } from './LinkObstructions';
 import {
-    createHoverPoint, createLinkGeometry,
-    calcLinkLength, generateClippingVolume, createTrackShappedOrbitPath,calculateCameraOffsetFromAnimation, updateControlPoints
+    createHoverPoint,
+    createLinkGeometry,
+    calcLinkLength,
+    generateClippingVolume,
+    createTrackShappedOrbitPath,
+    calculateCameraOffsetFromAnimation,
+    updateControlPoints
 } from './LinkOrbitAnimation';
-import { calculateLookVector, calculateLinkProfileFresnelPosition } from './HoverMoveLocation3DView';
-import { LinkMode, OverrideDirect, OverrideSimple, CPEDrawMode, combineStyles, load_custom_icons, APDrawMode} from './isptoolbox-mapbox-draw/index';
+import {
+    calculateLookVector,
+    calculateLinkProfileFresnelPosition
+} from './HoverMoveLocation3DView';
+import {
+    LinkMode,
+    OverrideDirect,
+    OverrideSimple,
+    CPEDrawMode,
+    combineStyles,
+    load_custom_icons,
+    APDrawMode
+} from './isptoolbox-mapbox-draw/index';
 import LidarAvailabilityLayer from './availabilityOverlay';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
-import { Potree } from "./Potree.js";
-import { hasCookie } from "./utils/Cookie";
-import {getInitialFeatures} from './utils/MapDefaults';
-import {isUnitsUS} from './utils/MapPreferences';
+import { Potree } from './Potree.js';
+import { hasCookie } from './utils/Cookie';
+import { getInitialFeatures } from './utils/MapDefaults';
+import { isUnitsUS } from './utils/MapPreferences';
 import PubSub from 'pubsub-js';
 import { WorkspaceManager } from './workspace/WorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
-import { getStreetAndAddressInfo, isBeta, validateHeight, validateLat, validateLng } from './LinkCheckUtils';
-import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup, LinkCheckVertexClickCustomerConnectPopup } from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
-import { LinkCheckTowerPopup } from "./isptoolbox-mapbox-draw/popups/TowerPopups";
-import {LinkProfileView, LinkProfileDisplayOption } from "./organisms/LinkProfileView";
-import { LinkCheckLocationSearchTool } from "./organisms/LinkCheckLocationSearchTool";
-import { LinkCheckBasePopup } from "./isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
-import { parseFormLatitudeLongitude } from "./utils/LatLngInputUtils";
-import { ISPToolboxAbstractAppPage } from "./ISPToolboxAbstractAppPage";
-import { WorkspacePointFeature } from "./workspace/BaseWorkspaceFeature.js";
-import { LinkCheckRadiusAndBuildingCoverageRenderer } from "./organisms/APCoverageRenderer";
+import {
+    getStreetAndAddressInfo,
+    isBeta,
+    validateHeight,
+    validateLat,
+    validateLng
+} from './LinkCheckUtils';
+import {
+    LinkCheckCPEClickCustomerConnectPopup,
+    LinkCheckCustomerConnectPopup,
+    LinkCheckVertexClickCustomerConnectPopup
+} from './isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
+import { LinkCheckTowerPopup } from './isptoolbox-mapbox-draw/popups/TowerPopups';
+import { LinkProfileView, LinkProfileDisplayOption } from './organisms/LinkProfileView';
+import { LinkCheckLocationSearchTool } from './organisms/LinkCheckLocationSearchTool';
+import { LinkCheckBasePopup } from './isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
+import { parseFormLatitudeLongitude } from './utils/LatLngInputUtils';
+import { ISPToolboxAbstractAppPage } from './ISPToolboxAbstractAppPage';
+import { WorkspacePointFeature } from './workspace/BaseWorkspaceFeature.js';
+import { LinkCheckRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
     SET_INPUTS = 'link.set_inputs',
     CLEAR_INPUTS = 'link.clear_inputs',
-    SHOW_INPUTS = 'link.show_inputs',
+    SHOW_INPUTS = 'link.show_inputs'
 }
 
 type HighChartsExtremesEvent = {
-    min: number | undefined,
-    max: number | undefined,
-}
+    min: number | undefined;
+    max: number | undefined;
+};
 
 let potree = (window as any).Potree as null | typeof Potree;
 // @ts-ignore
@@ -68,13 +101,13 @@ const center_freq_values: { [key: string]: number } = {
     '18 GHz': 18.7,
     // https://www.fcc.gov/auction/102/factsheet
     '24 GHz': 24.35,
-    '60 GHz': 64.790,
+    '60 GHz': 64.79
 };
 
 const center_freq_values_reverse: Map<number, string> = new Map();
 Object.keys(center_freq_values).forEach((k: string) => {
     center_freq_values_reverse.set(center_freq_values[k], k);
-})
+});
 
 const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];
 const DEFAULT_RADIO_HEIGHT = 60;
@@ -87,44 +120,46 @@ const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D', 'd'];
 
 export enum UnitSystems {
     US = 'US',
-    SI = 'SI',
+    SI = 'SI'
 }
 
 // Direct draw override const
 /**
- * Returns a function that reverse geocodes the given lngLat 
- * and displays a popup at that location with the result 
+ * Returns a function that reverse geocodes the given lngLat
+ * and displays a popup at that location with the result
  * of the reverse geocode. Also queries for ptp links (non workspace)
  * that share a vertex, to convert those ptp links to tower/customer
- * 
+ *
  * @param state mapbox state
  * @param e event e
  * @returns A function that calls reverseGeocode and displays the popup at the given coordinates.
  */
-    const createPopupFromVertexEvent = function (state: any, e: any) {
+const createPopupFromVertexEvent = function (state: any, e: any) {
     return () => {
         // Find which vertex the user has clicked. Works differently for drag and click vertex.
         let selectedCoord: number;
         if (e.featureTarget) {
             selectedCoord = e.featureTarget.properties.coord_path;
-        }
-        else {
+        } else {
             // Selected coordinate is the last item in selectedCoordPaths
-            selectedCoord = Number(state.selectedCoordPaths[state.selectedCoordPaths.length - 1])
+            selectedCoord = Number(state.selectedCoordPaths[state.selectedCoordPaths.length - 1]);
         }
         let vertexLngLat = state.feature.coordinates[selectedCoord];
         let mapboxClient = MapboxSDKClient.getInstance();
         mapboxClient.reverseGeocode(vertexLngLat, (response: any) => {
-            let popup =
-                LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckVertexClickCustomerConnectPopup, vertexLngLat, response);
+            let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                LinkCheckVertexClickCustomerConnectPopup,
+                vertexLngLat,
+                response
+            );
             popup.setSelectedFeatureId(state.feature.id);
             popup.setSelectedVertex(selectedCoord);
             popup.show();
         });
-    }
-}
+    };
+};
 
-// Abort controller used abort showing popup 
+// Abort controller used abort showing popup
 let popupAbortController: any = null;
 
 export class LinkCheckPage extends ISPToolboxAbstractAppPage {
@@ -170,7 +205,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     selectedFeatureID: string | null;
 
     datasets: Map<LOSWSHandlers, Array<string>>;
-    link_status : LinkStatus;
+    link_status: LinkStatus;
 
     navigationDelta: number;
 
@@ -201,7 +236,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         popupAbortController = new AbortController();
 
                         // @ts-ignore
-                        window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
+                        window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {
+                            once: true,
+                            signal: popupAbortController.signal
+                        });
                     }
                 },
                 dragVertex: (state: any, e: any) => {
@@ -211,7 +249,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         popupAbortController = new AbortController();
 
                         // @ts-ignore
-                        window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {once: true, signal: popupAbortController.signal});
+                        window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {
+                            once: true,
+                            signal: popupAbortController.signal
+                        });
                     }
                     if (!state.feature.properties.radius) {
                         LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
@@ -234,7 +275,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.currentView = 'map';
         this.hover3dDot = null;
         this.currentMaterial = null;
-        this.fresnel_width = 1.;
+        this.fresnel_width = 1;
         this.selectedFeatureID = null;
 
         this._elevation = [];
@@ -255,9 +296,12 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         // Add Resize-Window Callback
         const resize_window = () => {
             const window_height = $(window).height();
-            const bottom_row_height = $('#bottom-row-link-view-container').height()
+            const bottom_row_height = $('#bottom-row-link-view-container').height();
             const nav_height = $('#workspacenavelem').outerHeight(true);
-            let height = (window_height != null && bottom_row_height != null)  ? window_height - bottom_row_height : 0;
+            let height =
+                window_height != null && bottom_row_height != null
+                    ? window_height - bottom_row_height
+                    : 0;
             height = nav_height != null ? height - nav_height : height;
             height = Math.max(height, 400);
             $('#map').height(height);
@@ -266,21 +310,19 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             }
             $('#3d-view-container').height(height);
             $('#potree_render_area').height(height);
-            
-            if(this.link_chart){
+
+            if (this.link_chart) {
                 this.link_chart.redraw();
             }
-        }
+        };
         resize_window();
-        $(window).resize(
-            resize_window
-        );
+        $(window).resize(resize_window);
         // @ts-ignore
         const resizeObserver = new ResizeObserver(() => {
             resize_window();
         });
-        const bottom_row =  document.querySelector('#bottom-row-link-view-container');
-        if (bottom_row instanceof Element){
+        const bottom_row = document.querySelector('#bottom-row-link-view-container');
+        if (bottom_row instanceof Element) {
             resizeObserver.observe(bottom_row);
         }
         // Initialize Bootstrap Tooltips
@@ -294,12 +336,12 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         </div>`
         });
         // Add Freq Toggle Callback
-        $(".freq-dropdown-item").click((event) => {
+        $('.freq-dropdown-item').click((event) => {
             $('#freq-dropdown').text($(event.target).text());
             this.centerFreq = center_freq_values[event.target.id];
-            $(".freq-dropdown-item").removeClass('active');
+            $('.freq-dropdown-item').removeClass('active');
             $(this).addClass('active');
-            if(this.selectedFeatureID){
+            if (this.selectedFeatureID) {
                 if (this.workspaceLinkSelected()) {
                     let link = this.draw.get(this.selectedFeatureID);
 
@@ -308,8 +350,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
                     // @ts-ignore
                     this.workspaceManager.features[link.properties.uuid].update(link);
-                }
-                else {
+                } else {
                     this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', this.centerFreq);
                 }
             }
@@ -323,7 +364,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 } else {
                     $('#point-cloud-loading-status').addClass('d-none');
                 }
-            }
+            };
             potree.numNodesLoadingValue = 0;
             Object.defineProperty(potree, 'numNodesLoading', {
                 set: function (x) {
@@ -375,8 +416,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         changed = true;
                         this.cameraOffset.z += newCamera.z - this.oldCamera.z;
                     }
-                }
-                else if (isBeta()) {
+                } else if (isBeta()) {
                     // Only update target if it was updated via the hover tool.
                     // Otherwise, things get finnicky. BETA FUNCTIONALITY
                     if (Math.abs(target.x - this.oldTarget.x) >= SMALLEST_UPDATE) {
@@ -399,9 +439,13 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         newCamera.y - this.oldCamera.y,
                         newCamera.z - this.oldCamera.z
                     );
-                    
+
                     if (isBeta()) {
-                        updateControlPoints(this.globalLinkAnimation.controlPoints, cameraDelta, targetDelta);
+                        updateControlPoints(
+                            this.globalLinkAnimation.controlPoints,
+                            cameraDelta,
+                            targetDelta
+                        );
                     }
                     this.globalLinkAnimation.updatePath();
                 }
@@ -445,8 +489,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     this.linkProfileFresnelPosition -= this.navigationDelta;
                     this.fitFresnelPositionToBounds();
                     this.moveLocation3DView();
-                }
-                else if (RIGHT_NAVIGATION_KEYS.includes(event.key)) {
+                } else if (RIGHT_NAVIGATION_KEYS.includes(event.key)) {
                     this.highlightCurrentPosition(false);
                     this.linkProfileFresnelPosition += this.navigationDelta;
                     this.fitFresnelPositionToBounds();
@@ -454,22 +497,21 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 }
             }
         });
-    };
+    }
 
     initMapCenterAndZoom() {
         let tx_initial = parseFormLatitudeLongitude('#lat-lng-0');
         let rx_initial = parseFormLatitudeLongitude('#lat-lng-1');
-        let initial_map_center = {'lon': 0, 'lat': 0};
-        if(tx_initial != null && rx_initial != null){
+        let initial_map_center = { lon: 0, lat: 0 };
+        if (tx_initial != null && rx_initial != null) {
             return {
                 initial_map_center: {
-                    'lon': (tx_initial[1] + rx_initial[1]) / 2.0,
-                    'lat': (tx_initial[0] + rx_initial[0]) / 2.0
+                    lon: (tx_initial[1] + rx_initial[1]) / 2.0,
+                    lat: (tx_initial[0] + rx_initial[0]) / 2.0
                 },
                 initial_zoom: 17
-            }
-        }
-        else {
+            };
+        } else {
             return super.initMapCenterAndZoom();
         }
     }
@@ -487,10 +529,14 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     let mapboxClient = MapboxSDKClient.getInstance();
                     let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
                     mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(LinkCheckCustomerConnectPopup, lngLat, response);
+                        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                            LinkCheckCustomerConnectPopup,
+                            lngLat,
+                            response
+                        );
                         popup.show();
                     });
-                }, 1000)
+                }, 1000);
             });
 
             this.map.on('touchend', (e) => {
@@ -522,21 +568,27 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.map.on('draw.update', this.updateRadioLocation.bind(this));
         this.map.on('draw.create', this.updateRadioLocation.bind(this));
 
-        this.profileWS = new LOSCheckWS(
-            this.networkID,
-            [this.ws_message_handler.bind(this)]
-        );
+        this.profileWS = new LOSCheckWS(this.networkID, [this.ws_message_handler.bind(this)]);
 
         this.link_chart = createLinkChart(
             this.link_chart,
             this.highLightPointOnGround.bind(this),
             this.moveLocation3DView.bind(this),
             this.mouseLeave.bind(this),
-            this.setExtremes.bind(this),
+            this.setExtremes.bind(this)
         );
 
-        this.workspaceManager = new WorkspaceManager('#accessPointModal', this.map, this.draw, getInitialFeatures());
-        this.locationMarker = new LinkCheckLocationSearchTool(this.map, this.workspaceManager, this.geocoder);
+        this.workspaceManager = new WorkspaceManager(
+            '#accessPointModal',
+            this.map,
+            this.draw,
+            getInitialFeatures()
+        );
+        this.locationMarker = new LinkCheckLocationSearchTool(
+            this.map,
+            this.workspaceManager,
+            this.geocoder
+        );
 
         // instantiate singletons
         new LinkCheckCustomerConnectPopup(this.map, this.draw, this.locationMarker);
@@ -550,9 +602,12 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.draw.changeMode('direct_select', {
                     featureId: features[0].id
                 });
-                this.map.fire('draw.modechange', {mode:  'direct_select', featureId: features[0].id});
+                this.map.fire('draw.modechange', {
+                    mode: 'direct_select',
+                    featureId: features[0].id
+                });
             }
-        }
+        };
         this.map.on('draw.selectionchange', this.updateRadioLocation.bind(this));
         this.map.on('draw.selectionchange', prioritizeDirectSelect.bind(this));
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
@@ -565,108 +620,125 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         window.addEventListener('keydown', (event) => {
             const featureCollection = this.draw.getSelected();
-            if (event.target === this.map.getCanvas() && (event.key === "Backspace" || event.key === "Delete")) {
-                featureCollection.features.forEach((feat:any) => {this.draw.delete(feat.id)});
-                this.map.fire('draw.delete', {features: featureCollection.features});
+            if (
+                event.target === this.map.getCanvas() &&
+                (event.key === 'Backspace' || event.key === 'Delete')
+            ) {
+                featureCollection.features.forEach((feat: any) => {
+                    this.draw.delete(feat.id);
+                });
+                this.map.fire('draw.delete', { features: featureCollection.features });
             }
         });
 
         this.lidarAvailabilityLayer = new LidarAvailabilityLayer(this.map);
 
-
         const tx_coords = parseFormLatitudeLongitude('#lat-lng-0');
         const rx_coords = parseFormLatitudeLongitude('#lat-lng-1');
-        if(tx_coords != null && rx_coords != null)
-        {
+        if (tx_coords != null && rx_coords != null) {
             const [tx_lat, tx_lng] = tx_coords;
             const [rx_lat, rx_lng] = rx_coords;
             const features = this.draw.add({
-                "type": 'Feature',
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: [
+                        [tx_lng, tx_lat],
+                        [rx_lng, rx_lat]
+                    ]
                 },
-                "properties": {
-                    "meta": "radio_link",
-                    'radio_label_0': 'radio_0',
-                    'radio_label_1': 'radio_1',
-                    'radio_color': '#00FF00',
-                    'radio0hgt': parseFloat(String($('#hgt-0').val())),
-                    'radio1hgt': parseFloat(String($('#hgt-1').val())),
-                    'freq': DEFAULT_LINK_FREQ,
+                properties: {
+                    meta: 'radio_link',
+                    radio_label_0: 'radio_0',
+                    radio_label_1: 'radio_1',
+                    radio_color: '#00FF00',
+                    radio0hgt: parseFloat(String($('#hgt-0').val())),
+                    radio1hgt: parseFloat(String($('#hgt-1').val())),
+                    freq: DEFAULT_LINK_FREQ
                 }
             });
             this.selectedFeatureID = features.length ? features[0] : null;
 
             this.map.addSource(SELECTED_LINK_SOURCE, {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': [
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: [
                         {
-                            'type': 'Feature',
-                            'properties': {},
-                            'geometry': {
-                                "type": "LineString",
-                                "coordinates": [[tx_lng, tx_lat], [rx_lng, rx_lat]]
-                            },
+                            type: 'Feature',
+                            properties: {},
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: [
+                                    [tx_lng, tx_lat],
+                                    [rx_lng, rx_lat]
+                                ]
+                            }
                         }
                     ]
                 }
             });
         } else {
             this.map.addSource(SELECTED_LINK_SOURCE, {
-                'type': 'geojson',
-                'data': {
-                    'type': 'FeatureCollection',
-                    'features': []
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
                 }
             });
         }
         // Add Data Sources to Help User Understand Map
 
         // Selected Link Layer
-        this.map.addLayer({
-            'id': SELECTED_LINK_LAYER,
-            'type': 'line',
-            'source': SELECTED_LINK_SOURCE,
-            'layout': {
-                'line-cap': 'round'
+        this.map.addLayer(
+            {
+                id: SELECTED_LINK_LAYER,
+                type: 'line',
+                source: SELECTED_LINK_SOURCE,
+                layout: {
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#FFFFFF',
+                    'line-width': 7
+                }
             },
-            'paint': {
-                'line-color': '#FFFFFF',
-                'line-width': 7
-            }
-        }, LOWEST_LAYER_LAYER);
+            LOWEST_LAYER_LAYER
+        );
         this.map.addSource(HOVER_POINT_SOURCE, {
-            'type': 'geojson',
-            'data': {
-                'type': 'FeatureCollection',
-                'features': []
+            type: 'geojson',
+            data: {
+                type: 'FeatureCollection',
+                features: []
             }
         });
 
         // HOVER POINT MAP LAYERS
-        this.map.addLayer({
-            'id': `${HOVER_POINT_LAYER}_halo`,
-            'type': 'circle',
-            'source': HOVER_POINT_SOURCE,
-            'paint': {
-                'circle-radius': 7,
-                'circle-color': '#FFFFFF'
-            }
-        }, LOWEST_LAYER_LAYER);
+        this.map.addLayer(
+            {
+                id: `${HOVER_POINT_LAYER}_halo`,
+                type: 'circle',
+                source: HOVER_POINT_SOURCE,
+                paint: {
+                    'circle-radius': 7,
+                    'circle-color': '#FFFFFF'
+                }
+            },
+            LOWEST_LAYER_LAYER
+        );
 
-        this.map.addLayer({
-            'id': HOVER_POINT_LAYER,
-            'type': 'circle',
-            'source': HOVER_POINT_SOURCE,
-            'paint': {
-                'circle-radius': 5,
-                'circle-color': '#3887be'
-            }
-        }, LOWEST_LAYER_LAYER);
-
+        this.map.addLayer(
+            {
+                id: HOVER_POINT_LAYER,
+                type: 'circle',
+                source: HOVER_POINT_SOURCE,
+                paint: {
+                    'circle-radius': 5,
+                    'circle-color': '#3887be'
+                }
+            },
+            LOWEST_LAYER_LAYER
+        );
 
         this.updateLinkProfile();
         this.link_chart.redraw();
@@ -682,10 +754,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         let link = this.draw.get(this.selectedFeatureID);
                         let ap = this.workspaceManager.features[link?.properties?.ap];
                         ap.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
-                        this.map.fire('draw.update', {features: [ap.getFeatureData()]});
-                    }
-                    else {
-                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height)
+                        this.map.fire('draw.update', { features: [ap.getFeatureData()] });
+                    } else {
+                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height);
                     }
                 }
             }, 500)
@@ -700,35 +771,41 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         let link = this.draw.get(this.selectedFeatureID);
                         let cpe = this.workspaceManager.features[link?.properties?.cpe];
                         cpe.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
-                        this.map.fire('draw.update', {features: [cpe.getFeatureData()]});
-                    }
-                    else {
-                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height)
+                        this.map.fire('draw.update', { features: [cpe.getFeatureData()] });
+                    } else {
+                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height);
                     }
                 }
             }, 500)
         );
         const createRadioCoordinateChangeCallback = (htmlId: string, coord1: number) => {
-            $(htmlId).on('change',
+            $(htmlId).on(
+                'change',
                 _.debounce(() => {
                     if (this.selectedFeatureID != null) {
                         const feat = this.draw.get(this.selectedFeatureID);
                         let coords = parseFormLatitudeLongitude(htmlId);
-                        if (coords != null){
+                        if (coords != null) {
                             coords = [coords[1], coords[0]];
-                            if(feat && feat.geometry.type !== 'GeometryCollection' && feat.geometry.coordinates){
+                            if (
+                                feat &&
+                                feat.geometry.type !== 'GeometryCollection' &&
+                                feat.geometry.coordinates
+                            ) {
                                 if (this.workspaceLinkSelected()) {
                                     // @ts-ignore
-                                    let point = this.workspaceManager.features[coord1 === 0 ? feat.properties.ap : feat.properties.cpe] as WorkspacePointFeature;
+                                    let point = this.workspaceManager.features[
+                                        coord1 === 0 ? feat.properties.ap : feat.properties.cpe
+                                    ] as WorkspacePointFeature;
 
                                     // @ts-ignore
                                     point.move(coords);
-                                }
-                                else {
+                                } else {
                                     //@ts-ignore
                                     feat.geometry.coordinates[coord1] = coords;
                                     this.draw.add(feat);
-                                    const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+                                    const selected_link_source =
+                                        this.map.getSource(SELECTED_LINK_SOURCE);
                                     if (selected_link_source.type === 'geojson') {
                                         //@ts-ignore
                                         selected_link_source.setData(feat.geometry);
@@ -741,7 +818,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     }
                 }, 500)
             );
-        }
+        };
         createRadioCoordinateChangeCallback('#lat-lng-0', 0);
         createRadioCoordinateChangeCallback('#lat-lng-1', 1);
 
@@ -761,16 +838,19 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     this.highlightCurrentPosition(true);
                 }
                 // If they haven't seen the tooltip yet, expand it by default for 30 seconds
-                if (!hasCookie("losHelpSeen")) {
+                if (!hasCookie('losHelpSeen')) {
                     // Set cookie so tooltip is closed next time they visit
                     const now = new Date();
-                    const exp = now.getTime() + 365*24*60*60*1000;
+                    const exp = now.getTime() + 365 * 24 * 60 * 60 * 1000;
                     now.setTime(exp);
-                    document.cookie = "losHelpSeen=true; Expires=" + now.toUTCString() + '; SameSite=None; Secure; path=/;';
+                    document.cookie =
+                        'losHelpSeen=true; Expires=' +
+                        now.toUTCString() +
+                        '; SameSite=None; Secure; path=/;';
                     // Set the tooltip copy to visible, hide after 10s
-                    $('.help-3D-copy').css({"opacity": "1", "visibility": "visible"});
+                    $('.help-3D-copy').css({ opacity: '1', visibility: 'visible' });
                     setTimeout(() => {
-                        $('.help-3D-copy').css({"opacity": "0", "visibility": "hidden"})
+                        $('.help-3D-copy').css({ opacity: '0', visibility: 'hidden' });
                     }, 10000);
                 }
             }
@@ -797,86 +877,124 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     workspaceLinkSelected(): boolean {
         if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
             let feat = this.draw.get(this.selectedFeatureID);
-            return feat?.properties?.feature_type && feat?.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
-        }
-        else {
+            return (
+                feat?.properties?.feature_type &&
+                feat?.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
+            );
+        } else {
             return false;
         }
     }
 
     removeLinkHalo: (features: Array<MapboxGL.MapboxGeoJSONFeature>) => void = (features) => {
-        const contains_selected = features.filter((feat) => { return feat.id === this.selectedFeatureID }).length > 0;
+        const contains_selected =
+            features.filter((feat) => {
+                return feat.id === this.selectedFeatureID;
+            }).length > 0;
         if (contains_selected) {
             const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
             if (selected_link_source.type === 'geojson') {
-                selected_link_source.setData({ type: 'FeatureCollection', 'features': [] });
+                selected_link_source.setData({ type: 'FeatureCollection', features: [] });
             }
         }
-    }
+    };
 
-    setInputs(msg: string, data : {radio: number, latitude: number, longitude: number, name: string, height: number}){
-        $(`#lat-lng-${data.radio}`).val(`${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`);
+    setInputs(
+        msg: string,
+        data: { radio: number; latitude: number; longitude: number; name: string; height: number }
+    ) {
+        $(`#lat-lng-${data.radio}`).val(
+            `${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`
+        );
         $(`#hgt-${data.radio}`).val(data.height.toFixed(0));
         $(`#radio_name-${data.radio}`).text(data.name);
     }
 
-    showLinkCheckProfile(){
+    showLinkCheckProfile() {
         //@ts-ignore
         $('#data-container').collapse('show');
     }
 
     updateAnimationTitles() {
         // Update animation titles if they exist
-        const name1 = this.radio_names[0].length > 15 ? this.radio_names[0].substr(0, 15) + '...' : this.radio_names[0];
-        const name2 = this.radio_names[1].length > 15 ? this.radio_names[1].substr(0, 15) + '...' : this.radio_names[1];
+        const name1 =
+            this.radio_names[0].length > 15
+                ? this.radio_names[0].substr(0, 15) + '...'
+                : this.radio_names[0];
+        const name2 =
+            this.radio_names[1].length > 15
+                ? this.radio_names[1].substr(0, 15) + '...'
+                : this.radio_names[1];
         if (this.aAbout1) {
-            this.aAbout1.title = name1
+            this.aAbout1.title = name1;
         }
         if (this.aAbout2) {
-            this.aAbout2.title = name2
+            this.aAbout2.title = name2;
         }
     }
 
     updateRadioLocation(update: any) {
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
-        if (update.features.length && update.features[0].properties.radius === undefined && update.features[0].geometry.type !== "Point") {
-
+        if (
+            update.features.length &&
+            update.features[0].properties.radius === undefined &&
+            update.features[0].geometry.type !== 'Point'
+        ) {
             // Don't pop up the link profile view if it was an AP/customer link that was moved.
-            if (!(update.features[0].properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK && update.action === 'move')) {
+            if (
+                !(
+                    update.features[0].properties.feature_type ===
+                        WorkspaceFeatureTypes.AP_CPE_LINK && update.action === 'move'
+                )
+            ) {
                 this.showLinkCheckProfile();
             }
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;
 
             // Workspace AP-CPE link frequency, heights, and name
-            if (feat.properties.feature_type && feat.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK) {
+            if (
+                feat.properties.feature_type &&
+                feat.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
+            ) {
                 if (center_freq_values_reverse.has(feat.properties.frequency)) {
-                    $('#freq-dropdown').text(center_freq_values_reverse.get(feat.properties.frequency) as string);
+                    $('#freq-dropdown').text(
+                        center_freq_values_reverse.get(feat.properties.frequency) as string
+                    );
                 }
 
                 let ap = this.workspaceManager.features[feat.properties.ap];
                 let cpe = this.workspaceManager.features[feat.properties.cpe];
 
                 $('#hgt-0').val(
-                    Math.round(isUnitsUS() ? ap.getFeatureProperty('height_ft') : ap.getFeatureProperty('height'))
+                    Math.round(
+                        isUnitsUS()
+                            ? ap.getFeatureProperty('height_ft')
+                            : ap.getFeatureProperty('height')
+                    )
                 );
                 $('#hgt-1').val(
-                    Math.round(isUnitsUS() ? cpe.getFeatureProperty('height_ft') : cpe.getFeatureProperty('height'))
+                    Math.round(
+                        isUnitsUS()
+                            ? cpe.getFeatureProperty('height_ft')
+                            : cpe.getFeatureProperty('height')
+                    )
                 );
 
                 $('#radio_name-0').text(ap.getFeatureProperty('name'));
                 $('#radio_name-1').text(cpe.getFeatureProperty('name'));
-                this.radio_names[0] = ap.getFeatureProperty('name')
-                this.radio_names[1] = cpe.getFeatureProperty('name')
+                this.radio_names[0] = ap.getFeatureProperty('name');
+                this.radio_names[1] = cpe.getFeatureProperty('name');
                 this.updateAnimationTitles();
-            }
-            else {
+            } else {
                 if (feat.properties.freq == undefined && this.selectedFeatureID) {
                     this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', DEFAULT_LINK_FREQ);
                 }
                 if (center_freq_values_reverse.has(feat.properties.freq)) {
-                    $('#freq-dropdown').text(center_freq_values_reverse.get(feat.properties.freq) as string);
+                    $('#freq-dropdown').text(
+                        center_freq_values_reverse.get(feat.properties.freq) as string
+                    );
                 }
 
                 let radio0hgt = feat.properties.radio0hgt;
@@ -893,15 +1011,22 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 $('#hgt-1').val(radio1hgt);
                 $('#radio_name-0').text(DEFAULT_RADIO_0_NAME);
                 $('#radio_name-1').text(DEFAULT_RADIO_1_NAME);
-                this.radio_names[0] = DEFAULT_RADIO_0_NAME
-                this.radio_names[1] = DEFAULT_RADIO_1_NAME
+                this.radio_names[0] = DEFAULT_RADIO_0_NAME;
+                this.radio_names[1] = DEFAULT_RADIO_1_NAME;
                 this.updateAnimationTitles();
             }
 
-            
-            $('#lat-lng-0').val(`${feat.geometry.coordinates[0][1].toFixed(5)}, ${feat.geometry.coordinates[0][0].toFixed(5)}`);
-            $('#lat-lng-1').val(`${feat.geometry.coordinates[1][1].toFixed(5)}, ${feat.geometry.coordinates[1][0].toFixed(5)}`);
-            
+            $('#lat-lng-0').val(
+                `${feat.geometry.coordinates[0][1].toFixed(
+                    5
+                )}, ${feat.geometry.coordinates[0][0].toFixed(5)}`
+            );
+            $('#lat-lng-1').val(
+                `${feat.geometry.coordinates[1][1].toFixed(
+                    5
+                )}, ${feat.geometry.coordinates[1][0].toFixed(5)}`
+            );
+
             const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
             if (selected_link_source.type === 'geojson') {
                 selected_link_source.setData(feat.geometry);
@@ -910,19 +1035,19 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             this.updateLinkChart();
             this.updateLinkProfile();
         }
-    };
+    }
 
-    deleteDrawingCallback({features} : any) {
+    deleteDrawingCallback({ features }: any) {
         this.removeLinkHalo(features);
         PubSub.publish(LinkCheckEvents.CLEAR_INPUTS);
     }
 
-    highLightPointOnGround({ x, y }: { x: number, y: number }) {
+    highLightPointOnGround({ x, y }: { x: number; y: number }) {
         const integer_X = Math.round(x);
         if (this._coords !== null && integer_X < this._coords.length && integer_X >= 0) {
             const new_data = {
-                'type': 'Point',
-                'coordinates': [this._coords[integer_X].lng, this._coords[integer_X].lat]
+                type: 'Point',
+                coordinates: [this._coords[integer_X].lng, this._coords[integer_X].lat]
             };
             const source = this.map.getSource(HOVER_POINT_SOURCE);
             if (source.type === 'geojson') {
@@ -930,14 +1055,23 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 source.setData(new_data);
             }
         }
-    };
+    }
 
-    moveLocation3DView({ x, y }: { x: number, y: number } = {x: this.linkProfileFresnelPosition, y: 0}) {
+    moveLocation3DView(
+        { x, y }: { x: number; y: number } = { x: this.linkProfileFresnelPosition, y: 0 }
+    ) {
         try {
             const tx_h = this.getRadioHeightFromUI('0') + this._elevation[0];
-            const rx_h = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
+            const rx_h =
+                this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
             const pos = x / this._elevation.length;
-            const { location, lookAt } = calculateLookVector(this.tx_loc_lidar, tx_h, this.rx_loc_lidar, rx_h, pos);
+            const { location, lookAt } = calculateLookVector(
+                this.tx_loc_lidar,
+                tx_h,
+                this.rx_loc_lidar,
+                rx_h,
+                pos
+            );
 
             // Factor in camera offset
             location[0] += this.cameraOffset.x;
@@ -965,7 +1099,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 scene.view.position.set(location[0], location[1], location[2]);
                 // Point Camera at Link plus target offset
                 //@ts-ignore
-                scene.view.lookAt(new THREE.Vector3(lookAt[0], lookAt[1],lookAt[2]));
+                scene.view.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
             }
             // @ts-ignore
             let scene = window.viewer.scene;
@@ -974,35 +1108,40 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 scene.scene.remove(this.hover3dDot);
             }
 
-            this.hover3dDot = createHoverPoint(lookAt, [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h], this.isOverlapping());
+            this.hover3dDot = createHoverPoint(
+                lookAt,
+                [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h],
+                this.isOverlapping()
+            );
 
             scene.scene.add(this.hover3dDot);
-        } catch (err) {
-        }
-    };
+        } catch (err) {}
+    }
 
     isOverlapping() {
-        return this.link_status.obstructions.some(interval => {
-            return this.linkProfileFresnelPosition >= interval[0] && 
-                   this.linkProfileFresnelPosition <= interval[1];
+        return this.link_status.obstructions.some((interval) => {
+            return (
+                this.linkProfileFresnelPosition >= interval[0] &&
+                this.linkProfileFresnelPosition <= interval[1]
+            );
         });
-    };
+    }
 
     getRadioLocations() {
         const tx_coords = parseFormLatitudeLongitude('#lat-lng-0');
         const rx_coords = parseFormLatitudeLongitude('#lat-lng-1');
-        if (tx_coords == null || rx_coords == null){
+        if (tx_coords == null || rx_coords == null) {
             return null;
         }
         const [tx_lat, tx_lng] = tx_coords;
         const [rx_lat, rx_lng] = rx_coords;
-        if([tx_lat, tx_lng, rx_lat, rx_lng].some(Number.isNaN)) {
+        if ([tx_lat, tx_lng, rx_lat, rx_lng].some(Number.isNaN)) {
             return null;
         }
         const query_params: {
-            tx: [number, number],
-            rx: [number, number],
-            id: string
+            tx: [number, number];
+            rx: [number, number];
+            id: string;
         } = { tx: [tx_lng, tx_lat], rx: [rx_lng, rx_lat], id: this.userRequestIdentity };
         return query_params;
     }
@@ -1010,43 +1149,42 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     // Overlay
     updateLinkProfile() {
         const query_params = this.getRadioLocations();
-        if(query_params !== null) {
+        if (query_params !== null) {
+            // @ts-ignore
+            const query = new URLSearchParams(query_params).toString();
+            if (this.selected_feature === query) {
+                return;
+            } else {
+                this.selected_feature = query;
+            }
+            this.link_chart.showLoading();
+            this.showLoading();
+            PubSub.publish(LinkCheckEvents.SHOW_INPUTS);
 
-        // @ts-ignore
-        const query = new URLSearchParams(query_params).toString();
-        if (this.selected_feature === query) {
-            return;
-        } else {
-            this.selected_feature = query;
-        }
-        this.link_chart.showLoading();
-        this.showLoading();
-        PubSub.publish(LinkCheckEvents.SHOW_INPUTS);
-
-        // Create Callback Function for WebSocket
-        // Use Websocket for request:
-        this.profileWS.sendRequest(
-            query_params.tx,
-            query_params.rx,
-            this.userRequestIdentity,
-            this.centerFreq
-        );
-        this._elevation = [];
-        this._lidar = [];
-        this._link_distance = 0;
+            // Create Callback Function for WebSocket
+            // Use Websocket for request:
+            this.profileWS.sendRequest(
+                query_params.tx,
+                query_params.rx,
+                this.userRequestIdentity,
+                this.centerFreq
+            );
+            this._elevation = [];
+            this._lidar = [];
+            this._link_distance = 0;
         }
     }
 
     zoomUpdateLinkProfile(aoi: [number, number]) {
         const query_params = this.getRadioLocations();
-        if(query_params !== null) {
-        this.profileWS.sendRequest(
-            query_params.tx,
-            query_params.rx,
-            this.userRequestIdentity,
-            this.centerFreq,
-            aoi
-        );
+        if (query_params !== null) {
+            this.profileWS.sendRequest(
+                query_params.tx,
+                query_params.rx,
+                this.userRequestIdentity,
+                this.centerFreq,
+                aoi
+            );
         }
     }
 
@@ -1054,7 +1192,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         const source = this.map.getSource(HOVER_POINT_SOURCE);
         if (source.type === 'geojson') {
             // @ts-ignore
-            source.setData({ 'type': "FeatureCollection", "features": [] });
+            source.setData({ type: 'FeatureCollection', features: [] });
         }
         this.highlightCurrentPosition(true);
     }
@@ -1067,10 +1205,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         // Set the hover state over both the fresnel cone chart
         // and the LOS chart in Highchart.
-        if(this.link_chart.series[3].data.length > this.linkProfileFresnelPosition){
+        if (this.link_chart.series[3].data.length > this.linkProfileFresnelPosition) {
             this.link_chart.series[3].data[this.linkProfileFresnelPosition].setState(state);
         }
-        if(this.link_chart.series[2].data.length > this.linkProfileFresnelPosition){
+        if (this.link_chart.series[2].data.length > this.linkProfileFresnelPosition) {
             this.link_chart.series[2].data[this.linkProfileFresnelPosition].setState(state);
         }
     }
@@ -1083,14 +1221,15 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             scene.scene.remove(this.hover3dDot);
         }
         this.hover3dDot = null;
-    };
+    }
 
     renderNewLinkProfile() {
         // Check if we can update the chart
         if (this.link_chart != null) {
             if (this._elevation.length > 1 && this._lidar.length > 1) {
                 const tx_h = this.getRadioHeightFromUI('0') + this._elevation[0];
-                const rx_h = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
+                const rx_h =
+                    this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
                 this.link_chart.yAxis[0].update({
                     min: Math.min(...[...this._lidar, tx_h, rx_h]),
                     max: Math.max(...[...this._lidar, tx_h, rx_h])
@@ -1099,7 +1238,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.link_chart.yAxis[0].update({ min: Math.min(...this._elevation) });
             }
         }
-    };
+    }
 
     /**
      * Updates link chart for LOS based on new elevation profile and tx/rx height
@@ -1126,15 +1265,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         to: x[1],
                         color: 'rgba(242, 62, 62, 0.2)'
                     });
-                })
+                });
             }
         }
         if (this._elevation != null && this.updateLinkHeight != null && update3DView) {
             this.highlightCurrentPosition(false);
 
             const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
-            const rx_hgt = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
-            this.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);            
+            const rx_hgt =
+                this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
+            this.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);
             if (this._lidar != null) {
                 this.link_chart.yAxis[0].update({
                     min: Math.min(...[...this._lidar, tx_hgt, rx_hgt]),
@@ -1158,8 +1298,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.zoomUpdateLinkProfile(extremes);
     }
 
-    setPlayPauseButton(pause: boolean){
-        if( pause ){
+    setPlayPauseButton(pause: boolean) {
+        if (pause) {
             $('#pause-button-3d').addClass('d-none');
             $('#play-button-3d').removeClass('d-none');
         } else {
@@ -1200,12 +1340,17 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             }
             this.updateAnimationTitles();
 
-            this.globalLinkAnimation = new potree.CameraAnimation(
-                (window as any).viewer
-            );
+            this.globalLinkAnimation = new potree.CameraAnimation((window as any).viewer);
             this.setPlayPauseButton(false);
 
-            const { targets, positions } = createTrackShappedOrbitPath(tx, tx_h, rx, rx_h, 50.0, 50.0);
+            const { targets, positions } = createTrackShappedOrbitPath(
+                tx,
+                tx_h,
+                rx,
+                rx_h,
+                50.0,
+                50.0
+            );
 
             for (let i = 0; i < positions.length; i++) {
                 const cp = this.globalLinkAnimation.createControlPoint();
@@ -1213,9 +1358,12 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 cp.target.set(...targets[i]);
             }
             const link_len = calcLinkLength(tx, rx, tx_h, rx_h);
-            const desired_animation_speed = 50; // meters per second 
+            const desired_animation_speed = 50; // meters per second
             const min_animation_duration = 20;
-            const animationDuration = Math.max((link_len * 2 / desired_animation_speed), min_animation_duration);
+            const animationDuration = Math.max(
+                (link_len * 2) / desired_animation_speed,
+                min_animation_duration
+            );
             // @ts-ignore
             window.viewer.scene.addCameraAnimation(this.globalLinkAnimation);
             this.globalLinkAnimation.setDuration(animationDuration);
@@ -1276,8 +1424,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.linkProfileFresnelPosition = Math.round(this.linkProfileFresnelPosition);
         if (this.linkProfileFresnelPosition < xMin) {
             this.linkProfileFresnelPosition = xMin;
-        }
-        else if (this.linkProfileFresnelPosition > xMax) {
+        } else if (this.linkProfileFresnelPosition > xMax) {
             this.linkProfileFresnelPosition = xMax;
         }
     }
@@ -1291,8 +1438,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         // Less than 1 mile = 8 units
         if (this._link_distance < 1600) {
             this.navigationDelta = 8;
-        }
-        else {
+        } else {
             // Minimal delta speed is 1
             this.navigationDelta = Math.max(Math.round(17000 / this._link_distance), 1);
         }
@@ -1307,16 +1453,26 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 scene.scene.remove(this.linkLine);
             }
 
-            const fresnel_width_m = calculateMaximumFresnelRadius(this._link_distance, this.centerFreq);
+            const fresnel_width_m = calculateMaximumFresnelRadius(
+                this._link_distance,
+                this.centerFreq
+            );
             this.linkLine = createLinkGeometry(tx, rx, tx_h, rx_h, fresnel_width_m);
             scene.scene.add(this.linkLine);
             this.createAnimationForLink(tx, rx, tx_h, rx_h, start_animation);
-        }
+        };
         this.updateLinkHeight(tx_h, rx_h, true);
     }
 
-
-    updateLidarRender(name: Array<string>, urls: Array<string>, bb: Array<number>, tx: any, rx: any, tx_h: any, rx_h: any) {
+    updateLidarRender(
+        name: Array<string>,
+        urls: Array<string>,
+        bb: Array<number>,
+        tx: any,
+        rx: any,
+        tx_h: any,
+        rx_h: any
+    ) {
         this.tx_loc_lidar = tx;
         this.rx_loc_lidar = rx;
         const setClippingVolume = (bb: Array<number>) => {
@@ -1324,30 +1480,32 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 // @ts-ignore
                 let scene = window.viewer.scene;
                 let { position, scale, camera } = generateClippingVolume(bb);
-                { // VOLUME visible
+                {
+                    // VOLUME visible
                     if (this.clippingVolume !== null) {
                         scene.removeVolume(this.clippingVolume);
                     }
                     this.clippingVolume = new potree.BoxVolume();
-                    this.clippingVolume.name = "Visible Clipping Volume";
+                    this.clippingVolume.name = 'Visible Clipping Volume';
                     this.clippingVolume.scale.set(scale[0], scale[1], scale[2]);
                     this.clippingVolume.position.set(position[0], position[1], position[2]);
                     this.clippingVolume.lookAt(new THREE.Vector3(tx[0], tx[1], position[2]));
                     this.clippingVolume.clip = true;
                     scene.addVolume(this.clippingVolume);
                     this.clippingVolume.visible = false;
-
                 }
                 scene.view.position.set(camera[0], camera[1], camera[2]);
                 scene.view.lookAt(new THREE.Vector3(position[0], position[1], 0));
                 // @ts-ignore
                 window.viewer.setClipTask(potree.ClipTask.SHOW_INSIDE);
             }
-        }
+        };
         // Check if we already added point cloud
         urls.forEach((url: string, idx: number) => {
             //@ts-ignore
-            const existing_pc_names: Array<string> = window.viewer.scene.pointclouds.map((cld) => { return cld.name });
+            const existing_pc_names: Array<string> = window.viewer.scene.pointclouds.map((cld) => {
+                return cld.name;
+            });
             if (!existing_pc_names.includes(name[idx]) && potree) {
                 potree.loadPointCloud(url, name[idx], (e: any) => {
                     // @ts-ignore
@@ -1360,7 +1518,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         this.currentMaterial.pointSizeType = potree.PointSizeType.FIXED;
                         this.currentMaterial.shape = potree.PointShape.CIRCLE;
                     }
-                    this.currentMaterial.activeAttributeName = "elevation";
+                    this.currentMaterial.activeAttributeName = 'elevation';
                     this.currentMaterial.elevationRange = [bb[4], bb[5]];
                 });
             }
@@ -1371,29 +1529,41 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     updateLegend() {
         const sources: Array<string> = [];
-        this.datasets.forEach((l, k) => { if (l instanceof Array) { l.forEach(v => { sources.push(v); }) } })
-        $('#los-chart-tooltip-button').attr(
-            "title",
-            `<div class="los-chart-legend">
+        this.datasets.forEach((l, k) => {
+            if (l instanceof Array) {
+                l.forEach((v) => {
+                    sources.push(v);
+                });
+            }
+        });
+        $('#los-chart-tooltip-button')
+            .attr(
+                'title',
+                `<div class="los-chart-legend">
                 <h5>Link Profile</h5>
                     <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-los' ></span><p class='list-item'>LOS</p></div>
                     <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-fresnel' ></span><p class='list-item'>Fresnel</p></div>
                     <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-lidar' ></span><p class='list-item'>LiDAR</p></div>
                     <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-terrain'></span><p class='list-item'>Terrain</p></div>
                     <div class='isptoolbox-bullet-line'><span class='isptoolbox-tooltip-colorbox isptoolbox-obstruction'></span><p class='list-item'>LOS Obstructions</p></div>
-                    ${this.datasets.size ? `
-                    <p class='isptoolbox-data-source'>Data Sources: ${sources.join(', ')}</p>` : ''}
+                    ${
+                        this.datasets.size
+                            ? `
+                    <p class='isptoolbox-data-source'>Data Sources: ${sources.join(', ')}</p>`
+                            : ''
+                    }
             </div>`
-            // @ts-ignore
-        ).tooltip('_fixTitle');
+                // @ts-ignore
+            )
+            .tooltip('_fixTitle');
     }
 
     setErrorMessage(error_message: string | null): void {
-        if (error_message !== null){
-            $("#link-request-error-description").text(error_message);
+        if (error_message !== null) {
+            $('#link-request-error-description').text(error_message);
             this.profileView.render(LinkProfileDisplayOption.LOADING_ERROR);
         } else {
-            $("#link-request-error-description").text('');
+            $('#link-request-error-description').text('');
         }
     }
 
@@ -1415,16 +1585,27 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     }
     ws_terrain_callback(response: TerrainResponse): void {
         if (response.aoi[0] === 0 && response.aoi[1] === 1) {
-            this._elevation = response.terrain_profile.map(pt => { return pt.elevation; });
-            this._coords = response.terrain_profile.map(
-                (pt: any) => { return { lat: pt.lat, lng: pt.lng } }
+            this._elevation = response.terrain_profile.map((pt) => {
+                return pt.elevation;
+            });
+            this._coords = response.terrain_profile.map((pt: any) => {
+                return { lat: pt.lat, lng: pt.lng };
+            });
+            this.link_chart.series[0].setData(
+                this._elevation.map((v, idx) => {
+                    return [idx, v];
+                })
             );
-            this.link_chart.series[0].setData(this._elevation.map((v, idx) => { return [idx, v]; }));
-
         } else {
-            this.link_chart.series[0].setData(response.terrain_profile.map((pt, idx) => {
-                return [idx * (response.aoi[1] - response.aoi[0]) + (response.aoi[0] * response.terrain_profile.length), pt.elevation];
-            }));
+            this.link_chart.series[0].setData(
+                response.terrain_profile.map((pt, idx) => {
+                    return [
+                        idx * (response.aoi[1] - response.aoi[0]) +
+                            response.aoi[0] * response.terrain_profile.length,
+                        pt.elevation
+                    ];
+                })
+            );
         }
 
         this.renderNewLinkProfile();
@@ -1446,16 +1627,22 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         if (response.aoi[0] === 0 && response.aoi[1] === 1) {
             this._lidar = response.lidar_profile;
             this._link_distance = response.dist;
-            this.link_chart.series[1].setData(this._lidar.map((v, idx) => { return [idx, v]; }));
+            this.link_chart.series[1].setData(
+                this._lidar.map((v, idx) => {
+                    return [idx, v];
+                })
+            );
             if (response.error !== null) {
-                $("#3D-view-btn").addClass('d-none');
+                $('#3D-view-btn').addClass('d-none');
             } else {
                 if (this.selectedFeatureID && this.draw.get(this.selectedFeatureID)) {
-                    $("#3D-view-btn").removeClass('d-none');
+                    $('#3D-view-btn').removeClass('d-none');
 
                     if (this.currentLinkHash !== response.hash && this._elevation.length > 1) {
                         const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
-                        const rx_hgt = this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
+                        const rx_hgt =
+                            this.getRadioHeightFromUI('1') +
+                            this._elevation[this._elevation.length - 1];
                         this.updateLidarRender(
                             response.source,
                             response.url,
@@ -1469,15 +1656,23 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     } else {
                         // @ts-ignore
                         const scene = window.viewer.scene;
-                        scene.pointclouds.forEach((cld: any) => { cld.material.elevationRange = [response.bb[4], response.bb[5]] });
+                        scene.pointclouds.forEach((cld: any) => {
+                            cld.material.elevationRange = [response.bb[4], response.bb[5]];
+                        });
                     }
                     this.updateNavigationDelta();
                 }
             }
         } else {
-            this.link_chart.series[1].setData(response.lidar_profile.map((v, idx) => {
-                return [idx * (response.aoi[1] - response.aoi[0]) + (response.aoi[0] * response.lidar_profile.length), v];
-            }));
+            this.link_chart.series[1].setData(
+                response.lidar_profile.map((v, idx) => {
+                    return [
+                        idx * (response.aoi[1] - response.aoi[0]) +
+                            response.aoi[0] * response.lidar_profile.length,
+                        v
+                    ];
+                })
+            );
         }
         this.data_resolution = response.res;
         this.link_status.updateLoadingStatus(response.still_loading);
@@ -1507,13 +1702,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     clearInputs(): void {
         // Clear All Inputs
-        if(this.draw.getAll().features.length === 0 &&  (!this.selectedFeatureID || !this.draw.get(this.selectedFeatureID))){
+        if (
+            this.draw.getAll().features.length === 0 &&
+            (!this.selectedFeatureID || !this.draw.get(this.selectedFeatureID))
+        ) {
             this.profileView.render(LinkProfileDisplayOption.DRAWING_INSTRUCTIONS);
         }
     }
 
     showInputs(): void {
-        if(this.draw.getSelected().features.length > 0){
+        if (this.draw.getSelected().features.length > 0) {
             $('.radio-card-body').removeClass('d-none');
         }
     }
@@ -1524,11 +1722,15 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     showPlotIfValidState() {
         if (
-            this._lidar.length && this._elevation.length && this.selected_feature && this.selectedFeatureID &&
-            this.draw.get(this.selectedFeatureID) != null) {
+            this._lidar.length &&
+            this._elevation.length &&
+            this.selected_feature &&
+            this.selectedFeatureID &&
+            this.draw.get(this.selectedFeatureID) != null
+        ) {
             this.link_chart.hideLoading();
             this.profileView.render(LinkProfileDisplayOption.LINK_CHART);
-            
+
             this.link_chart.redraw();
             this.updateLegend();
         }
@@ -1538,29 +1740,36 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         const scaling_factor = this._link_distance / this._lidar.length;
         this.link_chart.xAxis[0].update({
             labels: {
-                formatter: this.units === UnitSystems.US ? function () {
-                    return `${km2miles(this.value * scaling_factor / 1000).toFixed(2)}`
-                }
-                    : function () {
-                        return `${(this.value * scaling_factor / 1000).toFixed(1)}`;
-                    }
+                formatter:
+                    this.units === UnitSystems.US
+                        ? function () {
+                              return `${km2miles((this.value * scaling_factor) / 1000).toFixed(2)}`;
+                          }
+                        : function () {
+                              return `${((this.value * scaling_factor) / 1000).toFixed(1)}`;
+                          }
             },
             title: {
-                text: `Distance ${this.units === UnitSystems.US ? '[mi]' : '[km]'} - resolution ${this.units === UnitSystems.US ? m2ft(this.data_resolution).toFixed(1) : this.data_resolution
-                    } ${this.units === UnitSystems.US ? '[ft]' : '[m]'}`
+                text: `Distance ${this.units === UnitSystems.US ? '[mi]' : '[km]'} - resolution ${
+                    this.units === UnitSystems.US
+                        ? m2ft(this.data_resolution).toFixed(1)
+                        : this.data_resolution
+                } ${this.units === UnitSystems.US ? '[ft]' : '[m]'}`
             }
         });
         this.link_chart.yAxis[0].update({
             labels: {
-                formatter: this.units === UnitSystems.US ? function () {
-                    return `${m2ft(this.value).toFixed(0)}`
-                }
-                    : function () {
-                        return `${(this.value).toFixed(0)}`;
-                    }
-            }, title: {
-                text:
-                    this.units === UnitSystems.US ? 'Elevation [ft]' : 'Elevation [m]'
+                formatter:
+                    this.units === UnitSystems.US
+                        ? function () {
+                              return `${m2ft(this.value).toFixed(0)}`;
+                          }
+                        : function () {
+                              return `${this.value.toFixed(0)}`;
+                          }
+            },
+            title: {
+                text: this.units === UnitSystems.US ? 'Elevation [ft]' : 'Elevation [m]'
             }
         });
     }

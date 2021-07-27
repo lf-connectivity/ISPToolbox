@@ -1,18 +1,24 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl, { VideoSource } from 'mapbox-gl';
-import { CbrsOverlayPopup, CensusBlocksOverlayPopup, CommunityConnectOverlayPopup, RdofOverlayPopup, TribalOverlayPopup } from '../isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
+import {
+    CbrsOverlayPopup,
+    CensusBlocksOverlayPopup,
+    CommunityConnectOverlayPopup,
+    RdofOverlayPopup,
+    TribalOverlayPopup
+} from '../isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
 import MarketEvaluatorWS, { MarketEvalWSEvents } from '../MarketEvaluatorWS';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import MapboxOverlay from './MapboxOverlay';
 
 export type GeoOverlay = {
-    sourceId: string,
-    fills: string,
-    borders: string,
-    hover: boolean,
-    color: string,
-    outlineOnly: boolean,
-}
+    sourceId: string;
+    fills: string;
+    borders: string;
+    hover: boolean;
+    color: string;
+    outlineOnly: boolean;
+};
 
 abstract class MapboxGeoOverlay implements MapboxOverlay {
     map: mapboxgl.Map;
@@ -30,8 +36,16 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
     boundMouseMoveCallback: (e: any) => void;
     boundMouseLeaveCallback: () => void;
     boundMouseClickCallback: (e: any) => void;
-    
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string, popupClass: any, wsGeojsonEvent: MarketEvalWSEvents) {
+
+    constructor(
+        map: mapboxgl.Map,
+        draw: MapboxDraw,
+        overlay: GeoOverlay,
+        sourceUrl: string,
+        sourceLayer: string,
+        popupClass: any,
+        wsGeojsonEvent: MarketEvalWSEvents
+    ) {
         this.map = map;
         this.draw = draw;
         this.sourceId = overlay.sourceId;
@@ -51,7 +65,7 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
     }
 
     mouseMoveCallback(e: any) {
-        const features = e.features
+        const features = e.features;
         const canvas = this.map.getCanvas();
         if (canvas) {
             canvas.style.cursor = 'pointer';
@@ -61,9 +75,9 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
                 {
                     source: this.sourceId,
                     sourceLayer: this.sourceLayer,
-                    id: this.hoverFeature,
+                    id: this.hoverFeature
                 },
-                {hover: false}
+                { hover: false }
             );
             this.popup.hide();
         }
@@ -74,11 +88,11 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
                 {
                     source: this.sourceId,
                     sourceLayer: this.sourceLayer,
-                    id: this.hoverFeature,
+                    id: this.hoverFeature
                 },
-                {hover: true}
+                { hover: true }
             );
-            
+
             this.popup.setFeature(features[0]);
             this.popup.setLngLat(e.lngLat);
             this.popup.show();
@@ -93,9 +107,9 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
             {
                 source: this.sourceId,
                 sourceLayer: this.sourceLayer,
-                id: this.hoverFeature,
+                id: this.hoverFeature
             },
-            {hover: false}
+            { hover: false }
         );
         const canvas = this.map.getCanvas();
         if (canvas) {
@@ -112,7 +126,7 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
 
     receiveGeojsonCallback(msg: string, response: any) {
         if (response.error == 0) {
-            let properties = {...response};
+            let properties = { ...response };
             delete properties.error;
             delete properties.geojson;
 
@@ -125,20 +139,20 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
                     feature_type: WorkspaceFeatureTypes.COVERAGE_AREA
                 },
                 id: ''
-            }
+            };
             // @ts-ignore
             let id = this.draw.add(newFeature)[0];
             newFeature.id = id;
-            this.map.fire('draw.create', {features: [newFeature]});
-            this.draw.changeMode('simple_select', {featureIds: [id]});
-            this.map.fire('draw.selectionchange', {features: [newFeature]});
+            this.map.fire('draw.create', { features: [newFeature] });
+            this.draw.changeMode('simple_select', { featureIds: [id] });
+            this.map.fire('draw.selectionchange', { features: [newFeature] });
         }
     }
 
     show() {
         this.map.addSource(this.sourceId, {
             type: 'vector',
-            url: `${this.sourceUrl}?optimize=true`,
+            url: `${this.sourceUrl}?optimize=true`
         });
         if (this.outlineOnly) {
             this.map.addLayer({
@@ -149,11 +163,13 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
                 layout: {},
                 paint: {
                     'fill-color': this.color,
-                    'fill-opacity': ['case', ['boolean', ['feature-state', 'hover'], false],
-                    0.34,
-                    0,
-                ]
-                },
+                    'fill-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false],
+                        0.34,
+                        0
+                    ]
+                }
             });
         } else {
             this.map.addLayer({
@@ -164,8 +180,8 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
                 layout: {},
                 paint: {
                     'fill-color': this.color,
-                    'fill-opacity': 0.34,
-                },
+                    'fill-opacity': 0.34
+                }
             });
         }
         this.map.addLayer({
@@ -176,27 +192,19 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
             layout: {},
             paint: {
                 'line-color': this.color,
-                'line-width': [
-                    'case',
-                    ['boolean', ['feature-state', 'hover'], false],
-                    3,
-                    1,
-                ],
-            },
+                'line-width': ['case', ['boolean', ['feature-state', 'hover'], false], 3, 1]
+            }
         });
 
         this.map.on('mousemove', this.fillsId, this.boundMouseMoveCallback);
         this.map.on('mouseleave', this.fillsId, this.boundMouseLeaveCallback);
         this.map.on('click', this.fillsId, this.boundMouseClickCallback);
     }
-    
+
     remove() {
-        this.map.getLayer(this.fillsId) &&
-        this.map.removeLayer(this.fillsId);
-        this.map.getLayer(this.bordersId) &&
-        this.map.removeLayer(this.bordersId);
-        this.map.getSource(this.sourceId) &&
-        this.map.removeSource(this.sourceId);
+        this.map.getLayer(this.fillsId) && this.map.removeLayer(this.fillsId);
+        this.map.getLayer(this.bordersId) && this.map.removeLayer(this.bordersId);
+        this.map.getSource(this.sourceId) && this.map.removeSource(this.sourceId);
         this.map.off('mousemove', this.fillsId, this.boundMouseMoveCallback);
         this.map.off('mouseleave', this.fillsId, this.boundMouseLeaveCallback);
         this.map.off('click', this.fillsId, this.boundMouseClickCallback);
@@ -205,10 +213,23 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
     abstract sendGeojsonRequest(featureProperties: any): void;
 }
 
-
 export class RdofGeoOverlay extends MapboxGeoOverlay {
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string) {
-        super(map, draw, overlay, sourceUrl, sourceLayer, RdofOverlayPopup, MarketEvalWSEvents.RDOF_GEOG_MSG);
+    constructor(
+        map: mapboxgl.Map,
+        draw: MapboxDraw,
+        overlay: GeoOverlay,
+        sourceUrl: string,
+        sourceLayer: string
+    ) {
+        super(
+            map,
+            draw,
+            overlay,
+            sourceUrl,
+            sourceLayer,
+            RdofOverlayPopup,
+            MarketEvalWSEvents.RDOF_GEOG_MSG
+        );
     }
 
     sendGeojsonRequest(properties: any) {
@@ -216,10 +237,23 @@ export class RdofGeoOverlay extends MapboxGeoOverlay {
     }
 }
 
-
 export class CommunityConnectGeoOverlay extends MapboxGeoOverlay {
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string) {
-        super(map, draw, overlay, sourceUrl, sourceLayer, CommunityConnectOverlayPopup, MarketEvalWSEvents.ZIP_GEOG_MSG);
+    constructor(
+        map: mapboxgl.Map,
+        draw: MapboxDraw,
+        overlay: GeoOverlay,
+        sourceUrl: string,
+        sourceLayer: string
+    ) {
+        super(
+            map,
+            draw,
+            overlay,
+            sourceUrl,
+            sourceLayer,
+            CommunityConnectOverlayPopup,
+            MarketEvalWSEvents.ZIP_GEOG_MSG
+        );
     }
 
     sendGeojsonRequest(properties: any) {
@@ -227,21 +261,50 @@ export class CommunityConnectGeoOverlay extends MapboxGeoOverlay {
     }
 }
 
-
 export class CbrsGeoOverlay extends MapboxGeoOverlay {
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string) {
-        super(map, draw, overlay, sourceUrl, sourceLayer, CbrsOverlayPopup, MarketEvalWSEvents.COUNTY_GEOG_MSG);
+    constructor(
+        map: mapboxgl.Map,
+        draw: MapboxDraw,
+        overlay: GeoOverlay,
+        sourceUrl: string,
+        sourceLayer: string
+    ) {
+        super(
+            map,
+            draw,
+            overlay,
+            sourceUrl,
+            sourceLayer,
+            CbrsOverlayPopup,
+            MarketEvalWSEvents.COUNTY_GEOG_MSG
+        );
     }
 
     sendGeojsonRequest(properties: any) {
-        MarketEvaluatorWS.getInstance().sendCountyRequest(properties.countycode, properties.statecode);
+        MarketEvaluatorWS.getInstance().sendCountyRequest(
+            properties.countycode,
+            properties.statecode
+        );
     }
 }
 
-
 export class CensusBlocksGeoOverlay extends MapboxGeoOverlay {
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string) {
-        super(map, draw, overlay, sourceUrl, sourceLayer, CensusBlocksOverlayPopup, MarketEvalWSEvents.CENSUSBLOCK_GEOG_MSG);
+    constructor(
+        map: mapboxgl.Map,
+        draw: MapboxDraw,
+        overlay: GeoOverlay,
+        sourceUrl: string,
+        sourceLayer: string
+    ) {
+        super(
+            map,
+            draw,
+            overlay,
+            sourceUrl,
+            sourceLayer,
+            CensusBlocksOverlayPopup,
+            MarketEvalWSEvents.CENSUSBLOCK_GEOG_MSG
+        );
     }
 
     sendGeojsonRequest(properties: any) {
@@ -249,10 +312,23 @@ export class CensusBlocksGeoOverlay extends MapboxGeoOverlay {
     }
 }
 
-
 export class TribalGeoOverlay extends MapboxGeoOverlay {
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, overlay: GeoOverlay, sourceUrl: string, sourceLayer: string) {
-        super(map, draw, overlay, sourceUrl, sourceLayer, TribalOverlayPopup, MarketEvalWSEvents.TRIBAL_GEOG_MSG);
+    constructor(
+        map: mapboxgl.Map,
+        draw: MapboxDraw,
+        overlay: GeoOverlay,
+        sourceUrl: string,
+        sourceLayer: string
+    ) {
+        super(
+            map,
+            draw,
+            overlay,
+            sourceUrl,
+            sourceLayer,
+            TribalOverlayPopup,
+            MarketEvalWSEvents.TRIBAL_GEOG_MSG
+        );
     }
 
     sendGeojsonRequest(properties: any) {

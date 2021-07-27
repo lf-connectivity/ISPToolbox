@@ -1,25 +1,37 @@
-import mapboxgl, * as MapboxGL from "mapbox-gl";
-import * as _ from "lodash";
-import { Geometry, GeoJsonProperties, FeatureCollection }  from 'geojson';
-import { createGeoJSONCircle } from "../isptoolbox-mapbox-draw/DrawModeUtils";
+import mapboxgl, * as MapboxGL from 'mapbox-gl';
+import * as _ from 'lodash';
+import { Geometry, GeoJsonProperties, FeatureCollection } from 'geojson';
+import { createGeoJSONCircle } from '../isptoolbox-mapbox-draw/DrawModeUtils';
 import { getCookie } from '../utils/Cookie';
 import LOSCheckWS, { LOSWSEvents } from '../LOSCheckWS';
 import type { AccessPointCoverageResponse } from '../LOSCheckWS';
 import PubSub from 'pubsub-js';
-import {isUnitsUS} from '../utils/MapPreferences';
+import { isUnitsUS } from '../utils/MapPreferences';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { AccessPoint, APToCPELink, CPE } from './WorkspaceFeatures';
-import { LinkCheckCPEClickCustomerConnectPopup, LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
-import { MapboxSDKClient } from "../MapboxSDKClient";
-import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
-import { ViewshedTool } from "../organisms/ViewshedTool";
-import { BuildingCoverage, BuildingCoverageStatus, EMPTY_BUILDING_COVERAGE } from "./BuildingCoverage";
-import { LinkCheckTowerPopup } from "../isptoolbox-mapbox-draw/popups/TowerPopups";
+import {
+    LinkCheckCPEClickCustomerConnectPopup,
+    LinkCheckCustomerConnectPopup
+} from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
+import { MapboxSDKClient } from '../MapboxSDKClient';
+import { LinkCheckBasePopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
+import { ViewshedTool } from '../organisms/ViewshedTool';
+import {
+    BuildingCoverage,
+    BuildingCoverageStatus,
+    EMPTY_BUILDING_COVERAGE
+} from './BuildingCoverage';
+import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
-import { getStreetAndAddressInfo } from "../LinkCheckUtils";
+import { getStreetAndAddressInfo } from '../LinkCheckUtils';
 import { getSessionID } from '../utils/MapPreferences';
-import { DEFAULT_AP_HEIGHT, DEFAULT_AP_NAME, DEFAULT_CPE_NAME, DEFAULT_NO_CHECK_RADIUS } from "./BaseWorkspaceManager";
+import {
+    DEFAULT_AP_HEIGHT,
+    DEFAULT_AP_NAME,
+    DEFAULT_CPE_NAME,
+    DEFAULT_NO_CHECK_RADIUS
+} from './BaseWorkspaceManager';
 export class LOSModal {
     selector: string;
     map: mapboxgl.Map;
@@ -35,33 +47,43 @@ export class LOSModal {
         PubSub.subscribe(WorkspaceEvents.AP_DELETED, this.deleteAccessPoint.bind(this));
 
         // Modal Callbacks
-        $(this.selector).on(
-            'shown.bs.modal',
-            () => {
-                PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
-            }
-        );
+        $(this.selector).on('shown.bs.modal', () => {
+            PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
+        });
 
         // Open Modal
-
     }
 
-    getAccessPoints(msg: string, data : {session: string | null, ordering: string | null | undefined, page: number | string | null | undefined} | null) {
-        if (data != null){
+    getAccessPoints(
+        msg: string,
+        data: {
+            session: string | null;
+            ordering: string | null | undefined;
+            page: number | string | null | undefined;
+        } | null
+    ) {
+        if (data != null) {
             data['session'] = getSessionID();
         } else {
-            data = {session: getSessionID(), ordering: undefined, page : undefined};
+            data = { session: getSessionID(), ordering: undefined, page: undefined };
         }
-        $.get('/pro/workspace/api/ap-los/', data ? data : '', (result) => {
-            $('#ap-list-modal-body').html(result);
-        }, 'html').done(() => { PubSub.publish(WorkspaceEvents.APS_LOADED) });
+        $.get(
+            '/pro/workspace/api/ap-los/',
+            data ? data : '',
+            (result) => {
+                $('#ap-list-modal-body').html(result);
+            },
+            'html'
+        ).done(() => {
+            PubSub.publish(WorkspaceEvents.APS_LOADED);
+        });
     }
 
     updateAccessPoint(msg: string, feature: any) {
-        if(feature.properties.uuid){
+        if (feature.properties.uuid) {
             $.ajax({
                 url: `/pro/workspace/api/ap-los/${feature.properties.uuid}/`,
-                method: "PATCH",
+                method: 'PATCH',
                 data: {
                     max_radius: feature.properties.radius,
                     location: JSON.stringify(feature.geometry),
@@ -70,7 +92,7 @@ export class LOSModal {
                 },
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken'),
-                    'Accept': 'application/json'
+                    Accept: 'application/json'
                 }
             }).done(() => {
                 PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
@@ -81,7 +103,9 @@ export class LOSModal {
     deleteAccessPoint(uuid: string | null) {
         if (typeof uuid === 'string') {
             $.ajax({
-                url: `/pro/workspace/api/ap-los/${uuid}/`, method: "DELETE", headers: {
+                url: `/pro/workspace/api/ap-los/${uuid}/`,
+                method: 'DELETE',
+                headers: {
                     'X-CSRFToken': getCookie('csrftoken')
                 }
             }).done(() => {
@@ -116,57 +140,56 @@ export class LOSModal {
             const uuid = event.currentTarget.getAttribute('data-target');
             const drawn_features = this.draw.getAll();
             const ap = drawn_features.features.filter((feat: any) => feat.properties.uuid === uuid);
-            $(`input[ap-uuid-target=${uuid}]`).each((idx, elem)=>{
-                ap.forEach((feat :any) => {
+            $(`input[ap-uuid-target=${uuid}]`).each((idx, elem) => {
+                ap.forEach((feat: any) => {
                     let attr_name = elem.getAttribute('name');
                     let val = $(elem).val();
-                    if (isUnitsUS()){
-                    switch (attr_name){
-                        case 'height':
-                            //@ts-ignore
-                            val = parseFloat(val) * 0.3048;
-                            break;
-                        case 'max_radius':
-                            attr_name = 'radius';
-                            //@ts-ignore
-                            val = parseFloat(val) * 1.60934;
-                            break;
-                        default:
+                    if (isUnitsUS()) {
+                        switch (attr_name) {
+                            case 'height':
+                                //@ts-ignore
+                                val = parseFloat(val) * 0.3048;
+                                break;
+                            case 'max_radius':
+                                attr_name = 'radius';
+                                //@ts-ignore
+                                val = parseFloat(val) * 1.60934;
+                                break;
+                            default:
+                        }
                     }
-                    }
-                    if(attr_name) {
+                    if (attr_name) {
                         this.draw.setFeatureProperty(feat.id, attr_name, val);
                     }
                 });
-            })
-            const feats = ap.map((feat:any) => this.draw.get(feat.id));
-            this.map.fire('draw.update', {features: feats, action: 'move'});
+            });
+            const feats = ap.map((feat: any) => this.draw.get(feat.id));
+            this.map.fire('draw.update', { features: feats, action: 'move' });
             PubSub.publish(WorkspaceEvents.AP_UPDATE, feats[0]);
         });
 
         $('.sort-ap').on('click', (event) => {
             const ordering = event.currentTarget.getAttribute('ordering-target');
             const page = $('#ap-modal-page-num').val();
-            PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED, {ordering, page});
-        })
+            PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED, { ordering, page });
+        });
 
         $('.ap-modal-page-change').on('click', (event) => {
             const ordering = $('#ap-modal-ordering').val();
             const page = event.currentTarget.getAttribute('page-target');
-            PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED, {ordering, page});
-        })
+            PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED, { ordering, page });
+        });
     }
 }
-
 
 export class WorkspaceManager {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     // ws: LOSCheckWS;
-    readonly features: { [workspaceId: string] : BaseWorkspaceFeature }; // Map from workspace UUID to feature
+    readonly features: { [workspaceId: string]: BaseWorkspaceFeature }; // Map from workspace UUID to feature
     view: LOSModal;
     viewshed: ViewshedTool;
-    private last_selection : string = '';
+    private last_selection: string = '';
     private static _instance: WorkspaceManager;
 
     constructor(selector: string, map: MapboxGL.Map, draw: MapboxDraw, initialFeatures: any) {
@@ -185,9 +208,11 @@ export class WorkspaceManager {
         // Add Workspace features from user, if they exist.
         if (initialFeatures) {
             const nonLinks = initialFeatures?.features.filter((feature: any) => {
-                return feature.properties.feature_type !== undefined &&
-                       (feature.properties.feature_type === WorkspaceFeatureTypes.AP ||
-                        feature.properties.feature_type === WorkspaceFeatureTypes.CPE);
+                return (
+                    feature.properties.feature_type !== undefined &&
+                    (feature.properties.feature_type === WorkspaceFeatureTypes.AP ||
+                        feature.properties.feature_type === WorkspaceFeatureTypes.CPE)
+                );
             });
 
             nonLinks.forEach((feature: any) => {
@@ -199,8 +224,7 @@ export class WorkspaceManager {
                     feature.properties.radius = feature.properties.max_radius;
                     feature.properties.center = feature.geometry.coordinates;
                     workspaceFeature = new AccessPoint(this.map, this.draw, feature);
-                }
-                else {
+                } else {
                     workspaceFeature = new CPE(this.map, this.draw, feature);
                 }
                 this.features[workspaceFeature.workspaceId] = workspaceFeature;
@@ -208,8 +232,10 @@ export class WorkspaceManager {
 
             // Add links
             const links = initialFeatures?.features.filter((feature: any) => {
-                return feature.properties.feature_type !== undefined &&
-                       feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK;
+                return (
+                    feature.properties.feature_type !== undefined &&
+                    feature.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
+                );
             });
 
             links.forEach((feature: any) => {
@@ -245,8 +271,8 @@ export class WorkspaceManager {
                     no_check_radius: DEFAULT_NO_CHECK_RADIUS,
                     name: DEFAULT_AP_NAME
                 },
-                id: feature.id,
-            }
+                id: feature.id
+            };
             let ap = new AccessPoint(this.map, this.draw, newCircle);
             ap.create((resp) => {
                 const apPopup = LinkCheckTowerPopup.getInstance();
@@ -256,7 +282,7 @@ export class WorkspaceManager {
                     feature.properties.ptpLinksToRemove.forEach((id: string) => {
                         let featToDelete = this.draw.get(id);
                         this.draw.delete(id);
-                        this.map.fire('draw.delete', {features: [featToDelete]});
+                        this.map.fire('draw.delete', { features: [featToDelete] });
                     });
                 }
 
@@ -266,18 +292,18 @@ export class WorkspaceManager {
                             let result = mapboxResponse.body.features;
                             let street = getStreetAndAddressInfo(result[0].place_name);
                             let newCPE = {
-                                'type': 'Feature',
-                                'geometry': {
-                                    'type': 'Point',
-                                    'coordinates': lngLat
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: lngLat
                                 },
-                                'properties': {
-                                    'name': street.street,
-                                    'ap': ap.workspaceId,
-                                    'feature_type': WorkspaceFeatureTypes.CPE,
+                                properties: {
+                                    name: street.street,
+                                    ap: ap.workspaceId,
+                                    feature_type: WorkspaceFeatureTypes.CPE
                                 }
                             };
-                            this.map.fire('draw.create', {features: [newCPE]});
+                            this.map.fire('draw.create', { features: [newCPE] });
                         });
                     });
                 }
@@ -291,7 +317,7 @@ export class WorkspaceManager {
 
         // Ignore features already saved in this.features
         const unsavedFeatures = features.filter((feature: any) => {
-            return (!feature.properties.uuid || !(feature.properties.uuid in this.features));
+            return !feature.properties.uuid || !(feature.properties.uuid in this.features);
         });
 
         const mapboxClient = MapboxSDKClient.getInstance();
@@ -303,7 +329,7 @@ export class WorkspaceManager {
         // Mode simple_select: Points are CPEs, LineStrings are links.
         unsavedFeatures.forEach((feature: any) => {
             let workspaceFeature: BaseWorkspaceFeature | undefined = undefined;
-            switch(mode) {
+            switch (mode) {
                 case 'draw_ap':
                     this.createApFeature(feature, mapboxClient);
                     break;
@@ -314,9 +340,11 @@ export class WorkspaceManager {
                             ...feature,
                             id: feature.id,
                             properties: {
-                                name: feature.properties.name ? feature.properties.name : DEFAULT_CPE_NAME,
+                                name: feature.properties.name
+                                    ? feature.properties.name
+                                    : DEFAULT_CPE_NAME
                             }
-                        }
+                        };
                         workspaceFeature = new CPE(this.map, this.draw, newFeature);
                         workspaceFeature.create((resp) => {
                             // @ts-ignore
@@ -328,7 +356,7 @@ export class WorkspaceManager {
                 case 'simple_select':
                     // It is possible to add either an AP or CPE while in simple_select so determine based on feature properties
                     // Adding CPE also adds link from CPE to specified AP (see customer popup)
-                    if(feature.geometry.type == 'Point' && !feature.properties.radius) {
+                    if (feature.geometry.type == 'Point' && !feature.properties.radius) {
                         workspaceFeature = new CPE(this.map, this.draw, feature);
                         workspaceFeature.create((resp) => {
                             // @ts-ignore
@@ -339,7 +367,7 @@ export class WorkspaceManager {
                             let link = cpe.linkAP(ap);
                             link.create((resp) => {
                                 this.features[link.workspaceId] = link;
-                                this.map.fire('draw.create', {features: [link.getFeatureData()]})
+                                this.map.fire('draw.create', { features: [link.getFeatureData()] });
                             });
                         });
                     } else if (feature.properties.radius) {
@@ -366,9 +394,9 @@ export class WorkspaceManager {
                 let workspaceFeature = this.features[feature.properties.uuid];
                 let featureType = workspaceFeature.getFeatureType();
 
-                switch(featureType) {
+                switch (featureType) {
                     case WorkspaceFeatureTypes.AP:
-                        let popup = LinkCheckTowerPopup.getInstance()
+                        let popup = LinkCheckTowerPopup.getInstance();
                         let ap = workspaceFeature as AccessPoint;
 
                         // Get rid of tower tooltip if the APs match
@@ -398,8 +426,7 @@ export class WorkspaceManager {
                             workspaceFeature.delete((resp) => {
                                 delete this.features[feature.properties.uuid];
                             });
-                        }
-                        else {
+                        } else {
                             delete this.features[feature.properties.uuid];
                         }
                         break;
@@ -410,18 +437,24 @@ export class WorkspaceManager {
 
     filterByType(list: Array<any>, feat_type: WorkspaceFeatureTypes) {
         return list.filter((feat: any) => {
-            return (feat.properties && feat.properties.feature_type) ?
-                feat.properties.feature_type === feat_type : false;
+            return feat.properties && feat.properties.feature_type
+                ? feat.properties.feature_type === feat_type
+                : false;
         });
     }
 
-    drawModeChangeCallback(a: any) {
-    }
+    drawModeChangeCallback(a: any) {}
 
-    updateFeatures({ features, action }: { features: Array<any>, action: 'move' | 'change_coordinates' }) {
+    updateFeatures({
+        features,
+        action
+    }: {
+        features: Array<any>;
+        action: 'move' | 'change_coordinates';
+    }) {
         features.forEach((feature: any) => {
             if (feature.properties.uuid) {
-                switch(feature.properties.feature_type) {
+                switch (feature.properties.feature_type) {
                     case WorkspaceFeatureTypes.AP:
                         let ap = this.features[feature.properties.uuid] as AccessPoint;
                         ap.update(() => {
@@ -435,14 +468,19 @@ export class WorkspaceManager {
                     case WorkspaceFeatureTypes.CPE:
                         let cpe = this.features[feature.properties.uuid] as CPE;
                         let mapboxClient = MapboxSDKClient.getInstance();
-                        mapboxClient.reverseGeocode(feature.geometry.coordinates, (response: any) => {
-                            let result = response.body.features;
-                            feature.properties.name = getStreetAndAddressInfo(result[0].place_name).street;
-                            cpe.update(() => {
-                                // I hate this hack
-                                $(`#radio_name-1`).text(feature.properties.name);
-                            });
-                        });
+                        mapboxClient.reverseGeocode(
+                            feature.geometry.coordinates,
+                            (response: any) => {
+                                let result = response.body.features;
+                                feature.properties.name = getStreetAndAddressInfo(
+                                    result[0].place_name
+                                ).street;
+                                cpe.update(() => {
+                                    // I hate this hack
+                                    $(`#radio_name-1`).text(feature.properties.name);
+                                });
+                            }
+                        );
                         break;
                     default:
                         this.features[feature.properties.uuid].update();
@@ -457,16 +495,16 @@ export class WorkspaceManager {
     static getInstance() {
         if (WorkspaceManager._instance) {
             return WorkspaceManager._instance;
-        }
-        else {
-            throw new Error('No instance of WorkspaceManager instantiated.')
+        } else {
+            throw new Error('No instance of WorkspaceManager instantiated.');
         }
     }
 
     static getFeatures(feat_type: WorkspaceFeatureTypes) {
         return WorkspaceManager._instance.draw.getAll()['features'].filter((feat) => {
-            return (feat.properties && feat.properties.feature_type) ?
-                feat.properties.feature_type === feat_type : false;
-        })
+            return feat.properties && feat.properties.feature_type
+                ? feat.properties.feature_type === feat_type
+                : false;
+        });
     }
 }

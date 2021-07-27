@@ -1,10 +1,10 @@
-import mapboxgl, * as MapboxGL from "mapbox-gl";
-import { isBeta } from "../LinkCheckUtils";
-import { LinkCheckBasePopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup";
-import { LinkCheckCustomerConnectPopup } from "../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup";
-import { MapboxSDKClient } from "../MapboxSDKClient";
-import { ClickableMarker } from "../molecules/ClickableMarker";
-import { WorkspaceManager } from "../workspace/WorkspaceManager";
+import mapboxgl, * as MapboxGL from 'mapbox-gl';
+import { isBeta } from '../LinkCheckUtils';
+import { LinkCheckBasePopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
+import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
+import { MapboxSDKClient } from '../MapboxSDKClient';
+import { ClickableMarker } from '../molecules/ClickableMarker';
+import { WorkspaceManager } from '../workspace/WorkspaceManager';
 
 export class LinkCheckLocationSearchTool {
     private map: mapboxgl.Map;
@@ -25,16 +25,16 @@ export class LinkCheckLocationSearchTool {
         this.geocoder = geocoder;
 
         if (isBeta()) {
-            this.geocoder.on('result', ({result}: any) => {
+            this.geocoder.on('result', ({ result }: any) => {
                 this.setLngLat(result.center);
                 this.show();
             });
 
             this.geocoder.on('clear', () => {
                 this.marker.remove();
-            })
+            });
         }
-        
+
         // Clicking on point -> show popup on desktop
         this.marker.onClick((e: any) => {
             if (e.originalEvent.button == 0) {
@@ -96,7 +96,10 @@ export class LinkCheckLocationSearchTool {
     private showPopup() {
         let lngLat: [number, number] = [this.marker.getLngLat().lng, this.marker.getLngLat().lat];
         let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-            LinkCheckCustomerConnectPopup, lngLat, this.reverseGeocodeResponse) as LinkCheckCustomerConnectPopup;
+            LinkCheckCustomerConnectPopup,
+            lngLat,
+            this.reverseGeocodeResponse
+        ) as LinkCheckCustomerConnectPopup;
         popup.show();
         this.isPopupOpen = true;
     }

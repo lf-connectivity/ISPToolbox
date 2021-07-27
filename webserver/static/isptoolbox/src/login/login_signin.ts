@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
     function showLoginModal() {
         $('#signin_container').removeClass('d-none');
         $('#signup_container').addClass('d-none');
@@ -12,30 +11,30 @@ $(document).ready(function () {
         $('#fb_sign_up_container').addClass('d-none');
     }
 
-    function showFBSignUpModal(){
+    function showFBSignUpModal() {
         $('#fb_sign_up_container').removeClass('d-none');
         $('#signin_container').addClass('d-none');
         $('#signup_container').addClass('d-none');
     }
     // $ Add Nav Listeners
-    $("#login-btn-nav").on("click", () => {
+    $('#login-btn-nav').on('click', () => {
         showLoginModal();
     });
-    $("#no-email-sign-in").on("click", () => {
+    $('#no-email-sign-in').on('click', () => {
         showSignUpModal();
     });
-    $(".dy_have_account").on("click", (e: any) => {
+    $('.dy_have_account').on('click', (e: any) => {
         console.log('here');
         showLoginModal();
         e.preventDefault();
     });
-    $("#signup_email").on("click", () => {
+    $('#signup_email').on('click', () => {
         showSignUpModal();
     });
-    $('#signup_fb').on("click", () => {
+    $('#signup_fb').on('click', () => {
         showFBSignUpModal();
     });
-    $('#no_act_yet').on("click", (e: any) => {
+    $('#no_act_yet').on('click', (e: any) => {
         showFBSignUpModal();
         e.preventDefault();
     });

@@ -18,25 +18,29 @@ export class MapboxSDKClient {
      * Performs a reverse geocode lookup using the Mapbox API with the following coordinates.
      * On success, executes the success callback, if defined, and on failure, executes the
      * error callback, if defined.
-     * 
+     *
      * @param {[number, number]} coordinates Coordinates in [longitude, latitude] form
      * @param {*} successCallback Callback on success
      * @param {*} errorCallback Callback on error
      */
     reverseGeocode(coordinates, successCallback = undefined, errorCallback = undefined) {
-        this.geocodingClient.reverseGeocode({
-            query: coordinates,
-        })
-        .send()
-        .then(response => {
-            if (successCallback) {
-                successCallback(response);
-            }
-        }, error => {
-            if (errorCallback) {
-                errorCallback(error);
-            }
-        });
+        this.geocodingClient
+            .reverseGeocode({
+                query: coordinates
+            })
+            .send()
+            .then(
+                (response) => {
+                    if (successCallback) {
+                        successCallback(response);
+                    }
+                },
+                (error) => {
+                    if (errorCallback) {
+                        errorCallback(error);
+                    }
+                }
+            );
     }
 
     static getInstance() {

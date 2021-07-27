@@ -2,12 +2,11 @@ export enum LinkProfileDisplayOption {
     LINK_CHART = 'link_chart',
     DRAWING_INSTRUCTIONS = 'drawing_instructions',
     LOADING_CHART = 'loading_spinner',
-    LOADING_ERROR = 'loading_failed_spinner',
+    LOADING_ERROR = 'loading_failed_spinner'
 }
 
 export class LinkProfileView {
-    constructor() {
-    }
+    constructor() {}
 
     render(display: LinkProfileDisplayOption) {
         for (let option in LinkProfileDisplayOption) {
@@ -19,12 +18,12 @@ export class LinkProfileView {
         }
 
         if (display === LinkProfileDisplayOption.LINK_CHART) {
-            $("#3D-view-btn").removeClass('d-none');
+            $('#3D-view-btn').removeClass('d-none');
             $('#los-chart-tooltip-button').removeClass('d-none');
             $('#link-title').removeClass('d-none');
         } else {
             $('#los-chart-tooltip-button').addClass('d-none');
-            $("#3D-view-btn").addClass('d-none');
+            $('#3D-view-btn').addClass('d-none');
         }
 
         if (display === LinkProfileDisplayOption.DRAWING_INSTRUCTIONS) {

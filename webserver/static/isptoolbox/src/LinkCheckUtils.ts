@@ -1,55 +1,55 @@
-import { validateNumber, validateString } from "./molecules/InputValidator";
+import { validateNumber, validateString } from './molecules/InputValidator';
 
 const US_STATE_ABBREVIATIONS = {
-    'Alabama': 'AL',
-    'Alaska': 'AK',
-    'Arizona': 'AZ',
-    'Arkansas': 'AR',
-    'California': 'CA',
-    'Connecticut': 'CT',
+    Alabama: 'AL',
+    Alaska: 'AK',
+    Arizona: 'AZ',
+    Arkansas: 'AR',
+    California: 'CA',
+    Connecticut: 'CT',
     'District of Columbia': 'DC',
-    'Florida': 'FL',
-    'Georgia': 'GA',
-    'Hawaii': 'HI',
-    'Idaho': 'ID',
-    'Illinois': 'IL',
-    'Indiana': 'IN',
-    'Iowa': 'IA',
-    'Kansas': 'KS',
-    'Kentucky': 'KY',
-    'Louisiana': 'LA',
-    'Maine': 'ME',
-    'Maryland': 'MD',
-    'Massachusetts': 'MA',
-    'Michigan': 'MI',
-    'Minnesota': 'MN',
-    'Mississippi': 'MS',
-    'Missouri': 'MO',
-    'Montana': 'MT',
-    'Nebraska': 'NE',
-    'Nevada': 'NV',
+    Florida: 'FL',
+    Georgia: 'GA',
+    Hawaii: 'HI',
+    Idaho: 'ID',
+    Illinois: 'IL',
+    Indiana: 'IN',
+    Iowa: 'IA',
+    Kansas: 'KS',
+    Kentucky: 'KY',
+    Louisiana: 'LA',
+    Maine: 'ME',
+    Maryland: 'MD',
+    Massachusetts: 'MA',
+    Michigan: 'MI',
+    Minnesota: 'MN',
+    Mississippi: 'MS',
+    Missouri: 'MO',
+    Montana: 'MT',
+    Nebraska: 'NE',
+    Nevada: 'NV',
     'New Hampshire': 'NH',
     'New Jersey': 'NJ',
     'New Mexico': 'NM',
     'New York': 'NY',
     'North Carolina': 'NC',
     'North Dakota': 'ND',
-    'Ohio': 'OH',
-    'Oklahoma': 'OK',
-    'Oregon': 'OR',
-    'Pennsylvania': 'PA',
+    Ohio: 'OH',
+    Oklahoma: 'OK',
+    Oregon: 'OR',
+    Pennsylvania: 'PA',
     'Rhode Island': 'RI',
     'South Carolina': 'SC',
     'South Dakota': 'SD',
-    'Tennessee': 'TN',
-    'Texas': 'TX',
-    'Utah': 'UT',
-    'Vermont': 'VT',
-    'Virginia': 'VA',
-    'Washington': 'WA',
+    Tennessee: 'TN',
+    Texas: 'TX',
+    Utah: 'UT',
+    Vermont: 'VT',
+    Virginia: 'VA',
+    Washington: 'WA',
     'West Virginia': 'WV',
-    'Wisconsin': 'WI',
-    'Wyoming': 'WY',
+    Wisconsin: 'WI',
+    Wyoming: 'WY'
 };
 
 export const MIN_LAT = -90;
@@ -68,10 +68,10 @@ export const MAX_NAME_LEN = 50;
 
 const DEFAULT_STREET = 'Unknown Street Name';
 
-export function isBeta() : boolean{
+export function isBeta(): boolean {
     const contents = document.getElementById('los_beta')?.textContent;
-    if(typeof contents !== "string"){
-        return false
+    if (typeof contents !== 'string') {
+        return false;
     }
     return JSON.parse(contents);
 }
@@ -89,13 +89,11 @@ export function getStreetAndAddressInfo(mapboxPlace: string) {
         // Change state name (state ZIP) to "<abbreviated state>, zip"
         let stateName = components[1].split(' ').slice(0, -1).join(' ');
         // @ts-ignore
-        city = `${components[2]}, ${US_STATE_ABBREVIATIONS[stateName]}, ${zipCode}`
-    }
-    else if (countryName === 'Puerto Rico') {
-        city = `${components[2]}, PR, ${zipCode}`
-    }
-    else {
-        city = `${components[2]}, Unsupported Country`
+        city = `${components[2]}, ${US_STATE_ABBREVIATIONS[stateName]}, ${zipCode}`;
+    } else if (countryName === 'Puerto Rico') {
+        city = `${components[2]}, PR, ${zipCode}`;
+    } else {
+        city = `${components[2]}, Unsupported Country`;
     }
 
     return {

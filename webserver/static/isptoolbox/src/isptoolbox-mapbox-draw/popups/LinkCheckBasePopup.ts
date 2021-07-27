@@ -1,8 +1,8 @@
-import mapboxgl, * as MapboxGL from "mapbox-gl";
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import mapboxgl, * as MapboxGL from 'mapbox-gl';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { getStreetAndAddressInfo } from "../../LinkCheckUtils";
 
-const DEFAULT_LNGLAT: [number, number] = [0.00000, 0.00000];
+const DEFAULT_LNGLAT: [number, number] = [0.0, 0.0];
 
 export abstract class LinkCheckBasePopup {
     protected map: mapboxgl.Map;
@@ -37,7 +37,7 @@ export abstract class LinkCheckBasePopup {
     }
 
     show() {
-        this.popup.setLngLat(this.lnglat)
+        this.popup.setLngLat(this.lnglat);
         if (!this.popup.isOpen()) {
             this.popup.setHTML(this.getHTML());
             this.popup.addTo(this.map);
@@ -52,20 +52,24 @@ export abstract class LinkCheckBasePopup {
     }
 
     displayLatLng() {
-        return `${this.lnglat[1].toFixed(5)}&deg;, ${this.lnglat[0].toFixed(5)}&deg;`
+        return `${this.lnglat[1].toFixed(5)}&deg;, ${this.lnglat[0].toFixed(5)}&deg;`;
     }
 
     /**
      * Creates a popup of the type class (must be singleton) at the specified lat/long
      * with the given mapbox reverse geocode response. Must be done from within the success
      * callback of a mapbox sdk reverse geocode call.
-     * 
+     *
      * @param cls Class of popup to set
      * @param lngLat Long/lat
      * @param response Mapbox Reverse Geocode response
      * @returns A popup instance of the specified class, set to the correct address and coordinates.
      */
-    static createPopupFromReverseGeocodeResponse(cls: any, lngLat: [number, number], response: any) {
+    static createPopupFromReverseGeocodeResponse(
+        cls: any,
+        lngLat: [number, number],
+        response: any
+    ) {
         let result = response.body.features;
         let popup = cls.getInstance();
         popup.setLngLat(lngLat);

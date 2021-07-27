@@ -1,4 +1,4 @@
-import {Polygon, Feature} from 'geojson';
+import { Polygon, Feature } from 'geojson';
 
 export enum BuildingCoverageStatus {
     SERVICEABLE = 'serviceable',
@@ -6,8 +6,11 @@ export enum BuildingCoverageStatus {
     UNKNOWN = 'unknown'
 }
 
-export function updateCoverageStatus(currentStatus: BuildingCoverageStatus, newStatus: BuildingCoverageStatus) : BuildingCoverageStatus{
-    switch(currentStatus) {
+export function updateCoverageStatus(
+    currentStatus: BuildingCoverageStatus,
+    newStatus: BuildingCoverageStatus
+): BuildingCoverageStatus {
+    switch (currentStatus) {
         case BuildingCoverageStatus.SERVICEABLE:
             return BuildingCoverageStatus.SERVICEABLE;
         case BuildingCoverageStatus.UNSERVICEABLE:
@@ -16,8 +19,9 @@ export function updateCoverageStatus(currentStatus: BuildingCoverageStatus, newS
             // unservicaeable + serviceable -> serviceable
             return newStatus;
         case BuildingCoverageStatus.UNKNOWN:
-            return (status === BuildingCoverageStatus.SERVICEABLE) ? 
-                BuildingCoverageStatus.SERVICEABLE : BuildingCoverageStatus.UNKNOWN;
+            return status === BuildingCoverageStatus.SERVICEABLE
+                ? BuildingCoverageStatus.SERVICEABLE
+                : BuildingCoverageStatus.UNKNOWN;
     }
 }
 
@@ -40,8 +44,7 @@ export class BuildingCoverage {
         if (this.buildings.has(buildingId)) {
             // @ts-ignore
             return this.buildings.get(buildingId)[1] as BuildingCoverageStatus;
-        }
-        else {
+        } else {
             return BuildingCoverageStatus.UNKNOWN;
         }
     }
@@ -52,16 +55,18 @@ export class BuildingCoverage {
 
     toFeatureArray(): Array<Feature<Polygon, any>> {
         let arr: Array<Feature<Polygon, any>> = [];
-        this.buildings.forEach(([building, status]: [Polygon, BuildingCoverageStatus], id: number) => {
-            arr.push({
-                'type': 'Feature',
-                'geometry': building,
-                'properties': {
-                    'serviceable': status,
-                    'msftid': id
-                }
-            })
-        });
+        this.buildings.forEach(
+            ([building, status]: [Polygon, BuildingCoverageStatus], id: number) => {
+                arr.push({
+                    type: 'Feature',
+                    geometry: building,
+                    properties: {
+                        serviceable: status,
+                        msftid: id
+                    }
+                });
+            }
+        );
 
         return arr;
     }
@@ -69,26 +74,30 @@ export class BuildingCoverage {
     /**
      * Returns a BuildingCoverage object representing the union of all given
      * BuildingCoverage objects, according to the following rules:
-     * 
+     *
      * 1. If a building is marked as servicable by any building coverage, it is marked as servicable
      * 2. If a building is marked as unservicable by all building coverages, it is marked as unservicable.
      * 3. Otherwise, it is marked as unknown.
-     * 
+     *
      * @param coverages Building Coverage object representing the union
      */
     static union(coverages: Array<BuildingCoverage>): BuildingCoverage {
         let union = new BuildingCoverage([]);
         coverages.forEach((coverage: BuildingCoverage) => {
-            coverage.buildings.forEach(([building, status]: [Polygon, BuildingCoverageStatus], id: number) => {
-                if (!union.buildings.has(id)) {
-                    union.buildings.set(id, [building, status]);
+            coverage.buildings.forEach(
+                ([building, status]: [Polygon, BuildingCoverageStatus], id: number) => {
+                    if (!union.buildings.has(id)) {
+                        union.buildings.set(id, [building, status]);
+                    } else {
+                        let result = union.buildings.get(id) as [Polygon, BuildingCoverageStatus];
+                        let unionStatus = result[1];
+                        union.buildings.set(id, [
+                            building,
+                            updateCoverageStatus(unionStatus, status)
+                        ]);
+                    }
                 }
-                else {
-                    let result = union.buildings.get(id) as [Polygon, BuildingCoverageStatus];
-                    let unionStatus = result[1];
-                    union.buildings.set(id, [building, updateCoverageStatus(unionStatus, status)]);
-                }
-            });
+            );
         });
         return union;
     }

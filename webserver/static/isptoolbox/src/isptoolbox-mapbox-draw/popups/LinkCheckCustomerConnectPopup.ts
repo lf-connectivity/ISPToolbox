@@ -1,20 +1,24 @@
-import mapboxgl, * as MapboxGL from "mapbox-gl";
-import { Feature, Geometry, Point, LineString, GeoJsonProperties, Position }  from 'geojson';
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import { distance, point } from "@turf/turf";
+import mapboxgl, * as MapboxGL from 'mapbox-gl';
+import { Feature, Geometry, Point, LineString, GeoJsonProperties, Position } from 'geojson';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { distance, point } from '@turf/turf';
 import { isUnitsUS } from '../../utils/MapPreferences';
 import { km2miles } from '../../LinkCalcUtils';
-import { LinkCheckBasePopup } from "./LinkCheckBasePopup";
+import { LinkCheckBasePopup } from './LinkCheckBasePopup';
 import { AccessPoint, CPE } from '../../workspace/WorkspaceFeatures';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from "../../workspace/WorkspaceConstants";
-import { BuildingCoverage, BuildingCoverageStatus, updateCoverageStatus } from "../../workspace/BuildingCoverage";
-import { LinkCheckLocationSearchTool } from "../../organisms/LinkCheckLocationSearchTool";
-import { WorkspaceManager } from "../../workspace/WorkspaceManager";
-import { BaseWorkspaceFeature } from "../../workspace/BaseWorkspaceFeature";
-import { DEFAULT_RADIUS } from "../APDrawMode";
+import { WorkspaceEvents, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
+import {
+    BuildingCoverage,
+    BuildingCoverageStatus,
+    updateCoverageStatus
+} from '../../workspace/BuildingCoverage';
+import { LinkCheckLocationSearchTool } from '../../organisms/LinkCheckLocationSearchTool';
+import { WorkspaceManager } from '../../workspace/WorkspaceManager';
+import { BaseWorkspaceFeature } from '../../workspace/BaseWorkspaceFeature';
+import { DEFAULT_RADIUS } from '../APDrawMode';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
-import { BUILDING_LAYER } from "../../organisms/APCoverageRenderer";
+import { BUILDING_LAYER } from '../../organisms/APCoverageRenderer';
 
 const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-customer-popup';
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
@@ -29,7 +33,7 @@ const CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID = 'connect-tower-status-icon-custo
 const EMPTY_BUILDING_ID = -1;
 
 // Five decimal places of precision for lat longs,
-const EPSILON = 0.000001
+const EPSILON = 0.000001;
 
 const BACK_SVG = `<svg class="back-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0)">
@@ -40,8 +44,7 @@ const BACK_SVG = `<svg class="back-icon" width="12" height="12" viewBox="0 0 12 
         <rect width="12" height="12" fill="white" transform="translate(12) rotate(90)"/>
     </clipPath>
 </defs>
-</svg>`
-
+</svg>`;
 
 export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     protected apDistances: Map<AccessPoint, number>; // AP to distance from customer
@@ -65,7 +68,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.apDistances = new Map();
         this.buildingId = EMPTY_BUILDING_ID;
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
-        this.ptpRowPrompt = 'Draw PtP to:'
+        this.ptpRowPrompt = 'Draw PtP to:';
         this.apConnectIndex = 0;
         PubSub.subscribe(WorkspaceEvents.AP_COVERAGE_UPDATED, this.onCoverageUpdate.bind(this));
         if (!LinkCheckCustomerConnectPopup._instance) {
@@ -82,11 +85,15 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     }
 
     protected getHTML() {
-        return (this.accessPoints.length > 0) ? this.getInCoverageAreaMainPageHTML() : this.getNotInCoverageAreaHTML();
+        return this.accessPoints.length > 0
+            ? this.getInCoverageAreaMainPageHTML()
+            : this.getNotInCoverageAreaHTML();
     }
 
     protected setEventHandlers() {
-        (this.accessPoints.length > 0) ? this.setInCoverageAreaMainPageEventHandlers() : this.setNotInCoverageAreaEventHandlers();
+        this.accessPoints.length > 0
+            ? this.setInCoverageAreaMainPageEventHandlers()
+            : this.setNotInCoverageAreaEventHandlers();
     }
 
     show() {
@@ -102,9 +109,8 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     static getInstance() {
         if (LinkCheckCustomerConnectPopup._instance) {
             return LinkCheckCustomerConnectPopup._instance;
-        }
-        else {
-            throw new Error('No instance of LinkCheckCustomerConnectPopup instantiated.')
+        } else {
+            throw new Error('No instance of LinkCheckCustomerConnectPopup instantiated.');
         }
     }
 
@@ -123,11 +129,11 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     ----------------------------------------------------------------------
     */
     private getStatusHTMLElements(status: BuildingCoverageStatus): {
-        icon: string,
-        divClass: string,
-        message: string
+        icon: string;
+        divClass: string;
+        message: string;
     } {
-        switch(status) {
+        switch (status) {
             case BuildingCoverageStatus.SERVICEABLE:
                 return {
                     icon: pass_svg,
@@ -166,7 +172,11 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             <div class="tooltip--cpe">
                 <div id="${STATUS_MESSAGE_DIV_ID}" class="${statusElements.divClass}">
                     <h6>${statusElements.message}                    
-                        <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN ? '' : statusElements.icon} >
+                        <img src=${
+                            this.losStatus === BuildingCoverageStatus.UNKNOWN
+                                ? ''
+                                : statusElements.icon
+                        } >
                     </h6>
                 </div>
 
@@ -179,10 +189,16 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 <div class="description section">
                     <div class="draw-ptp-row">
                         <p class="small">${this.ptpRowPrompt}</p>
-                        ${this.accessPoints.length > 1 ? `<a id='${SWITCH_TOWER_LINK_ID}' class="link">Switch</a>` : ''}
+                        ${
+                            this.accessPoints.length > 1
+                                ? `<a id='${SWITCH_TOWER_LINK_ID}' class="link">Switch</a>`
+                                : ''
+                        }
                     </div>
                     <div id="${RADIO_TOWER_CONNECT_DIV_ID}">
-                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
+                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${
+            isUnitsUS() ? 'mi' : 'km'
+        }</p>
                     </div>
                 </div>
                 ${this.getButtonRowHTML()}
@@ -228,7 +244,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                         <img src="${statusIcon}"/>
                     </div>
                 </li>
-            `
+            `;
         });
         return retval;
     }
@@ -261,7 +277,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             });
 
             $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseenter', () => {
-                this.highlightAndSelectAP(this.accessPoints[i])
+                this.highlightAndSelectAP(this.accessPoints[i]);
             });
 
             $(`#${CONNECT_TOWER_INDEX_LINK_BASE_ID}-${i}`).on('mouseleave', () => {
@@ -291,10 +307,10 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 <a id='${PLACE_TOWER_LINK_ID}' class="link">Place Tower</a>
             </div>
         </div>
-        `
+        `;
     }
 
-    protected setNotInCoverageAreaEventHandlers() {     
+    protected setNotInCoverageAreaEventHandlers() {
         $(`#${DRAW_PTP_BUTTON_ID}`).on('click', () => {
             this.onDrawPtPLink();
         });
@@ -311,17 +327,23 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     */
     protected calculateCoverageStatus() {
         // Set APs.
-        let accessPoints = Object.values(WorkspaceManager.getInstance().features).filter((feature: BaseWorkspaceFeature) =>
-            feature.getFeatureType() === WorkspaceFeatureTypes.AP
+        let accessPoints = Object.values(WorkspaceManager.getInstance().features).filter(
+            (feature: BaseWorkspaceFeature) => feature.getFeatureType() === WorkspaceFeatureTypes.AP
         ) as AccessPoint[];
 
         // Filter APs by whether or not the lat long is in each AP's radius, or building in coverage area.
         let customerPt = point(this.lnglat);
         accessPoints.forEach((ap: AccessPoint) => {
             let distFromCustomer = distance(customerPt, ap.getFeatureGeometry());
-            if (distFromCustomer <= ap.getFeatureProperty('max_radius') || ap.coverage.includes(this.buildingId)) {
+            if (
+                distFromCustomer <= ap.getFeatureProperty('max_radius') ||
+                ap.coverage.includes(this.buildingId)
+            ) {
                 this.accessPoints.push(ap);
-                this.apDistances.set(ap, isUnitsUS() ? km2miles(distFromCustomer) : distFromCustomer);
+                this.apDistances.set(
+                    ap,
+                    isUnitsUS() ? km2miles(distFromCustomer) : distFromCustomer
+                );
             }
         });
 
@@ -339,12 +361,14 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         // set to closest tower.
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.accessPoints.every((ap: AccessPoint, i: number) => {
-            this.losStatus = updateCoverageStatus(this.losStatus, ap.coverage.getCoverageStatus(this.buildingId));
+            this.losStatus = updateCoverageStatus(
+                this.losStatus,
+                ap.coverage.getCoverageStatus(this.buildingId)
+            );
             if (this.losStatus === BuildingCoverageStatus.SERVICEABLE) {
                 this.apConnectIndex = i;
                 return false;
-            }
-            else {
+            } else {
                 return true;
             }
         });
@@ -352,8 +376,8 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
     protected onDrawPtPLink() {
         //@ts-ignore
-        this.draw.changeMode('draw_link', {start: this.lnglat});
-        this.map.fire('draw.modechange', {mode: 'draw_link'});
+        this.draw.changeMode('draw_link', { start: this.lnglat });
+        this.map.fire('draw.modechange', { mode: 'draw_link' });
         this.marker.hide();
         this.hide();
     }
@@ -361,18 +385,18 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     protected onViewLOS() {
         let ap = this.accessPoints[this.apConnectIndex];
         let newCPE = {
-            'type': 'Feature',
-            'geometry': {
-                'type': 'Point',
-                'coordinates': this.lnglat
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: this.lnglat
             },
-            'properties': {
-                'name': this.street,
-                'ap': ap.workspaceId,
-                'feature_type': WorkspaceFeatureTypes.CPE,
+            properties: {
+                name: this.street,
+                ap: ap.workspaceId,
+                feature_type: WorkspaceFeatureTypes.CPE
             }
         } as Feature<Point, any>;
-        this.map.fire('draw.create', {features: [newCPE]});
+        this.map.fire('draw.create', { features: [newCPE] });
         this.marker.hide();
         this.hide();
     }
@@ -387,8 +411,8 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             properties: {
                 radius: DEFAULT_RADIUS
             }
-        } as Feature<Point, any>
-        this.map.fire('draw.create', {features: [newAP]});
+        } as Feature<Point, any>;
+        this.map.fire('draw.create', { features: [newAP] });
         this.marker.hide();
         this.hide();
     }
@@ -399,7 +423,9 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 if (ap.workspaceId === data.uuid) {
                     let apStatus = ap.coverage.getCoverageStatus(this.buildingId);
                     let statusIcon = this.getStatusHTMLElements(apStatus).icon;
-                    $(`#${CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID}-${i}`).html(`<img src="${statusIcon}"/>`);
+                    $(`#${CONNECT_TOWER_INDEX_STATUS_ICON_BASE_ID}-${i}`).html(
+                        `<img src="${statusIcon}"/>`
+                    );
 
                     this.calculateAPConnectIndex();
                     let apName = this.accessPoints[this.apConnectIndex].getFeatureProperty('name');
@@ -409,15 +435,20 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                     $(`#${STATUS_MESSAGE_DIV_ID}`).attr('class', statusElements.divClass);
                     $(`#${STATUS_MESSAGE_DIV_ID}`).html(`
                         <h6>${statusElements.message}
-                            <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN ? '' : statusElements.icon} >
+                            <img src=${
+                                this.losStatus === BuildingCoverageStatus.UNKNOWN
+                                    ? ''
+                                    : statusElements.icon
+                            } >
                         </h6>
                     `);
                     $(`#${RADIO_TOWER_CONNECT_DIV_ID}`).html(`
-                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'}</p>
-                    `)
+                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${
+                        isUnitsUS() ? 'mi' : 'km'
+                    }</p>
+                    `);
                     return false;
-                }
-                else {
+                } else {
                     return true;
                 }
             });
@@ -434,9 +465,11 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
 
     protected changeSelection(features: Array<BaseWorkspaceFeature>) {
         let feats = features.map((f: BaseWorkspaceFeature) => f.mapboxId);
-        this.draw.changeMode('simple_select', {featureIds: feats});
-        this.map.fire('draw.modechange', { mode: 'simple_select'});
-        this.map.fire('draw.selectionchange', {features: features.map((f) => f.getFeatureData())});
+        this.draw.changeMode('simple_select', { featureIds: feats });
+        this.map.fire('draw.modechange', { mode: 'simple_select' });
+        this.map.fire('draw.selectionchange', {
+            features: features.map((f) => f.getFeatureData())
+        });
     }
 
     protected highlightAllAPFeatures() {
@@ -444,11 +477,12 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     }
 
     protected highlightFeatures(aps: Array<BaseWorkspaceFeature>) {
-        const features = aps.map(f => {return f.getFeatureData()})
-        PubSub.publish(WorkspaceEvents.AP_RENDER_GIVEN, {features});
+        const features = aps.map((f) => {
+            return f.getFeatureData();
+        });
+        PubSub.publish(WorkspaceEvents.AP_RENDER_GIVEN, { features });
     }
 }
-
 
 export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerConnectPopup {
     private selectedFeatureId: string;
@@ -475,9 +509,10 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
     static getInstance() {
         if (LinkCheckVertexClickCustomerConnectPopup._subclass_instance) {
             return LinkCheckVertexClickCustomerConnectPopup._subclass_instance;
-        }
-        else {
-            throw new Error('No instance of LinkCheckVertexClickCustomerConnectPopup instantiated.')
+        } else {
+            throw new Error(
+                'No instance of LinkCheckVertexClickCustomerConnectPopup instantiated.'
+            );
         }
     }
 
@@ -485,13 +520,13 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
         // Revert selection back to original direct select state if that was how this
         // popup was accessed.
         if (!this.tooltipAction) {
-            this.draw.changeMode('direct_select', {featureId: this.selectedFeatureId});
-            this.map.fire('mode.change', {mode: 'direct_select'});
+            this.draw.changeMode('direct_select', { featureId: this.selectedFeatureId });
+            this.map.fire('mode.change', { mode: 'direct_select' });
         }
         this.tooltipAction = false;
         super.cleanup();
     }
-    
+
     protected onDrawPtPLink() {
         this.tooltipAction = true;
         super.onDrawPtPLink();
@@ -499,24 +534,38 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
 
     protected onPlaceTower() {
         const sameVertex = (coord1: [number, number], coord2: [number, number]) => {
-            return (Math.abs(coord1[0] - coord2[0]) < EPSILON && Math.abs(coord1[1] - coord2[1]) < EPSILON);
+            return (
+                Math.abs(coord1[0] - coord2[0]) < EPSILON &&
+                Math.abs(coord1[1] - coord2[1]) < EPSILON
+            );
         };
 
         // Find all non-workspace PtP links sharing a vertex with the selected one
 
         // @ts-ignore
-        let vertex = this.draw.get(this.selectedFeatureId).geometry.coordinates[this.selectedVertex] as [number, number];
-        let sharedLinks = this.draw.getFeatureIdsAt(this.map.project(vertex)).map((id) => this.draw.get(id)).filter((feat) => {
-            return (feat && feat.properties && feat.geometry.type === 'LineString' && !feat.properties.uuid &&
-                (sameVertex(feat.geometry.coordinates[0] as [number, number], vertex) || sameVertex(feat.geometry.coordinates[1] as [number, number], vertex))
-            );
-        });
-
+        let vertex = this.draw.get(this.selectedFeatureId).geometry.coordinates[
+            this.selectedVertex
+        ] as [number, number];
+        let sharedLinks = this.draw
+            .getFeatureIdsAt(this.map.project(vertex))
+            .map((id) => this.draw.get(id))
+            .filter((feat) => {
+                return (
+                    feat &&
+                    feat.properties &&
+                    feat.geometry.type === 'LineString' &&
+                    !feat.properties.uuid &&
+                    (sameVertex(feat.geometry.coordinates[0] as [number, number], vertex) ||
+                        sameVertex(feat.geometry.coordinates[1] as [number, number], vertex))
+                );
+            });
 
         // Find lat longs of CPEs
         let cpeLngLats = sharedLinks.map((feature: Feature<LineString, any>) => {
             let coords = feature.geometry.coordinates;
-            return (coords[0][0] == this.lnglat[0] && coords[0][1] == this.lnglat[1]) ? coords[1] : coords[0]
+            return coords[0][0] == this.lnglat[0] && coords[0][1] == this.lnglat[1]
+                ? coords[1]
+                : coords[0];
         });
 
         let ptpLinksToRemove = sharedLinks.map((feature: Feature<LineString, any>) => {
@@ -534,15 +583,14 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
             properties: {
                 radius: DEFAULT_RADIUS,
                 cpeLngLats: cpeLngLats,
-                ptpLinksToRemove: ptpLinksToRemove,
+                ptpLinksToRemove: ptpLinksToRemove
             }
-        } as Feature<Point, any>
-        this.map.fire('draw.create', {features: [newAP]});
+        } as Feature<Point, any>;
+        this.map.fire('draw.create', { features: [newAP] });
         this.marker.hide();
         this.hide();
     }
 }
-
 
 export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConnectPopup {
     private cpe: CPE;
@@ -559,9 +607,8 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
     static getInstance() {
         if (LinkCheckCPEClickCustomerConnectPopup._subclass_instance) {
             return LinkCheckCPEClickCustomerConnectPopup._subclass_instance;
-        }
-        else {
-            throw new Error('No instance of LinkCheckCPEClickCustomerConnectPopup instantiated.')
+        } else {
+            throw new Error('No instance of LinkCheckCPEClickCustomerConnectPopup instantiated.');
         }
     }
 
@@ -576,16 +623,20 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
             // We set a delay on showing tooltip to allow time for building coverage to render.
             this.changeSelection([]);
             setTimeout(() => {
-                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [BUILDING_LAYER]})[0];
+                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {
+                    layers: [BUILDING_LAYER]
+                })[0];
                 if (building) {
                     this.setBuildingId(building.properties?.msftid);
                 }
                 super.show();
                 // Add delete btn event handler
-                $(`#cpe-delete-btn`).off().on('click', () => {
-                    this.hide();
-                    this.cpe.delete();
-                })
+                $(`#cpe-delete-btn`)
+                    .off()
+                    .on('click', () => {
+                        this.hide();
+                        this.cpe.delete();
+                    });
             }, 50);
         }
     }
@@ -607,7 +658,10 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
         // Set AP connect index to AP that matches connected AP.
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.accessPoints.forEach((ap: AccessPoint, i: number) => {
-            this.losStatus = updateCoverageStatus(this.losStatus, ap.coverage.getCoverageStatus(this.buildingId));
+            this.losStatus = updateCoverageStatus(
+                this.losStatus,
+                ap.coverage.getCoverageStatus(this.buildingId)
+            );
             if (ap === this.cpe.ap) {
                 this.apConnectIndex = i;
             }
@@ -627,7 +681,9 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
     protected onCoverageUpdate(msg: string, data: any) {
         if (this.popup.isOpen()) {
             if (this.buildingId === EMPTY_BUILDING_ID) {
-                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {layers: [BUILDING_LAYER]})[0];
+                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {
+                    layers: [BUILDING_LAYER]
+                })[0];
                 if (building) {
                     this.setBuildingId(building.properties?.msftid);
                 }

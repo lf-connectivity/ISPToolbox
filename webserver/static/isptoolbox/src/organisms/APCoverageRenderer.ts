@@ -195,9 +195,9 @@ abstract class RadiusAndBuildingCoverageRenderer {
                 this.apPopup.setAccessPoint(ap);
                 this.apPopup.show();
             };
-            
         }
     }
+    
     updateBuildingCoverage(msg: string, data: { features: Array<GeoJSON.Feature> }) {
         data.features.forEach((f: GeoJSON.Feature) => {
             if (f.properties) {

@@ -113,10 +113,7 @@ export abstract class BaseWorkspaceFeature{
             this.updateFeatureProperties(resp);
             PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
             if (successFollowup) {
-                // the update callback was causing the input to reset while it was being used
-                if (resp.feature_type) {
-                    successFollowup(resp);
-                }
+                successFollowup(resp);
             }
         });
     }

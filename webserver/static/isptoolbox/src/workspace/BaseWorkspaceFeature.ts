@@ -188,7 +188,6 @@ export abstract class BaseWorkspaceFeature{
     }
 
     protected updateFeatureProperties(response: any) {
-        console.log
         this.responseFields.forEach(field => {
             if (field in response) {
                 this.setFeatureProperty(field, response[field]);

@@ -191,7 +191,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         return `
             <div class="tooltip--tower-summary">
                 <div class="title"> 
-                    <h6>Edit Tower 2</h6>
+                    <h6>Edit Tower</h6>
                 </div>
                 <div>
                     <ul>

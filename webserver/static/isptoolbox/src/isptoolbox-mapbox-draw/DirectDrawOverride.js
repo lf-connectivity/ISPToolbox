@@ -139,7 +139,7 @@ export function OverrideDirect(additionalFunctionality = {}) {
     };
     direct_select.dragFeature = function (state, e, delta) {
         // Don't drag if lockDragging is on
-        if (this.drawConfig.lockDragging) {
+        if (this._ctx.options.lockDragging) {
             return;
         }
 

@@ -5,8 +5,9 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 //@ts-ignore
 import styles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import { combineStyles, load_custom_icons } from './isptoolbox-mapbox-draw/index';
+import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
 import MapboxCustomDeleteControl from "./organisms/controls/MapboxCustomDeleteControl";
-import { setCenterZoomPreferences } from "./utils/MapPreferences";
+import { getInitialLockDragging, setCenterZoomPreferences } from "./utils/MapPreferences";
 import { MapboxSDKClient } from "./MapboxSDKClient";
 import { parseSearchBarLatitudeLongitude } from "./utils/LatLngInputUtils";
 import { isBeta } from "./LinkCheckUtils";
@@ -84,7 +85,7 @@ export abstract class ISPToolboxAbstractAppPage {
             });
 
             // @ts-ignore
-            this.draw.options.lockDragging = false;
+            this.draw.options.lockDragging = getInitialLockDragging();
 
             this.map.addControl(this.draw, 'bottom-right');
             const delete_confirmation = isBeta();

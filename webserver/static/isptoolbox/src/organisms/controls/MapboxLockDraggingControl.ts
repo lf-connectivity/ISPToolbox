@@ -1,3 +1,6 @@
+import { getCookie } from "../../utils/Cookie";
+import { getSessionID } from "../../utils/MapPreferences";
+
 const DEFAULT_DIMENSIONS = '14';
 
 // SVG path is a red hand with a transparent cross across it.
@@ -82,6 +85,20 @@ export default class MapboxLockDraggingControl {
     private clickCallback: { (event: MouseEvent): void } = (event: MouseEvent) =>  {
         // @ts-ignore
         this.draw.options.lockDragging = !this.draw.options.lockDragging;
+
+        const session_id = getSessionID();
+        if(session_id !== null){
+            $.ajax({
+                url: `/pro/workspace/api/session/${session_id}/`,
+                // @ts-ignore
+                data: { lock_dragging: this.draw.options.lockDragging },
+                method: "PATCH",
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            });
+        }
+
         this.updateIcon();
 
         // This hack preserves both the selection and the tooltip in simple select mode.

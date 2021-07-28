@@ -38,6 +38,7 @@ class WorkspaceMapSession(models.Model):
     # Map Preferences
     center = geo_models.PointField(default=Point(-97.03125, 36.59789))
     zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
+    lock_dragging = models.BooleanField(default=False)
 
     fks_serializers = [AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageAreaSerializer]
     UNIQUE_TOGETHER_ERROR = _("You already have a session with that name, please write a different name.")

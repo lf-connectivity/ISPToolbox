@@ -23,9 +23,10 @@ export function setCenterZoomPreferences(map: mapboxgl.Map) {
 }
 
 export function isUnitsUS() {
-    // @ts-ignore
     if (
+        // @ts-ignore
         window.ISPTOOLBOX_SESSION_INFO !== undefined &&
+        // @ts-ignore
         window.ISPTOOLBOX_SESSION_INFO.units === 'US'
     ) {
         return true;
@@ -34,9 +35,10 @@ export function isUnitsUS() {
 }
 
 export function getSessionID(): null | string {
-    //@ts-ignore
     if (
+        //@ts-ignore
         window.ISPTOOLBOX_SESSION_INFO !== undefined &&
+        //@ts-ignore
         window.ISPTOOLBOX_SESSION_INFO.networkID !== undefined
     ) {
         //@ts-ignore

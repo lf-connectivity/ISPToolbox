@@ -235,9 +235,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         // time when the user releases the mouse.
                         popupAbortController = new AbortController();
 
-                        // @ts-ignore
                         window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {
                             once: true,
+                            // @ts-ignore
                             signal: popupAbortController.signal
                         });
                     }
@@ -248,9 +248,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         popupAbortController.abort();
                         popupAbortController = new AbortController();
 
-                        // @ts-ignore
                         window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {
                             once: true,
+                            // @ts-ignore
                             signal: popupAbortController.signal
                         });
                     }
@@ -793,8 +793,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                                 feat.geometry.coordinates
                             ) {
                                 if (this.workspaceLinkSelected()) {
-                                    // @ts-ignore
                                     let point = this.workspaceManager.features[
+                                        // @ts-ignore
                                         coord1 === 0 ? feat.properties.ap : feat.properties.cpe
                                     ] as WorkspacePointFeature;
 
@@ -1553,8 +1553,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                             : ''
                     }
             </div>`
-                // @ts-ignore
             )
+            // @ts-ignore
             .tooltip('_fixTitle');
     }
 

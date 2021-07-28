@@ -117,8 +117,8 @@ export class MarketEvaluatorSidebarManager {
             });
         });
         // Only one popover opens at a time
-        // @ts-ignore
         $('body')
+            // @ts-ignore
             .popover({
                 selector: '[rel=popover]',
                 trigger: 'click'

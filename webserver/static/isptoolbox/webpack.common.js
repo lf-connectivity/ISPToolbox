@@ -11,32 +11,32 @@ module.exports = {
         market_eval_test: '/src/apps/MarketEvaluatorTestApp.ts',
         solar_sizing: '/src/apps/SolarSizingApp.ts'
     },
-    module : {
-        rules : [
+    module: {
+        rules: [
             {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
-                exclude: /node_modules/,
+                exclude: /node_modules/
             },
             {
                 test: /\.(png|jpe?g|svg)$/,
                 loader: 'file-loader',
                 options: {
-                    name: 'assets/[name].[ext]',
+                    name: 'assets/[name].[ext]'
                 }
             }
         ]
     },
     resolve: {
         alias: {
-            'mapbox-gl-draw-circle': path.resolve(__dirname, '../mapbox-gl-draw-circle/'),
+            'mapbox-gl-draw-circle': path.resolve(__dirname, '../mapbox-gl-draw-circle/')
         },
-        extensions : ['.js', '.jsx', '.ts', '.tsx'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
     },
-    output : {
+    output: {
         filename: '[name].min.js',
         path: path.resolve(__dirname, 'build'),
         library: 'isptoolbox',
         libraryExport: 'default'
-    },
+    }
 };

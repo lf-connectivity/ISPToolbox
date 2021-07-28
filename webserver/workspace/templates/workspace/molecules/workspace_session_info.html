@@ -4,7 +4,7 @@
       {% if session %}
         initialMapCenter : {{ session.center.json|safe }},
         initialMapZoom : {{ session.zoom }},
-        lockDragging: {{ session.lock_dragging }}
+        lockDragging: {{ session.lock_dragging|yesno:'true,false'|safe }},
       {% endif %}
         units: "{{units}}",
         networkID: "{{session.uuid}}",

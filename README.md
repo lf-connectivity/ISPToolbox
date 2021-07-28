@@ -1,5 +1,7 @@
 # ISP Toolbox Webserver
+
 ISP Toolbox Backend Server Code
+
 - powers market evaluator, network cost comparison, los-check, dsm-export
 - hosted: AWS, EC2, S3
 - database: AWS Postgres
@@ -7,13 +9,16 @@ ISP Toolbox Backend Server Code
 - domain: https://isptoolbox.io/
 
 ## Development Philosophy:
--    Move Fast and Break Things! - Get to market as fast as possible, you want people to use your code and improve connectivity with it
--    Don't reinvent the wheel - ["not invented here"](https://en.wikipedia.org/wiki/Not_invented_here) syndrome is real, always research if someone already built what you want
--    [KISS](https://en.wikipedia.org/wiki/KISS_principle) - keep it simple, stupid
--    [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) - don't repeat yourself
+
+- Move Fast and Break Things! - Get to market as fast as possible, you want people to use your code and improve connectivity with it
+- Don't reinvent the wheel - ["not invented here"](https://en.wikipedia.org/wiki/Not_invented_here) syndrome is real, always research if someone already built what you want
+- [KISS](https://en.wikipedia.org/wiki/KISS_principle) - keep it simple, stupid
+- [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) - don't repeat yourself
 
 ## Main Technologies / Frameworks:
+
 This is basically the Instagram techstack
+
 - [Django](https://docs.djangoproject.com/en/3.1/) - web framework + ORM
 - [Celery](https://docs.celeryproject.org/en/stable/) - async tasks (things that aren't CRUD)
 - [django rest framework](https://www.django-rest-framework.org/) - ORM -> REST API generator
@@ -22,6 +27,7 @@ This is basically the Instagram techstack
 All of these frameworks have stellar open source documentation, so be sure to consult them
 
 ## Getting Dev Environment Setup
+
 - get AWS account `fbc-tower-design` - bunnylol aws
 - create EC2 instance from template
 - chmod 400 on .pem file
@@ -29,36 +35,44 @@ All of these frameworks have stellar open source documentation, so be sure to co
 - install docker and docker compose
 - ensure docker daemon is running (dockerd)
 - clone git repository
-    - make sure you clone all submodules `git submodule update --init --recursive`
+  - make sure you clone all submodules `git submodule update --init --recursive`
 - `make setup_dev` to build docker containers - these will have volume mounts - this enables hot reloading code, only re-run this if you've added an npm module or modified the pip/conda dependencies
 - `make run_dev` to run locally on localhost:8000
+
 ## Make command list
+
 `make setup_dev`
+
 - Installs required packages on system. Should only need to be ran once during first-time setup.
 
 `make run_dev`
+
 - Runs code in development environment
-    - gis data is production
-    - your local code checkout is mounted as a volume in docker
-    - hot reloading should be enabled
+  - gis data is production
+  - your local code checkout is mounted as a volume in docker
+  - hot reloading should be enabled
 
 `make update`
+
 - Updates and/or installs python packages as definred in requirements.txt via pip.
 
 `make makemigrations`
+
 - Creates django migrations for model changes.
 
 `make migrate`
+
 - Performs django migrations for model changes.
 
 `make run`
+
 - Starts the webserver.
 
 ## Running fbctower locally with WWW OnDemand
 
 1. On your EC2 instance
 
-    `make run_dev`
+   `make run_dev`
 
 this will startup the whole backend stack on your machine
 
@@ -79,33 +93,35 @@ const ISPTOOLBOX_BACKEND_WS_PROTOCOL = 'ws://'; //@nocommit 'wss://';
 ## Pushing New Images to Production
 
 Option 1: Github action
+
 1. push latest code change to github master branch, wait for workflow to complete successfully. Make sure aws cli is configured locally -
 
-    ``` git push origin master```
+   ` git push origin master`
 
-    ```aws configure```
+   `aws configure`
 
 2. deploy images to ecs
 
-    ```./scripts/deploy_latest_image_to_prod.sh```
+   `./scripts/deploy_latest_image_to_prod.sh`
 
 Option 2: Scripts for manual push (something broke)
 
 1. login to AWS and ECR repository
 
-    ```aws configure```
+   `aws configure`
 
-    ```aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin 623762516657.dkr.ecr.us-west-1.amazonaws.com```
+   `aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin 623762516657.dkr.ecr.us-west-1.amazonaws.com`
 
 2. build docker images locally and change tags, push to ecr
 
-    ```./scripts/buildnpush.sh```
+   `./scripts/buildnpush.sh`
 
 3. deploy images to ecs
 
-    ```./scripts/deploy_latest_image_to_prod.sh```
+   `./scripts/deploy_latest_image_to_prod.sh`
 
 ## Debugging Django Tests with VSCode
+
 add the following to your test:
 
 ```
@@ -113,7 +129,9 @@ import ptvsd # @nocommit - vscode python debugger
 ptvsd.enable_attach(address=('0.0.0.0', 3000))
 ptvsd.wait_for_attach()
 ```
+
 then run the following command:
+
 ```
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --service-ports django-app python manage.py test IspToolboxApp.<TestPath>
 ```
@@ -123,10 +141,13 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --service-por
 vscode debugger must attach before the test is run
 
 ## Locally run Django Webserver (Ubuntu) (Old steps, follow "Running fbctower locally with WWW OnDemand" unless you really need to run without docker)
+
 ### Configure system environment (once):
+
 - `make setup`
 
 Make sure to follow steps printed to console in order to set up a test postgres db. Find them here as well for convenience:
+
 - `sudo -i -u postgres`
 - `createdb django_test`
 - `psql`
@@ -135,20 +156,27 @@ Make sure to follow steps printed to console in order to set up a test postgres 
 Set the password to "password"
 
 ### Install required packages:
+
 - `make update`
 
 ### Perform django migrations:
+
 - `make migrate`
 
 ### Run the Webserver:
+
 - `make run`
 
 ### Building + Pushing new static Files
+
 Make sure you commit the new staticfiles.json manifest file
+
 - `make static_prod`
 
 ### Database Migrations (Standard Django Process)
+
 Run when you have made changes to or added to Django Models.
+
 - `make makemigrations`
 - `make migrate`
 
@@ -171,6 +199,7 @@ The latest environment variables are in the `terraform/variables.tf` file
 2. set the environment to point to the production database (create a .env file)
 
 `.env`
+
 ```
 DB_NAME=
 DB_PASSWORD=
@@ -187,22 +216,25 @@ REDIS_BACKEND=
 ### Reverting production to an earlier stable build
 
 1. use the digest hash of the last stable image and tag it as `latest`
-`./scripts/change_latest_image_production.sh <DIGEST_HASH>`
+   `./scripts/change_latest_image_production.sh <DIGEST_HASH>`
 
 you can see a list of the ecr images in the aws console, or in the workflow step on github
 
 2. update the tasks in ecs, they will pull the latest image
-`./scripts/deploy_latest_image_to_prod.sh`
+   `./scripts/deploy_latest_image_to_prod.sh`
 
 ## Administrative
+
 ### M-Lab
+
 - Make BigQueries on M-Lab data [here](https://www.measurementlab.net/data/docs/bq/quickstart/#subscribe-your-google-account-to-the-m-lab-discuss-group)
 - M-Lab BigQueries require a google account in M-Lab's discuss group
 - FB Google accounts don't allow access to google groups
 - Use this account to access instead:
-    - Username: isptoolboxmlab@gmail.com
+  - Username: isptoolboxmlab@gmail.com
 
 ## Overlay Update
+
 ### Update Mapbox sources on public."Overlay_overlay" Table
 
 create overlay objects in your sandbox:
@@ -211,9 +243,10 @@ create overlay objects in your sandbox:
 
 ### Alternatively update the table directly:
 
-*Below are example of SQL Commands*
+_Below are example of SQL Commands_
 
 Example of rdof, tower, and communityConnect
+
 ```
 INSERT INTO public."Overlay_overlay"(type, source_url, source_layer, created)
 VALUES ('rdof', 'mapbox://alexychong.9r5cne0h', 'auction_904_final_simplified-1qpgm7', NOW())
@@ -227,24 +260,31 @@ INSERT INTO public."Overlay_overlay"(type, source_url, source_layer, created)
 VALUES ('communityConnect', 'mapbox://alexychong.bp1lmhp5', 'calculated-cc-speeds-shp-casfao', NOW())
 ```
 
-
 ## Async Task Monitoring with Flower (pronounced flow-er)
- url: isptoolbox.io/async/
 
- username: isptoolboxadmin
+url: isptoolbox.io/async/
 
- password: wisplover123
+username: isptoolboxadmin
 
- ![Alt text](images/flower_signin.png "Title")
+password: wisplover123
 
- ### Inspect Running / Queued / Failed Jobs
+![Alt text](images/flower_signin.png "Title")
+
+### Inspect Running / Queued / Failed Jobs
 
 ![Alt text](images/flower_sample.png "Title")
 
 ## Why isn't my LiDAR / 3D view loading?
 
 - Check that potree static files are being pulled and are not 404ing
-    - if they are you need to recursively clone submodules (potree is a submodule)
-        - `git submodule update --init --recursive`
+  - if they are you need to recursively clone submodules (potree is a submodule)
+    - `git submodule update --init --recursive`
 - Check that you have the lidar boundaries loaded in your database
-    - `make default_objects`
+  - `make default_objects`
+
+## Gatekeepers
+
+Configure gatekeepers at: https://isptoolbox.io/admin/waffle/
+Grant or block access to certain features
+Uses the library: https://waffle.readthedocs.io/en/stable/
+Keep in mind the differences between local database and production database

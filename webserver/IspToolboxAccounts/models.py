@@ -81,17 +81,18 @@ class IspToolboxUserSignUpInfo(models.Model):
         ("fiber", _("Fiber")),
     )
     ROLE_CHOICES = (
-       ("bus_fin", _("Business & Finance")),
-       ("tech_install", _("Tech & Installation")),
-       ("mar_sales", _("Marketing & Sales")),
+        ("bus_fin", _("Business & Finance")),
+        ("tech_install", _("Tech & Installation")),
+        ("mar_sales", _("Marketing & Sales")),
     )
     GOAL_CHOICES = (
-       ("start_business", _("Start an ISP Business")),
-       ("customer_acquistion", _("Acquire more customers")),
-       ("expansion", _("Expand service to new areas")),
+        ("start_business", _("Start an ISP Business")),
+        ("customer_acquistion", _("Acquire more customers")),
+        ("expansion", _("Expand service to new areas")),
     )
 
-    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    owner = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     company_website = models.CharField(max_length=100, null=True)
     subscriber_size = models.CharField(
         null=True,
@@ -106,7 +107,16 @@ class IspToolboxUserSignUpInfo(models.Model):
         max_length=500,
     )
 
-    # ip_prefix = models.GenericIPAddressField()
-    # ip_prefix_length = models.IntegerField()
 
-    # asn = models.CharField(max_length=30)
+class NewUserExperience(models.Model):
+    name = models.CharField(
+        max_length=50, unique=True,
+        help_text="""Name of the new user experience - used for template tags. Must be unique""")
+    description = models.CharField(
+        max_length=255, blank=True, help_text="""Description of what the nux does""")
+    users = models.ManyToManyField(
+        to=settings.AUTH_USER_MODEL, blank=True, help_text="""Users that have seen the nux""")
+
+    @property
+    def num_users_seen(self):
+        return self.users.count()

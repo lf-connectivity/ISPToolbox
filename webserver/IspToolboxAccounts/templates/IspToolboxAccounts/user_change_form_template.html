@@ -3,6 +3,7 @@
 
 {% block object-tools %}
 {{ block.super }}
+{% if original.email %}
 <div style="border: 2px dashed grey; padding: 10px;">
     <h1>Hijack User</h1>
     <p>CAUTION! This will log you into the user, all actions will be recorded and written to the database.</p>
@@ -11,4 +12,5 @@
         <button type="submit">{% blocktrans %}Hijack {{ original.username }}{% endblocktrans %}</button>
     </form>
 </div>
+{% endif %}
 {% endblock %}

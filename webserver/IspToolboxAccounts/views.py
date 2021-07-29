@@ -2,7 +2,7 @@ from django.contrib.auth import login, authenticate
 from django.urls.base import reverse
 from django.views import View
 from IspToolboxAccounts.forms import IspToolboxUserCreationForm
-from IspToolboxAccounts.models import User
+from IspToolboxAccounts.models import User, NewUserExperience
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect, render
 from django.conf import settings
@@ -12,13 +12,15 @@ from django.utils.http import (
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.http import Http404, JsonResponse
+from workspace.mixnins import SuperuserRequiredMixin
 
 
 class CreateAccountView(View):
     def post(self, request):
         form = IspToolboxUserCreationForm(request.POST)
         if form.is_valid() and (settings.ENABLE_ACCOUNT_CREATION or (
-                form.cleaned_data.get('registration_code') == 'isptoolbox usability testing'
+                form.cleaned_data.get(
+                    'registration_code') == 'isptoolbox usability testing'
         )):
             form.save()
             username = form.cleaned_data.get('email')
@@ -71,3 +73,18 @@ class IntegrationTestAccountCreationView(View):
 
     def get(self, request):
         raise Http404
+
+
+class UpdateNuxSettingView(SuperuserRequiredMixin, View):
+    def post(self, request):
+        try:
+            nux = NewUserExperience.objects.get(
+                id=request.POST.get('nux')
+            )
+        except Exception:
+            raise Http404
+        if request.POST.get('seen'):
+            nux.users.add(request.POST.get('user'))
+        else:
+            nux.users.remove(request.POST.get('user'))
+        return redirect(request.POST.get('next'))

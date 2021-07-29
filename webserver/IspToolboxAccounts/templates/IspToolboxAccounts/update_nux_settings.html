@@ -1,0 +1,42 @@
+{% extends "admin/change_list.html" %}
+{% load nux %}
+{% block content_title %}
+<h1> Update user: "{{ user.first_name}}" nux settings </h1>
+<div style="width:100%; padding-bottom: 100px;">
+    {% for nux in cl.result_list %}
+    <form method="POST" action="{% url "update-nux" %}" id="{{nux.id}}_{{nux.name}}">
+        {% csrf_token %}
+        <input name="next" type="text" hidden value="{{ request.path }}">
+    </form>
+    {% endfor %}
+
+    <table>
+        <tbody>
+            <tr>
+                <th>nux</th>
+                <th>description</th>
+                <th></th>
+                <th>nux seen</th>
+            </tr>
+            {% for nux in cl.result_list %}
+            <tr>
+                <td>
+                    {{ nux.name }}
+                </td>
+                <td>
+                    {{ nux.description }}
+                </td>
+                <td>
+                    <input name="user" type="text" value="{{user.id}}" hidden form="{{nux.id}}_{{nux.name}}">
+                    <input name="nux" type="text" value="{{nux.id}}" hidden form="{{nux.id}}_{{nux.name}}">
+                </td>
+                <td>{% user_nux_value_input user nux %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% load humanize %}
+{% block pagination %}{% endblock %}

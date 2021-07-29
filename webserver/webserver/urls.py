@@ -31,7 +31,7 @@ from IspToolboxApp.views.redirect_view import HomepageRedirect
 from Overlay.views import OverlaySource
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView
 from mmwave.views import LOSCheckDemo, DSMExportView, LatestLidarView
-from IspToolboxAccounts.views import IntegrationTestAccountCreationView
+from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView
 from solar_sizing_tool.views import SolarSizingToolView
 
 from rest_framework import routers
@@ -93,6 +93,8 @@ urlpatterns = [
     path('test/accounts/', IntegrationTestAccountCreationView.as_view(), name="test-accounts"),
     # Feature Flipper
     url(r'^', include('waffle.urls')),
+    # New User Experiences - Admin Reset
+    path('admin/update-nux/', UpdateNuxSettingView.as_view(), name="update-nux"),
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

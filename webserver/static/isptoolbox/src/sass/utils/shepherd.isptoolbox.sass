@@ -1,0 +1,147 @@
+@import ../theme
+
+.footer-left-aligned .shepherd-footer
+    justify-content: flex-start !important
+
+.shepherd-footer
+    border-bottom-left-radius: 5px
+    border-bottom-right-radius: 5px
+    display: flex
+    justify-content: flex-end
+    padding: 0 2rem 1.5rem
+
+    & .shepherd-button:last-child
+        margin-right: 0
+
+.shepherd-cancel-icon
+    background: transparent
+    border: none
+    color: hsla(0,0%,50.2%,.75)
+    font-size: 2.5em
+    cursor: pointer
+    font-weight: 400
+    margin: 0
+    padding: 0.5rem
+    position: absolute
+    right: 0px
+    top: 0px
+    transition: color .5s ease
+
+    &:hover
+        color: rgba(0,0,0,.75)
+
+    .shepherd-has-title .shepherd-content &
+        color: hsla(0,0%,50.2%,.75)
+
+    .shepherd-has-title .shepherd-content &:hover
+        color: rgba(0,0,0,.75)
+
+.shepherd-title
+    color: $brand-theme-color
+    display: flex
+    font-size: 1rem
+    font-weight: 400
+    flex: 1 0 auto
+    margin: 0
+    padding: 0
+
+.shepherd-header
+    display: flex
+    justify-content: flex-end
+    line-height: 2em
+    padding: .75rem .75rem 0
+
+    .shepherd-has-title .shepherd-content &
+        background: $brand-dark-gray-color
+        padding: 1.5em 2em 0
+
+.shepherd-text
+    color: white
+    font-size: 1rem
+    line-height: 1.3em
+    padding: 1.5em 2em
+
+    & p
+        margin-top: 0
+
+    & p:last-child
+        margin-bottom: 0
+
+.shepherd-content
+    border-radius: 0
+    outline: none
+
+.shepherd-element
+    background: $brand-dark-gray-color
+    box-shadow: 0 1px 4px rgba(0,0,0,.2)
+    max-width: 400px
+    opacity: 0
+    outline: none
+    transition: opacity .3s,visibility .3s
+    visibility: hidden
+    width: 100%
+    z-index: 9999
+
+    &.shepherd-enabled
+        opacity: 1
+        visibility: visible
+
+    &[data-popper-reference-hidden]:not(.shepherd-centered)
+        opacity: 0
+        pointer-events: none
+        visibility: hidden
+
+    &,.shepherd-element *,.shepherd-element :after,.shepherd-element :before
+        box-sizing: border-box
+
+.shepherd-arrow,.shepherd-arrow:before
+    position: absolute
+    width: 16px
+    height: 16px
+    z-index: -1
+
+.shepherd-arrow:before
+    content: ""
+    transform: rotate(45deg)
+    background: $brand-dark-gray-color
+
+.shepherd-element[data-popper-placement^=top]>.shepherd-arrow
+    bottom: -8px
+
+.shepherd-element[data-popper-placement^=bottom]>.shepherd-arrow
+    top: -8px
+
+.shepherd-element[data-popper-placement^=left]>.shepherd-arrow
+    right: -8px
+
+.shepherd-element[data-popper-placement^=right]>.shepherd-arrow
+    left: -8px
+
+.shepherd-element.shepherd-centered>.shepherd-arrow
+    opacity: 0
+
+.shepherd-element.shepherd-has-title[data-popper-placement^=bottom]>.shepherd-arrow:before
+    background-color: $brand-dark-gray-color
+
+.shepherd-target-click-disabled.shepherd-enabled.shepherd-target,.shepherd-target-click-disabled.shepherd-enabled.shepherd-target *
+    pointer-events: none
+
+.shepherd-modal-overlay-container
+    height: 0
+    left: 0
+    opacity: 0
+    overflow: hidden
+    pointer-events: none
+    position: fixed
+    top: 0
+    transition: all .3s ease-out,height 0ms .3s,opacity .3s 0ms
+    width: 100vw
+    z-index: 9997
+
+    &.shepherd-modal-is-visible
+        height: 100vh
+        opacity: .5
+        transition: all .3s ease-out,height 0s 0s,opacity .3s 0s
+
+    &.shepherd-modal-is-visible path
+        pointer-events: all

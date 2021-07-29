@@ -8,6 +8,9 @@
         <div class="homepage-logo align-items-center d-flex mx-1">
             {% include "workspace/atoms/isptoolbox_logo.html"%}
         </div>
+        <button class="btn m-auto d-flex" id="tool_help_button">
+            {% include "workspace/atoms/icons/question_mark_icon.html" %}
+        </button>
     </div>
     {% include 'workspace/molecules/dropdown_workspace.html' %}
     {% block right_nav %}

@@ -22,7 +22,7 @@
         <div id="geocoder" class="geocoder-container"></div>
       </div>
       <div class="on-map-controls" style="right: 0;">
-        <div class="draw-contols">
+        <div class="draw-contols" id="drawing-controls">
           {% include "market_evaluator/molecules/draw_controls.html" %}
         </div>
         <div class="layer-button-container">
@@ -40,6 +40,7 @@
   {{ geojson|json_script:"isp-map-features" }}
   {% include "workspace/organisms/workspace_session_modals.html" %}
   {% include "workspace/organisms/confirmation_modals.html" %}
+  {% include "workspace/organisms/nux_market.html"%}
 </body>
 
 </html>

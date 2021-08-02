@@ -4,6 +4,7 @@ import botocore
 from botocore.exceptions import ClientError
 from django.conf import settings
 import concurrent.futures
+from functools import lru_cache
 
 max_workers = 32
 
@@ -107,9 +108,11 @@ def checkPrefixExists(prefix):
         return False
 
 
+@lru_cache
 def findPointCloudPrefix(prefix: str, name: str):
     """
     Use this method to find the production prefix of the point cloud tiles in s3
+    TODO achong: replace with better s3 keys
     """
     objs = s3_client.list_objects_v2(
         Bucket=bucket_name, Prefix=prefix, Delimiter='/')

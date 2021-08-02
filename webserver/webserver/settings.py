@@ -190,8 +190,10 @@ ENABLE_ACCOUNT_CREATION = False
 FB_SDK_SECRETS = json.loads(get_secret("prod/fb_sdk_isptoolbox",
                                        aws_access_key_id=AWS_ACCESS_KEY_ID,
                                        aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
-SOCIAL_AUTH_FACEBOOK_KEY = FB_SDK_SECRETS['fb_sdk_isptoolbox_app_key']  # App ID
-SOCIAL_AUTH_FACEBOOK_SECRET = FB_SDK_SECRETS['fb_sdk_isptoolbox_app_secret']  # app key
+# App ID
+SOCIAL_AUTH_FACEBOOK_KEY = FB_SDK_SECRETS['fb_sdk_isptoolbox_app_key']
+# app key
+SOCIAL_AUTH_FACEBOOK_SECRET = FB_SDK_SECRETS['fb_sdk_isptoolbox_app_secret']
 ASN_CURL_SECRET = FB_SDK_SECRETS['asn_fb_curl']
 
 MAPBOX_ACCESS_TOKEN_PUBLIC = 'pk.eyJ1IjoiaXNwdG9vbGJveCIsImEiOiJja2p5eHd1aGcwMjhoMm5wcGkxdnl4N2htIn0.cLO8vp0k2kXclp4CNzwWhQ'
@@ -222,9 +224,9 @@ CLOUDRF_KEY = CLOUD_RF['cloud_rf_key']
 
 # This is a tiny, tiny elastic search cluster
 ELASTICSEARCH_SECRETS = json.loads(get_secret(
-                                    "prod/elastic_search_asn",
-                                    aws_access_key_id=AWS_ACCESS_KEY_ID,
-                                    aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+    "prod/elastic_search_asn",
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
 
 ES_ENDPOINT = ELASTICSEARCH_SECRETS['ENDPOINT_ELASTICSEARCH']
 USERNAME_ES = ELASTICSEARCH_SECRETS['ADMIN_ELASTICSEARCH']
@@ -286,23 +288,26 @@ CHANNEL_LAYERS = {
 GIS_DB_CREDENTIALS = json.loads(get_secret("prod/gis_db",
                                            aws_access_key_id=AWS_ACCESS_KEY_ID,
                                            aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+DJANGO_ORM_DB_CREDENTIALS = {
+    'name': 'django_test',
+    'username': 'postgres',
+    'password': 'password',
+    'host': 'postgres',
+    'host-read-replica': 'postgres',
+    'port': '5432',
+}
+
+
+PROD_DJANGO_ORM_DB_CREDENTIALS = json.loads(get_secret("prod/isptoolbox_django",
+                                            aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                                       aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+PROD_DJANGO_ORM_DB_CREDENTIALS.update({
+    'name': 'django_db',
+    'host-read-replica': 'isptoolbox-db-prod-read-replica1.cahmkzzberpf.us-west-1.rds.amazonaws.com',
+})
 if PROD:
-    DJANGO_ORM_DB_CREDENTIALS = json.loads(get_secret("prod/isptoolbox_django",
-                                                      aws_access_key_id=AWS_ACCESS_KEY_ID,
-                                                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
-    DJANGO_ORM_DB_CREDENTIALS.update({
-        'name': 'django_db',
-        'host-read-replica': 'isptoolbox-db-prod-read-replica1.cahmkzzberpf.us-west-1.rds.amazonaws.com',
-    })
-else:
-    DJANGO_ORM_DB_CREDENTIALS = {
-        'name': os.environ.get('DB_NAME', 'django_test'),
-        'username': os.environ.get('DB_USERNAME', 'postgres'),
-        'password': os.environ.get('DB_PASSWORD', 'password'),
-        'host': os.environ.get('POSTGRES_DB', 'localhost'),
-        'host-read-replica': os.environ.get('POSTGRES_DB', 'localhost'),
-        'port': '5432',
-    }
+    DJANGO_ORM_DB_CREDENTIALS = PROD_DJANGO_ORM_DB_CREDENTIALS
+
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -389,7 +394,8 @@ USE_TZ = True
 
 
 CELERY_BROKER_URL = os.environ.get('REDIS_BACKEND', 'redis://localhost:6379')
-CELERY_RESULT_BACKEND = os.environ.get('REDIS_BACKEND', 'redis://localhost:6379')
+CELERY_RESULT_BACKEND = os.environ.get(
+    'REDIS_BACKEND', 'redis://localhost:6379')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'

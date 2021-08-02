@@ -13,6 +13,7 @@ class EPTLidarPointCloudManager(models.Manager):
     """
     This Manager is used to filter out the point clouds that have data / boundary issues
     """
+
     def get_queryset(self):
         return super(EPTLidarPointCloudManager, self).get_queryset().filter(valid=True)
 
@@ -21,6 +22,7 @@ class EPTLidarPointCloudManagerAll(models.Manager):
     """
     This Manager includes all point clouds, even the ones that have been marked invalid
     """
+
     def get_queryset(self):
         return super(EPTLidarPointCloudManagerAll, self).get_queryset()
 
@@ -109,12 +111,14 @@ class EPTLidarPointCloud(models.Model):
         return key
 
     def get_s3_key_tile(self, x, y, z, **kwargs):
-        folder = self.get_s3_folder_key(**kwargs)
-        if settings.PROD or kwargs.get('tile_prod', True):
-            key = f'{folder}{int(z)}/{int(x)}/{int(y)}{kwargs.get("old_path", "")}{kwargs.get("suffix", ".tif")}'
+        folder = self.get_s3_prefix()
+        return f'{folder}{int(z)}/{int(x)}/{int(y)}.tif'
+
+    def get_s3_prefix(self):
+        if settings.PROD:
+            return f'dsm/tiles/{self.id}-{self.name}/'
         else:
-            key = f'{folder}{int(z)}/{int(x)}/{int(y)}{kwargs.get("old_path", "")}{kwargs.get("suffix", ".tif")}'
-        return key
+            return s3.findPointCloudPrefix('dsm/tiles/', self.name)
 
     def existsTile(self, x, y, z, **kwargs):
         # Use or statement to allow development machines to get tiles
@@ -193,7 +197,8 @@ class USGSLidarMetaDataModel(models.Model):
     """
     workunit = models.CharField(max_length=255)
     workunit_id = models.IntegerField(null=True)
-    project = models.CharField(max_length=255, null=True, db_column='workpackage')
+    project = models.CharField(
+        max_length=255, null=True, db_column='workpackage')
     project_id = models.IntegerField(null=True, db_column='workpackage_id')
     collect_start = models.CharField(max_length=255)
     collect_end = models.CharField(max_length=255)

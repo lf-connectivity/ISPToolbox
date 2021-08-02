@@ -107,6 +107,19 @@ def checkPrefixExists(prefix):
         return False
 
 
+def findPointCloudPrefix(prefix: str, name: str):
+    """
+    Use this method to find the production prefix of the point cloud tiles in s3
+    """
+    objs = s3_client.list_objects_v2(
+        Bucket=bucket_name, Prefix=prefix, Delimiter='/')
+    cloud = list(
+        filter(lambda x: name in x['Prefix'], objs.get('CommonPrefixes', [])))
+    if len(cloud) > 0:
+        return cloud[0]['Prefix']
+    return ''
+
+
 def checkObjectExists(object_name, bucket_name=bucket_name):
     try:
         s3_resource.Object(bucket_name, object_name).load()

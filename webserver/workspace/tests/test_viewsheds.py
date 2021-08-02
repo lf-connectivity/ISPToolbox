@@ -45,7 +45,7 @@ class ViewshedTestCase(WorkspaceBaseTestCase):
         self.test_cloud.save()
         return
 
-    def test_session_duplication(self):
+    def test_viewshed_creation(self):
         """
         Test creation of tiles for viewshed
         """

@@ -9,7 +9,7 @@ cmd="$@"
   
 >&2 echo "Checking if postgres is available"
 
-until PGPASSWORD=$DB_PASSWORD psql -h "$POSTGRES_DB" -U "postgres" -c '\q'; do
+until PGPASSWORD="password" psql -h "postgres" -U "postgres" -c '\q'; do
   >&2 echo "Postgres is unavailable - sleeping"
   sleep 1
 done

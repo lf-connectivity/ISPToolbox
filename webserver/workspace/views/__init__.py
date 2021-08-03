@@ -1,5 +1,5 @@
 from .login_views import (
-    DefaultWorkspaceView, OptionalInfoWorkspaceView,
+    WorkspaceDashboard, DefaultWorkspaceView, OptionalInfoWorkspaceView,
     OptionalInfoWorkspaceUpdateView, AccountSettingsView,
 )
 from .network_views import EditNetworkView, BulkUploadTowersView

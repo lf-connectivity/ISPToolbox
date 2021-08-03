@@ -9,6 +9,9 @@ from IspToolboxAccounts.forms import (
 )
 from django.contrib.auth import logout
 
+class WorkspaceDashboard(View):
+    def get(self, request):
+        return render(request, 'workspace/pages/dashboard.html')
 
 class DefaultWorkspaceView(View):
     def get(self, request, **kwargs):
@@ -26,7 +29,6 @@ class DefaultWorkspaceView(View):
                 'sign_up_form': IspToolboxUserCreationForm,
             }
         )
-
 
 class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
     form_class = IspToolboxUserSignUpInfoForm

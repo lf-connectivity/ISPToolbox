@@ -9,7 +9,8 @@ from rest_framework.schemas import get_schema_view
 
 
 urlpatterns = [
-    path('', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
+    path('', views.WorkspaceDashboard.as_view(), name='workspace_dashboard'),
+    path('signin', views.DefaultWorkspaceView.as_view(), name="isptoolbox_pro_home"),
     path('optional-info/', views.OptionalInfoWorkspaceView.as_view(), name="optional_info"),
     path('optional-info/update/', views.OptionalInfoWorkspaceUpdateView.as_view(), name="optional_info_update"),
     # LOS

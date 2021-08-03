@@ -14,10 +14,12 @@
             {% include "workspace/atoms/icons/question_mark_icon.html" %}
         </button>
     </div>
-    {% include 'workspace/molecules/dropdown_workspace.html' %}
+    {% if user.is_authenticated %}
+        {% include 'workspace/molecules/dropdown_workspace.html' %}
+    {% endif %}
+    
     {% block right_nav %}
-
-    {% include "workspace/atoms/account_dropdown.html" %}
+        {% include "workspace/atoms/account_dropdown.html" %}
     {% endblock %}
 </nav>
 

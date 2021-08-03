@@ -8,13 +8,10 @@
   {% comment %} {% if workspace_account and request.user.is_authenticated %}
   {% include 'workspace/organisms/tool_suggest_workspace_overlay.html' %}
   {% endif %} {% endcomment %}
-
-  {% if workspace_account %}
-  {% include "mmwave/organisms/network_edit_nav.html" %}
+  {% include 'workspace/organisms/workspace_nav.html' with page_title="LOS Check" %}
   {% with tool="network" %}
   {% include "workspace/organisms/tool_drawer_menu.html" %}
   {% endwith %}
-  {% endif %}
   <div>
     <div class="mobile-overlay-lock">
       {% block overlay%}

@@ -41,6 +41,21 @@ class NetworkDemoView(View):
         }
         return render(request, 'workspace/pages/demo_network.index.html', context)
 
+class MarketDemoView(View):
+    """
+    Demo view for market evaluator app
+    """
+    def get(self, request):
+        map_session, created = WorkspaceMapSession.get_or_create_demo_view(request)
+        context = {
+            'session': map_session,
+            'geojson': map_session.get_session_geojson(),
+            'units': map_session.units_old,
+            'workspace_account': False,
+            'title': 'LiDAR LOS Check - ISP Toolbox',
+            'should_collapse_link_view': True,
+        }
+        return render(request, 'workspace/pages/demo_market.index.html', context)
 
 @method_decorator(xframe_options_exempt, name='dispatch')
 class LOSCheckDemo(View):

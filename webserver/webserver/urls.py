@@ -41,7 +41,7 @@ from django.conf.urls import (
     handler404, handler500, url
 )
 
-from mmwave.views.demo_views import NetworkDemoView
+from mmwave.views.demo_views import (NetworkDemoView, MarketDemoView)
 
 # REST API Router
 router = routers.DefaultRouter()
@@ -85,6 +85,7 @@ urlpatterns = [
     path('demo/dsm-app/', DSMExportView.as_view(), name="demo-dsm-app"),
     path('demo/latest-gis-data/<int:year>/<int:month>/', LatestLidarView.as_view(), name='demo-latest_gis'),
     path('demo/latest-gis-data/', LatestLidarView.as_view(), name='demo-latest_gis-nodate'),
+    path('demo/market-app/', MarketDemoView.as_view(), name='demo-market-app'),
     # Redirect
     path('', HomepageRedirect.as_view()),
     # Django Hijack

@@ -36,7 +36,7 @@ class _CitationNode(template.Node):
             id = self.id[1:-1]
         else:
             id = context[self.id]
-        
+
         # Simple render resolver, variable names or True/False only
         if self.do_render == 'True':
             do_render = True
@@ -94,11 +94,11 @@ def citation(parser, token):
 
     Required Parameters:
         - `sources`: List of sources
-    
+
     Required Parameters (in kwargs):
         - `id`: Unique ID for the disclaimer (should be different than those for
                 sources too).
-    
+
     Optional Parameters:
         - `render`: Whether or not to render the citation. Default to `True`.
         - `href`: A link to the footnote section (or page). If not there, won't render as a link.

@@ -16,6 +16,7 @@ class ISPToolboxSource(object):
     title: str
     last_updated: str = ''
 
+
 # TODO: Migrate this shit into database. Make a migration for sources, then add this
 # in via admin page.
 _ISP_TOOLBOX_US_SOURCES = {
@@ -101,7 +102,7 @@ def get_source(country, source_id):
     if Source.objects.filter(source_country=country, source_id=source_id).exists():
         db_source = Source.objects.get(source_country=country, source_id=source_id)
         source.last_updated = db_source.last_updated.strftime('%b %Y')
-    
+
     return source
 
 

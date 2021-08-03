@@ -34,3 +34,5 @@ node_modules/
 # latent script files
 scripts/census-blocks/census_blocks/
 webserver/census_blocks/
+
+*.pem

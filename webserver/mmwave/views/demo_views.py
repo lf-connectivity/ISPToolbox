@@ -52,7 +52,7 @@ class MarketDemoView(View):
             'geojson': map_session.get_session_geojson(),
             'units': map_session.units_old,
             'workspace_account': False,
-            'title': 'LiDAR LOS Check - ISP Toolbox',
+            'title': 'Market Evaluator - ISP Toolbox',
             'should_collapse_link_view': True,
         }
         return render(request, 'workspace/pages/demo_market.index.html', context)

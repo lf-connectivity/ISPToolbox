@@ -1,4 +1,5 @@
 {% load i18n %}
+
 <div class="account-dropdown">
   {% if user.is_authenticated %}
   <div class="dropdown show">
@@ -76,19 +77,11 @@
       >
     </div>
   </div>
-  {% else %} {% if not authentication_form %}
-  <a href="{% url 'login_view' %}">
-    {% endif %}
-    <button
-      type="button"
-      class="btn btn-primary isptoolbox-btn"
-      data-toggle="modal"
-      data-target="#loginModal"
-      id="login-btn-nav"
-    >
-      Login
-    </button>
-    {% if not authentication_form %}
-  </a>
-  {% endif %} {% endif %}
+  {% else %} 
+      <a href="#" data-toggle="modal" data-target="#importKMZModal">Upload File</a>
+      &nbsp;or&nbsp;
+      <a href="{% url 'login_view' %}">Log In</a>
+      &nbsp;to pick up where you left off. 
+  {% endif %}
 </div>
+

@@ -6,10 +6,11 @@
                 <path d="M18.7858 8.5L2.71433 8.5M9.1429 16L2.00005 8.5L9.1429 1" stroke="#2D2D2D" stroke-width="2"/>
             </svg>
         </a>
-        <div class="homepage-logo align-items-center d-flex mx-1">
+        <div class="homepage-logo align-items-center d-flex mx-2">
             {% include "workspace/atoms/isptoolbox_logo.html"%}
+          <span class='mx-1'>Market Evaluator</span>
         </div>
-        <button class="btn m-auto d-flex" id="tool_help_button">
+        <button class="btn my-auto d-flex" id="tool_help_button">
             {% include "workspace/atoms/icons/question_mark_icon.html" %}
         </button>
     </div>
@@ -19,3 +20,4 @@
     {% include "workspace/atoms/account_dropdown.html" %}
     {% endblock %}
 </nav>
+

@@ -24,7 +24,6 @@ $(document).ready(function () {
         showSignUpModal();
     });
     $('.dy_have_account').on('click', (e: any) => {
-        console.log('here');
         showLoginModal();
         e.preventDefault();
     });

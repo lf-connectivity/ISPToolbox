@@ -5,6 +5,7 @@
 <script src="{% url 'wafflejs' %}"></script>
 
 <body>
+  
   {% include 'workspace/organisms/workspace_nav.html' %}
   {% with tool="business" %}
   {% include "workspace/organisms/tool_drawer_menu.html" %}
@@ -41,6 +42,8 @@
   {% include "workspace/organisms/workspace_session_modals.html" %}
   {% include "workspace/organisms/confirmation_modals.html" %}
   {% include "workspace/organisms/nux_market.html"%}
+  {% include "workspace/organisms/export_kmz_modal.html" %}
+
 </body>
 
 </html>

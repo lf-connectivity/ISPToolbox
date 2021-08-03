@@ -21,7 +21,7 @@
                 <div class="table-header--competitors">
                     <h4>
                         {{ service_providers|length }} Service Provider{{ service_providers|length|pluralize }} from FCC Form 477
-                        {% citation sources "SOURCE_PROVIDERS" %}
+                        {% citation sources id="SOURCE_PROVIDERS" %}
                             Service Provider data is obtained via {% source_link "US" "SERVICE_PROVIDERS" %} {% source_last_updated "US" "SERVICE_PROVIDERS" %}
                         {% endcitation %}
                     </h4>
@@ -81,7 +81,7 @@
                 <div class="table-header--competitors">
                     <h4>
                         Lowest Price from BroadbandNow Data
-                        {% citation sources "bbn" %}
+                        {% citation sources id="bbn" %}
                             The selected area may include multiple census blocks,
                             and as a result, the lowest price maybe represented as a range.
                             The lowest price option may be offered in a portion of the
@@ -116,7 +116,7 @@
                         <div class="table-data--tech">
                             <h5>
                                 Terrestrial<br />Broadband
-                                {% citation sources "terrestrial_broadband" %}
+                                {% citation sources id="terrestrial_broadband" %}
                                     Terrestrial Broadband excludes satellite and mobile.
                                 {% endcitation %}
                             </h5>

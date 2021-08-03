@@ -5,10 +5,15 @@ from collections import OrderedDict
 
 from workspace.utils.sources import get_source
 
+import re
+
 register = template.Library()
 
-CITATION_TYPE_REGULAR = 'Citation'
-CITATION_TYPE_SOURCE = 'Source'
+CITATION_HTML_FORMAT_STRING_LINK = """
+    <a href="{}">
+        {}
+    </a>
+"""
 
 CITATION_HTML_FORMAT_STRING = """
     <sup>
@@ -18,24 +23,51 @@ CITATION_HTML_FORMAT_STRING = """
 
 
 class _CitationNode(template.Node):
-    def __init__(self, nodelist, sources, id):
+    def __init__(self, nodelist, sources, params):
         self.nodelist = nodelist
         self.sources = sources
-        self.id = id
+        self.id = params['id']
+        self.do_render = params['render']
+        self.href = params['href']
 
     def render(self, context):
         # Simple id resolver, variable names or quoted strings only!!!
-        if (self.id[0] == '"' and self.id[-1] == '"') or (self.id[0] == self.id[-1] and self.id[0] == '\''):
+        if re.match('^\'.*\'$', self.id) or re.match('^\".*\"$', self.id):
             id = self.id[1:-1]
         else:
-            self.id = context[self.id]
+            id = context[self.id]
+        
+        # Simple render resolver, variable names or True/False only
+        if self.do_render == 'True':
+            do_render = True
+        elif self.do_render == 'False':
+            do_render = False
+        else:
+            do_render = bool(context.get(self.do_render, False))
+
+        # Simple href resolver, var names or string only
+        if self.href:
+            if re.match('^\'.*\'$', self.href) or re.match('^\".*\"$', self.href):
+                href = self.href[1:-1]
+            else:
+                href = context.get(self.href, None)
+        else:
+            href = None
 
         sources = context[self.sources]
 
         # Render footnote for later
         sources[id] = self.nodelist.render(context)
         index = list(sources).index(id) + 1
-        return format_html(CITATION_HTML_FORMAT_STRING, index)
+        if not do_render:
+            return ''
+        else:
+            citation = format_html(CITATION_HTML_FORMAT_STRING, index)
+
+            if href:
+                return format_html(CITATION_HTML_FORMAT_STRING_LINK, href, citation)
+            else:
+                return citation
 
 
 @register.simple_tag
@@ -53,31 +85,53 @@ def citation(parser, token):
     Adds a new citation footnote to the source. Usage is as follows:
 
     ```
-    {% citation source "MY ID" %}
+    {% citation source id="MY ID" render=False  %}
         <footnote text goes here>
     {% endcitation %}
     ```
     This citation will be automatically numbered in order of inclusion.
     Returns a superscripted citation for where in the eventual sources list the footnote will be.
 
-    Parameters:
+    Required Parameters:
         - `sources`: List of sources
+    
+    Required Parameters (in kwargs):
         - `id`: Unique ID for the disclaimer (should be different than those for
-                sources too)
+                sources too).
+    
+    Optional Parameters:
+        - `render`: Whether or not to render the citation. Default to `True`.
+        - `href`: A link to the footnote section (or page). If not there, won't render as a link.
     """
     # Find the id.
     try:
-        _, sources, id = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError(f'{token.split_contents()[0]} requires two arguments')
+        tokens = token.split_contents()
+        sources = tokens[1]
+        kwargs = tokens[2:]
+        params = {
+            'id': None,
+            'render': 'True',
+            'href': None
+        }
+        for kwarg in kwargs:
+            param, value = kwarg.split('=')
+            params[param] = value
+
+        if not params['id']:
+            raise template.TemplateSyntaxError('Missing id.')
+
+    except IndexError:
+        raise template.TemplateSyntaxError(f'{token.split_contents()[0]} requires at least two arguments')
+    except KeyError as err:
+        raise template.TemplateSyntaxError(f'{err} is not a valid parameter')
 
     nodelist = parser.parse(('endcitation',))
     parser.delete_first_token()
-    return _CitationNode(nodelist, sources, id)
+    return _CitationNode(nodelist, sources, params)
 
 
-@register.inclusion_tag('workspace/atoms/components/citation.html')
-def existing_citation(sources, id):
+@register.simple_tag
+def existing_citation(sources, id, href=None):
     """
     Template tag for citing an already cited source.
     """
@@ -85,9 +139,7 @@ def existing_citation(sources, id):
         raise template.TemplateSyntaxError(f'{id} not in sources.')
 
     index = list(sources).index(id) + 1
-    return {
-        'index': index
-    }
+    return format_html(CITATION_HTML_FORMAT_STRING, index)
 
 
 @register.simple_tag
@@ -123,6 +175,7 @@ def footnote_section(sources, **kwargs):
         - `sources`: List of sources
 
     Optional Parameters:
+        - `id`: ID of the foothote section
         - `ol_classes`: Class attribute for the `<ol>` element
         - `ol_style`: Style attribute for the `<ol>` element
         - `li_classes`: Class attribute for the `<li>` elements

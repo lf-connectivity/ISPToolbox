@@ -1,9 +1,10 @@
 {% load static %}
+{% load isp_toolbox_sources %}
+{% new_sources_list as sources %}
 <!DOCTYPE html>
 <html lang="en">
 {% include "workspace/molecules/page_header_market_eval.html" %}
 <script src="{% url 'wafflejs' %}"></script>
-
 <body>
   
   {% include 'workspace/organisms/workspace_nav.html' with page_title="Market Evaluator"%}
@@ -16,7 +17,7 @@
     {% endblock %}
   </div>
   <div class="d-flex market-eval-container website-content">
-    {% include "market_evaluator/organisms/market_stats_column.html" %}
+    {% include "market_evaluator/organisms/market_stats_column.html" with sources=sources %}
     <div id='map' class='planner-map col-lg-9 col-md-9 order-1 order-md-2 px-0' style="min-height: 500px">
       <div class="search-container on-map-controls">
         {% include "workspace/atoms/components/reconnecting_msg.html" %}

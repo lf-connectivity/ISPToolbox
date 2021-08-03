@@ -1,5 +1,6 @@
 {% load isp_toolbox_sources %}
 <ol
+ {% if id %} id="{{id}}" {% endif %}
  {% if ol_classes %} class="{{ol_classes}}" {% endif %}
  {% if ol_style %} style="{{ol_style}}" {% endif %}
 >

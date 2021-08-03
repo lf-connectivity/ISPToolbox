@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load isp_toolbox_sources %}
 <div class="mt-3">
     <h5 class="mx-3 market_stats_column--section-header">
         {% translate 'Market Sizing' %}
@@ -9,9 +10,9 @@
         <div class="d-flex justify-content-between ">
             <p role="text" tabindex="" class="market-eval-section--label">
                 {% translate 'Buildings inside Coverage Area' %}
-                <sup>
-                    <span class="footnote--bracket">[</span>1<span class="footnote--bracket">]</span>
-                </sup>
+                {% citation sources id="Buildings Inside Coverage Area" %}
+                  Building estimates obtained via {% source_link "US" "BUILDINGS" %} {% source_last_updated "US" "BUILDINGS" %}
+                {% endcitation %}
             </p>
             <div class="d-flex flex-row market-eval-section--value-section">
                 <div class="market-eval-section--value">

@@ -7,6 +7,8 @@
 
 from dataclasses import dataclass
 
+from dataUpdate.models import Source
+
 
 @dataclass
 class ISPToolboxSource(object):
@@ -14,7 +16,8 @@ class ISPToolboxSource(object):
     title: str
     last_updated: str = ''
 
-
+# TODO: Migrate this shit into database. Make a migration for sources, then add this
+# in via admin page.
 _ISP_TOOLBOX_US_SOURCES = {
     'BUILDINGS': ISPToolboxSource(
         link='https://github.com/Microsoft/USBuildingFootprints',
@@ -67,8 +70,7 @@ _ISP_TOOLBOX_US_SOURCES = {
     ),
     'AP_LOS': ISPToolboxSource(
         link='https://cloudrf.com/api/',
-        title='Cloud-RF',
-        last_updated=' (resolution is ~30m x 30m). Data as of 2003.'
+        title='Cloud-RF'
     ),
     'CENSUS_BLOCKS': ISPToolboxSource(
         link='https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html',
@@ -93,7 +95,15 @@ def get_source(country, source_id):
     if source_id not in _ISP_TOOLBOX_SOURCES[country]:
         raise ValueError(f'No source with id {source_id} in country {country}')
 
-    return _ISP_TOOLBOX_SOURCES[country][source_id]
+    source = _ISP_TOOLBOX_SOURCES[country][source_id]
+
+    # Update last_updated with recent information, if any.
+    if Source.objects.filter(source_country=country, source_id=source_id).exists():
+        db_source = Source.objects.get(source_country=country, source_id=source_id)
+        source.last_updated = db_source.last_updated.strftime('%b %Y')
+    
+    return source
+
 
 # TODO: Support Canada!!!
 

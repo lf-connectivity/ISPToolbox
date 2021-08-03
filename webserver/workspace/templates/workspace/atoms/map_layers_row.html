@@ -1,8 +1,13 @@
+{% load isp_toolbox_sources %}
+
 <div class="market_overlay--row">
 	<p class="market_overlay--label">
 		{% include "workspace/atoms/icons/swatch.html" with swatchType=swatchType %}
 		<span>
 			{{ layerName }}
+			{% citation sources id=layerName %}
+				{{ citation }} {% source_link "US" sourceId %} {% source_last_updated "US" sourceId %}
+			{% endcitation %}
 		</span>
 	</p>
 	<div class="market_overlay--controls">

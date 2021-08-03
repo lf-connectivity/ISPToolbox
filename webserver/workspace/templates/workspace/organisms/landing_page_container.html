@@ -50,7 +50,8 @@
         technologies are most applicable."%}
       </p>
       <a
-        href="{% url 'market_eval_entry' %}"
+        href="{% if user.is_authenticated %}{% url 'market_eval_entry' %}
+              {% else %}{% url 'demo-market-app' %}{% endif %}"
         class="btn btn-primary isptoolbox-btn"
       >
         {% translate "Launch Market Evaluator"%}

@@ -6,7 +6,7 @@
 
 <body>
   
-  {% include 'workspace/organisms/workspace_nav.html' %}
+  {% include 'workspace/organisms/workspace_nav.html' with page_title="Market Evaluator"%}
   {% with tool="business" %}
   {% include "workspace/organisms/tool_drawer_menu.html" %}
   {% endwith %}

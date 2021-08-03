@@ -1,24 +1,36 @@
 @use '../fonts'
 @import ../theme
     
-.homepage-logo    
+.homepage-logo
+    span
+        font-size: 1.125rem
+        color: $brand-dark-gray-color
+
     @media (max-width: $breakpoint-xl)
         .span
             display: none
 
-    .logo-container
-        display: block
-        width: 170px
-
+.logo-absolute
+    svg
+        position: absolute
+        left: 50%
+        margin-left: -14px
 
     
 .workspace-nav
+    color: #2D2D2D
     align-items: center
     background-color: #fff
-    display: grid 
-    grid-template-columns: repeat(3, 1fr)
+    display: flex
+    flex-direction: row
+    justify-content: space-between
     height: 50px
     width: 100%
+    font-family: $brand-font-family-sans-serif
+
+    h5
+        font-weight: bold
+        font-size: .875rem
 
     .back-icon
         cursor: pointer
@@ -26,11 +38,13 @@
         height: 50px
         display: flex 
         place-items: center center 
+    
         
     .account-dropdown
         display: flex
         flex-direction: row
         justify-content: flex-end
+        min-width: 234px
         .dropdown a
             display: flex
             align-items: center
@@ -40,15 +54,17 @@
             height: 40px
             width: 40px
             border-radius: 20px
-        &--name
-            font-family: $brand-font-family-mono
-            font-size: 0.875rem
+    
+    .subtitle
+        margin: auto 0 auto 1rem
+        color: $light-gray-color-2
+        font-size: .75rem
+
 
 .file-menu, .account-menu
     padding-bottom: 10px
     min-width: 14rem
     a
-        font-family: $brand-font-family-mono
         font-size: 0.875rem
         padding: 10px 25px 10px 25px
         transition: 0.1s all ease-in-out
@@ -93,7 +109,6 @@
 
 .workspace-nav-dropdown-toggle
     #session_name_workspace
-        font-family: $brand-font-family-mono
         max-width: 300px
         overflow: hidden
         font-size: 0.875rem
@@ -115,7 +130,6 @@
         font-size: 1rem
         align-items: center
         font-weight: 300
-        font-family: $brand-font-family-mono
         display: flex
         flex-flow: row
         color: $brand-dark-gray-color
@@ -178,6 +192,9 @@
         .homepage-logo
             margin: 0
         .empty
+            display: none
+
+        .account-dropdown
             display: none
 
 @media (max-width: $breakpoint-md)

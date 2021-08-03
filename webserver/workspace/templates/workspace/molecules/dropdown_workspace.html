@@ -4,7 +4,7 @@
     <div class="nav-item dropdown">
         <a class="nav-link dropdown-toggle workspace-nav-dropdown-toggle d-flex flex-row align-items-center" href="#"
             id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <h5 class="my-auto mr-1" id="session_name_workspace">
+            <h5 class="my-auto mr-1" id="session_name_workspace bold">
                 {% translate 'Editing: '%}{% firstof session.name 'untitled session' %}
             </h5>
             <svg width="10" height="15" viewBox="0 0 10 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="ml-1">
@@ -56,4 +56,5 @@
             </li>
         </ul>
     </div>
+    <span class='subtitle'>All Changes Saved</span>
 </div>

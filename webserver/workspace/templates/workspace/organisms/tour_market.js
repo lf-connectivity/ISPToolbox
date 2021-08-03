@@ -8,7 +8,7 @@ const tour = new Shepherd.Tour({
 });
 tour.addStep({
     id: 'example-step',
-    text: 'Quickly estimate the number of buildings (i.e. rooftops) within a service area to help you identify where to expand your business.',
+    text: 'Market Evaluator helps you assess areas your ISP could serve. Start by drawing a coverage area or placing an access point to see the number of rooftops, potential competitors, and average incomes in that area. <a href="https://facebook.com/isptoolbox" target="_blank">Learn More</a>',
     attachTo: {
         element: '#tool_help_button',
         on: 'bottom'

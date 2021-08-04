@@ -41,6 +41,7 @@ class NetworkDemoView(View):
         }
         return render(request, 'workspace/pages/demo_network.index.html', context)
 
+
 class MarketDemoView(View):
     """
     Demo view for market evaluator app
@@ -52,6 +53,7 @@ class MarketDemoView(View):
             'geojson': map_session.get_session_geojson(),
         }
         return render(request, 'workspace/pages/demo_market.index.html', context)
+
 
 @method_decorator(xframe_options_exempt, name='dispatch')
 class LOSCheckDemo(View):

@@ -2,8 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from workspace import models as workspace_models
-from workspace.forms import UploadTowerCSVForm, WorkspaceForms
-from IspToolboxApp.views.MarketEvaluatorTooltips import TOOLTIPS
+
 
 class MarketEvaluatorSourcesView(LoginRequiredMixin, View):
     def get(self, request, session_id=None, name=None):

@@ -1,5 +1,4 @@
 from django import template
-from django.template.exceptions import TemplateSyntaxError
 from django.utils.html import format_html
 
 from collections import OrderedDict
@@ -23,10 +22,10 @@ _CITATION_HTML_FORMAT_STRING = """
     </sup>
 """
 
-_VARIABLE_NAME_REGEX = re.compile('^(\w+)$')
+_VARIABLE_NAME_REGEX = re.compile('^(\w+)$')                # flake: noqa
 _STRING_LITERAL_REGEX = re.compile('(^\'.*\'$)|(^\".*\"$)')
-_INT_LITERAL_REGEX = re.compile('^(\d+)$')
-_KWARG_REGEX = re.compile('^(\w+)=(.+)$')
+_INT_LITERAL_REGEX = re.compile('^(\d+)$')                  # flake: noqa
+_KWARG_REGEX = re.compile('^(\w+)=(.+)$')                   # flake: noqa
 
 
 class _TokenParserBlockState(enum.Enum):
@@ -88,7 +87,7 @@ class _LoadSourcesListNode(template.Node):
 
         for k, v in self.new_page_context.items():
             page_context[k] = _eval_general_value(v, context)
-        
+
         t = template.Engine.get_default().get_template(template_name=page)
         c = template.Context(page_context)
         t.render(c)
@@ -167,10 +166,10 @@ def new_sources_list(parser, token):
     defined.
     """
     body = ' '.join(token.split_contents()[1:])
-    match = re.match('^as (\w+)$', body)
+    match = re.match('^as (\w+)$', body)  # flake: noqa
     if not match:
         raise template.TemplateSyntaxError('Invalid syntax for new_sources_list')
-    
+
     return _NewSourcesListNode(match.group(1))
 
 
@@ -198,7 +197,7 @@ def load_sources_from(parser, token):
     tokens = token.split_contents()
     if len(tokens) < 3:
         raise template.TemplateSyntaxError('Missing page and/or source_var parameters')
-    
+
     page = _parse_string_literal_or_variable_statement(tokens[1])
     source_var = _parse_variable_name_statement(tokens[2])
 
@@ -217,7 +216,7 @@ def load_sources_from(parser, token):
 
         if new_state != _TokenParserBlockState.NEUTRAL and new_state in encountered_states:
             raise template.TemplateSyntaxError(f'Encountered multiple {new_state.value} blocks.')
-        
+
         parser_state = new_state
         encountered_states.add(new_state)
 

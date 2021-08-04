@@ -22,10 +22,10 @@ _CITATION_HTML_FORMAT_STRING = """
     </sup>
 """
 
-_VARIABLE_NAME_REGEX = re.compile('^(\w+)$')                # flake: noqa
+_VARIABLE_NAME_REGEX = re.compile('^(\w+)$')                # noqa: W605
 _STRING_LITERAL_REGEX = re.compile('(^\'.*\'$)|(^\".*\"$)')
-_INT_LITERAL_REGEX = re.compile('^(\d+)$')                  # flake: noqa
-_KWARG_REGEX = re.compile('^(\w+)=(.+)$')                   # flake: noqa
+_INT_LITERAL_REGEX = re.compile('^(\d+)$')                  # noqa: W605
+_KWARG_REGEX = re.compile('^(\w+)=(.+)$')                   # noqa: W605
 
 
 class _TokenParserBlockState(enum.Enum):
@@ -171,7 +171,7 @@ def new_sources_list(parser, token):
     defined.
     """
     body = ' '.join(token.split_contents()[1:])
-    match = re.match('^as (\w+)$', body)  # flake: noqa
+    match = re.match('^as (\w+)$', body)  # noqa: W605
     if not match:
         raise template.TemplateSyntaxError('Invalid syntax for new_sources_list')
 

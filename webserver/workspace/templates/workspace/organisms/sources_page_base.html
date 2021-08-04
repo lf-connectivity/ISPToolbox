@@ -16,11 +16,17 @@
     <ul>
     {% for link_url, link_text in source_pages.items %}
         <li>
-        {% if link_url == page_url %}
-            <p>{{ link_text }}</p>
-        {% else %}
-            <a href="{% url link_url session_id=session.uuid name=session.name %}">{{ link_text }}</a>
-        {% endif %}
+        <a
+            href="
+            {% if link_url == page_url %}
+                #footnotes-section
+            {% else %}
+                {% url link_url session_id=session.uuid name=session.name %}
+            {% endif %}"
+            {% if link_url == page_url %} style="text-decoration: underline;" {% endif %}
+        >
+            {{ link_text }}
+        </a>
         </li>
     {% endfor %}
     </ul>

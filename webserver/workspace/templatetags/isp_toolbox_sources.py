@@ -1,25 +1,38 @@
 from django import template
+from django.template.exceptions import TemplateSyntaxError
 from django.utils.html import format_html
 
 from collections import OrderedDict
 
 from workspace.utils.sources import get_source
 
+import enum
 import re
 
 register = template.Library()
 
-CITATION_HTML_FORMAT_STRING_LINK = """
+_CITATION_HTML_FORMAT_STRING_LINK = """
     <a href="{}">
         {}
     </a>
 """
 
-CITATION_HTML_FORMAT_STRING = """
+_CITATION_HTML_FORMAT_STRING = """
     <sup>
         <span class="footnote--bracket">[</span>{}<span class="footnote--bracket">]</span>
     </sup>
 """
+
+_VARIABLE_NAME_REGEX = re.compile('^(\w+)$')
+_STRING_LITERAL_REGEX = re.compile('(^\'.*\'$)|(^\".*\"$)')
+_INT_LITERAL_REGEX = re.compile('^(\d+)$')
+_KWARG_REGEX = re.compile('^(\w+)=(.+)$')
+
+
+class _TokenParserBlockState(enum.Enum):
+    NEUTRAL = ''
+    AS_BLOCK = 'as'
+    WITH_BLOCK = 'with'
 
 
 class _CitationNode(template.Node):
@@ -31,28 +44,9 @@ class _CitationNode(template.Node):
         self.href = params['href']
 
     def render(self, context):
-        # Simple id resolver, variable names or quoted strings only!!!
-        if re.match('^\'.*\'$', self.id) or re.match('^\".*\"$', self.id):
-            id = self.id[1:-1]
-        else:
-            id = context[self.id]
-
-        # Simple render resolver, variable names or True/False only
-        if self.do_render == 'True':
-            do_render = True
-        elif self.do_render == 'False':
-            do_render = False
-        else:
-            do_render = bool(context.get(self.do_render, False))
-
-        # Simple href resolver, var names or string only
-        if self.href:
-            if re.match('^\'.*\'$', self.href) or re.match('^\".*\"$', self.href):
-                href = self.href[1:-1]
-            else:
-                href = context.get(self.href, None)
-        else:
-            href = None
+        id = _eval_string_literal_or_variable_value(self.id, context)
+        do_render = _eval_boolean_literal_or_variable_value(self.do_render, context)
+        href = _eval_string_literal_or_variable_value(self.href, context) if self.href else None
 
         sources = context[self.sources]
 
@@ -62,21 +56,192 @@ class _CitationNode(template.Node):
         if not do_render:
             return ''
         else:
-            citation = format_html(CITATION_HTML_FORMAT_STRING, index)
+            citation = format_html(_CITATION_HTML_FORMAT_STRING, index)
 
             if href:
-                return format_html(CITATION_HTML_FORMAT_STRING_LINK, href, citation)
+                return format_html(_CITATION_HTML_FORMAT_STRING_LINK, href, citation)
             else:
                 return citation
 
 
-@register.simple_tag
-def new_sources_list():
+class _NewSourcesListNode(template.Node):
+    def __init__(self, var_name):
+        self.var_name = var_name
+
+    def render(self, context):
+        if self.var_name not in context:
+            context[self.var_name] = OrderedDict()
+        return ''
+
+
+class _LoadSourcesListNode(template.Node):
+    def __init__(self, page, source_var, new_page_context, as_var):
+        self.page = page
+        self.source_var = source_var
+        self.new_page_context = new_page_context
+        self.as_var = as_var
+        self.new_sources_list = OrderedDict()
+
+    def render(self, context):
+        page = _eval_string_literal_or_variable_value(self.page, context)
+        page_context = {self.source_var: self.new_sources_list}
+
+        for k, v in self.new_page_context.items():
+            page_context[k] = _eval_general_value(v, context)
+        
+        t = template.Engine.get_default().get_template(template_name=page)
+        c = template.Context(page_context)
+        t.render(c)
+
+        if self.as_var:
+            context[self.as_var] = self.new_sources_list
+        return ''
+
+
+def _parse_kwarg_statement(statement):
+    match = re.match(_KWARG_REGEX, statement)
+    if not match:
+        raise template.TemplateSyntaxError(f'Expected kwarg statement, got {statement} instead')
+    else:
+        return (match.group(1), match.group(2))
+
+
+def _parse_variable_name_statement(statement):
+    if not re.match(_VARIABLE_NAME_REGEX, statement):
+        raise template.TemplateSyntaxError(f'Invalid variable name {statement}')
+    else:
+        return statement
+
+
+def _parse_string_literal_or_variable_statement(statement):
+    if re.match(_STRING_LITERAL_REGEX, statement):
+        return statement
+    elif re.match(_VARIABLE_NAME_REGEX, statement):
+        return statement
+    else:
+        raise template.TemplateSyntaxError(f'Expected string literal or variable name, got {statement} instead')
+
+
+def _eval_string_literal_or_variable_value(value, context, default=None):
+    if re.match(_STRING_LITERAL_REGEX, value):
+        return value[1:-1]
+    else:
+        return context.get(value, default)
+
+
+def _eval_boolean_literal_or_variable_value(value, context, default=False):
+    if value == 'True':
+        return True
+    elif value == 'False':
+        return False
+    else:
+        return bool(context.get(value, default))
+
+
+def _eval_general_value(value, context, default=None):
+    # Could be string literal, int/boolean literal, or variable
+    # eval string literal
+    if re.match(_STRING_LITERAL_REGEX, value):
+        return value[1:-1]
+    elif value == 'True':
+        return True
+    elif value == 'False':
+        return False
+    elif re.match(_INT_LITERAL_REGEX, value):
+        return int(value)
+    else:
+        return context.get(value, default)
+
+
+@register.tag
+def new_sources_list(parser, token):
     """
     Instantiates a new list of sources. This should be invoked and stored as a
-    template variable at the beginning of the template.
+    template variable at the beginning of the template. Usage is as follows:
+
+    ```
+    {% new_sources_list as context_var %}
+    ```
+
+    Unlike Django simple tags, this variable will not be updated if it is already
+    defined.
     """
-    return OrderedDict()
+    body = ' '.join(token.split_contents()[1:])
+    match = re.match('^as (\w+)$', body)
+    if not match:
+        raise template.TemplateSyntaxError('Invalid syntax for new_sources_list')
+    
+    return _NewSourcesListNode(match.group(1))
+
+
+@register.tag
+def load_sources_from(parser, token):
+    """
+    Loads the sources list from another page into the current page's context.
+    Usage is as follows (brackets are optional syntax):
+
+    ```
+    {% load_sources_list_from <page> <source_var> [ with <kwargs> ] [ as <output_var> ] %}
+    ```
+
+    Sample usage:
+    ```
+    {% load_sources_list_from 'test/page.html' source with foo="bar" as sources %}
+    ```
+
+    Required Parameters:
+        - `page`: The template page to load the sources list from
+        - `source_var`: The variable name in the page's context to extract the source list from.
+    """
+
+    # Parse page and source_var
+    tokens = token.split_contents()
+    if len(tokens) < 3:
+        raise template.TemplateSyntaxError('Missing page and/or source_var parameters')
+    
+    page = _parse_string_literal_or_variable_statement(tokens[1])
+    source_var = _parse_variable_name_statement(tokens[2])
+
+    # Parse with/as blocks, which are optional, using a state machine based parsing implementation
+    # NEUTRAL accepts only 'as' or 'with', then goes to either AS_BLOCK or WITH_BLOCK
+    # AS_BLOCK only accepts variable names, then goes to NEUTRAL
+    # WITH_BLOCK can only go to AS_BLOCK if encountering 'as'; otherwise, it only accepts kwarg statements.
+    encountered_states = set([_TokenParserBlockState.NEUTRAL])
+    new_page_context = {}
+    as_var = None
+    parser_state = _TokenParserBlockState.NEUTRAL
+
+    # We should only encounter one WITH and one AS block
+    def change_state(new_state):
+        nonlocal parser_state
+
+        if new_state != _TokenParserBlockState.NEUTRAL and new_state in encountered_states:
+            raise template.TemplateSyntaxError(f'Encountered multiple {new_state.value} blocks.')
+        
+        parser_state = new_state
+        encountered_states.add(new_state)
+
+    for tok in tokens[3:]:
+        if parser_state == _TokenParserBlockState.NEUTRAL:
+            if tok == 'as':
+                change_state(_TokenParserBlockState.AS_BLOCK)
+            elif tok == 'with':
+                change_state(_TokenParserBlockState.WITH_BLOCK)
+            else:
+                raise template.TemplateSyntaxError(f'Expected \'as\' or \'with\', got {tok} instead')
+
+        elif parser_state == _TokenParserBlockState.AS_BLOCK:
+            as_var = _parse_variable_name_statement(tok)
+            change_state(_TokenParserBlockState.NEUTRAL)
+
+        elif parser_state == _TokenParserBlockState.WITH_BLOCK:
+            if tok == 'as':
+                change_state(_TokenParserBlockState.AS_BLOCK)
+            else:
+                var, value = _parse_kwarg_statement(tok)
+                new_page_context[var] = value
+
+    return _LoadSourcesListNode(page, source_var, new_page_context, as_var)
 
 
 @register.tag
@@ -106,7 +271,7 @@ def citation(parser, token):
     # Find the id.
     try:
         tokens = token.split_contents()
-        sources = tokens[1]
+        sources = _parse_variable_name_statement(tokens[1])
         kwargs = tokens[2:]
         params = {
             'id': None,
@@ -114,7 +279,7 @@ def citation(parser, token):
             'href': None
         }
         for kwarg in kwargs:
-            param, value = kwarg.split('=')
+            param, value = _parse_kwarg_statement(kwarg)
             params[param] = value
 
         if not params['id']:
@@ -139,7 +304,7 @@ def existing_citation(sources, id, href=None):
         raise template.TemplateSyntaxError(f'{id} not in sources.')
 
     index = list(sources).index(id) + 1
-    return format_html(CITATION_HTML_FORMAT_STRING, index)
+    return format_html(_CITATION_HTML_FORMAT_STRING, index)
 
 
 @register.simple_tag

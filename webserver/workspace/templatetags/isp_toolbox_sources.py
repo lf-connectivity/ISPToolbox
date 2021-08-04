@@ -41,11 +41,13 @@ class _CitationNode(template.Node):
         self.id = params['id']
         self.do_render = params['render']
         self.href = params['href']
+        self.footer_id = params['footer_id']
 
     def render(self, context):
         id = _eval_string_literal_or_variable_value(self.id, context)
         do_render = _eval_boolean_literal_or_variable_value(self.do_render, context)
         href = _eval_string_literal_or_variable_value(self.href, context) if self.href else None
+        footer_id = _eval_string_literal_or_variable_value(self.footer_href, context) if self.footer_id else None
 
         sources = context[self.sources]
 
@@ -56,8 +58,10 @@ class _CitationNode(template.Node):
             return ''
         else:
             citation = format_html(_CITATION_HTML_FORMAT_STRING, index)
-
             if href:
+                if footer_id:
+                    href += f'#{footer_id}-{index}'
+
                 return format_html(_CITATION_HTML_FORMAT_STRING_LINK, href, citation)
             else:
                 return citation
@@ -83,7 +87,8 @@ class _LoadSourcesListNode(template.Node):
 
     def render(self, context):
         page = _eval_string_literal_or_variable_value(self.page, context)
-        page_context = {self.source_var: self.new_sources_list}
+        page_context = template.Context(context)
+        page_context[self.source_var] = self.new_sources_list
 
         for k, v in self.new_page_context.items():
             page_context[k] = _eval_general_value(v, context)
@@ -266,6 +271,7 @@ def citation(parser, token):
     Optional Parameters:
         - `render`: Whether or not to render the citation. Default to `True`.
         - `href`: A link to the footnote section (or page). If not there, won't render as a link.
+        - `footer_id`: Footer element. If given, link directly to element as opposed to footer object.
     """
     # Find the id.
     try:
@@ -275,7 +281,8 @@ def citation(parser, token):
         params = {
             'id': None,
             'render': 'True',
-            'href': None
+            'href': None,
+            'footer_id': None
         }
         for kwarg in kwargs:
             param, value = _parse_kwarg_statement(kwarg)
@@ -352,6 +359,7 @@ def footnote_section(sources, **kwargs):
 
     return {
         'sources': source_list,
+        'id': kwargs.get('id', ''),
         'ol_classes': kwargs.get('ol_classes', ''),
         'ol_style': kwargs.get('ol_style', ''),
         'li_classes': kwargs.get('li_classes', ''),

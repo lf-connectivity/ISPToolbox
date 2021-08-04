@@ -47,7 +47,7 @@ class _CitationNode(template.Node):
         id = _eval_string_literal_or_variable_value(self.id, context)
         do_render = _eval_boolean_literal_or_variable_value(self.do_render, context)
         href = _eval_string_literal_or_variable_value(self.href, context) if self.href else None
-        footer_id = _eval_string_literal_or_variable_value(self.footer_href, context) if self.footer_id else None
+        footer_id = _eval_string_literal_or_variable_value(self.footer_id, context) if self.footer_id else None
 
         sources = context[self.sources]
 

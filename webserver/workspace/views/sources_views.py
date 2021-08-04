@@ -8,6 +8,7 @@ _SOURCE_PAGES = {
     'market_eval_sources': 'Market Evaluator'
 }
 
+
 class MarketEvaluatorSourcesView(LoginRequiredMixin, View):
     def get(self, request, session_id=None, name=None):
         if session_id is None:

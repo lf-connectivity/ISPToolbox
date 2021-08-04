@@ -1,0 +1,43 @@
+@use '../atoms/headings'
+@use '../atoms/buttons'
+@use '../atoms/loading-icon'
+@use '../atoms/tooltips'
+@use '../atoms/_collapse-button'
+@use '../atoms/_reconnecting_status'
+@use '../atoms/_footnote-id'
+@use '../molecules/cards'
+@use '../molecules/_map-tooltips'
+@use '../molecules/frequency_dropdown'
+@use '../molecules/webgl2-error-msg'
+@use '../molecules/error-container'
+@use '../organisms/profile-view'
+@use '../organisms/map-view'
+@use '../organisms/lidar-availbility-mapbox-popup'
+@use '../organisms/radio-view'
+@use 'global.sass'
+@use '../mixins'
+@use '../fonts'
+@use '../overrides'
+@import '../theme'
+
+body
+    background-image: linear-gradient(rgba(194, 216, 236, 1), rgba(194, 216, 236, 1))
+    background-size: 230px 230px, 230px, 230px
+    background-repeat: repeat-x
+
+.sources-page-links
+    background-color: #5692D1
+
+    ul
+        list-style-type: none
+    
+    p
+        text-decoration: underline
+        color: white
+    
+    a
+        text-decoration: none
+        color: white
+
+.sources-page-content
+    background-color: white

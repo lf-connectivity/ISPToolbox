@@ -1,0 +1,33 @@
+{% extends "workspace/pages/base.html" %}
+{% load i18n isp_toolbox_sources %}
+
+{% block additional_headers %}
+{% include "workspace/molecules/page_header_sources_page.html"%}
+{% endblock %}
+
+{% block nav %}
+{% include 'workspace/organisms/workspace_nav.html' with nav_skip_account_dropdown=True nav_skip_dropdown_workspace=True nav_skip_tour_button=True %}
+{% endblock %}
+
+{% block content %}
+{% load_sources_from page_template sources as sources %}
+
+<div class="sources-page-links">
+    <ul>
+    {% for link_url, link_text in source_pages.items %}
+        <li>
+        {% if link_url == page_url %}
+            <p>{{ link_text }}</p>
+        {% else %}
+            <a href="{% url link_url session_id=session.uuid name=session.name %}">{{ link_text }}</a>
+        {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+<div class="sources-page-content">
+    {% block sources_page_content %}
+        {% footnote_section sources id="footnotes-section" ol_classes="footnotes" %}
+    {% endblock %}
+</div>
+{% endblock %}

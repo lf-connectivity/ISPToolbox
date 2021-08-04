@@ -11,9 +11,11 @@ import re
 register = template.Library()
 
 _CITATION_HTML_FORMAT_STRING_LINK = """
-    <a href="{}">
-        {}
-    </a>
+    <sup>
+        <a href="{}" class="footnote--link">
+            <span class="footnote--bracket">[</span>{}<span class="footnote--bracket">]</span>
+        </a>
+    </sup>
 """
 
 _CITATION_HTML_FORMAT_STRING = """
@@ -41,13 +43,13 @@ class _CitationNode(template.Node):
         self.id = params['id']
         self.do_render = params['render']
         self.href = params['href']
-        self.footer_id = params['footer_id']
+        self.footnote_id = params['footnote_id']
 
     def render(self, context):
         id = _eval_string_literal_or_variable_value(self.id, context)
         do_render = _eval_boolean_literal_or_variable_value(self.do_render, context)
         href = _eval_string_literal_or_variable_value(self.href, context) if self.href else None
-        footer_id = _eval_string_literal_or_variable_value(self.footer_id, context) if self.footer_id else None
+        footnote_id = _eval_string_literal_or_variable_value(self.footnote_id, context) if self.footnote_id else None
 
         sources = context[self.sources]
 
@@ -57,14 +59,13 @@ class _CitationNode(template.Node):
         if not do_render:
             return ''
         else:
-            citation = format_html(_CITATION_HTML_FORMAT_STRING, index)
             if href:
-                if footer_id:
-                    href += f'#{footer_id}-{index}'
+                if footnote_id:
+                    href += f'#{footnote_id}-{index}'
 
-                return format_html(_CITATION_HTML_FORMAT_STRING_LINK, href, citation)
+                return format_html(_CITATION_HTML_FORMAT_STRING_LINK, href, index)
             else:
-                return citation
+                return format_html(_CITATION_HTML_FORMAT_STRING, index)
 
 
 class _NewSourcesListNode(template.Node):
@@ -271,7 +272,7 @@ def citation(parser, token):
     Optional Parameters:
         - `render`: Whether or not to render the citation. Default to `True`.
         - `href`: A link to the footnote section (or page). If not there, won't render as a link.
-        - `footer_id`: Footer element. If given, link directly to element as opposed to footer object.
+        - `footnote_id`: Footnote element. If given, link directly to element as opposed to footnote object.
     """
     # Find the id.
     try:
@@ -282,7 +283,7 @@ def citation(parser, token):
             'id': None,
             'render': 'True',
             'href': None,
-            'footer_id': None
+            'footnote_id': None
         }
         for kwarg in kwargs:
             param, value = _parse_kwarg_statement(kwarg)

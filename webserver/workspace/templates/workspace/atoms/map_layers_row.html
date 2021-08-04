@@ -5,7 +5,7 @@
 		{% include "workspace/atoms/icons/swatch.html" with swatchType=swatchType %}
 		<span>
 			{{ layerName }}
-			{% citation sources id=layerName %}
+			{% citation sources id=layerName href=sources_page footnote_id=footnote_id %}
 				{{ citation }} {% source_link "US" sourceId %} {% source_last_updated "US" sourceId %}
 			{% endcitation %}
 		</span>

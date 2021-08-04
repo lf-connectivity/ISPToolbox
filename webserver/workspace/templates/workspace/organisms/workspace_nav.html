@@ -10,16 +10,20 @@
             {% include "workspace/atoms/isptoolbox_logo.html"%}
           <span class='ml-3'>{{ page_title|default:"ISP Toolbox Workspace" }}</span>
         </div>
-        <button class="btn my-auto px-0 d-flex" id="tool_help_button">
-            {% include "workspace/atoms/icons/question_mark_icon.html" %}
-        </button>
+        {% if not nav_skip_tour_button %}
+            <button class="btn my-auto px-0 d-flex" id="tool_help_button">
+                {% include "workspace/atoms/icons/question_mark_icon.html" %}
+            </button>
+        {% endif %}
     </div>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not nav_skip_dropdown_workspace %}
         {% include 'workspace/molecules/dropdown_workspace.html' %}
     {% endif %}
     
     {% block right_nav %}
-        {% include "workspace/atoms/account_dropdown.html" %}
+        {% if not nav_skip_account_dropdown %}
+            {% include "workspace/atoms/account_dropdown.html" %}
+        {% endif %}
     {% endblock %}
 </nav>
 

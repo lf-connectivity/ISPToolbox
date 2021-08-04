@@ -11,8 +11,7 @@ describe("Test Sign Up / Login", () => {
   });
 
   it("Check Login Works", function () {
-    cy.visit("/pro");
-    cy.get("a").contains("Sign in").click();
+    cy.visit("/pro/accounts/sign-in/");
 
     // {enter} causes the form to submit
     cy.get("input[name=username]").type(this.user.email);
@@ -33,9 +32,10 @@ describe("Test Sign Up / Login", () => {
   });
 
   it("Create Account Email Test", function () {
-    cy.visit("/pro");
+    cy.visit("/pro/accounts/sign-in/");
 
-    cy.get("a").contains("with Email").click();
+    cy.get("#no_act_yet").click();
+    cy.get("#signup_email").click();
 
     // Create an Account
     cy.get("input[name=email]").type(this.user_signup.email);

@@ -5,8 +5,10 @@ from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, bro
     grantGeog, zipGeog, countyGeog, medianIncome, censusBlockGeog, tribalGeog
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
     getOSMBuildings
+from gis_data.models.hrsl import HrslUsa15
 from towerlocator.helpers import getViewShed
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
+from django.contrib.humanize.templatetags.humanize import intcomma
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -85,6 +87,23 @@ def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
     result = mlabSpeed(include, read_only)
     sync_send(channelName, 'median.speeds', result, uuid)
+
+
+@shared_task
+def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
+    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson
+    try:
+        result = HrslUsa15.get_intersection_population(include, read_only)
+        returnval = {
+            'population': intcomma(int(result[0])),
+            'error': 0
+        }
+    except:
+        returnval = {
+            'population': 'error',
+            'error': -1
+        }
+    sync_send(channelName, 'population', returnval, uuid)
 
 
 @shared_task

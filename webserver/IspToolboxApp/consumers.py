@@ -1,8 +1,11 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
-from .tasks.MarketEvaluatorWebsocketTasks import genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow, \
-    genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getCensusBlockGeog, getTowerViewShed, getTribalGeog
+from .tasks.MarketEvaluatorWebsocketTasks import (
+    genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow,
+    genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getCensusBlockGeog,
+    getTowerViewShed, getTribalGeog, genPopulation
+)
 from NetworkComparison.tasks import genPolySize
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from celery.task.control import revoke
@@ -23,7 +26,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
             'county': self.county_geography_request,
             'viewshed': self.viewshed_request,
             'census_block': self.census_block_geography_request,
-            'tribal': self.tribal_geography_request
+            'tribal': self.tribal_geography_request,
         }
         await self.accept()
 
@@ -68,12 +71,20 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         pipeline = MarketEvaluatorPipeline(include_geojson=include)
         await sync_to_async(pipeline.save)()
 
-        self.taskList.append(genBuildings.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
-        self.taskList.append(genMedianIncome.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
-        self.taskList.append(genServiceProviders.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
-        self.taskList.append(genMedianSpeeds.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
-        self.taskList.append(genBroadbandNow.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
-        self.taskList.append(genPolySize.delay(pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genBuildings.delay(
+            pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genMedianIncome.delay(
+            pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genServiceProviders.delay(
+            pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genMedianSpeeds.delay(
+            pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genBroadbandNow.delay(
+            pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genPolySize.delay(
+            pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
+        self.taskList.append(genPopulation.delay(
+            pipeline.uuid, self.channel_name, uuid, run_query_read_only).id)
 
     async def grant_geography_request(self, content, uuid):
         grantId = content['cbgid']
@@ -103,7 +114,8 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         customerHeight = content['customerHeight']
         radius = content['radius']
         apUuid = content.get('apUuid', None)
-        getTowerViewShed.delay(lat, lon, height, customerHeight, radius, self.channel_name, uuid, apUuid)
+        getTowerViewShed.delay(
+            lat, lon, height, customerHeight, radius, self.channel_name, uuid, apUuid)
 
     async def building_overlays(self, event):
         await self.send_json(event)
@@ -115,6 +127,9 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(event)
 
     async def median_speeds(self, event):
+        await self.send_json(event)
+
+    async def population(self, event):
         await self.send_json(event)
 
     async def broadband_now(self, event):

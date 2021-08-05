@@ -98,7 +98,7 @@ def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
             'population': intcomma(int(result[0])),
             'error': 0
         }
-    except:
+    except Exception:
         returnval = {
             'population': 'error',
             'error': -1

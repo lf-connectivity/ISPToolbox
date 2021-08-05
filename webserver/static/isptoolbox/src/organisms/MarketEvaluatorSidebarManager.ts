@@ -7,7 +7,8 @@ import {
     MedianIncomeResponse,
     MedianSpeed,
     MedianSpeedResponse,
-    ServiceProvidersResponse
+    ServiceProvidersResponse,
+    PopulationResponse
 } from '../MarketEvaluatorWS';
 import { getCookie } from '../utils/Cookie';
 import { WorkspaceEvents } from '../workspace/WorkspaceConstants';
@@ -21,6 +22,7 @@ const MARKET_PENETRATION_INPUT_ID = 'market_penetration_percent';
 const POTENTIAL_LEADS_BASE_ID = 'me-out-leads';
 const SERVICE_PROVIDERS_BASE_ID = 'me-out-providers';
 const AVG_INCOME_BASE_ID = 'me-out-income';
+const POPULATION_BASE_ID = 'me-out-population';
 const MEDIAN_SPEEDS_BASE_ID = 'me-out-speeds';
 
 const COMPETITOR_MODAL_LOADED_ID = 'me-competitor-modal-loaded';
@@ -68,6 +70,7 @@ export class MarketEvaluatorSidebarManager {
         PubSub.subscribe(MarketEvalWSEvents.SERVICE_PROV_MSG, this.onServiceProviderMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.BROADBAND_NOW_MSG, this.onBbnMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.INCOME_MSG, this.onIncomeMsg.bind(this));
+        PubSub.subscribe(MarketEvalWSEvents.POPULATION_MSG, this.onPopulationMsg.bind(this));
         PubSub.subscribe(MarketEvalWSEvents.SPEEDS_MSG, this.onSpeedsMsg.bind(this));
         PubSub.subscribe(WorkspaceEvents.NO_ITEMS, this.onNoItems.bind(this));
 
@@ -147,6 +150,7 @@ export class MarketEvaluatorSidebarManager {
         this.setIDValue(BUILDING_DENSITY_BASE_ID, 0, this.buildingOverlaysLoading, true);
         this.setIDValue(POTENTIAL_LEADS_BASE_ID, 0, this.buildingOverlaysLoading, true);
         this.setIDValue(AVG_INCOME_BASE_ID, '$000K', isLoading, true);
+        this.setIDValue(POPULATION_BASE_ID, '0', isLoading, true);
         this.setIDValue(SERVICE_PROVIDERS_BASE_ID, 0, isLoading, true);
         this.setIDValue(MEDIAN_SPEEDS_BASE_ID, '0/0', isLoading, true);
         this.updateCompetitorModalLink(true);
@@ -237,6 +241,10 @@ export class MarketEvaluatorSidebarManager {
     private onIncomeMsg(msg: any, response: MedianIncomeResponse) {
         let incomeInThousands = Math.trunc(response.averageMedianIncome / 1000.0);
         this.setIDValue(AVG_INCOME_BASE_ID, `\$${incomeInThousands}K`, false, false);
+    }
+
+    private onPopulationMsg(msg: any, response: PopulationResponse) {
+        this.setIDValue(POPULATION_BASE_ID, response.population, false, false);
     }
 
     private onSpeedsMsg(msg: any, response: MedianSpeedResponse) {

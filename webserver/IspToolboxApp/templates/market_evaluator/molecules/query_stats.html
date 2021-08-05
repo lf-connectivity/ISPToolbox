@@ -82,6 +82,30 @@
 
     <div class="d-flex justify-content-between market-eval-section--row">
         <p role="text" tabindex="" class="market-eval-section--label">
+            {% translate 'Population' %}
+            {% citation sources id="Population" href=sources_page_url footnote_id=footnote_id %}
+                {% translate "Population is obtained from "%} {% source_link "US" "POPULATION" %} {% source_last_updated "US" "POPULATION" %}
+            {% endcitation %}
+        </p>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <div class="market-eval-section--value">
+                <div id="me-out-population-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                    {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-population">
+                    0
+                </h4>
+            </div>
+            {% with tooltips.population as tooltip %}
+            {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
             {% translate 'Median Speeds'%}
             {% citation sources id="Median Speeds" href=sources_page_url footnote_id=footnote_id %}
                 Median Speeds data is obtained from {% source_link "US" "MLAB" %} {% source_last_updated "US" "MLAB" %}

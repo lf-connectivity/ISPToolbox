@@ -37,6 +37,12 @@ TOOLTIPS = {
         'link': '',
         'linkDesc': '',
     },
+    'population': {
+        'title': _('Population'),
+        'body': _("""Estimated population of selected area. Based on satellite imagery and census data."""),
+        'link': 'https://data.humdata.org/dataset/united-states-high-resolution-population-density-maps-demographic-estimates',
+        'linkDesc': 'See Data Source',
+    },
     'providers': {
         'title': _('Service Providers'),
         'body': _("""This is the number of Service Providers in the selected

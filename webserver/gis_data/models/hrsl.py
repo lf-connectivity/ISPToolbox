@@ -1,7 +1,7 @@
 # This is an auto-generated Django model module.
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
-from django.db import connection, connections
+from django.db import connections
 
 
 class HrslUsa15(models.Model):
@@ -32,7 +32,7 @@ class HrslUsa15(models.Model):
                     ) as intersect
                 FROM
                     {HrslUsa15._meta.db_table}
-                WHERE 
+                WHERE
                     ST_Intersects(
                         ST_SetSRID({HrslUsa15.rast.field.column}, ST_SRID(ST_GeomFromEWKB(%s))),
                         ST_GeomFromEWKB(%s)

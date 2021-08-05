@@ -21,6 +21,7 @@ export enum MarketEvalWSEvents {
     MKT_EVAL_WS_CONNECTED = 'ws.mkt_eval_connected',
     BUILDING_OVERLAYS_MSG = 'ws.building_overlays',
     INCOME_MSG = 'ws.area_income',
+    POPULATION_MSG = 'ws.population',
     SERVICE_PROV_MSG = 'ws.area_service_providers',
     BROADBAND_NOW_MSG = 'ws.area_bbn',
     SPEEDS_MSG = 'ws.area_speeds',
@@ -109,12 +110,18 @@ export type MedianIncomeResponse = {
     error?: string;
 };
 
+export type PopulationResponse = {
+    population: string;
+    error: number;
+};
+
 type MarketEvaluatorWSValue =
     | MedianSpeedResponse
     | ServiceProvidersResponse
     | BroadbandNowResponse
     | BuildingOverlaysResponse
     | MedianIncomeResponse
+    | PopulationResponse
     | RDOFGeojsonResponse
     | ZipGeojsonResponse
     | CountyGeojsonResponse
@@ -236,6 +243,11 @@ class MarketEvaluatorWS {
                     const medianIncome: MedianIncomeResponse =
                         response.value as MedianIncomeResponse;
                     PubSub.publish(MarketEvalWSEvents.INCOME_MSG, medianIncome);
+                    break;
+
+                case 'population':
+                    const population: PopulationResponse = response.value as PopulationResponse;
+                    PubSub.publish(MarketEvalWSEvents.POPULATION_MSG, population);
                     break;
 
                 case 'service.providers':

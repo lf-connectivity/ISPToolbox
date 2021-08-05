@@ -50,6 +50,11 @@ _ISP_TOOLBOX_US_SOURCES = {
         title='M-Lab.',
         last_updated='Oct 2020'
     ),
+    'POPULATION': ISPToolboxSource(
+        link='https://data.humdata.org/dataset/united-states-high-resolution-population-density-maps-demographic-estimates',
+        title='High Resolution Settlement Layer. ',
+        last_updated='July 2019'
+    ),
     'PR_BUILDINGS': ISPToolboxSource(
         link='https://www.openstreetmap.org/copyright',
         title='\u00A9 OpenStreetMap contributors.',
@@ -104,7 +109,8 @@ def get_source(country, source_id):
 
     # Update last_updated with recent information, if any.
     if Source.objects.filter(source_country=country, source_id=source_id).exists():
-        db_source = Source.objects.get(source_country=country, source_id=source_id)
+        db_source = Source.objects.get(
+            source_country=country, source_id=source_id)
         source.last_updated = db_source.last_updated.strftime('%b %Y')
 
     return source

@@ -6,10 +6,9 @@
 <script>
     // Highlight footnote section if exists.
     $(document).ready(function($){
-        let footnotesMatch = window.location.href.match(/(#footnotes-section-\d+)/)
+        let footnotesMatch = window.location.href.match(/(#footnotes-section-\d+)/);
         if (footnotesMatch !== null) {
-            console.log(footnotesMatch[0])
-            $(footnotesMatch[0]).addClass('footnote-highlight')
+            $(footnotesMatch[0]).addClass('footnote-highlight');
         }
     });
 </script>

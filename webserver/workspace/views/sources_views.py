@@ -5,6 +5,7 @@ from django.views import View
 
 import uuid
 
+
 @dataclass
 class _SourcesPage:
     app_page_template: str

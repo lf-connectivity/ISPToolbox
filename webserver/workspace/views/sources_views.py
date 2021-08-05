@@ -5,12 +5,6 @@ from django.views import View
 
 import uuid
 
-# Map from url shorthand to link text
-_SOURCE_PAGES = {
-    'market_eval_sources': 'Market Evaluator',
-    'network_sources': 'LOS Check'
-}
-
 @dataclass
 class _SourcesPage:
     app_page_template: str
@@ -48,7 +42,7 @@ class WorkspaceSourcesView(View):
 
         if sources_page not in _SOURCE_PAGES:
             raise Http404
-        
+
         page = _SOURCE_PAGES[sources_page]
 
         context = {

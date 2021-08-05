@@ -165,7 +165,7 @@ def _eval_variable_value(value, context, default=None):
             return parent.get(child, default)
         else:
             return getattr(parent, child, default)
-    
+
     parent = context
     val = None
 

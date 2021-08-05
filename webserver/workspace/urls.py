@@ -26,13 +26,7 @@ urlpatterns = [
     path('workspace/api/dsm-export/', CreateExportDSM.as_view()),
     path('workspace/api/dsm-export/<uuid:uuid>/', CreateExportDSM.as_view()),
     # Sources
-    path('sources/market/', views.MarketEvaluatorSourcesView.as_view()),
-    path('sources/market/<uuid:session_id>/', views.MarketEvaluatorSourcesView.as_view()),
-    path(
-        'sources/market/<uuid:session_id>/<str:name>/',
-        views.MarketEvaluatorSourcesView.as_view(),
-        name="market_eval_sources"
-    ),
+    path('sources/<str:sources_page>/', views.WorkspaceSourcesView.as_view(), name="sources"),
     # Account Creation and Management
     path(
         'accounts/sign-in/',

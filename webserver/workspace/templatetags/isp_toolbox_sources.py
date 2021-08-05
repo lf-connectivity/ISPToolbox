@@ -24,7 +24,7 @@ _CITATION_HTML_FORMAT_STRING = """
     </sup>
 """
 
-_VARIABLE_NAME_REGEX = re.compile('^(\w+)$')                # noqa: W605
+_VARIABLE_NAME_REGEX = re.compile('^([\w\.]+)$')            # noqa: W605
 _STRING_LITERAL_REGEX = re.compile('(^\'.*\'$)|(^\".*\"$)')
 _INT_LITERAL_REGEX = re.compile('^(\d+)$')                  # noqa: W605
 _KWARG_REGEX = re.compile('^(\w+)=(.+)$')                   # noqa: W605
@@ -131,7 +131,7 @@ def _eval_string_literal_or_variable_value(value, context, default=None):
     if re.match(_STRING_LITERAL_REGEX, value):
         return value[1:-1]
     else:
-        return context.get(value, default)
+        return _eval_variable_value(value, context, default)
 
 
 def _eval_boolean_literal_or_variable_value(value, context, default=False):
@@ -140,7 +140,7 @@ def _eval_boolean_literal_or_variable_value(value, context, default=False):
     elif value == 'False':
         return False
     else:
-        return bool(context.get(value, default))
+        return bool(_eval_variable_value(value, context, default))
 
 
 def _eval_general_value(value, context, default=None):
@@ -155,7 +155,25 @@ def _eval_general_value(value, context, default=None):
     elif re.match(_INT_LITERAL_REGEX, value):
         return int(value)
     else:
-        return context.get(value, default)
+        return _eval_variable_value(value, context, default)
+
+
+def _eval_variable_value(value, context, default=None):
+    def __eval(parent, child):
+        # Try accessing with .get if context or dict
+        if parent is context or isinstance(parent, dict):
+            return parent.get(child, default)
+        else:
+            return getattr(parent, child, default)
+    
+    parent = context
+    val = None
+
+    for token in value.split('.'):
+        val = __eval(parent, token)
+        parent = val
+
+    return val
 
 
 @register.tag

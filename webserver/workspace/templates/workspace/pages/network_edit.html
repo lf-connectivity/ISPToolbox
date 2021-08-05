@@ -1,4 +1,15 @@
-{% load static %}
+{% load static isp_toolbox_sources %}
+{% new_sources_list as sources %}
+{% url 'sources' sources_page="edit_network" as sources_page_url %}
+
+{% comment %}
+Not rendering this citation for now, but will be useful for sources page 
+{% endcomment %}
+{% citation sources id="Lidar Data" render=False %}
+  LiDAR Data Obtained via {% source_link "US" "USGS_3DEP" %}.
+  Check for <a href="{% url "demo-latest_gis-nodate" %}"> new LiDAR updates</a>.
+{% endcitation %}
+
 <!DOCTYPE html>
 <html lang="en">
 {% include "workspace/molecules/page_header.html" %}

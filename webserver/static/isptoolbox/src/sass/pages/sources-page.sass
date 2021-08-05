@@ -7,6 +7,7 @@
 @use '../atoms/_footnote-id'
 @use '../molecules/cards'
 @use '../molecules/_map-tooltips'
+@use '../molecules/_footnotes'
 @use '../molecules/frequency_dropdown'
 @use '../molecules/webgl2-error-msg'
 @use '../molecules/error-container'
@@ -21,20 +22,70 @@
 @import '../theme'
 
 body
-    background-image: linear-gradient(rgba(194, 216, 236, 1), rgba(194, 216, 236, 1))
-    background-size: 230px 230px, 230px, 230px
-    background-repeat: repeat-x
+    background-image: none
 
-.sources-page-links
-    background-color: #5692D1
+.sources-page
+    flex-direction: row
+    height: 100vh
 
-    ul
-        list-style-type: none
-    
-    a
-        text-decoration: none
-        color: white
-        font-weight: normal
+    .sources-page-sidebar
+        width: 33%
+        height: 100%
 
-.sources-page-content
-    background-color: white
+        .sources-page-links-wrapper
+            background-color: #5692D1
+            min-height: 30%
+
+            .sources-page-links
+                margin: 0 auto
+                padding: 2rem 0
+                width: 50%
+
+                ul
+                    list-style-type: none
+                    margin: 0 auto
+                    display: block
+                    
+                    li
+                        padding: 5px 0
+                        line-height: 2rem
+                
+                a
+                    text-decoration: none
+                    color: white
+                    font-weight: 300
+                    padding-bottom: 2px
+
+    .sources-page-main
+        background: linear-gradient(to bottom, $brand-theme-color 0 25%, transparent 25% 100%)
+        height: 100%
+        width: 66%
+
+        .sources-page-content
+            background-color: white
+            display: flex
+            flex-direction: column
+            margin: 50px 50px 50px -50px
+            padding: 25px
+
+            h5
+                padding-left: 25px
+                font-size: 25px
+                font-weight: 100
+            
+            .sources-page-disclaimer
+                padding: 25px 0
+                p
+                    padding-left: 25px
+                    font-size: 15px
+                    font-weight: bold
+                    line-height: 28px
+
+ol.footnotes
+    li
+        font-size: 15px
+        padding: 2px 0px 2px 9px
+        line-height: 1.7rem
+
+    .footnote-highlight
+        background-color:  lighten($brand-theme-color, 10%)

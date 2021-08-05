@@ -1,7 +1,7 @@
 {% load static %}
 {% load isp_toolbox_sources %}
 {% new_sources_list as sources %}
-{% url 'market_eval_sources' session_id=session.uuid name=session.name as sources_page %}
+{% url 'sources' sources_page='market_eval' as sources_page_url %}
 <!DOCTYPE html>
 <html lang="en">
 {% include "workspace/molecules/page_header_market_eval.html" %}

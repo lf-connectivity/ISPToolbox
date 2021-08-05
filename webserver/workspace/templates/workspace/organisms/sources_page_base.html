@@ -2,38 +2,70 @@
 {% load i18n isp_toolbox_sources %}
 
 {% block additional_headers %}
-{% include "workspace/molecules/page_header_sources_page.html"%}
+{% include "workspace/molecules/page_header_sources_page.html" %}
+<script>
+    // Highlight footnote section if exists.
+    $(document).ready(function($){
+        let footnotesMatch = window.location.href.match(/(#footnotes-section-\d+)/)
+        if (footnotesMatch !== null) {
+            console.log(footnotesMatch[0])
+            $(footnotesMatch[0]).addClass('footnote-highlight')
+        }
+    });
+</script>
 {% endblock %}
 
 {% block nav %}
-{% include 'workspace/organisms/workspace_nav.html' with nav_skip_account_dropdown=True nav_skip_dropdown_workspace=True nav_skip_tour_button=True %}
+{% include 'workspace/organisms/workspace_nav.html' with nav_skip_account_dropdown=True nav_skip_dropdown_workspace=True nav_skip_tour_button=True page_title="ISP Toolbox Sources" %}
 {% endblock %}
 
 {% block content %}
-{% load_sources_from page_template sources as sources %}
+{% load_sources_from sources_page_info.app_page_template sources as sources %}
+<div class="d-flex sources-page">
+    <div class="sources-page-sidebar">
+        <div class="sources-page-links-wrapper">
+            <div class="sources-page-links">
+                <ul>
+                {% for page, info in sources_pages.items %}
+                    <li>
+                    <a
+                        href="{% if page == sources_page %}#footnotes-section{% else %}
+                            {% url 'sources' sources_page=page %}
+                        {% endif %}"
+                        {% if page == sources_page %} style="border-bottom: 1px solid white;" {% endif %}
+                    >
+                        {{ info.link_title }}
+                    </a>
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
 
-<div class="sources-page-links">
-    <ul>
-    {% for link_url, link_text in source_pages.items %}
-        <li>
-        <a
-            href="
-            {% if link_url == page_url %}
-                #footnotes-section
-            {% else %}
-                {% url link_url session_id=session.uuid name=session.name %}
-            {% endif %}"
-            {% if link_url == page_url %} style="text-decoration: underline;" {% endif %}
-        >
-            {{ link_text }}
-        </a>
-        </li>
-    {% endfor %}
-    </ul>
-</div>
-<div class="sources-page-content">
-    {% block sources_page_content %}
-        {% footnote_section sources id="footnotes-section" ol_classes="footnotes" %}
-    {% endblock %}
+    <div class="sources-page-main">
+        <div class="sources-page-content">
+            <div>
+                {% block sources_page_title %}
+                <h5>
+                    {{ title|cut:" - ISP Toolbox" }}
+                </h5>
+                {% endblock %}
+            </div>
+
+            <div class="sources-page-disclaimer">
+                <p>
+                    {% block sources_page_disclaimer %}
+                    {% endblock %}
+                </p>
+            </div>
+
+            <div>
+                {% block sources_page_footer %}
+                    {% footnote_section sources id="footnotes-section" ol_classes="footnotes" %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

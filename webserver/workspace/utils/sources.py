@@ -83,6 +83,10 @@ _ISP_TOOLBOX_US_SOURCES = {
         title='Census Tiger/Line\u00AE Shapefiles',
         last_updated='June 2021'
     ),
+    'USGS_3DEP': ISPToolboxSource(
+        link='https://www.usgs.gov/news/usgs-3dep-lidar-point-cloud-now-available-amazon-public-dataset',
+        title='USGS 3DEP',
+    )
 }
 
 _ISP_TOOLBOX_SOURCES = {

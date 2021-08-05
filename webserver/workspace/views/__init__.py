@@ -22,7 +22,7 @@ from .social_views import FBDeauthorizeSocialView, FBDataDeletionView
 from .legal_views import DataPolicy, Cookies, TermsOfService
 from .multiplayer_views import MultiplayerTestView
 from .tour_views import NuxTourView
-from .sources_views import MarketEvaluatorSourcesView
+from .sources_views import WorkspaceSourcesView
 
 import workspace.utils.import_utils
 

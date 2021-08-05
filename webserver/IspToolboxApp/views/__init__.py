@@ -1,18 +1,38 @@
-from django.shortcuts import render
-from django.views import View
-from django.http import HttpResponse
+from .MarketEvaluatorView import (
+    MarketEvaluatorPipelineBuildings, MarketEvaluatorPipelineBroadbandNow, MarketEvaluatorPipelineServiceProviders, MarketEvaluatorPipelineIncome, MarketEvaluatorPipelineKMZ, MarketEvaluatorPipelineView, MarketEvaluatorExportNoPipeline, MarketEvaluatorExport
+)
+from .MarketingViews import (
+    MarketingConvertPolygons
+)
+from .MLabSpeedView import (
+    MLabSpeedView
+)
+from .mmWavePlannerViews import (
+    MMWavePlannerView,
+    MMWaveHelpCenterView
+)
+from .redirect_view import (
+    HomepageRedirect
+)
+from .RetargetingPixelView import (
+    MarketingAccountView,
+    MarketingAudienceView,
+    MarketingAudienceGeoPixelCheck
+)
+from .simple_views import (
+    SocialLoginView,
+    HealthCheckView,
+    MarketEvaluatorTest
+)
+from .market_evaluator_views.MarketEvaluator import (
+    DataAvailableView, BuildingsView, CountBuildingsView, RDOFView, IncomeView, Form477View, ServiceProviders
+)
+from .market_evaluator_views.GrantViews import (
+    SelectCensusGroupView
+)
+from .market_evaluator_views.GeographicViews import (
+    SelectZipView, SelectCountyView
+)
+import workspace.utils.import_utils
 
-
-class SocialLoginView(View):
-    def get(self, request):
-        return render(request, 'index.html')
-
-
-class HealthCheckView(View):
-    def get(self, request):
-        return HttpResponse()
-
-
-class MarketEvaluatorTest(View):
-    def get(self, request):
-        return render(request, 'market_evaluator/sample_market_evaluator.html')
+__all__ = workspace.utils.import_utils.get_imported_classnames(__name__)

@@ -1,5 +1,6 @@
 from .demo_views import (
     LOSCheckDemo, DSMExportView, CreateExportDSM, LatestLidarView,
+    NetworkDemoView, MarketDemoView
 )
 from .admin_views import (
     StartTilingJobView
@@ -7,5 +8,5 @@ from .admin_views import (
 
 __all__ = [
     'LOSCheckDemo', 'DSMExportView', 'CreateExportDSM', 'LatestLidarView',
-    'StartTilingJobView',
+    'StartTilingJobView', 'MarketDemoView', 'NetworkDemoView',
 ]

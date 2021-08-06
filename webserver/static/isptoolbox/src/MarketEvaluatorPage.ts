@@ -24,12 +24,15 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     overlayManager: MarketEvaluatorOverlayManager;
 
     constructor() {
-        super({
-            simple_select: OverrideSimple(),
-            direct_select: OverrideDirect(),
-            draw_ap: APDrawMode(),
-            draw_polygon: OverrideDrawPolygon()
-        });
+        super(
+            {
+                simple_select: OverrideSimple(),
+                direct_select: OverrideDirect(),
+                draw_ap: APDrawMode(),
+                draw_polygon: OverrideDrawPolygon()
+            },
+            'market_eval'
+        );
 
         new MarketEvaluatorWS([]);
         MarketEvaluatorSidebarManager.getInstance().initializePopovers();

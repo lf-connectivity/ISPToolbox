@@ -6,12 +6,12 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import styles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import { combineStyles, load_custom_icons } from './isptoolbox-mapbox-draw/index';
 import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
-import MapboxCustomDeleteControl from "./organisms/controls/MapboxCustomDeleteControl";
-import { getInitialLockDragging, setCenterZoomPreferences } from "./utils/MapPreferences";
-import { MapboxSDKClient } from "./MapboxSDKClient";
-import { parseSearchBarLatitudeLongitude } from "./utils/LatLngInputUtils";
-import { isBeta } from "./LinkCheckUtils";
-import MapboxLockDraggingControl from "./organisms/controls/MapboxLockDraggingControl";
+import MapboxCustomDeleteControl from './organisms/controls/MapboxCustomDeleteControl';
+import { getInitialLockDragging, setCenterZoomPreferences } from './utils/MapPreferences';
+import { MapboxSDKClient } from './MapboxSDKClient';
+import { parseSearchBarLatitudeLongitude } from './utils/LatLngInputUtils';
+import { isBeta } from './LinkCheckUtils';
+import MapboxLockDraggingControl from './organisms/controls/MapboxLockDraggingControl';
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -27,6 +27,8 @@ const MapboxGeocoder = window.MapboxGeocoder;
 const LOWEST_LAYER_SOURCE = 'lowest_layer_source';
 export const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
 
+const SOURCES_PAGE_BASE_URL = '/pro/sources';
+
 function addEventHandler(map: mapboxgl.Map, draw: MapboxDraw, id: string, mode: string) {
     $(`#${id}`).click(() => {
         //@ts-ignore
@@ -40,7 +42,7 @@ export abstract class ISPToolboxAbstractAppPage {
     draw: MapboxDraw;
     geocoder: typeof MapboxGeocoder;
 
-    constructor(draw_modes: any) {
+    constructor(draw_modes: any, sources_page: string) {
         let { initial_map_center, initial_zoom } = this.initMapCenterAndZoom();
 
         try {
@@ -54,8 +56,17 @@ export abstract class ISPToolboxAbstractAppPage {
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
             center: initial_map_center, // starting position [lng, lat]
-            zoom: initial_zoom // starting zoom
+            zoom: initial_zoom, // starting zoom
+            attributionControl: false
         });
+
+        this.map.addControl(
+            new mapboxgl.AttributionControl({
+                customAttribution: `<a href="${SOURCES_PAGE_BASE_URL}/${sources_page}">
+                Sources
+            </a>`
+            })
+        );
 
         this.map.on('load', () => {
             // When map movement ends save where the user is looking
@@ -94,10 +105,7 @@ export abstract class ISPToolboxAbstractAppPage {
                 this.draw,
                 delete_confirmation
             );
-            const lockDragControl = new MapboxLockDraggingControl(
-                this.map,
-                this.draw
-            );
+            const lockDragControl = new MapboxLockDraggingControl(this.map, this.draw);
 
             this.map.addControl(deleteControl, 'bottom-right');
             this.map.addControl(lockDragControl, 'bottom-right');

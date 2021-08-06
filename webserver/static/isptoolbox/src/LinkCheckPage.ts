@@ -221,47 +221,58 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     geocoder: typeof MapboxGeocoder;
 
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
-        super({
-            draw_link: LinkMode(),
-            simple_select: OverrideSimple(),
-            direct_select: OverrideDirect({
-                onVertex: (state: any, e: any) => {
-                    // If it's a PtP link, open a popup if the user clicks on a vertex. This
-                    // is the only way I could think of of implementing this at a granular
-                    // sub-feature level.
-                    if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
-                        // onVertex is called onMouseDown. We need to wait until mouseup to show the popup
-                        // otherwise there will be a race condition with the reverseGeocode callback and the
-                        // time when the user releases the mouse.
-                        popupAbortController = new AbortController();
+        super(
+            {
+                draw_link: LinkMode(),
+                simple_select: OverrideSimple(),
+                direct_select: OverrideDirect({
+                    onVertex: (state: any, e: any) => {
+                        // If it's a PtP link, open a popup if the user clicks on a vertex. This
+                        // is the only way I could think of of implementing this at a granular
+                        // sub-feature level.
+                        if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
+                            // onVertex is called onMouseDown. We need to wait until mouseup to show the popup
+                            // otherwise there will be a race condition with the reverseGeocode callback and the
+                            // time when the user releases the mouse.
+                            popupAbortController = new AbortController();
 
-                        window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {
-                            once: true,
-                            // @ts-ignore
-                            signal: popupAbortController.signal
-                        });
-                    }
-                },
-                dragVertex: (state: any, e: any) => {
-                    // Abort and replace popup event listener if we are still dragging.
-                    if (popupAbortController !== null && isBeta()) {
-                        popupAbortController.abort();
-                        popupAbortController = new AbortController();
+                            window.addEventListener(
+                                'mouseup',
+                                createPopupFromVertexEvent(state, e),
+                                {
+                                    once: true,
+                                    // @ts-ignore
+                                    signal: popupAbortController.signal
+                                }
+                            );
+                        }
+                    },
+                    dragVertex: (state: any, e: any) => {
+                        // Abort and replace popup event listener if we are still dragging.
+                        if (popupAbortController !== null && isBeta()) {
+                            popupAbortController.abort();
+                            popupAbortController = new AbortController();
 
-                        window.addEventListener('mouseup', createPopupFromVertexEvent(state, e), {
-                            once: true,
-                            // @ts-ignore
-                            signal: popupAbortController.signal
-                        });
+                            window.addEventListener(
+                                'mouseup',
+                                createPopupFromVertexEvent(state, e),
+                                {
+                                    once: true,
+                                    // @ts-ignore
+                                    signal: popupAbortController.signal
+                                }
+                            );
+                        }
+                        if (!state.feature.properties.radius) {
+                            LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
+                        }
                     }
-                    if (!state.feature.properties.radius) {
-                        LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
-                    }
-                }
-            }),
-            draw_ap: APDrawMode(),
-            draw_cpe: CPEDrawMode()
-        });
+                }),
+                draw_ap: APDrawMode(),
+                draw_cpe: CPEDrawMode()
+            },
+            'edit_network'
+        );
 
         if (!(window as any).webgl2support) {
             potree = null;

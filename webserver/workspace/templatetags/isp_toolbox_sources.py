@@ -12,7 +12,7 @@ register = template.Library()
 
 _CITATION_HTML_FORMAT_STRING_LINK = """
     <sup>
-        <a href="{}" class="footnote--link">
+        <a href="{}" target="{}" class="footnote--link">
             <span class="footnote--bracket">[</span>{}<span class="footnote--bracket">]</span>
         </a>
     </sup>
@@ -59,11 +59,14 @@ class _CitationNode(template.Node):
         if not do_render:
             return ''
         else:
-            if href:
+            # href being empty string = same page.
+            if href is not None:
+                # Open page in new tab unless it's the same page.
+                target = '_self' if href == '' else '_blank'
                 if footnote_id:
                     href += f'#{footnote_id}-{index}'
 
-                return format_html(_CITATION_HTML_FORMAT_STRING_LINK, href, index)
+                return format_html(_CITATION_HTML_FORMAT_STRING_LINK, href, target, index)
             else:
                 return format_html(_CITATION_HTML_FORMAT_STRING, index)
 
@@ -342,7 +345,7 @@ def source_link(country, source_id):
     link_href = source_info.link
     link_text = source_info.title
     return format_html(
-        f'<a href="{link_href}">{link_text}</a>'
+        f'<a href="{link_href}" target="_blank">{link_text}</a>'
     )
 
 

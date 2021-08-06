@@ -62,9 +62,7 @@ export abstract class ISPToolboxAbstractAppPage {
 
         this.map.addControl(
             new mapboxgl.AttributionControl({
-                customAttribution: `<a href="${SOURCES_PAGE_BASE_URL}/${sources_page}">
-                Sources
-            </a>`
+                customAttribution: `<a href="${SOURCES_PAGE_BASE_URL}/${sources_page}" target="_blank">Sources</a>`
             })
         );
 

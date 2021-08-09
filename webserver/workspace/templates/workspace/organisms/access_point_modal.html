@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="modal theme-modal fade" id="accessPointModal" tabindex="-1" role="dialog"
   aria-labelledby="accessPointModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+  <div class="modal-dialog modal-xl modal-fullscreen-lg-down" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="accessPointModalLabel">{% translate "Tower Locations"%}</h3>
@@ -13,9 +13,11 @@
       </div>
       <div id="ap-list-modal-body">
         <div class="modal-body">
-          {% with spinner_style='height: 75px; width: 100%;' blink=True spinner_classes="mx-auto mb-3" %}
-          {% include 'workspace/atoms/components/loading_spinner.html' %}
-          {% endwith %}
+        </div>
+      </div>
+      <div id="ap-list-modal-body-loading">
+        <div class="modal-body">
+          {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 75px; width: 100%;' blink=True spinner_classes="mx-auto mb-3" %}
         </div>
       </div>
     </div>

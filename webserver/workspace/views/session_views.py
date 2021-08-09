@@ -19,9 +19,9 @@ from rest_framework.permissions import AllowAny
 
 
 class SessionCreateUpdateView(
-                        mixins.CreateModelMixin,
-                        mixins.UpdateModelMixin,
-                        generics.RetrieveAPIView):
+        mixins.CreateModelMixin,
+        mixins.UpdateModelMixin,
+        generics.RetrieveAPIView):
     serializer_class = WorkspaceMapSessionSerializer
     lookup_field = 'uuid'
     permission_classes = [AllowAny]
@@ -48,8 +48,8 @@ class SessionCreateUpdateView(
 
 
 class SessionListView(
-                    mixins.ListModelMixin,
-                    generics.RetrieveAPIView):
+        mixins.ListModelMixin,
+        generics.RetrieveAPIView):
     serializer_class = WorkspaceMapSessionSerializer
     template_name = "workspace/molecules/workspace_session_pagination.html"
     renderer_classes = [renderers.TemplateHTMLRenderer, renderers.JSONRenderer]
@@ -58,7 +58,7 @@ class SessionListView(
 
     filter_backends = [filters.OrderingFilter]
 
-    ordering_fields = ['name', 'last_updated', 'height', 'max_radius']
+    ordering_fields = ['name', 'last_updated', 'number_of_towers']
     ordering = ['-last_updated']
 
     def get_queryset(self):
@@ -76,8 +76,8 @@ class SessionListView(
 
 
 class SessionDeleteView(
-                    mixins.DestroyModelMixin,
-                    generics.RetrieveAPIView):
+        mixins.DestroyModelMixin,
+        generics.RetrieveAPIView):
     serializer_class = WorkspaceMapSessionSerializer
     lookup_field = 'uuid'
     permission_classes = [AllowAny]
@@ -91,9 +91,11 @@ class SessionDeleteView(
 
 class SessionDownloadView(LoginRequiredMixin, View):
     def get(self, request, session_uuid=None):
-        session = get_object_or_404(WorkspaceMapSession, owner=request.user, uuid=session_uuid)
+        session = get_object_or_404(
+            WorkspaceMapSession, owner=request.user, uuid=session_uuid)
         geojson = session.get_session_geojson(request)
-        geojson_str = json.dumps(geojson, default=lambda x: x.hex if isinstance(x, UUID) else None),
+        geojson_str = json.dumps(
+            geojson, default=lambda x: x.hex if isinstance(x, UUID) else None),
         response = HttpResponse(geojson_str, content_type='csv')
         response['Content-Disposition'] = f'attachment; filename="{session.name}.geojson"'
         return response
@@ -103,9 +105,11 @@ class SessionSaveAsView(LoginRequiredMixin, View):
     def post(self, request):
         saveas_form = SaveAsSessionForm(request.POST)
         if saveas_form.is_valid():
-            session = get_object_or_404(WorkspaceMapSession, owner=request.user, uuid=request.POST.get('session'))
+            session = get_object_or_404(
+                WorkspaceMapSession, owner=request.user, uuid=request.POST.get('session'))
             try:
-                session = session.duplicate(saveas_form.cleaned_data['save_as_session_name'])
+                session = session.duplicate(
+                    saveas_form.cleaned_data['save_as_session_name'])
                 return JsonResponse({'url': reverse('edit_network', args=[session.uuid, session.name])})
             except IntegrityError:
                 return JsonResponse({'error': WorkspaceMapSession.UNIQUE_TOGETHER_ERROR}, status=400)

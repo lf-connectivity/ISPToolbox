@@ -1,3 +1,4 @@
+{% load static %}
 <div class="modal fade theme-modal open-workspace" id="paginationNetworkModal" tabindex="-1" role="dialog"
   aria-labelledby="paginationNetworkModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -18,73 +19,3 @@
     </div>
   </div>
 </div>
-<script>
-  function showModalCallback(e, page) {
-    $.get('{% url "session_list" %}' + (page ? `?page=${page}` : ''), '', (result) => {
-      $('#session-list-modal-body').html(result);
-    }, 'html').done(() => {
-      // Pagination Callback
-      $('.session-modal-page-change').one('click', (e) => {
-        const page = e.currentTarget.getAttribute("page-target");
-        showModalCallback({}, page);
-      });
-
-      // Edit Button Callback
-      $('.session-edit-btn').on('click', (event) => {
-        const uuid = event.currentTarget.getAttribute('data-target');
-        $(`.update-form-name[data-target=${uuid}]`).removeClass('d-none');
-        $(`.session-name-link[data-target=${uuid}]`).addClass('d-none');
-        $(`.session-edit-btn[data-target=${uuid}]`).addClass('d-none');
-        $(`.session-save-btn[data-target=${uuid}]`).removeClass('d-none');
-      });
-
-      // Save Button Callback
-      $('.session-save-btn').on('click', (event) => {
-        const uuid = event.currentTarget.getAttribute('data-target');
-        $.ajax({
-          url: `{% url "session_create" %}${uuid}/`,
-          data: {
-            name: $(`.session-name-input[data-target=${uuid}]`).val(),
-          },
-          method: "PATCH",
-          headers: {
-            'X-CSRFToken': "{{ csrf_token }}",
-            'Accept': 'application/json'
-          }
-        }).done(() => {
-          if (uuid === "{{session.uuid}}") {
-            window.location.replace("{% url 'edit_network_by_uuid' session.uuid %}");
-          }
-        }).always(() => {
-          showModalCallback();
-        });
-      });
-      // Delete Button Callback
-      $('.session-delete-btn').on('click', (event) => {
-        const uuid = event.currentTarget.getAttribute('data-target');
-        if (typeof uuid === 'string') {
-          $.ajax({
-            url: `{% url 'session_delete' %}${uuid}/`,
-            method: "POST",
-            headers: {
-              'X-CSRFToken': "{{ csrf_token }}",
-              'Accept': 'application/json'
-            }
-          }).done(() => {
-            if (uuid === "{{session.uuid}}") {
-              window.location.replace("{% url 'edit_account_network' %}");
-            } else {
-              showModalCallback();
-            }
-          });
-        }
-      });
-    });
-  }
-  $(() => {
-    $('#paginationNetworkModal').on(
-      'shown.bs.modal',
-      showModalCallback
-    );
-  })
-</script>

@@ -1,25 +1,50 @@
 {% load rest_framework %}
 
 <tr>
-    <th scope="row">{{ forloop.counter0|add:offset }}</th>
+    <td scope="row">{{ forloop.counter0|add:offset }}</td>
     <td><input name="name" type="text" value="{{ ap.name }}" ap-uuid-target="{{ap.uuid}}" disabled></td>
     <td>
-        <input name="max_radius" type="number" disabled ap-uuid-target="{{ap.uuid}}"
-        {% if units == "SI" %}
-            value="{{ap.max_radius|floatformat:2}}"> km
-        {% else %}
-            value="{{ap.max_radius_miles|floatformat:2}}"> mi
-        {% endif %}</td>
+        <div class="input-group">
+            <div class="input-group-prepend">
+            <input name="max_radius" type="number" disabled ap-uuid-target="{{ap.uuid}}"
+            {% if units == "SI" %}
+                value="{{ap.max_radius|floatformat:2}}"
+            {% else %}
+                value="{{ap.max_radius_miles|floatformat:2}}"
+            {% endif %}
+            >
+            <span class="input-group-text">{% if units == "SI" %}
+            km
+            {% else %}
+            mi
+            {% endif %}
+            </span>
+            </div>
+        </div>
+    </td>
     <td>
-        <input name="height" type="number" disabled ap-uuid-target="{{ap.uuid}}"
-        {% if units == "SI" %}
-            value="{{ap.height|floatformat:1}}"> m
-        {% else %}
-            value="{{ap.height_ft|floatformat:0}}"> ft
-        {% endif %}
+        <div class="input-group">
+            <div class="input-group-prepend">
+            <input name="height" type="number" disabled ap-uuid-target="{{ap.uuid}}"
+            {% if units == "SI" %}
+                value="{{ap.height|floatformat:1}}"
+            {% else %}
+                value="{{ap.height_ft|floatformat:0}}"
+            {% endif %}
+            >
+            <span class="input-group-text">
+                {% if units == "SI" %}
+                    m
+                {% else %}
+                    ft
+                {% endif %}
+            </span>
+            </div>
+        </div>
     </td>
     <td>{{ap.last_updated|lower}}</td>
-    <td class="d-flex">
+    <td>
+        <div class="btn-group" role="group" aria-label="edit-btn-group">
         <button type="button" class="btn btn-primary isptoolbox-btn d-none ap-save-edit-btn" id="ap-save-edit-{{ap.uuid}}"  data-target="{{ap.uuid}}">
             Save
         </button>
@@ -29,5 +54,6 @@
         <button type="button" class="btn btn-secondary ap-delete-btn" data-target="{{ap.uuid}}">
             {% include 'workspace/atoms/trash_icon.html'%}
         </button>
+        </div>
     </td>
 </tr>

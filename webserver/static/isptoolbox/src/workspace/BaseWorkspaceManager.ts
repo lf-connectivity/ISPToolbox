@@ -2,6 +2,8 @@ import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { getStreetAndAddressInfo } from '../LinkCheckUtils';
 import { MapboxSDKClient } from '../MapboxSDKClient';
+import { TowerPaginationModal } from '../organisms/TowerPaginationModal';
+import { SessionModal } from '../organisms/SessionModal';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
@@ -43,6 +45,9 @@ export abstract class BaseWorkspaceManager {
         [featureType in WorkspaceFeatureTypes]: UpdateDeleteFeatureProcessor;
     };
 
+    private towerModal: TowerPaginationModal;
+    private sessionModal: SessionModal;
+
     /**
      * Initializes a WorkspaceManager base object
      * @param map Map
@@ -61,6 +66,10 @@ export abstract class BaseWorkspaceManager {
 
         this.map = map;
         this.draw = draw;
+
+        this.towerModal = new TowerPaginationModal('#accessPointModal', this.map, this.draw);
+        this.sessionModal = new SessionModal();
+
         this.features = {};
         this.supportedFeatureTypes = supportedFeatureTypes;
 

@@ -9,41 +9,29 @@
         <p class="th-column workspace-name">{% translate "Session Name"%}
           {% if ordering == "name"%}
           <a name="" class="sort-ap" ordering-target="-name">
-            {% include 'workspace/atoms/arrow_icon.html' %}
+            <button class="btn">{% include 'workspace/atoms/arrow_icon.html' %}</button>
           </a>
           {% else %}
           <a name="" class="sort-ap" ordering-target="name">
-            {% with flip=True %}
-            {% include 'workspace/atoms/arrow_icon.html' %}
-            {% endwith %}
+            <button class="btn">{% include 'workspace/atoms/arrow_icon.html' with flip=True %}</button>
           </a>
           {% endif %}
         </p>
 
         <p class="th-column tower-count desktop-only">Towers
-          {% if ordering == "number_of_towers"%}
-          <a name="" class="sort-ap" ordering-target="-number_of_towers">
-            {% include 'workspace/atoms/arrow_icon.html' %}
-          </a>
-          {% else %}
-          <a name="" class="sort-ap" ordering-target="number_of_towers">
-            {% with flip=True %}
-            {% include 'workspace/atoms/arrow_icon.html' %}
-            {% endwith %}
-          </a>
-          {% endif %}
+          {% comment %}
+            can't sort by tower-count - doesn't map to SQL
+          {% endcomment %}
         </p>
 
         <p class="th-column last-edit desktop-only">Last Edited
           {% if ordering == "last_updated"%}
           <a class="sort-ap" ordering-target="-last_updated">
-            {% include 'workspace/atoms/arrow_icon.html' %}
+            <button class="btn">{% include 'workspace/atoms/arrow_icon.html' %}</button>
           </a>
           {% else %}
           <a class="sort-ap" ordering-target="last_updated">
-            {% with flip=True %}
-            {% include 'workspace/atoms/arrow_icon.html' %}
-            {% endwith %}
+            <button class="btn">{% include 'workspace/atoms/arrow_icon.html' with flip=True %}</button>
           </a>
           {% endif %}
         </p>

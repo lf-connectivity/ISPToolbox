@@ -112,7 +112,6 @@ export abstract class BaseWorkspaceFeature {
             }
         }).done((resp) => {
             this.updateFeatureProperties(resp);
-            PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
             if (successFollowup) {
                 successFollowup(resp);
             }
@@ -136,7 +135,6 @@ export abstract class BaseWorkspaceFeature {
                 Accept: 'application/json'
             }
         }).done((resp) => {
-            PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
             if (successFollowup) {
                 successFollowup(resp);
             }

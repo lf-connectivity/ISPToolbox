@@ -22,7 +22,8 @@ BUFFER_DSM_EXPORT_KM = 0.5
 
 
 class WorkspaceFeature(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
+                              on_delete=models.CASCADE, null=True, blank=True)
     session = models.ForeignKey(
         Session,
         on_delete=models.SET_NULL, null=True,
@@ -57,14 +58,16 @@ class WorkspaceFeature(models.Model):
             return cls.objects.filter(session=request.session.session_key)
         else:
             return (
-                cls.objects.filter(owner=user) | cls.objects.filter(session=request.session.session_key)
+                cls.objects.filter(owner=user) | cls.objects.filter(
+                    session=request.session.session_key)
             )
 
 
 class SessionWorkspaceModelMixin:
     @classmethod
     def get_features_for_session(serializer, session):
-        objects = serializer.Meta.model.objects.filter(map_session=session).all()
+        objects = serializer.Meta.model.objects.filter(
+            map_session=session).all()
 
         # Filter out all geometryfield model properties from properties.
         features = []
@@ -133,14 +136,16 @@ class AccessPointLocation(WorkspaceFeature):
         """
         Get the suggest aoi to export w/ buffer
         """
-        geo_circle = createGeoJSONCircle(self.geojson, self.max_radius + BUFFER_DSM_EXPORT_KM)
+        geo_circle = createGeoJSONCircle(
+            self.geojson, self.max_radius + BUFFER_DSM_EXPORT_KM)
         aoi = GEOSGeometry(json.dumps(geo_circle))
         return aoi.envelope
 
 
 class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
-    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    last_updated = serializers.DateTimeField(
+        format="%D", required=False, read_only=True)
     height_ft = serializers.FloatField(read_only=True)
     max_radius_miles = serializers.FloatField(read_only=True)
     feature_type = serializers.CharField(read_only=True)
@@ -154,8 +159,10 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     def update(self, instance, validated_data):
         new_height = validated_data.get('height', instance.height)
         new_radius = validated_data.get('max_radius', instance.max_radius)
-        new_cpe_height = validated_data.get('default_cpe_height', instance.default_cpe_height)
-        new_geojson = json.loads(validated_data.get('geojson', instance.geojson.json))
+        new_cpe_height = validated_data.get(
+            'default_cpe_height', instance.default_cpe_height)
+        new_geojson = json.loads(validated_data.get(
+            'geojson', instance.geojson.json))
         new_point = new_geojson['coordinates']
 
         if not math.isclose(new_height, instance.height) or \
@@ -164,7 +171,8 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
            not numpy.allclose(new_point, json.loads(instance.geojson.json)['coordinates']):
             new_cloudrf = None
         else:
-            new_cloudrf = validated_data.get('cloudrf_coverage_geojson', instance.cloudrf_coverage_geojson)
+            new_cloudrf = validated_data.get(
+                'cloudrf_coverage_geojson', instance.cloudrf_coverage_geojson)
 
         validated_data['cloudrf_coverage_geojson'] = new_cloudrf
         return super(AccessPointSerializer, self).update(instance, validated_data)
@@ -178,7 +186,8 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
 
 class CPELocation(WorkspaceFeature):
     name = models.CharField(max_length=100)
-    ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, null=True)
+    ap = models.ForeignKey(AccessPointLocation,
+                           on_delete=models.CASCADE, null=True)
     height = models.FloatField(
         help_text="""
         This height value is relative to the terrain in meters. When object is first created the height field
@@ -193,7 +202,8 @@ class CPELocation(WorkspaceFeature):
 
     def get_dsm_height(self) -> float:
         point = self.geojson
-        tile_engine = DSMTileEngine(point, EPTLidarPointCloud.query_intersect_aoi(point))
+        tile_engine = DSMTileEngine(
+            point, EPTLidarPointCloud.query_intersect_aoi(point))
         dsm = tile_engine.getSurfaceHeight(point)
         return dsm
 
@@ -224,7 +234,8 @@ def _modify_height(sender, instance, **kwargs):
 
 class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
-    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    last_updated = serializers.DateTimeField(
+        format="%m/%d/%Y %-I:%M%p", required=False)
     height = serializers.FloatField(required=False)
     height_ft = serializers.FloatField(required=False)
     feature_type = serializers.CharField(read_only=True)
@@ -240,8 +251,10 @@ class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
 
 class APToCPELink(WorkspaceFeature):
     frequency = models.FloatField(default=2.437)
-    ap = models.ForeignKey(AccessPointLocation, on_delete=models.CASCADE, editable=False)
-    cpe = models.ForeignKey(CPELocation, on_delete=models.CASCADE, editable=False)
+    ap = models.ForeignKey(AccessPointLocation,
+                           on_delete=models.CASCADE, editable=False)
+    cpe = models.ForeignKey(
+        CPELocation, on_delete=models.CASCADE, editable=False)
 
     @property
     def geojson(self):
@@ -254,7 +267,8 @@ class APToCPELink(WorkspaceFeature):
 
 class APToCPELinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
-    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    last_updated = serializers.DateTimeField(
+        format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
     ap = serializers.PrimaryKeyRelatedField(
         queryset=AccessPointLocation.objects.all(),
@@ -280,7 +294,8 @@ class CoverageArea(WorkspaceFeature):
 
 class CoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = 'uuid'
-    last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
+    last_updated = serializers.DateTimeField(
+        format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
 
     class Meta:
@@ -310,13 +325,15 @@ class AccessPointCoverageBuildings(models.Model):
         FAIL = 'Failed'
         COMPLETE = 'Complete'
 
-    ap = models.OneToOneField(AccessPointLocation, on_delete=models.CASCADE, primary_key=True)
+    ap = models.OneToOneField(
+        AccessPointLocation, on_delete=models.CASCADE, primary_key=True)
     status = models.CharField(
         default=CoverageCalculationStatus.START,
         max_length=20,
         choices=CoverageCalculationStatus.choices
     )
-    nearby_buildings = models.ManyToManyField(BuildingCoverage, related_name="nearby_buildings")
+    nearby_buildings = models.ManyToManyField(
+        BuildingCoverage, related_name="nearby_buildings")
     hash = models.CharField(
         max_length=255,
         help_text="""

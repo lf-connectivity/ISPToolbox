@@ -33,9 +33,15 @@
         dataType: "json",
         url: "{% url 'session_create' %}?format=json",
         success: function (response) {
+          {% if tool == 'business' %}
+          window.location.replace(
+            `{% url 'market_eval_entry' %}${response.uuid}/${response.name}/`
+          );
+          {% else %}
           window.location.replace(
             `{% url 'edit_account_network' %}${response.uuid}/${response.name}/`
           );
+          {% endif %}
         },
         error: (response) => {
           $(this).find('.error').removeClass('d-none').html(response.responseJSON.non_field_errors);

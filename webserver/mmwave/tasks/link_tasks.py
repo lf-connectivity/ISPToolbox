@@ -5,6 +5,7 @@ import math
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
+from django.core.cache import caches
 
 from celery import shared_task
 from mmwave.lidar_utils.caching import lidar_cache_get, lidar_cache_set, terrain_cache_get, terrain_cache_set

@@ -405,7 +405,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
-    'los':{
+    'los': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'los_cache',
     }

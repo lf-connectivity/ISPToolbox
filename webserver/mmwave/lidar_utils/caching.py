@@ -33,8 +33,10 @@ def lidar_cache_set(tx, rx, aoi, resp):
 def lidar_cache_get(tx, rx, aoi):
     return cache.get(_get_key('lidar', tx, rx, aoi))
 
+
 def terrain_cache_set(tx, rx, aoi, resp):
     cache.set(_get_key('terrain', tx, rx, aoi), resp, timeout=_DURATION)
+
 
 def terrain_cache_get(tx, rx, aoi):
     return cache.get(_get_key('terrain', tx, rx, aoi))

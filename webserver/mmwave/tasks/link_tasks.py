@@ -223,12 +223,12 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value, use_
         r = lidar_cache_get(tx, rx, aoi)
         if r and r['resolution'] >= resolution:
             logging.info('lidar cache hit: resolution %s', r['resolution'])
-            resp.update({k: r[k] for k in 
-                ('lidar_profile', 'url', 'bb', 'source', 'tx', 'rx', 'aoi', 'resolution')})
+            resp.update({k: r[k] for k in
+                        ('lidar_profile', 'url', 'bb', 'source', 'tx', 'rx', 'aoi', 'resolution')})
 
         else:
             logging.info('lidar cache miss for resolution %s', resolution)
-            
+
             resp['dist'] = link_dist_m
             le = LidarEngine(
                 link=LineString([tx_sub, rx_sub]),
@@ -289,8 +289,7 @@ def getTerrainProfile(network_id, data):
         r = terrain_cache_get(tx, rx, aoi)
         if r:
             logging.info('cache hit on terrain')
-            resp.update({k: r[k] for k in 
-                ('dist', 'terrain_profile', 'aoi')})
+            resp.update({k: r[k] for k in ('dist', 'terrain_profile', 'aoi')})
         else:
             logging.info('cache miss on terrain')
             tx_sub, rx_sub = createSubLinkFromAoi(tx, rx, aoi)

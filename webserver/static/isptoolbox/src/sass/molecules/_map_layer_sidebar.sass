@@ -1,0 +1,23 @@
+@import ../theme
+
+#map-objects-section
+  .object-toggle-row
+    display: flex
+    justify-content: flex-start
+    align-items: center
+    padding: 1rem 0
+    
+    &:not(:last-child)
+      border-bottom: 1px solid $light-gray-color-2
+
+    span
+      display: flex
+
+    span.label
+      cursor: pointer
+      margin: 0 1rem
+      &:hover
+        color: $brand-secondary-color
+
+    .toggle-switch
+      margin-left: auto

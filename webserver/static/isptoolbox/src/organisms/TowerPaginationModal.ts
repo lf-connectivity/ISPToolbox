@@ -4,7 +4,8 @@ import { getCookie } from '../utils/Cookie';
 import { getSessionID, isUnitsUS } from '../utils/MapPreferences';
 
 export class TowerPaginationModal {
-    constructor(private selector: string, private map: mapboxgl.Map, private draw: MapboxDraw) {
+    selector: string = '#accessPointModal';
+    constructor(private map: mapboxgl.Map, private draw: MapboxDraw) {
         $(this.selector).on('shown.bs.modal', () => {
             this.getAccessPoints(undefined);
         });

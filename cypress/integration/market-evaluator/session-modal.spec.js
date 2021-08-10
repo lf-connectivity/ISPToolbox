@@ -9,7 +9,7 @@ context('Work', () => {
         const default_workspace_name = 'untitled workspace';
 
         cy.visit('/pro/market/');
-
+        cy.wait_mapbox();
         // Close out of new user tour
         cy.get('.shepherd-cancel-icon').should('be.visible');
         cy.get('body').type('{esc}');
@@ -31,7 +31,7 @@ context('Work', () => {
             expect(loc.pathname).to.contain('market');
             expect(loc.pathname).to.contain(session_name);
         });
-
+        cy.wait_mapbox();
         // Let's check that the list view works properly
         // Click on the session menu
         cy.contains('Editing').click();

@@ -67,7 +67,7 @@ export abstract class BaseWorkspaceManager {
         this.map = map;
         this.draw = draw;
 
-        this.towerModal = new TowerPaginationModal('#accessPointModal', this.map, this.draw);
+        this.towerModal = new TowerPaginationModal(this.map, this.draw);
         this.sessionModal = new SessionModal();
 
         this.features = {};

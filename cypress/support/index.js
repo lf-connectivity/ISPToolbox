@@ -21,3 +21,7 @@ Cypress.Commands.add("login", () => {
 Cypress.Commands.add("create_session", () => {
     cy.visit('/pro/market/');
 });
+
+Cypress.Commands.add("wait_mapbox", () => {
+    cy.get('.mapboxgl-ctrl-geocoder--input').should('exist');
+})

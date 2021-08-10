@@ -1,46 +1,161 @@
+import asyncio
+import functools
 import os
 import glob
-import subprocess
 import shlex
-import zipfile
+import shutil
+import datetime
+
+# Let's not try to crash the thing.
+CONCURRENCY_LIMIT = 15
+
+UNTRANSLATED_PATH = os.path.expanduser('~/hrsl/')
+TRANSLATED_PATH = os.path.expanduser('~/hrsl/translate/')
+PROGRESS_PATH = os.path.expanduser('~/hrsl/progress/')
+
+UNZIP_STEP = 'unzip'
+CONVERT_STEP = 'convert_float32'
+CREATE_TABLE_STEP = 'create_table'
+CREATE_SQL_STEP = 'create_sql'
+EXEC_CREATE_TABLE_STEP = 'exec_create_table'
+EXEC_SQL_STEP = 'exec_sql'
+SQL_TABLE = 'hrsl_usa_1_5'
 
 
-# USE THIS SCRIPT TO CONVERT TO FLOAT32 - postgis doesn't support float64
-# #!/bin/sh
-cmd = """
-mkdir ~/hrsl/translate/
-ls ~/hrsl/*.tif | awk '{print $1}' | while read file; do
-echo $file;
-gdal_translate -ot Float32 -a_nodata 0 $file ~/hrsl/translate/`basename $file`;
-done
-"""
-subprocess.run(shlex.split(cmd))
+# RUN https://gist.github.com/johnjreiser/24c8267d8fa0a866fdf352f1911a1c40 before starting
+# then set LD_LIBRARY_PATH to /lib. Also set settings for DB.
 
-# CREATE SQL commands to add dataset
+# Create progress file so if script stops in the middle everything that got completed
+# doesn't happen again.
+def finish_step(filepath, step):
+    progress_filename = filepath.replace('/', '_')
+    progress_filepath = f'{PROGRESS_PATH}{progress_filename}.{step}'
+    open(progress_filepath, 'w')
 
-output_path = '~/hrsl/translate/'
-output_path = os.path.expanduser(output_path)
-files = glob.glob(f'{output_path}*.zip')
-for file in files:
-    with zipfile.ZipFile(file, 'r') as zip_ref:
-        zip_ref.extractall(output_path)
 
-files = glob.glob(f'{output_path}*.tif')
-table = 'hrsl_usa_1_5'
-# create_table_sql
-if len(files) > 0:
-    command = f'raster2pgsql -p -I {files[0]} {table} > {output_path}create.sql'
-    subprocess.run(shlex.split(command))
-for file in files:
-    command = f'raster2pgsql -t auto -I -a {file} {table} > {file}.sql'
-    subprocess.run(shlex.split(command))
+def step_finished(filepath, step):
+    progress_filename = filepath.replace('/', '_')
+    progress_filepath = f'{PROGRESS_PATH}{progress_filename}.{step}'
+    return os.path.exists(progress_filepath)
 
-# Run SQL commands on dataset
-# #!/bin/sh
-cmd = """
-# get credentials from secrets manager
-ls *.sql | awk '{print $1}' | while read file; do
-psql -h -p -U -f $file;
-done
-"""
-subprocess.run(shlex.split(cmd))
+
+# https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio/61478547#61478547
+async def gather_with_concurrency(n, *tasks):
+    semaphore = asyncio.Semaphore(n)
+
+    async def sem_task(task):
+        async with semaphore:
+            return await task
+    return await asyncio.gather(*(sem_task(task) for task in tasks))
+
+
+# func takes a filename and outputs a command. The invocation of parallel step
+# is passing in a list.
+def parallel_command_step(step_name, concurrency_limit=CONCURRENCY_LIMIT):
+    def decorator(func):
+        @functools.wraps(func)
+        async def do_step(filelist):
+            start_time = datetime.datetime.now()
+            unfinished_files = [file for file in filelist if not step_finished(file, step_name)]
+
+            async def process_file(file):
+                command = func(file)
+                if isinstance(command, tuple):
+                    args, stdout = shlex.split(command[0]), open(command[1], 'w')
+                else:
+                    args, stdout = shlex.split(command), None
+                
+                proc = await asyncio.create_subprocess_exec(*args, env=os.environ, stdout=stdout)
+                await proc.wait()
+
+                if proc.returncode == 0:
+                    finish_step(file, step_name)
+
+            await gather_with_concurrency(concurrency_limit, *[process_file(file) for file in unfinished_files])
+
+            diff = datetime.datetime.now() - start_time
+            num_processing = len(unfinished_files)
+            num_skipped = len(filelist) - num_processing
+            print(f'Executed {step_name} for {num_processing} items ({num_skipped} skipped)\tTime: {diff}')
+
+        return do_step
+    return decorator
+
+
+@parallel_command_step(UNZIP_STEP)
+def unzip_file(file):
+    return f'unzip -o {file} -d {UNTRANSLATED_PATH}'
+
+
+@parallel_command_step(CONVERT_STEP, concurrency_limit=5)
+def convert_to_float32(file):
+    return f'gdal_translate -ot Float32 -a_nodata 0 {file} {TRANSLATED_PATH}/{os.path.basename(file)}'
+
+
+@parallel_command_step(CREATE_TABLE_STEP)
+def create_table_sql(file):
+    return f'raster2pgsql -p -I {file} {SQL_TABLE}', f'{TRANSLATED_PATH}create.sql'
+
+
+@parallel_command_step(CREATE_SQL_STEP, concurrency_limit=3)
+def create_sql_file(file):
+    return f'raster2pgsql -t auto -I -a {file} {SQL_TABLE}', f'{file}-exec.sql'
+
+
+# Be sure to have your environment variables set properly, and your password set up
+# in ~/.pgpasswd
+@parallel_command_step(EXEC_CREATE_TABLE_STEP)
+def execute_create_table(file):
+    host = os.environ['PGHOST']
+    port = os.environ['PGPORT']
+    user = os.environ['PGUSER']
+    db = os.environ['PGDATABASE']
+    return f'psql -h {host} -U {user} -d {db} -p {port} -f {file}'
+
+
+@parallel_command_step(EXEC_SQL_STEP, concurrency_limit=6)
+def execute_sql(file):
+    host = os.environ['PGHOST']
+    port = os.environ['PGPORT']
+    user = os.environ['PGUSER']
+    db = os.environ['PGDATABASE']
+    return f'psql -h {host} -U {user} -d {db} -p {port} -f {file}'
+
+
+# SCRIPT BEGINS HERE
+async def main():
+    if not os.path.exists(TRANSLATED_PATH):
+        os.mkdir(TRANSLATED_PATH)
+
+    if not os.path.exists(PROGRESS_PATH):
+        os.mkdir(PROGRESS_PATH)
+
+    # Extract zip files
+    files = glob.glob(f'{UNTRANSLATED_PATH}*.zip')
+    await unzip_file(files)
+
+    # CONVERT TO FLOAT32 - postgis doesn't support float64
+    files = glob.glob(f'{UNTRANSLATED_PATH}*.tif')
+    await convert_to_float32(files)
+
+    # CREATE SQL commands to add dataset
+    files = glob.glob(f'{TRANSLATED_PATH}*.tif')
+
+    # create_table_sql
+    if len(files) > 0:
+        await create_table_sql([files[0]])
+    await create_sql_file(files)
+
+    # Run SQL commands on dataset
+    files = glob.glob(f'{TRANSLATED_PATH}create.sql')
+    if len(files) > 0:
+        await execute_create_table([files[0]])
+
+    files = glob.glob(f'{TRANSLATED_PATH}*-exec.sql')
+    await execute_sql(files)
+
+    print('Finished setting up DB.')
+    shutil.rmtree(PROGRESS_PATH)
+
+if __name__ == '__main__':
+    asyncio.run(main())

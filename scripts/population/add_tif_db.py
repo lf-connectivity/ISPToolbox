@@ -19,6 +19,7 @@ CREATE_TABLE_STEP = 'create_table'
 CREATE_SQL_STEP = 'create_sql'
 EXEC_CREATE_TABLE_STEP = 'exec_create_table'
 EXEC_SQL_STEP = 'exec_sql'
+EXEC_SQL_CMD_STEP = 'exec_sql_cmd'
 SQL_TABLE = 'hrsl_usa_1_5'
 
 
@@ -56,12 +57,14 @@ def parallel_command_step(step_name, concurrency_limit=CONCURRENCY_LIMIT):
         @functools.wraps(func)
         async def do_step(filelist):
             start_time = datetime.datetime.now()
-            unfinished_files = [file for file in filelist if not step_finished(file, step_name)]
+            unfinished_files = [
+                file for file in filelist if not step_finished(file, step_name)]
 
             async def process_file(file):
                 command = func(file)
                 if isinstance(command, tuple):
-                    args, stdout = shlex.split(command[0]), open(command[1], 'w')
+                    args, stdout = shlex.split(
+                        command[0]), open(command[1], 'w')
                 else:
                     args, stdout = shlex.split(command), None
 
@@ -76,7 +79,8 @@ def parallel_command_step(step_name, concurrency_limit=CONCURRENCY_LIMIT):
             diff = datetime.datetime.now() - start_time
             num_processing = len(unfinished_files)
             num_skipped = len(filelist) - num_processing
-            print(f'Executed {step_name} for {num_processing} items ({num_skipped} skipped)\tTime: {diff}')
+            print(
+                f'Executed {step_name} for {num_processing} items ({num_skipped} skipped)\tTime: {diff}')
 
         return do_step
     return decorator
@@ -122,6 +126,15 @@ def execute_sql(file):
     return f'psql -h {host} -U {user} -d {db} -p {port} -f {file}'
 
 
+@parallel_command_step(EXEC_SQL_CMD_STEP, concurrency_limit=6)
+def execute_sql_cmd(command):
+    host = os.environ['PGHOST']
+    port = os.environ['PGPORT']
+    user = os.environ['PGUSER']
+    db = os.environ['PGDATABASE']
+    return f'psql -h {host} -U {user} -d {db} -p {port} -c \'{command}\''
+
+
 # SCRIPT BEGINS HERE
 async def main():
     if not os.path.exists(TRANSLATED_PATH):
@@ -153,6 +166,8 @@ async def main():
 
     files = glob.glob(f'{TRANSLATED_PATH}*-exec.sql')
     await execute_sql(files)
+
+    await execute_sql_cmd('UPDATE hrsl_usa_1_5 SET rast = ST_SetSRID(rast, 4326);')
 
     print('Finished setting up DB.')
     shutil.rmtree(PROGRESS_PATH)

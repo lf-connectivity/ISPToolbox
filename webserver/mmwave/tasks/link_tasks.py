@@ -186,7 +186,7 @@ def getLinkInfo(network_id, data, user_id=None):
 
 
 @shared_task
-def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value, use_cache=True):
+def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
     """
         Async Task to load LiDAR data profile and send to client,
         calls progressively higher resolution lidar data

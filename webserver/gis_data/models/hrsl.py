@@ -25,7 +25,7 @@ class HrslUsa15(models.Model):
             WITH raster_data as (
                 SELECT
                     ST_Clip(
-                        ST_SetSRID({HrslUsa15.rast.field.column}, ST_SRID(ST_GeomFromEWKB(%s))),
+                        {HrslUsa15.rast.field.column},
                         ST_GeomFromEWKB(%s),
                         0,
                         TRUE
@@ -34,7 +34,7 @@ class HrslUsa15(models.Model):
                     {HrslUsa15._meta.db_table}
                 WHERE
                     ST_Intersects(
-                        ST_SetSRID({HrslUsa15.rast.field.column}, ST_SRID(ST_GeomFromEWKB(%s))),
+                        {HrslUsa15.rast.field.column},
                         ST_GeomFromEWKB(%s)
                     )
             )
@@ -42,6 +42,6 @@ class HrslUsa15(models.Model):
         """
         with connections[HrslUsa15.objects.db].cursor() as cursor:
             cursor.execute(
-                query, [area_of_interest.ewkb, area_of_interest.ewkb, area_of_interest.ewkb, area_of_interest.ewkb])
+                query, [area_of_interest.ewkb, area_of_interest.ewkb])
             res = cursor.fetchone()
             return res

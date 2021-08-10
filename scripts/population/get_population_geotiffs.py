@@ -13,6 +13,7 @@ base_url = 'https://data.humdata.org'
 host_url = 'https://data.humdata.org/dataset/united-states-high-resolution-population-density-maps-demographic-estimates'
 output_path = os.path.expanduser('~/hrsl/')
 
+
 # https://stackoverflow.com/questions/48483348/how-to-limit-concurrency-with-python-asyncio/61478547#61478547
 async def gather_with_concurrency(*tasks):
     semaphore = asyncio.Semaphore(CONCURRENCY_LIMIT)
@@ -38,7 +39,7 @@ async def main():
         if 'population_usa' in href:
             download_link = base_url + href
             dl_links.append(download_link)
-    
+
     async def dl(link):
         proc = await asyncio.create_subprocess_exec(*shlex.split(f'wget -P {output_path} {link}'))
         await proc.wait()

@@ -64,7 +64,7 @@ def parallel_command_step(step_name, concurrency_limit=CONCURRENCY_LIMIT):
                     args, stdout = shlex.split(command[0]), open(command[1], 'w')
                 else:
                     args, stdout = shlex.split(command), None
-                
+
                 proc = await asyncio.create_subprocess_exec(*args, env=os.environ, stdout=stdout)
                 await proc.wait()
 

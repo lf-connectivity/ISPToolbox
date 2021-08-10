@@ -1,11 +1,14 @@
 import requests
 import json
+import logging
 import math
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
+from django.core.cache import caches
 
 from celery import shared_task
+from mmwave.lidar_utils.caching import lidar_cache_get, lidar_cache_set, terrain_cache_get, terrain_cache_set
 from mmwave.scripts.create_lidar_availability_preview import createOpenGraphPreviewImage
 from datetime import date
 from webserver.celery import celery_app as app
@@ -183,7 +186,7 @@ def getLinkInfo(network_id, data, user_id=None):
 
 
 @shared_task
-def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
+def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value, use_cache=True):
     """
         Async Task to load LiDAR data profile and send to client,
         calls progressively higher resolution lidar data
@@ -204,7 +207,8 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
         "type": 'standard.message',
         'handler': 'lidar',
         'aoi': [0, 1],
-        'still_loading': False
+        'still_loading': False,
+        'resolution': resolution
     }
     channel_layer = get_channel_layer()
     channel_name = 'los_check_%s' % network_id
@@ -212,33 +216,49 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW):
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
         aoi = data.get('aoi', [0, 1])
-        tx, rx = createSubLinkFromAoi(tx, rx, aoi)
-        link_dist_m = genLinkDistance(tx, rx)
-        resp['dist'] = link_dist_m
-        le = LidarEngine(
-            link=LineString([tx, rx]),
-            resolution=LIDAR_RESOLUTION_DEFAULTS[resolution],
-            num_samples=MAXIMUM_NUM_POINTS_RETURNED
-        )
-        resp['lidar_profile'] = le.getProfile()
-        resp['url'] = le.getUrls()
-        resp['bb'] = le.getBoundingBox()
-        resp['source'] = le.getSources()
-        resp['tx'] = le.getTxLidarCoord()
-        resp['rx'] = le.getRxLidarCoord()
-        resp['aoi'] = aoi
+
+        tx_sub, rx_sub = createSubLinkFromAoi(tx, rx, aoi)
+        link_dist_m = genLinkDistance(tx_sub, rx_sub)
+
+        r = lidar_cache_get(tx, rx, aoi)
+        if r and r['resolution'] >= resolution:
+            logging.info('lidar cache hit: resolution %s', r['resolution'])
+            resp.update({k: r[k] for k in 
+                ('lidar_profile', 'url', 'bb', 'source', 'tx', 'rx', 'aoi', 'resolution')})
+
+        else:
+            logging.info('lidar cache miss for resolution %s', resolution)
+            
+            resp['dist'] = link_dist_m
+            le = LidarEngine(
+                link=LineString([tx_sub, rx_sub]),
+                resolution=LIDAR_RESOLUTION_DEFAULTS[resolution],
+                num_samples=MAXIMUM_NUM_POINTS_RETURNED
+            )
+            resp['lidar_profile'] = le.getProfile()
+            resp['url'] = le.getUrls()
+            resp['bb'] = le.getBoundingBox()
+            resp['source'] = le.getSources()
+            resp['tx'] = le.getTxLidarCoord()
+            resp['rx'] = le.getRxLidarCoord()
+            resp['aoi'] = aoi
+            if resp['error'] is None:
+                logging.info(f'updating cache with resolution %s', resp['resolution'])
+                lidar_cache_set(tx, rx, aoi, resp)
         if (
-                resp['error'] is None and
-                resolution != LidarResolution.ULTRA and
-                link_dist_m < LIDAR_RESOLUTION_MAX_LINK_LENGTH[resolution + 1]
+            resp['error'] is None and
+            resp['resolution'] != LidarResolution.ULTRA and
+            link_dist_m < LIDAR_RESOLUTION_MAX_LINK_LENGTH[resp['resolution'] + 1]
         ):
-            getLiDARProfile.delay(network_id, data, resolution + 1)
+            getLiDARProfile.delay(network_id, data, resp['resolution'] + 1)
             resp['still_loading'] = True
     except LidarEngineException as e:
         resp['error'] = str(e)
-    except Exception:
+    except Exception as e:
+        logging.error(f'Error during loading lidar profile: {e}')
         resp['error'] = 'An unexpected error occurred'
 
+    del resp['resolution']
     async_to_sync(channel_layer.group_send)(channel_name, resp)
 
 
@@ -265,11 +285,21 @@ def getTerrainProfile(network_id, data):
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
         aoi = data.get('aoi', [0, 1])
-        tx, rx = createSubLinkFromAoi(tx, rx, aoi)
-        resp['dist'] = genLinkDistance(tx, rx)
-        resp['terrain_profile'] = getElevationProfile(tx, rx)
-        resp['aoi'] = aoi
+
+        r = terrain_cache_get(tx, rx, aoi)
+        if r:
+            logging.info('cache hit on terrain')
+            resp.update({k: r[k] for k in 
+                ('dist', 'terrain_profile', 'aoi')})
+        else:
+            logging.info('cache miss on terrain')
+            tx_sub, rx_sub = createSubLinkFromAoi(tx, rx, aoi)
+            resp['dist'] = genLinkDistance(tx_sub, rx_sub)
+            resp['terrain_profile'] = getElevationProfile(tx_sub, rx_sub)
+            resp['aoi'] = aoi
+            terrain_cache_set(tx, rx, aoi, resp)
     except Exception as e:
+        logging.error(f'Error occurred during generating terrain profile: {e}')
         resp['error'] = str(e)
 
     async_to_sync(channel_layer.group_send)(channel_name, resp)

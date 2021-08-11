@@ -45,11 +45,11 @@ body
                     list-style-type: none
                     margin: 0 auto
                     display: block
-                    
+
                     li
                         padding: 5px 0
                         line-height: 2rem
-                
+
                 a
                     text-decoration: none
                     color: white
@@ -72,7 +72,7 @@ body
                 padding-left: 25px
                 font-size: 25px
                 font-weight: 100
-            
+
             .sources-page-disclaimer
                 padding: 25px 0
                 p
@@ -88,4 +88,51 @@ ol.footnotes
         line-height: 1.7rem
 
     .footnote-highlight
-        background-color:  lighten($brand-theme-color, 10%)
+        background-color: lighten($brand-theme-color, 10%)
+
+@media(max-width: $breakpoint-md)
+    .sources-page
+        flex-direction: column
+
+        .sources-page-sidebar
+            height: 150px
+            width: 100%
+
+            .sources-page-links-wrapper
+                background-color: $brand-primary-color
+                min-height: 150px
+
+                .sources-page-links
+                    margin: 0 auto
+                    padding: 2rem 0
+                    width: 85vw
+
+                    ul
+                        white-space: nowrap
+                        overflow-x: scroll
+                        display: flex
+                        padding-left: 0
+
+                        li
+                            padding: 5px 20px
+                            display: inline
+
+        .sources-page-main
+            background: none
+            height: 90%
+            width: 89vw
+
+            .sources-page-content
+                margin: -75px 5.5vw 10vh 5.5vw
+                width: 100%
+
+                h5
+                    padding-left: min(1vw, 25px)
+
+                .sources-page-disclaimer
+                    padding: min(5vw, 25px) 0
+                    p
+                        padding-left: min(1vw, 25px)
+
+    ol.footnotes
+        padding-left: min(35px, 7vw)

@@ -26,6 +26,7 @@ import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopup
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { getStreetAndAddressInfo } from '../LinkCheckUtils';
 import { getSessionID } from '../utils/MapPreferences';
+
 import {
     DEFAULT_AP_HEIGHT,
     DEFAULT_AP_NAME,

@@ -12,7 +12,6 @@ export function getMapDefault(): MapDefault {
 
 export function getInitialFeatures() {
     const mapdefaultelem = document.getElementById('isp-map-features');
-    console.log('running get initial features', mapdefaultelem);
 
     return mapdefaultelem
         ? JSON.parse(mapdefaultelem.textContent ? mapdefaultelem.textContent : '')

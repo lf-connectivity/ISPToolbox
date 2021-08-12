@@ -95,7 +95,17 @@ abstract class RadiusAndBuildingCoverageRenderer {
                         '#1172a9',
                         '#1172a9'
                     ],
-                    'fill-opacity': 0.4
+                    // 'fill-opacity': 0.4
+                    'fill-opacity': ['case', ['boolean', ['get', 'user_hidden'], false], 0, 0.4]
+                    // 'fill-opacity': [
+                    //     'match',
+                    //     ['get', IS_ACTIVE_AP],
+                    //     ACTIVE_AP,
+                    //     0,
+                    //     INACTIVE_AP,
+                    //     0.4,
+                    //     0.4
+                    // ]
                 }
             },
             BUILDING_LAYER

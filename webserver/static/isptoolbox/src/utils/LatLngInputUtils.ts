@@ -1,3 +1,5 @@
+import { last } from 'lodash';
+
 export function parseLatitudeLongitude(val: string): [number, number] | null {
     try {
         let coords = val.split(',');

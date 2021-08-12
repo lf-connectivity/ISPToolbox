@@ -45,6 +45,10 @@ const IS_ACTIVE_AP = 'active_ap';
 const ACTIVE_AP = 'true';
 const INACTIVE_AP = 'false';
 
+const IS_HIDDEN_AP = 'hidden';
+const HIDDEN_AP = 'true';
+const VISIBLE_AP = 'false';
+
 abstract class RadiusAndBuildingCoverageRenderer {
     map: mapboxgl.Map;
     draw: MapboxDraw;
@@ -95,17 +99,15 @@ abstract class RadiusAndBuildingCoverageRenderer {
                         '#1172a9',
                         '#1172a9'
                     ],
-                    // 'fill-opacity': 0.4
-                    'fill-opacity': ['case', ['boolean', ['get', 'user_hidden'], false], 0, 0.4]
-                    // 'fill-opacity': [
-                    //     'match',
-                    //     ['get', IS_ACTIVE_AP],
-                    //     ACTIVE_AP,
-                    //     0,
-                    //     INACTIVE_AP,
-                    //     0.4,
-                    //     0.4
-                    // ]
+                    'fill-opacity': [
+                        'match',
+                        ['get', IS_HIDDEN_AP],
+                        HIDDEN_AP,
+                        0,
+                        VISIBLE_AP,
+                        0.4,
+                        0.4
+                    ]
                 }
             },
             BUILDING_LAYER
@@ -127,7 +129,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
                         '#1172a9'
                     ],
                     'line-dasharray': [0.2, 2],
-                    'line-width': 2
+                    'line-width': ['match', ['get', IS_HIDDEN_AP], HIDDEN_AP, 0, VISIBLE_AP, 2, 0.4]
                 }
             },
             BUILDING_LAYER
@@ -298,10 +300,20 @@ abstract class RadiusAndBuildingCoverageRenderer {
                     new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
                         ? ACTIVE_AP
                         : INACTIVE_AP;
+                    if (this.workspaceManager.selectedFeatures.includes(feat.id)) {
+                        // @ts-ignore
+                        new_feat.properties[IS_HIDDEN_AP] = HIDDEN_AP;
+                    } else {
+                        // @ts-ignore
+                        new_feat.properties[IS_HIDDEN_AP] = VISIBLE_AP;
+                    }
+
                     circle_feats[feat.id] = new_feat;
                 }
             }
         });
+
+        // this.workspaceManager.registerRenderRadiusCallback(this.renderAPRadius);
 
         // Replace radius features with selected
         const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);

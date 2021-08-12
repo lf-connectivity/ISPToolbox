@@ -33,6 +33,7 @@ import {
     DEFAULT_CPE_NAME,
     DEFAULT_NO_CHECK_RADIUS
 } from './BaseWorkspaceManager';
+
 export class LOSModal {
     selector: string;
     map: mapboxgl.Map;

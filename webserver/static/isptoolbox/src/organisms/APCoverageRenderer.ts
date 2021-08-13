@@ -300,13 +300,12 @@ abstract class RadiusAndBuildingCoverageRenderer {
                     new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
                         ? ACTIVE_AP
                         : INACTIVE_AP;
-                    if (this.workspaceManager.selectedFeatures.includes(feat.id)) {
-                        // @ts-ignore
-                        new_feat.properties[IS_HIDDEN_AP] = HIDDEN_AP;
-                    } else {
-                        // @ts-ignore
-                        new_feat.properties[IS_HIDDEN_AP] = VISIBLE_AP;
-                    }
+
+                    // @ts-ignore
+                    new_feat.properties[IS_HIDDEN_AP] =
+                        this.workspaceManager.hiddenAccessPointIds.includes(feat.id)
+                            ? HIDDEN_AP
+                            : VISIBLE_AP;
 
                     circle_feats[feat.id] = new_feat;
                 }

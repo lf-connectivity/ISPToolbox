@@ -9,10 +9,6 @@ import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CPE, APToCPELink, CoverageArea } from './WorkspaceFeatures';
 import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
 import { getPolygonCentroid } from '../utils/MapUtils';
-import {
-    MarketEvaluatorRadiusAndBuildingCoverageRenderer,
-    LinkCheckRadiusAndBuildingCoverageRenderer
-} from '../organisms/APCoverageRenderer';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void;
 
@@ -31,8 +27,8 @@ export abstract class BaseWorkspaceManager {
     draw: MapboxDraw;
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
     readonly features: { [workspaceId: string]: BaseWorkspaceFeature }; // Map from workspace UUID to feature
-    selectedFeatures: Array<string>;
-    apCoverageRenderer: any;
+    hiddenAccessPointIds: Array<string>;
+    hiddenCoverageAreas: { [workspaceId: string]: BaseWorkspaceFeature };
 
     // Event handlers for specific workspace feature types
     protected readonly saveFeatureDrawModeHandlers: { [mode: string]: (feature: any) => void };
@@ -59,9 +55,7 @@ export abstract class BaseWorkspaceManager {
     constructor(
         map: MapboxGL.Map,
         draw: MapboxDraw,
-        supportedFeatureTypes: Array<WorkspaceFeatureTypes>,
-        selectedFeatures: Array<string>,
-        apCoverageRenderer: any
+        supportedFeatureTypes: Array<WorkspaceFeatureTypes>
     ) {
         this.map = map;
         this.draw = draw;
@@ -70,8 +64,6 @@ export abstract class BaseWorkspaceManager {
 
         this.saveFeatureDrawModeHandlers = {};
         this.initSaveFeatureHandlers();
-        this.selectedFeatures = [];
-        this.apCoverageRenderer = apCoverageRenderer;
 
         // Default update handlers are are just do nothings.
         let updateHandlers: any = {};
@@ -93,11 +85,8 @@ export abstract class BaseWorkspaceManager {
         this.initDeleteFeatureHandlers();
 
         let initialFeatures = getInitialFeatures().features;
-
-        // this.registerRenderRadiusCallback = (cb: any) => {
-        //     console.log('registering callback', cb);
-        //     this.renderRadiusCallback = cb;
-        // };
+        this.hiddenAccessPointIds = [];
+        this.hiddenCoverageAreas = {};
 
         const addType = (
             featureType: WorkspaceFeatureTypes,
@@ -165,31 +154,31 @@ export abstract class BaseWorkspaceManager {
                 });
             };
 
-            const updateCoverageAreaViisibility = (MBFeature: any, WSFeature: any) => {
-                //@ts-ignore
-                if (MBFeature?.properties.hidden) {
-                    this.draw.setFeatureProperty(WSFeature.mapboxId, 'hidden', false);
-                    MBFeature = this.draw.get(WSFeature.mapboxId);
-                    //@ts-ignore
+            const updateCoverageAreaVisibility = (MBFeature: any, WSFeature: any) => {
+                console.log('mbfeature', MBFeature);
+                console.log('wsfeature', WSFeature);
+
+                if (!MBFeature) {
+                    const MBFeature = this.hiddenCoverageAreas[WSFeature.mapboxId];
                     this.draw.add(MBFeature);
+                    delete this.hiddenCoverageAreas[WSFeature.uuid];
                 } else {
-                    this.draw.setFeatureProperty(WSFeature.mapboxId, 'hidden', true);
-                    MBFeature = this.draw.get(WSFeature.mapboxId);
-                    //@ts-ignore
-                    this.draw.add(MBFeature);
+                    this.hiddenCoverageAreas[WSFeature.mapboxId] = MBFeature;
+                    this.draw.delete(MBFeature.id);
                 }
+                console.log('hidden', this.hiddenCoverageAreas);
             };
 
             const updateAPVisibility = (MBFeature: any, WSFeature: any) => {
-                console.log('hello');
                 let id = String(MBFeature?.id);
-                if (this.selectedFeatures.includes(id)) {
-                    let i = this.selectedFeatures.indexOf(id);
+
+                if (this.hiddenAccessPointIds.includes(id)) {
+                    let i = this.hiddenAccessPointIds.indexOf(id);
                     if (i > -1) {
-                        this.selectedFeatures.splice(i, 1);
+                        this.hiddenAccessPointIds.splice(i, 1);
                     }
                 } else {
-                    this.selectedFeatures = [...this.selectedFeatures, id];
+                    this.hiddenAccessPointIds = [...this.hiddenAccessPointIds, id];
                 }
 
                 PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [WSFeature] });
@@ -200,7 +189,7 @@ export abstract class BaseWorkspaceManager {
                 var MBFeature = this.draw.get(WSFeature.mapboxId);
                 //@ts-ignore
                 if (WSFeature.featureType === WorkspaceFeatureTypes.COVERAGE_AREA) {
-                    updateCoverageAreaViisibility(MBFeature, WSFeature);
+                    updateCoverageAreaVisibility(MBFeature, WSFeature);
                 }
 
                 //@ts-ignore

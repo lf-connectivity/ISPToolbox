@@ -117,9 +117,8 @@ export const LOSCheckMapboxStyles = [
         ],
         paint: {
             'fill-color': '#1172A9',
-            // 'fill-outline-color': '#1172A9',
-            'fill-outline-color': '#ffffff',
-            'fill-opacity': ['case', ['boolean', ['get', 'user_hidden'], false], 0, 0.4]
+            'fill-outline-color': '#1172A9',
+            'fill-opacity': 0.4
         }
     },
     {
@@ -343,9 +342,7 @@ export const LOSCheckMapboxStyles = [
         },
         paint: {
             'line-color': '#1172A9',
-            'line-width': 4,
-            'line-opacity': 0
-            // 'line-width': ['case', ['boolean', ['get', 'user_hidden'], false], 4, 4]
+            'line-width': 4
         }
     },
     // Drawing Instructions

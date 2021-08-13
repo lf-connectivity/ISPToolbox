@@ -105,7 +105,6 @@ export const LOSCheckMapboxStyles = [
         }
     },
     // Polygon line and fill
-    // use this as example
     {
         id: 'gl-draw-polygon-fill-inactive',
         type: 'fill',

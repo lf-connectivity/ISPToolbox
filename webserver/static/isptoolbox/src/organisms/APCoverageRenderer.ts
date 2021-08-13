@@ -312,8 +312,6 @@ abstract class RadiusAndBuildingCoverageRenderer {
             }
         });
 
-        // this.workspaceManager.registerRenderRadiusCallback(this.renderAPRadius);
-
         // Replace radius features with selected
         const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
         if (radiusSource.type === 'geojson') {

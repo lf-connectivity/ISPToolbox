@@ -48,15 +48,11 @@ class MarketDemoView(View):
     """
     def get(self, request):
         map_session, created = WorkspaceMapSession.get_or_create_demo_view(request)
-    
         context = {
             'session': map_session,
             'geojson': map_session.get_session_geojson(),
         }
-
-
         return render(request, 'workspace/pages/demo_market.index.html', context)
-
 
 
 @method_decorator(xframe_options_exempt, name='dispatch')

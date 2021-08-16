@@ -36,6 +36,7 @@ Not rendering this citation for now, but will be useful for sources page
       <script async src="{% static "wireless_network.min.js" %}"> </script>
       {% include "mmwave/3d_view.html" %}
       {% include "mmwave/link_view.html" %}
+      {% include "workspace/molecules/map_layer_sidebar.html" with footnote_id="footnotes-section" %}
       {% include "workspace/molecules/workspace_session_info.html" %}
       {{ geojson|json_script:"isp-map-features" }}
       {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}

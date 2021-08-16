@@ -1,31 +1,18 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import * as _ from 'lodash';
-import { Geometry, GeoJsonProperties, FeatureCollection } from 'geojson';
-import { createGeoJSONCircle } from '../isptoolbox-mapbox-draw/DrawModeUtils';
 import { getCookie } from '../utils/Cookie';
-import LOSCheckWS, { LOSWSEvents } from '../LOSCheckWS';
-import type { AccessPointCoverageResponse } from '../LOSCheckWS';
 import PubSub from 'pubsub-js';
 import { isUnitsUS } from '../utils/MapPreferences';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { AccessPoint, APToCPELink, CPE } from './WorkspaceFeatures';
-import {
-    LinkCheckCPEClickCustomerConnectPopup,
-    LinkCheckCustomerConnectPopup
-} from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { MapboxSDKClient } from '../MapboxSDKClient';
-import { LinkCheckBasePopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
 import { ViewshedTool } from '../organisms/ViewshedTool';
-import {
-    BuildingCoverage,
-    BuildingCoverageStatus,
-    EMPTY_BUILDING_COVERAGE
-} from './BuildingCoverage';
+import { BuildingCoverageStatus } from './BuildingCoverage';
 import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
-import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { getStreetAndAddressInfo } from '../LinkCheckUtils';
 import { getSessionID } from '../utils/MapPreferences';
+import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 
 import {
     DEFAULT_AP_HEIGHT,
@@ -52,7 +39,6 @@ export class LOSModal {
         $(this.selector).on('shown.bs.modal', () => {
             PubSub.publish(WorkspaceEvents.LOS_MODAL_OPENED);
         });
-
         // Open Modal
     }
 
@@ -193,6 +179,7 @@ export class WorkspaceManager {
     viewshed: ViewshedTool;
     private last_selection: string = '';
     private static _instance: WorkspaceManager;
+    mapLayerSidebarManager: MapLayerSidebarManager;
 
     constructor(selector: string, map: MapboxGL.Map, draw: MapboxDraw, initialFeatures: any) {
         if (WorkspaceManager._instance) {
@@ -203,6 +190,7 @@ export class WorkspaceManager {
         // this.ws = ws;
         this.view = new LOSModal(selector, this.map, this.draw);
         this.viewshed = new ViewshedTool(this.map, this.draw);
+        this.mapLayerSidebarManager = new MapLayerSidebarManager(map, draw);
 
         // Initialize features
         this.features = {};
@@ -250,6 +238,9 @@ export class WorkspaceManager {
                 cpe.ap = ap;
                 this.features[workspaceFeature.workspaceId] = workspaceFeature;
             });
+
+            this.mapLayerSidebarManager.setInitialFeatures(initialFeatures.features, this.features);
+            this.mapLayerSidebarManager.createUserMapLayers();
         }
 
         // Initialize Constructors

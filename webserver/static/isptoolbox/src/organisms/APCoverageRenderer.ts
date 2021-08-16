@@ -303,7 +303,9 @@ abstract class RadiusAndBuildingCoverageRenderer {
 
                     // @ts-ignore
                     new_feat.properties[IS_HIDDEN_AP] =
-                        this.workspaceManager.hiddenAccessPointIds.includes(feat.id)
+                        this.workspaceManager.mapLayerSidebarManager.hiddenAccessPointIds.includes(
+                            feat.id
+                        )
                             ? HIDDEN_AP
                             : VISIBLE_AP;
 

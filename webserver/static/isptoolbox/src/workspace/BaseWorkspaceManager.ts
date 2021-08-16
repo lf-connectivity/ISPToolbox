@@ -1,14 +1,12 @@
-import { divide } from 'lodash';
 import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { getStreetAndAddressInfo } from '../LinkCheckUtils';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
+import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CPE, APToCPELink, CoverageArea } from './WorkspaceFeatures';
-import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
-import { getPolygonCentroid } from '../utils/MapUtils';
+import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void;
 
@@ -27,8 +25,7 @@ export abstract class BaseWorkspaceManager {
     draw: MapboxDraw;
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
     readonly features: { [workspaceId: string]: BaseWorkspaceFeature }; // Map from workspace UUID to feature
-    hiddenAccessPointIds: Array<string>;
-    hiddenCoverageAreas: { [workspaceId: string]: BaseWorkspaceFeature };
+    mapLayerSidebarManager: MapLayerSidebarManager;
 
     // Event handlers for specific workspace feature types
     protected readonly saveFeatureDrawModeHandlers: { [mode: string]: (feature: any) => void };
@@ -85,8 +82,7 @@ export abstract class BaseWorkspaceManager {
         this.initDeleteFeatureHandlers();
 
         let initialFeatures = getInitialFeatures().features;
-        this.hiddenAccessPointIds = [];
-        this.hiddenCoverageAreas = {};
+        this.mapLayerSidebarManager = new MapLayerSidebarManager(this.map, this.draw);
 
         const addType = (
             featureType: WorkspaceFeatureTypes,
@@ -139,85 +135,8 @@ export abstract class BaseWorkspaceManager {
                     }
                 );
             }
-            // add building objects to sidebar
-            const clickHandler = (uuid: String) => {
-                const feature = initialFeatures.find(
-                    (feature: any) => feature.properties.uuid === uuid
-                );
-                let coordinates = feature.geometry.coordinates;
-                if (feature.geometry.type === 'Polygon') {
-                    coordinates = getPolygonCentroid(feature.geometry.coordinates[0]);
-                }
-                // select tower on fly to
-                this.map.flyTo({
-                    center: coordinates
-                });
-            };
-
-            const updateCoverageAreaVisibility = (MBFeature: any, WSFeature: any) => {
-                console.log('mbfeature', MBFeature);
-                console.log('wsfeature', WSFeature);
-
-                if (!MBFeature) {
-                    const MBFeature = this.hiddenCoverageAreas[WSFeature.mapboxId];
-                    this.draw.add(MBFeature);
-                    delete this.hiddenCoverageAreas[WSFeature.uuid];
-                } else {
-                    this.hiddenCoverageAreas[WSFeature.mapboxId] = MBFeature;
-                    this.draw.delete(MBFeature.id);
-                }
-                console.log('hidden', this.hiddenCoverageAreas);
-            };
-
-            const updateAPVisibility = (MBFeature: any, WSFeature: any) => {
-                let id = String(MBFeature?.id);
-
-                if (this.hiddenAccessPointIds.includes(id)) {
-                    let i = this.hiddenAccessPointIds.indexOf(id);
-                    if (i > -1) {
-                        this.hiddenAccessPointIds.splice(i, 1);
-                    }
-                } else {
-                    this.hiddenAccessPointIds = [...this.hiddenAccessPointIds, id];
-                }
-
-                PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [WSFeature] });
-            };
-
-            const toggleHandler = (e: any, uuid: string) => {
-                const WSFeature = this.features[uuid];
-                var MBFeature = this.draw.get(WSFeature.mapboxId);
-                //@ts-ignore
-                if (WSFeature.featureType === WorkspaceFeatureTypes.COVERAGE_AREA) {
-                    updateCoverageAreaVisibility(MBFeature, WSFeature);
-                }
-
-                //@ts-ignore
-                if (WSFeature.featureType === WorkspaceFeatureTypes.AP) {
-                    updateAPVisibility(MBFeature, WSFeature);
-                }
-            };
-
-            let mapObjectsSection = document.getElementById('map-objects-section');
-
-            let polygonCounter = 1;
-            initialFeatures.forEach((feature: any) => {
-                let objectLabel;
-                if (feature.geometry.type === 'Point') {
-                    objectLabel = feature.properties.name;
-                } else {
-                    objectLabel = 'Area ' + polygonCounter;
-                    polygonCounter++;
-                }
-
-                const elem = generateMapLayerSidebarRow(
-                    feature,
-                    objectLabel,
-                    clickHandler,
-                    toggleHandler
-                );
-                mapObjectsSection!.appendChild(elem);
-            });
+            this.mapLayerSidebarManager.setInitialFeatures(initialFeatures, this.features);
+            this.mapLayerSidebarManager.createUserMapLayers();
         }
 
         // Instantiate CRUD

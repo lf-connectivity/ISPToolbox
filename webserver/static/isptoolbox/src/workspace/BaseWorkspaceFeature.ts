@@ -18,7 +18,7 @@ export abstract class BaseWorkspaceFeature {
     map: MapboxGL.Map;
     draw: MapboxDraw;
 
-    private readonly featureType: WorkspaceFeatureTypes;
+    readonly featureType: WorkspaceFeatureTypes;
     private readonly responseFields: Array<string>;
     private readonly serializerFields: Array<string>;
     private readonly apiEndpoint: string;

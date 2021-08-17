@@ -5,6 +5,7 @@ import math
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
+from django.core.cache import caches
 
 from celery import shared_task
 from mmwave.lidar_utils.caching import lidar_cache_get, lidar_cache_set, terrain_cache_get, terrain_cache_set
@@ -223,11 +224,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
         if r and r['resolution'] >= resolution:
             logging.info('lidar cache hit: resolution %s', r['resolution'])
             resp.update({k: r[k] for k in
-<<<<<<< HEAD
                         ('lidar_profile', 'url', 'bb', 'source', 'tx', 'rx', 'aoi', 'resolution', 'res', 'dist')})
-=======
-                        ('lidar_profile', 'url', 'bb', 'source', 'tx', 'rx', 'aoi', 'resolution')})
->>>>>>> 44bba7c (Linting.)
 
         else:
             logging.info('lidar cache miss for resolution %s', resolution)

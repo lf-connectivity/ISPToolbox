@@ -18,8 +18,6 @@ export class MapLayerSidebarManager {
         this.hiddenCoverageAreas = {};
         this.map = map;
         this.draw = draw;
-        this.features = {};
-        this.initialFeatures = [];
     }
 
     setInitialFeatures(

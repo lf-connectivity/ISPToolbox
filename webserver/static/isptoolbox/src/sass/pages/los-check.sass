@@ -5,6 +5,7 @@
 @use '../atoms/_collapse-button'
 @use '../atoms/_reconnecting_status'
 @use '../atoms/_footnote-id'
+@use '../atoms/toggle-switch'
 @use '../molecules/cards'
 @use '../molecules/_map-tooltips'
 @use '../molecules/frequency_dropdown'
@@ -14,11 +15,13 @@
 @use '../organisms/map-view'
 @use '../organisms/lidar-availbility-mapbox-popup'
 @use '../organisms/radio-view'
+@use '../organisms/_market-eval-overlaybar'
 @use 'global.sass'
 @use '../mixins'
 @use '../fonts'
 @use '../overrides'
 @import '../theme'
+
 
 body
     background-color: $brand-theme-color
@@ -43,6 +46,18 @@ body
         width: 6px
     ::-webkit-scrollbar-thumb
         background-color: $light-gray-color
+    
+    .network-page-wrapper
+        height: 100%
+        width: 100%
+        display: flex 
+        flex-direction: row
+        justify-content: flex-start
+
+        .map-container
+            width: 100%
+
+
 
 .nodes-loading-message
     display: none

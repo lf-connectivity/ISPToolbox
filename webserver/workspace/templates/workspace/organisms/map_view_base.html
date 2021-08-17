@@ -1,19 +1,21 @@
 <div class="map-container-network">
-    <div id='map' class='planner-map'></div>
-    <div id='map-controls' class="on-map-controls">
-        <div>
-            {% include "workspace/atoms/components/reconnecting_msg.html" %}
-            <div id="geocoder" class="geocoder-container"></div>
-            {% block draw_controls %}
-            {% endblock %}
+    <div id='map' class='planner-map col-lg-12 col-md-12 order-1 order-md-2 px-0' style="min-height: 500px">
+        <div id='map-controls' class="on-map-controls">
+            <div>
+                {% include "workspace/atoms/components/reconnecting_msg.html" %}
+                <div id="geocoder" class="geocoder-container"></div>
+                {% block draw_controls %}
+                {% endblock %}
+            </div>
         </div>
+        {% if not ptponly %}
+            <div class="on-map-controls" style="right: 0px">
+                {% include "mmwave/molecules/draw_controls.html" %}
+                <div class="layer-button-container">
+                {% include "workspace/atoms/buttons/map_layers_button.html" %}
+                </div>
+            </div>
+        {% endif %}
     </div>
-    {% if not ptponly %}
-    <div class="on-map-controls" style="right: 0px">
-        {% include "mmwave/molecules/draw_controls.html" %}
-        <div class="layer-button-container">
-          {% include "workspace/atoms/buttons/map_layers_button.html" %}
-        </div>
-    </div>
-    {% endif %}
+    {% include "workspace/molecules/map_layer_sidebar.html" with footnote_id="footnotes-section" %}
 </div>

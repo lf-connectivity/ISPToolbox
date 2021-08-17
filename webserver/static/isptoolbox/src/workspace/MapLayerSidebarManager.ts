@@ -3,7 +3,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
 import { WorkspaceFeatureTypes, WorkspaceEvents } from './WorkspaceConstants';
-import { getPolygonCentroid } from '../utils/MapUtils';
+import centroid from '@turf/centroid';
 
 export class MapLayerSidebarManager {
     hiddenAccessPointIds: Array<string>;
@@ -103,7 +103,8 @@ export class MapLayerSidebarManager {
         if (feature) {
             let coordinates = feature.geometry.coordinates;
             if (feature.geometry.type === 'Polygon') {
-                coordinates = getPolygonCentroid(feature.geometry.coordinates[0]);
+                let polygonCentroid = centroid(feature.geometry);
+                coordinates = polygonCentroid.geometry.coordinates;
             }
             // POSSIBLE TODO - Select tower on fly to?
             this.map.flyTo({

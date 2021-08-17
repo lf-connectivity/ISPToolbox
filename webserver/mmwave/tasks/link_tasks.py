@@ -223,7 +223,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
         if r and r['resolution'] >= resolution:
             logging.info('lidar cache hit: resolution %s', r['resolution'])
             resp.update({k: r[k] for k in
-                        ('lidar_profile', 'url', 'bb', 'source', 'tx', 'rx', 'aoi', 'resolution')})
+                        ('lidar_profile', 'url', 'bb', 'source', 'tx', 'rx', 'aoi', 'resolution', 'res', 'dist')})
 
         else:
             logging.info('lidar cache miss for resolution %s', resolution)

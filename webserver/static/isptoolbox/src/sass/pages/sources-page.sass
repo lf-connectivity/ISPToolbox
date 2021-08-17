@@ -90,7 +90,7 @@ ol.footnotes
     .footnote-highlight
         background-color: lighten($brand-theme-color, 10%)
 
-@media(max-width: $breakpoint-md)
+@media(max-width: 1100px)
     .sources-page
         flex-direction: column
 
@@ -112,6 +112,11 @@ ol.footnotes
                         overflow-x: scroll
                         display: flex
                         padding-left: 0
+                        -ms-overflow-style: none
+                        scrollbar-width: none
+
+                        &::-webkit-scrollbar
+                            display: none
 
                         li
                             padding: 10px 20px
@@ -120,11 +125,12 @@ ol.footnotes
         .sources-page-main
             background: none
             height: 90%
-            width: 97vw
+            width: 100%
 
             .sources-page-content
-                margin: -70px 1.5vw 5vh 1.5vw
+                margin: -70px 0 5vh 0
                 width: 100%
+                max-width: 1100px
 
                 h5
                     padding-left: min(1vw, 25px)

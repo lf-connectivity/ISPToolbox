@@ -17,5 +17,7 @@
             </div>
         {% endif %}
     </div>
-    {% include "workspace/molecules/map_layer_sidebar.html" with footnote_id="footnotes-section" %}
+    {% if not ptponly %}
+        {% include "workspace/molecules/map_layer_sidebar.html" with footnote_id="footnotes-section" %}
+    {% endif %}
 </div>

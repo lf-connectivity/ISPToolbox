@@ -15,3 +15,8 @@ export enum WorkspaceFeatureTypes {
     AP_CPE_LINK = 'ap_cpe_link',
     COVERAGE_AREA = 'coverage_area'
 }
+
+export enum WorkspaceTools {
+    MARKET_EVALUATOR = 'market_evaluator',
+    LOS_CHECK = 'los_check'
+}

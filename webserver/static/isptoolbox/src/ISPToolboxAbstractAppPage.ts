@@ -12,6 +12,7 @@ import { MapboxSDKClient } from './MapboxSDKClient';
 import { parseSearchBarLatitudeLongitude } from './utils/LatLngInputUtils';
 import { isBeta } from './LinkCheckUtils';
 import MapboxLockDraggingControl from './organisms/controls/MapboxLockDraggingControl';
+import { WorkspaceTools } from './workspace/WorkspaceConstants';
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -179,10 +180,15 @@ export abstract class ISPToolboxAbstractAppPage {
             this.map.getStyle().layers?.every((layer: any) => {
                 if (layer.id.includes('gl-draw')) {
                     $(`#map-layers-btn`).on('click', (event) => {
-                        $(`#map`).toggleClass(['col-md-6', 'col-md-9']);
-                        $(`#map`).toggleClass(['col-lg-7', 'col-lg-9']);
-                        $(`#map`).toggleClass(['col-md-10', 'col-md-12']);
-                        $(`#map`).toggleClass(['col-lg-10', 'col-lg-12']);
+                        const $map = $('#map');
+                        if ($map.data('workspace-tool') === WorkspaceTools.LOS_CHECK) {
+                            $map.toggleClass(['col-md-10', 'col-md-12']);
+                            $map.toggleClass(['col-lg-10', 'col-lg-12']);
+                        } else {
+                            $map.toggleClass(['col-md-6', 'col-md-9']);
+                            $map.toggleClass(['col-lg-7', 'col-lg-9']);
+                        }
+
                         const $sidebar = $('#map-layer-sidebar');
                         if ($sidebar.hasClass('show')) {
                             $sidebar.removeClass('show');

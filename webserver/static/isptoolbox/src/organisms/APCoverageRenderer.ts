@@ -46,8 +46,6 @@ const ACTIVE_AP = 'true';
 const INACTIVE_AP = 'false';
 
 const IS_HIDDEN_AP = 'hidden';
-const HIDDEN_AP = 'true';
-const VISIBLE_AP = 'false';
 
 abstract class RadiusAndBuildingCoverageRenderer {
     map: mapboxgl.Map;
@@ -99,15 +97,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
                         '#1172a9',
                         '#1172a9'
                     ],
-                    'fill-opacity': [
-                        'match',
-                        ['get', IS_HIDDEN_AP],
-                        HIDDEN_AP,
-                        0,
-                        VISIBLE_AP,
-                        0.4,
-                        0.4
-                    ]
+                    'fill-opacity': 0.4
                 }
             },
             BUILDING_LAYER
@@ -129,7 +119,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
                         '#1172a9'
                     ],
                     'line-dasharray': [0.2, 2],
-                    'line-width': ['match', ['get', IS_HIDDEN_AP], HIDDEN_AP, 0, VISIBLE_AP, 2, 0.4]
+                    'line-width': 0.4
                 }
             },
             BUILDING_LAYER
@@ -301,15 +291,13 @@ abstract class RadiusAndBuildingCoverageRenderer {
                         ? ACTIVE_AP
                         : INACTIVE_AP;
 
-                    // @ts-ignore
-                    new_feat.properties[IS_HIDDEN_AP] =
-                        this.workspaceManager.mapLayerSidebarManager.hiddenAccessPointIds.includes(
+                    if (
+                        !this.workspaceManager.mapLayerSidebarManager.hiddenAccessPointIds.includes(
                             feat.id
                         )
-                            ? HIDDEN_AP
-                            : VISIBLE_AP;
-
-                    circle_feats[feat.id] = new_feat;
+                    ) {
+                        circle_feats[feat.id] = new_feat;
+                    }
                 }
             }
         });

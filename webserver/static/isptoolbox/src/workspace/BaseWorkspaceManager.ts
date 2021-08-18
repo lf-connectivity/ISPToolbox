@@ -8,7 +8,7 @@ import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CPE, APToCPELink, CoverageArea } from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 
-type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void;
+type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void | boolean;
 
 function doNothingProcessor(): UpdateDeleteFeatureProcessor {
     return (workspaceFeature: BaseWorkspaceFeature) => {};
@@ -26,6 +26,7 @@ export abstract class BaseWorkspaceManager {
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
     readonly features: { [workspaceId: string]: BaseWorkspaceFeature }; // Map from workspace UUID to feature
     mapLayerSidebarManager: MapLayerSidebarManager;
+    protected static _instance: BaseWorkspaceManager;
 
     // Event handlers for specific workspace feature types
     protected readonly saveFeatureDrawModeHandlers: { [mode: string]: (feature: any) => void };
@@ -54,6 +55,10 @@ export abstract class BaseWorkspaceManager {
         draw: MapboxDraw,
         supportedFeatureTypes: Array<WorkspaceFeatureTypes>
     ) {
+        if (BaseWorkspaceManager._instance) {
+            return BaseWorkspaceManager._instance;
+        }
+
         this.map = map;
         this.draw = draw;
         this.features = {};
@@ -115,7 +120,7 @@ export abstract class BaseWorkspaceManager {
             addType(WorkspaceFeatureTypes.CPE, CPE);
             addType(WorkspaceFeatureTypes.COVERAGE_AREA, CoverageArea);
 
-            if (WorkspaceFeatureTypes.AP_CPE_LINK in supportedFeatureTypes) {
+            if (supportedFeatureTypes.includes(WorkspaceFeatureTypes.AP_CPE_LINK)) {
                 this.filterByType(initialFeatures, WorkspaceFeatureTypes.AP_CPE_LINK).forEach(
                     (feature: any) => {
                         let apWorkspaceId = feature.properties.ap;
@@ -239,11 +244,13 @@ export abstract class BaseWorkspaceManager {
                     let workspaceFeature = this.features[feature.properties.uuid];
 
                     // Delete pre-ajax call stuff
-                    this.deleteFeaturePreAjaxHandlers[featureType](workspaceFeature);
+                    let retval = this.deleteFeaturePreAjaxHandlers[featureType](workspaceFeature);
 
-                    workspaceFeature.delete((resp) => {
-                        delete this.features[feature.properties.uuid];
-                    });
+                    if (retval !== false) {
+                        workspaceFeature.delete((resp) => {
+                            delete this.features[feature.properties.uuid];
+                        });
+                    }
                 });
             }
         };
@@ -278,18 +285,24 @@ export abstract class BaseWorkspaceManager {
                                 feature.geometry.coordinates,
                                 (response: any) => {
                                     let result = response.body.features;
-                                    feature.properties.name = getStreetAndAddressInfo(
+                                    let streetName = getStreetAndAddressInfo(
                                         result[0].place_name
                                     ).street;
 
-                                    this.updateFeatureAjaxHandlers[
-                                        WorkspaceFeatureTypes.CPE
-                                    ].pre_update(workspaceFeature);
-                                    cpe.update(() => {
+                                    workspaceFeature.setFeatureProperty('name', streetName);
+
+                                    let retval =
                                         this.updateFeatureAjaxHandlers[
                                             WorkspaceFeatureTypes.CPE
-                                        ].post_update(workspaceFeature);
-                                    });
+                                        ].pre_update(workspaceFeature);
+
+                                    if (retval !== false) {
+                                        cpe.update(() => {
+                                            this.updateFeatureAjaxHandlers[
+                                                WorkspaceFeatureTypes.CPE
+                                            ].post_update(workspaceFeature);
+                                        });
+                                    }
                                 }
                             );
                         }
@@ -297,20 +310,32 @@ export abstract class BaseWorkspaceManager {
 
                     default:
                         if (this.isSupportedFeatureType(feature.properties.feature_type)) {
-                            // @ts-ignore
-                            this.updateFeatureAjaxHandlers[
-                                feature.properties.feature_type
-                            ].pre_update(workspaceFeature);
-                            workspaceFeature.update(() => {
+                            let retval =
                                 // @ts-ignore
                                 this.updateFeatureAjaxHandlers[
                                     feature.properties.feature_type
-                                ].post_update(workspaceFeature);
-                            });
+                                ].pre_update(workspaceFeature);
+
+                            if (retval !== false) {
+                                workspaceFeature.update(() => {
+                                    // @ts-ignore
+                                    this.updateFeatureAjaxHandlers[
+                                        feature.properties.feature_type
+                                    ].post_update(workspaceFeature);
+                                });
+                            }
                         }
                         break;
                 }
             }
         });
+    }
+
+    static getInstance(): BaseWorkspaceManager {
+        if (BaseWorkspaceManager._instance) {
+            return BaseWorkspaceManager._instance;
+        } else {
+            throw new Error('No Instance of BaseWorkspaceManager instantiated.');
+        }
     }
 }

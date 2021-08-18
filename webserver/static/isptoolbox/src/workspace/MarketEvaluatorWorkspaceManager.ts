@@ -21,16 +21,15 @@ const SUPPORTED_FEATURE_TYPES = [WorkspaceFeatureTypes.COVERAGE_AREA, WorkspaceF
 export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
     map: MapboxGL.Map;
     draw: MapboxDraw;
-    private static _instance: MarketEvaluatorWorkspaceManager;
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super(map, draw, SUPPORTED_FEATURE_TYPES);
-        if (!MarketEvaluatorWorkspaceManager._instance) {
+        if (!BaseWorkspaceManager._instance) {
             PubSub.subscribe(
                 MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG,
                 this.onViewshedMsg.bind(this)
             );
-            MarketEvaluatorWorkspaceManager._instance = this;
+            BaseWorkspaceManager._instance = this;
         }
     }
 
@@ -115,14 +114,6 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
         if (ap) {
             ap.setFeatureProperty('cloudrf_coverage_geojson_json', response.coverage);
             PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [ap.getFeatureData()] });
-        }
-    }
-
-    static getInstance(): MarketEvaluatorWorkspaceManager {
-        if (MarketEvaluatorWorkspaceManager._instance) {
-            return MarketEvaluatorWorkspaceManager._instance;
-        } else {
-            throw new Error('No Instance of MarketEvaluatorWorkspaceManager instantiated.');
         }
     }
 }

@@ -104,7 +104,7 @@ export class AccessPoint extends WorkspacePointFeature {
             // Yes, this should probably be moved into its own function, but when
             // I do that it doesn't work as intended. ¯\_(ツ)_/¯
             if (deletedLink) {
-                this.map.fire('draw.delete', { features: [deletedLink] });
+                this.map.fire('draw.delete', { features: [deletedLink, deletedCPE] });
             }
         });
         this.links.clear();
@@ -289,7 +289,12 @@ export class APToCPELink extends WorkspaceLineStringFeature {
         this.ap.links.delete(this.cpe);
         let cpeData = this.cpe.getFeatureData();
         this.removeFeatureFromMap(this.cpe.mapboxId);
-        super.delete(successFollowup);
+        this.map.fire('draw.delete', { features: [cpeData] });
+
+        // Deleting the CPE deletes the link, so we don't need the AJAX call.
+        if (successFollowup) {
+            successFollowup({});
+        }
     }
 
     switchAP(newAP: AccessPoint) {

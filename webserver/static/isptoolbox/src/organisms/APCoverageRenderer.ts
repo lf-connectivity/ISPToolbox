@@ -7,7 +7,7 @@ import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from '../workspace/Building
 import { WorkspaceEvents, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { AccessPoint, CoverageArea, CPE } from '../workspace/WorkspaceFeatures';
 import LOSCheckWS, { AccessPointCoverageResponse, LOSWSEvents } from '../LOSCheckWS';
-import { WorkspaceManager } from '../workspace/WorkspaceManager';
+import { LOSCheckWorkspaceManager } from '../workspace/LOSCheckWorkspaceManager';
 import {
     LinkCheckTowerPopup,
     MarketEvaluatorTowerPopup
@@ -361,7 +361,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
     ws: LOSCheckWS;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw, ws: LOSCheckWS) {
-        super(map, draw, WorkspaceManager, LinkCheckTowerPopup);
+        super(map, draw, LOSCheckWorkspaceManager, LinkCheckTowerPopup);
         this.ws = ws;
 
         // Building Layer click callback

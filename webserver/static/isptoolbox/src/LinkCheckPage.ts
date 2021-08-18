@@ -42,7 +42,7 @@ import { hasCookie } from './utils/Cookie';
 import { getInitialFeatures } from './utils/MapDefaults';
 import { isUnitsUS } from './utils/MapPreferences';
 import PubSub from 'pubsub-js';
-import { WorkspaceManager } from './workspace/WorkspaceManager';
+import { LOSCheckWorkspaceManager } from './workspace/LOSCheckWorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
 import {
     getStreetAndAddressInfo,
@@ -64,6 +64,7 @@ import { parseFormLatitudeLongitude } from './utils/LatLngInputUtils';
 import { ISPToolboxAbstractAppPage } from './ISPToolboxAbstractAppPage';
 import { WorkspacePointFeature } from './workspace/BaseWorkspaceFeature.js';
 import { LinkCheckRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
+import { ViewshedTool } from './organisms/ViewshedTool';
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -169,7 +170,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     lidarAvailabilityLayer: LidarAvailabilityLayer;
 
-    workspaceManager: WorkspaceManager;
+    workspaceManager: LOSCheckWorkspaceManager;
     profileWS: LOSCheckWS;
     currentLinkHash: any;
 
@@ -589,12 +590,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             this.setExtremes.bind(this)
         );
 
-        this.workspaceManager = new WorkspaceManager(
-            '#accessPointModal',
-            this.map,
-            this.draw,
-            getInitialFeatures()
-        );
+        this.workspaceManager = new LOSCheckWorkspaceManager(this.map, this.draw);
+        new ViewshedTool(this.map, this.draw);
         this.locationMarker = new LinkCheckLocationSearchTool(
             this.map,
             this.workspaceManager,

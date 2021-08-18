@@ -4,17 +4,17 @@ import { LinkCheckBasePopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckBa
 import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { ClickableMarker } from '../molecules/ClickableMarker';
-import { WorkspaceManager } from '../workspace/WorkspaceManager';
+import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 
 export class LinkCheckLocationSearchTool {
     private map: mapboxgl.Map;
     private marker: ClickableMarker;
-    private workspaceManager: WorkspaceManager;
+    private workspaceManager: BaseWorkspaceManager;
     private geocoder: any;
     private reverseGeocodeResponse: any;
     private isPopupOpen: boolean;
 
-    constructor(map: mapboxgl.Map, workspaceManager: WorkspaceManager, geocoder: any) {
+    constructor(map: mapboxgl.Map, workspaceManager: BaseWorkspaceManager, geocoder: any) {
         this.workspaceManager = workspaceManager;
         this.marker = new ClickableMarker({
             draggable: true,

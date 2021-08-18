@@ -13,12 +13,12 @@ import {
     updateCoverageStatus
 } from '../../workspace/BuildingCoverage';
 import { LinkCheckLocationSearchTool } from '../../organisms/LinkCheckLocationSearchTool';
-import { WorkspaceManager } from '../../workspace/WorkspaceManager';
 import { BaseWorkspaceFeature } from '../../workspace/BaseWorkspaceFeature';
 import { DEFAULT_RADIUS } from '../APDrawMode';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
 import { BUILDING_LAYER } from '../../organisms/APCoverageRenderer';
+import { BaseWorkspaceManager } from '../../workspace/BaseWorkspaceManager';
 
 const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-customer-popup';
 const SWITCH_TOWER_LINK_ID = 'cpe-switch-tower-link-customer-popup';
@@ -327,7 +327,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     */
     protected calculateCoverageStatus() {
         // Set APs.
-        let accessPoints = Object.values(WorkspaceManager.getInstance().features).filter(
+        let accessPoints = Object.values(BaseWorkspaceManager.getInstance().features).filter(
             (feature: BaseWorkspaceFeature) => feature.getFeatureType() === WorkspaceFeatureTypes.AP
         ) as AccessPoint[];
 

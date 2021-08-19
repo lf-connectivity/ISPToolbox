@@ -86,7 +86,8 @@ export abstract class BaseWorkspaceManager {
         this.deleteFeaturePreAjaxHandlers = deleteHandlers;
         this.initDeleteFeatureHandlers();
 
-        let initialFeatures = getInitialFeatures().features;
+        let initialFeatures =
+            getInitialFeatures() !== null ? getInitialFeatures().features : undefined;
         this.mapLayerSidebarManager = new MapLayerSidebarManager(this.map, this.draw);
 
         const addType = (

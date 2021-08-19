@@ -2,10 +2,14 @@
 {% load static %} 
 {% load i18n %} 
 {% block content %}
-  <div class="dashboard">
+  <div class="dashboard px-3 px-sm-5">
     <div class="container text-container">
         <h2>{% translate "ISP Control Center" %}</h2>
         <p class='title-copy'>{% translate "ISP Toolbox provides tools to help you grow your Internet Service Provider (ISP) businesses so that you can provide communities with better connectivity." %}</p>
+    </div>
+    <div class='error d-flex d-md-none text-container'>
+        {% include 'workspace/atoms/icons/error_icon.html' %}
+        <div>Please use your desktop at full width for the best experience.</div>
     </div>
     <div class='card-wrapper'>
         <div class="card">
@@ -41,7 +45,7 @@
                 
 
                 <p class="card-text">
-                {% translate " Explore market data of an area to idenify where to expand your ISP." %}
+                {% translate " Explore market data of an area to identify where to expand your ISP." %}
                 </p>
             </div>
         </div>
@@ -91,8 +95,7 @@
       >
     </div>
     {% endif %} {% endcomment %}
-    <div class='text-container'>
-      {% now "Y" as current_year %} {% now "m" as current_month %}
+    <div class='text-container-links'>
       <p>Have questions or feedback for us?</p>
       <a
         href="https://facebook.com"

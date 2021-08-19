@@ -4,16 +4,10 @@
 .dashboard
   margin-top: 50px
   min-height: calc(100vh - 100px)
-  padding: 0 3rem
-  
-  @media screen and (min-width: $breakpoint-lg) 
-    .dashboard: 0 5rem
 
   /*
     namespacing new typography rules under dashboard for now
     TODO: Implement this sitewide
-    
-  
   h1, h2, h3, h4, h5, p
     font-family: $brand-font-family-sans-serif
     color: $brand-dark-gray-color
@@ -85,25 +79,43 @@
     .small
       font-size: .9375rem
       line-height: 1.5rem
-  
+  // end of typography rules
+
+  .error
+    color: $error-color
 
   .text-container
-    text-align: center
+    text-align: left
     padding: 3rem 0
-
+    max-width: 100%
+    
     .title-copy
-      margin: 2rem auto 0 auto
-      max-width: 100%
+      margin-top: 2rem
 
-    @media screen and (min-width: $breakpoint-lg) 
-      .title-copy
-        max-width: 50%
+    @media screen and (min-width: $breakpoint-md) 
+      margin: 0 auto
+      text-align: center
+      max-width: 66%
+    
+    @media screen and (min-width: $breakpoint-lg)
+      max-width: min(50%, 800px)
+  
+  .text-container.error
+    margin-top: 0
+    padding-top: 0
+    flex-direction: row
+    align-items: center
+    svg 
+      margin-right: 1rem
 
   .card-wrapper
-    display: flex
-    flex-direction: column
     max-width: 1200px
-    margin: 0 auto
+    margin: 0 auto  
+    display: grid
+    grid-gap: 1rem
+
+    @media screen and (min-width: $breakpoint-md)
+        grid-template-columns: repeat(2, 1fr)
       
     .card 
       background-color: white
@@ -123,12 +135,11 @@
         
         svg
           transform: translateY(-1px)
-    
-  @media screen and (min-width: $breakpoint-lg) 
-    .card-wrapper
-      flex-direction: row
-      flex-wrap: wrap
-      .card
-        width: 50%
-    
+  
+  .text-container-links
+    text-align: center
+    margin: 2rem 0
+
+    p 
+      margin-bottom: .3rem
     

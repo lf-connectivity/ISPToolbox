@@ -86,15 +86,16 @@
 
   .text-container
     text-align: left
-    padding: 3rem 0
+    padding: 2rem 0
     max-width: 100%
     
     .title-copy
       margin-top: 2rem
 
     @media screen and (min-width: $breakpoint-md) 
-      margin: 0 auto
       text-align: center
+      padding: 3rem 0
+      margin: 0 auto
       max-width: 66%
     
     @media screen and (min-width: $breakpoint-lg)
@@ -135,6 +136,9 @@
         
         svg
           transform: translateY(-1px)
+      
+      p
+        padding-top: .5rem
   
   .text-container-links
     text-align: center

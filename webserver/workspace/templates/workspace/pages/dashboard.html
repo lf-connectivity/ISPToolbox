@@ -1,9 +1,107 @@
-{% extends "workspace/pages/base.html" %}
-{% load static %}
-
+{% extends "workspace/pages/base.html" %} 
+{% load static %} 
+{% load i18n %} 
 {% block content %}
-<div style="margin-top: 50px;">
-    {% include "workspace/organisms/landing_page_container.html" %}
-    {% include "workspace/organisms/import_kmz_modal.html"%}
+  <div class="dashboard">
+    <div class="container text-container">
+        <h2>{% translate "ISP Control Center" %}</h2>
+        <p class='title-copy'>{% translate "ISP Toolbox provides tools to help you grow your Internet Service Provider (ISP) businesses so that you can provide communities with better connectivity." %}</p>
+    </div>
+    <div class='card-wrapper'>
+        <div class="card">
+            <div class="card-body">
+                <div class='header-row'>
+                    <span class='small subheading'>Business</span>
+                    {% include 'workspace/atoms/icons/dashboard_graph.html' %}
+                </div>
+                <a
+                href="https://www.facebook.com/isptoolbox/roi-estimator/"
+                >
+                    {% translate "ROI Estimator"%}
+                {% include 'workspace/atoms/icons/arrow_up_right.html' %}
+                </a>
+                <p class="card-text">
+                    {% translate "Explore potential Return on Investment (ROI) of an ISP business."%}
+                </p>
+            </div>
+        </div>
+        <div class="card" >
+            <div class="card-body">
+                <div class='header-row'>
+                    <span class='small subheading'>Business</span>
+                    {% include 'workspace/atoms/icons/dashboard_market.html' %}
+                </div>
+                <a
+                href="{% if user.is_authenticated %}{% url 'market_eval_entry' %}
+                        {% else %}{% url 'demo-market-app' %}{% endif %}"
+                >
+                {% translate "Launch Market Evaluator"%}
+                {% include 'workspace/atoms/icons/arrow_up_right.html' %}
+                </a>
+                
+
+                <p class="card-text">
+                {% translate " Explore market data of an area to idenify where to expand your ISP." %}
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class='header-row'>
+                    <span class='small subheading'>Network</span>
+                    {% include 'workspace/atoms/icons/dashboard_los.html' %}
+                </div>
+                <a
+                href="{% if user.is_authenticated %}{% url 'edit_account_network' %}{% else %}{% url 'demo-network-app' %}{% endif %}"
+                >
+                    {% translate "Line of Sight Check"%}
+                    {% include 'workspace/atoms/icons/arrow_up_right.html' %}
+                </a>
+                <p class="card-text">
+                    {% translate "Use LiDAR data to determine if a customer is serviceable"%}
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class='header-row'>
+                    <span class='small subheading'>Marketing</span>
+                    {% include 'workspace/atoms/icons/dashboard_saa.html' %}
+                </div>
+                <a
+                href="#"
+                >
+                    {% translate "Service Area Ads"%}
+                {% include 'workspace/atoms/icons/arrow_up_right.html' %}
+                </a>
+                <p class="card-text">
+                    {% translate "Generate Custom Audiences based on service areas for your Facebook Ads."%}
+                </p>
+            </div>
+        </div>
+  </div>
+  <div class="container text-center">
+    {% comment %} 
+    // not sure if we're still including this
+    {% if showSurvey %}
+    <div class="alert alert-primary" role="alert">
+      <a href="{% url 'optional_info' %}"
+        >{% translate "Take a quick survey to help us make ISP Toolbox
+        better"%}</a
+      >
+    </div>
+    {% endif %} {% endcomment %}
+    <div class='text-container'>
+      {% now "Y" as current_year %} {% now "m" as current_month %}
+      <p>Have questions or feedback for us?</p>
+      <a
+        href="https://facebook.com"
+        >{% translate "Contact us on Facebook"%}
+        {% include 'workspace/atoms/icons/arrow_up_right_circle.html' %}
+        </a>
+    </div>
+
+  {% include "workspace/organisms/import_kmz_modal.html"%}
 </div>
+
 {% endblock %}

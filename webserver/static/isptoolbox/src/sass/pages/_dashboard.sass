@@ -1,0 +1,134 @@
+@import '../_theme.sass'
+@import '../fonts'
+
+.dashboard
+  margin-top: 50px
+  min-height: calc(100vh - 100px)
+  padding: 0 3rem
+  
+  @media screen and (min-width: $breakpoint-lg) 
+    .dashboard: 0 5rem
+
+  /*
+    namespacing new typography rules under dashboard for now
+    TODO: Implement this sitewide
+    
+  
+  h1, h2, h3, h4, h5, p
+    font-family: $brand-font-family-sans-serif
+    color: $brand-dark-gray-color
+    font-weight: 300
+    margin: 0
+
+  h1
+    font-size: 2.5rem
+    line-height: 2.75rem
+  
+  h2
+    font-size: 2.1rem
+    line-height: 2.5rem
+
+  h3 
+    font-size: 1.72rem
+    line-height: 2rem
+  
+  h4
+    font-size: 1.43rem
+    line-height: 1.5rem
+  
+  h5
+    font-size: 1.2rem
+    line-height: 1.5rem
+
+  h6 
+    font-size: 1.2rem
+    line-height: 1.5rem
+
+  p
+    font-size: 1rem
+    line-height: 1.5rem
+  
+  .small
+    font-size: .83rem
+    line-height: 1.5rem
+  
+  @media screen and (min-width: $breakpoint-lg) 
+    h1
+      font-size: 3.35rem
+      line-height: 3.5rem
+  
+    h2
+      font-size: 2.83rem
+      line-height: 3.5rem
+
+
+    h3 
+      font-size: 2.33rem
+      line-height: 2.5rem
+    
+    h4
+      font-size: 1.94rem
+      line-height: 2rem
+    
+    h5
+      font-size: 1.62rem
+      line-height: 2rem
+
+    h6 
+      font-size: 1.35rem
+      line-height: 1.75rem
+    
+    p
+      font-size: 1.125rem
+      line-height: 1.75rem
+    
+    .small
+      font-size: .9375rem
+      line-height: 1.5rem
+  
+
+  .text-container
+    text-align: center
+    padding: 3rem 0
+
+    .title-copy
+      margin: 2rem auto 0 auto
+      max-width: 100%
+
+    @media screen and (min-width: $breakpoint-lg) 
+      .title-copy
+        max-width: 50%
+
+  .card-wrapper
+    display: flex
+    flex-direction: column
+    max-width: 1200px
+    margin: 0 auto
+      
+    .card 
+      background-color: white
+      border: 1px solid $brand-theme-color
+      width: 100%
+      margin-bottom: 1rem
+
+      .header-row
+        display: flex
+        flex-direction: row
+        justify-content: space-between
+        align-items: center
+        margin-bottom: 1rem
+
+        .subheading
+          color: $dashboard-subheading-gray
+        
+        svg
+          transform: translateY(-1px)
+    
+  @media screen and (min-width: $breakpoint-lg) 
+    .card-wrapper
+      flex-direction: row
+      flex-wrap: wrap
+      .card
+        width: 50%
+    
+    

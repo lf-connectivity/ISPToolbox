@@ -1,11 +1,37 @@
 {% load i18n %}
 {% load isp_toolbox_sources %}
 <div class="mt-4">
-    <h5 class="mx-3 market_stats_column--section-header">
+    <h5 class="mx-3 market-stats-column--section-header">
         {% translate 'Market Data' %}
     </h5>
 </div>
 <div class="mx-3 my-2 market-eval-section">
+
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
+            {% translate 'Population' %}
+            {% citation sources id="Population" href=sources_page_url footnote_id=footnote_id %}
+                {% translate "Facebook Connectivity Lab and Center for International Earth Science Information Network - CIESIN - Columbia University. 2016." %}
+                {% source_link "US" "POPULATION" %} {% translate "&nbsp;Source imagery for HRSL © 2016 DigitalGlobe." %} {% source_last_updated "US" "POPULATION" %}
+            {% endcitation %}
+        </p>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <div class="market-eval-section--value">
+                <div id="me-out-population-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                    {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-population">
+                    0
+                </h4>
+            </div>
+            {% with tooltips.population as tooltip %}
+            {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
     <div class="d-flex justify-content-between market-eval-section--row">
         <p role="text" tabindex="" class="market-eval-section--label">
             {% translate 'Building Density' %}
@@ -58,54 +84,6 @@
 
     <div class="d-flex justify-content-between market-eval-section--row">
         <p role="text" tabindex="" class="market-eval-section--label">
-            {% translate 'Avg. Household Income'%}
-            {% citation sources id="Avg. Household Income" href=sources_page_url footnote_id=footnote_id %}
-                Household income data is obtained via {% source_link "US" "INCOME" %} {% source_last_updated "US" "INCOME" %}
-            {% endcitation %}
-        </p>
-        <div class="d-flex flex-row market-eval-section--value-section">
-            <div class="market-eval-section--value">
-                <div id="me-out-income-loading-spinner" class="market-eval-section--spinner-container d-none">
-                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
-                    {% include "workspace/atoms/components/loading_spinner.html" %}
-                    {% endwith %}
-                </div>
-                <h4 id="me-out-income">
-                    $000K
-                </h4>
-            </div>
-            {% with tooltips.income as tooltip %}
-            {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
-            {% endwith %}
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-between market-eval-section--row">
-        <p role="text" tabindex="" class="market-eval-section--label">
-            {% translate 'Population' %}
-            {% citation sources id="Population" href=sources_page_url footnote_id=footnote_id %}
-                {% translate "Population is obtained from "%} {% source_link "US" "POPULATION" %} {% source_last_updated "US" "POPULATION" %}
-            {% endcitation %}
-        </p>
-        <div class="d-flex flex-row market-eval-section--value-section">
-            <div class="market-eval-section--value">
-                <div id="me-out-population-loading-spinner" class="market-eval-section--spinner-container d-none">
-                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
-                    {% include "workspace/atoms/components/loading_spinner.html" %}
-                    {% endwith %}
-                </div>
-                <h4 id="me-out-population">
-                    0
-                </h4>
-            </div>
-            {% with tooltips.population as tooltip %}
-            {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
-            {% endwith %}
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-between market-eval-section--row">
-        <p role="text" tabindex="" class="market-eval-section--label">
             {% translate 'Median Speeds'%}
             {% citation sources id="Median Speeds" href=sources_page_url footnote_id=footnote_id %}
                 Median Speeds data is obtained from {% source_link "US" "MLAB" %} {% source_last_updated "US" "MLAB" %}
@@ -123,6 +101,30 @@
                 </h4>
             </div>
             {% with tooltips.speeds as tooltip %}
+            {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between market-eval-section--row">
+        <p role="text" tabindex="" class="market-eval-section--label">
+            {% translate 'Avg. Household Income'%}
+            {% citation sources id="Avg. Household Income" href=sources_page_url footnote_id=footnote_id %}
+                Household income data is obtained via {% source_link "US" "INCOME" %} {% source_last_updated "US" "INCOME" %}
+            {% endcitation %}
+        </p>
+        <div class="d-flex flex-row market-eval-section--value-section">
+            <div class="market-eval-section--value">
+                <div id="me-out-income-loading-spinner" class="market-eval-section--spinner-container d-none">
+                    {% with spinner_style='height: 15px;' blink=True spinner_classes="mr-2"%}
+                    {% include "workspace/atoms/components/loading_spinner.html" %}
+                    {% endwith %}
+                </div>
+                <h4 id="me-out-income">
+                    $000K
+                </h4>
+            </div>
+            {% with tooltips.income as tooltip %}
             {% include 'workspace/atoms/info_tooltip_and_marker.html' %}
             {% endwith %}
         </div>

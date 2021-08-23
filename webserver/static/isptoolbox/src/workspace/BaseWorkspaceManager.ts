@@ -150,7 +150,6 @@ export abstract class BaseWorkspaceManager {
                     }
                 );
             }
-            PubSub.publish(WorkspaceEvents.FEATURES_LOADED);
             MapLayerSidebarManager.getInstance().setUserMapLayers();
         }
 

@@ -178,6 +178,7 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super(map, draw);
+        MapLayerSidebarManager._instance = this;
         this.sources = overlay.sourceLayerInit;
         this.activeGeoSource = null;
         new RdofOverlayPopup(this.map, this.draw);
@@ -208,8 +209,6 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
                 }
             });
         }
-
-        MapLayerSidebarManager._instance = this;
     }
 
     swap(lst: Array<string>, x: number, y: number) {

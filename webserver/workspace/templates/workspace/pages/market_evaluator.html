@@ -22,10 +22,8 @@
 
   {% include "workspace/organisms/market_eval_competitors.html" %}
 
-  
   <script async src="{% static "market_evaluator.min.js" %}"> </script>
   {{ geojson|json_script:"isp-map-features" }}
   {% include "workspace/organisms/nux_market.html"%}
-
 
 {% endblock %}

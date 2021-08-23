@@ -174,27 +174,6 @@ export abstract class ISPToolboxAbstractAppPage {
             // Additional loading
             this.onMapLoad();
         });
-
-        const loadMapCallback = () => {
-            this.map.getStyle().layers?.every((layer: any) => {
-                if (layer.id.includes('gl-draw')) {
-                    $(`#map-layers-btn`).on('click', (event) => {
-                        const $sidebar = $('#map-layer-sidebar');
-                        if ($sidebar.hasClass('show')) {
-                            $sidebar.removeClass('show');
-                        } else {
-                            $sidebar.addClass('show');
-                        }
-
-                        this.map.resize();
-                    });
-                    this.map.off('idle', loadMapCallback);
-                    return false;
-                }
-                return true;
-            });
-        };
-        this.map.on('idle', loadMapCallback);
     }
 
     initMapCenterAndZoom(): {

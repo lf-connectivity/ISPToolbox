@@ -2,7 +2,7 @@ import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
-import { WorkspaceFeatureTypes, WorkspaceEvents } from './WorkspaceConstants';
+import { WorkspaceFeatureTypes, WorkspaceEvents, WorkspaceTools } from './WorkspaceConstants';
 import centroid from '@turf/centroid';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
@@ -24,6 +24,27 @@ export class MapLayerSidebarManager {
         this.hiddenCoverageAreas = {};
         this.map = map;
         this.draw = draw;
+
+        const loadMapCallback = () => {
+            this.map.getStyle().layers?.every((layer: any) => {
+                if (layer.id.includes('gl-draw')) {
+                    $(`#map-layers-btn`).on('click', (event) => {
+                        const $sidebar = $('#map-layer-sidebar');
+                        if ($sidebar.hasClass('show')) {
+                            $sidebar.removeClass('show');
+                        } else {
+                            $sidebar.addClass('show');
+                        }
+
+                        this.map.resize();
+                    });
+                    this.map.off('idle', loadMapCallback);
+                    return false;
+                }
+                return true;
+            });
+        };
+        this.map.on('idle', loadMapCallback);
     }
 
     setUserMapLayers() {

@@ -38,6 +38,7 @@ class NetworkDemoView(View):
             'workspace_account': False,
             'title': 'LiDAR LOS Check - ISP Toolbox',
             'should_collapse_link_view': True,
+            'tool': 'los_check',
         }
         return render(request, 'workspace/pages/demo_network.index.html', context)
 
@@ -51,6 +52,7 @@ class MarketDemoView(View):
         context = {
             'session': map_session,
             'geojson': map_session.get_session_geojson(),
+            'tool': 'market_evaluator',
         }
         return render(request, 'workspace/pages/demo_market.index.html', context)
 
@@ -90,6 +92,7 @@ class LOSCheckDemo(View):
             'units': units,
             'workspace_account': False,
             'ptponly': True,
+            'tool': 'market_evaluator',
         }
 
         # we're in demo view: suggest user sign-in or create an account

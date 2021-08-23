@@ -101,7 +101,7 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
             'workspace_forms': WorkspaceForms(request, session),
             'beta': True,
             'units': 'US',
-            'tool': 'business',
+            'tool': 'market_evaluator',
             'tower_upload_form': UploadTowerCSVForm,
             'title': 'Market Evaluator - ISP Toolbox',
             'tooltips': TOOLTIPS

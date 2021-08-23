@@ -410,3 +410,9 @@ CACHES = {
         'LOCATION': 'los_cache',
     }
 }
+
+# New User Experiences
+NUXES = [
+    'market_nux',
+    'network_nux'
+]

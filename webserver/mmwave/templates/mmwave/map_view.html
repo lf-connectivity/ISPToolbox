@@ -4,7 +4,7 @@
 {% if not workspace_account and ptponly %}
 {% with width=True %}
 <div class="mt-1">
-    {% include 'mmwave/molecules/draw_controls.html' %}
+    {% include 'workspace/molecules/draw_controls.html' with tool="los_check"%}
 </div>
 {% endwith %}
 {% endif %}

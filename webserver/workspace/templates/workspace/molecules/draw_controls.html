@@ -1,0 +1,13 @@
+<div class="btn-group draw-controls" role="group" aria-label="Drawing Controls" id="drawing-controls">
+  {% if tool == "market_evaluator" %}
+    {% include "workspace/atoms/buttons/draw_coverage_area_base.html" %}
+    {% include "workspace/atoms/buttons/place_tower_button_base.html" %}
+  {% elif tool == "los_check" %}
+  {% include "workspace/atoms/buttons/draw_ptp_link_button_base.html" %}
+    {% if not ptponly %}
+    {% include "mmwave/atoms/buttons/place_tower_button.html" %}
+    {% endif %}
+  {% endif %}
+</div>
+
+

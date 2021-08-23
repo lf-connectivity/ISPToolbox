@@ -28,6 +28,7 @@ import MarketEvaluatorWS, {
 import { GeometryCollection } from '@turf/helpers';
 //@ts-ignore
 import geojsonArea from '@mapbox/geojson-area';
+import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -292,9 +293,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
                         : INACTIVE_AP;
 
                     if (
-                        !this.workspaceManager.mapLayerSidebarManager.hiddenAccessPointIds.includes(
-                            feat.id
-                        )
+                        !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(feat.id)
                     ) {
                         circle_feats[feat.id] = new_feat;
                     }

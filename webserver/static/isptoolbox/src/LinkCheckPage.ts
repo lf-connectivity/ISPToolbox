@@ -65,6 +65,7 @@ import { ISPToolboxAbstractAppPage } from './ISPToolboxAbstractAppPage';
 import { WorkspacePointFeature } from './workspace/BaseWorkspaceFeature.js';
 import { LinkCheckRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
 import { ViewshedTool } from './organisms/ViewshedTool';
+import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -590,6 +591,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             this.setExtremes.bind(this)
         );
 
+        new MapLayerSidebarManager(this.map, this.draw);
         this.workspaceManager = new LOSCheckWorkspaceManager(this.map, this.draw);
         new ViewshedTool(this.map, this.draw);
         this.locationMarker = new LinkCheckLocationSearchTool(

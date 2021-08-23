@@ -4,52 +4,68 @@ import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
 import { WorkspaceFeatureTypes, WorkspaceEvents } from './WorkspaceConstants';
 import centroid from '@turf/centroid';
+import { BaseWorkspaceManager } from './BaseWorkspaceManager';
+import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
 
 export class MapLayerSidebarManager {
     hiddenAccessPointIds: Array<string>;
     hiddenCoverageAreas: { [workspaceId: string]: BaseWorkspaceFeature };
     map: MapboxGL.Map;
     draw: MapboxDraw;
-    initialFeatures: Array<any>;
-    features: { [workspaceId: string]: BaseWorkspaceFeature };
+    protected static _instance: MapLayerSidebarManager;
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
+        if (MapLayerSidebarManager._instance) {
+            throw Error('Already defined');
+        }
+
+        MapLayerSidebarManager._instance = this;
         this.hiddenAccessPointIds = [];
         this.hiddenCoverageAreas = {};
         this.map = map;
         this.draw = draw;
     }
 
-    setInitialFeatures(
-        initialFeatures: Array<any>,
-        features: { [workspaceId: string]: BaseWorkspaceFeature }
-    ) {
-        this.initialFeatures = initialFeatures;
-        this.features = features;
-    }
-
-    createUserMapLayers() {
+    setUserMapLayers() {
         // add building objects to sidebar
         let mapObjectsSection = document.getElementById('map-objects-section');
         let polygonCounter = 1;
 
-        this.initialFeatures.forEach((feature: any) => {
-            let objectLabel;
-            if (feature.geometry.type === 'Point') {
-                objectLabel = feature.properties.name;
-            } else {
-                objectLabel = 'Area ' + polygonCounter;
-                polygonCounter++;
-            }
+        while (mapObjectsSection?.firstChild) {
+            mapObjectsSection.removeChild(mapObjectsSection.firstChild);
+        }
 
+        // Towers, then coverage areas
+        BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.AP).forEach((ap: AccessPoint) => {
             const elem = generateMapLayerSidebarRow(
-                feature,
-                objectLabel,
+                ap.getFeatureData(),
+                ap.getFeatureProperty('name'),
                 this.clickHandler,
                 this.toggleHandler
             );
             mapObjectsSection!.appendChild(elem);
         });
+
+        BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.COVERAGE_AREA).forEach(
+            (coverage: CoverageArea) => {
+                const elem = generateMapLayerSidebarRow(
+                    coverage.getFeatureData(),
+                    'Area ' + polygonCounter,
+                    this.clickHandler,
+                    this.toggleHandler
+                );
+                mapObjectsSection!.appendChild(elem);
+                polygonCounter++;
+            }
+        );
+    }
+
+    static getInstance(): MapLayerSidebarManager {
+        if (MapLayerSidebarManager._instance) {
+            return MapLayerSidebarManager._instance;
+        } else {
+            throw new Error('No Instance of MapLayerSidebarManager instantiated.');
+        }
     }
 
     private updateCoverageAreaVisibility = (MBFeature: any, WSFeature: any) => {
@@ -80,7 +96,7 @@ export class MapLayerSidebarManager {
     };
 
     private toggleHandler = (e: any, uuid: string) => {
-        const WSFeature = this.features[uuid];
+        const WSFeature = BaseWorkspaceManager.getInstance().features[uuid];
         if (WSFeature) {
             var MBFeature = this.draw.get(WSFeature.mapboxId);
             switch (WSFeature.featureType) {
@@ -94,15 +110,19 @@ export class MapLayerSidebarManager {
         }
     };
 
-    private clickHandler = (uuid: String) => {
-        const feature = this.initialFeatures.find(
-            (feature: any) => feature.properties.uuid === uuid
-        );
+    private clickHandler = (uuid: string) => {
+        const feature = BaseWorkspaceManager.getInstance().features[uuid];
         if (feature) {
-            let coordinates = feature.geometry.coordinates;
-            if (feature.geometry.type === 'Polygon') {
-                let polygonCentroid = centroid(feature.geometry);
-                coordinates = polygonCentroid.geometry.coordinates;
+            let coordinates;
+            if (feature.getFeatureType() == WorkspaceFeatureTypes.COVERAGE_AREA) {
+                let coverageArea = feature as CoverageArea;
+
+                // @ts-ignore
+                let polygonCentroid = centroid(coverageArea.getFeatureGeometry());
+                coordinates = polygonCentroid.geometry.coordinates as [number, number];
+            } else {
+                let ap = feature as AccessPoint;
+                coordinates = ap.getFeatureGeometryCoordinates() as [number, number];
             }
             // POSSIBLE TODO - Select tower on fly to?
             this.map.flyTo({

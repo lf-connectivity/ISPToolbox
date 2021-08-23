@@ -24,13 +24,8 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super(map, draw, SUPPORTED_FEATURE_TYPES);
-        if (!BaseWorkspaceManager._instance) {
-            PubSub.subscribe(
-                MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG,
-                this.onViewshedMsg.bind(this)
-            );
-            BaseWorkspaceManager._instance = this;
-        }
+        PubSub.subscribe(MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG, this.onViewshedMsg.bind(this));
+        BaseWorkspaceManager._instance = this;
     }
 
     initSaveFeatureHandlers() {

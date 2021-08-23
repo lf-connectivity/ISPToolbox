@@ -3,7 +3,8 @@ export enum WorkspaceEvents {
     AP_RENDER_GIVEN = 'ap.render_given',
     AP_SELECTED = 'ap.selected',
     AP_COVERAGE_UPDATED = 'ap.coverage_updated',
-    NO_ITEMS = 'workspace.no_items'
+    NO_ITEMS = 'workspace.no_items',
+    FEATURES_LOADED = 'workspace.features_loaded'
 }
 
 export enum WorkspaceFeatureTypes {

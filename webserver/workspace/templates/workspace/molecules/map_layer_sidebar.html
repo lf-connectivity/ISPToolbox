@@ -1,29 +1,31 @@
 <div class="market_overlay--column px-4 py-3 order-3 order-md-2 collapse" id="map-layer-sidebar">
-    <div class="market_overlay--section-header"><h5>Federal Grants</h5></div>
-    <div class="market_overlay--section">
-        {% with tooltips.rdof as tooltipDesc %}
-            {% include "workspace/atoms/map_layers_row.html" with layerName="FCC Rural Digital Opportunity Fund" swatchType="swatch_rdof" layerId="rdof" sources=sources sourceId="RDOF" citation="FCC Rural Digital Opportunity Fund (RDOF) data is obtained via" %}
-        {% endwith %}
-    </div>
+    {% if tool == "market_evaluator" %}
+        <div class="market_overlay--section-header"><h5>Federal Grants</h5></div>
+        <div class="market_overlay--section">
+            {% with tooltips.rdof as tooltipDesc %}
+                {% include "workspace/atoms/map_layers_row.html" with layerName="FCC Rural Digital Opportunity Fund" swatchType="swatch_rdof" layerId="rdof" sources=sources sourceId="RDOF" citation="FCC Rural Digital Opportunity Fund (RDOF) data is obtained via" %}
+            {% endwith %}
+        </div>
 
-    <div class="market_overlay--section-header mt-4"><h5>Additional Layers</h5></div>
-    <div class="market_overlay--section"> 
-        {% with tooltips.census_blocks as tooltipDesc %}
-            {% include "workspace/atoms/map_layers_row.html" with layerName="Census Blocks" swatchType="swatch_census_blocks" layerId="censusBlocks" sources=sources sourceId="CENSUS_BLOCKS" citation="Census Block data was obtained from US 2020 Census Data from" %}
-        {% endwith %}
+        <div class="market_overlay--section-header mt-4"><h5>Additional Layers</h5></div>
+        <div class="market_overlay--section"> 
+            {% with tooltips.census_blocks as tooltipDesc %}
+                {% include "workspace/atoms/map_layers_row.html" with layerName="Census Blocks" swatchType="swatch_census_blocks" layerId="censusBlocks" sources=sources sourceId="CENSUS_BLOCKS" citation="Census Block data was obtained from US 2020 Census Data from" %}
+            {% endwith %}
 
-        {% with tooltips.non_urban as tooltipDesc %}
-            {% include "workspace/atoms/map_layers_row.html" with layerName="Non-urban < 10/1 Mbps" swatchType="swatch_non_urban" layerId="communityConnect" sources=sources sourceId="RURAL" citation="\"Urban Areas\" and \"Urban Clusters\" defined by the" %}
-        {% endwith %}
+            {% with tooltips.non_urban as tooltipDesc %}
+                {% include "workspace/atoms/map_layers_row.html" with layerName="Non-urban < 10/1 Mbps" swatchType="swatch_non_urban" layerId="communityConnect" sources=sources sourceId="RURAL" citation="\"Urban Areas\" and \"Urban Clusters\" defined by the" %}
+            {% endwith %}
 
-        {% with tooltips.cbrs as tooltipDesc %}
-            {% include "workspace/atoms/map_layers_row.html" with layerName="CBRS PAL Holders" swatchType="swatch_cbrs" layerId="cbrs" sources=sources sourceId="CBRS" citation="FCC CBRS PAL data from" %}
-        {% endwith %}
+            {% with tooltips.cbrs as tooltipDesc %}
+                {% include "workspace/atoms/map_layers_row.html" with layerName="CBRS PAL Holders" swatchType="swatch_cbrs" layerId="cbrs" sources=sources sourceId="CBRS" citation="FCC CBRS PAL data from" %}
+            {% endwith %}
 
-        {% with tooltips.tribal as tooltipDesc %}
-            {% include "workspace/atoms/map_layers_row.html" with layerName="Tribal Lands" swatchType="swatch_tribal" layerId="tribal" sources=sources sourceId="TRIBAL" citation="Tribal Lands data was obtained from US 2020 Census Data from"%}
-        {% endwith %}
-    </div>
+            {% with tooltips.tribal as tooltipDesc %}
+                {% include "workspace/atoms/map_layers_row.html" with layerName="Tribal Lands" swatchType="swatch_tribal" layerId="tribal" sources=sources sourceId="TRIBAL" citation="Tribal Lands data was obtained from US 2020 Census Data from"%}
+            {% endwith %}
+        </div>
+    {% endif %}
     <div class="market_overlay--section-header mt-4"><h5>Your Layers</h5></div>
     <div class='market_overlay--section' id='map-objects-section'>
     </div>

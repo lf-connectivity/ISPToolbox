@@ -6,9 +6,10 @@ import { TowerPaginationModal } from '../organisms/TowerPaginationModal';
 import { SessionModal } from '../organisms/SessionModal';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
-import { WorkspaceFeatureTypes } from './WorkspaceConstants';
+import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CPE, APToCPELink, CoverageArea } from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
+import { feature } from '@turf/turf';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void | boolean;
 
@@ -27,7 +28,6 @@ export abstract class BaseWorkspaceManager {
     draw: MapboxDraw;
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
     readonly features: { [workspaceId: string]: BaseWorkspaceFeature }; // Map from workspace UUID to feature
-    mapLayerSidebarManager: MapLayerSidebarManager;
     protected static _instance: BaseWorkspaceManager;
 
     // Event handlers for specific workspace feature types
@@ -61,8 +61,9 @@ export abstract class BaseWorkspaceManager {
         supportedFeatureTypes: Array<WorkspaceFeatureTypes>
     ) {
         if (BaseWorkspaceManager._instance) {
-            return BaseWorkspaceManager._instance;
+            throw Error('BaseWorkspaceManager initialized twice.');
         }
+        BaseWorkspaceManager._instance = this;
 
         this.map = map;
         this.draw = draw;
@@ -97,7 +98,6 @@ export abstract class BaseWorkspaceManager {
 
         let initialFeatures =
             getInitialFeatures() !== null ? getInitialFeatures().features : undefined;
-        this.mapLayerSidebarManager = new MapLayerSidebarManager(this.map, this.draw);
 
         const addType = (
             featureType: WorkspaceFeatureTypes,
@@ -150,8 +150,8 @@ export abstract class BaseWorkspaceManager {
                     }
                 );
             }
-            this.mapLayerSidebarManager.setInitialFeatures(initialFeatures, this.features);
-            this.mapLayerSidebarManager.createUserMapLayers();
+            PubSub.publish(WorkspaceEvents.FEATURES_LOADED);
+            MapLayerSidebarManager.getInstance().setUserMapLayers();
         }
 
         // Instantiate CRUD
@@ -346,6 +346,17 @@ export abstract class BaseWorkspaceManager {
             return BaseWorkspaceManager._instance;
         } else {
             throw new Error('No Instance of BaseWorkspaceManager instantiated.');
+        }
+    }
+
+    static getFeatures(feature_type?: WorkspaceFeatureTypes) {
+        let features = Object.values(BaseWorkspaceManager.getInstance().features);
+        if (!feature_type) {
+            return features;
+        } else {
+            return features.filter(
+                (feature: BaseWorkspaceFeature) => feature.getFeatureType() === feature_type
+            );
         }
     }
 }

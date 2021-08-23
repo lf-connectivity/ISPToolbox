@@ -23,6 +23,7 @@ import {
     TribalGeoOverlay
 } from './molecules/MapboxGeoOverlay';
 import MapboxOverlay from './molecules/MapboxOverlay';
+import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
 
 type GeoLayerString = 'rdof' | 'communityConnect' | 'cbrs' | 'censusBlocks' | 'tribal';
 
@@ -170,20 +171,13 @@ const overlay = {
     }
 };
 
-export default class MarketEvaluatorOverlayManager {
-    map: MapboxGL.Map;
-    draw: MapboxDraw;
+export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSidebarManager {
     sources: OverlaySourceLayer;
     activeGeoSource: GeoLayerString | null;
     overlays: { [key in GeoLayerString]: MapboxOverlay };
-    static _instance: MarketEvaluatorOverlayManager;
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
-        if (MarketEvaluatorOverlayManager._instance) {
-            throw Error('This singleton has already been instantiated, use getInstance.');
-        }
-        this.map = map;
-        this.draw = draw;
+        super(map, draw);
         this.sources = overlay.sourceLayerInit;
         this.activeGeoSource = null;
         new RdofOverlayPopup(this.map, this.draw);
@@ -215,15 +209,7 @@ export default class MarketEvaluatorOverlayManager {
             });
         }
 
-        MarketEvaluatorOverlayManager._instance = this;
-    }
-
-    static getInstance(): MarketEvaluatorOverlayManager {
-        if (MarketEvaluatorOverlayManager._instance) {
-            return MarketEvaluatorOverlayManager._instance;
-        } else {
-            throw new Error('No Instance of MarketEvaluatorOverlayManager instantiated.');
-        }
+        MapLayerSidebarManager._instance = this;
     }
 
     swap(lst: Array<string>, x: number, y: number) {

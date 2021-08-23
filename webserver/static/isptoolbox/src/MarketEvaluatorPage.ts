@@ -3,7 +3,6 @@ import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import MarketEvaluatorWS from './MarketEvaluatorWS';
 import { MarketEvaluatorSidebarManager } from './organisms/MarketEvaluatorSidebarManager';
-import MarketEvaluatorOverlayManager from './MarketEvaluatorOverlayManager';
 
 import {
     OverrideDirect,
@@ -16,12 +15,13 @@ import { MarketEvaluatorWorkspaceManager } from './workspace/MarketEvaluatorWork
 import { MarketEvaluatorTowerPopup } from './isptoolbox-mapbox-draw/popups/TowerPopups';
 import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
 import { MultiThumbSlider } from './atoms/MultiThumbSlider';
+import MarketEvaluatorMapLayerSidebarManager from './MarketEvaluatorMapLayerSidebarManager';
 
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     marketEvalWS: MarketEvaluatorWS;
-    overlayManager: MarketEvaluatorOverlayManager;
+    overlayManager: MarketEvaluatorMapLayerSidebarManager;
 
     constructor() {
         super(
@@ -40,7 +40,7 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
 
     onMapLoad() {
         // stuff might go here later
-        new MarketEvaluatorOverlayManager(this.map, this.draw);
+        new MarketEvaluatorMapLayerSidebarManager(this.map, this.draw);
         new MarketEvaluatorWorkspaceManager(this.map, this.draw);
 
         // Tooltips

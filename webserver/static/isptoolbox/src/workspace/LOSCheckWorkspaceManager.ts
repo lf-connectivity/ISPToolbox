@@ -24,9 +24,7 @@ const SUPPORTED_FEATURE_TYPES = [
 export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super(map, draw, SUPPORTED_FEATURE_TYPES);
-        if (!BaseWorkspaceManager._instance) {
-            BaseWorkspaceManager._instance = this;
-        }
+        BaseWorkspaceManager._instance = this;
     }
 
     initSaveFeatureHandlers() {

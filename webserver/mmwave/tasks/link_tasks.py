@@ -288,7 +288,6 @@ def getTerrainProfile(network_id, data):
         resp['dist'] = genLinkDistance(tx_sub, rx_sub)
         resp['terrain_profile'] = getElevationProfile(tx_sub, rx_sub)
         resp['aoi'] = aoi
-        terrain_cache_set(tx, rx, aoi, resp)
     except Exception as e:
         logging.error(f'Error occurred during generating terrain profile: {e}')
         resp['error'] = str(e)

@@ -284,18 +284,11 @@ def getTerrainProfile(network_id, data):
         tx = Point([float(f) for f in data.get('tx', [])])
         rx = Point([float(f) for f in data.get('rx', [])])
         aoi = data.get('aoi', [0, 1])
-
-        r = terrain_cache_get(tx, rx, aoi)
-        if r:
-            logging.info('cache hit on terrain')
-            resp.update({k: r[k] for k in ('dist', 'terrain_profile', 'aoi')})
-        else:
-            logging.info('cache miss on terrain')
-            tx_sub, rx_sub = createSubLinkFromAoi(tx, rx, aoi)
-            resp['dist'] = genLinkDistance(tx_sub, rx_sub)
-            resp['terrain_profile'] = getElevationProfile(tx_sub, rx_sub)
-            resp['aoi'] = aoi
-            terrain_cache_set(tx, rx, aoi, resp)
+        tx_sub, rx_sub = createSubLinkFromAoi(tx, rx, aoi)
+        resp['dist'] = genLinkDistance(tx_sub, rx_sub)
+        resp['terrain_profile'] = getElevationProfile(tx_sub, rx_sub)
+        resp['aoi'] = aoi
+        terrain_cache_set(tx, rx, aoi, resp)
     except Exception as e:
         logging.error(f'Error occurred during generating terrain profile: {e}')
         resp['error'] = str(e)

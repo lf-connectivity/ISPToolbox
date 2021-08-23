@@ -1,14 +1,18 @@
+{% extends 'workspace/pages/workspace_tool_base.html' %}
 {% load static %}
-{% load isp_toolbox_sources %}
-{% new_sources_list as sources %}
 {% url 'sources' sources_page='market_eval' as sources_page_url %}
-<!DOCTYPE html>
-<html lang="en">
-{% include "workspace/molecules/page_header_market_eval.html" %}
-<script src="{% url 'wafflejs' %}"></script>
-<body>
-  
+
+{% block custom_headers %}
+  {% include "workspace/molecules/page_header_market_eval.html" %}
+  <title>{{title}}</title>
+{% endblock %}
+
+{% block nav %}
   {% include 'workspace/organisms/workspace_nav.html' with page_title="Market Evaluator"%}
+{% endblock %}
+
+{% block content %}
+  
   {% with tool="business" %}
   {% include "workspace/organisms/tool_drawer_menu.html" %}
   {% endwith %}
@@ -44,5 +48,4 @@
   {% include "workspace/organisms/nux_market.html"%}
   {% include "workspace/organisms/export_kmz_modal.html" %}
 
-</body>
-</html>
+{% endblock %}

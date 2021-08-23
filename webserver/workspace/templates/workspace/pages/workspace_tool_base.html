@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% load static %} 
+{% load isp_toolbox_sources %} 
+{% new_sources_list as sources %}
+
+<html lang="en">
+  <head>
+    {% include "workspace/molecules/page_header.html" %} 
+    {% block custom_headers %}
+    {% endblock %}
+  </head>
+
+  <body>
+  {% block nav %}
+  {% endblock %}
+    <div class="d-flex flex-column min-vh-100">
+      {% comment %} <header>
+        {% include "workspace/organisms/workspace_nav.html" %} 
+      </header> {% endcomment %}
+      <div class="flex-grow-1">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+
+    {% include "workspace/organisms/workspace_session_modals.html" %}
+    {% include "workspace/organisms/confirmation_modals.html" %}
+    {% include "workspace/organisms/export_kmz_modal.html" %}
+    {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
+  </body>
+</html>

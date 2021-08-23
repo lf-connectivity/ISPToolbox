@@ -26,34 +26,12 @@
     <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
     <!-- Lodash -->
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js" integrity="sha256-ur/YlHMU96MxHEsy3fHGszZHas7NzH4RQlD4tDVvFhw=" crossorigin="anonymous"></script><script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js" integrity="sha256-ur/YlHMU96MxHEsy3fHGszZHas7NzH4RQlD4tDVvFhw=" crossorigin="anonymous"></script>
+    <script src="{% url 'wafflejs' %}"></script>
     <!-- Favicon -->
     <link rel="shortcut icon" href="{% static 'isptoolbox_favicon--light.png' %}">
 
     <!-- Style Sheets-->
     <link href='{% static "stylesheets/pages/workspace.css" %}' rel='stylesheet' />
-
-    {% block additional_headers %}
-        <!-- High Charts -->
-        <script src="https://code.highcharts.com/highcharts.js"></script>
-        <script src="https://code.highcharts.com/highcharts-more.js"></script>
-        <link href='{% static "stylesheets/pages/los-check.css" %}' rel='stylesheet' />
-
-        <!-- Potree -->
-        <script src="{% static "spectrum/spectrum.js" %}"></script>
-        <script src="{% static "three.js/build/three.min.js" %}"></script>
-        <script src="{% static "three.js/extra/lines.js" %}"></script>
-        <script src="{% static "other/BinaryHeap.js" %}"></script>
-        <script src="{% static "tween/tween.min.js" %}"></script>
-        <script src="{% static "d3/d3.js" %}"></script>
-        <script src="{% static "proj4/proj4.js" %}"></script>
-        <script src="{% static "openlayers3/ol.js" %}"></script>
-        <script src="{% static "i18next/i18next.js" %}"></script>
-        <script src="{% static "jstree/jstree.js" %}"></script>
-        <script src="{% static "potree/potree.js" %}"></script>
-        <script src="{% static "plasio/js/laslaz.js" %}"></script>
-        <link rel="stylesheet" type="text/css" href="{% static "potree/potree.css" %}">
-    {% endblock %}
-
 
     <title>{{title}}</title>
 </head>

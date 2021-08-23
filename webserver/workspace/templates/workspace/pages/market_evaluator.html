@@ -12,15 +12,7 @@
 {% endblock %}
 
 {% block content %}
-  
-  {% with tool="business" %}
-  {% include "workspace/organisms/tool_drawer_menu.html" %}
-  {% endwith %}
-  <div class="mobile-overlay-lock">
-    {% block overlay%}
-    {% include "workspace/organisms/disable_mobile_use.html" %}
-    {% endblock %}
-  </div>
+
   <div class="d-flex market-eval-container website-content">
     {% include "market_evaluator/organisms/market_stats_column.html" with footnote_id="footnotes-section" %}
     <div id='map' class='planner-map col-12 col-md-7 col-lg-8 col-xl-9 col-xxl-10 order-1 order-md-2 px-0' style="min-height: 500px" data-workspace-tool='market_evaluator'>
@@ -38,14 +30,14 @@
     {% include "workspace/molecules/map_layer_sidebar.html" with footnote_id="footnotes-section" %}
   </div>
   </div>
+
   {% include "workspace/organisms/market_eval_competitors.html" %}
-  {% include "workspace/atoms/mapbox_global_public_key.html" %}
+
   <script async src="{% static "market_evaluator.min.js" %}"> </script>
-  {% include "workspace/molecules/workspace_session_info.html" %}
+  
   {{ geojson|json_script:"isp-map-features" }}
-  {% include "workspace/organisms/workspace_session_modals.html" %}
-  {% include "workspace/organisms/confirmation_modals.html" %}
+
   {% include "workspace/organisms/nux_market.html"%}
-  {% include "workspace/organisms/export_kmz_modal.html" %}
+
 
 {% endblock %}

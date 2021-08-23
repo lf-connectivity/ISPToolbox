@@ -11,21 +11,24 @@
   </head>
 
   <body>
-  {% block nav %}
-  {% endblock %}
-    <div class="d-flex flex-column min-vh-100">
-      {% comment %} <header>
-        {% include "workspace/organisms/workspace_nav.html" %} 
-      </header> {% endcomment %}
-      <div class="flex-grow-1">
-        {% block content %}
-        {% endblock %}
+    {% block nav %}
+    {% endblock %}
+
+    <div class="workspace-container">
+      <div class="mobile-overlay-lock">
+        {% include "workspace/organisms/disable_mobile_use.html" %}
       </div>
+        
+      {% block content %}
+      {% endblock %}
     </div>
 
     {% include "workspace/organisms/workspace_session_modals.html" %}
     {% include "workspace/organisms/confirmation_modals.html" %}
     {% include "workspace/organisms/export_kmz_modal.html" %}
     {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
+    {% include "workspace/atoms/mapbox_global_public_key.html" %}
+    {% include "workspace/molecules/workspace_session_info.html" %}
+    {% include "workspace/molecules/workspace_session_info.html" %}
   </body>
 </html>

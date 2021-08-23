@@ -11,50 +11,25 @@ Not rendering this citation for now, but will be useful for sources page
   Check for <a href="{% url "demo-latest_gis-nodate" %}" target="_blank"> new LiDAR updates</a>.
 {% endcitation %}
 
-{% block nav %}
-  {% include 'workspace/organisms/workspace_nav.html' with page_title="LOS Check" %}
-{% endblock %}
-
 {% block custom_headers %}
   {% include "workspace/molecules/page_header_network.html" %}
   <title>{{title}}</title>
 {% endblock %}
 
-  {% comment %} {% if workspace_account and request.user.is_authenticated %}
-  {% include 'workspace/organisms/tool_suggest_workspace_overlay.html' %}
-  {% endif %} {% endcomment %}
+{% block nav %}
+  {% include 'workspace/organisms/workspace_nav.html' with page_title="LOS Check" %}
+{% endblock %}
   
-  {% block content %}
-
-  {% with tool="network" %}
-  {% include "workspace/organisms/tool_drawer_menu.html" %}
-  {% endwith %}
-  <div>
-    <div class="mobile-overlay-lock">
-      {% block overlay%}
-      {% include "workspace/organisms/disable_mobile_use.html" %}
-      {% endblock %}
-    </div>
-
-    <div class="website-content">
-      {% include "mmwave/map_view.html" %}
-      {% include "workspace/atoms/mapbox_global_public_key.html" %}
-      <script async src="{% static "wireless_network.min.js" %}"> </script>
-      {% include "mmwave/3d_view.html" %}
-      {% include "mmwave/link_view.html" %}
-      {% include "workspace/molecules/workspace_session_info.html" %}
-      {{ geojson|json_script:"isp-map-features" }}
-      {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
-    </div>
+{% block content %}
+  <div class="website-content">
+    {% include "mmwave/map_view.html" %}   
+    {% include "mmwave/3d_view.html" %}
+    {% include "mmwave/link_view.html" %}
   </div>
 
-  {% comment %} {% if workspace_account and request.user.is_authenticated %}
-  {% include "workspace/organisms/demo_redirect_to_workspace.html" %}
-  {% endif %} {% endcomment %}
-
-  {% include "workspace/organisms/workspace_session_modals.html" %}
-  {% include "workspace/organisms/confirmation_modals.html" %}
-
+  <script async src="{% static "wireless_network.min.js" %}"> </script>
+  {{ geojson|json_script:"isp-map-features" }}
+  {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
   {% include "workspace/organisms/nux_network.html" %}
 
 {% endblock %}

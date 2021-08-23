@@ -59,6 +59,7 @@ class EditNetworkView(LoginRequiredMixin, View):
             'should_collapse_link_view': True,
             'units': session.units_old,
             'tower_upload_form': UploadTowerCSVForm,
-            'title': 'LiDAR LOS Check - ISP Toolbox'
+            'title': 'LiDAR LOS Check - ISP Toolbox',
+            'tool': 'los_check'
         }
         return render(request, 'workspace/pages/network_edit.html', context)

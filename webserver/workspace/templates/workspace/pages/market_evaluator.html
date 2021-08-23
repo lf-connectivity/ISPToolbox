@@ -13,22 +13,11 @@
 
 {% block content %}
 
-  <div class="d-flex market-eval-container website-content">
-    {% include "market_evaluator/organisms/market_stats_column.html" with footnote_id="footnotes-section" %}
-    <div id='map' class='planner-map col-12 col-md-7 col-lg-8 col-xl-9 col-xxl-10 order-1 order-md-2 px-0' style="min-height: 500px" data-workspace-tool='market_evaluator'>
-      <div class="search-container on-map-controls">
-        {% include "workspace/atoms/components/reconnecting_msg.html" %}
-        <div id="geocoder" class="geocoder-container"></div>
-      </div>
-      <div class="on-map-controls" style="right: 0;">
-          {% include "workspace/molecules/draw_controls.html" with tool="market_evaluator" %}
-        <div class="layer-button-container">
-          {% include "workspace/atoms/buttons/map_layers_button.html" %}
-        </div>
-      </div>
+  <div class="website-content">
+    <div class="market-eval-container">
+      {% include "market_evaluator/organisms/market_stats_column.html" with footnote_id="footnotes-section" %}
+      {% include 'workspace/organisms/map_view_base.html' with tool="market_evaluator" %}
     </div>
-    {% include "workspace/molecules/map_layer_sidebar.html" with footnote_id="footnotes-section" %}
-  </div>
   </div>
 
   {% include "workspace/organisms/market_eval_competitors.html" %}

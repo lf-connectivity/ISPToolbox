@@ -22,7 +22,9 @@ Not rendering this citation for now, but will be useful for sources page
   
 {% block content %}
   <div class="website-content">
-    {% include "mmwave/map_view.html" %}   
+    <div class="map-container-network">
+      {% include "mmwave/map_view.html" with tool="los_check" %}   
+    </div>
     {% include "mmwave/3d_view.html" %}
     {% include "mmwave/link_view.html" %}
   </div>

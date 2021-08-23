@@ -1,11 +1,11 @@
 {% extends "workspace/organisms/map_view_base.html" %}
 
 {% block draw_controls %}
-{% if not workspace_account and ptponly %}
-{% with width=True %}
-<div class="mt-1">
-    {% include 'workspace/molecules/draw_controls.html' with tool="los_check"%}
-</div>
-{% endwith %}
-{% endif %}
+    {% if not workspace_account and ptponly %}
+        {% with width=True %}
+            <div class="mt-1">
+                {% include 'workspace/molecules/draw_controls.html' with tool="los_check"%}
+            </div>
+        {% endwith %}
+    {% endif %}
 {% endblock %}

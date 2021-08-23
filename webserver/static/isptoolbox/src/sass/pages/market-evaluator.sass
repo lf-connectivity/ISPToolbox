@@ -15,9 +15,18 @@
 @use 'global.sass'
 @import ../theme
 
+.market-eval-container
+    display: flex
+    flex-direction: row
+    justify-content: flex-start
+    align-items: center
+    height: 100%
 
-@media (max-width: $breakpoint-md) 
-    .market-eval-container
-        flex-flow: column
     #map
-        min-height: 500px
+        min-height: calc(100vh - 50px)
+
+    @media (max-width: $breakpoint-md) 
+        .market-eval-container
+            flex-flow: column
+        #map
+            min-height: 500px

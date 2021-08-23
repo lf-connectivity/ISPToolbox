@@ -1,4 +1,4 @@
-<div class="col-12 col-md-3 col-lg-2 market_overlay--column px-4 py-3 order-3 order-md-2 collapse" id="map-layer-sidebar">
+<div class="market_overlay--column px-4 py-3 order-3 order-md-2 collapse" id="map-layer-sidebar">
     <div class="market_overlay--section-header"><h5>Federal Grants</h5></div>
     <div class="market_overlay--section">
         {% with tooltips.rdof as tooltipDesc %}
@@ -7,7 +7,7 @@
     </div>
 
     <div class="market_overlay--section-header mt-4"><h5>Additional Layers</h5></div>
-    <div class="market_overlay--section">
+    <div class="market_overlay--section"> 
         {% with tooltips.census_blocks as tooltipDesc %}
             {% include "workspace/atoms/map_layers_row.html" with layerName="Census Blocks" swatchType="swatch_census_blocks" layerId="censusBlocks" sources=sources sourceId="CENSUS_BLOCKS" citation="Census Block data was obtained from US 2020 Census Data from" %}
         {% endwith %}

@@ -9,10 +9,9 @@ context('Work', () => {
         const default_workspace_name = 'untitled workspace';
 
         cy.visit('/pro/market/');
+        cy.close_nux();
         cy.wait_mapbox();
-        // Close out of new user tour
-        cy.get('.shepherd-cancel-icon').should('be.visible');
-        cy.get('body').type('{esc}');
+
 
         // We should see an untitled workspace
         cy.contains(default_workspace_name).should('be.visible');

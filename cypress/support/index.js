@@ -25,3 +25,9 @@ Cypress.Commands.add("create_session", () => {
 Cypress.Commands.add("wait_mapbox", () => {
     cy.get('.mapboxgl-ctrl-geocoder--input').should('exist');
 })
+
+Cypress.Commands.add("close_nux", () => {
+    // Close out of new user tour
+    cy.get('.shepherd-cancel-icon').should('be.visible');
+    cy.get('body').type('{esc}');
+});

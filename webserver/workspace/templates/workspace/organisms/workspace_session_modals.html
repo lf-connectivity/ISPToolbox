@@ -1,4 +1,8 @@
+{% if tool == "business" %}
+{% include "workspace/organisms/create_market_modal.html"%}
+{% else %}
 {% include "workspace/organisms/create_network_modal.html"%}
+{% endif %}
 {% include "workspace/organisms/pagination_network_modal.html"%}
 {% include "workspace/organisms/import_kmz_modal.html" %}
 {% include "workspace/organisms/rename_session_modal.html"%}

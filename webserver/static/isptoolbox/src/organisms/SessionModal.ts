@@ -1,5 +1,6 @@
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
+import { getToolURL } from '../utils/ToolURL';
 
 export class SessionModal {
     constructor() {
@@ -27,6 +28,13 @@ export class SessionModal {
                 const page = e.currentTarget.getAttribute('page-target') as string;
                 const ordering = this.getCurrentOrdering();
                 this.showModalCallback({}, page, ordering);
+            });
+
+            $('.session-name-link').on('click', (event) => {
+                e.preventDefault();
+                const uuid = event.currentTarget.getAttribute('data-target');
+                const url = `${getToolURL()}${uuid}/`;
+                window.location.replace(url);
             });
 
             // Edit Button Callback

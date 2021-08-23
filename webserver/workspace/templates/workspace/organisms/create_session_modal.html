@@ -1,0 +1,46 @@
+{% load i18n %}
+<div class="modal fade theme-modal" id="createNetworkModal" tabindex="-1" role="dialog"
+  aria-labelledby="createNetworkModalLabel" aria-hidden="true">
+  <form action="{% url 'session_create' %}" method="POST" id="workspace_create_session_form">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="createNetworkModalLabel">{% translate "Create New Session as"%}</h3>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="isptoolbox-form inline-field-group">
+            {% csrf_token %}
+            {{ workspace_forms.new_session }}
+            <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
+          </div>
+          <p class="error d-none"></p>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  $(() => {
+    $('#workspace_create_session_form').on('submit', function (event) {
+      event.preventDefault();
+      $.ajax({
+        data: $(this).serialize(),
+        type: "POST",
+        dataType: "json",
+        url: "{% url 'session_create' %}?format=json",
+        success: function (response) {
+          window.location.replace(
+            `{% url tool_url %}${response.uuid}/${response.name}/`
+          );
+        },
+        error: (response) => {
+          $(this).find('.error').removeClass('d-none').html(response.responseJSON.non_field_errors);
+        }
+      })
+    });
+  })
+</script>

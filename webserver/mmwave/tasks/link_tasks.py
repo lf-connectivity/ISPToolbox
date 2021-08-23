@@ -7,7 +7,7 @@ from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
 
 from celery import shared_task
-from mmwave.lidar_utils.caching import lidar_cache_get, lidar_cache_set, terrain_cache_get, terrain_cache_set
+from mmwave.lidar_utils.caching import lidar_cache_get, lidar_cache_set
 from mmwave.scripts.create_lidar_availability_preview import createOpenGraphPreviewImage
 from datetime import date
 from webserver.celery import celery_app as app

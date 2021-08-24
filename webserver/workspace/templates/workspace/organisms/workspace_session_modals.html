@@ -1,4 +1,4 @@
-{% if tool == "business" %}
+{% if tool == "market_evaluator" %}
 {% include "workspace/organisms/create_market_modal.html"%}
 {% else %}
 {% include "workspace/organisms/create_network_modal.html"%}
@@ -7,7 +7,7 @@
 {% include "workspace/organisms/import_kmz_modal.html" %}
 {% include "workspace/organisms/rename_session_modal.html"%}
 {% include "workspace/organisms/save_as_modal.html"%}
-{% if tool == "business" %}
+{% if tool == "market_evaluator" %}
 {% include "workspace/organisms/market_eval_export_modal.html"%}
 {% else %}
 {% endif %}

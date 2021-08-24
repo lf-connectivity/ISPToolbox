@@ -1,6 +1,5 @@
 {% extends "workspace/pages/base.html" %} 
-{% load static %} 
-{% load i18n %} 
+{% load static i18n messenger_plugin %} 
 {% block content %}
   <div class="dashboard px-3 px-sm-5">
     <div class="container text-container">
@@ -106,5 +105,7 @@
 
   {% include "workspace/organisms/import_kmz_modal.html"%}
 </div>
-
+{% with localization='en_US' %}
+{% include 'workspace/molecules/messenger_cta.html' %}
+{% endwith %}
 {% endblock %}

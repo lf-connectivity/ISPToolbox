@@ -66,7 +66,7 @@ tour.addStep({
 });
 tour.addStep({
     id: 'example-step',
-    title: 'Send us feedback on our facebook page!',
+    title: 'Send us feedback on our Facebook page!',
     text: "{% translate '<a href=\'https://www.facebook.com/fbctoolbox\' target=\'_blank\'>Link</a> to our facebook page.' %}",
     cancelIcon: { enabled: true },
     buttons: [{

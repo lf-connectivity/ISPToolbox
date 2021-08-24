@@ -1,7 +1,9 @@
 {% extends 'workspace/pages/base.html' %}
-{% load i18n %}
-{% block additional_headers %}
-<title>{% translate "Account Settings - ISP Toolbox" %}</title>
+
+{% block title %}
+{% with title="Account Settings - ISP Toolbox"%}
+{{block.super}}
+{% endwith %}
 {% endblock %}
 {% block content %}
 <div class="container" style="margin-top: 50px;">

@@ -1,7 +1,10 @@
 {% extends "workspace/pages/base.html" %} 
-{% load static i18n %} 
-{% block additional_headers %}
-<title>{% translate "ISP Toolbox"%}</title>
+{% load static %} 
+{% load i18n %} 
+{% block seo_headers %}
+{% with title="ISP Toolbox" description="Tools to help you grow your Internet Service Provider"%}
+{{block.super}}
+{% endwith %}
 {% endblock %}
 {% block content %}
   <div class="dashboard px-3 px-sm-5">

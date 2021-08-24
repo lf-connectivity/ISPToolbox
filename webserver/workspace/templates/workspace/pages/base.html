@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-{% load static %}
+{% load static i18n %}
 <html lang="en">
 
 <head>
+    {% block title %}
+    <title>
+    {% if title %}
+    {% translate title %}
+    {% else %}
+    {% translate "ISP Toolbox" %}
+    {% endif %}
+    </title>
+    {% endblock title %}
     {% include "workspace/organisms/default_header.html" %}
     {% block additional_headers %}
+    {% endblock %}
+    {% block seo_headers %}
+    {% include "workspace/atoms/seo_headers.html"%}
     {% endblock %}
 </head>
 

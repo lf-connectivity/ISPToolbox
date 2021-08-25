@@ -1,4 +1,4 @@
-{% load messenger_plugin %}
+{% load settings %}
 <!-- Messenger Chat Plugin Code -->
 <div id="fb-root"></div>
 
@@ -8,7 +8,7 @@
 
 <script>
     var chatbox = document.getElementById('fb-customer-chat');
-    chatbox.setAttribute("page_id", "{% fb_page_id %}");
+    chatbox.setAttribute("page_id", "{% settings_value 'FB_PAGE_ID' %}");
     chatbox.setAttribute("attribution", "biz_inbox");
 
     window.fbAsyncInit = function() {

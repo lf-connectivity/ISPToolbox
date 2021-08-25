@@ -762,7 +762,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     if (this.workspaceLinkSelected()) {
                         // @ts-ignore
                         let link = this.draw.get(this.selectedFeatureID);
-                        let ap = this.workspaceManager.features[link?.properties?.ap];
+                        let ap = LOSCheckWorkspaceManager.getFeatureByUuid(link?.properties?.ap);
                         ap.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
                         this.map.fire('draw.update', { features: [ap.getFeatureData()] });
                     } else {
@@ -779,7 +779,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     if (this.workspaceLinkSelected()) {
                         // @ts-ignore
                         let link = this.draw.get(this.selectedFeatureID);
-                        let cpe = this.workspaceManager.features[link?.properties?.cpe];
+                        let cpe = LOSCheckWorkspaceManager.getFeatureByUuid(link?.properties?.cpe);
                         cpe.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
                         this.map.fire('draw.update', { features: [cpe.getFeatureData()] });
                     } else {
@@ -803,10 +803,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                                 feat.geometry.coordinates
                             ) {
                                 if (this.workspaceLinkSelected()) {
-                                    let point = this.workspaceManager.features[
+                                    let point = LOSCheckWorkspaceManager.getFeatureByUuid(
                                         // @ts-ignore
                                         coord1 === 0 ? feat.properties.ap : feat.properties.cpe
-                                    ] as WorkspacePointFeature;
+                                    ) as WorkspacePointFeature;
 
                                     // @ts-ignore
                                     point.move(coords);
@@ -974,8 +974,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     );
                 }
 
-                let ap = this.workspaceManager.features[feat.properties.ap];
-                let cpe = this.workspaceManager.features[feat.properties.cpe];
+                let ap = LOSCheckWorkspaceManager.getFeatureByUuid(feat.properties.ap);
+                let cpe = LOSCheckWorkspaceManager.getFeatureByUuid(feat.properties.cpe);
 
                 $('#hgt-0').val(
                     Math.round(

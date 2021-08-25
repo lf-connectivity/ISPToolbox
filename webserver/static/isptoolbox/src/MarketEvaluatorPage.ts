@@ -1,7 +1,7 @@
 // Create new mapbox Map
 import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import MarketEvaluatorWS, { MarketEvalWSEvents } from './MarketEvaluatorWS';
+import MarketEvaluatorWS from './MarketEvaluatorWS';
 import { MarketEvaluatorSidebarManager } from './organisms/MarketEvaluatorSidebarManager';
 
 import {

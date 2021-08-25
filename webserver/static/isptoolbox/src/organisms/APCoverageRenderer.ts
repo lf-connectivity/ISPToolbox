@@ -4,7 +4,11 @@ import { createGeoJSONCircle } from '../isptoolbox-mapbox-draw/DrawModeUtils';
 import { Geometry, GeoJsonProperties, FeatureCollection, Feature } from 'geojson';
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from '../workspace/BuildingCoverage';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import {
+    SQM_2_SQFT,
+    WorkspaceEvents,
+    WorkspaceFeatureTypes
+} from '../workspace/WorkspaceConstants';
 import { AccessPoint, CoverageArea, CPE } from '../workspace/WorkspaceFeatures';
 import LOSCheckWS, { AccessPointCoverageResponse, LOSWSEvents } from '../LOSCheckWS';
 import { LOSCheckWorkspaceManager } from '../workspace/LOSCheckWorkspaceManager';
@@ -637,8 +641,7 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         if (buildingSource.type === 'geojson') {
             const polygons = [];
             for (const poly of this.buildingOverlays.geometries) {
-                // Convert sq m to sq ft
-                const area = 10.7639 * geojsonArea.geometry(poly);
+                const area = SQM_2_SQFT * geojsonArea.geometry(poly);
                 if (this.buildingFilterSize[0] <= area && area <= this.buildingFilterSize[1]) {
                     polygons.push(poly);
                 }
@@ -658,6 +661,14 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             }
             this.buildingOverlays.geometries.push(...response.gc.geometries);
         }
+        PubSub.publish('filter.bounds_update', this.calculateMinMaxBuildingSizes());
         this.renderBuildings();
+    }
+
+    calculateMinMaxBuildingSizes() {
+        const areas = this.buildingOverlays.geometries.map((g) => {
+            return geojsonArea.geometry(g);
+        });
+        return [SQM_2_SQFT * Math.min(...areas), SQM_2_SQFT * Math.max(...areas)];
     }
 }

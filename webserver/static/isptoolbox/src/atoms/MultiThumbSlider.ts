@@ -55,6 +55,19 @@ export class MultiThumbSlider {
         });
     }
 
+    setRange(min: number, max: number) {
+        this.domNode.setAttribute('aria-valuemin', String(min));
+        this.domNode.setAttribute('aria-valuemax', String(max));
+        this.redraw();
+    }
+
+    resetSliders() {
+        if (this.thumbs.length >= 2) {
+            this.thumbs[0].moveSliderTo(this.thumbs[0].getMin());
+            this.thumbs[1].moveSliderTo(this.thumbs[1].getMax());
+        }
+    }
+
     renderMiddleArea() {
         let middle_area = Array.from(this.domNode.children).find((n) => {
             return n.classList.contains('aria-middle-area');
@@ -199,7 +212,9 @@ export class SliderThumb {
     }
 
     formatValueText(): string {
-        if (this.valueNow > 1000) {
+        if (this.valueNow > 10000) {
+            return (this.valueNow / 1000).toFixed(0) + 'k';
+        } else if (this.valueNow > 1000) {
             return (this.valueNow / 1000).toFixed(1) + 'k';
         } else {
             return this.valueNow.toFixed(0);

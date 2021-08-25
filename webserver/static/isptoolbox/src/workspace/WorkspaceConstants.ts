@@ -17,3 +17,5 @@ export enum WorkspaceTools {
     MARKET_EVALUATOR = 'market_evaluator',
     LOS_CHECK = 'los_check'
 }
+
+export const SQM_2_SQFT = 10.7639;

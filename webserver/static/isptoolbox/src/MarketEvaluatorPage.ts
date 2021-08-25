@@ -1,7 +1,7 @@
 // Create new mapbox Map
 import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import MarketEvaluatorWS from './MarketEvaluatorWS';
+import MarketEvaluatorWS, { MarketEvalWSEvents } from './MarketEvaluatorWS';
 import { MarketEvaluatorSidebarManager } from './organisms/MarketEvaluatorSidebarManager';
 
 import {
@@ -56,7 +56,11 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
                 radius_building_render.updateBuildingFilterSize(range);
                 MarketEvaluatorSidebarManager.getInstance().updateBuildingFilter(range);
             });
+            $('#collapseBuildingFilter').on('shown.bs.collapse', filter.resetSliders.bind(filter));
             $('#collapseBuildingFilter').on('shown.bs.collapse', filter.redraw.bind(filter));
+            PubSub.subscribe('filter.bounds_update', (msg: string, data: [number, number]) => {
+                filter.setRange(data[0], data[1]);
+            });
         });
     }
 }

@@ -560,7 +560,7 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
             return `
                 <div align="center">
                     <img src="${pass_svg}" width="25" height="25">
-                    <p align="center bold">Lidar Coverage Plotted</p>
+                    <p align="center bold">Tower Coverage Plotted</p>
                 </div>
             `;
         }

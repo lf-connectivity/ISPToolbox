@@ -29,6 +29,7 @@ import { GeometryCollection } from '@turf/helpers';
 //@ts-ignore
 import geojsonArea from '@mapbox/geojson-area';
 import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
+import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -68,7 +69,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
         this.map = map;
         this.draw = draw;
         this.apPopup = apPopupClass.getInstance();
-        this.workspaceManager = workspaceManagerClass.getInstance();
+        this.workspaceManager = BaseWorkspaceManager.getInstance();
 
         this.renderCloudRF = options?.renderCloudRF || false;
 
@@ -159,9 +160,9 @@ abstract class RadiusAndBuildingCoverageRenderer {
             );
             if (selectedAPs.length === 1) {
                 hideLinkCheckProfile();
-                let ap = this.workspaceManager.features[
+                let ap = BaseWorkspaceManager.getFeatureByUuid(
                     selectedAPs[0].properties.uuid
-                ] as AccessPoint;
+                ) as AccessPoint;
                 // Setting this timeout so the natural mouseclick close popup trigger resolves
                 // before this one
                 setTimeout(() => {
@@ -233,7 +234,9 @@ abstract class RadiusAndBuildingCoverageRenderer {
             features.length === 1 &&
             features[0].properties?.feature_type === WorkspaceFeatureTypes.AP
         ) {
-            let ap = this.workspaceManager.features[features[0].properties.uuid] as AccessPoint;
+            let ap = BaseWorkspaceManager.getFeatureByUuid(
+                features[0].properties.uuid
+            ) as AccessPoint;
             if (this.apPopup.getAccessPoint() !== ap) {
                 this.apPopup.hide();
                 this.apPopup.setAccessPoint(ap);
@@ -335,9 +338,9 @@ abstract class RadiusAndBuildingCoverageRenderer {
         if (buildingSource.type === 'geojson') {
             const coverage = BuildingCoverage.union(
                 renderFeatures.map((feat) => {
-                    let coverage_object = this.workspaceManager.features[
+                    let coverage_object = BaseWorkspaceManager.getFeatureByUuid(
                         feat.properties?.uuid
-                    ] as AccessPoint;
+                    ) as AccessPoint;
                     return coverage_object?.coverage || EMPTY_BUILDING_COVERAGE;
                 })
             );
@@ -415,7 +418,9 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             );
             let cpePopup = LinkCheckCPEClickCustomerConnectPopup.getInstance();
             if (selectedCPEs.length === 1) {
-                let cpe = this.workspaceManager.features[selectedCPEs[0].properties.uuid] as CPE;
+                let cpe = BaseWorkspaceManager.getFeatureByUuid(
+                    selectedCPEs[0].properties.uuid
+                ) as CPE;
                 let mapboxClient = MapboxSDKClient.getInstance();
                 let lngLat = cpe.getFeatureGeometry().coordinates as [number, number];
                 mapboxClient.reverseGeocode(lngLat, (resp: any) => {
@@ -523,7 +528,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     this.draw.setFeatureProperty(feat.id as string, 'last_updated', now);
                 });
                 this.apPopup.onAPUpdate(
-                    this.workspaceManager.features[message.uuid] as AccessPoint
+                    BaseWorkspaceManager.getFeatureByUuid(message.uuid) as AccessPoint
                 );
             },
             method: 'GET',
@@ -534,7 +539,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
     }
 
     updateCoverageFromAjaxResponse(resp: any, uuid: string) {
-        const ap = this.workspaceManager.features[uuid] as AccessPoint;
+        const ap = BaseWorkspaceManager.getFeatureByUuid(uuid) as AccessPoint;
         ap.setCoverage(resp.features);
         this.renderBuildings();
         PubSub.publish(WorkspaceEvents.AP_COVERAGE_UPDATED, { uuid: uuid });

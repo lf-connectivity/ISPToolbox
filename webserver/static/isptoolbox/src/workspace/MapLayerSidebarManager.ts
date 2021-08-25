@@ -1,6 +1,5 @@
 import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
 import { WorkspaceFeatureTypes, WorkspaceEvents, WorkspaceTools } from './WorkspaceConstants';
 import centroid from '@turf/centroid';
@@ -9,7 +8,9 @@ import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
 
 export class MapLayerSidebarManager {
     hiddenAccessPointIds: Array<string>;
-    hiddenCoverageAreas: { [workspaceId: string]: BaseWorkspaceFeature };
+    hiddenCoverageAreas: { [workspaceId: string]: any };
+    polygonCounter: number;
+    workspaceIdToPolygonCounter: { [workspaceId: string]: number };
     map: MapboxGL.Map;
     draw: MapboxDraw;
     protected static _instance: MapLayerSidebarManager;
@@ -20,8 +21,10 @@ export class MapLayerSidebarManager {
         }
 
         MapLayerSidebarManager._instance = this;
+        this.polygonCounter = 1;
         this.hiddenAccessPointIds = [];
         this.hiddenCoverageAreas = {};
+        this.workspaceIdToPolygonCounter = {};
         this.map = map;
         this.draw = draw;
 
@@ -50,7 +53,6 @@ export class MapLayerSidebarManager {
     setUserMapLayers() {
         // add building objects to sidebar
         let mapObjectsSection = document.getElementById('map-objects-section');
-        let polygonCounter = 1;
 
         while (mapObjectsSection?.firstChild) {
             mapObjectsSection.removeChild(mapObjectsSection.firstChild);
@@ -69,14 +71,21 @@ export class MapLayerSidebarManager {
 
         BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.COVERAGE_AREA).forEach(
             (coverage: CoverageArea) => {
+                let polygonNumber;
+                if (coverage.workspaceId in this.workspaceIdToPolygonCounter) {
+                    polygonNumber = this.workspaceIdToPolygonCounter[coverage.workspaceId];
+                } else {
+                    polygonNumber = this.polygonCounter;
+                    this.workspaceIdToPolygonCounter[coverage.workspaceId] = polygonNumber;
+                    this.polygonCounter++;
+                }
                 const elem = generateMapLayerSidebarRow(
                     coverage.getFeatureData(),
-                    'Area ' + polygonCounter,
+                    'Area ' + polygonNumber,
                     this.clickHandler,
                     this.toggleHandler
                 );
                 mapObjectsSection!.appendChild(elem);
-                polygonCounter++;
             }
         );
     }
@@ -91,13 +100,17 @@ export class MapLayerSidebarManager {
 
     private updateCoverageAreaVisibility = (MBFeature: any, WSFeature: any) => {
         if (!MBFeature) {
-            const MBFeature = this.hiddenCoverageAreas[WSFeature.mapboxId];
+            const MBFeature = this.hiddenCoverageAreas[WSFeature.workspaceId];
             //@ts-ignore
-            this.draw.add(MBFeature);
-            delete this.hiddenCoverageAreas[WSFeature.uuid];
+            let mapboxId = this.draw.add(MBFeature)[0];
+            WSFeature.mapboxId = mapboxId;
+            this.map.fire('draw.create', { features: [MBFeature] });
+            delete this.hiddenCoverageAreas[WSFeature.workspaceId];
         } else {
-            this.hiddenCoverageAreas[WSFeature.mapboxId] = MBFeature;
+            MBFeature.properties.hidden = true;
+            this.hiddenCoverageAreas[WSFeature.workspaceId] = MBFeature;
             this.draw.delete(MBFeature.id);
+            this.map.fire('draw.delete', { features: [MBFeature] });
         }
     };
 
@@ -117,9 +130,9 @@ export class MapLayerSidebarManager {
     };
 
     private toggleHandler = (e: any, uuid: string) => {
-        const WSFeature = BaseWorkspaceManager.getInstance().features[uuid];
+        const WSFeature = BaseWorkspaceManager.getFeatureByUuid(uuid);
         if (WSFeature) {
-            var MBFeature = this.draw.get(WSFeature.mapboxId);
+            let MBFeature = this.draw.get(WSFeature.mapboxId);
             switch (WSFeature.featureType) {
                 case WorkspaceFeatureTypes.COVERAGE_AREA:
                     this.updateCoverageAreaVisibility(MBFeature, WSFeature);
@@ -132,7 +145,7 @@ export class MapLayerSidebarManager {
     };
 
     private clickHandler = (uuid: string) => {
-        const feature = BaseWorkspaceManager.getInstance().features[uuid];
+        const feature = BaseWorkspaceManager.getFeatureByUuid(uuid);
         if (feature) {
             let coordinates;
             if (feature.getFeatureType() == WorkspaceFeatureTypes.COVERAGE_AREA) {

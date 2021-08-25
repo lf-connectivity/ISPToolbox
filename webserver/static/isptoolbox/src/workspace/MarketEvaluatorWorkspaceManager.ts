@@ -1,5 +1,6 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import { MarketEvaluatorTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
+import MarketEvaluatorMapLayerSidebarManager from '../MarketEvaluatorMapLayerSidebarManager';
 import MarketEvaluatorWS, {
     MarketEvalWSEvents,
     MarketEvalWSRequestType,
@@ -30,8 +31,10 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
 
     initSaveFeatureHandlers() {
         const saveCoverageArea = (feature: any) => {
-            let polygon = new CoverageArea(this.map, this.draw, feature);
-            this.saveWorkspaceFeature(polygon);
+            if (!feature.properties.hidden === true) {
+                let polygon = new CoverageArea(this.map, this.draw, feature);
+                this.saveWorkspaceFeature(polygon);
+            }
         };
 
         this.saveFeatureDrawModeHandlers.draw_polygon = saveCoverageArea;
@@ -102,10 +105,19 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
                 ws.cancelCurrentRequest(MarketEvalWSRequestType.VIEWSHED);
             }
         };
+
+        this.deleteFeaturePreAjaxHandlers[WorkspaceFeatureTypes.COVERAGE_AREA] = (
+            feat: BaseWorkspaceFeature
+        ) => {
+            return !(
+                feat.workspaceId in
+                MarketEvaluatorMapLayerSidebarManager.getInstance().hiddenCoverageAreas
+            );
+        };
     }
 
     onViewshedMsg(msg: string, response: ViewshedGeojsonResponse) {
-        let ap = this.features[response.ap_uuid] as AccessPoint;
+        let ap = this.features.get(response.ap_uuid) as AccessPoint;
         if (ap) {
             ap.setFeatureProperty('cloudrf_coverage_geojson_json', response.coverage);
             PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [ap.getFeatureData()] });

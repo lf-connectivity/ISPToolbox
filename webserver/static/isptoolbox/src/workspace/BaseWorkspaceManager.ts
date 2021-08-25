@@ -27,7 +27,7 @@ export abstract class BaseWorkspaceManager {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
-    readonly features: { [workspaceId: string]: BaseWorkspaceFeature }; // Map from workspace UUID to feature
+    readonly features: Map<string, BaseWorkspaceFeature>; // Map from workspace UUID to feature
     protected static _instance: BaseWorkspaceManager;
 
     // Event handlers for specific workspace feature types
@@ -40,7 +40,6 @@ export abstract class BaseWorkspaceManager {
         };
     };
 
-    // Haven't seen a need for post-ajax handlers for delete feature just yet :)
     protected readonly deleteFeaturePreAjaxHandlers: {
         [featureType in WorkspaceFeatureTypes]: UpdateDeleteFeatureProcessor;
     };
@@ -71,7 +70,7 @@ export abstract class BaseWorkspaceManager {
         this.towerModal = new TowerPaginationModal(this.map, this.draw);
         this.sessionModal = new SessionModal();
 
-        this.features = {};
+        this.features = new Map();
         this.supportedFeatureTypes = supportedFeatureTypes;
 
         this.saveFeatureDrawModeHandlers = {};
@@ -91,7 +90,10 @@ export abstract class BaseWorkspaceManager {
         // Default delete handlers are are just do nothings.
         let deleteHandlers: any = {};
         Object.values(WorkspaceFeatureTypes).forEach((val: string) => {
-            deleteHandlers[val] = doNothingProcessor();
+            deleteHandlers[val] = {
+                pre_delete: doNothingProcessor(),
+                post_delete: doNothingProcessor()
+            };
         });
         this.deleteFeaturePreAjaxHandlers = deleteHandlers;
         this.initDeleteFeatureHandlers();
@@ -114,7 +116,7 @@ export abstract class BaseWorkspaceManager {
                         preprocessFeature(feature);
                     }
                     let workspaceFeature = new featureClass(this.map, this.draw, feature);
-                    this.features[workspaceFeature.workspaceId] = workspaceFeature;
+                    this.features.set(workspaceFeature.workspaceId, workspaceFeature);
                 });
             }
         };
@@ -135,8 +137,8 @@ export abstract class BaseWorkspaceManager {
                     (feature: any) => {
                         let apWorkspaceId = feature.properties.ap;
                         let cpeWorkspaceId = feature.properties.cpe;
-                        let ap = this.features[apWorkspaceId] as AccessPoint;
-                        let cpe = this.features[cpeWorkspaceId] as CPE;
+                        let ap = this.features.get(apWorkspaceId) as AccessPoint;
+                        let cpe = this.features.get(cpeWorkspaceId) as CPE;
                         let workspaceFeature = new APToCPELink(
                             this.map,
                             this.draw,
@@ -146,10 +148,12 @@ export abstract class BaseWorkspaceManager {
                         );
                         ap.links.set(cpe, workspaceFeature);
                         cpe.ap = ap;
-                        this.features[workspaceFeature.workspaceId] = workspaceFeature;
+                        this.features.set(workspaceFeature.workspaceId, workspaceFeature);
                     }
                 );
             }
+
+            // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
         }
 
@@ -214,7 +218,11 @@ export abstract class BaseWorkspaceManager {
         successFollowup?: (resp: any) => void
     ) {
         workspaceFeature.create((resp: any) => {
-            this.features[workspaceFeature.workspaceId] = workspaceFeature;
+            this.features.set(workspaceFeature.workspaceId, workspaceFeature);
+
+            // Should probably be replaced with a pubsub event signal
+            MapLayerSidebarManager.getInstance().setUserMapLayers();
+
             if (successFollowup) {
                 successFollowup(resp);
             }
@@ -250,14 +258,19 @@ export abstract class BaseWorkspaceManager {
         const deleteFeaturesOfType = (featureType: WorkspaceFeatureTypes) => {
             if (this.isSupportedFeatureType(featureType)) {
                 this.filterByType(features, featureType).forEach((feature: any) => {
-                    let workspaceFeature = this.features[feature.properties.uuid];
+                    let workspaceFeature = this.features.get(
+                        feature.properties.uuid
+                    ) as BaseWorkspaceFeature;
 
                     // Delete pre-ajax call stuff
                     let retval = this.deleteFeaturePreAjaxHandlers[featureType](workspaceFeature);
 
                     if (retval !== false) {
                         workspaceFeature.delete((resp) => {
-                            delete this.features[feature.properties.uuid];
+                            this.features.delete(feature.properties.uuid);
+
+                            // Should probably be replaced with a pubsub event signal
+                            MapLayerSidebarManager.getInstance().setUserMapLayers();
                         });
                     }
                 });
@@ -282,13 +295,15 @@ export abstract class BaseWorkspaceManager {
         // statement will do.
         features.forEach((feature: any) => {
             if (feature.properties.uuid) {
-                let workspaceFeature = this.features[feature.properties.uuid];
+                let workspaceFeature = this.features.get(
+                    feature.properties.uuid
+                ) as BaseWorkspaceFeature;
                 switch (feature.properties.feature_type) {
                     // Need to process CPEs differently
                     case WorkspaceFeatureTypes.CPE:
                         if (this.isSupportedFeatureType(WorkspaceFeatureTypes.CPE)) {
                             // Need to do this otherwise name change won't work.
-                            let cpe = this.features[feature.properties.uuid] as CPE;
+                            let cpe = this.features.get(feature.properties.uuid) as CPE;
                             let mapboxClient = MapboxSDKClient.getInstance();
                             mapboxClient.reverseGeocode(
                                 feature.geometry.coordinates,
@@ -307,6 +322,9 @@ export abstract class BaseWorkspaceManager {
 
                                     if (retval !== false) {
                                         cpe.update(() => {
+                                            // Should probably be replaced with a pubsub event signal
+                                            MapLayerSidebarManager.getInstance().setUserMapLayers();
+
                                             this.updateFeatureAjaxHandlers[
                                                 WorkspaceFeatureTypes.CPE
                                             ].post_update(workspaceFeature);
@@ -327,6 +345,9 @@ export abstract class BaseWorkspaceManager {
 
                             if (retval !== false) {
                                 workspaceFeature.update(() => {
+                                    // Should probably be replaced with a pubsub event signal
+                                    MapLayerSidebarManager.getInstance().setUserMapLayers();
+
                                     // @ts-ignore
                                     this.updateFeatureAjaxHandlers[
                                         feature.properties.feature_type
@@ -349,7 +370,7 @@ export abstract class BaseWorkspaceManager {
     }
 
     static getFeatures(feature_type?: WorkspaceFeatureTypes) {
-        let features = Object.values(BaseWorkspaceManager.getInstance().features);
+        let features = Array.from(BaseWorkspaceManager.getInstance().features.values());
         if (!feature_type) {
             return features;
         } else {
@@ -357,5 +378,9 @@ export abstract class BaseWorkspaceManager {
                 (feature: BaseWorkspaceFeature) => feature.getFeatureType() === feature_type
             );
         }
+    }
+
+    static getFeatureByUuid(uuid: string) {
+        return BaseWorkspaceManager.getInstance().features.get(uuid) as BaseWorkspaceFeature;
     }
 }

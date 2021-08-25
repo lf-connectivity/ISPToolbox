@@ -38,7 +38,7 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
                 this.saveWorkspaceFeature(workspaceFeature, (resp) => {
                     let cpe = workspaceFeature as CPE;
                     let apUUID = feature.properties.ap;
-                    let ap = this.features[apUUID] as AccessPoint;
+                    let ap = this.features.get(apUUID) as AccessPoint;
                     let link = cpe.linkAP(ap);
                     this.saveWorkspaceFeature(link, (resp) => {
                         this.map.fire('draw.create', { features: [link.getFeatureData()] });
@@ -74,7 +74,7 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
         ) => {
             let link = workspaceFeature as APToCPELink;
             if (!this.draw.get(link.ap.mapboxId) || !this.draw.get(link.cpe.mapboxId)) {
-                delete this.features[workspaceFeature.workspaceId];
+                this.features.delete(workspaceFeature.workspaceId);
                 return false;
             } else {
                 return true;

@@ -1,17 +1,19 @@
 {% extends "workspace/pages/base.html" %}
 {% load i18n isp_toolbox_sources %}
+{% load static %}
 
 {% block additional_headers %}
-{% include "workspace/molecules/page_header_sources_page.html" %}
-<script>
-    // Highlight footnote section if exists.
-    $(document).ready(function($){
-        let footnotesMatch = window.location.href.match(/(#footnotes-section-\d+)/);
-        if (footnotesMatch !== null) {
-            $(footnotesMatch[0]).addClass('footnote-highlight');
-        }
-    });
-</script>
+    {% include "workspace/molecules/page_header.html" %}
+    <link href='{% static "stylesheets/pages/sources-page.css" %}' rel='stylesheet' />
+    <script>
+        // Highlight footnote section if exists.
+        $(document).ready(function($){
+            let footnotesMatch = window.location.href.match(/(#footnotes-section-\d+)/);
+            if (footnotesMatch !== null) {
+                $(footnotesMatch[0]).addClass('footnote-highlight');
+            }
+        });
+    </script>
 {% endblock %}
 
 {% block nav %}

@@ -573,7 +573,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             });
         }
 
-        // Doesn't play nicely with mapbelcbuncbitjhdtfkgtfnbhkvrujj
         this.map.on('draw.create', this.updateRadioLocation.bind(this));
 
         this.profileWS = new LOSCheckWS(this.networkID, [this.ws_message_handler.bind(this)]);

@@ -12,6 +12,7 @@ class _SourcesPage:
     sources_page_template: str
     link_title: str
     page_title: str
+    tool: str
 
 
 _SOURCE_PAGES = {
@@ -19,13 +20,15 @@ _SOURCE_PAGES = {
         app_page_template='workspace/pages/market_evaluator.html',
         sources_page_template='workspace/pages/market_evaluator_sources.html',
         link_title='Market Evaluator',
-        page_title='Market Evaluator Sources - ISP Toolbox'
+        page_title='Market Evaluator Sources - ISP Toolbox',
+        tool='market_evaluator'
     ),
     'edit_network': _SourcesPage(
         app_page_template='workspace/pages/network_edit.html',
         sources_page_template='workspace/pages/network_sources.html',
         link_title='Line of Sight',
-        page_title='LiDAR LOS Check Sources - ISP Toolbox'
+        page_title='LiDAR LOS Check Sources - ISP Toolbox',
+        tool='los_check'
     )
 }
 
@@ -52,6 +55,7 @@ class WorkspaceSourcesView(View):
             'title': page.page_title,
             'sources_page': sources_page,
             'sources_page_info': page,
-            'sources_pages': _SOURCE_PAGES
+            'sources_pages': _SOURCE_PAGES,
+            'tool': page.tool
         }
         return render(request, page.sources_page_template, context)

@@ -1,15 +1,5 @@
 {% extends 'workspace/pages/workspace_tool_base.html' %}
-
-{% load static isp_toolbox_sources %}
-{% url 'sources' sources_page="edit_network" as sources_page_url %}
-
-{% comment %}
-Not rendering this citation for now, but will be useful for sources page 
-{% endcomment %}
-{% citation sources id="Lidar Data" render=False %}
-  LiDAR Data Obtained via {% source_link "US" "USGS_3DEP" %}.
-  Check for <a href="{% url "demo-latest_gis-nodate" %}" target="_blank"> new LiDAR updates</a>.
-{% endcitation %}
+{% load static %}
 
 {% block custom_headers %}
   {% include "workspace/molecules/page_header_network.html" %}
@@ -21,6 +11,11 @@ Not rendering this citation for now, but will be useful for sources page
 {% endblock %}
   
 {% block content %}
+
+  {% load isp_toolbox_sources %} 
+  {% new_sources_list as sources %}
+  {% url 'sources' sources_page="edit_network" as sources_page_url %}
+  
   <div class="website-content">
     <div class="map-container-network">
       {% include "mmwave/map_view.html" %}   
@@ -33,5 +28,13 @@ Not rendering this citation for now, but will be useful for sources page
   {{ geojson|json_script:"isp-map-features" }}
   {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
   {% include "workspace/organisms/nux_network.html" %}
+
+  {% comment %}
+  Not rendering this citation for now, but will be useful for sources page 
+  {% endcomment %}
+  {% citation sources id="Lidar Data" render=False %}
+    LiDAR Data Obtained via {% source_link "US" "USGS_3DEP" %}.
+    Check for <a href="{% url "demo-latest_gis-nodate" %}" target="_blank"> new LiDAR updates</a>.
+  {% endcitation %}
 
 {% endblock %}

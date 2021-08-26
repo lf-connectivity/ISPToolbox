@@ -1,4 +1,5 @@
 {% extends 'workspace/pages/workspace_tool_base.html' %}
+{% load static %}
 
 {% block custom_headers %}
   {% include "workspace/molecules/page_header_market_eval.html" %}
@@ -10,9 +11,10 @@
 {% endblock %}
 
 {% block content %}
-  {% load static %}
+
   {% load isp_toolbox_sources %} 
   {% new_sources_list as sources %}
+  {% url 'sources' sources_page='market_eval' as sources_page_url %}
   
   <div class="website-content">
     <div class="market-eval-container">

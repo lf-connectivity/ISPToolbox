@@ -24,9 +24,7 @@ export default abstract class CollapsibleComponent {
      * which will trigger hiding conflicting components.
      */
     show(): void {
-        PubSub.publish(CollapsibleComponentEvents.COMPONENT_SHOWN, {
-            component: this
-        });
+        this.onShow();
         this.showComponent();
     }
 

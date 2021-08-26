@@ -150,12 +150,6 @@ abstract class RadiusAndBuildingCoverageRenderer {
         this.map.on('draw.selectionchange', this.drawSelectionChangeCallback.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.AP_updateCallback.bind(this));
 
-        // Add building layer callbacks
-        const hideLinkCheckProfile = () => {
-            //@ts-ignore
-            $('#data-container').collapse('hide');
-        };
-
         const onClickAP = (e: any) => {
             // Show tooltip if only one AP is selected.
             const selectedAPs = this.workspaceManager.filterByType(
@@ -163,7 +157,6 @@ abstract class RadiusAndBuildingCoverageRenderer {
                 WorkspaceFeatureTypes.AP
             );
             if (selectedAPs.length === 1) {
-                hideLinkCheckProfile();
                 let ap = BaseWorkspaceManager.getFeatureByUuid(
                     selectedAPs[0].properties.uuid
                 ) as AccessPoint;

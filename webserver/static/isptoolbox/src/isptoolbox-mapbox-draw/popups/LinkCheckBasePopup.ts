@@ -1,10 +1,11 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { getStreetAndAddressInfo } from "../../LinkCheckUtils";
+import { getStreetAndAddressInfo } from '../../LinkCheckUtils';
+import CollapsibleComponent from '../../atoms/CollapsibleComponent';
 
 const DEFAULT_LNGLAT: [number, number] = [0.0, 0.0];
 
-export abstract class LinkCheckBasePopup {
+export abstract class LinkCheckBasePopup extends CollapsibleComponent {
     protected map: mapboxgl.Map;
     protected draw: MapboxDraw;
     protected street: string;
@@ -13,13 +14,14 @@ export abstract class LinkCheckBasePopup {
     protected popup: mapboxgl.Popup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        super();
         this.map = map;
         this.draw = draw;
         this.street = '';
         this.city = '';
         this.lnglat = DEFAULT_LNGLAT;
         this.popup = new window.mapboxgl.Popup({
-            className: "map-tooltip"
+            className: 'map-tooltip'
         });
         this.popup.on('close', () => {
             this.cleanup();
@@ -36,7 +38,7 @@ export abstract class LinkCheckBasePopup {
         this.lnglat = lnglat;
     }
 
-    show() {
+    showComponent() {
         this.popup.setLngLat(this.lnglat);
         if (!this.popup.isOpen()) {
             this.popup.setHTML(this.getHTML());
@@ -45,7 +47,7 @@ export abstract class LinkCheckBasePopup {
         }
     }
 
-    hide() {
+    hideComponent() {
         if (this.popup.isOpen()) {
             this.popup.remove();
         }
@@ -53,6 +55,16 @@ export abstract class LinkCheckBasePopup {
 
     displayLatLng() {
         return `${this.lnglat[1].toFixed(5)}&deg;, ${this.lnglat[0].toFixed(5)}&deg;`;
+    }
+
+    /**
+     * Hide all tooltips
+     */
+    protected onComponentShown(msg: any, { component }: { component: CollapsibleComponent }) {
+        if (component !== this && component instanceof LinkCheckBasePopup) {
+            this.hideComponent();
+        }
+        super.onComponentShown(msg, { component });
     }
 
     /**

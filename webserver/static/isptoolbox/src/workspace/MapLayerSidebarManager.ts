@@ -5,8 +5,9 @@ import { WorkspaceFeatureTypes, WorkspaceEvents, WorkspaceTools } from './Worksp
 import centroid from '@turf/centroid';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
+import CollapsibleComponent from '../atoms/CollapsibleComponent';
 
-export class MapLayerSidebarManager {
+export class MapLayerSidebarManager extends CollapsibleComponent {
     hiddenAccessPointIds: Array<string>;
     hiddenCoverageAreas: { [workspaceId: string]: any };
     polygonCounter: number;
@@ -16,6 +17,7 @@ export class MapLayerSidebarManager {
     protected static _instance: MapLayerSidebarManager;
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
+        super();
         if (MapLayerSidebarManager._instance) {
             throw Error('Already defined');
         }
@@ -34,12 +36,10 @@ export class MapLayerSidebarManager {
                     $(`#map-layers-btn`).on('click', (event) => {
                         const $sidebar = $('#map-layer-sidebar');
                         if ($sidebar.hasClass('show')) {
-                            $sidebar.removeClass('show');
+                            this.hide();
                         } else {
-                            $sidebar.addClass('show');
+                            this.show();
                         }
-
-                        this.map.resize();
                     });
                     this.map.off('idle', loadMapCallback);
                     return false;
@@ -88,6 +88,18 @@ export class MapLayerSidebarManager {
                 mapObjectsSection!.appendChild(elem);
             }
         );
+    }
+
+    protected showComponent() {
+        //@ts-ignore
+        $('#map-layer-sidebar').addClass('show');
+        this.map.resize();
+    }
+
+    protected hideComponent() {
+        //@ts-ignore
+        $('#map-layer-sidebar').removeClass('show');
+        this.map.resize();
     }
 
     static getInstance(): MapLayerSidebarManager {

@@ -66,6 +66,8 @@ import { WorkspacePointFeature } from './workspace/BaseWorkspaceFeature.js';
 import { LinkCheckRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
 import { ViewshedTool } from './organisms/ViewshedTool';
 import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
+import LOSCheckLinkProfileView from './organisms/LOSCheckLinkProfileView';
+import CollapsibleComponent from './atoms/CollapsibleComponent';
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -571,14 +573,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             });
         }
 
-        // Doesn't play nicely with mapbox draw yet mapboxjs v2.0.1
-        // this.map.addSource('mapbox-dem', {
-        //     "type": "raster-dem",
-        //     "url": "mapbox://mapbox.mapbox-terrain-dem-v1",
-        // });
-        // this.map.setTerrain({"source": "mapbox-dem"});
-
-        this.map.on('draw.update', this.updateRadioLocation.bind(this));
+        // Doesn't play nicely with mapbelcbuncbitjhdtfkgtfnbhkvrujj
         this.map.on('draw.create', this.updateRadioLocation.bind(this));
 
         this.profileWS = new LOSCheckWS(this.networkID, [this.ws_message_handler.bind(this)]);
@@ -601,11 +596,18 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         );
 
         // instantiate singletons
+        new LOSCheckLinkProfileView();
         new LinkCheckCustomerConnectPopup(this.map, this.draw, this.locationMarker);
         new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
         new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
         new LinkCheckTowerPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
+
+        // Set relationships amongst collapsible components
+        CollapsibleComponent.registerSingletonConflicts(LOSCheckLinkProfileView, [
+            LinkCheckTowerPopup,
+            MapLayerSidebarManager
+        ]);
 
         const prioritizeDirectSelect = function ({ features }: any) {
             if (features.length == 1 && features[0].geometry.type !== 'Point') {
@@ -623,7 +625,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
         this.map.on('draw.selectionchange', this.showInputs.bind(this));
         this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
-        PubSub.subscribe(WorkspaceEvents.AP_SELECTED, this.showLinkCheckProfile.bind(this));
+        PubSub.subscribe(WorkspaceEvents.AP_SELECTED, () => {
+            LOSCheckLinkProfileView.getInstance().show();
+        });
         PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));
@@ -920,11 +924,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         $(`#radio_name-${data.radio}`).text(data.name);
     }
 
-    showLinkCheckProfile() {
-        //@ts-ignore
-        $('#data-container').collapse('show');
-    }
-
     updateAnimationTitles() {
         // Update animation titles if they exist
         const name1 =
@@ -958,7 +957,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         WorkspaceFeatureTypes.AP_CPE_LINK && update.action === 'move'
                 )
             ) {
-                this.showLinkCheckProfile();
+                LOSCheckLinkProfileView.getInstance().show();
             }
             const feat = update.features[0];
             this.selectedFeatureID = feat.id;

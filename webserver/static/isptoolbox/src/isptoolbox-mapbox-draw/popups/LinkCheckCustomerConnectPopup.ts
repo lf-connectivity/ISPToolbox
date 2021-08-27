@@ -96,10 +96,10 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             : this.setNotInCoverageAreaEventHandlers();
     }
 
-    show() {
+    showComponent() {
         if (!this.popup.isOpen()) {
             this.calculateCoverageStatus();
-            super.show();
+            super.showComponent();
             if (this.accessPoints.length > 0) {
                 this.highlightAllAPFeatures();
             }
@@ -327,8 +327,8 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     */
     protected calculateCoverageStatus() {
         // Set APs.
-        let accessPoints = Object.values(BaseWorkspaceManager.getInstance().features).filter(
-            (feature: BaseWorkspaceFeature) => feature.getFeatureType() === WorkspaceFeatureTypes.AP
+        let accessPoints = BaseWorkspaceManager.getFeatures(
+            WorkspaceFeatureTypes.AP
         ) as AccessPoint[];
 
         // Filter APs by whether or not the lat long is in each AP's radius, or building in coverage area.
@@ -617,7 +617,7 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
         this.setLngLat(cpe.getFeatureGeometryCoordinates() as [number, number]);
     }
 
-    show() {
+    showComponent() {
         if (!this.popup.isOpen()) {
             // Find the building ID by rendering the entire area, then doing a query on underlying building ID.
             // We set a delay on showing tooltip to allow time for building coverage to render.
@@ -629,7 +629,7 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
                 if (building) {
                     this.setBuildingId(building.properties?.msftid);
                 }
-                super.show();
+                super.showComponent();
                 // Add delete btn event handler
                 $(`#cpe-delete-btn`)
                     .off()

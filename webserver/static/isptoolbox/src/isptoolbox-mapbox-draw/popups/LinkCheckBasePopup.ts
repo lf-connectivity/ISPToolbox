@@ -38,7 +38,7 @@ export abstract class LinkCheckBasePopup extends CollapsibleComponent {
         this.lnglat = lnglat;
     }
 
-    showComponent() {
+    protected showComponent() {
         this.popup.setLngLat(this.lnglat);
         if (!this.popup.isOpen()) {
             this.popup.setHTML(this.getHTML());
@@ -47,7 +47,7 @@ export abstract class LinkCheckBasePopup extends CollapsibleComponent {
         }
     }
 
-    hideComponent() {
+    protected hideComponent() {
         if (this.popup.isOpen()) {
             this.popup.remove();
         }

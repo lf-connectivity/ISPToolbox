@@ -8,7 +8,10 @@
         </a>
         <div class="homepage-logo align-items-center d-flex mx-2">
             {% include "workspace/atoms/isptoolbox_logo.html"%}
-          <span class='ml-3'>{{ page_title|default:"ISP Toolbox Workspace" }}</span>
+            <span class='ml-3 page-title'>{{ page_title|default:"ISP Toolbox Workspace" }}</span>
+            {% if beta_logo_mark is True %}
+                <span class='ml-1 beta-mark'>[beta]</span>
+            {% endif %}
         </div>
         {% if not nav_skip_tour_button %}
             <button class="btn my-auto px-0 d-flex" id="tool_help_button">

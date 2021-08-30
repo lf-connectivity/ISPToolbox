@@ -2,12 +2,19 @@
 @import ../theme
     
 .homepage-logo
-    span
+    .page-title
         font-size: 1.125rem
         color: $brand-dark-gray-color
+    .beta-mark
+        color: $mid-gray-color
+        font-size: 0.875rem
+        letter-spacing: 0.4px
+        font-family: $brand-font-family-mono
 
     @media (max-width: $breakpoint-xl)
-        .span
+        .page-title
+            display: none
+        .beta-mark
             display: none
 
 .logo-absolute

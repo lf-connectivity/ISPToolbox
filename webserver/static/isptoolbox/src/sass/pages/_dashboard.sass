@@ -114,6 +114,11 @@
     margin: 0 auto  
     display: grid
     grid-gap: 1rem
+    grid-auto-rows: 1fr
+
+    a
+      margin-bottom: 1rem
+
 
     @media screen and (min-width: $breakpoint-md)
         grid-template-columns: repeat(2, 1fr)
@@ -122,7 +127,7 @@
       background-color: white
       border: 1px solid $brand-theme-color
       width: 100%
-      margin-bottom: 1rem
+      height: 100%
 
       .header-row
         display: flex

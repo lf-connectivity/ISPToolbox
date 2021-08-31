@@ -1,6 +1,6 @@
-import { WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
+import { WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
 
-export const LOSCheckMapboxStyles = [
+export const WorkspaceMapboxStyles = [
     // Standard Link Styling - unselected
     {
         id: 'gl-draw-line-inactive-link',
@@ -348,7 +348,7 @@ export const LOSCheckMapboxStyles = [
     {
         id: 'gl-draw-instructions',
         type: 'symbol',
-        filter: ['all', ['==', '$type', 'Point'], ['has', 'user_draw_guide']],
+        filter: ['all', ['==', '$type', 'Point'], ['has', 'draw_guide']],
         paint: {
             'text-halo-width': 1,
             'text-halo-color': 'rgba(0,0,0,1)',

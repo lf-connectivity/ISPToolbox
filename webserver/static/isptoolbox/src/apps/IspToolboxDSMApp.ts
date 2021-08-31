@@ -2,7 +2,7 @@ import * as MapboxGL from 'mapbox-gl';
 import LidarAvailabilityLayer from '../availabilityOverlay';
 import { getMapDefault } from '../utils/MapDefaults';
 import type { MapDefault } from '../utils/MapDefaults';
-import { LOSCheckMapboxStyles } from '../LOSCheckMapboxStyles';
+import { WorkspaceMapboxStyles } from '../isptoolbox-mapbox-draw/styles/WorkspaceMapboxStyles';
 import { combineStyles } from '../isptoolbox-mapbox-draw/index';
 import PubSub from 'pubsub-js';
 //@ts-ignore
@@ -50,7 +50,7 @@ export default class DSMExportApp {
                 userProperties: true,
                 displayControlsDefault: true,
                 // @ts-ignore
-                styles: combineStyles(combineStyles(styles, LOSCheckMapboxStyles), dsmExportStyles)
+                styles: combineStyles(combineStyles(styles, WorkspaceMapboxStyles), dsmExportStyles)
             });
             this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
             this.map.addControl(this.draw, 'bottom-right');

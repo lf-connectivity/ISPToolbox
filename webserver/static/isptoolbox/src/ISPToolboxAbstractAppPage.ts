@@ -5,7 +5,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 //@ts-ignore
 import styles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import { combineStyles, load_custom_icons } from './isptoolbox-mapbox-draw/index';
-import { LOSCheckMapboxStyles } from './LOSCheckMapboxStyles';
+import { WorkspaceMapboxStyles } from './isptoolbox-mapbox-draw/styles/WorkspaceMapboxStyles';
 import MapboxCustomDeleteControl from './organisms/controls/MapboxCustomDeleteControl';
 import { getInitialLockDragging, setCenterZoomPreferences } from './utils/MapPreferences';
 import { MapboxSDKClient } from './MapboxSDKClient';
@@ -19,7 +19,7 @@ const mapboxgl = window.mapboxgl;
 const mapbox_draw_lib = window.MapboxDraw;
 
 //@ts-ignore
-const mapboxdrawstyles = combineStyles(styles, LOSCheckMapboxStyles);
+const mapboxdrawstyles = combineStyles(styles, WorkspaceMapboxStyles);
 
 // @ts-ignore
 const MapboxGeocoder = window.MapboxGeocoder;
@@ -42,7 +42,7 @@ export abstract class ISPToolboxAbstractAppPage {
     draw: MapboxDraw;
     geocoder: typeof MapboxGeocoder;
 
-    constructor(draw_modes: any, sources_page: string, styles: Array<any> = []) {
+    constructor(draw_modes: any, sources_page: string) {
         let { initial_map_center, initial_zoom } = this.initMapCenterAndZoom();
 
         try {
@@ -90,7 +90,7 @@ export abstract class ISPToolboxAbstractAppPage {
                 modes: { ...MapboxDraw.modes, ...draw_modes },
                 displayControlsDefault: false,
                 controls: {},
-                styles: combineStyles(mapboxdrawstyles, styles)
+                styles: mapboxdrawstyles
             });
 
             // @ts-ignore

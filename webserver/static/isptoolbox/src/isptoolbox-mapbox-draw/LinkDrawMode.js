@@ -1,4 +1,6 @@
-export function LinkMode(){
+import { addDrawingInstructions, getMessageLink } from "./styles/drawing_instructions";
+
+function _LinkMode() {
     const link_mode = MapboxDraw.modes.draw_line_string;
 
     /*
@@ -6,10 +8,10 @@ export function LinkMode(){
     functionality for our purposes. Start indicates the start point, and user fills in
     second point.
     */
-    link_mode.onSetup = function(opts) {
+    link_mode.onSetup = function (opts) {
         opts = opts || {};
         const start = opts.start;
-      
+
         let line, currentVertexPosition;
         let direction = 'forward';
         if (start) {
@@ -23,7 +25,7 @@ export function LinkMode(){
                 geometry: {
                     type: 'LineString',
                     coordinates: [start]
-                }    
+                }
             });
             currentVertexPosition = 1;
         } else {
@@ -38,7 +40,7 @@ export function LinkMode(){
             currentVertexPosition = 0;
         }
         this.addFeature(line);
-      
+
         this.clearSelectedFeatures();
         this.map.doubleClickZoom.disable();
         this.updateUIClasses({ mouse: 'add' });
@@ -46,7 +48,7 @@ export function LinkMode(){
         this.setActionableState({
             trash: true
         });
-      
+
         return {
             line,
             currentVertexPosition,
@@ -58,12 +60,12 @@ export function LinkMode(){
     link_mode.clickAnywhere = function (state, e) {
         if (e.originalEvent.type.includes('touch')) {
             state.line.updateCoordinate(
-              state.currentVertexPosition,
-              e.lngLat.lng,
-              e.lngLat.lat,
+                state.currentVertexPosition,
+                e.lngLat.lng,
+                e.lngLat.lat,
             );
         }
-        
+
         if (state.currentVertexPosition === 1) {
             state.line.addCoordinate(state.currentVertexPosition, e.lngLat.lng, e.lngLat.lat);
             return this.changeMode('simple_select', { featureIds: [state.line.id] });
@@ -79,16 +81,16 @@ export function LinkMode(){
     };
 
     const originalToDisplayFeatures = link_mode.toDisplayFeatures;
-    link_mode.toDisplayFeatures = function(state, geojson, display) {
+    link_mode.toDisplayFeatures = function (state, geojson, display) {
         originalToDisplayFeatures(state, geojson, display);
         renderLinkEnds(geojson, display);
     };
     return link_mode;
 };
 
-export function renderLinkEnds(geojson, display){
-    if(geojson.properties.radius === undefined){
-        if(geojson.geometry.coordinates.length > 0) {
+export function renderLinkEnds(geojson, display) {
+    if (geojson.properties.radius === undefined) {
+        if (geojson.geometry.coordinates.length > 0) {
             const radio0 = {
                 type: 'Feature',
                 properties: {
@@ -104,7 +106,7 @@ export function renderLinkEnds(geojson, display){
             };
             display(radio0);
         }
-        if(geojson.geometry.coordinates.length > 1) {
+        if (geojson.geometry.coordinates.length > 1) {
             const radio1 = {
                 type: 'Feature',
                 properties: {
@@ -121,4 +123,8 @@ export function renderLinkEnds(geojson, display){
             display(radio1);
         }
     }
+}
+
+export function LinkMode() {
+    return addDrawingInstructions(_LinkMode(), getMessageLink);
 }

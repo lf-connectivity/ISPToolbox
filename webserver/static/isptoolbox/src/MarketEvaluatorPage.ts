@@ -16,12 +16,6 @@ import { MarketEvaluatorTowerPopup } from './isptoolbox-mapbox-draw/popups/Tower
 import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
 import { MultiThumbSlider } from './atoms/MultiThumbSlider';
 import MarketEvaluatorMapLayerSidebarManager from './MarketEvaluatorMapLayerSidebarManager';
-import {
-    AddDrawingInstructions,
-    DRAWING_INSTRUCTIONS,
-    getMessagePoint,
-    getMessagePolygon
-} from './isptoolbox-mapbox-draw/styles/drawing_instructions';
 
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
@@ -34,11 +28,10 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
             {
                 simple_select: OverrideSimple(),
                 direct_select: OverrideDirect(),
-                draw_ap: AddDrawingInstructions(APDrawMode(), getMessagePoint),
-                draw_polygon: AddDrawingInstructions(OverrideDrawPolygon(), getMessagePolygon)
+                draw_ap: APDrawMode(),
+                draw_polygon: OverrideDrawPolygon()
             },
-            'market_eval',
-            [DRAWING_INSTRUCTIONS]
+            'market_eval'
         );
 
         new MarketEvaluatorWS([]);

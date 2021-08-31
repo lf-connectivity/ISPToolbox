@@ -1,5 +1,7 @@
+import { getMessagePoint, addDrawingInstructions } from "./styles/drawing_instructions";
+
 export const DEFAULT_RADIUS = 322;
-export function APDrawMode() {
+function _APDrawMode() {
     let mode = Object.assign({}, MapboxDraw.modes.draw_point);
 
     mode.onSetup = function (opts) {
@@ -34,8 +36,19 @@ export function APDrawMode() {
     }
 
     mode.onMouseMove = function (state, e) {
-        state.point.updateCoordinate(`0`, e.lngLat.lng, e.lngLat.lat);
+        state.point.updateCoordinate(e.lngLat.lng, e.lngLat.lat);
     };
 
+    mode.toDisplayFeatures = function (state, geojson, display) {
+        // Never render the point we're drawing
+        const isActivePoint = geojson.properties.id === state.point.id;
+        geojson.properties.active = (isActivePoint) ? 'true' : 'false';
+        if (!isActivePoint) return display(geojson);
+    }
+
     return mode;
+}
+
+export function APDrawMode() {
+    return addDrawingInstructions(_APDrawMode(), getMessagePoint);
 }

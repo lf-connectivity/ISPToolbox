@@ -1,4 +1,6 @@
-export function OverrideDrawPolygon() {
+import { getMessagePolygon, addDrawingInstructions } from "./styles/drawing_instructions";
+
+function _OverrideDrawPolygon() {
     const draw_polygon = MapboxDraw.modes.draw_polygon;
 
     /**
@@ -61,4 +63,8 @@ export function OverrideDrawPolygon() {
     };
 
     return draw_polygon;
+}
+
+export function OverrideDrawPolygon() {
+    return addDrawingInstructions(_OverrideDrawPolygon(), getMessagePolygon);
 }

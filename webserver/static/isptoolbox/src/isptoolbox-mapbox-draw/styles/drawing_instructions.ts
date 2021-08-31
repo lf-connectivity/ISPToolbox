@@ -1,25 +1,5 @@
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
-
-export const DRAWING_INSTRUCTIONS = {
-    id: 'gl-draw-instructions',
-    type: 'symbol',
-    filter: ['all', ['==', '$type', 'Point'], ['has', 'draw_guide']],
-    paint: {
-        'text-halo-width': 1,
-        'text-halo-color': 'rgba(0,0,0,1)',
-        'text-color': 'rgba(194,216,236,1)'
-    },
-    layout: {
-        'text-field': ['get', 'draw_guide'],
-        'text-font': ['Arial Unicode MS Bold'],
-        'text-justify': 'center',
-        'text-offset': [0, 3],
-        'text-size': 13,
-        'text-letter-spacing': 0.03
-    }
-};
-
-export function AddDrawingInstructions(drawing_mode: any, getMessage: (state: any) => string) {
+// modify mapbox draw mode to render instructions to help user accomplish their task
+export function addDrawingInstructions(drawing_mode: any, getMessage: (state: any) => string) {
     const addDrawInstructions = (state: any, geojson: any, display: any) => {
         try {
             const msg = getMessage(state);

@@ -188,7 +188,36 @@ The latest environment variables are in the `terraform/variables.tf` file
 
 `DB_NAME=django_db DB_USERNAME=fbcmasteruser DB_PASSWORD=<db-password> POSTGRES_DB=isptoolbox-db-prod.cahmkzzberpf.us-west-1.rds.amazonaws.com python manage.py migrate`
 
-## Troubleshooting:
+# Cypress Getting Started (GUI):
+
+### Requirements:
+
+- Macbook
+- AWS EC2 instance
+
+## Running Locally on Macbook (recommended ✅):
+
+1. install node on your macbook `https://nodejs.org/en/download/`
+1. install cypress on your macbook `npm install cypress --save-dev`
+1. on your macbook git clone repository locally - i like the github desktop app https://desktop.github.com/
+1. run isptoolbox application on ec2 instance
+1. on your macbook `npx cypress open`
+
+## Run Cypress in EC2 (not recommended ❌):
+
+1. install cypress on your ec2 instance https://docs.cypress.io/guides/getting-started/installing-cypress
+1. install xquartz on your mac machine
+1. ssh onto your ec2 instance using x11
+   eg: ssh -Y -i isptoolbox.pem user@instance
+1. verify x forwarding works `xclock`
+1. `npx cypress open`
+
+## Cypress Headless (CLI):
+
+1. install cypress on your ec2 instance https://docs.cypress.io/guides/getting-started/installing-cypress
+1. `npx cypress run`
+
+# Troubleshooting:
 
 ### My code works on my dev server but not on the prod image!
 

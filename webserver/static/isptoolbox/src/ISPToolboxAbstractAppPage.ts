@@ -42,7 +42,7 @@ export abstract class ISPToolboxAbstractAppPage {
     draw: MapboxDraw;
     geocoder: typeof MapboxGeocoder;
 
-    constructor(draw_modes: any, sources_page: string) {
+    constructor(draw_modes: any, sources_page: string, styles: Array<any> = []) {
         let { initial_map_center, initial_zoom } = this.initMapCenterAndZoom();
 
         try {
@@ -90,7 +90,7 @@ export abstract class ISPToolboxAbstractAppPage {
                 modes: { ...MapboxDraw.modes, ...draw_modes },
                 displayControlsDefault: false,
                 controls: {},
-                styles: mapboxdrawstyles
+                styles: combineStyles(mapboxdrawstyles, styles)
             });
 
             // @ts-ignore

@@ -2,7 +2,7 @@ export const DEFAULT_RADIUS = 322;
 export function APDrawMode() {
     let mode = Object.assign({}, MapboxDraw.modes.draw_point);
 
-    mode.onSetup = function(opts) {
+    mode.onSetup = function (opts) {
         const point = this.newFeature({
             type: 'Feature',
             properties: {
@@ -25,16 +25,17 @@ export function APDrawMode() {
         }
     }
 
-    mode.onClick = function(state, e) {
+    mode.onClick = function (state, e) {
         state.point.coordinates = [e.lngLat.lng, e.lngLat.lat];
         this.map.fire('draw.create', {
             features: [state.point.toGeoJSON()],
         });
-        this.changeMode('simple_select', {featureIds: [state.point.id]});
+        this.changeMode('simple_select', { featureIds: [state.point.id] });
     }
 
-    mode.toDisplayFeatures = function(state, geojson, display) {
-        display(geojson);
-    }
+    mode.onMouseMove = function (state, e) {
+        state.point.updateCoordinate(`0`, e.lngLat.lng, e.lngLat.lat);
+    };
+
     return mode;
 }

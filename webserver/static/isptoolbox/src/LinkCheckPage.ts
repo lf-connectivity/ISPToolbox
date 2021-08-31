@@ -68,6 +68,12 @@ import { ViewshedTool } from './organisms/ViewshedTool';
 import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
 import LOSCheckLinkProfileView from './organisms/LOSCheckLinkProfileView';
 import CollapsibleComponent from './atoms/CollapsibleComponent';
+import {
+    AddDrawingInstructions,
+    DRAWING_INSTRUCTIONS,
+    getMessageLink,
+    getMessagePoint
+} from './isptoolbox-mapbox-draw/styles/drawing_instructions';
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -227,7 +233,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
         super(
             {
-                draw_link: LinkMode(),
+                draw_link: AddDrawingInstructions(LinkMode(), getMessageLink),
                 simple_select: OverrideSimple(),
                 direct_select: OverrideDirect({
                     onVertex: (state: any, e: any) => {
@@ -272,10 +278,11 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         }
                     }
                 }),
-                draw_ap: APDrawMode(),
-                draw_cpe: CPEDrawMode()
+                draw_ap: AddDrawingInstructions(APDrawMode(), getMessagePoint),
+                draw_cpe: AddDrawingInstructions(CPEDrawMode(), getMessagePoint)
             },
-            'edit_network'
+            'edit_network',
+            [DRAWING_INSTRUCTIONS]
         );
 
         if (!(window as any).webgl2support) {

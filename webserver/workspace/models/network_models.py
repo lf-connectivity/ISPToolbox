@@ -15,6 +15,7 @@ from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from django.contrib.sessions.models import Session
+import logging
 import numpy
 import math
 
@@ -227,9 +228,14 @@ def _modify_height(sender, instance, **kwargs):
     if instance.created is None:
         if instance.height is None:
             instance.height = instance.ap.default_cpe_height_ft
-        instance.height = (
-            instance.get_dsm_height() - instance.get_dtm_height() + instance.height
-        )
+
+        try:
+            instance.height = (
+                instance.get_dsm_height() - instance.get_dtm_height() + instance.height
+            )
+        except Exception as e:
+            logging.error(f'Exception when modifying height: {e}')
+            instance.height = instance.ap.default_cpe_height_ft
 
 
 class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):

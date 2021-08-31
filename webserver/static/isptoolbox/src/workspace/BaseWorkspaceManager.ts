@@ -90,10 +90,7 @@ export abstract class BaseWorkspaceManager {
         // Default delete handlers are are just do nothings.
         let deleteHandlers: any = {};
         Object.values(WorkspaceFeatureTypes).forEach((val: string) => {
-            deleteHandlers[val] = {
-                pre_delete: doNothingProcessor(),
-                post_delete: doNothingProcessor()
-            };
+            deleteHandlers[val] = doNothingProcessor();
         });
         this.deleteFeaturePreAjaxHandlers = deleteHandlers;
         this.initDeleteFeatureHandlers();

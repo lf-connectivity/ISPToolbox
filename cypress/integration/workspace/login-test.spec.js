@@ -48,8 +48,17 @@ describe("Test Sign Up / Login", () => {
     );
     cy.get("input[type=submit]").contains("Sign Up").click();
 
+    // Fill out the optional survey
+    cy.url().should("contain", "optional-info");
+    cy.get("input[name=company_website]").type("www.facebook.com");
+    cy.get("label").contains("Fiber").click();
+    cy.get("label").contains("Installation").click();
+    cy.get("select[name=subscriber_size]").select("medium");
+    cy.get("label").contains("customers").click();
+    cy.get("input[type=submit]").click();
+
     // we should be redirected to homepage
-    cy.url().should("equal", "/pro");
+    cy.location('pathname').should("equal", "/pro/");
 
     // our auth cookie should be present
     cy.getCookie("sessionid").should("exist");

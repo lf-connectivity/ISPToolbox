@@ -1,103 +1,122 @@
-'use strict';
+"use strict";
 /**
  * Nodejs Server used for high-throughput websocket connections
- * 
+ *
  * Django-Channels was not working for high throughput, low latency operations
  */
 
-import * as socketio from 'socket.io';
-import django_multiplayer_session_auth_middleware from './middleware/django_auth_middleware';
-import { initAutoMergeMap, loadAutoMergeMap, deleteAutoMergeMap, updateAutoMergeMap} from './mapbox-automerge/mapbox-automerge';
+import * as socketio from "socket.io";
+import Redis from "ioredis";
+
+import django_multiplayer_session_auth_middleware from "./middleware/django_auth_middleware";
+import {
+  initAutoMergeMap,
+  loadAutoMergeMap,
+  deleteAutoMergeMap,
+  updateAutoMergeMap,
+} from "./mapbox-automerge/mapbox-automerge";
+import { settings } from "./settings";
+
 const socketIOPort = process.argv[2];
-const production = process.env.NODE_ENV === 'production';
 const development_server_cors = "http://localhost:8000";
-const options = {
+
+(async () => {
+  const initialized_settings = await settings();
+  const options = {
     cors: {
-        origin: !production ? development_server_cors : 'https://isptoolbox.io',
-        methods: ["GET", "POST"]
+      origin: !initialized_settings.production
+        ? development_server_cors
+        : "https://isptoolbox.io",
+      methods: ["GET", "POST"],
     },
-    path: '/live'
-};
-const io = require('socket.io')(options);
+    path: "/live",
+  };
+  const redis = new Redis(initialized_settings.elasticache);
 
-// Add the Auth Middleware to add user info to the context
-io.use(django_multiplayer_session_auth_middleware);
+  const io = require("socket.io")(options);
 
-io.of("/").adapter.on("create-room", async (room: string) => {
-    await initAutoMergeMap(room);
-});
+  // Add the Auth Middleware to add user info to the context
+  io.use(django_multiplayer_session_auth_middleware(redis));
 
-io.of("/").adapter.on("delete-room", async (room: string) => {
+  io.of("/").adapter.on("create-room", async (room: string) => {
+    await initAutoMergeMap(redis, room);
+  });
+
+  io.of("/").adapter.on("delete-room", async (room: string) => {
     // TODO achong: When room is deleted we should write to DB
-    await deleteAutoMergeMap(room);
-});
+    await deleteAutoMergeMap(redis, room);
+  });
 
-// Callback for new connections
-io.on('connection', async(socket: socketio.Socket) => {
+  // Callback for new connections
+  io.on("connection", async (socket: socketio.Socket) => {
     // Help Typescript
-    if(socket.handshake.query.session) {
-        console.log(`user: ${socket.handshake.query.user}, joined: ${socket.handshake.query.session}`);
-        socket.join(socket.handshake.query.session);
+    if (socket.handshake.query.session) {
+      console.log(
+        `user: ${socket.handshake.query.user}, joined: ${socket.handshake.query.session}`
+      );
+      socket.join(socket.handshake.query.session);
 
-        // Notify Session that we have joined
-        io.in(socket.handshake.query.session).emit(
-            'multiplayer-msg',
-            {
-                type: 'userjoin',
-                uid: socket.handshake.query.user,
-                name: socket.handshake.query.name
-            }
-        );
+      // Notify Session that we have joined
+      io.in(socket.handshake.query.session).emit("multiplayer-msg", {
+        type: "userjoin",
+        uid: socket.handshake.query.user,
+        name: socket.handshake.query.name,
+      });
 
-        // Initialize Initial AutoMerge
-        socket.emit('multiplayer-msg', {
-            type: 'initautomergemap',
-            map: await loadAutoMergeMap(socket.handshake.query.session as string),
+      // Initialize Initial AutoMerge
+      socket.emit("multiplayer-msg", {
+        type: "initautomergemap",
+        map: await loadAutoMergeMap(
+          redis,
+          socket.handshake.query.session as string
+        ),
+      });
+
+      const welcome_new_user = (room: string, id: string) => {
+        io.to(id).emit("multiplayer-msg", {
+          type: "userjoin",
+          uid: socket.handshake.query.user,
+          name: socket.handshake.query.name,
         });
+      };
 
-        const welcome_new_user =  (room: string, id: string) => {
-            io.to(id).emit('multiplayer-msg',
-            {
-                type: 'userjoin',
-                uid: socket.handshake.query.user,
-                name: socket.handshake.query.name
+      io.of("/").adapter.on("join-room", welcome_new_user);
+
+      socket.on("multiplayer-msg", async (msg: any) => {
+        if (socket.handshake.query.session) {
+          socket.broadcast
+            .to(socket.handshake.query.session)
+            .emit("multiplayer-msg", {
+              ...msg,
+              uid: socket.handshake.query.user,
             });
-        };
+        }
+        if (msg.type === "isp.drawedit") {
+          await updateAutoMergeMap(
+            redis,
+            socket.handshake.query.session as string,
+            msg.edit
+          );
+        }
+      });
 
-        io.of("/").adapter.on("join-room", welcome_new_user);
-
-        socket.on('multiplayer-msg', async (msg: any) => {
-            if(socket.handshake.query.session){
-                socket.broadcast.to(socket.handshake.query.session).emit(
-                    'multiplayer-msg',
-                    {
-                        ...msg,
-                        uid: socket.handshake.query.user,
-                    }
-                );
-            }
-            if(msg.type === 'isp.drawedit') {
-                await updateAutoMergeMap(socket.handshake.query.session as string, msg.edit);
-            }
+      // Add disconnection Callback
+      socket.on("disconnect", function () {
+        console.log(
+          `user: ${socket.handshake.query.user}, left: ${socket.handshake.query.session}`
+        );
+        io.of("/").adapter.off("join-room", welcome_new_user);
+        // Notify Session that user has left
+        io.to(socket.handshake.query.session).emit("multiplayer-msg", {
+          type: "userleave",
+          uid: socket.handshake.query.user,
         });
-
-        // Add disconnection Callback
-        socket.on('disconnect', function() {
-            console.log(`user: ${socket.handshake.query.user}, left: ${socket.handshake.query.session}`);
-            io.of("/").adapter.off("join-room", welcome_new_user);
-            // Notify Session that user has left
-            io.to(socket.handshake.query.session).emit(
-                'multiplayer-msg',
-                {
-                    type: 'userleave',
-                    uid: socket.handshake.query.user,
-                }
-            );
-        });
+      });
     }
+  });
 
-
-});
-
-console.log(`Listening for connections on port: https://0.0.0.0:${socketIOPort}`);
-io.listen(socketIOPort);
+  console.log(
+    `Listening for connections on port: https://0.0.0.0:${socketIOPort}`
+  );
+  io.listen(socketIOPort);
+})();

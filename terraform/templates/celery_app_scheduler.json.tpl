@@ -20,10 +20,6 @@
         "value": "${rds_hostname}"
       },
       {
-        "name" : "REDIS_BACKEND",
-        "value" : "${redis}"
-      },
-      {
         "name" : "GOOGLE_APPLICATION_CREDENTIALS",
         "value" : "/usr/src/app/dataUpdate/config/gcp-service-key.json"
       }

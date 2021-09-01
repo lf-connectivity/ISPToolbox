@@ -1,5 +1,12 @@
-export const settings = {
-    REDIS_BACKEND : (
-        process.env.REDIS_BACKEND ?
-            process.env.REDIS_BACKEND : 'redis://localhost:6379'),
+import { getSecretValue } from "./secrets";
+
+const production = process.env.NODE_ENV === "production";
+
+export async function settings() {
+  return {
+    production,
+    elasticache: production
+      ? ((await getSecretValue("prod/isptoolbox_django")) as any).elastiCache
+      : "redis://redis:6379",
+  };
 }

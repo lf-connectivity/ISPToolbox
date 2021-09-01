@@ -275,16 +275,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'webserver.wsgi.application'
-# Channels
-ASGI_APPLICATION = 'webserver.asgi.application'
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [os.environ.get('REDIS_BACKEND', 'redis://localhost:6379')],
-        },
-    },
-}
 
 # Load Secrets
 GIS_DB_CREDENTIALS = json.loads(get_secret("prod/gis_db",
@@ -310,6 +300,19 @@ PROD_DJANGO_ORM_DB_CREDENTIALS.update({
 if PROD:
     DJANGO_ORM_DB_CREDENTIALS = PROD_DJANGO_ORM_DB_CREDENTIALS
 
+ELASTICACHE_ENDPOINT = PROD_DJANGO_ORM_DB_CREDENTIALS[
+    'elastiCache'] if PROD else 'redis://redis:6379'
+
+# Channels
+ASGI_APPLICATION = 'webserver.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [ELASTICACHE_ENDPOINT],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -395,9 +398,8 @@ USE_L10N = True
 USE_TZ = True
 
 
-CELERY_BROKER_URL = os.environ.get('REDIS_BACKEND', 'redis://localhost:6379')
-CELERY_RESULT_BACKEND = os.environ.get(
-    'REDIS_BACKEND', 'redis://localhost:6379')
+CELERY_BROKER_URL = ELASTICACHE_ENDPOINT
+CELERY_RESULT_BACKEND = ELASTICACHE_ENDPOINT
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
@@ -409,7 +411,7 @@ CACHES = {
     },
     'los': {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get('REDIS_BACKEND', 'redis://localhost:6379'),
+        "LOCATION": ELASTICACHE_ENDPOINT,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },

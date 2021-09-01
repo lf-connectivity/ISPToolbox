@@ -26,10 +26,6 @@
       {
         "name": "POSTGRES_DB",
         "value": "${rds_hostname}"
-      },
-      {
-        "name" : "REDIS_BACKEND",
-        "value" : "${redis}"
       }
     ],
     "mountPoints": [
@@ -74,10 +70,6 @@
       {
         "name": "POSTGRES_DB",
         "value": "${rds_hostname}"
-      },
-      {
-        "name" : "REDIS_BACKEND",
-        "value" : "${redis}"
       }
     ],
     "mountPoints": [
@@ -114,10 +106,6 @@
       {
         "name": "NODE_ENV",
         "value": "production"
-      },
-      {
-        "name" : "REDIS_BACKEND",
-        "value" : "${redis}"
       }
     ],
     "logConfiguration": {
@@ -185,10 +173,6 @@
       {
         "name": "POSTGRES_DB",
         "value": "${rds_hostname}"
-      },
-      {
-        "name" : "REDIS_BACKEND",
-        "value" : "${redis}"
       }
     ],
     "logConfiguration": {

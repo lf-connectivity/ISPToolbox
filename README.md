@@ -235,7 +235,6 @@ DB_PASSWORD=
 DB_USERNAME=
 DEBUG=True
 POSTGRES_DB=
-REDIS_BACKEND=
 ```
 
 3. run the following command:

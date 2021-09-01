@@ -6,7 +6,7 @@ const SOCKET_OPTIONS = {
     transports: ['websocket']
 };
 const SOCKET_IO_ENDPOINT =
-    window.location.protocol === 'http:' ? 'ws://localhost:8080' : 'wss://isptoolbox.io';
+    window.location.protocol === 'http:' ? 'ws://localhost:52200' : 'wss://isptoolbox.io';
 
 export class MultiplayerConnection {
     socket: any;

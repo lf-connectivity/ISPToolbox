@@ -36,7 +36,7 @@ class DefaultWorkspaceView(View):
 class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
     form_class = IspToolboxUserSignUpInfoForm
     template_name = 'workspace/pages/optional_info.html'
-    success_url = reverse_lazy("isptoolbox_pro_home")
+    success_url = reverse_lazy("workspace_dashboard")
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -52,7 +52,7 @@ class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
 class OptionalInfoWorkspaceUpdateView(LoginRequiredMixin, UpdateView):
     form_class = IspToolboxUserSignUpInfoForm
     template_name = 'workspace/pages/optional_info.html'
-    success_url = reverse_lazy("isptoolbox_pro_home")
+    success_url = reverse_lazy("workspace_dashboard")
 
     def get_object(self):
         return IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=self.request.user)
@@ -68,11 +68,12 @@ class AccountSettingsView(LoginRequiredMixin, View):
                 'password_form': IspToolboxUserPasswordChangeForm(user=request.user),
                 'delete_account_form': IspToolboxUserDeleteAccountForm,
                 'optional_account_form': (
-                        IspToolboxUserSignUpInfoForm(
-                            instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=request.user)
-                        )
-                        if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists()
-                        else IspToolboxUserSignUpInfoForm
+                    IspToolboxUserSignUpInfoForm(
+                        instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(
+                            owner=request.user)
+                    )
+                    if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists()
+                    else IspToolboxUserSignUpInfoForm
                 ),
             }
         )
@@ -84,7 +85,8 @@ class AccountSettingsView(LoginRequiredMixin, View):
             'delete_account_form': IspToolboxUserDeleteAccountForm(request.POST),
             'optional_account_form': IspToolboxUserSignUpInfoForm(
                 request.POST, instance=(
-                    IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=request.user)
+                    IspToolboxUserSignUpInfoForm.Meta.model.objects.get(
+                        owner=request.user)
                     if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists()
                     else None
                 )
@@ -94,26 +96,29 @@ class AccountSettingsView(LoginRequiredMixin, View):
             if context['account_form'].is_valid():
                 context['account_form'].save()
         else:
-            context.update({'account_form': IspToolboxUserInfoChangeForm(instance=request.user)})
+            context.update(
+                {'account_form': IspToolboxUserInfoChangeForm(instance=request.user)})
 
         if "change_password" in request.POST:
             if context['password_form'].is_valid():
                 context['password_form'].save()
         else:
-            context.update({'password_form': IspToolboxUserPasswordChangeForm(user=request.user)})
+            context.update(
+                {'password_form': IspToolboxUserPasswordChangeForm(user=request.user)})
 
         if "user_info" in request.POST:
             if context['optional_account_form'].is_valid():
                 context['optional_account_form'].save()
         else:
             context.update({'optional_account_form': IspToolboxUserSignUpInfoForm(
-                instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=request.user)
+                instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(
+                    owner=request.user)
             )})
 
         if "delete_account" in request.POST and context['delete_account_form'].is_valid():
             if context['delete_account_form'].try_delete(request):
                 logout(request)
-                return redirect('isptoolbox_pro_home')
+                return redirect('workspace_dashboard')
 
         return render(
             request,

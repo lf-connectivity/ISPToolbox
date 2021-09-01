@@ -49,7 +49,7 @@ class CreateAccountView(View):
         )
 
     def get(self, request):
-        return redirect("isptoolbox_pro_home")
+        return redirect("workspace_dashboard")
 
 
 @method_decorator(csrf_exempt, name='dispatch')

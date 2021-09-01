@@ -9,7 +9,7 @@
         {% include 'workspace/organisms/value_props.html' %}
 
         <div class="fb-login-button"
-            data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'isptoolbox_pro_home' %}, '')});"
+            data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'workspace_dashboard' %}, '')});"
             data-width="" data-size="large"
             data-button-type="continue_with"
             data-layout="rounded"

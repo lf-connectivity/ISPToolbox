@@ -49,7 +49,7 @@ describe("Test Sign Up / Login", () => {
     cy.get("input[type=submit]").contains("Sign Up").click();
 
     // we should be redirected to homepage
-    cy.url().should("include", "/pro");
+    cy.url().should("equal", "/pro");
 
     // our auth cookie should be present
     cy.getCookie("sessionid").should("exist");

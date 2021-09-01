@@ -125,6 +125,9 @@ class AccessPointLocation(WorkspaceFeature):
     def cloudrf_coverage_geojson_json(self):
         return self.cloudrf_coverage_geojson.json if self.cloudrf_coverage_geojson else None
 
+    def get_dtm_height(self) -> float:
+        return getDTMPoint(self.geojson)
+
     def getDSMExtentRequired(self):
         """
         Get the AOI necessary to render AP location

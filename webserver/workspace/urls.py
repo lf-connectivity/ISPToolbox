@@ -93,6 +93,8 @@ urlpatterns = [
     path('workspace/api/session/delete/',
          views.SessionDeleteView.as_view(), name="session_delete"),
     path('workspace/500/', views.Error500View, name='404'),
+    # Potree Visualization
+    path('workspace/api/visualization/<uuid:feature>/', views.PotreeVisualizationMetaView.as_view(), name="potree_viz"),
     # Facebook SDK Login
     path('fb/deauthorize-callback/',
          views.FBDeauthorizeSocialView.as_view(), name="fb_deauthorize"),

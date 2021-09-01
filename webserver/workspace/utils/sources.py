@@ -9,12 +9,14 @@ from dataclasses import dataclass
 
 from dataUpdate.models import Source
 
+import datetime
+
 
 @dataclass
 class ISPToolboxSource(object):
     link: str
     title: str
-    last_updated: str = ''
+    last_updated: datetime.date = None
 
 
 # TODO: Migrate this shit into database. Make a migration for sources, then add this
@@ -22,57 +24,57 @@ class ISPToolboxSource(object):
 _ISP_TOOLBOX_US_SOURCES = {
     'BUILDINGS': ISPToolboxSource(
         link='https://github.com/Microsoft/USBuildingFootprints',
-        title='Microsoft US Building Footprints, July 2018.',
-        last_updated='June 2020'
+        title='Microsoft US Building Footprints, July 2018',
+        last_updated=datetime.date(2020, 6, 1)
     ),
     'SERVICE_PROVIDERS': ISPToolboxSource(
         link='https://www.fcc.gov/general/broadband-deployment-data-fcc-form-477',
         title='Federal Communications Commission (FCC): Form 477 June 2020.',
-        last_updated='June 2020'
+        last_updated=datetime.date(2020, 6, 1)
     ),
     'INCOME': ISPToolboxSource(
         link='https://www.census.gov/programs-surveys/acs',
         title='US Census Bureau: American Community Survey 2019.',
-        last_updated='Feb 2021'
+        last_updated=datetime.date(2021, 2, 1)
     ),
     'RDOF': ISPToolboxSource(
         link='https://www.fcc.gov/auction/904',
         title='FCC Auction 904.',
-        last_updated='Oct 2020'
+        last_updated=datetime.date(2020, 10, 1)
     ),
     'BROADBAND_PRICING': ISPToolboxSource(
         link='https://www.broadbandnow.com/',
         title='BroadbandNow.',
-        last_updated='Apr 2021'
+        last_updated=datetime.date(2021, 4, 1)
     ),
-    'MLAB': ISPToolboxSource(
+    'MLAB_NDT': ISPToolboxSource(
         link='https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information',  # noqa: E501
-        title='M-Lab.',
-        last_updated='Oct 2020'
+        title='The M-Lab NDT Dataset',
+        last_updated=datetime.date(2021, 7, 1)
     ),
     'POPULATION': ISPToolboxSource(
         link='https://data.humdata.org/dataset/united-states-high-resolution-population-density-maps-demographic-estimates',
-        title='High Resolution Settlement Layer. ',
-        last_updated='July 2019'
+        title='High Resolution Settlement Layer (HRSL)',
+        last_updated=datetime.date(2021, 8, 8)
     ),
     'PR_BUILDINGS': ISPToolboxSource(
         link='https://www.openstreetmap.org/copyright',
-        title='\u00A9 OpenStreetMap contributors.',
+        title='\u00A9 OpenStreetMap contributors',
     ),
     'TOWERS': ISPToolboxSource(
         link='https://www.fcc.gov/uls/transactions/daily-weekly',
         title='FCC Weekly Database.',
-        last_updated='Oct 2020'
+        last_updated=datetime.date(2020, 10, 1)
     ),
     'RURAL': ISPToolboxSource(
         link='https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html',
         title='US Census Bureau\'s UA10 "Urban Areas" dataset, 2019.',
-        last_updated='Nov 2020'
+        last_updated=datetime.date(2020, 11, 1)
     ),
     'CBRS': ISPToolboxSource(
         link='https://auctiondata.fcc.gov/public/projects/auction105/reports/results_by_license',
         title='FCC Auction 105.',
-        last_updated='May 2021'
+        last_updated=datetime.date(2021, 6, 1)
     ),
     'AP_LOS': ISPToolboxSource(
         link='https://cloudrf.com/api/',
@@ -81,21 +83,40 @@ _ISP_TOOLBOX_US_SOURCES = {
     'CENSUS_BLOCKS': ISPToolboxSource(
         link='https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html',
         title='Census Tiger/Line\u00AE Shapefiles.',
-        last_updated='May 2021'
+        last_updated=datetime.date(2021, 5, 1)
     ),
     'TRIBAL': ISPToolboxSource(
         link='https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2020&layergroup=American+Indian+Area+Geography',
         title='Census Tiger/Line\u00AE Shapefiles',
-        last_updated='June 2021'
+        last_updated=datetime.date(2021, 6, 1)
     ),
     'USGS_3DEP': ISPToolboxSource(
-        link='https://www.usgs.gov/news/usgs-3dep-lidar-point-cloud-now-available-amazon-public-dataset',
-        title='USGS 3DEP',
+        link='https://www.usgs.gov/core-science-systems/ngp/3dep',
+        title='USGS 3DEP LiDAR Data',
+    ),
+    'USGS_3DEP_POINT_CLOUDS': ISPToolboxSource(
+        link='https://registry.opendata.aws/usgs-lidar/',
+        title='USGS 3DEP LiDAR Point Clouds AWS Public Dataset',
+    ),
+    'CLOUD_RF': ISPToolboxSource(
+        link='https://cloudrf.com/api/',
+        title='Cloud-RF',
+        last_updated=datetime.date(2003, 1, 1)
     )
 }
 
+
+_ISP_TOOLBOX_LICENSES = {
+    'ODBL': ISPToolboxSource(
+        link='https://opendatacommons.org/licenses/odbl/',
+        title='Open Data Commons Open Database License (ODbL)'
+    )
+}
+
+
 _ISP_TOOLBOX_SOURCES = {
-    'US': _ISP_TOOLBOX_US_SOURCES
+    'US': _ISP_TOOLBOX_US_SOURCES,
+    'LICENSES': _ISP_TOOLBOX_LICENSES
 }
 
 
@@ -111,7 +132,7 @@ def get_source(country, source_id):
     if Source.objects.filter(source_country=country, source_id=source_id).exists():
         db_source = Source.objects.get(
             source_country=country, source_id=source_id)
-        source.last_updated = db_source.last_updated.strftime('%b %Y')
+        source.last_updated = db_source.last_updated
 
     return source
 

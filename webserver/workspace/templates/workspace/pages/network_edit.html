@@ -33,7 +33,8 @@
   Not rendering this citation for now, but will be useful for sources page 
   {% endcomment %}
   {% citation sources id="Lidar Data" render=False %}
-    LiDAR Data Obtained via {% source_link "US" "USGS_3DEP" %}.
+    {% source_link "US" "USGS_3DEP" %} obtained via {% source_link "US" "USGS_3DEP_POINT_CLOUDS" %}.
+    Last updated date can be found in the legend tooltip.
     Check for <a href="{% url "demo-latest_gis-nodate" %}" target="_blank"> new LiDAR updates</a>.
   {% endcitation %}
 

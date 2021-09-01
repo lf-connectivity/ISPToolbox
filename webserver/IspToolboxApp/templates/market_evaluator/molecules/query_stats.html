@@ -12,7 +12,7 @@
             {% translate 'Population' %}
             {% citation sources id="Population" href=sources_page_url footnote_id=footnote_id %}
                 {% translate "Facebook Connectivity Lab and Center for International Earth Science Information Network - CIESIN - Columbia University. 2016." %}
-                {% source_link "US" "POPULATION" %} {% translate "&nbsp;Source imagery for HRSL © 2016 DigitalGlobe." %} {% source_last_updated "US" "POPULATION" %}
+                {% source_link "US" "POPULATION" %} {% translate ".&nbsp;Source imagery for HRSL © 2016 DigitalGlobe." %} {% source_last_updated "US" "POPULATION" format="Accessed <last_updated>." last_updated_format="%-d %B %Y" %}
             {% endcitation %}
         </p>
         <div class="d-flex flex-row market-eval-section--value-section">
@@ -86,7 +86,7 @@
         <p role="text" tabindex="" class="market-eval-section--label">
             {% translate 'Median Speeds'%}
             {% citation sources id="Median Speeds" href=sources_page_url footnote_id=footnote_id %}
-                Median Speeds data is obtained from {% source_link "US" "MLAB" %} {% source_last_updated "US" "MLAB" %}
+                {% source_link "US" "MLAB_NDT" %}, {% source_last_updated "US" "MLAB_NDT" format="<last_updated>"%}
             {% endcitation %}
         </p>
         <div class="d-flex flex-row market-eval-section--value-section">

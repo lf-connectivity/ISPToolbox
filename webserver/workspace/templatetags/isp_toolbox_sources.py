@@ -350,13 +350,14 @@ def source_link(country, source_id):
 
 
 @register.simple_tag
-def source_last_updated(country, source_id):
+def source_last_updated(country, source_id, format='[Last Updated <last_updated>]', last_updated_format='%b %Y'):
     """
     Creates text for the date of last update for the given source, by country
-    and source ID. Will look like `[Last Updated <last_updated>]`
+    and source ID. Will look like `[Last Updated <last_updated>]`, unless formatted otherwise
     """
     source_info = get_source(country, source_id)
-    return f'[Last Updated {source_info.last_updated}]'
+    last_updated = source_info.last_updated.strftime(last_updated_format) if source_info.last_updated else ''
+    return format.replace('<last_updated>', last_updated)
 
 
 @register.inclusion_tag('workspace/atoms/components/footnote_section.html')

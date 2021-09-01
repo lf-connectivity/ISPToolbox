@@ -89,7 +89,7 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
         widget=forms.Select,
         choices=IspToolboxUserSignUpInfo.SUBSCRIBER_SIZE_CHOICES)
     company_goal = forms.MultipleChoiceField(
-        label="What are you business goals this year?",
+        label="What are your business goals this year?",
         label_suffix="",
         required=False,
         widget=forms.CheckboxSelectMultiple,

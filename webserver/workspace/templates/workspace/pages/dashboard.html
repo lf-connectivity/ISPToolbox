@@ -61,7 +61,7 @@
             </div>
         </a>
         <a
-            href="{% if user.is_authenticated %}{% url 'edit_account_network' %}{% else %}{% url 'demo-network-app' %}{% endif %}"
+            href="{% if user.is_authenticated %}{% url 'edit_account_network' %}{% else %}{% url 'demo-los-check' %}{% endif %}"
         >
             <div class="card">
                 <div class="card-body">
@@ -98,16 +98,6 @@
         </a>
   </div>
   <div class="container text-center">
-    {% comment %} 
-    // not sure if we're still including this
-    {% if showSurvey %}
-    <div class="alert alert-primary" role="alert">
-      <a href="{% url 'optional_info' %}"
-        >{% translate "Take a quick survey to help us make ISP Toolbox
-        better"%}</a
-      >
-    </div>
-    {% endif %} {% endcomment %}
     <div class='text-container-links'>
       <p>Have questions or feedback for us?</p>
       <a

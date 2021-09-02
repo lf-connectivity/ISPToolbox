@@ -10,7 +10,7 @@ from IspToolboxAccounts.forms import (
 from django.contrib.auth import logout
 
 
-class WorkspaceDashboard(View):
+class WorkspaceDashboard(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, 'workspace/pages/dashboard.html')
 

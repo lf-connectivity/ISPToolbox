@@ -78,18 +78,18 @@ def readFromS3(object_name, fp, bucket_name=bucket_name):
     s3_client.download_fileobj(bucket_name, object_name, fp)
 
 
-def readMultipleHelper(client, s3key, local_filename):
+def readMultipleHelper(client, s3key, local_filename, bucket_name=bucket_name):
     return client.download_file(Filename=local_filename, Bucket=bucket_name, Key=s3key)
 
 
-def writeMultipleHelper(client, s3key, local_filename):
+def writeMultipleHelper(client, s3key, local_filename, bucket_name=bucket_name):
     return client.upload_file(Filename=local_filename, Bucket=bucket_name, Key=s3key)
 
 
-def readMultipleS3Objects(keys, filenames):
+def readMultipleS3Objects(keys, filenames, bucket_name=bucket_name):
     with concurrent.futures.ThreadPoolExecutor(max_workers) as executor:
         future_to_url = {
-            executor.submit(readMultipleHelper, s3_client, key, filename): key
+            executor.submit(readMultipleHelper, s3_client, key, filename, bucket_name): key
             for key, filename in zip(keys, filenames)
         }
     for future in concurrent.futures.as_completed(future_to_url):
@@ -99,10 +99,10 @@ def readMultipleS3Objects(keys, filenames):
             pass
 
 
-def writeMultipleS3Objects(keys, filenames):
+def writeMultipleS3Objects(keys, filenames, bucket_name=bucket_name):
     with concurrent.futures.ThreadPoolExecutor(max_workers) as executor:
         future_to_url = {
-            executor.submit(writeMultipleHelper, s3_client, key, filename): key
+            executor.submit(writeMultipleHelper, s3_client, key, filename, bucket_name): key
             for key, filename in zip(keys, filenames)
         }
     for future in concurrent.futures.as_completed(future_to_url):

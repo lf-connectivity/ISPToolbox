@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.gis.geos import Point
 from django.conf import settings
 from storages.backends.s3boto3 import S3Boto3Storage
-from IspToolboxApp.util.s3 import S3PublicExportMixin
+from IspToolboxApp.util.s3 import S3PublicExportMixin, writeMultipleS3Objects
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from workspace.models.network_models import AccessPointLocation
@@ -148,7 +148,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
         polynomials = [
             polyfit(samples, [3, 10, 23], 2),  # get dsm tiles
             polyfit(samples, [0.5, 1, 2], 2),  # compute viewshed
-            polyfit(samples, [22, 81, 210], 2),  # tile results
+            polyfit([0.5] + samples, [10, 43, 160, 640], 3),  # tile results
+            polyfit([0.5] + samples, [7, 25, 100, 400], 3),  # upload results
         ]
         time_remaining = 0
         for i in range(step, len(polynomials)):
@@ -171,8 +172,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
             {dsm_filepath} {output_filepath}
         """
 
-    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath, zoom_min=14, zoom_max=19, processes=4):
-        return f"""gdal2tiles.py --zoom={zoom_min}-{zoom_max} {viewshed_filepath} {output_folderpath}"""
+    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath, zoom_min=14, zoom_max=19, processes=8):
+        return f"""gdal2tiles.py --zoom={zoom_min}-{zoom_max} --processes={processes} {viewshed_filepath} {output_folderpath}"""
 
     def __calculateRadiusViewshed(self) -> float:
         # Calculate how far viewshed should extend
@@ -194,7 +195,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
             start_tiling = time.time()
 
             if status_callback is not None:
-                status_callback("Processing and Uploading Result",
+                status_callback("Tiling Result",
                                 self.__timeRemainingViewshed(2))
 
             with tempfile.NamedTemporaryFile(suffix=".tif") as colorized_temp:
@@ -204,17 +205,24 @@ class Viewshed(models.Model, S3PublicExportMixin):
                 self.__reprojectViewshed(output_temp)
                 logging.info(f'reproject: {time.time() - start}')
                 start = time.time()
-                self.__createTileset(colorized_temp)
+                self.__createTileset(
+                    colorized_temp, status_callback=status_callback)
                 logging.info(f'tileset: {time.time() - start}')
             logging.info(f'tiling: {time.time() - start_tiling}')
 
-    def __createTileset(self, tif_tempfile):
+    def __createTileset(self, tif_tempfile, status_callback=None):
         with tempfile.TemporaryDirectory() as tmp_dir:
             logging.info(f'tiling started')
             start = time.time()
             self.__convert2Tiles(tif_tempfile.name, tmp_dir)
             logging.info(f'finished tiling: {time.time() - start}')
+            if status_callback is not None:
+                status_callback("Uploading Result",
+                                self.__timeRemainingViewshed(3))
             start = time.time()
+            paths = []
+            keys = []
+            # Find all Tile Images
             for subdir, _, files in os.walk(tmp_dir):
                 for file in files:
                     if file.endswith('.png'):
@@ -222,8 +230,11 @@ class Viewshed(models.Model, S3PublicExportMixin):
                         regexpath = path.replace(tmp_dir, "")
                         z, y, x = re.findall('[0-9]+', regexpath)
                         tile = ViewshedTile(viewshed=self, zoom=z, y=y, x=x)
-                        with open(path, 'rb') as fp:
-                            tile.tile.save(f'{tile.pk}', fp)
+                        tile.save()
+                        paths.append(path)
+                        keys.append(tile.upload_to_path(''))
+            # Perform Bulk Upload of Tiles to S3 - performed in parallel is much faster
+            writeMultipleS3Objects(keys, paths, ViewshedTile.bucket_name)
             logging.info(f'finished uploading: {time.time() - start}')
 
     def __colorizeOutputViewshed(self, tif_viewshed_tempfile, output_colorized_tempfile):

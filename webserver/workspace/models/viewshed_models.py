@@ -68,7 +68,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
         encoded_jwt = jwt.encode(
             {
                 "tileset": str(self.uuid),
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=3)  # token is good for 3 days
+                # token is good for 3 days
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=3)
             },
             settings.TILESET_LAMBDA_EDGE_SECRET,
             algorithm="HS256"
@@ -99,15 +100,18 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
     def get_s3_key(self, **kwargs) -> str:
         if settings.PROD:
-            key = 'viewshed/viewshed-tower-' + str(self.ap.uuid) + ('.tif' if kwargs.get('tif') else '.png')
+            key = 'viewshed/viewshed-tower-' + \
+                str(self.ap.uuid) + ('.tif' if kwargs.get('tif') else '.png')
         else:
-            key = 'viewshed/test-viewshed-tower-' + str(self.ap.uuid) + ('.tif' if kwargs.get('tif') else '.png')
+            key = 'viewshed/test-viewshed-tower-' + \
+                str(self.ap.uuid) + ('.tif' if kwargs.get('tif') else '.png')
         return key
 
     def translate_dtm_height_to_dsm_height(self) -> float:
         point = self.ap.geojson
         dtm = getDTMPoint(point)
-        tile_engine = DSMTileEngine(point, EPTLidarPointCloud.query_intersect_aoi(point))
+        tile_engine = DSMTileEngine(
+            point, EPTLidarPointCloud.query_intersect_aoi(point))
         dsm = tile_engine.getSurfaceHeight(point)
         return self.ap.height + dtm - dsm
 
@@ -117,16 +121,20 @@ class Viewshed(models.Model, S3PublicExportMixin):
         """
         # Delete all tiles from previous calculations
         aoi = self.ap.getDSMExtentRequired()
-        dsm_engine = DSMTileEngine(aoi, EPTLidarPointCloud.query_intersect_aoi(aoi))
+        dsm_engine = DSMTileEngine(
+            aoi, EPTLidarPointCloud.query_intersect_aoi(aoi))
         with tempfile.NamedTemporaryFile(mode='w+b', suffix=".tif") as dsm_file:
             start = time.time()
             if status_callback is not None:
-                status_callback("Loading DSM Data", self.__timeRemainingViewshed(0))
+                status_callback("Loading DSM Data",
+                                self.__timeRemainingViewshed(0))
             dsm_engine.getDSM(dsm_file.name)
             logging.info(f'dsm download: {time.time() - start}')
             if status_callback is not None:
-                status_callback("Computing Coverage", self.__timeRemainingViewshed(1))
-            self.__renderViewshed(dsm_file=dsm_file, status_callback=status_callback)
+                status_callback("Computing Coverage",
+                                self.__timeRemainingViewshed(1))
+            self.__renderViewshed(
+                dsm_file=dsm_file, status_callback=status_callback)
         if status_callback is not None:
             status_callback(None, None)
         self.hash = self.calculate_hash()
@@ -144,7 +152,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
         ]
         time_remaining = 0
         for i in range(step, len(polynomials)):
-            time_remaining = time_remaining + polyval(polynomials[i], self.ap.max_radius_miles)
+            time_remaining = time_remaining + \
+                polyval(polynomials[i], self.ap.max_radius_miles)
         return time_remaining
 
     def __createRawGDALViewshedCommand(self, dsm_filepath, output_filepath, dsm_projection):
@@ -153,7 +162,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
         documentation: https://gdal.org/programs/gdal_viewshed.html
         """
-        transformed_observer = self.ap.geojson.transform(dsm_projection, clone=True)
+        transformed_observer = self.ap.geojson.transform(
+            dsm_projection, clone=True)
         transformed_height = self.translate_dtm_height_to_dsm_height()
         return f"""gdal_viewshed -b 1 -ov 1
             -oz {transformed_height} -tz {self.ap.default_cpe_height} -md {self.__calculateRadiusViewshed()}
@@ -161,7 +171,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
             {dsm_filepath} {output_filepath}
         """
 
-    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath, zoom_min=14, zoom_max=19):
+    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath, zoom_min=14, zoom_max=19, processes=4):
         return f"""gdal2tiles.py --zoom={zoom_min}-{zoom_max} {viewshed_filepath} {output_folderpath}"""
 
     def __calculateRadiusViewshed(self) -> float:
@@ -176,14 +186,16 @@ class Viewshed(models.Model, S3PublicExportMixin):
     def __renderViewshed(self, dsm_file, status_callback=None):
         with tempfile.NamedTemporaryFile(suffix=".tif") as output_temp:
             start = time.time()
-            raw_command = self.__createRawGDALViewshedCommand(dsm_file.name, output_temp.name, DEFAULT_PROJECTION)
+            raw_command = self.__createRawGDALViewshedCommand(
+                dsm_file.name, output_temp.name, DEFAULT_PROJECTION)
             filtered_command = shlex.split(raw_command)
             subprocess.check_output(filtered_command, encoding="UTF-8")
             logging.info(f'compute viewshed: {time.time() - start}')
             start_tiling = time.time()
 
             if status_callback is not None:
-                status_callback("Processing and Uploading Result", self.__timeRemainingViewshed(2))
+                status_callback("Processing and Uploading Result",
+                                self.__timeRemainingViewshed(2))
 
             with tempfile.NamedTemporaryFile(suffix=".tif") as colorized_temp:
                 self.__colorizeOutputViewshed(output_temp, colorized_temp)
@@ -198,7 +210,11 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
     def __createTileset(self, tif_tempfile):
         with tempfile.TemporaryDirectory() as tmp_dir:
+            logging.info(f'tiling started')
+            start = time.time()
             self.__convert2Tiles(tif_tempfile.name, tmp_dir)
+            logging.info(f'finished tiling: {time.time() - start}')
+            start = time.time()
             for subdir, _, files in os.walk(tmp_dir):
                 for file in files:
                     if file.endswith('.png'):
@@ -208,6 +224,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                         tile = ViewshedTile(viewshed=self, zoom=z, y=y, x=x)
                         with open(path, 'rb') as fp:
                             tile.tile.save(f'{tile.pk}', fp)
+            logging.info(f'finished uploading: {time.time() - start}')
 
     def __colorizeOutputViewshed(self, tif_viewshed_tempfile, output_colorized_tempfile):
         with rasterio.open(tif_viewshed_tempfile.name) as src:

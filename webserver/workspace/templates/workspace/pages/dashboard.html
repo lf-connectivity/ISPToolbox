@@ -14,92 +14,112 @@
 {% endblock %}
 
 {% block content %}
-  <div class="dashboard px-3 px-sm-5">
-    <div class="container text-container">
+  <div class="dashboard px-3 px-5">
+    <div class="container pb-4 heading-container">
         <h2>{% translate "ISP Control Center" %}</h2>
-        <p class='title-copy'>{% translate "ISP Toolbox is developing tools and resources to help ISPs connect more people." %}</p>
+        <p class="title-copy large">{% translate "ISP Toolbox is developing tools and resources to help ISPs connect more people." %}</p>
+        <div class='d-flex d-md-none error-container'>
+            {% include 'workspace/atoms/icons/error_icon.html' %}
+            <p class="error">Please use your desktop at full width for the best experience.</p>
+        </div>
     </div>
-    <div class='error d-flex d-md-none text-container'>
-        {% include 'workspace/atoms/icons/error_icon.html' %}
-        <div>Please use your desktop at full width for the best experience.</div>
+    <div class="container">
+        <div class='card-wrapper'>
+            <a
+                href="https://www.facebook.com/isptoolbox/roi-estimator/"
+                target="_blank"
+                class="card-container"
+            >
+                <div class="card">
+                    <div class="card-body">
+                        <div class='header-row'>
+                            <span class='small subheading'>Business</span>
+                            {% include 'workspace/atoms/icons/dashboard_graph.html' %}
+                        </div>
+                        <h4 class="card-title">
+                            {% translate "ROI Estimator"%}
+                            {% include 'workspace/atoms/icons/arrow_up_right.html' %}
+                        </h4>
+                        <p class="card-text">
+                            {% translate "Explore potential Return on Investment (ROI) of an ISP business."%}
+                        </p>
+                    </div>
+                </div>
+            </a>
+            <a
+                href="{% if user.is_authenticated %}{% url 'market_eval_entry' %}
+                    {% else %}{% url 'demo-market-app' %}{% endif %}"
+                class="card-container"
+            >
+                <div class="card" >
+                    <div class="card-body">
+                        <div class='header-row'>
+                            <span class='small subheading'>Business</span>
+                            {% include 'workspace/atoms/icons/dashboard_market.html' %}
+                        </div>
+                        
+                        <h4 class="card-title">{% translate "Market Evaluator"%}</h4>
+                        <p class="card-text">
+                        {% translate " Explore market data of an area to identify where to expand your ISP." %}
+                        </p>
+                    </div>
+                </div>
+            </a>
+            <a
+                href="{% if user.is_authenticated %}{% url 'edit_account_network' %}{% else %}{% url 'demo-los-check' %}{% endif %}"
+                class="card-container"
+            >
+                <div class="card">
+                    <div class="card-body">
+                        <div class='header-row'>
+                            <span class='small subheading'>Network</span>
+                            {% include 'workspace/atoms/icons/dashboard_los.html' %}
+                        </div>
+                        
+                        <h4 class="card-title">{% translate "Line of Sight Check"%}</h4>
+                        <p class="card-text">
+                            {% translate "Use LiDAR data to determine if a customer is serviceable"%}
+                        </p>
+                    </div>
+                </div>
+            </a>
+            <a
+                href="https://www.facebook.com/isptoolbox/marketing/"
+                target="_blank"
+                class="card-container"
+            >
+                <div class="card">
+                    <div class="card-body">
+                        <div class='header-row'>
+                            <span class='small subheading'>Marketing</span>
+                            {% include 'workspace/atoms/icons/dashboard_saa.html' %}
+                        </div>
+                        <h4 class="card-title">
+                            {% translate "Service Area Ads"%}
+                            {% include 'workspace/atoms/icons/arrow_up_right.html' %}
+                        </h4>
+                        
+                        <p class="card-text">
+                            {% translate "Generate Custom Audiences based on service areas for your Facebook Ads."%}
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
-    <div class='card-wrapper'>
-        <a
-            href="https://www.facebook.com/isptoolbox/roi-estimator/"
-            target="_blank"
+    <div class="container">
+    {% comment %} 
+    // not sure if we're still including this
+    {% if showSurvey %}
+        <div class="alert alert-primary" role="alert">
+        <a href="{% url 'optional_info' %}"
+            >{% translate "Take a quick survey to help us make ISP Toolbox
+            better"%}</a
         >
-            <div class="card">
-                <div class="card-body">
-                    <div class='header-row'>
-                        <span class='small subheading'>Business</span>
-                        {% include 'workspace/atoms/icons/dashboard_graph.html' %}
-                    </div>
-                        {% translate "ROI Estimator"%}
-                    {% include 'workspace/atoms/icons/arrow_up_right.html' %}
-                    <p class="card-text">
-                        {% translate "Explore potential Return on Investment (ROI) of an ISP business."%}
-                    </p>
-                </div>
-            </div>
-        </a>
-        <a
-            href="{% if user.is_authenticated %}{% url 'market_eval_entry' %}
-                {% else %}{% url 'demo-market-app' %}{% endif %}"
-        >
-            <div class="card" >
-                <div class="card-body">
-                    <div class='header-row'>
-                        <span class='small subheading'>Business</span>
-                        {% include 'workspace/atoms/icons/dashboard_market.html' %}
-                    </div>
-                    
-                    {% translate "Market Evaluator"%}
-                    <p class="card-text">
-                    {% translate " Explore market data of an area to identify where to expand your ISP." %}
-                    </p>
-                </div>
-            </div>
-        </a>
-        <a
-            href="{% if user.is_authenticated %}{% url 'edit_account_network' %}{% else %}{% url 'demo-los-check' %}{% endif %}"
-        >
-            <div class="card">
-                <div class="card-body">
-                    <div class='header-row'>
-                        <span class='small subheading'>Network</span>
-                        {% include 'workspace/atoms/icons/dashboard_los.html' %}
-                    </div>
-                    
-                        {% translate "Line of Sight Check"%}
-                    <p class="card-text">
-                        {% translate "Use LiDAR data to determine if a customer is serviceable"%}
-                    </p>
-                </div>
-            </div>
-        </a>
-        <a
-            href="https://www.facebook.com/isptoolbox/marketing/"
-            target="_blank"
-        >
-            <div class="card">
-                <div class="card-body">
-                    <div class='header-row'>
-                        <span class='small subheading'>Marketing</span>
-                        {% include 'workspace/atoms/icons/dashboard_saa.html' %}
-                    </div>
-                        {% translate "Service Area Ads"%}
-                    {% include 'workspace/atoms/icons/arrow_up_right.html' %}
-                    
-                    <p class="card-text">
-                        {% translate "Generate Custom Audiences based on service areas for your Facebook Ads."%}
-                    </p>
-                </div>
-            </div>
-        </a>
-  </div>
-  <div class="container text-center">
-    <div class='text-container-links'>
-      <p>Have questions or feedback for us?</p>
+        </div>
+    {% endif %} {% endcomment %}
+    <div class='text-container-links pt-5'>
+      <p class="large">Have questions or feedback for us?</p>
       <a
         href="https://www.facebook.com/fbctoolbox"
         target="_blank"

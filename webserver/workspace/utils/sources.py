@@ -29,27 +29,27 @@ _ISP_TOOLBOX_US_SOURCES = {
     ),
     'SERVICE_PROVIDERS': ISPToolboxSource(
         link='https://www.fcc.gov/general/broadband-deployment-data-fcc-form-477',
-        title='Federal Communications Commission (FCC): Form 477 June 2020.',
+        title='Federal Communications Commission (FCC): Form 477 June 2020',
         last_updated=datetime.date(2020, 6, 1)
     ),
     'INCOME': ISPToolboxSource(
         link='https://www.census.gov/programs-surveys/acs',
-        title='US Census Bureau: American Community Survey 2019.',
+        title='US Census Bureau: American Community Survey 2019',
         last_updated=datetime.date(2021, 2, 1)
     ),
     'RDOF': ISPToolboxSource(
         link='https://www.fcc.gov/auction/904',
-        title='FCC Auction 904.',
+        title='FCC Auction 904',
         last_updated=datetime.date(2020, 10, 1)
     ),
     'BROADBAND_PRICING': ISPToolboxSource(
         link='https://www.broadbandnow.com/',
-        title='BroadbandNow.',
+        title='BroadbandNow',
         last_updated=datetime.date(2021, 4, 1)
     ),
     'MLAB_NDT': ISPToolboxSource(
-        link='https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information',  # noqa: E501
-        title='The M-Lab NDT Dataset',
+        link='https://www.measurementlab.net/tests/ndt',  # noqa: E501
+        title='https://www.measurementlab.net/tests/ndt',
         last_updated=datetime.date(2021, 7, 1)
     ),
     'POPULATION': ISPToolboxSource(
@@ -63,17 +63,17 @@ _ISP_TOOLBOX_US_SOURCES = {
     ),
     'TOWERS': ISPToolboxSource(
         link='https://www.fcc.gov/uls/transactions/daily-weekly',
-        title='FCC Weekly Database.',
+        title='FCC Weekly Database',
         last_updated=datetime.date(2020, 10, 1)
     ),
     'RURAL': ISPToolboxSource(
         link='https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html',
-        title='US Census Bureau\'s UA10 "Urban Areas" dataset, 2019.',
+        title='US Census Bureau\'s UA10 "Urban Areas" dataset, 2019',
         last_updated=datetime.date(2020, 11, 1)
     ),
     'CBRS': ISPToolboxSource(
         link='https://auctiondata.fcc.gov/public/projects/auction105/reports/results_by_license',
-        title='FCC Auction 105.',
+        title='FCC Auction 105',
         last_updated=datetime.date(2021, 6, 1)
     ),
     'AP_LOS': ISPToolboxSource(
@@ -82,7 +82,7 @@ _ISP_TOOLBOX_US_SOURCES = {
     ),
     'CENSUS_BLOCKS': ISPToolboxSource(
         link='https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html',
-        title='Census Tiger/Line\u00AE Shapefiles.',
+        title='Census Tiger/Line\u00AE Shapefiles',
         last_updated=datetime.date(2021, 5, 1)
     ),
     'TRIBAL': ISPToolboxSource(

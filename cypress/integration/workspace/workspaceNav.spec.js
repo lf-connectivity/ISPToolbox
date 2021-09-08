@@ -13,6 +13,7 @@ import {
   DATA_POLICY_PAGE,
   DASHBOARD_PAGE,
   MANAGE_ACCOUNT_PAGE,
+  LATEST_LIDAR_PAGE,
 } from "../../support";
 
 context("Navbar desktop size logged in views", () => {
@@ -144,6 +145,18 @@ context("Navbar desktop size logged in views", () => {
       .navbar_title_should("not.exist.or.not.be.visible")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
       .navbar_beta_flag_should("be.visible.with.correct_text")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
+
+  it("Latest LiDAR Updates Navbar (old navbar, will update with redesign launch)", () => {
+    cy.visit(LATEST_LIDAR_PAGE);
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("not.exist.or.not.be.visible")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
+      .navbar_beta_flag_should("not.exist.or.not.be.visible")
       .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });
@@ -292,6 +305,18 @@ context("Navbar tablet size logged in views", () => {
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });
 
+  it("Latest LiDAR Updates Navbar (old navbar, will update with redesign launch)", () => {
+    cy.visit(LATEST_LIDAR_PAGE);
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("not.exist.or.not.be.visible")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
+      .navbar_beta_flag_should("not.exist.or.not.be.visible")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
+
   it("Dashboard page Navbar", () => {
     cy.visit(DASHBOARD_PAGE);
     cy.get_navbar()
@@ -436,6 +461,18 @@ context("Navbar phone size logged in views", () => {
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });
 
+  it("Latest LiDAR Updates Navbar (old navbar, will update with redesign launch)", () => {
+    cy.visit(LATEST_LIDAR_PAGE);
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("not.exist.or.not.be.visible")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
+      .navbar_beta_flag_should("not.exist.or.not.be.visible")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
+
   it("Dashboard page Navbar", () => {
     cy.visit(DASHBOARD_PAGE);
     cy.get_navbar()
@@ -566,6 +603,18 @@ context("Navbar desktop size logged out views", () => {
       .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });
+
+  it("Latest LiDAR Updates Navbar (old navbar, will update with redesign launch)", () => {
+    cy.visit(LATEST_LIDAR_PAGE);
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("not.exist.or.not.be.visible")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
+      .navbar_beta_flag_should("not.exist.or.not.be.visible")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
 });
 
 context("Navbar tablet size logged out views", () => {
@@ -685,6 +734,18 @@ context("Navbar tablet size logged out views", () => {
       .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });
+
+  it("Latest LiDAR Updates Navbar (old navbar, will update with redesign launch)", () => {
+    cy.visit(LATEST_LIDAR_PAGE);
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("not.exist.or.not.be.visible")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
+      .navbar_beta_flag_should("not.exist.or.not.be.visible")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
 });
 
 context("Navbar phone size logged out views", () => {
@@ -801,6 +862,18 @@ context("Navbar phone size logged out views", () => {
       .navbar_title_should("not.exist.or.not.be.visible")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
       .navbar_beta_flag_should("be.visible.with.correct_text")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
+
+  it("Latest LiDAR Updates Navbar (old navbar, will update with redesign launch)", () => {
+    cy.visit(LATEST_LIDAR_PAGE);
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("not.exist.or.not.be.visible")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
+      .navbar_beta_flag_should("not.exist.or.not.be.visible")
       .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });

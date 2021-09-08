@@ -30,9 +30,10 @@
 {% endblock %}
 
 {% block nav %}
-{% with link_back_fb=True%}
+{% comment %}
+TODO: Use new refactored nav once redesign is launched
+{% endcomment %}
 {% include 'workspace/organisms/demo_nav.html' %}
-{% endwith %}
 {% endblock %}
 
 {% block content %}

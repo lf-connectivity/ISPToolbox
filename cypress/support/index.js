@@ -15,6 +15,7 @@ export const TERMS_PAGE = "/pro/workspace/terms/";
 export const COOKIE_POLICY_PAGE = "/pro/workspace/cookie-policy/";
 export const DATA_POLICY_PAGE = "/pro/workspace/data-policy/";
 export const MANAGE_ACCOUNT_PAGE = "/pro/workspace/account/";
+export const LATEST_LIDAR_PAGE = "/demo/latest-gis-data/";
 
 Cypress.Commands.add("login", () => {
   // reset test accounts

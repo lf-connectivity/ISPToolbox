@@ -8,7 +8,7 @@ const tour = new Shepherd.Tour({
 });
 tour.addStep({
     id: 'example-step',
-    text: "{% translate 'LOS Check helps you assess if your link has a clear line of sight using LiDAR data. Start by plotting a PtP (point-to-point) link to see a 3D display of possible obstructions and details. <a href=\'https://facebook.com/isptoolbox\' target=\'_blank\'>Learn More</a>' %}",
+    text: "{% translate 'LOS Check helps you assess if your link has a clear line of sight using LiDAR data. Start by plotting a PtP (point-to-point) link to see a 3D display of possible obstructions and details. <a href=\'https://facebook.com/isptoolbox/line-of-sight-check/\' target=\'_blank\'>Learn More</a>' %}",
     attachTo: {
         element: '#tool_help_button',
         on: 'bottom'

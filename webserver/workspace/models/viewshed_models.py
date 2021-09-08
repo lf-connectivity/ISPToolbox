@@ -153,7 +153,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
         polynomials = [
             polyfit(samples, [3, 10, 23], 2),  # get dsm tiles
             polyfit(samples, [0.5, 1, 2], 2),  # compute viewshed
-            polyfit(samples, [5, 16, 35], 2),  # colorize + reproject
+            polyfit(samples, [1, 2, 4], 2),  # colorize + reproject
             polyfit([0.5] + samples, [2.5, 5.4, 12, 24], 2),  # tile results
             polyfit([0.5] + samples, [0.5, 1.3, 4.5, 10], 2),  # upload results
         ]
@@ -269,6 +269,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
     def __reprojectViewshed(self, output_temp):
         # Load Output Viewshed TIF File
         dst_crs = 'EPSG:4326'
+        start = time.time()
         with rasterio.open(output_temp.name) as src:
             transform, width, height = calculate_default_transform(
                 src.crs, dst_crs, src.width, src.height, *src.bounds)
@@ -279,6 +280,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                 'width': width,
                 'height': height
             })
+            logging.info(f'open: {time.time() - start}')
 
             # Create a transformed reprojection
             with tempfile.NamedTemporaryFile(suffix=".tif") as temp_transform:
@@ -294,16 +296,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                             resampling=Resampling.nearest)
                 temp_transform.seek(0)
                 self.write_object(temp_transform, tif=True)
-
-                # convert reprojected file to PNG
-                with tempfile.NamedTemporaryFile(suffix=".png") as raster_temp:
-                    shutil.copy(
-                        temp_transform.name,
-                        raster_temp.name,
-                        driver='PNG'
-                    )
-                    convertViewshedRGBA(raster_temp.name)
-                    self.write_object(raster_temp)
+                logging.info(f'reprojected: {time.time() - start}')
 
     def __convert2Tiles(self, tif_filepath, outputfolder):
         raw_command = self.__createGdal2TileCommand(tif_filepath, outputfolder)

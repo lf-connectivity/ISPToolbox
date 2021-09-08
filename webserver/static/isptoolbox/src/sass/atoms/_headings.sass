@@ -1,27 +1,50 @@
+@use '../fonts'
+@import ../theme
+
+h1, h2, h3, h4, h5
+    font-family: $brand-font-family-sans-serif
+    color: $brand-dark-gray-color
+    font-weight: 300
+    margin: 0
+
 h1, .heading-1
     font-size: 2.5rem
-    font-weight: 300
+    line-height: 2.75rem
 
 h2, .heading-2
-    font-size: 2rem
-    font-weight: 300
+    font-size: 2.1rem
+    line-height: 2.5rem
 
 h3, .heading-3
-    font-size: 1.75rem
-    font-weight: 300
+    font-size: 1.72rem
+    line-height: 2rem
 
 h4, .heading-4
-    font-size: 1.75rem
-    font-weight: 300
+    font-size: 1.43rem
+    line-height: 1.5rem
 
 h5, .heading-5
-    font-size: 1.25rem
-    font-weight: normal
+    font-size: 1.2rem
+    line-height: 1.5rem
 
-p, h6, .heading-6
-    font-size: 1rem
-    font-weight: normal
+h6, .heading-6 
+    font-size: 1.2rem
+    line-height: 1.5rem
 
-.large-paragraph
-    font-size: 1.1rem
-    line-height: 30px
+.large
+    font-size: $large-font-size
+    line-height: 1.75rem
+    font-weight: 400
+
+p
+    font-size: $base-font-size
+    line-height: 1.5rem
+    font-weight: 400
+
+.small
+    font-size: $small-font-size
+    line-height: 1.5rem
+    font-weight: 400
+
+.x-small
+    font-size: $xsmall-font-size

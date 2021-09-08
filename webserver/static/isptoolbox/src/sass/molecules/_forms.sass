@@ -5,7 +5,7 @@
     flex-direction: column
     label
         font-family: Basis Grotesque Pro
-        font-size: 1rem
+        font-size: $base-font-size
         font-weight: bold
         line-height: 135%
         letter-spacing: 0.01em
@@ -35,10 +35,10 @@
         padding-left: 2px
     &--errors
         color: $dark-error-color
-        font-size: 14px
+        font-size: $small-font-size
         margin-bottom: 0
     .helptext
-        font-size: 12px
+        font-size: $xsmall-font-size
         color: $mid-gray-color
         margin: 0
     input:not(.btn):not([type="file"])
@@ -70,7 +70,7 @@
         background-color: $light-gray-color
         color: $mid-gray-color
         border-bottom: 2px solid $brand-primary-color
-        font-size: 14px
+        font-size: $small-font-size
         margin-bottom: 5px
 
     .file-upload-form .form-control
@@ -79,7 +79,7 @@
         height: 36px
         font-family: $brand-font-family-mono
         padding: 0
-        font-size: 12px
+        font-size: $xsmall-font-size
         background-image: none
         border-radius: 0
         -webkit-box-shadow: none
@@ -90,8 +90,8 @@
         background-color: $brand-primary-color
         border: 0
         border-radius: 0px
-        font-size: 14px
-        line-height: 14px
+        font-size: $small-font-size
+        line-height: $small-font-size
         height: 36px
         margin-right: 6px
         text-align: center
@@ -106,6 +106,6 @@
 
 .error
     color: $dark-error-color
-    font-size: 14px
+    font-size: $small-font-size
     margin-bottom: 0
     margin-top: 10px

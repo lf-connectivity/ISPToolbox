@@ -22,7 +22,6 @@ import rasterio
 import PIL
 from PIL import Image
 import numpy as np
-from rasterio import shutil
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 import time
 import logging

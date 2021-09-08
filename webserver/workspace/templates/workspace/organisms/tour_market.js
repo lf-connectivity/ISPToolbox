@@ -96,7 +96,9 @@ tour.addStep({
 });
 {% endif %}
 {% show_nux market_nux %}
-tour.start();
+if (!$('.mobile-overlay-lock').is(':visible')) {
+    tour.start();
+}
 {% endnux %}
 $(() => {
     $('#tool_help_button').on('click', () => {

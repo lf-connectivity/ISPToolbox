@@ -1,15 +1,45 @@
-<div class="workspace-nav fixed-top px-4">
-  <div class="empty">
-    <!--empty-div-->
-  </div>
-  <div class="homepage-logo align-items-center d-flex mx-auto logo-absolute">
-    {% include "workspace/atoms/isptoolbox_logo.html" %}
-  </div>
-  {% block right_section_nav %}
-  {% include "workspace/atoms/account_dropdown.html" %}
-  {% endblock %}
-</div>
+{% if nav_is_app_page is True %}
+  <nav class="workspace-nav navbar navbar-expand-lg navbar-light bg-white pr-3 pl-0 py-0" id="workspacenavelem">
+{% else %}
+  <div class="workspace-nav fixed-top px-4" id="workspacenavelem">
+{% endif %}
+    <div class="d-flex">
+      {% if nav_is_app_page is True %}
+        <a href="/pro/" class="back-icon py-auto px-3 mr-2" id="workspacenavelem-backbutton">
+            <svg width="19" height="17" viewBox="0 0 19 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.7858 8.5L2.71433 8.5M9.1429 16L2.00005 8.5L9.1429 1" stroke="#2D2D2D" stroke-width="2"/>
+            </svg>
+        </a>
+      {% endif %}
+        <div class="homepage-logo align-items-center d-flex mx-2">
+          {% if nav_is_app_page is True %}
+            {% include "workspace/atoms/isptoolbox_logo.html"%}
+            <span class='ml-3 page-title'>{{ page_title|default:"ISP Toolbox Workspace" }}</span>
+          {% else %}
+            {% include "workspace/atoms/isptoolbox_logo_new.html"%}
+          {% endif %}
 
-{% if not user.is_authenticated %}
-{% include "workspace/molecules/login_modal.html" %}
+          <span class='ml-1 beta-mark'>[beta]</span>
+
+          {% if nav_is_app_page is True and not nav_skip_tour_button %}
+            <button class="btn my-auto px-0 d-flex" id="tool_help_button">
+                {% include "workspace/atoms/icons/question_mark_icon.html" %}
+            </button>
+        {% endif %}
+        </div>
+    </div>
+
+    {% if nav_is_app_page is True and user.is_authenticated and not nav_skip_dropdown_workspace %}
+        {% include 'workspace/molecules/dropdown_workspace.html' %}
+    {% endif %}
+
+    {% block right_section_nav %}
+      {% if nav_include_account_dropdown is True %}
+        {% include "workspace/atoms/account_dropdown.html" %}
+      {% endif %}
+    {% endblock %}
+{% if nav_is_app_page is True %}
+  </nav>
+{% else %}
+  </div>
 {% endif %}

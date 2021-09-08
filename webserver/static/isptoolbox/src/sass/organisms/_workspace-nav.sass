@@ -1,6 +1,6 @@
 @use '../fonts'
 @import ../theme
-    
+
 .homepage-logo
     .page-title
         font-size: $large-font-size
@@ -11,19 +11,12 @@
         letter-spacing: 0.4px
         font-family: $brand-font-family-mono
 
-    @media (max-width: $breakpoint-xl)
-        .page-title
-            display: none
-        .beta-mark
-            display: none
-
 .logo-absolute
     svg
         position: absolute
         left: 50%
         margin-left: -14px
 
-    
 .workspace-nav
     color: #2D2D2D
     align-items: center
@@ -43,10 +36,9 @@
         cursor: pointer
         background-color: $light-gray-color
         height: 50px
-        display: flex 
-        place-items: center center 
-    
-        
+        display: flex
+        place-items: center center
+
     .account-dropdown
         display: flex
         flex-direction: row
@@ -61,13 +53,12 @@
             height: 40px
             width: 40px
             border-radius: 20px
-    
+
     .subtitle
         margin: auto 0 auto 1rem
         color: $mid-gray-color
         font-size: $small-font-size
         letter-spacing: 0.2px
-
 
 .file-menu, .account-menu
     padding-bottom: 10px
@@ -76,7 +67,7 @@
         font-size: $small-font-size
         padding: 10px 25px 10px 25px
         transition: 0.1s all ease-in-out
-        &:hover, 
+        &:hover,
         &:focus
             color: $brand-secondary-color
             background-color: $light-gray-color
@@ -102,8 +93,8 @@
     .dropdown-submenu
         position: relative
     .import-menu
-        min-width: 10rem    
-    .dropdown-submenu:hover .dropdown-menu, 
+        min-width: 10rem
+    .dropdown-submenu:hover .dropdown-menu,
     .dropdown-submenu:focus .dropdown-menu
         display: flex
         flex-direction: column
@@ -163,7 +154,7 @@
 
 .hamburger-pullout .nested-options
     display: flex
-    flex-flow: column 
+    flex-flow: column
     a
         padding: 5px 0
         font-size: $base-font-size
@@ -199,6 +190,9 @@
         justify-content: space-between
         .homepage-logo
             margin: 0
+            #tool_help_button
+                display: none !important
+
         .empty
             display: none
 
@@ -208,3 +202,6 @@
 @media (max-width: $breakpoint-md)
     .file-dropdown-section
         display: none !important
+    .homepage-logo
+        #tool_help_button
+            display: none !important

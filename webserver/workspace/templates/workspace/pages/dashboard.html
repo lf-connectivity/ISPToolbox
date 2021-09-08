@@ -7,6 +7,10 @@
 {% endwith %}
 {% endblock %}
 
+{% block nav %}
+{% include "workspace/organisms/nav.html" with nav_include_account_dropdown=True %}
+{% endblock %}
+
 {% block seo_headers %}
 {% with  description="Tools to help you grow your Internet Service Provider"%}
 {{block.super}}

@@ -53,6 +53,8 @@ export type TerrainResponse = {
 export type ViewShedResponse = {
     type: WS_AP_Events.AP_VIEWSHED;
     base_url: string;
+    maxzoom: number;
+    minzoom: number;
     uuid: string;
 };
 

@@ -6,6 +6,7 @@ from IspToolboxApp.util.s3 import S3PublicExportMixin, writeMultipleS3Objects
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from workspace.models.network_models import AccessPointLocation
+from workspace.models.validators import validate_zoom_level
 from workspace.utils.geojson_circle import destination
 from mmwave.models import EPTLidarPointCloud, TileModel
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
@@ -48,6 +49,10 @@ class Viewshed(models.Model, S3PublicExportMixin):
         """
     )
     created = models.DateTimeField(auto_now_add=True)
+    max_zoom = models.IntegerField(
+        default=17, validators=[validate_zoom_level])
+    min_zoom = models.IntegerField(
+        default=12, validators=[validate_zoom_level])
 
     class CoverageStatus(models.TextChoices):
         VISIBLE = "VISIBLE"
@@ -148,8 +153,9 @@ class Viewshed(models.Model, S3PublicExportMixin):
         polynomials = [
             polyfit(samples, [3, 10, 23], 2),  # get dsm tiles
             polyfit(samples, [0.5, 1, 2], 2),  # compute viewshed
-            polyfit([0.5] + samples, [10, 43, 160, 640], 3),  # tile results
-            polyfit([0.5] + samples, [7, 25, 100, 400], 3),  # upload results
+            polyfit(samples, [5, 16, 35], 2),  # colorize + reproject
+            polyfit([0.5] + samples, [2.5, 5.4, 12, 24], 2),  # tile results
+            polyfit([0.5] + samples, [0.5, 1.3, 4.5, 10], 2),  # upload results
         ]
         time_remaining = 0
         for i in range(step, len(polynomials)):
@@ -172,8 +178,10 @@ class Viewshed(models.Model, S3PublicExportMixin):
             {dsm_filepath} {output_filepath}
         """
 
-    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath, zoom_min=14, zoom_max=19, processes=8):
-        return f"""gdal2tiles.py --zoom={zoom_min}-{zoom_max} --processes={processes} {viewshed_filepath} {output_folderpath}"""
+    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath, processes=8, tilesize=512):
+        return f"""gdal2tiles.py --zoom={self.min_zoom}-{self.max_zoom} --tilesize={tilesize}
+            --webviewer=none --no-kml --resampling=near --exclude --processes={processes}
+            {viewshed_filepath} {output_folderpath}"""
 
     def __calculateRadiusViewshed(self) -> float:
         # Calculate how far viewshed should extend
@@ -195,7 +203,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
             start_tiling = time.time()
 
             if status_callback is not None:
-                status_callback("Tiling Result",
+                status_callback("Colorizing and Reprojecting",
                                 self.__timeRemainingViewshed(2))
 
             with tempfile.NamedTemporaryFile(suffix=".tif") as colorized_temp:
@@ -212,13 +220,17 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
     def __createTileset(self, tif_tempfile, status_callback=None):
         with tempfile.TemporaryDirectory() as tmp_dir:
+            if status_callback is not None:
+                status_callback("Tiling",
+                                self.__timeRemainingViewshed(3))
             logging.info(f'tiling started')
             start = time.time()
             self.__convert2Tiles(tif_tempfile.name, tmp_dir)
             logging.info(f'finished tiling: {time.time() - start}')
+            size = 0
             if status_callback is not None:
                 status_callback("Uploading Result",
-                                self.__timeRemainingViewshed(3))
+                                self.__timeRemainingViewshed(4))
             start = time.time()
             paths = []
             keys = []
@@ -230,9 +242,12 @@ class Viewshed(models.Model, S3PublicExportMixin):
                         regexpath = path.replace(tmp_dir, "")
                         z, y, x = re.findall('[0-9]+', regexpath)
                         tile = ViewshedTile(viewshed=self, zoom=z, y=y, x=x)
+                        size += os.path.getsize(path)
                         tile.save()
                         paths.append(path)
                         keys.append(tile.upload_to_path(''))
+            logging.info(
+                f'number of tiles: {len(paths)} tiles | size of tiles: {size}B')
             # Perform Bulk Upload of Tiles to S3 - performed in parallel is much faster
             writeMultipleS3Objects(keys, paths, ViewshedTile.bucket_name)
             logging.info(f'finished uploading: {time.time() - start}')

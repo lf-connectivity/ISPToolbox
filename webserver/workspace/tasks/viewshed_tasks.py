@@ -67,6 +67,8 @@ def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
     resp = {
         'type': 'ap.viewshed',
         'base_url': ap.viewshed.getBaseTileSetUrl(),
+        'maxzoom': ap.viewshed.max_zoom,
+        'minzoom': ap.viewshed.min_zoom,
         'uuid': ap_uuid,
     }
     sendMessageToChannel(network_id, resp)

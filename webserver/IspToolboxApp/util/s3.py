@@ -1,13 +1,14 @@
 import logging
 import boto3
 import botocore
+from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
 from django.conf import settings
 import concurrent.futures
 from functools import lru_cache
 
 max_workers = 32
-
+config = TransferConfig(max_concurrency=250)
 
 bucket_name = 'isptoolbox-export-file'
 s3_resource = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -79,11 +80,11 @@ def readFromS3(object_name, fp, bucket_name=bucket_name):
 
 
 def readMultipleHelper(client, s3key, local_filename, bucket_name=bucket_name):
-    return client.download_file(Filename=local_filename, Bucket=bucket_name, Key=s3key)
+    return client.download_file(Filename=local_filename, Bucket=bucket_name, Key=s3key, Config=config)
 
 
 def writeMultipleHelper(client, s3key, local_filename, bucket_name=bucket_name):
-    return client.upload_file(Filename=local_filename, Bucket=bucket_name, Key=s3key)
+    return client.upload_file(Filename=local_filename, Bucket=bucket_name, Key=s3key, Config=config)
 
 
 def readMultipleS3Objects(keys, filenames, bucket_name=bucket_name):

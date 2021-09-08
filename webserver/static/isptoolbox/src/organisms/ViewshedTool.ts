@@ -109,7 +109,8 @@ export class ViewshedTool {
                 type: 'raster',
                 tiles: [data.base_url],
                 scheme: 'tms',
-                minzoom: 12
+                minzoom: data.minzoom,
+                maxzoom: data.maxzoom
             });
             this.map.addLayer(
                 {

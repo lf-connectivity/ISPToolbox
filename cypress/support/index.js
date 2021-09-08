@@ -38,8 +38,8 @@ Cypress.Commands.add("create_session", () => {
   cy.visit("/pro/market/");
 });
 
-Cypress.Commands.add("wait_mapbox", (options = { mobile: false }) => {
-  cy.get(".mapboxgl-ctrl-geocoder--input").should("exist");
+Cypress.Commands.add("wait_mapbox", () => {
+  cy.get(".mapboxgl-ctrl-geocoder--input", { timeout: 6000 }).should("exist");
 });
 
 Cypress.Commands.add("close_nux", () => {

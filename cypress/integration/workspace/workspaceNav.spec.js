@@ -24,8 +24,8 @@ context("Navbar desktop size logged in views", () => {
 
   it("Market Evaluator Navbar", () => {
     cy.visit(MARKET_EVAL_PAGE);
-    cy.wait_mapbox();
     cy.close_nux();
+    cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("be.visible.and.work_properly")
       .navbar_logo_should_be("old_logo")
@@ -38,8 +38,8 @@ context("Navbar desktop size logged in views", () => {
 
   it("LOS Check Navbar", () => {
     cy.visit(LOS_CHECK_PAGE);
-    cy.wait_mapbox();
     cy.close_nux();
+    cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("be.visible.and.work_properly")
       .navbar_logo_should_be("old_logo")

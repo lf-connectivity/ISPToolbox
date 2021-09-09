@@ -14,11 +14,14 @@ import {
   DASHBOARD_PAGE,
   MANAGE_ACCOUNT_PAGE,
   LATEST_LIDAR_PAGE,
+  DESKTOP_SIZE,
+  TABLET_SIZE,
+  MOBILE_SIZE,
 } from "../../support";
 
 context("Navbar desktop size logged in views", () => {
   beforeEach(() => {
-    cy.viewport(1920, 1080);
+    cy.viewport(DESKTOP_SIZE);
     cy.login();
   });
 
@@ -176,7 +179,7 @@ context("Navbar desktop size logged in views", () => {
 
 context("Navbar tablet size logged in views", () => {
   beforeEach(() => {
-    cy.viewport("ipad-mini");
+    cy.viewport(TABLET_SIZE);
     cy.login();
   });
 
@@ -330,9 +333,9 @@ context("Navbar tablet size logged in views", () => {
   });
 });
 
-context("Navbar phone size logged in views", () => {
+context("Navbar mobile size logged in views", () => {
   beforeEach(() => {
-    cy.viewport("iphone-6");
+    cy.viewport(MOBILE_SIZE);
     cy.login();
   });
 
@@ -488,7 +491,7 @@ context("Navbar phone size logged in views", () => {
 
 context("Navbar desktop size logged out views", () => {
   beforeEach(() => {
-    cy.viewport(1920, 1080);
+    cy.viewport(DESKTOP_SIZE);
   });
 
   it("Market Evaluator Navbar", () => {
@@ -619,7 +622,7 @@ context("Navbar desktop size logged out views", () => {
 
 context("Navbar tablet size logged out views", () => {
   beforeEach(() => {
-    cy.viewport("ipad-mini");
+    cy.viewport(TABLET_SIZE);
   });
 
   it("Market Evaluator Navbar", () => {
@@ -748,9 +751,9 @@ context("Navbar tablet size logged out views", () => {
   });
 });
 
-context("Navbar phone size logged out views", () => {
+context("Navbar mobile size logged out views", () => {
   beforeEach(() => {
-    cy.viewport("iphone-6");
+    cy.viewport(MOBILE_SIZE);
   });
 
   it("Market Evaluator Navbar", () => {

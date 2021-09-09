@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import './file_upload_cmds';
 
 import "@cypress/code-coverage/support";
 

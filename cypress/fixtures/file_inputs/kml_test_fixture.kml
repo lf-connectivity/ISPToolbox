@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+	<Document>
+		<Folder>
+			<name>Site</name>
+			<Placemark>
+				<Point>
+					<coordinates>-73.9700336878052,40.76328589100817,26</coordinates>
+				</Point>
+			</Placemark>
+			<Folder>
+				<name>Station</name>
+				<Placemark>
+				<Point>
+				<coordinates>-73.94595818058566,40.75746404569566,15</coordinates>
+				</Point>
+				</Placemark>
+			</Folder>
+		</Folder>
+		<Folder>
+		</Folder>
+	</Document>
+</kml>

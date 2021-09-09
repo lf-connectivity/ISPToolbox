@@ -52,17 +52,19 @@ class WorkspaceSessionForm(forms.ModelForm):
 
 
 class NewWorkspaceSessionFromKMZForm(forms.Form):
-    new_session_file_import_name = forms.CharField(
+    name = forms.CharField(
         max_length=63,
         label="Save Session as",
         label_suffix="",
         widget=forms.TextInput(attrs={'placeholder': 'Session Name'}))
-    kmz = forms.FileField(
+    file = forms.FileField(
         widget=CustomFileInput(
-            attrs={'accept': 'application/vnd.google-earth.kml+xml, application/vnd.google-earth.kmz, .geojson'},
+            attrs={
+                'accept': 'application/vnd.google-earth.kml+xml, application/vnd.google-earth.kmz, .geojson'},
         ),
         help_text="Files Accepted: KML, KMZ and Geojson. Max Upload Size: 1MB",
-        validators=[validators.FileExtensionValidator(['geojson', 'kml', 'kmz'])]
+        validators=[validators.FileExtensionValidator(
+            ['geojson', 'kml', 'kmz'])]
     )
 
 

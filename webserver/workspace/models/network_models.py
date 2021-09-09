@@ -99,8 +99,8 @@ class SessionWorkspaceModelMixin:
 
 class AccessPointLocation(WorkspaceFeature):
     name = models.CharField(max_length=50)
-    height = models.FloatField()
-    max_radius = models.FloatField()
+    height = models.FloatField(default=30)
+    max_radius = models.FloatField(default=2)
     no_check_radius = models.FloatField(default=0.01)
     default_cpe_height = models.FloatField(default=1)
     cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)

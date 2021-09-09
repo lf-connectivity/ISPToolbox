@@ -4,8 +4,12 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 import IspToolboxApp.tasks.MarketEvaluatorTasks
-from IspToolboxApp.Helpers.MarketEvaluatorHelpers import\
-    getMicrosoftBuildingsOffset, createPipelineFromKMZ, convertKml, getMicrosoftBuildings
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import (
+    getMicrosoftBuildingsOffset, getMicrosoftBuildings
+)
+from IspToolboxApp.Helpers.kmz_helpers import (
+    createPipelineFromKMZ, convertKml
+)
 from django.http import JsonResponse
 import json
 import logging
@@ -277,7 +281,8 @@ class MarketEvaluatorExportNoPipeline(View):
             url = createPresignedUrl(object_name)
             resp = {'url': url}
         except Exception as e:
-            logging.error("Internal error while exporting polygon area:" + str(e))
+            logging.error(
+                "Internal error while exporting polygon area:" + str(e))
             traceback.print_exc()
             resp['error'] = "Internal error while exporting"
             return JsonResponse(resp, status=500)

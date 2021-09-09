@@ -2,9 +2,12 @@ from django.db import models
 from django.conf import settings
 from rest_framework import serializers
 from django.contrib.gis.db import models as geo_models
-from django.contrib.gis.geos import Point, GeometryCollection
-from IspToolboxApp.Helpers.MarketEvaluatorHelpers import convertKml, getMicrosoftBuildings
-
+from django.contrib.gis.geos import Point, GeometryCollection, GEOSGeometry
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getMicrosoftBuildings
+from IspToolboxApp.Helpers.kmz_helpers import (
+    convertKml, createWorkspaceSessionGeoJsonFromAirLinkKML, createWorkspaceSessionGeoJsonFromAirLinkKMZ
+)
+from workspace.models.model_constants import FeatureType
 from .validators import validate_zoom_level
 import uuid
 import json
@@ -27,10 +30,13 @@ class WorkspaceMapSession(models.Model):
     This model represents a workspace map session
     """
     name = models.CharField(max_length=63, default="untitled workspace")
-    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    uuid = models.UUIDField(
+        default=uuid.uuid4, primary_key=True, editable=False)
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
-    session = models.ForeignKey(Session, on_delete=models.SET_NULL, blank=True, null=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
+                              on_delete=models.CASCADE, null=True)
+    session = models.ForeignKey(
+        Session, on_delete=models.SET_NULL, blank=True, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
@@ -40,8 +46,10 @@ class WorkspaceMapSession(models.Model):
     zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
     lock_dragging = models.BooleanField(default=False)
 
-    fks_serializers = [AccessPointSerializer, CPESerializer, APToCPELinkSerializer, CoverageAreaSerializer]
-    UNIQUE_TOGETHER_ERROR = _("You already have a session with that name, please write a different name.")
+    fks_serializers = [AccessPointSerializer, CPESerializer,
+                       APToCPELinkSerializer, CoverageAreaSerializer]
+    UNIQUE_TOGETHER_ERROR = _(
+        "You already have a session with that name, please write a different name.")
 
     class UnitPreferences(models.TextChoices):
         METRIC = "METRIC"
@@ -64,7 +72,8 @@ class WorkspaceMapSession(models.Model):
             return 'METRIC'
 
     # Logging
-    logging_fbid = models.BigIntegerField(null=True, default=None, help_text="fbid for logging purposes, don't trust")
+    logging_fbid = models.BigIntegerField(
+        null=True, default=None, help_text="fbid for logging purposes, don't trust")
 
     class Meta:
         unique_together = [["owner", "name"]]
@@ -81,7 +90,8 @@ class WorkspaceMapSession(models.Model):
         return (cls.objects.filter(owner=user) | cls.objects.filter(session=request.session))
 
     def get_session_geojson(self):
-        fcs = [serializer.get_features_for_session(self) for serializer in self.fks_serializers]
+        fcs = [serializer.get_features_for_session(
+            self) for serializer in self.fks_serializers]
         return geojson_utils.merge_feature_collections(*fcs)
 
     @classmethod
@@ -146,6 +156,52 @@ class WorkspaceMapSession(models.Model):
     def kml_key(self):
         return f'kml/ISPTOOLBOX_{self.name}_{self.uuid}.kml'
 
+    @classmethod
+    def importKMZ(cls, request):
+        file = request.FILES.get('file', None)
+        feats = []
+        if file.name.endswith('.kmz'):
+            feats = createWorkspaceSessionGeoJsonFromAirLinkKMZ(file)
+        elif file.name.endswith('.kml'):
+            feats = createWorkspaceSessionGeoJsonFromAirLinkKML(file)
+        session = WorkspaceMapSession(name=request.POST.get(
+            'name', None), owner=request.user)
+        session.save()
+        try:
+            ap_dict = {}
+            for f in feats:
+                f_str = json.dumps({key: f[key]
+                                   for key in ['type', 'coordinates']})
+                if f.get('type', None) == 'Polygon':
+                    CoverageAreaSerializer.Meta.model(
+                        owner=request.user, map_session=session, geojson=GEOSGeometry(f_str)).save()
+                elif f.get('type', None) == 'Point':
+                    if f.get('properties', {}).get('type', None) == FeatureType.AP:
+                        ap = AccessPointSerializer.Meta.model(
+                            owner=request.user, map_session=session,
+                            geojson=GEOSGeometry(f_str),
+                            height=f.get('properties', {}).get('height', 0))
+                        ap.save()
+                        ap_dict.update({
+                            f.get('properties', {}).get('id', None): ap
+                        })
+                    elif f.get('properties', {}).get('type', None) == FeatureType.CPE:
+                        cpe = CPESerializer.Meta.model(
+                            owner=request.user, map_session=session,
+                            geojson=GEOSGeometry(f_str),
+                            height=f.get('properties', {}).get('height', 0))
+                        cpe.save()
+                        ap_uuid = ap_dict.get(
+                            f.get('properties', {}).get('ap', None), None)
+                        APToCPELinkSerializer.Meta.model(
+                            owner=request.user, map_session=session,
+                            ap=ap_uuid, cpe=cpe
+                        ).save()
+        except Exception as e:
+            session.delete()
+            raise e
+        return session
+
     def exportKMZ(self, export_format):
         geo_list = []
         gc = []
@@ -202,7 +258,8 @@ class NetworkMapPreferences(models.Model):
     """
     This model stores the user's last location during a map session
     """
-    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    owner = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     # Map Preferences
     center = geo_models.PointField(default=Point(-97.03125, 36.59788913307022))

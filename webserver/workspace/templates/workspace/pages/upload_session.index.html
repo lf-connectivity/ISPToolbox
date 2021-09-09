@@ -1,0 +1,12 @@
+{% extends "workspace/pages/base.html" %} 
+{% load static i18n %} 
+
+{% block title %}
+{% with  title="Import Session - ISP Toolbox"%}
+{{block.super}}
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+    {% include 'workspace/molecules/import_kmz_form.html'%}
+{% endblock content %}

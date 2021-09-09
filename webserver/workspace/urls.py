@@ -94,7 +94,11 @@ urlpatterns = [
          views.SessionDeleteView.as_view(), name="session_delete"),
     path('workspace/500/', views.Error500View, name='404'),
     # Potree Visualization
-    path('workspace/api/visualization/<uuid:feature>/', views.PotreeVisualizationMetaView.as_view(), name="potree_viz"),
+    path('workspace/api/visualization/<uuid:feature>/',
+         views.PotreeVisualizationMetaView.as_view(), name="potree_viz"),
+    # Workspace Session Import
+    path('workspace/session/upload/kmz/',
+         views.KMZImportView.as_view(), name='session_import_kmz'),
     # Facebook SDK Login
     path('fb/deauthorize-callback/',
          views.FBDeauthorizeSocialView.as_view(), name="fb_deauthorize"),

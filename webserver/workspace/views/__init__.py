@@ -24,6 +24,7 @@ from .multiplayer_views import MultiplayerTestView
 from .tour_views import NuxTourView
 from .sources_views import WorkspaceSourcesView
 from .visualization_views import PotreeVisualizationMetaView
+from .import_views import KMZImportView
 
 import workspace.utils.import_utils
 

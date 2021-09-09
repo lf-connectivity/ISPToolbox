@@ -13,4 +13,12 @@ $(() => {
         radio_names = ['ap', 'cpe'];
     }
     new LinkCheckPage(networkID, userRequestIdentity, radio_names);
+
+    // window.addEventListener('message', (event) => {
+    //     // find some way to validate the event
+    //     console.log('message received', event);
+    //     let nav = document.getElementById('workspacenavelem');
+    //     nav && nav.remove();
+    //     // figure out which elements are actually getting removed here
+    // });
 });

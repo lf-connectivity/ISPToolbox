@@ -44,13 +44,7 @@ import { isUnitsUS } from './utils/MapPreferences';
 import PubSub from 'pubsub-js';
 import { LOSCheckWorkspaceManager } from './workspace/LOSCheckWorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
-import {
-    getStreetAndAddressInfo,
-    isBeta,
-    validateHeight,
-    validateLat,
-    validateLng
-} from './LinkCheckUtils';
+import { isBeta, validateHeight } from './LinkCheckUtils';
 import {
     LinkCheckCPEClickCustomerConnectPopup,
     LinkCheckCustomerConnectPopup,

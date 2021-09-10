@@ -93,6 +93,8 @@ INSTALLED_APPS = [
     'corsheaders',
     # Django Admin Docs
     'django.contrib.admindocs',
+    # Django URL export
+    'django_js_reverse',
     # Gatekeeper - feature flipper
     'waffle',
     # Other ISP Toolbox Apps
@@ -273,6 +275,9 @@ TEMPLATES = [
         },
     },
 ]
+
+# URL Exports
+JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['workspace']
 
 WSGI_APPLICATION = 'webserver.wsgi.application'
 

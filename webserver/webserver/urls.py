@@ -33,6 +33,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 from IspToolboxApp import views
+from django.views.decorators.cache import cache_page
+from django_js_reverse import views as reverse_views
 
 
 # REST API Router
@@ -121,6 +123,18 @@ else:
         path('fb-sdk/social/', include('allauth.socialaccount.urls')),
     ]
 urlpatterns += social_login
+
+if settings.PROD:
+    reverse_url = [
+        url(r'^jsreverse.json$', cache_page(3600)(
+            reverse_views.urls_json), name='js_reverse'),
+    ]
+else:
+    reverse_url = [
+        url(r'^jsreverse.json$', reverse_views.urls_json, name='js_reverse'),
+    ]
+
+urlpatterns += reverse_url
 
 
 handler500 = 'workspace.views.Error500View'  # noqa

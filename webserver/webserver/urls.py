@@ -130,13 +130,19 @@ urlpatterns += social_login
 
 if settings.PROD:
     reverse_url = [
-        url(r'^jsreverse.json$', cache_page(3600)(
-            reverse_views.urls_json), name='js_reverse'),
+        path('reversejs/jsreverse.json',
+             cache_page(3600)(reverse_views.urls_json), name='js_reverse_json'),
+        path('reversejs/jsreverse.js',
+             cache_page(3600)(reverse_views.urls_js), name='js_reverse'),
     ]
 else:
     reverse_url = [
-        url(r'^jsreverse.json$', reverse_views.urls_json, name='js_reverse'),
+        path('reversejs/jsreverse.json',
+             reverse_views.urls_json, name='js_reverse_json'),
+        path('reversejs/jsreverse.js',
+             reverse_views.urls_js, name='js_reverse'),
     ]
+
 
 urlpatterns += reverse_url
 

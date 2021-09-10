@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %} 
+{% load js_reverse %}
 
 <html lang="en">
   <head>
@@ -27,5 +28,7 @@
     {% include "workspace/organisms/access_point_bulk_upload_modal.html" %}
     {% include "workspace/atoms/mapbox_global_public_key.html" %}
     {% include "workspace/molecules/workspace_session_info.html" %}
+
+    <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
   </body>
 </html>

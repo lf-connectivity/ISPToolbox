@@ -79,7 +79,7 @@ class SaveAsSessionForm(forms.Form):
 def WorkspaceForms(request, session):
     return {
         'new_session': WorkspaceSessionForm(),
-        'new_session_from_kmz': NewWorkspaceSessionFromKMZForm(),
+        'new_session_from_kmz': NewWorkspaceSessionFromKMZForm(auto_id='id_import_%s'),
         'save_as_session': SaveAsSessionForm(),
         'rename_session': WorkspaceSessionForm(instance=session, auto_id='id_rename_%s'),
         'market_eval_export': ExportMarketEvaluatorForm(),

@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="modal theme-modal fade" id="saveAsModal" tabindex="-1" role="dialog" aria-labelledby="saveAsModalLabel"
   aria-hidden="true">
-  <form action="{% url 'session_saveas' %}" method="POST" id="workspace_session_save_form">
+  <form action="{% url 'workspace:session_saveas' %}" method="POST" id="workspace_session_save_form">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -32,7 +32,7 @@
         data: $(this).serialize(),
         type: "POST",
         dataType: "json",
-        url: "{% url 'session_saveas' %}?format=json",
+        url: "{% url 'workspace:session_saveas' %}?format=json",
         success: function (response) {
           window.location.replace(response.url);
         },

@@ -47,7 +47,7 @@ class FBDeauthorizeSocialView(View):
         if fb_request is None:
             raise PermissionDenied
         code = ''
-        url = 'https://isptoolbox.io' + reverse("account_view")
+        url = 'https://isptoolbox.io' + reverse('workspace:account_view')
         resp = {'url': url, 'confirmation_code': code}
         return JsonResponse(resp)
 
@@ -67,6 +67,6 @@ class FBDataDeletionView(View):
         if fb_request is None:
             raise PermissionDenied
         code = ''
-        url = 'https://isptoolbox.io' + reverse("account_view")
+        url = 'https://isptoolbox.io' + reverse('workspace:account_view')
         resp = {'url': url, 'confirmation_code': code}
         return JsonResponse(resp)

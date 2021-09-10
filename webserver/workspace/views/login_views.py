@@ -36,7 +36,7 @@ class DefaultWorkspaceView(View):
 class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
     form_class = IspToolboxUserSignUpInfoForm
     template_name = 'workspace/pages/optional_info.html'
-    success_url = reverse_lazy("workspace_dashboard")
+    success_url = reverse_lazy('workspace:workspace_dashboard')
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -44,7 +44,7 @@ class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
 
     def get(self, request):
         if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists():
-            return redirect("optional_info_update")
+            return redirect('workspace:optional_info_update')
         else:
             return super().get(request)
 
@@ -52,7 +52,7 @@ class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
 class OptionalInfoWorkspaceUpdateView(LoginRequiredMixin, UpdateView):
     form_class = IspToolboxUserSignUpInfoForm
     template_name = 'workspace/pages/optional_info.html'
-    success_url = reverse_lazy("workspace_dashboard")
+    success_url = reverse_lazy('workspace:workspace_dashboard')
 
     def get_object(self):
         return IspToolboxUserSignUpInfoForm.Meta.model.objects.get(owner=self.request.user)
@@ -118,7 +118,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
         if "delete_account" in request.POST and context['delete_account_form'].is_valid():
             if context['delete_account_form'].try_delete(request):
                 logout(request)
-                return redirect('workspace_dashboard')
+                return redirect('workspace:workspace_dashboard')
 
         return render(
             request,

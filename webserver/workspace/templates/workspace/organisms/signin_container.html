@@ -2,7 +2,7 @@
 <div class="container signup_container onboarding_container">
     <h3>Welcome Back!</h3>
     <div class="fb-login-button"
-        data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'workspace_dashboard' %}, '')});"
+        data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'workspace:workspace_dashboard' %}, '')});"
         data-width="" data-size="large"
         data-button-type="continue_with"
         data-layout="rounded"
@@ -13,7 +13,7 @@
     </div>
     {% include 'workspace/atoms/content_break.html' %}
     <div class="isp-signupform mx-auto">
-        <form action="{% url 'login_view'%}" method="post" class="isptoolbox-form py-3">
+        <form action="{% url 'workspace:login_view'%}" method="post" class="isptoolbox-form py-3">
             {% csrf_token %}
             {% if form %}
                 <ul>

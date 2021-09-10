@@ -36,7 +36,7 @@ class CreateAccountView(View):
             if next_url is not None and url_is_safe:
                 return redirect(next_url)
             else:
-                return redirect(reverse("optional_info"))
+                return redirect(reverse('workspace:optional_info'))
         return render(
             request,
             'workspace/pages/login_view.html',
@@ -49,7 +49,7 @@ class CreateAccountView(View):
         )
 
     def get(self, request):
-        return redirect("workspace_dashboard")
+        return redirect('workspace:workspace_dashboard')
 
 
 @method_decorator(csrf_exempt, name='dispatch')

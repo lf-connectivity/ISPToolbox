@@ -4,7 +4,7 @@ background: rgba(45, 45, 45, 0.8);
 position: fixed; top: 0; width: 100%; height: 100vh;
 z-index: 2000;" class="d-flex align-items-center justify-content-center">
     <div class="align-items-center d-flex flex-column">
-        <a target="_parent" href="{% url 'edit_account_network' %}">
+        <a target="_parent" href="{% url 'workspace:edit_account_network' %}">
             <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M41.4788 31.108C47.2058 25.381 47.2058 16.0956 41.4788 10.3686C35.7517 4.64153 26.4664 4.64153 20.7393 10.3686C15.0123 16.0956 15.0123 25.381 20.7393 31.108C26.4664 36.835 35.7517 36.835 41.4788 31.108Z" stroke="#F5F4F4" stroke-width="1.5"/>
                 <path d="M24.9816 17.4402L34.6443 17.6759L34.88 27.3386M10.6054 41.7148L34.173 18.1473L10.6054 41.7148Z" stroke="#C2D8EC" stroke-width="1.5"/>
@@ -13,7 +13,7 @@ z-index: 2000;" class="d-flex align-items-center justify-content-center">
         <h1 style="color: white; margin-bottom: 25px;">
             {%translate "You're already logged in!"%}
         </h1>
-        <a target="_parent" href="{% url 'edit_account_network' %}">
+        <a target="_parent" href="{% url 'workspace:edit_account_network' %}">
             <button class="btn isptoolbox-btn btn-primary">{%translate "Open Previous Session"%}</button>
         </a>
     </div>

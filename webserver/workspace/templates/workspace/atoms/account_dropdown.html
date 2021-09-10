@@ -61,7 +61,7 @@
       class="dropdown-menu account-menu dropdown-menu-right"
       aria-labelledby="dropdownMenuLink"
     >
-      <a class="dropdown-item" href="{% url 'account_view' %}"
+      <a class="dropdown-item" href="{% url 'workspace:account_view' %}"
         >{% translate "Manage Account"%}</a
       >
       <a class="dropdown-item" href="#">{% translate "Privacy/Terms"%}</a>
@@ -72,7 +72,7 @@
       {% endif %}
       <a
         class="dropdown-item"
-        href="{% url 'logout_view' %}?next={% url 'workspace_dashboard' %}"
+        href="{% url 'workspace:logout_view' %}?next={% url 'workspace:workspace_dashboard' %}"
         >{% translate "Logout"%}</a
       >
     </div>
@@ -80,7 +80,7 @@
   {% else %} 
       <a href="#" data-toggle="modal" data-target="#importKMZModal">Upload File</a>
       &nbsp;or&nbsp;
-      <a href="{% url 'login_view' %}">Log In</a>
+      <a href="{% url 'workspace:login_view' %}">Log In</a>
       &nbsp;to pick up where you left off. 
   {% endif %}
 </div>

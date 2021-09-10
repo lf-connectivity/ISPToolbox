@@ -1,6 +1,6 @@
 <tr>
     <th scope="row">{{ forloop.counter0|add:networks.start_index}}</th>
-    <td><a href="{% url 'edit_network' network_id=network.uuid %}">{{ network.name }}</a></td>
+    <td><a href="{% url 'workspace:edit_network' network_id=network.uuid %}">{{ network.name }}</a></td>
     <td>{{network.num_links}}</td>
     <td>{{network.created_date}}</td>
     <td>{{network.last_edited}}</td>

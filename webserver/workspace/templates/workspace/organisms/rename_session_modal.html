@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="modal theme-modal fade" id="renameSessionModal" tabindex="-1" role="dialog"
   aria-labelledby="renameSessionModalLabel" aria-hidden="true">
-  <form action="{% url 'session_update' session.uuid %}" method="PATCH" id="workspace_rename_session_form">
+  <form action="{% url 'workspace:session_update' session.uuid %}" method="PATCH" id="workspace_rename_session_form">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -35,10 +35,10 @@
         headers: {
           "X-CSRFToken": $crf_token
         },
-        url: "{% url 'session_update' session.uuid %}?format=json",
+        url: "{% url 'workspace:session_update' session.uuid %}?format=json",
         success: function (response) {
           window.location.replace(
-            `{% url 'edit_account_network' %}${response.uuid}/${response.name}/`
+            `{% url 'workspace:edit_account_network' %}${response.uuid}/${response.name}/`
           );
         },
         error: (response) => {

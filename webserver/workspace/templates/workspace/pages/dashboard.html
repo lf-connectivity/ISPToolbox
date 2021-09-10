@@ -51,7 +51,7 @@
                 </div>
             </a>
             <a
-                href="{% if user.is_authenticated %}{% url 'market_eval_entry' %}
+                href="{% if user.is_authenticated %}{% url 'workspace:market_eval_entry' %}
                     {% else %}{% url 'demo-market-app' %}{% endif %}"
                 class="card-container"
             >
@@ -70,7 +70,7 @@
                 </div>
             </a>
             <a
-                href="{% if user.is_authenticated %}{% url 'edit_account_network' %}{% else %}{% url 'demo-los-check' %}{% endif %}"
+                href="{% if user.is_authenticated %}{% url 'workspace:edit_account_network' %}{% else %}{% url 'demo-los-check' %}{% endif %}"
                 class="card-container"
             >
                 <div class="card">
@@ -116,7 +116,7 @@
     // not sure if we're still including this
     {% if showSurvey %}
         <div class="alert alert-primary" role="alert">
-        <a href="{% url 'optional_info' %}"
+        <a href="{% url 'workspace:optional_info' %}"
             >{% translate "Take a quick survey to help us make ISP Toolbox
             better"%}</a
         >

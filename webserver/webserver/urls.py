@@ -80,7 +80,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/', include(router.urls)),
     # Workspace
-    path('pro/', include('workspace.urls')),
+    path('pro/', include('workspace.urls', namespace='workspace')),
     # Demo Views
     path('demo/solar-sizing-tool/',
          SolarSizingToolView.as_view(), name="demo-solar-sizing"),

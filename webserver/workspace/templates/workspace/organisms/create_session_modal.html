@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="modal fade theme-modal" id="createNetworkModal" tabindex="-1" role="dialog"
   aria-labelledby="createNetworkModalLabel" aria-hidden="true">
-  <form action="{% url 'session_create' %}" method="POST" id="workspace_create_session_form">
+  <form action="{% url 'workspace:session_create' %}" method="POST" id="workspace_create_session_form">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -31,7 +31,7 @@
         data: $(this).serialize(),
         type: "POST",
         dataType: "json",
-        url: "{% url 'session_create' %}?format=json",
+        url: "{% url 'workspace:session_create' %}?format=json",
         success: function (response) {
           window.location.replace(
             `{% url tool_url %}${response.uuid}/${response.name}/`

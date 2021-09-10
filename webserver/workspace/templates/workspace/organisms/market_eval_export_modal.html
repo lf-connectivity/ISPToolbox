@@ -1,7 +1,7 @@
 {% load i18n static %}
 <div class="modal fade theme-modal" id="exportMEModal" tabindex="-1" role="dialog" aria-labelledby="exportMEModalLabel"
     aria-hidden="true">
-    <form action="{% url 'market_eval_export' session.uuid %}" method="POST" id="market-eval-export-frm">
+    <form action="{% url 'workspace:market_eval_export' session.uuid %}" method="POST" id="market-eval-export-frm">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">

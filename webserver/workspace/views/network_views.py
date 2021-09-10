@@ -22,7 +22,8 @@ class BulkUploadTowersView(LoginRequiredMixin, View):
                     _, created = AccessPointLocation.objects.update_or_create(
                         owner=request.user,
                         name=row['Name'],
-                        location=Point(y=float(row['Latitude']), x=float(row['Longitude'])),
+                        location=Point(
+                            y=float(row['Latitude']), x=float(row['Longitude'])),
                         height=float(row['Height(ft)']),
                         max_radius=float(row['Radius(mi)']),
                     )
@@ -39,11 +40,12 @@ class EditNetworkView(LoginRequiredMixin, View):
                 session = workspace_models.WorkspaceMapSession.objects.filter(
                     owner=request.user
                 ).order_by('-last_updated').first()
-                return redirect("edit_network", session.uuid, session.name)
+                return redirect('workspace:edit_network', session.uuid, session.name)
             else:
-                session = workspace_models.WorkspaceMapSession(owner=request.user)
+                session = workspace_models.WorkspaceMapSession(
+                    owner=request.user)
                 session.save()
-                return redirect("edit_network", session.uuid, session.name)
+                return redirect('workspace:edit_network', session.uuid, session.name)
 
         session = get_object_or_404(
             workspace_models.WorkspaceMapSession,

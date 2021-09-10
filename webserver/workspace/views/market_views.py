@@ -86,12 +86,12 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
                 session = workspace_models.WorkspaceMapSession.objects.filter(
                     owner=request.user
                 ).order_by('-last_updated').first()
-                return redirect("market_eval", session.uuid, session.name)
+                return redirect('workspace:market_eval', session.uuid, session.name)
             else:
                 session = workspace_models.WorkspaceMapSession(
                     owner=request.user)
                 session.save()
-                return redirect("market_eval", session.uuid, session.name)
+                return redirect('workspace:market_eval', session.uuid, session.name)
 
         session = workspace_models.WorkspaceMapSession.objects.filter(
             owner=request.user,

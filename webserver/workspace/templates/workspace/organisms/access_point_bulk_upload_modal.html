@@ -2,7 +2,7 @@
 <div class="modal theme-modal fade" id="bulkUploadAccessPoint" tabindex="-1" role="dialog" aria-labelledby="bulkUploadAccessPointLabel"
   aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
-    <form action="{% url 'bulk_tower_upload' %}?next={{request.get_full_path}}" method="post" enctype="multipart/form-data">
+    <form action="{% url 'workspace:bulk_tower_upload' %}?next={{request.get_full_path}}" method="post" enctype="multipart/form-data">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="bulkUploadAccessPointLabel">Upload Towers</h3>

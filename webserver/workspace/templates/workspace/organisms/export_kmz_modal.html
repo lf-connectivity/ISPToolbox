@@ -9,7 +9,7 @@
         </div>
         <div class="modal-body">
         <div class="isptoolbox-form" >
-            <a class="btn btn-primary isptoolbox-btn" target="_blank" href="{% url 'session_download'  session.uuid%}">
+            <a class="btn btn-primary isptoolbox-btn" target="_blank" href="{% url 'workspace:session_download'  session.uuid%}">
                 {% include "workspace/atoms/download_icon.html" %}
                 Download "{{session.name}}"</a>
         </div>

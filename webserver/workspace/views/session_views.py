@@ -30,7 +30,7 @@ class SessionCreateUpdateView(
         response = self.create(request, *args, **kwargs)
         if request.query_params.get('format') == 'json':
             return response
-        return redirect('edit_network', response.data['uuid'], response.data['name'])
+        return redirect('workspace:edit_network', response.data['uuid'], response.data['name'])
 
     def get_queryset(self):
         return WorkspaceMapSession.get_rest_queryset(self.request)
@@ -110,7 +110,7 @@ class SessionSaveAsView(LoginRequiredMixin, View):
             try:
                 session = session.duplicate(
                     saveas_form.cleaned_data['save_as_session_name'])
-                return JsonResponse({'url': reverse('edit_network', args=[session.uuid, session.name])})
+                return JsonResponse({'url': reverse('workspace:edit_network', args=[session.uuid, session.name])})
             except IntegrityError:
                 return JsonResponse({'error': WorkspaceMapSession.UNIQUE_TOGETHER_ERROR}, status=400)
             except Exception as unknown_error:

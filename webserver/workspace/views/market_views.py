@@ -45,7 +45,8 @@ class MarketEvaluatorCompetitorModalView(View):
             name = service_providers_response['competitors'][i]
             down_ad_speed = service_providers_response['down_ad_speed'][i]
             tech_used = ', '.join(
-                set([TECH_CODE_MAPPING[code] for code in service_providers_response['tech_used'][i]])
+                set([TECH_CODE_MAPPING[code]
+                    for code in service_providers_response['tech_used'][i]])
             )
             up_ad_speed = service_providers_response['up_ad_speed'][i]
 
@@ -70,7 +71,8 @@ class MarketEvaluatorSessionExportView(LoginRequiredMixin, View):
     def post(self, request, session_id=None):
         form = ExportMarketEvaluatorForm(request.POST)
         if form.is_valid():
-            session = WorkspaceMapSession.get_rest_queryset(request).get(uuid=session_id)
+            session = WorkspaceMapSession.get_rest_queryset(
+                request).get(uuid=session_id)
             url = session.exportKMZ(form)
             return JsonResponse({'url': url}, status=200)
         else:
@@ -86,7 +88,8 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
                 ).order_by('-last_updated').first()
                 return redirect("market_eval", session.uuid, session.name)
             else:
-                session = workspace_models.WorkspaceMapSession(owner=request.user)
+                session = workspace_models.WorkspaceMapSession(
+                    owner=request.user)
                 session.save()
                 return redirect("market_eval", session.uuid, session.name)
 
@@ -99,7 +102,6 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
             'session': session,
             'geojson': session.get_session_geojson(),
             'workspace_forms': WorkspaceForms(request, session),
-            'beta': True,
             'units': 'US',
             'tool': 'market_evaluator',
             'tower_upload_form': UploadTowerCSVForm,

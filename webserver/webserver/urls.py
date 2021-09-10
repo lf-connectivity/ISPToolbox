@@ -29,6 +29,7 @@ from Overlay.views import OverlaySource
 from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView
 
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 
 from django.urls import path, include
 
@@ -103,6 +104,9 @@ urlpatterns = [
     url(r'^', include('waffle.urls')),
     # New User Experiences - Admin Reset
     path('admin/update-nux/', UpdateNuxSettingView.as_view(), name="update-nux"),
+
+    # Accounts / All Auth
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name="account_logout"),
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

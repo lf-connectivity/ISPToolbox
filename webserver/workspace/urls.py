@@ -53,7 +53,6 @@ urlpatterns = [
     path('workspace/account/',
          views.AccountSettingsView.as_view(), name="account_view"),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout_view"),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name="account_logout"),
     path('accounts/create/', CreateAccountView.as_view(),
          name="create_account_view"),
     # Workspace Object Persistence

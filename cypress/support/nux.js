@@ -4,9 +4,7 @@ import { assertion_within_subject } from "./assertions";
 
 Cypress.Commands.add("close_nux", () => {
   // Close out of new user tour
-  cy.get(".shepherd-cancel-icon").should("be.visible");
-  cy.wait(300);
-  cy.get(".shepherd-cancel-icon").click();
+  cy.get(".shepherd-cancel-icon").should("be.visible").click();
 });
 
 Cypress.Commands.add("open_nux", () => {

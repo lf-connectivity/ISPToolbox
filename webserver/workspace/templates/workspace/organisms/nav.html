@@ -1,5 +1,5 @@
 {% if nav_is_app_page is True %}
-  <nav class="workspace-nav navbar navbar-expand-lg navbar-light bg-white pr-3 pl-0 py-0" id="workspacenavelem">
+  <nav class="workspace-nav navbar navbar-expand-lg navbar-light bg-white pr-3 pl-0 py-0{% if beta is True %} nav-beta{% endif %}" id="workspacenavelem">
 {% else %}
   <div class="workspace-nav fixed-top px-4" id="workspacenavelem">
 {% endif %}

@@ -39,6 +39,7 @@ class NetworkDemoView(View):
             'title': 'LiDAR LOS Check - ISP Toolbox',
             'should_collapse_link_view': True,
             'tool': 'los_check',
+            'beta': True
         }
         return render(request, 'workspace/pages/demo_network.index.html', context)
 

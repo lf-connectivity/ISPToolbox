@@ -11,7 +11,10 @@
         display: block
     .draw-controls
         margin-right: 20px
-    
+
+.map-controls-beta
+    .layer-button-container
+        display: none
 
 .mapboxgl-ctrl-geocoder
     border-radius: 0
@@ -23,7 +26,7 @@
     &--suggestion-title
         font-weight: bold
         letter-spacing: 0.02em !important
-    &--suggestion-title, &--suggestion-address 
+    &--suggestion-title, &--suggestion-address
         font-family: $brand-font-family-sans-serif
         letter-spacing: 0.01em
         color: $brand-dark-gray-color
@@ -55,8 +58,8 @@
         top: 15px
 
 #map-available
-    width:100%
-    height:80vh
+    width: 100%
+    height: 80vh
     min-height: 400px
 
 .map-container-network

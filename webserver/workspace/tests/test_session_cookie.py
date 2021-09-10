@@ -84,14 +84,15 @@ class TestPrivacyCookieBasedSession(TestCase):
         """
         Test that user2 cannot access the network of user 1
         """
-        response = self.user_client2.get(reverseurl 'workspace:edit_network', args=[self.network1.uuid, self.network1.name]))
+        response = self.user_client2.get(reverse('workspace:edit_network', args=[
+                                         self.network1.uuid, self.network1.name]))
         self.assertEqual(response.status_code, 404)
 
     def test_cannot_change_ownership_to_other_user(self) -> None:
         """
         Test that user 1 cannot reassign values of user1's network
         """
-        response=self.user_client1.patch(
+        response = self.user_client1.patch(
             reverse('workspace:session_update', args=[self.network2.uuid]), {'zoom': 4})
         self.assertEqual(response.status_code, 404)
 
@@ -99,10 +100,10 @@ class TestPrivacyCookieBasedSession(TestCase):
         """
         Test that user2 cannot modify values of user1's features
         """
-        response=self.user_client2.patch(
+        response = self.user_client2.patch(
             reverse('workspace:get_ap_network', args=[self.ap1.uuid]),
             {'max_radius': 4},
-            content_type = 'application/json'
+            content_type='application/json'
         )
         self.assertEqual(response.status_code, 404)
 
@@ -110,8 +111,8 @@ class TestPrivacyCookieBasedSession(TestCase):
         """
         Test that user1 can modify his/her own features
         """
-        response=self.user_client1.patch(
+        response = self.user_client1.patch(
             reverse('workspace:get_ap_network', args=[self.ap1.uuid]),
-            {'max_radius': 4}, content_type = 'application/json'
+            {'max_radius': 4}, content_type='application/json'
         )
         self.assertEqual(response.status_code, 200)

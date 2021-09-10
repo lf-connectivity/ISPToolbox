@@ -21,6 +21,7 @@ TEST_KML = """<?xml version="1.0" encoding="UTF-8"?>
 </Point>
 </Placemark>
 </Folder>
+</Folder>
 <Folder>
 </Folder>
 </Document>

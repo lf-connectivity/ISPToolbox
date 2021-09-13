@@ -3,6 +3,5 @@
 
 [run]
 data_file = ../coverage/.coverage
-plugins = django_coverage_plugin
 source =
     webserver/

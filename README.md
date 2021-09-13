@@ -91,7 +91,7 @@ After running tests/doing manual testing on the `run_test` version of the server
 
 ```
 cd webserver
-python3 scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
+python3 ../scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
 coverage combine
 coverage report
 coverage html

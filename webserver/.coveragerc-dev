@@ -5,3 +5,7 @@
 data_file = ../coverage/.coverage
 source =
     webserver/
+
+
+[html]
+directory = ../coverage/htmlcov

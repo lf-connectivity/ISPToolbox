@@ -90,8 +90,8 @@ coverage==5.5
 After running tests/doing manual testing on the `run_test` version of the server, do the following:
 
 ```
-cd ../webserver
-python3 ../scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
+cd webserver
+python3 scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
 coverage combine
 coverage report
 coverage html

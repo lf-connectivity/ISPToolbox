@@ -1,8 +1,8 @@
 import sys
 import configparser
 
-def main():
 
+def main():
     base_config = configparser.ConfigParser()
     base_config.read(sys.argv[1])
 
@@ -18,6 +18,7 @@ def main():
     base_config.write(sys.stdout)
     with open(sys.argv[3], 'w') as f:
         base_config.write(f)
+
 
 if __name__ == '__main__':
     main()

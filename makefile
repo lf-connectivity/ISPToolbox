@@ -36,13 +36,13 @@ test:
 	mkdir -p coverage
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec django-app python3 /opt/scripts/create_coverage_file.py .coveragerc-base .coveragerc-unittest /opt/.coveragerc
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec django-app coverage erase
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec django-app ./wait-for-postgres.sh coverage run manage.py test --noinput
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec django-app coverage combine
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec django-app coverage report
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec django-app coverage html
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec django-app coverage erase
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T django-app python3 /opt/scripts/create_coverage_file.py .coveragerc-base .coveragerc-unittest /opt/.coveragerc
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T django-app coverage erase
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T django-app ./wait-for-postgres.sh coverage run manage.py test --noinput
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T django-app coverage combine
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T django-app coverage report
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T django-app coverage html
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml exec -T django-app coverage erase
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml stop
 
 static_test:

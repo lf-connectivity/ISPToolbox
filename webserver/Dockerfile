@@ -27,7 +27,7 @@ CMD [ "/bin/bash" ]
 # Install ISP Toolbox Dependencies
 
 RUN apt-get update && apt-get install -y \
-binutils libproj-dev gdal-bin python3-gdal libglib2.0-0 libsm6 libxext6 libxrender-dev python3-pip procps
+    binutils libproj-dev gdal-bin python3-gdal libglib2.0-0 libsm6 libxext6 libxrender-dev python3-pip procps
 RUN mkdir -p /usr/src/app
 
 WORKDIR /usr/src/app

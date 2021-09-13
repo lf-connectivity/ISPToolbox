@@ -36,6 +36,7 @@ jobs:
           start: make run_test
           wait-on: "http://localhost:8000"
       - name: Generate E2E test backend coverage
+        if: always()
         run: |
           cd webserver
           python3 scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
@@ -45,6 +46,7 @@ jobs:
           coverage erase
       - name: Upload E2E test backend coverage
         uses: actions/upload-artifact@v1
+        if: always()
         with:
           name: coverage-python-htmlcov
           path: coverage/htmlcov

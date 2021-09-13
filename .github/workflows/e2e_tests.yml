@@ -53,6 +53,7 @@ jobs:
           name: coverage-python-htmlcov
           path: coverage/htmlcov
       - name: Post-upload artifact removal for coverage
+        if: always()
         run: rm -rf coverage
       - uses: actions/upload-artifact@v1
         if: failure()

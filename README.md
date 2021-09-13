@@ -87,7 +87,7 @@ All of these frameworks have stellar open source documentation, so be sure to co
 coverage==5.5
 ```
 
-After running tests/doing manual testing on the `run_test` version of the server, do the following:
+After running tests/doing manual testing on the `run_test` version of the server, stop the server, then do the following:
 
 ```
 cd webserver

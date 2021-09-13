@@ -45,6 +45,7 @@ jobs:
           coverage report
           coverage html
           coverage erase
+          cd ..
       - name: Upload E2E test backend coverage
         uses: actions/upload-artifact@v1
         if: always()

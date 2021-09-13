@@ -38,6 +38,7 @@ jobs:
       - name: Generate E2E test backend coverage
         if: always()
         run: |
+          docker stop $(docker ps -a -f "name=isptoolbox_" -q)
           cd webserver
           python3 ../scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
           coverage combine

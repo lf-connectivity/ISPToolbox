@@ -197,7 +197,7 @@ context("Navbar tablet size logged in views", () => {
   });
 
   it("LOS Check Navbar", () => {
-    cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
+    cy.visit(LOS_CHECK_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("be.visible.and.work_properly")
@@ -353,7 +353,7 @@ context("Navbar mobile size logged in views", () => {
   });
 
   it("LOS Check Navbar", () => {
-    cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
+    cy.visit(LOS_CHECK_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("be.visible.and.work_properly")
@@ -511,13 +511,12 @@ context("Navbar desktop size logged out views", () => {
     cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "LOS Check")
       .navbar_tool_help_button_should("be.visible.with.icon")
       .navbar_beta_flag_should("be.visible.with.correct_text")
-      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
-      .navbar_account_dropdown_should("be.logged_out_view");
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible");
   });
 
   it("Sources pages Navbars", () => {
@@ -642,13 +641,12 @@ context("Navbar tablet size logged out views", () => {
     cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "LOS Check")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
       .navbar_beta_flag_should("be.visible.with.correct_text")
-      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
-      .navbar_account_dropdown_should("be.logged_out_view");
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible");
   });
 
   it("Sources pages Navbars", () => {
@@ -773,7 +771,7 @@ context("Navbar mobile size logged out views", () => {
     cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "LOS Check")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")

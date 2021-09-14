@@ -87,12 +87,12 @@ class _LoadSourcesListNode(template.Node):
         self.source_var = source_var
         self.new_page_context = new_page_context
         self.as_var = as_var
-        self.new_sources_list = OrderedDict()
 
     def render(self, context):
         page = _eval_string_literal_or_variable_value(self.page, context)
+        new_sources_list = OrderedDict()
         page_context = template.Context(context)
-        page_context[self.source_var] = self.new_sources_list
+        page_context[self.source_var] = new_sources_list
 
         for k, v in self.new_page_context.items():
             page_context[k] = _eval_general_value(v, context)
@@ -102,7 +102,7 @@ class _LoadSourcesListNode(template.Node):
         t.render(c)
 
         if self.as_var:
-            context[self.as_var] = self.new_sources_list
+            context[self.as_var] = new_sources_list
         return ''
 
 

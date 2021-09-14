@@ -9,7 +9,7 @@ context("Work", () => {
     const default_workspace_name = "untitled workspace";
 
     cy.visit("/pro/market/");
-    // cy.close_nux();
+    cy.close_nux();
     cy.wait_mapbox();
 
     // We should see an untitled workspace

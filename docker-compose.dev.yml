@@ -1,4 +1,4 @@
-version: "3.2"
+version: '3.2'
 
 services:
   static:
@@ -9,16 +9,13 @@ services:
   django-app:
     command: /bin/sh -c "/usr/src/app/dev_entrypoint_django.sh"
     environment:
-      COVERAGE_RCFILE: "/opt/.coveragerc"
-      DEBUG: "TRUE"
-      POSTGRES_DB: "postgres"
+      DEBUG: 'TRUE'
+      POSTGRES_DB: 'postgres'
       DB_NAME: "django_test"
       DB_USERNAME: "postgres"
       DB_PASSWORD: "password"
     volumes:
       - ./webserver:/usr/src/app
-      - ./coverage:/opt/coverage
-      - ./scripts:/opt/scripts
     ports:
       - 3000:3000
       - 8000:8000
@@ -27,7 +24,7 @@ services:
   celery:
     command: /bin/sh -c "/usr/src/app/dev_entrypoint_celery.sh"
     environment:
-      POSTGRES_DB: "postgres"
+      POSTGRES_DB: 'postgres'
     volumes:
       - ./webserver:/usr/src/app
   node-app:

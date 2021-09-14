@@ -37,6 +37,3 @@ webserver/census_blocks/
 
 # macosx
 **/.DS_Store
-
-# nothing in coverage
-coverage/*

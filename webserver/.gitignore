@@ -1,3 +1,2 @@
 celerybeat-schedule.*
 core.*
-.coveragerc

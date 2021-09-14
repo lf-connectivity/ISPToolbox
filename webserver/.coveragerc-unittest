@@ -1,5 +1,0 @@
-# .coveragerc file for e2e testing - for django test container
-
-[html]
-# For unit testing
-directory = /opt/coverage/unittest-htmlcov

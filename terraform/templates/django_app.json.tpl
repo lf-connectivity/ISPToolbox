@@ -90,7 +90,7 @@
   {
     "name": "node-app",
     "image": "${docker_image_url_node}",
-    "essential": true,
+    "essential": false,
     "cpu": 512,
     "memory": 1024,
     "links": [],

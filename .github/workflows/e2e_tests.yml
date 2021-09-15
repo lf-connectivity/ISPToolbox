@@ -34,7 +34,7 @@ jobs:
         id: cypress
         with:
           start: make run_test
-          wait-on: "http://localhost:8000 http://localhost:8020"
+          wait-on: "http://localhost:8000, http://localhost:8020"
       - name: Generate E2E test backend coverage
         if: always()
         run: |

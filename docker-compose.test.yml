@@ -41,7 +41,9 @@ services:
       - ./webserver:/usr/src/app
       - ./coverage:/opt/coverage
       - ./scripts:/opt/scripts
+
   node-app:
+    command: ["npm", "run", "start", "--", "8020"]
     ports:
       - 8020:8020
     volumes:

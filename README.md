@@ -68,6 +68,38 @@ All of these frameworks have stellar open source documentation, so be sure to co
 
 - Starts the webserver.
 
+`make setup_test`
+
+- Installs required packages for an e2e testing version of the server.
+
+`make run_test`
+
+- Starts the e2e testing version of the server.
+  - Server will be slower because of backend instrumentation.
+  - Same DB/code checkout configuration as `run_dev`
+  - hot reloading disabled
+
+## Code coverage in dev/test
+
+**Prerequisites:** You will need to pip install the following packages on your dev host:
+
+```
+coverage==5.5
+```
+
+After running tests/doing manual testing on the `run_test` version of the server, stop the server, then do the following:
+
+```
+cd webserver
+python3 ../scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
+coverage combine
+coverage report
+coverage html
+coverage erase
+```
+
+You should have a copy of the integration test coverage under `coverage/htmlcov/index.html`
+
 ## Running fbctower locally with WWW OnDemand
 
 1. On your EC2 instance

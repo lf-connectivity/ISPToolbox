@@ -9,30 +9,35 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v2      
-    - name: Setup Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install make
-      run: |
-        sudo apt-get update && sudo apt-get install -y make
-    - name: Lint with flake8
-      run: |
-        pip install flake8==3.7.9
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        echo "if you're seeing this, your code is ugly ( ͡ಥ ͜ʖ ͡ಥ)"
-        flake8 . --count --max-complexity=11 --max-line-length=127 --statistics --exclude *migrations*,*__init__.py
-    - name: Log into Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Run Django Test Suite
-      run: |
-        # Test then cleanup containers
-        make test
-        docker stop $(docker ps -a -f "name=isptoolbox_" -q)
-        docker rm $(docker ps -a -f "name=isptoolbox_" -q)
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install make
+        run: |
+          sudo apt-get update && sudo apt-get install -y make
+      - name: Lint with flake8
+        run: |
+          pip install flake8==3.7.9
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          echo "if you're seeing this, your code is ugly ( ͡ಥ ͜ʖ ͡ಥ)"
+          flake8 . --count --max-complexity=11 --max-line-length=127 --statistics --exclude *migrations*,*__init__.py
+      - name: Log into Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Run Django Test Suite
+        run: |
+          # Test then cleanup containers
+          make test
+          docker stop $(docker ps -a -f "name=isptoolbox_" -q)
+          docker rm $(docker ps -a -f "name=isptoolbox_" -q)
+      - name: Upload unittest coverage
+        uses: actions/upload-artifact@v1
+        with:
+          name: coverage-unittest-htmlcov
+          path: coverage/unittest-htmlcov

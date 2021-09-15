@@ -8,15 +8,16 @@ jobs:
   cypress-run:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v2      
+      - uses: actions/checkout@v2
         with:
           submodules: true
       - name: Install make + cypress
         run: |
           sudo apt-get update && sudo apt-get install -y make
-          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb python3-pip
           sudo apt install -y nodejs npm
           npm install cypress --save-dev
+          pip3 install coverage==5.5
       - name: Log into Docker Hub
         uses: docker/login-action@v1
         with:
@@ -32,8 +33,28 @@ jobs:
         uses: cypress-io/github-action@v2
         id: cypress
         with:
-          start: make run_dev
-          wait-on: 'http://localhost:8000'
+          start: make run_test
+          wait-on: "http://localhost:8000"
+      - name: Generate E2E test backend coverage
+        if: always()
+        run: |
+          docker stop $(docker ps -a -f "name=isptoolbox_" -q)
+          cd webserver
+          python3 ../scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
+          coverage combine
+          coverage report
+          coverage html
+          coverage erase
+          cd ..
+      - name: Upload E2E test backend coverage
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: coverage-python-htmlcov
+          path: coverage/htmlcov
+      - name: Post-upload artifact removal for coverage
+        if: always()
+        run: rm -rf coverage
       - uses: actions/upload-artifact@v1
         if: failure()
         with:

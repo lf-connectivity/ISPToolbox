@@ -6,10 +6,13 @@ services:
     build: ./webserver/static
     volumes:
       - ./webserver/static:/usr/src/app
+
   django-app:
-    command: /bin/sh -c "/usr/src/app/dev_entrypoint_django.sh"
+    entrypoint: ["/usr/bin/tini", "-g", "--"]
+    command: ["/bin/sh", "-c", "/usr/src/app/test_entrypoint_django.sh"]
     environment:
-      COVERAGE_RCFILE: "/opt/.coveragerc"
+      COVERAGE_RCFILE: "/usr/src/app/.coveragerc-base"
+      COVERAGE_PROCESS_START: "/usr/src/app/.coveragerc-base"
       DEBUG: "TRUE"
       POSTGRES_DB: "postgres"
       DB_NAME: "django_test"
@@ -22,14 +25,22 @@ services:
     ports:
       - 3000:3000
       - 8000:8000
+    stop_signal: SIGINT
     depends_on:
       - static
+
   celery:
-    command: /bin/sh -c "/usr/src/app/dev_entrypoint_celery.sh"
+    entrypoint: ["/usr/bin/tini", "-g", "--"]
+    command: ["/bin/sh", "-c", "/usr/src/app/test_entrypoint_celery.sh"]
     environment:
+      COVERAGE_RCFILE: "/usr/src/app/.coveragerc-base"
+      COVERAGE_PROCESS_START: "/usr/src/app/.coveragerc-base"
       POSTGRES_DB: "postgres"
+    stop_signal: SIGINT
     volumes:
       - ./webserver:/usr/src/app
+      - ./coverage:/opt/coverage
+      - ./scripts:/opt/scripts
   node-app:
     ports:
       - 8020:8020

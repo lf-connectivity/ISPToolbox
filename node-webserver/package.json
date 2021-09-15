@@ -2,7 +2,7 @@
   "name": "webserver",
   "version": "1.0.0",
   "description": "ISP Toolbox nodejs webserver for async communication",
-  "main": "dist/app.js",
+  "main": "src/app.ts",
   "scripts": {
     "start": "tsc; node dist/app.js",
     "watch": "tsnd --respawn src/app.ts",

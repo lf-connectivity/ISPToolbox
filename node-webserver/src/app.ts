@@ -17,7 +17,8 @@ import {
 } from "./mapbox-automerge/mapbox-automerge";
 import { settings } from "./settings";
 
-const socketIOPort = process.argv[2];
+const DEFAULT_PORT = 8020;
+const socketIOPort = process.argv[2] ? process.argv[2] : DEFAULT_PORT;
 const development_server_cors = "http://localhost:8000";
 
 (async () => {

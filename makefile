@@ -60,4 +60,5 @@ static_prod:
 run_test:
 	@echo ----------------------------------------------Start Integration Test Server------------------------------------------
 	mkdir -p coverage
+	docker-compose -f docker-compose.yml -f docker-compose.test.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.test.yml up

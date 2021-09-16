@@ -5,8 +5,11 @@
  * Django-Channels was not working for high throughput, low latency operations
  */
 
+import { Server } from "socket.io";
 import * as socketio from "socket.io";
 import Redis from "ioredis";
+import express from "express";
+import http from "http";
 
 import django_multiplayer_session_auth_middleware from "./middleware/django_auth_middleware";
 import {
@@ -23,6 +26,15 @@ const development_server_cors = "http://localhost:8000";
 
 (async () => {
   const initialized_settings = await settings();
+  const app = express();
+
+  app.get("/", (req, res) => {
+    // Health Check Endpoint
+    res.send("🔥");
+  });
+
+  const server = http.createServer(app);
+
   const options = {
     cors: {
       origin: !initialized_settings.production
@@ -34,7 +46,7 @@ const development_server_cors = "http://localhost:8000";
   };
   const redis = new Redis(initialized_settings.elasticache);
 
-  const io = require("socket.io")(options);
+  const io = new Server(server, options);
 
   // Add the Auth Middleware to add user info to the context
   io.use(django_multiplayer_session_auth_middleware(redis));
@@ -108,10 +120,12 @@ const development_server_cors = "http://localhost:8000";
         );
         io.of("/").adapter.off("join-room", welcome_new_user);
         // Notify Session that user has left
-        io.to(socket.handshake.query.session).emit("multiplayer-msg", {
-          type: "userleave",
-          uid: socket.handshake.query.user,
-        });
+        if (socket.handshake.query.session) {
+          io.to(socket.handshake.query.session).emit("multiplayer-msg", {
+            type: "userleave",
+            uid: socket.handshake.query.user,
+          });
+        }
       });
     }
   });
@@ -119,5 +133,5 @@ const development_server_cors = "http://localhost:8000";
   console.log(
     `Listening for connections on port: https://0.0.0.0:${socketIOPort}`
   );
-  io.listen(socketIOPort);
+  server.listen(socketIOPort);
 })();

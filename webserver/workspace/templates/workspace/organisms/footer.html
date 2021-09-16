@@ -1,35 +1,25 @@
+{% load i18n %}
 <div class="workspace-footer">
     <div class="container_copyright">
-        <p>
-            Facebook &#169; {% now "Y" %}
-        </p>
+        <p>Facebook &#169; {% now "Y" %}</p>
     </div>
     <div class="container_links">
-        <a href="{% url 'workspace:terms' %}" target="_blank">
-        Terms
-        </a>
-    
-        <a href="{% url 'workspace:data_policy' %}" target="_blank">
-        Privacy
-        </a>
-    
-        <a href="{% url 'workspace:cookies' %}" target="_blank">
-        Cookies
-        </a>
-    
-        <a class="arrow-link" href='https://www.facebook.com/fbctoolbox' target="_blank">
-        Contact 
-            <svg
-                class="arrow-link--icon"
-                width="19"
-                height="19"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                d="M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432"
-                strokeWidth="1.5px"
-                />
-            </svg>
-        </a>
-    </div>
+    <a href="{% url 'workspace:terms' %}" target="_blank">{% trans "Terms"%}</a>
+    <a href="{% url 'workspace:data_policy' %}" target="_blank">{% trans "Privacy"%}</a>
+    <a href="{% url 'workspace:cookies' %}" target="_blank">{% trans "Cookies"%}</a>
+    <a class="arrow-link" href='https://www.facebook.com/fbctoolbox' target="_blank">
+        {% trans "Contact"%} 
+        <svg
+            class="arrow-link--icon"
+            width="19"
+            height="19"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+            d="M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432"
+            strokeWidth="1.5px"
+            />
+        </svg>
+    </a>
+</div>
 </div>

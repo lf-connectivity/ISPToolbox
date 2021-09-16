@@ -514,6 +514,7 @@ context("Navbar desktop size logged out views", () => {
       .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "LOS Check")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
       .navbar_beta_flag_should("be.visible.with.correct_text")
       .navbar_workspace_dropdown_should("not.exist.or.not.be.visible");
   });

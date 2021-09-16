@@ -516,13 +516,14 @@ context("Navbar desktop size logged out views", () => {
       .navbar_title_should("be.visible.with.text", "LOS Check")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
       .navbar_beta_flag_should("be.visible.with.correct_text")
-      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible");
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });
 
   it("Sources pages Navbars", () => {
     cy.visit(MARKET_EVAL_SOURCES_PAGE);
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Sources")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
@@ -532,7 +533,7 @@ context("Navbar desktop size logged out views", () => {
 
     cy.visit(LOS_CHECK_SOURCES_PAGE);
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Sources")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
@@ -646,13 +647,14 @@ context("Navbar tablet size logged out views", () => {
       .navbar_title_should("be.visible.with.text", "LOS Check")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
       .navbar_beta_flag_should("be.visible.with.correct_text")
-      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible");
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });
 
   it("Sources pages Navbars", () => {
     cy.visit(MARKET_EVAL_SOURCES_PAGE);
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Sources")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
@@ -662,7 +664,7 @@ context("Navbar tablet size logged out views", () => {
 
     cy.visit(LOS_CHECK_SOURCES_PAGE);
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Sources")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
@@ -783,7 +785,7 @@ context("Navbar mobile size logged out views", () => {
   it("Sources pages Navbars", () => {
     cy.visit(MARKET_EVAL_SOURCES_PAGE);
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Sources")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
@@ -793,7 +795,7 @@ context("Navbar mobile size logged out views", () => {
 
     cy.visit(LOS_CHECK_SOURCES_PAGE);
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Sources")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")

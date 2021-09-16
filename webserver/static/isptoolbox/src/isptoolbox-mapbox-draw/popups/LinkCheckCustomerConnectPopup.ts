@@ -181,7 +181,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 </div>
 
                 <div class="description">
-                    <p class="bold">${this.street}</p>
+                    <p class="bold">${this.street}${this.getMapboxCitation()}</p>
                     <p class="small">${this.city}</p>
                     <p class="small">${this.displayLatLng()}</p>
                 </div>
@@ -296,7 +296,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         return `
         <div class="tooltip--location">
             <div class="title"> 
-                <h6>${this.street}</h6>
+                <h6>${this.street}${this.getMapboxCitation()}</h6>
             </div>
             <div class="description">
                 <p>${this.city}</p>
@@ -481,6 +481,16 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             return f.getFeatureData();
         });
         PubSub.publish(WorkspaceEvents.AP_RENDER_GIVEN, { features });
+    }
+
+    protected getMapboxCitation() {
+        return `
+            <sup>
+                <a href="/pro/sources/edit_network/#footnotes-section-2" target="_blank" class="footnote--link">
+                    <span class="footnote--bracket">[</span>2<span class="footnote--bracket">]</span>
+                </a>
+            </sup>
+        `;
     }
 }
 

@@ -102,6 +102,10 @@ _ISP_TOOLBOX_US_SOURCES = {
         link='https://cloudrf.com/api/',
         title='Cloud-RF',
         last_updated=datetime.date(2003, 1, 1)
+    ),
+    'MAPBOX': ISPToolboxSource(
+        link='https://www.mapbox.com/about/maps',
+        title='Mapbox'
     )
 }
 

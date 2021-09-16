@@ -486,8 +486,8 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     protected getMapboxCitation() {
         return `
             <sup>
-                <a href="/pro/sources/edit_network/#footnotes-section-2" target="_blank" class="footnote--link">
-                    <span class="footnote--bracket">[</span>2<span class="footnote--bracket">]</span>
+                <a href="/pro/sources/edit_network/#footnotes-section-1" target="_blank" class="footnote--link">
+                    <span class="footnote--bracket">[</span>1<span class="footnote--bracket">]</span>
                 </a>
             </sup>
         `;

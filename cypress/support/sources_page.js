@@ -2,8 +2,8 @@
 
 export const FOOTNOTES_SECTION = "footnotes-section";
 
-Cypress.Commands.add("get_footnote_by_text", (text) => {
-  cy.get(`p:contains(${text}) a:first`)
+Cypress.Commands.add("get_footnote", (selector) => {
+  cy.get(`${selector} a:first`)
     .invoke("removeAttr", "target")
     .then((a) => {
       let match = a.text().match(/(\d+)/);
@@ -13,6 +13,10 @@ Cypress.Commands.add("get_footnote_by_text", (text) => {
       cy.wrap(a).click({ force: true });
       return cy.get(`#${FOOTNOTES_SECTION}-${num}`);
     });
+});
+
+Cypress.Commands.add("get_footnote_by_text", (text) => {
+  cy.get_footnote(`p:contains(${text})`);
 });
 
 Cypress.Commands.add(

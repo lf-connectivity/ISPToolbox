@@ -32,14 +32,14 @@
   {% comment %}
   Not rendering this citation for now, but will be useful for sources page 
   {% endcomment %}
+  {% citation sources id="Mapbox" render=False %}
+    Address data obtained via {% source_link "US" "MAPBOX" %}'s Geocoding API.
+  {% endcitation %}
   {% citation sources id="Lidar Data" render=False %}
     {% source_link "US" "USGS_3DEP" %} obtained via {% source_link "US" "USGS_3DEP_POINT_CLOUDS" %}.
     Last updated date can be found in the legend tooltip.
     Check for <a href="{% url "demo-latest_gis-nodate" %}" target="_blank"> new LiDAR updates</a>.
     Clear or obstructed LiDAR data depends on changes in foliage or other obstructions.
-  {% endcitation %}
-  {% citation sources id="Mapbox" render=False %}
-    Address data obtained by {% source_link "US" "MAPBOX" %}'s Geocoding API.
   {% endcitation %}
 
 {% endblock %}

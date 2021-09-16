@@ -185,6 +185,7 @@ context("Sources checks for LOS", () => {
     cy.login();
     cy.visit(LOS_CHECK_PAGE);
     cy.wait_mapbox();
+    cy.close_nux();
   });
 
   it("Click Sources in LOS Check page brings up sources page", () => {
@@ -193,6 +194,31 @@ context("Sources checks for LOS", () => {
       .contains("a", "Sources")
       .should("have.attr", "target", "_blank")
       .should("have.attr", "href", LOS_CHECK_SOURCES_PAGE);
+  });
+
+  it("Radio tooltip in LOS Check page has the correct citation for Mapbox Geocoding", () => {
+    // Get the CPE tooltip. This was done through lots of trial/error to find a combination of numbers that worked.
+    // TODO: Mock websocket responses out so nobody has to do guesswork in the future!!!
+    for (let i = 0; i < 12; i++) {
+      cy.get("#map").trigger("wheel", 700, 300, { deltaY: -50000 });
+      cy.wait(100);
+    }
+    cy.get("#add-ap-btn").click();
+    cy.wait(500);
+    cy.get("#map").click(200, 500);
+    cy.wait(10000);
+    cy.get("#map").click(305, 540);
+    cy.wait(100);
+
+    // Tooltip should be visible
+    cy.get("#map").get("div.tooltip--cpe").should("be.visible");
+
+    // Click the citation in the street address portion
+    cy.get_footnote("#map div.tooltip--cpe:first div.description:first p:first")
+      .footnote_text_should_match(
+        /^Address data obtained via Mapbox's Geocoding API\.$/
+      )
+      .footnote_should_have_link("Mapbox", "https://www.mapbox.com/about/maps");
   });
 });
 

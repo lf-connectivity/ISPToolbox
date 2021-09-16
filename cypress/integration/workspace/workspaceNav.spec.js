@@ -47,7 +47,6 @@ context("Navbar desktop size logged in views", () => {
       .navbar_back_button_should("be.visible.and.work_properly")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "LOS Check")
-      .navbar_tool_help_button_should("be.visible.with.icon")
       .navbar_beta_flag_should("be.visible.with.correct_text")
       .navbar_workspace_dropdown_should("be.visible.with.correct_items")
       .navbar_account_dropdown_should("be.logged_in_view");

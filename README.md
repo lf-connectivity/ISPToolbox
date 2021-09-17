@@ -227,6 +227,13 @@ The latest environment variables are in the `terraform/variables.tf` file
 
 1. install node on your macbook `https://nodejs.org/en/download/`
 1. install cypress on your macbook `npm install cypress --save-dev`
+1. install the following other dev dependencies:
+
+```
+npm install -D @cypress/code-coverage
+npm install -D @istanbuljs/nyc-config-typescript
+```
+
 1. on your macbook git clone repository locally - i like the github desktop app https://desktop.github.com/
 1. run isptoolbox application on ec2 instance
 1. on your macbook `npx cypress open`
@@ -234,6 +241,13 @@ The latest environment variables are in the `terraform/variables.tf` file
 ## Run Cypress in EC2 (not recommended ❌):
 
 1. install cypress on your ec2 instance https://docs.cypress.io/guides/getting-started/installing-cypress
+1. install the following other dev dependencies:
+
+```
+npm install -D @cypress/code-coverage
+npm install -D @istanbuljs/nyc-config-typescript
+```
+
 1. install xquartz on your mac machine
 1. ssh onto your ec2 instance using x11
    eg: ssh -Y -i isptoolbox.pem user@instance

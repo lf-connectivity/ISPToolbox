@@ -62,7 +62,9 @@ jobs:
           path: frontend_coverage/reports/lcov-report
       - name: Post-upload artifact removal for coverage
         if: always()
-        run: rm -rf coverage
+        run: |
+          rm -rf coverage
+          rm -rf frontend_coverage
       - uses: actions/upload-artifact@v1
         if: failure()
         with:

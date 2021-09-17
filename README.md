@@ -68,10 +68,6 @@ All of these frameworks have stellar open source documentation, so be sure to co
 
 - Starts the webserver.
 
-`make setup_test`
-
-- Installs required packages for an e2e testing version of the server.
-
 `make run_test`
 
 - Starts the e2e testing version of the server.

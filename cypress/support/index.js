@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+import "@cypress/code-coverage/support";
+
 import "./los_check";
 import "./nux";
 import "./pages";

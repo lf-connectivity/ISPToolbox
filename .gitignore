@@ -40,3 +40,4 @@ webserver/census_blocks/
 
 # nothing in coverage
 coverage/*
+frontend_coverage/*

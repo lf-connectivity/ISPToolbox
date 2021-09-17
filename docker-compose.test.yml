@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   static:
-    command: /bin/sh -c "/usr/src/app/watch_static_dev.sh"
+    command: ["/bin/sh", "-c", "/usr/src/app/watch_static_dev.sh"]
     build: ./webserver/static
     volumes:
       - ./webserver/static:/usr/src/app

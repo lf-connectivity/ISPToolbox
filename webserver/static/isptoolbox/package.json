@@ -28,6 +28,7 @@
         "socket.io-client": "^4.0.1"
     },
     "devDependencies": {
+        "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
         "@types/jquery": "^3.5.5",
         "@types/lodash": "^4.14.168",
         "@types/mapbox-gl": "^2.0.0",

@@ -4,11 +4,28 @@
   "private": true,
   "description": "E2E Testing using Cypress of ISP Toolbox",
   "dependencies": {
-    "cypress": "6.8.0"
+    "cypress": "^6.9.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@cypress/code-coverage": "^3.9.11",
+    "@istanbuljs/nyc-config-typescript": "^1.0.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "include": [
+      "./webserver/static/isptoolbox/src/**/*.js",
+      "./webserver/static/isptoolbox/src/**/*.ts"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "report-dir": "./frontend_coverage/reports",
+    "temp-dir": "./frontend_coverage/.nyc_output"
   },
   "repository": {
     "type": "git",

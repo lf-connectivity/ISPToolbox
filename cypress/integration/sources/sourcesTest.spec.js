@@ -197,9 +197,8 @@ context("Sources checks for LOS", () => {
   });
 
   it("Radio tooltip in LOS Check page has the correct citation for Mapbox Geocoding", () => {
-    // Get the CPE tooltip. This was done through lots of trial/error to find a combination of numbers that worked.
-    // TODO: Mock websocket responses out so nobody has to do guesswork in the future!!!
     cy.los_setup_tower_radio();
+    cy.los_click_radio();
 
     // Tooltip should be visible
     cy.get("#map").get("div.tooltip--cpe").should("be.visible");

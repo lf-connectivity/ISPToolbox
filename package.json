@@ -16,10 +16,7 @@
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
     "all": true,
-    "include": [
-      "./webserver/static/isptoolbox/src/**/*.js",
-      "./webserver/static/isptoolbox/src/**/*.ts"
-    ],
+    "include": [],
     "reporter": [
       "lcov",
       "text"

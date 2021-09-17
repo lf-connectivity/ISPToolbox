@@ -52,8 +52,14 @@ jobs:
         uses: actions/upload-artifact@v1
         if: always()
         with:
-          name: coverage-python-htmlcov
+          name: coverage-backend
           path: coverage/htmlcov
+      - name: Upload E2E test frontend coverage
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: coverage-frontend
+          path: frontend_coverage/reports/lcov-report
       - name: Post-upload artifact removal for coverage
         if: always()
         run: rm -rf coverage

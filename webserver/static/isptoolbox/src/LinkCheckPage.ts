@@ -600,6 +600,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         // Set relationships amongst collapsible components
         CollapsibleComponent.registerSingletonConflicts(LOSCheckLinkProfileView, [
             LinkCheckTowerPopup,
+            LinkCheckCustomerConnectPopup,
+            LinkCheckVertexClickCustomerConnectPopup,
+            LinkCheckCPEClickCustomerConnectPopup,
             MapLayerSidebarManager
         ]);
 

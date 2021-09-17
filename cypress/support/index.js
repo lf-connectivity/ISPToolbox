@@ -1,5 +1,6 @@
 /// <reference types="cypress" />
 
+import "./los_check";
 import "./nux";
 import "./pages";
 import "./assertions";
@@ -9,6 +10,7 @@ import "./viewports";
 
 import { LOGIN_PAGE } from "./pages";
 
+export * from "./los_check";
 export * from "./nux";
 export * from "./pages";
 export * from "./assertions";

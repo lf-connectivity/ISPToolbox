@@ -426,9 +426,3 @@ CACHES = {
         "KEY_PREFIX": "los"
     }
 }
-
-# New User Experiences
-NUXES = [
-    'market_nux',
-    'network_nux'
-]

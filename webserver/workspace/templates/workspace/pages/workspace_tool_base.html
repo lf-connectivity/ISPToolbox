@@ -13,14 +13,12 @@
     {% block nav %}
     {% endblock %}
 
-    <div class="workspace-container">
-      <div class="mobile-overlay-lock">
-        {% include "workspace/organisms/disable_mobile_use.html" %}
-      </div>
-      
+    <div class="workspace-container">      
       {% block content %}
       {% endblock %}
     </div>
+    {% block footer%}
+    {% endblock %}
 
     {% include "workspace/organisms/workspace_session_modals.html" %}
     {% include "workspace/organisms/confirmation_modals.html" %}

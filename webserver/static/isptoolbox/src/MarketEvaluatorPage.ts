@@ -36,6 +36,21 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
 
         new MarketEvaluatorWS([]);
         MarketEvaluatorSidebarManager.getInstance().initializePopovers();
+        this.windowResizeCallback();
+        window.addEventListener('resize', this.windowResizeCallback);
+    }
+
+    windowResizeCallback() {
+        const disclaimer_height = $('footer').outerHeight();
+        $('#map, .workspace-container').css(
+            'min-height',
+            `calc(100vh - 50px - ${disclaimer_height}px)`
+        );
+        $('.workspace-container').css('height', `calc(100vh - 50px - ${disclaimer_height}px)`);
+        $('#map-layer-sidebar').css('max-height', `calc(100vh - 50px - ${disclaimer_height}px)`);
+        if (this.map?.resize) {
+            this.map.resize();
+        }
     }
 
     onMapLoad() {

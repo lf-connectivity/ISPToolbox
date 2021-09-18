@@ -21,6 +21,12 @@ class ShowUserNux(template.Node):
         if request is not None:
             try:
                 nux = NewUserExperience.objects.get(name=self.nux)
+                if request.user.is_anonymous:
+                    if not nux.anonymous_sessions.filter(session_key=request.session.session_key).exists():
+                        nux.anonymous_sessions.add(request.session.session_key)
+                        return self.nodelist.render(context)
+                    else:
+                        return ''
                 if not nux.users.filter(id=request.user.id).exists():
                     nux.users.add(request.user)
                     return self.nodelist.render(context)

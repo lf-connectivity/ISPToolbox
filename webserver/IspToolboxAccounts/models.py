@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import BaseUserManager
+from django.contrib.sessions.models import Session
 
 
 class UserManager(BaseUserManager):
@@ -116,7 +117,14 @@ class NewUserExperience(models.Model):
         max_length=255, blank=True, help_text="""Description of what the nux does""")
     users = models.ManyToManyField(
         to=settings.AUTH_USER_MODEL, blank=True, help_text="""Users that have seen the nux""")
+    anonymous_sessions = models.ManyToManyField(
+        to=Session, blank=True, help_text="""Anonymous Users - cookie based sessions"""
+    )
 
     @property
     def num_users_seen(self):
         return self.users.count()
+
+    @property
+    def num_anonymous_users_seen(self):
+        return self.anonymous_sessions.count()

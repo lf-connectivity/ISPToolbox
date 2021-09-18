@@ -302,38 +302,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.animationWasPlaying = false;
         this.cameraOffset = new THREE.Vector3();
 
-        // Add Resize-Window Callback
-        const resize_window = () => {
-            const window_height = $(window).height();
-            const bottom_row_height = $('#bottom-row-link-view-container').height();
-            const nav_height = $('#workspacenavelem').outerHeight(true);
-            let height =
-                window_height != null && bottom_row_height != null
-                    ? window_height - bottom_row_height
-                    : 0;
-            height = nav_height != null ? height - nav_height : height;
-            height = Math.max(height, 400);
-            $('#map').height(height);
-            if (this.map != null) {
-                this.map.resize();
-            }
-            $('#3d-view-container').height(height);
-            $('#potree_render_area').height(height);
-
-            if (this.link_chart) {
-                this.link_chart.redraw();
-            }
-        };
-        resize_window();
-        $(window).resize(resize_window);
-        // @ts-ignore
-        const resizeObserver = new ResizeObserver(() => {
-            resize_window();
-        });
-        const bottom_row = document.querySelector('#bottom-row-link-view-container');
-        if (bottom_row instanceof Element) {
-            resizeObserver.observe(bottom_row);
-        }
         // Initialize Bootstrap Tooltips
         // @ts-ignore
         $('[data-toggle="tooltip"]').tooltip({
@@ -513,6 +481,46 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 }
             }
         });
+
+        // Add Resize-Window Callback
+        this.windowResizeCallback();
+        window.addEventListener('resize', this.windowResizeCallback.bind(this));
+        // @ts-ignore
+        const resizeObserver = new ResizeObserver(() => {
+            this.windowResizeCallback();
+        });
+        const bottom_row = document.querySelector('#bottom-row-link-view-container');
+        if (bottom_row instanceof Element) {
+            resizeObserver.observe(bottom_row);
+        }
+    }
+
+    windowResizeCallback() {
+        const window_height = $(window).height();
+        const bottom_row_height = $('#bottom-row-link-view-container').height();
+        const disclaimer_height = $('footer').outerHeight(true);
+        const nav_height = $('#workspacenavelem').outerHeight(true);
+        let height =
+            window_height != null && bottom_row_height != null
+                ? window_height - bottom_row_height
+                : 0;
+        if (disclaimer_height && height) {
+            height -= disclaimer_height;
+        }
+        $('.workspace-container').css('min-height', `calc(100vh - 50px - ${disclaimer_height}px)`);
+        $('.workspace-container').css('height', `calc(100vh - 50px - ${disclaimer_height}px)`);
+        height = nav_height != null ? height - nav_height : height;
+        height = Math.max(height, 400);
+        $('#map').height(height);
+        if (this.map?.resize) {
+            this.map.resize();
+        }
+        $('#3d-view-container').height(height);
+        $('#potree_render_area').height(height);
+
+        if (this.link_chart) {
+            this.link_chart.redraw();
+        }
     }
 
     initMapCenterAndZoom() {

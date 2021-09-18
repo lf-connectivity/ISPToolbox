@@ -1,11 +1,18 @@
 from django.core.management.base import BaseCommand
 from IspToolboxAccounts.models import NewUserExperience
-from django.conf import settings
+
+
+DEFAULT_NUXES = [
+    'market_nux',
+    'network_nux',
+    'market_disclaimer',
+    'network_disclaimer'
+]
 
 
 def create_default_nuxes():
     try:
-        for nux_name in settings.NUXES:
+        for nux_name in DEFAULT_NUXES:
             nux, created = NewUserExperience.objects.get_or_create(
                 name=nux_name
             )

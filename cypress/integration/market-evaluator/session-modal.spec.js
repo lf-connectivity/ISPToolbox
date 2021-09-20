@@ -9,6 +9,7 @@ context("Work", () => {
     const default_workspace_name = "Test Workspace";
 
     cy.visit("/pro/market/");
+    cy.close_disclaimer();
     cy.close_nux();
     cy.wait_mapbox();
 

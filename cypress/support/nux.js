@@ -7,6 +7,10 @@ Cypress.Commands.add("close_nux", () => {
   cy.get(".shepherd-cancel-icon").should("be.visible").click();
 });
 
+Cypress.Commands.add("close_disclaimer", () => {
+  cy.contains('I understand').should("be.visible").click();
+})
+
 Cypress.Commands.add("open_nux", () => {
   cy.get("button#tool_help_button").click();
 });

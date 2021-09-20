@@ -32,6 +32,7 @@ function create_logged_in_nux_test_case(
         )
         .nux_cta_button_should("have.text", "Take a Tour");
 
+      cy.close_disclaimer();
       cy.close_nux();
       cy.get_nux().should("not.exist");
 

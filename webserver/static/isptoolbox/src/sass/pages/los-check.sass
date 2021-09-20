@@ -22,7 +22,6 @@
 @use '../overrides'
 @import '../theme'
 
-
 body
     background-color: $brand-theme-color
     overflow: auto !important
@@ -46,11 +45,11 @@ body
         width: 6px
     ::-webkit-scrollbar-thumb
         background-color: $light-gray-color
-    
+
     .network-page-wrapper
         height: 100%
         width: 100%
-        display: flex 
+        display: flex
         flex-direction: row
         justify-content: flex-start
 
@@ -61,6 +60,10 @@ body
         .isptoolbox-btn, .collapse-button
             transform: translateY(-1rem)
 
+@media screen and (max-width: $breakpoint-lg)
+    .link-view-bar
+        position: relative
+
 .nodes-loading-message
     display: none
     font-family: $brand-font-family-mono
@@ -70,4 +73,3 @@ body
 @media (min-width: 640px)
     .nodes-loading-message
         display: inline-block
-    

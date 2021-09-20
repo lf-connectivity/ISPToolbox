@@ -31,7 +31,7 @@ Cypress.Commands.add("los_setup_tower_radio", () => {
   }
 
   cy.get("#add-ap-btn").click();
-  cy.wait(500);
+  cy.wait(800);
   cy.get("#map").click(450, 200);
   cy.wait(6500);
   cy.get("#map").click(220, 300);

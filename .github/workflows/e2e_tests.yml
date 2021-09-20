@@ -31,6 +31,8 @@ jobs:
           make default_objects
           make static_test
           docker stop $(docker ps -a -f "name=isptoolbox_" -q)
+          sudo mkdir -p /usr/src/app
+          sudo cp -r webserver/static/* /usr/src/app
       - name: Cypress run
         uses: cypress-io/github-action@v2
         id: cypress
@@ -63,6 +65,7 @@ jobs:
       - name: Post-upload artifact removal for coverage
         if: always()
         run: |
+          sudo rm -rf /usr/src/app
           rm -rf coverage
           rm -rf frontend_coverage
       - uses: actions/upload-artifact@v1

@@ -1,6 +1,6 @@
+{% spaceless %}
 <!DOCTYPE html>
-{% load static %} 
-{% load js_reverse %}
+{% load static js_reverse %} 
 
 <html lang="en">
   <head>
@@ -13,7 +13,10 @@
     {% block nav %}
     {% endblock %}
 
-    <div class="workspace-container">      
+    <div class="workspace-container">
+      <div class="mobile-overlay-lock">
+        {% include "workspace/organisms/disable_mobile_use.html" %}
+      </div>
       {% block content %}
       {% endblock %}
     </div>
@@ -30,3 +33,4 @@
     <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
   </body>
 </html>
+{% endspaceless %}

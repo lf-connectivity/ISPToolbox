@@ -2,10 +2,6 @@
 body
     .isptoolbox-btn
         border-radius: 0 !important
-        &.btn-secondary
-            border-color: $brand-primary-color !important
-        &.btn-primary
-            border-color: $brand-primary-color !important
         display: flex
         align-items: center
         font-size: $small-font-size
@@ -16,8 +12,11 @@ body
         justify-content: center
         flex-flow: wrap
         border-width: 2px
-        svg
-            margin-right: 9px
+        &.btn-secondary
+            border-color: $brand-primary-color !important
+        &.btn-primary
+            border-color: $brand-primary-color !important
+
     .isptoolbox-btn.large
         padding: 13px
     .isptoolbox-btn.negative
@@ -30,13 +29,3 @@ body
     .btn-primary
         background-color: $brand-primary-color !important
         color: $white-color
-    .btn-edit:hover
-        background-color: $light-gray-color !important
-        border-radius: 4px
-    .ap-edit-btn
-        color: $brand-primary-color !important
-    .ap-save-edit-btn:hover
-        background-color: $light-gray-color !important
-        border-radius: 4px
-
-

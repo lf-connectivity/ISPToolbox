@@ -1,4 +1,6 @@
 {% load nux i18n %}
+const tour_dots = '<svg width="48" height="10" viewBox="0 0 48 10" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="5" r="5" fill="#EDEDED"/><circle cx="24" cy="5" r="5" fill="#A2A2A2"/><circle cx="43" cy="5" r="5" fill="#EDEDED"/></svg>';
+const tour_arrow = '<svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 1.9975L6.18084 8.5L0 15.0025L1.90283 17L10 8.5L1.90283 0L0 1.9975Z" fill="white"/></svg>';
 const tour = new Shepherd.Tour({
     defaultStepOptions: {
         classes: 'isptoolbox-tour',
@@ -32,11 +34,17 @@ tour.addStep({
         element: '#geocoder',
         on: 'bottom'
     },
+    classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: "{% translate 'Next'%}",
+        text: tour_dots,
+        action: tour.back,
+        classes: 'btn px-4 ml-2'
+    },
+    {
+        text: tour_arrow,
         action: tour.next,
-        classes: "btn btn-primary isptoolbox-btn",
+        classes: "btn btn-primary isptoolbox-btn py-3 px-4",
     }]
 });
 tour.addStep({
@@ -46,11 +54,17 @@ tour.addStep({
         element: '#drawing-controls',
         on: 'bottom'
     },
+    classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: "{% translate 'Next'%}",
+        text: tour_dots,
+        action: tour.back,
+        classes: 'btn px-4 ml-2'
+    },
+    {
+        text: tour_arrow,
         action: tour.next,
-        classes: "btn btn-primary isptoolbox-btn",
+        classes: "btn btn-primary isptoolbox-btn py-3 px-4",
     }]
 });
 tour.addStep({
@@ -60,11 +74,17 @@ tour.addStep({
         element: '#market-eval-stats',
         on: 'right'
     },
+    classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: "{% translate 'Next'%}",
+        text: tour_dots,
+        action: tour.back,
+        classes: 'btn px-4 ml-2'
+    },
+    {
+        text: tour_arrow,
         action: tour.next,
-        classes: "btn btn-primary isptoolbox-btn",
+        classes: "btn btn-primary isptoolbox-btn py-3 px-4",
     }]
 });
 {% if request.user.is_authenticated %}
@@ -144,3 +164,4 @@ $(() => {
         disclaimer.start();
     });
 })
+

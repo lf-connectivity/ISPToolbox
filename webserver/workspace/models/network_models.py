@@ -278,7 +278,7 @@ class APToCPELink(WorkspaceFeature):
 
     @property
     def geojson(self):
-        return LineString(self.ap.geojson, self.cpe.geojson)
+        return LineString(self.ap.geojson, self.cpe.geojson, srid=self.ap.geojson.srid)
 
     @property
     def feature_type(self):

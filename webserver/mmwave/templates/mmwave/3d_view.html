@@ -6,17 +6,11 @@
     <div id="potree_render_area" style="width:100%; min-height: 400px;">
     </div>
     {% include "mmwave/molecules/webgl2_error.html" %}
+    {% include 'mmwave/atoms/error_occured.html' %}
     <div id="potree_sidebar_container" class="d-none"> </div>
   </div>
   {% include 'mmwave/atoms/3d_help.html' %}
 </div>
-
-<style>
-
-.potree_container img{
-  display:none !important;
-}
-</style>
 <script>
   if(typeof window.WebGL2RenderingContext !== 'undefined'){
     console.log('WebGL2 Enabled');
@@ -27,7 +21,8 @@
     document.getElementById("webgl-error-msg").classList.remove('d-none');
     document.getElementById("potree_render_area").classList.add('d-none');
   }
-    window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
+    window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"),
+      {noNavCube: true, noCompass: true, noTransformationTool: true});
 
     if (window.viewer.renderer.getContext().getSupportedExtensions().includes("EXT_frag_depth"))
     {

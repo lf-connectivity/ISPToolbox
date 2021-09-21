@@ -2,7 +2,10 @@
 const tour = new Shepherd.Tour({
     defaultStepOptions: {
         classes: 'isptoolbox-tour',
-        scrollTo: true
+        scrollTo: true,
+        popperOptions: {
+            modifiers: [{ name: 'offset', options: { offset: [0, 12] } }]
+        }
     },
     useModalOverlay: true
 });
@@ -14,7 +17,7 @@ tour.addStep({
         on: 'bottom'
     },
     cancelIcon: { enabled: true },
-    title: 'ISP Toolbox - Market Evaluator',
+    title: '<b>ISP Toolbox - Market Evaluator</b>',
     classes: 'footer-left-aligned',
     buttons: [{
         text: "{% translate 'Take a Tour'%}",

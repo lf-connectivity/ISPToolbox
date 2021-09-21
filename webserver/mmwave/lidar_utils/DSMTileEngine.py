@@ -5,9 +5,7 @@ from django.contrib.gis.geos import GEOSGeometry, Point
 from mmwave.lidar_utils import SlippyTiles
 import tempfile
 import shlex
-import subprocess
 import time
-import logging
 from IspToolboxApp.util.s3 import readMultipleS3Objects
 import rasterio
 

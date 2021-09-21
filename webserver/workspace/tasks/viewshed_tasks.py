@@ -24,7 +24,7 @@ def computeViewshedCoverage(network_id, data, user_id):
         calculateCoverage(ap_uuid, user_id)
         # Update the Client
         updateClientAPStatus(network_id, ap_uuid, user_id)
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         # Already logged
         resp = {
             'type': 'ap.unexpected_error',

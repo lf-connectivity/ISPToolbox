@@ -1,4 +1,6 @@
 from celery import shared_task
+from celery.utils.log import get_task_logger
+from mmwave.lidar_utils.DSMTileEngine import TASK_LOGGER
 from workspace.models import (
     AccessPointLocation, AccessPointCoverageBuildings, BuildingCoverage
 )
@@ -10,12 +12,12 @@ from workspace.tasks.websocket_utils import updateClientAPStatus
 
 import numpy as np
 import json
-import logging
 
 
 ARC_SECOND_DEGREES = 1.0 / 60.0 / 60.0
 LIMIT_BUILDINGS = 10000
 INTERVAL_UPDATE_FRONTEND = 10
+TASK_LOGGER = get_task_logger(__name__)
 
 
 @shared_task
@@ -29,7 +31,7 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
         building_coverage.save()
     # check if the result exists already
     if not building_coverage.result_cached():
-        logging.info('cache miss building coverage')
+        TASK_LOGGER.info('cache miss building coverage')
         new_hash = building_coverage.calculate_hash()
         # Get circle geometry
         circle_json = json.dumps(createGeoJSONCircle(building_coverage.ap.geojson, building_coverage.ap.max_radius))
@@ -50,7 +52,7 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
         building_coverage.hash = new_hash
         building_coverage.save()
     else:
-        logging.info('cache hit building coverage')
+        TASK_LOGGER.info('cache hit building coverage')
 
     updateClientAPStatus(channel_id, ap.uuid, user_id)
 

@@ -1,3 +1,4 @@
+from celery.utils.log import get_task_logger
 from mmwave.models import EPTLidarPointCloud
 from typing import Iterable
 from django.contrib.gis.geos import GEOSGeometry, Point
@@ -10,8 +11,11 @@ import logging
 from IspToolboxApp.util.s3 import readMultipleS3Objects
 import rasterio
 
+from workspace.utils.process_utils import celery_task_subprocess_check_output_wrapper
+
 
 USE_OLD_TILES = "/tile"
+TASK_LOGGER = get_task_logger(__name__)
 
 
 class DSMTileEngine:
@@ -34,12 +38,11 @@ class DSMTileEngine:
                         jobs.append(cloud.get_s3_key_tile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES))
                         tifs.append(tmp_tif.name)
                         break
-            logging.info(f'Time to generate jobs: {time.time() - start} jobs:{ len(jobs)}')
+            TASK_LOGGER.info(f'Time to generate jobs: {time.time() - start} jobs:{ len(jobs)}')
             readMultipleS3Objects(jobs, tifs)
-            logging.info(f'Finished: {time.time() - start} ')
+            TASK_LOGGER.info(f'Finished: {time.time() - start} ')
             cmd = shlex.split(f'gdal_merge.py -o {output_filepath} -of GTiff {" ".join(tifs)}')
-            process = subprocess.Popen(cmd)
-            process.wait()
+            celery_task_subprocess_check_output_wrapper(cmd, stderr=subprocess.STDOUT)
 
     def getSurfaceHeight(self, pt: Point) -> float:
         # get tile coordinates x,y,z

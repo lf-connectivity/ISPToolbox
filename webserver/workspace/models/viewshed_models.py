@@ -1,3 +1,4 @@
+from celery.utils.log import get_task_logger
 from django.db import models
 from django.contrib.gis.geos import Point
 from django.conf import settings
@@ -29,10 +30,13 @@ import os
 import re
 from numpy import polyfit, polyval
 
+from workspace.utils.process_utils import celery_task_subprocess_check_output_wrapper
+
 
 DEFAULT_PROJECTION = 3857
 DEFAULT_OBSTRUCTED_COLOR = [0, 0, 0, 128]
 PIL.Image.MAX_IMAGE_PIXELS = 20_000 * 20_000
+TASK_LOGGER = get_task_logger(__name__)
 
 
 class Viewshed(models.Model, S3PublicExportMixin):
@@ -133,7 +137,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                 status_callback("Loading DSM Data",
                                 self.__timeRemainingViewshed(0))
             dsm_engine.getDSM(dsm_file.name)
-            logging.info(f'dsm download: {time.time() - start}')
+            TASK_LOGGER.info(f'dsm download: {time.time() - start}')
             if status_callback is not None:
                 status_callback("Computing Coverage",
                                 self.__timeRemainingViewshed(1))
@@ -197,8 +201,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
             raw_command = self.__createRawGDALViewshedCommand(
                 dsm_file.name, output_temp.name, DEFAULT_PROJECTION)
             filtered_command = shlex.split(raw_command)
-            subprocess.check_output(filtered_command, encoding="UTF-8")
-            logging.info(f'compute viewshed: {time.time() - start}')
+            celery_task_subprocess_check_output_wrapper(filtered_command, encoding="UTF-8", stderr=subprocess.STDOUT)
+            TASK_LOGGER.info(f'compute viewshed: {time.time() - start}')
             start_tiling = time.time()
 
             if status_callback is not None:
@@ -207,15 +211,15 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
             with tempfile.NamedTemporaryFile(suffix=".tif") as colorized_temp:
                 self.__colorizeOutputViewshed(output_temp, colorized_temp)
-                logging.info(f'colorizing: {time.time() - start_tiling}')
+                TASK_LOGGER.info(f'colorizing: {time.time() - start_tiling}')
                 start = time.time()
                 self.__reprojectViewshed(output_temp)
-                logging.info(f'reproject: {time.time() - start}')
+                TASK_LOGGER.info(f'reproject: {time.time() - start}')
                 start = time.time()
                 self.__createTileset(
                     colorized_temp, status_callback=status_callback)
-                logging.info(f'tileset: {time.time() - start}')
-            logging.info(f'tiling: {time.time() - start_tiling}')
+                TASK_LOGGER.info(f'tileset: {time.time() - start}')
+            TASK_LOGGER.info(f'tiling: {time.time() - start_tiling}')
 
     def __createTileset(self, tif_tempfile, status_callback=None):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -279,7 +283,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                 'width': width,
                 'height': height
             })
-            logging.info(f'open: {time.time() - start}')
+            TASK_LOGGER.info(f'open: {time.time() - start}')
 
             # Create a transformed reprojection
             with tempfile.NamedTemporaryFile(suffix=".tif") as temp_transform:
@@ -295,7 +299,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                             resampling=Resampling.nearest)
                 temp_transform.seek(0)
                 self.write_object(temp_transform, tif=True)
-                logging.info(f'reprojected: {time.time() - start}')
+                TASK_LOGGER.info(f'reprojected: {time.time() - start}')
 
     def __convert2Tiles(self, tif_filepath, outputfolder):
         raw_command = self.__createGdal2TileCommand(tif_filepath, outputfolder)

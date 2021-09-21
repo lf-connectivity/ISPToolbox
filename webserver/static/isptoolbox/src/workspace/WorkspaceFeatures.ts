@@ -64,7 +64,6 @@ export class AccessPoint extends WorkspacePointFeature {
 
     create(successFollowup?: (resp: any) => void) {
         super.create((resp) => {
-            console.log(resp);
             PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
 
             if (successFollowup) {

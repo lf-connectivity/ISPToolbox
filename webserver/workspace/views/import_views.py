@@ -19,7 +19,7 @@ class KMZImportView(LoginRequiredMixin, View):
             request.POST, files=request.FILES)
         try:
             session = WorkspaceMapSession.importKMZ(request)
-            return redirect(reverse('edit_network', args=[session.pk, session.name]))
+            return redirect(reverse('workspace:edit_network', args=[session.pk, session.name]))
         except Exception as e:
             # name of session already exists? TODO: duplicate unique constraint error handling
             if 'unique constraint' in repr(e) and '(owner_id, name)' in repr(e):

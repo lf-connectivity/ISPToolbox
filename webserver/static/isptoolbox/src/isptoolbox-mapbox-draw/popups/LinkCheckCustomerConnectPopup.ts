@@ -14,7 +14,6 @@ import {
 } from '../../workspace/BuildingCoverage';
 import { LinkCheckLocationSearchTool } from '../../organisms/LinkCheckLocationSearchTool';
 import { BaseWorkspaceFeature } from '../../workspace/BaseWorkspaceFeature';
-import { DEFAULT_RADIUS } from '../APDrawMode';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
 import { BUILDING_LAYER } from '../../organisms/APCoverageRenderer';
@@ -408,9 +407,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 type: 'Point',
                 coordinates: this.lnglat
             },
-            properties: {
-                radius: DEFAULT_RADIUS
-            }
+            properties: {}
         } as Feature<Point, any>;
         this.map.fire('draw.create', { features: [newAP] });
         this.marker.hide();
@@ -591,7 +588,6 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
                 coordinates: this.lnglat
             },
             properties: {
-                radius: DEFAULT_RADIUS,
                 cpeLngLats: cpeLngLats,
                 ptpLinksToRemove: ptpLinksToRemove
             }

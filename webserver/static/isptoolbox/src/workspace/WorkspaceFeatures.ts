@@ -3,20 +3,20 @@ import { Feature, Geometry, Point, LineString, Polygon } from 'geojson';
 import {
     BaseWorkspaceFeature,
     WorkspaceLineStringFeature,
-    WorkspacePointFeature,
-    WorkspacePolygonFeature
+    WorkspacePointFeature
 } from './BaseWorkspaceFeature';
 import { isUnitsUS } from '../utils/MapPreferences';
 import { LinkCheckEvents } from '../LinkCheckPage';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';
+import { djangoUrl } from '../utils/djangoUrl';
 
-const AP_API_ENDPOINT = '/pro/workspace/api/ap-los';
 const AP_RESPONSE_FIELDS = [
     'name',
     'height',
     'max_radius',
+    'radius',
     'no_check_radius',
     'default_cpe_height',
     'max_radius_miles',
@@ -32,14 +32,11 @@ const AP_SERIALIZER_FIELDS = [
     'default_cpe_height'
 ];
 
-const CPE_ENDPOINT = '/pro/workspace/api/cpe';
 const CPE_RESPONSE_FIELDS = ['name', 'height', 'height_ft', 'ap'];
 const CPE_SERIALIZER_FIELDS = ['name', 'height', 'ap'];
 
-const AP_CPE_LINK_ENDPOINT = '/pro/workspace/api/ap-cpe-link';
 const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe'];
 
-const COVERAGE_AREA_ENDPOINT = '/pro/workspace/api/coverage-area';
 const COVERAGE_AREA_FIELDS: string[] = [];
 
 const LINK_AP_INDEX = 0;
@@ -55,7 +52,7 @@ export class AccessPoint extends WorkspacePointFeature {
             map,
             draw,
             featureData,
-            AP_API_ENDPOINT,
+            djangoUrl('workspace:ap'),
             AP_RESPONSE_FIELDS,
             AP_SERIALIZER_FIELDS,
             WorkspaceFeatureTypes.AP
@@ -67,6 +64,7 @@ export class AccessPoint extends WorkspacePointFeature {
 
     create(successFollowup?: (resp: any) => void) {
         super.create((resp) => {
+            console.log(resp);
             PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
 
             if (successFollowup) {
@@ -169,7 +167,7 @@ export class CPE extends WorkspacePointFeature {
             map,
             draw,
             featureData,
-            CPE_ENDPOINT,
+            djangoUrl('workspace:cpe'),
             CPE_RESPONSE_FIELDS,
             CPE_SERIALIZER_FIELDS,
             WorkspaceFeatureTypes.CPE
@@ -240,7 +238,7 @@ export class APToCPELink extends WorkspaceLineStringFeature {
             map,
             draw,
             featureData,
-            AP_CPE_LINK_ENDPOINT,
+            djangoUrl('workspace:ap-cpe-link'),
             AP_CPE_LINK_FIELDS,
             AP_CPE_LINK_FIELDS,
             WorkspaceFeatureTypes.AP_CPE_LINK
@@ -326,7 +324,7 @@ export class CoverageArea extends BaseWorkspaceFeature {
             map,
             draw,
             featureData,
-            COVERAGE_AREA_ENDPOINT,
+            djangoUrl('workspace:coverage-area'),
             COVERAGE_AREA_FIELDS,
             COVERAGE_AREA_FIELDS,
             WorkspaceFeatureTypes.COVERAGE_AREA

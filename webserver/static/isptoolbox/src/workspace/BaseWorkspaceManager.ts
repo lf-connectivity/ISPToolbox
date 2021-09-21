@@ -6,22 +6,15 @@ import { TowerPaginationModal } from '../organisms/TowerPaginationModal';
 import { SessionModal } from '../organisms/SessionModal';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
+import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CPE, APToCPELink, CoverageArea } from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
-import { feature } from '@turf/turf';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void | boolean;
 
 function doNothingProcessor(): UpdateDeleteFeatureProcessor {
     return (workspaceFeature: BaseWorkspaceFeature) => {};
 }
-
-export const DEFAULT_AP_HEIGHT = 30.48;
-export const DEFAULT_CPE_HEIGHT = 1.0;
-export const DEFAULT_NO_CHECK_RADIUS = 0.01;
-export const DEFAULT_AP_NAME = 'Unnamed AP';
-export const DEFAULT_CPE_NAME = 'Unnamed CPE';
 
 export abstract class BaseWorkspaceManager {
     map: MapboxGL.Map;

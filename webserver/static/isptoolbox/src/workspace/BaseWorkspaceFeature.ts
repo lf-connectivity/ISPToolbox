@@ -77,7 +77,7 @@ export abstract class BaseWorkspaceFeature {
      */
     create(successFollowup?: (resp: any) => void) {
         $.ajax({
-            url: `${this.apiEndpoint}/`,
+            url: `${this.apiEndpoint}`,
             method: 'POST',
             data: this.serialize(),
             headers: {
@@ -102,7 +102,7 @@ export abstract class BaseWorkspaceFeature {
      */
     update(successFollowup?: (resp: any) => void) {
         $.ajax({
-            url: `${this.apiEndpoint}/${this.workspaceId}/`,
+            url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'PATCH',
             data: this.serialize(),
             headers: {
@@ -127,7 +127,7 @@ export abstract class BaseWorkspaceFeature {
     delete(successFollowup?: (resp: any) => void) {
         this.removeFeatureFromMap(this.mapboxId);
         $.ajax({
-            url: `${this.apiEndpoint}/${this.workspaceId}/`,
+            url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),

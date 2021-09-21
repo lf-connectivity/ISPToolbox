@@ -1,6 +1,5 @@
 import { getMessagePoint, addDrawingInstructions } from "./styles/drawing_instructions";
 
-export const DEFAULT_RADIUS = 322;
 function _APDrawMode() {
     let mode = Object.assign({}, MapboxDraw.modes.draw_point);
 
@@ -8,7 +7,6 @@ function _APDrawMode() {
         const point = this.newFeature({
             type: 'Feature',
             properties: {
-                radius: DEFAULT_RADIUS
             },
             geometry: {
                 type: 'Point',

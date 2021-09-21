@@ -98,12 +98,16 @@ class SessionWorkspaceModelMixin:
 
 
 class AccessPointLocation(WorkspaceFeature):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, default="Unnamed AP")
     height = models.FloatField(default=30)
     max_radius = models.FloatField(default=2)
     no_check_radius = models.FloatField(default=0.01)
     default_cpe_height = models.FloatField(default=1)
     cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)
+
+    @property
+    def radius(self):
+        return self.max_radius
 
     @property
     def max_radius_miles(self):
@@ -151,6 +155,7 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     last_updated = serializers.DateTimeField(
         format="%D", required=False, read_only=True)
     height_ft = serializers.FloatField(read_only=True)
+    radius = serializers.FloatField(read_only=True)
     max_radius_miles = serializers.FloatField(read_only=True)
     feature_type = serializers.CharField(read_only=True)
     default_cpe_height_ft = serializers.FloatField(read_only=True)

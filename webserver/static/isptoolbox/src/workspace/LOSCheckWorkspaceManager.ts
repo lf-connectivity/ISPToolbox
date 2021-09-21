@@ -8,12 +8,7 @@ import { BuildingCoverageStatus } from './BuildingCoverage';
 import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 import { getStreetAndAddressInfo } from '../LinkCheckUtils';
 
-import {
-    BaseWorkspaceManager,
-    DEFAULT_AP_HEIGHT,
-    DEFAULT_AP_NAME,
-    DEFAULT_NO_CHECK_RADIUS
-} from './BaseWorkspaceManager';
+import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 
 const SUPPORTED_FEATURE_TYPES = [
     WorkspaceFeatureTypes.AP_CPE_LINK,
@@ -110,12 +105,7 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
             const newCircle = {
                 ...feature,
                 properties: {
-                    radius: feature.properties.radius / 1000,
-                    max_radius: feature.properties.radius / 1000,
-                    center: feature.geometry.coordinates,
-                    height: DEFAULT_AP_HEIGHT,
-                    no_check_radius: DEFAULT_NO_CHECK_RADIUS,
-                    name: DEFAULT_AP_NAME
+                    center: feature.geometry.coordinates
                 },
                 id: feature.id
             };

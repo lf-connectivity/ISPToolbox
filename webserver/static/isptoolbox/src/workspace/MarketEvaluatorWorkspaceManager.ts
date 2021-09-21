@@ -7,13 +7,7 @@ import MarketEvaluatorWS, {
     ViewshedGeojsonResponse
 } from '../MarketEvaluatorWS';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
-import {
-    BaseWorkspaceManager,
-    DEFAULT_AP_HEIGHT,
-    DEFAULT_AP_NAME,
-    DEFAULT_CPE_HEIGHT,
-    DEFAULT_NO_CHECK_RADIUS
-} from './BaseWorkspaceManager';
+import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
 
@@ -44,13 +38,7 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
                 const newCircle = {
                     ...feature,
                     properties: {
-                        radius: feature.properties.radius / 1000,
-                        max_radius: feature.properties.radius / 1000,
-                        center: feature.geometry.coordinates,
-                        height: DEFAULT_AP_HEIGHT,
-                        default_cpe_height: DEFAULT_CPE_HEIGHT,
-                        no_check_radius: DEFAULT_NO_CHECK_RADIUS,
-                        name: DEFAULT_AP_NAME
+                        center: feature.geometry.coordinates
                     },
                     id: feature.id
                 };

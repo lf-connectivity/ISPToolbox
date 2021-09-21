@@ -580,6 +580,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                     'default_cpe_height': DEFAULT_CPE_HEIGHT,
                     'feature_type': FeatureType.AP.value,
                     'max_radius': DEFAULT_MAX_RADIUS,
+                    'radius': DEFAULT_MAX_RADIUS,
                     'height_ft': expected_height_ft,
                     'cloudrf_coverage_geojson_json': None,
                     'default_cpe_height_ft': expected_default_cpe_height_ft,

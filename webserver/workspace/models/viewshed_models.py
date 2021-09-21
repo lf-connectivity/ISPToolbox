@@ -25,7 +25,6 @@ from PIL import Image
 import numpy as np
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 import time
-import logging
 import os
 import re
 from numpy import polyfit, polyval
@@ -201,7 +200,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
             raw_command = self.__createRawGDALViewshedCommand(
                 dsm_file.name, output_temp.name, DEFAULT_PROJECTION)
             filtered_command = shlex.split(raw_command)
-            celery_task_subprocess_check_output_wrapper(filtered_command, encoding="UTF-8", stderr=subprocess.STDOUT)
+            celery_task_subprocess_check_output_wrapper(filtered_command)
             TASK_LOGGER.info(f'compute viewshed: {time.time() - start}')
             start_tiling = time.time()
 
@@ -226,10 +225,10 @@ class Viewshed(models.Model, S3PublicExportMixin):
             if status_callback is not None:
                 status_callback("Tiling",
                                 self.__timeRemainingViewshed(3))
-            logging.info(f'tiling started')
+            TASK_LOGGER.info(f'tiling started')
             start = time.time()
             self.__convert2Tiles(tif_tempfile.name, tmp_dir)
-            logging.info(f'finished tiling: {time.time() - start}')
+            TASK_LOGGER.info(f'finished tiling: {time.time() - start}')
             size = 0
             if status_callback is not None:
                 status_callback("Uploading Result",
@@ -249,11 +248,11 @@ class Viewshed(models.Model, S3PublicExportMixin):
                         tile.save()
                         paths.append(path)
                         keys.append(tile.upload_to_path(''))
-            logging.info(
+            TASK_LOGGER.info(
                 f'number of tiles: {len(paths)} tiles | size of tiles: {size}B')
             # Perform Bulk Upload of Tiles to S3 - performed in parallel is much faster
             writeMultipleS3Objects(keys, paths, ViewshedTile.bucket_name)
-            logging.info(f'finished uploading: {time.time() - start}')
+            TASK_LOGGER.info(f'finished uploading: {time.time() - start}')
 
     def __colorizeOutputViewshed(self, tif_viewshed_tempfile, output_colorized_tempfile):
         with rasterio.open(tif_viewshed_tempfile.name) as src:

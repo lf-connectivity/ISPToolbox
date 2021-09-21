@@ -5,14 +5,15 @@ import subprocess
 TASK_LOGGER = get_task_logger(__name__)
 
 
-def celery_task_subprocess_check_output_wrapper(command, *args, **kwargs):
+def celery_task_subprocess_check_output_wrapper(command):
     """Runs `check_output`, and if fails, logs the output and error and reraises"""
     try:
-        subprocess.check_output(command, *args, **kwargs)
+        subprocess.check_output(command, encoding="UTF-8", stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        TASK_LOGGER.error(f'{str(e)}')
-        TASK_LOGGER.error('Output:')
-        output = e.output.decode('utf-8')
-        for line in output.split('\n'):
+        TASK_LOGGER.error(f'Task failed: {str(e)}')
+        TASK_LOGGER.error('[BEGIN COMMAND OUTPUT]')
+        output = e.output
+        for line in output.strip().split('\n'):
             TASK_LOGGER.error(line)
+        TASK_LOGGER.error('[END COMMAND OUTPUT]')
         raise e

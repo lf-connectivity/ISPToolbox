@@ -34,6 +34,7 @@ def computeViewshedCoverage(network_id, data, user_id):
         sendMessageToChannel(network_id, resp)
     except Exception as e:
         # Log this scheisse to cloudwatch
+        TASK_LOGGER.error(f'Task failed: {str(e)}')
         for line in format_exc().split('\n'):
             TASK_LOGGER.error(line)
         resp = {

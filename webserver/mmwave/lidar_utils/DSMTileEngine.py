@@ -42,7 +42,7 @@ class DSMTileEngine:
             readMultipleS3Objects(jobs, tifs)
             TASK_LOGGER.info(f'Finished: {time.time() - start} ')
             cmd = shlex.split(f'gdal_merge.py -o {output_filepath} -of GTiff {" ".join(tifs)}')
-            celery_task_subprocess_check_output_wrapper(cmd, stderr=subprocess.STDOUT)
+            celery_task_subprocess_check_output_wrapper(cmd)
 
     def getSurfaceHeight(self, pt: Point) -> float:
         # get tile coordinates x,y,z

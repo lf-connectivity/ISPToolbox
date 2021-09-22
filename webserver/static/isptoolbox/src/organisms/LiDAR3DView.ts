@@ -57,7 +57,6 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
     clippingVolume: any = null;
     globalLinkAnimation: any;
     currentView: 'map' | '3d' = 'map';
-    hoverUpdated: boolean = false;
     hover3dDot: any = null;
     currentMaterial: any;
 
@@ -70,7 +69,6 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
     // variables for handling offsets for hover point volume
     oldCamera: any = null;
     oldTarget: any;
-    cameraOffset: any = new THREE.Vector3();
 
     aAbout1: any;
     aAbout2: any;
@@ -282,7 +280,7 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
             if (this.globalLinkAnimation) {
                 scene.removeCameraAnimation(this.globalLinkAnimation);
                 window.removeEventListener('keydown', this.spacebarCallback);
-                this.globalLinkAnimation.pause();
+                this.globalLinkAnimation.stop();
                 this.globalLinkAnimation = null;
             }
             this.globalLinkAnimation = new potree.CameraAnimation((window as any).viewer);
@@ -458,32 +456,33 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
     ) {
         if (this.app._elevation.length > 1) {
             try {
-                const tx_h = getRadioHeightFromUI('0') + this.app._elevation[0];
-                const rx_h =
-                    getRadioHeightFromUI('1') + this.app._elevation[this.app._elevation.length - 1];
-                const pos = x / this.app._elevation.length;
-                const { location, lookAt } = calculateLookVector(
-                    this.tx_loc_lidar,
-                    tx_h,
-                    this.rx_loc_lidar,
-                    rx_h,
-                    pos
-                );
-
-                // Factor in camera offset
-                location[0] += this.cameraOffset.x;
-                location[1] += this.cameraOffset.y;
-                location[2] += this.cameraOffset.z;
-
-                // Floating points might happen
-                this.app.linkProfileHoverPosition = Math.floor(x);
-                this.app.highlightCurrentPosition(true);
-
-                // Stop Current Animation
                 if (this.currentView === '3d') {
+                    const tx_h = getRadioHeightFromUI('0') + this.app._elevation[0];
+                    const rx_h =
+                        getRadioHeightFromUI('1') +
+                        this.app._elevation[this.app._elevation.length - 1];
+                    const pos = Math.max(Math.min(x / this.app._elevation.length, 1), 0);
+                    const { location, lookAt } = calculateLookVector(
+                        this.tx_loc_lidar,
+                        tx_h,
+                        this.rx_loc_lidar,
+                        rx_h,
+                        pos
+                    );
+
+                    // Floating points might happen
+                    this.app.linkProfileHoverPosition = Math.floor(x);
+                    this.app.highlightCurrentPosition(true);
                     if (this.globalLinkAnimation != null) {
-                        this.globalLinkAnimation.pause();
-                        this.setPlayPauseButton(true);
+                        if (this.globalLinkAnimation.playing) {
+                            this.globalLinkAnimation.pause();
+                            this.setPlayPauseButton(true);
+                        }
+
+                        // Set Resume Location
+                        const LINK_ORBIT_MULTIPLIER = 3 / 8;
+                        const modified_t = pos * LINK_ORBIT_MULTIPLIER;
+                        this.globalLinkAnimation.setResumeTime(modified_t);
                     }
                     // @ts-ignore
                     const scene = window.viewer.scene;
@@ -493,21 +492,20 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
                     // Point Camera at Link plus target offset
                     //@ts-ignore
                     scene.view.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
-                }
-                // @ts-ignore
-                let scene = window.viewer.scene;
-                // Add LOS Link Line
-                if (this.hover3dDot !== null) {
-                    scene.scene.remove(this.hover3dDot);
-                }
 
-                this.hover3dDot = createHoverPoint(
-                    lookAt,
-                    [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h],
-                    this.app.isOverlapping()
-                );
+                    // Add LOS Link Line
+                    if (this.hover3dDot !== null) {
+                        scene.scene.remove(this.hover3dDot);
+                    }
 
-                scene.scene.add(this.hover3dDot);
+                    this.hover3dDot = createHoverPoint(
+                        lookAt,
+                        [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h],
+                        this.app.isOverlapping()
+                    );
+
+                    scene.scene.add(this.hover3dDot);
+                }
             } catch (err) {}
         }
     }

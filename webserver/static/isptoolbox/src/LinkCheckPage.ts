@@ -139,7 +139,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     // variables for handling offsets for hover point volume
     oldCamera: any;
     oldTarget: any;
-    cameraOffset: any;
 
     geocoder: typeof MapboxGeocoder;
 
@@ -211,7 +210,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         this.linkProfileHoverPosition = 0;
         this.oldCamera = null;
-        this.cameraOffset = new THREE.Vector3();
 
         // Initialize Bootstrap Tooltips
         // @ts-ignore

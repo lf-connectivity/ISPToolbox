@@ -2,49 +2,24 @@
 import * as MapboxGL from 'mapbox-gl';
 import { MapboxSDKClient } from './MapboxSDKClient.js';
 import { createLinkChart } from './link_profile.js';
-import LOSCheckWS from './LOSCheckWS';
-import {
-    createLinkProfile,
-    findLidarObstructions,
-    km2miles,
-    m2ft,
-    ft2m,
-    calculateMaximumFresnelRadius
-} from './LinkCalcUtils';
+import LOSCheckWS, { LOSWSEvents } from './LOSCheckWS';
+import { createLinkProfile, findLidarObstructions, km2miles, m2ft, ft2m } from './LinkCalcUtils';
 import { LinkStatus } from './LinkObstructions';
-import {
-    createHoverPoint,
-    createLinkGeometry,
-    calcLinkLength,
-    generateClippingVolume,
-    createTrackShappedOrbitPath,
-    calculateCameraOffsetFromAnimation,
-    updateControlPoints
-} from './LinkOrbitAnimation';
-import {
-    calculateLookVector,
-    calculateLinkProfileFresnelPosition
-} from './HoverMoveLocation3DView';
 import {
     LinkMode,
     OverrideDirect,
     OverrideSimple,
     CPEDrawMode,
-    combineStyles,
-    load_custom_icons,
     APDrawMode
 } from './isptoolbox-mapbox-draw/index';
 import LidarAvailabilityLayer from './availabilityOverlay';
 import { LOSWSHandlers } from './LOSCheckWS';
 import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
-import { Potree } from './Potree.js';
-import { hasCookie } from './utils/Cookie';
-import { getInitialFeatures } from './utils/MapDefaults';
 import { isUnitsUS } from './utils/MapPreferences';
 import PubSub from 'pubsub-js';
 import { LOSCheckWorkspaceManager } from './workspace/LOSCheckWorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
-import { isBeta, validateHeight } from './LinkCheckUtils';
+import { isBeta, validateHeight, getUnits, UnitSystems } from './LinkCheckUtils';
 import {
     LinkCheckCPEClickCustomerConnectPopup,
     LinkCheckCustomerConnectPopup,
@@ -56,12 +31,15 @@ import { LinkCheckLocationSearchTool } from './organisms/LinkCheckLocationSearch
 import { LinkCheckBasePopup } from './isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
 import { parseFormLatitudeLongitude } from './utils/LatLngInputUtils';
 import { ISPToolboxAbstractAppPage } from './ISPToolboxAbstractAppPage';
-import { WorkspacePointFeature } from './workspace/BaseWorkspaceFeature.js';
+import { WorkspacePointFeature } from './workspace/BaseWorkspaceFeature';
 import { LinkCheckRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
 import { ViewshedTool } from './organisms/ViewshedTool';
 import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
 import LOSCheckLinkProfileView from './organisms/LOSCheckLinkProfileView';
 import CollapsibleComponent from './atoms/CollapsibleComponent';
+import { LiDAR3DView } from './organisms/LiDAR3DView';
+import { createPopupFromVertexEvent } from './utils/GeocodeUtils';
+
 var _ = require('lodash');
 
 export enum LinkCheckEvents {
@@ -74,10 +52,12 @@ type HighChartsExtremesEvent = {
     min: number | undefined;
     max: number | undefined;
 };
-
-let potree = (window as any).Potree as null | typeof Potree;
 // @ts-ignore
 const THREE = window.THREE;
+
+const SMALLEST_UPDATE = 1e-5;
+const LEFT_NAVIGATION_KEYS = ['ArrowLeft', 'Left', 'A', 'a'];
+const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D', 'd'];
 
 // @ts-ignore
 const MapboxGeocoder = window.MapboxGeocoder;
@@ -112,51 +92,6 @@ const DEFAULT_RADIO_HEIGHT = 60;
 const DEFAULT_RADIO_0_NAME = 'radio_0';
 const DEFAULT_RADIO_1_NAME = 'radio_1';
 
-const SMALLEST_UPDATE = 1e-5;
-const LEFT_NAVIGATION_KEYS = ['ArrowLeft', 'Left', 'A', 'a'];
-const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D', 'd'];
-
-export enum UnitSystems {
-    US = 'US',
-    SI = 'SI'
-}
-
-// Direct draw override const
-/**
- * Returns a function that reverse geocodes the given lngLat
- * and displays a popup at that location with the result
- * of the reverse geocode. Also queries for ptp links (non workspace)
- * that share a vertex, to convert those ptp links to tower/customer
- *
- * @param state mapbox state
- * @param e event e
- * @returns A function that calls reverseGeocode and displays the popup at the given coordinates.
- */
-const createPopupFromVertexEvent = function (state: any, e: any) {
-    return () => {
-        // Find which vertex the user has clicked. Works differently for drag and click vertex.
-        let selectedCoord: number;
-        if (e.featureTarget) {
-            selectedCoord = e.featureTarget.properties.coord_path;
-        } else {
-            // Selected coordinate is the last item in selectedCoordPaths
-            selectedCoord = Number(state.selectedCoordPaths[state.selectedCoordPaths.length - 1]);
-        }
-        let vertexLngLat = state.feature.coordinates[selectedCoord];
-        let mapboxClient = MapboxSDKClient.getInstance();
-        mapboxClient.reverseGeocode(vertexLngLat, (response: any) => {
-            let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                LinkCheckVertexClickCustomerConnectPopup,
-                vertexLngLat,
-                response
-            );
-            popup.setSelectedFeatureId(state.feature.id);
-            popup.setSelectedVertex(selectedCoord);
-            popup.show();
-        });
-    };
-};
-
 // Abort controller used abort showing popup
 let popupAbortController: any = null;
 
@@ -171,23 +106,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     profileWS: LOSCheckWS;
     currentLinkHash: any;
 
-    currentView: 'map' | '3d';
-    units: UnitSystems = UnitSystems.US;
+    lidar3dview: LiDAR3DView | null = null;
+
     data_resolution: number;
-    _elevation: Array<number>;
     _coords: any;
-    _lidar: Array<number>;
+    _elevation: Array<number> = [];
+    _lidar: Array<number> = [];
     _link_distance: number;
     fresnel_width: number;
-    globalLinkAnimation: any;
-    animationPlaying: boolean;
-    aAbout1: any;
-    aAbout2: any;
-    spacebarCallback: any;
 
     clippingVolume: any;
-    linkLine: any;
-    updateLinkHeight: any;
 
     tx_loc_lidar: any;
     rx_loc_lidar: any;
@@ -195,11 +123,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     centerFreq: number;
     userRequestIdentity: string;
     networkID: string;
-    radio_names: [string, string];
+    radio_names: [string, string] = ['ap', 'cpe'];
 
     hover3dDot: any;
-    linkProfileFresnelPosition: number;
-    currentMaterial: any;
+    linkProfileHoverPosition: number;
     selectedFeatureID: string | null;
 
     datasets: Map<LOSWSHandlers, Array<string>>;
@@ -213,12 +140,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     oldCamera: any;
     oldTarget: any;
     cameraOffset: any;
-    animationWasPlaying: boolean;
-    hoverUpdated: boolean;
 
     geocoder: typeof MapboxGeocoder;
 
-    constructor(networkID: string, userRequestIdentity: string, radio_names: [string, string]) {
+    constructor(networkID: string, userRequestIdentity: string) {
         super(
             {
                 draw_link: LinkMode(),
@@ -271,35 +196,21 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             },
             'edit_network'
         );
-
-        if (!(window as any).webgl2support) {
-            potree = null;
-        }
         this.networkID = networkID;
         this.userRequestIdentity = userRequestIdentity;
-        this.radio_names = radio_names;
-        this.animationPlaying = true;
-        this.animationWasPlaying = true;
         this.centerFreq = DEFAULT_LINK_FREQ;
-        this.currentView = 'map';
         this.hover3dDot = null;
-        this.currentMaterial = null;
         this.fresnel_width = 1;
         this.selectedFeatureID = null;
 
-        this._elevation = [];
-        this._lidar = [];
         this._link_distance = 0;
-        //@ts-ignore
-        this.units = window.ISPTOOLBOX_SESSION_INFO.units;
 
         this.profileView = new LinkProfileView();
 
         this.datasets = new Map();
 
-        this.linkProfileFresnelPosition = 0;
+        this.linkProfileHoverPosition = 0;
         this.oldCamera = null;
-        this.animationWasPlaying = false;
         this.cameraOffset = new THREE.Vector3();
 
         // Initialize Bootstrap Tooltips
@@ -340,144 +251,21 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             }
             this.updateLinkChart(true);
         });
-
-        if (potree) {
-            const numNodesLoadingChangedCallback = (num_nodes: number) => {
-                if (num_nodes > 0 && this.currentView === '3d') {
-                    $('#point-cloud-loading-status').removeClass('d-none');
-                } else {
-                    $('#point-cloud-loading-status').addClass('d-none');
-                }
-            };
-            potree.numNodesLoadingValue = 0;
-            Object.defineProperty(potree, 'numNodesLoading', {
-                set: function (x) {
-                    numNodesLoadingChangedCallback(x);
-                    this.numNodesLoadingValue = x;
-                },
-                get: function () {
-                    return this.numNodesLoadingValue;
-                }
-            });
-        }
-
         this.link_status = new LinkStatus();
 
-        // Add an event listener to handle camera updates.
-        // @ts-ignore
-        window.viewer.addEventListener('update', () => {
-            // @ts-ignore
-            let camera = window.viewer.scene.getActiveCamera();
-
-            // @ts-ignore
-            let target = window.viewer.scene.view.getPivot();
-
-            let newCamera = new THREE.Vector3(
-                camera.position.x - target.x,
-                camera.position.y - target.y,
-                camera.position.z - target.z
-            );
-
-            if (!this.animationPlaying && !this.animationWasPlaying && !this.hoverUpdated) {
-                // Only update offsets if greater than smallest update, and
-                // if animation wasn't playing during the previous update.
-                // This to not cause bugs with pausing animation updating the camera.
-                let changed = false;
-                let targetDelta = new THREE.Vector3();
-
-                // Updating camera offset when user mouses over link status creates
-                // an infinite loop.
-                if (!this.hoverUpdated) {
-                    if (Math.abs(newCamera.x - this.oldCamera.x) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        this.cameraOffset.x += newCamera.x - this.oldCamera.x;
-                    }
-                    if (Math.abs(newCamera.y - this.oldCamera.y) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        this.cameraOffset.y += newCamera.y - this.oldCamera.y;
-                    }
-                    if (Math.abs(newCamera.z - this.oldCamera.z) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        this.cameraOffset.z += newCamera.z - this.oldCamera.z;
-                    }
-                } else if (isBeta()) {
-                    // Only update target if it was updated via the hover tool.
-                    // Otherwise, things get finnicky. BETA FUNCTIONALITY
-                    if (Math.abs(target.x - this.oldTarget.x) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        targetDelta.x = target.x - this.oldTarget.x;
-                    }
-                    if (Math.abs(target.y - this.oldTarget.y) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        targetDelta.y = target.y - this.oldTarget.y;
-                    }
-                    if (Math.abs(target.z - this.oldTarget.z) >= SMALLEST_UPDATE) {
-                        changed = true;
-                        targetDelta.z = target.z - this.oldTarget.z;
-                    }
-                }
-
-                if (changed) {
-                    const cameraDelta = new THREE.Vector3(
-                        newCamera.x - this.oldCamera.x,
-                        newCamera.y - this.oldCamera.y,
-                        newCamera.z - this.oldCamera.z
-                    );
-
-                    if (isBeta()) {
-                        updateControlPoints(
-                            this.globalLinkAnimation.controlPoints,
-                            cameraDelta,
-                            targetDelta
-                        );
-                    }
-                    this.globalLinkAnimation.updatePath();
-                }
-            }
-
-            if (isBeta() && this.animationPlaying) {
-                // Set camera offset to actual camera angle - look vector normal.
-                // This is a hack to provide for a smooth transition from animation
-                // to hover view.
-
-                if (this.tx_loc_lidar != null && this.rx_loc_lidar != null) {
-                    this.cameraOffset = calculateCameraOffsetFromAnimation(
-                        camera,
-                        target,
-                        this.tx_loc_lidar,
-                        this.rx_loc_lidar,
-                        this.getRadioHeightFromUI('0') + this._elevation[0], //tx_h
-                        this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1] //rx_h
-                    );
-
-                    this.linkProfileFresnelPosition = calculateLinkProfileFresnelPosition(
-                        target,
-                        this.tx_loc_lidar,
-                        this.rx_loc_lidar,
-                        this._elevation.length
-                    );
-                }
-            }
-
-            this.oldCamera = newCamera;
-            this.oldTarget = target;
-            this.animationWasPlaying = this.animationPlaying;
-            this.hoverUpdated = false;
-        });
-
-        // Fresnel navigation keyboard event listener
+        // Profile navigation keyboard event listener
         window.addEventListener('keydown', (event: any) => {
-            if (this.currentView === '3d') {
+            if (this.lidar3dview?.currentView === '3d') {
                 if (LEFT_NAVIGATION_KEYS.includes(event.key)) {
                     this.highlightCurrentPosition(false);
-                    this.linkProfileFresnelPosition -= this.navigationDelta;
+                    this.linkProfileHoverPosition -= this.navigationDelta;
                     this.fitFresnelPositionToBounds();
-                    this.moveLocation3DView();
+                    this.lidar3dview.moveLocation3DView();
                 } else if (RIGHT_NAVIGATION_KEYS.includes(event.key)) {
                     this.highlightCurrentPosition(false);
-                    this.linkProfileFresnelPosition += this.navigationDelta;
+                    this.linkProfileHoverPosition += this.navigationDelta;
                     this.fitFresnelPositionToBounds();
-                    this.moveLocation3DView();
+                    this.lidar3dview.moveLocation3DView();
                 }
             }
         });
@@ -585,12 +373,14 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.map.on('draw.update', this.updateRadioLocation.bind(this));
         this.map.on('draw.create', this.updateRadioLocation.bind(this));
 
-        this.profileWS = new LOSCheckWS(this.networkID, [this.ws_message_handler.bind(this)]);
+        this.profileWS = new LOSCheckWS(this.networkID);
 
         this.link_chart = createLinkChart(
             this.link_chart,
             this.highLightPointOnGround.bind(this),
-            this.moveLocation3DView.bind(this),
+            (point: any) => {
+                this.lidar3dview?.moveLocation3DView(point);
+            },
             this.mouseLeave.bind(this),
             this.setExtremes.bind(this)
         );
@@ -598,6 +388,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new MapLayerSidebarManager(this.map, this.draw);
         this.workspaceManager = new LOSCheckWorkspaceManager(this.map, this.draw);
         new ViewshedTool(this.map, this.draw);
+        this.lidar3dview = new LiDAR3DView(this.map, this.draw, this, this.radio_names);
 
         // instantiate singletons
         new LOSCheckLinkProfileView();
@@ -638,6 +429,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));
+        PubSub.subscribe(LOSWSEvents.STD_MSG, this.ws_message_handler.bind(this));
 
         window.addEventListener('keydown', (event) => {
             const featureCollection = this.draw.getSelected();
@@ -842,57 +634,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         };
         createRadioCoordinateChangeCallback('#lat-lng-0', 0);
         createRadioCoordinateChangeCallback('#lat-lng-1', 1);
-
-        $('#3D-view-btn').click(() => {
-            if (this.currentView === 'map') {
-                $('#3D-view-btn').addClass('btn-primary');
-                $('#3D-view-btn').removeClass('btn-secondary');
-                $('#map-view-btn').addClass('btn-secondary');
-                $('#map-view-btn').removeClass('btn-primary');
-                $('#3d-view-container').removeClass('d-none');
-                $('#map').addClass('d-none');
-                $('#3d-controls').removeClass('d-none');
-                $('#map-controls').addClass('d-none');
-                this.currentView = '3d';
-
-                if (!this.animationPlaying) {
-                    this.highlightCurrentPosition(true);
-                }
-                // If they haven't seen the tooltip yet, expand it by default for 30 seconds
-                if (!hasCookie('losHelpSeen')) {
-                    // Set cookie so tooltip is closed next time they visit
-                    const now = new Date();
-                    const exp = now.getTime() + 365 * 24 * 60 * 60 * 1000;
-                    now.setTime(exp);
-                    document.cookie =
-                        'losHelpSeen=true; Expires=' +
-                        now.toUTCString() +
-                        '; SameSite=None; Secure; path=/;';
-                    // Set the tooltip copy to visible, hide after 10s
-                    $('.help-3D-copy').css({ opacity: '1', visibility: 'visible' });
-                    setTimeout(() => {
-                        $('.help-3D-copy').css({ opacity: '0', visibility: 'hidden' });
-                    }, 10000);
-                }
-            }
-        });
-        $('#map-view-btn').click(() => {
-            if (this.currentView === '3d') {
-                $('#3D-view-btn').addClass('btn-secondary');
-                $('#3D-view-btn').removeClass('btn-primary');
-                $('#map-view-btn').addClass('btn-primary');
-                $('#map-view-btn').removeClass('btn-secondary');
-                $('#3d-view-container').addClass('d-none');
-                $('#map').removeClass('d-none');
-                $('#map-controls').removeClass('d-none');
-                if (this.map != null) {
-                    this.map.resize();
-                }
-                $('#3d-controls').addClass('d-none');
-                this.currentView = 'map';
-                this.highlightCurrentPosition(false);
-            }
-        });
     }
 
     onGeocoderLoad() {
@@ -939,22 +680,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         $(`#radio_name-${data.radio}`).text(data.name);
     }
 
-    updateAnimationTitles() {
-        // Update animation titles if they exist
-        const name1 =
-            this.radio_names[0].length > 15
-                ? this.radio_names[0].substr(0, 15) + '...'
-                : this.radio_names[0];
-        const name2 =
-            this.radio_names[1].length > 15
-                ? this.radio_names[1].substr(0, 15) + '...'
-                : this.radio_names[1];
-        if (this.aAbout1) {
-            this.aAbout1.title = name1;
-        }
-        if (this.aAbout2) {
-            this.aAbout2.title = name2;
-        }
+    showLinkCheckProfile() {
+        //@ts-ignore
+        $('#data-container').collapse('show');
     }
 
     updateRadioLocation(update: any) {
@@ -1010,7 +738,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 $('#radio_name-1').text(cpe.getFeatureProperty('name'));
                 this.radio_names[0] = ap.getFeatureProperty('name');
                 this.radio_names[1] = cpe.getFeatureProperty('name');
-                this.updateAnimationTitles();
+                this.lidar3dview?.updateAnimationTitles();
             } else {
                 if (feat.properties.frequency === undefined && this.selectedFeatureID) {
                     this.draw.setFeatureProperty(
@@ -1041,7 +769,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 $('#radio_name-1').text(DEFAULT_RADIO_1_NAME);
                 this.radio_names[0] = DEFAULT_RADIO_0_NAME;
                 this.radio_names[1] = DEFAULT_RADIO_1_NAME;
-                this.updateAnimationTitles();
+                this.lidar3dview?.updateAnimationTitles();
             }
 
             $('#lat-lng-0').val(
@@ -1085,72 +813,11 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         }
     }
 
-    moveLocation3DView(
-        { x, y }: { x: number; y: number } = { x: this.linkProfileFresnelPosition, y: 0 }
-    ) {
-        try {
-            const tx_h = this.getRadioHeightFromUI('0') + this._elevation[0];
-            const rx_h =
-                this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
-            const pos = x / this._elevation.length;
-            const { location, lookAt } = calculateLookVector(
-                this.tx_loc_lidar,
-                tx_h,
-                this.rx_loc_lidar,
-                rx_h,
-                pos
-            );
-
-            // Factor in camera offset
-            location[0] += this.cameraOffset.x;
-            location[1] += this.cameraOffset.y;
-            location[2] += this.cameraOffset.z;
-
-            // Floating points might happen
-            this.linkProfileFresnelPosition = Math.floor(x);
-            this.highlightCurrentPosition(true);
-
-            // Stop Current Animation
-            if (this.currentView === '3d') {
-                if (this.globalLinkAnimation != null) {
-                    this.globalLinkAnimation.pause();
-                    this.setPlayPauseButton(true);
-                    this.animationPlaying = false;
-                }
-                // @ts-ignore
-                const scene = window.viewer.scene;
-
-                // Update to scene is caused by location3d view update.
-                this.hoverUpdated = true;
-
-                // Move Camera to Location
-                scene.view.position.set(location[0], location[1], location[2]);
-                // Point Camera at Link plus target offset
-                //@ts-ignore
-                scene.view.lookAt(new THREE.Vector3(lookAt[0], lookAt[1], lookAt[2]));
-            }
-            // @ts-ignore
-            let scene = window.viewer.scene;
-            // Add LOS Link Line
-            if (this.hover3dDot !== null) {
-                scene.scene.remove(this.hover3dDot);
-            }
-
-            this.hover3dDot = createHoverPoint(
-                lookAt,
-                [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h],
-                this.isOverlapping()
-            );
-
-            scene.scene.add(this.hover3dDot);
-        } catch (err) {}
-    }
-
     isOverlapping() {
         return this.link_status.obstructions.some((interval) => {
             return (
-                this.linkProfileFresnelPosition >= interval[0] &&
-                this.linkProfileFresnelPosition <= interval[1]
+                this.linkProfileHoverPosition >= interval[0] &&
+                this.linkProfileHoverPosition <= interval[1]
             );
         });
     }
@@ -1233,22 +900,12 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         // Set the hover state over both the fresnel cone chart
         // and the LOS chart in Highchart.
-        if (this.link_chart.series[3].data.length > this.linkProfileFresnelPosition) {
-            this.link_chart.series[3].data[this.linkProfileFresnelPosition].setState(state);
+        if (this.link_chart.series[3].data.length > this.linkProfileHoverPosition) {
+            this.link_chart.series[3].data[this.linkProfileHoverPosition].setState(state);
         }
-        if (this.link_chart.series[2].data.length > this.linkProfileFresnelPosition) {
-            this.link_chart.series[2].data[this.linkProfileFresnelPosition].setState(state);
+        if (this.link_chart.series[2].data.length > this.linkProfileHoverPosition) {
+            this.link_chart.series[2].data[this.linkProfileHoverPosition].setState(state);
         }
-    }
-
-    hideHover3DDot() {
-        // @ts-ignore
-        let scene = window.viewer.scene;
-        // Add LOS Link Line
-        if (this.hover3dDot !== null) {
-            scene.scene.remove(this.hover3dDot);
-        }
-        this.hover3dDot = null;
     }
 
     renderNewLinkProfile() {
@@ -1296,13 +953,13 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 });
             }
         }
-        if (this._elevation != null && this.updateLinkHeight != null && update3DView) {
+        if (this._elevation != null && this.lidar3dview?.updateLinkHeight != null && update3DView) {
             this.highlightCurrentPosition(false);
 
             const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
             const rx_hgt =
                 this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
-            this.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);
+            this.lidar3dview?.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);
             if (this._lidar != null) {
                 this.link_chart.yAxis[0].update({
                     min: Math.min(...[...this._lidar, tx_hgt, rx_hgt]),
@@ -1310,7 +967,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 });
             }
 
-            this.moveLocation3DView();
+            this.lidar3dview?.moveLocation3DView();
         }
     }
 
@@ -1326,116 +983,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.zoomUpdateLinkProfile(extremes);
     }
 
-    setPlayPauseButton(pause: boolean) {
-        if (pause) {
-            $('#pause-button-3d').addClass('d-none');
-            $('#play-button-3d').removeClass('d-none');
-        } else {
-            $('#pause-button-3d').removeClass('d-none');
-            $('#play-button-3d').addClass('d-none');
-        }
-    }
-
-    createAnimationForLink(tx: any, rx: any, tx_h: any, rx_h: any, start_animation: boolean) {
-        $('#3d-pause-play').off('click');
-        if (this.globalLinkAnimation != null) {
-            window.removeEventListener('keydown', this.spacebarCallback);
-            this.globalLinkAnimation.pause();
-            this.setPlayPauseButton(true);
-            this.animationPlaying = false;
-            this.globalLinkAnimation = null;
-        }
-        if (potree) {
-            if (this.aAbout1 == null) {
-                this.aAbout1 = new potree.Annotation({
-                    position: [tx[0], tx[1], tx_h + 10],
-                    title: this.radio_names[0].substr(0, 15)
-                });
-                // @ts-ignore
-                window.viewer.scene.annotations.add(this.aAbout1);
-            } else {
-                this.aAbout1.position.set(tx[0], tx[1], tx_h + 10);
-            }
-            if (this.aAbout2 == null) {
-                this.aAbout2 = new potree.Annotation({
-                    position: [rx[0], rx[1], rx_h + 10],
-                    title: this.radio_names[1].substr(0, 15)
-                });
-                // @ts-ignore
-                window.viewer.scene.annotations.add(this.aAbout2);
-            } else {
-                this.aAbout2.position.set(rx[0], rx[1], rx_h + 10);
-            }
-            this.updateAnimationTitles();
-
-            this.globalLinkAnimation = new potree.CameraAnimation((window as any).viewer);
-            this.setPlayPauseButton(false);
-
-            const { targets, positions } = createTrackShappedOrbitPath(
-                tx,
-                tx_h,
-                rx,
-                rx_h,
-                50.0,
-                50.0
-            );
-
-            for (let i = 0; i < positions.length; i++) {
-                const cp = this.globalLinkAnimation.createControlPoint();
-                cp.position.set(...positions[i]);
-                cp.target.set(...targets[i]);
-            }
-            const link_len = calcLinkLength(tx, rx, tx_h, rx_h);
-            const desired_animation_speed = 50; // meters per second
-            const min_animation_duration = 20;
-            const animationDuration = Math.max(
-                (link_len * 2) / desired_animation_speed,
-                min_animation_duration
-            );
-            // @ts-ignore
-            window.viewer.scene.addCameraAnimation(this.globalLinkAnimation);
-            this.globalLinkAnimation.setDuration(animationDuration);
-            this.globalLinkAnimation.setVisible(false);
-            this.globalLinkAnimation.setInterpolateControlPoints(true);
-            if (start_animation) {
-                this.animationPlaying = true;
-                this.globalLinkAnimation.play(true);
-                this.setPlayPauseButton(false);
-            } else {
-                this.animationPlaying = false;
-            }
-            const animationClickCallback = () => {
-                if (this.animationPlaying) {
-                    this.fitFresnelPositionToBounds();
-                    this.moveLocation3DView();
-
-                    // funny hack to get last line of code to toggle correctly
-                    this.animationPlaying = true;
-                } else {
-                    this.globalLinkAnimation.play(true);
-                    this.setPlayPauseButton(false);
-
-                    // hide dot and link profile highlight when animation plays.
-                    this.highlightCurrentPosition(false);
-                    this.hideHover3DDot();
-                }
-                this.animationPlaying = !this.animationPlaying;
-            };
-
-            this.spacebarCallback = (event: any) => {
-                var key = event.which || event.keyCode;
-                if (key === 32 && this.currentView === '3d') {
-                    event.preventDefault();
-                    animationClickCallback();
-                }
-            };
-
-            window.addEventListener('keydown', this.spacebarCallback);
-
-            $('#3d-pause-play').click(animationClickCallback);
-        }
-    }
-
     /*
     Sets fresnel position to somewhere between the min and max value of x-axis,
     depending on current zoom. Also tries to round fresnel position to prevent
@@ -1449,11 +996,11 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         let xMax = Math.min(Math.floor(this.link_chart.xAxis[0].max), this._elevation.length - 1);
 
         // Round fresnel position first before applying bounds calculations
-        this.linkProfileFresnelPosition = Math.round(this.linkProfileFresnelPosition);
-        if (this.linkProfileFresnelPosition < xMin) {
-            this.linkProfileFresnelPosition = xMin;
-        } else if (this.linkProfileFresnelPosition > xMax) {
-            this.linkProfileFresnelPosition = xMax;
+        this.linkProfileHoverPosition = Math.round(this.linkProfileHoverPosition);
+        if (this.linkProfileHoverPosition < xMin) {
+            this.linkProfileHoverPosition = xMin;
+        } else if (this.linkProfileHoverPosition > xMax) {
+            this.linkProfileHoverPosition = xMax;
         }
     }
 
@@ -1470,89 +1017,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             // Minimal delta speed is 1
             this.navigationDelta = Math.max(Math.round(17000 / this._link_distance), 1);
         }
-    }
-
-    addLink(tx: any, rx: any, tx_h: any, rx_h: any) {
-        this.updateLinkHeight = (tx_h: any, rx_h: any, start_animation: boolean = false) => {
-            // @ts-ignore
-            let scene = window.viewer.scene;
-            // Add LOS Link Line
-            if (this.linkLine !== null) {
-                scene.scene.remove(this.linkLine);
-            }
-
-            const fresnel_width_m = calculateMaximumFresnelRadius(
-                this._link_distance,
-                this.centerFreq
-            );
-            this.linkLine = createLinkGeometry(tx, rx, tx_h, rx_h, fresnel_width_m);
-            scene.scene.add(this.linkLine);
-            this.createAnimationForLink(tx, rx, tx_h, rx_h, start_animation);
-        };
-        this.updateLinkHeight(tx_h, rx_h, true);
-    }
-
-    updateLidarRender(
-        name: Array<string>,
-        urls: Array<string>,
-        bb: Array<number>,
-        tx: any,
-        rx: any,
-        tx_h: any,
-        rx_h: any
-    ) {
-        this.tx_loc_lidar = tx;
-        this.rx_loc_lidar = rx;
-        const setClippingVolume = (bb: Array<number>) => {
-            if (potree) {
-                // @ts-ignore
-                let scene = window.viewer.scene;
-                let { position, scale, camera } = generateClippingVolume(bb);
-                {
-                    // VOLUME visible
-                    if (this.clippingVolume !== null) {
-                        scene.removeVolume(this.clippingVolume);
-                    }
-                    this.clippingVolume = new potree.BoxVolume();
-                    this.clippingVolume.name = 'Visible Clipping Volume';
-                    this.clippingVolume.scale.set(scale[0], scale[1], scale[2]);
-                    this.clippingVolume.position.set(position[0], position[1], position[2]);
-                    this.clippingVolume.lookAt(new THREE.Vector3(tx[0], tx[1], position[2]));
-                    this.clippingVolume.clip = true;
-                    scene.addVolume(this.clippingVolume);
-                    this.clippingVolume.visible = false;
-                }
-                scene.view.position.set(camera[0], camera[1], camera[2]);
-                scene.view.lookAt(new THREE.Vector3(position[0], position[1], 0));
-                // @ts-ignore
-                window.viewer.setClipTask(potree.ClipTask.SHOW_INSIDE);
-            }
-        };
-        // Check if we already added point cloud
-        urls.forEach((url: string, idx: number) => {
-            //@ts-ignore
-            const existing_pc_names: Array<string> = window.viewer.scene.pointclouds.map((cld) => {
-                return cld.name;
-            });
-            if (!existing_pc_names.includes(name[idx]) && potree) {
-                potree.loadPointCloud(url, name[idx], (e: any) => {
-                    // @ts-ignore
-                    let scene = window.viewer.scene;
-                    scene.addPointCloud(e.pointcloud);
-
-                    this.currentMaterial = e.pointcloud.material;
-                    this.currentMaterial.size = 4;
-                    if (potree) {
-                        this.currentMaterial.pointSizeType = potree.PointSizeType.FIXED;
-                        this.currentMaterial.shape = potree.PointShape.CIRCLE;
-                    }
-                    this.currentMaterial.activeAttributeName = 'elevation';
-                    this.currentMaterial.elevationRange = [bb[4], bb[5]];
-                });
-            }
-        });
-        setClippingVolume(bb);
-        this.addLink(tx, rx, tx_h, rx_h);
     }
 
     updateLegend() {
@@ -1596,7 +1060,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     }
 
     // Websocket Message Callback Handlers
-    ws_message_handler(response: LOSCheckResponse): void {
+    ws_message_handler(msg: string, response: LOSCheckResponse): void {
         switch (response.handler) {
             case LOSWSHandlers.LIDAR:
                 this.ws_lidar_callback(response);
@@ -1638,6 +1102,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         this.renderNewLinkProfile();
         this.updateLinkChart();
+        this.lidar3dview?.updateLink();
 
         this.showPlotIfValidState();
         if (response.source != null) {
@@ -1665,28 +1130,15 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             } else {
                 if (this.selectedFeatureID && this.draw.get(this.selectedFeatureID)) {
                     $('#3D-view-btn').removeClass('d-none');
-
-                    if (this.currentLinkHash !== response.hash && this._elevation.length > 1) {
-                        const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
-                        const rx_hgt =
-                            this.getRadioHeightFromUI('1') +
-                            this._elevation[this._elevation.length - 1];
-                        this.updateLidarRender(
+                    if (this.currentLinkHash !== response.hash) {
+                        this.lidar3dview?.updateLidarRender(
                             response.source,
                             response.url,
                             response.bb,
                             response.tx,
-                            response.rx,
-                            tx_hgt,
-                            rx_hgt
+                            response.rx
                         );
                         this.currentLinkHash = response.hash;
-                    } else {
-                        // @ts-ignore
-                        const scene = window.viewer.scene;
-                        scene.pointclouds.forEach((cld: any) => {
-                            cld.material.elevationRange = [response.bb[4], response.bb[5]];
-                        });
                     }
                     this.updateNavigationDelta();
                 }
@@ -1725,7 +1177,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     getRadioHeightFromUI(radio: '0' | '1') {
         const hgt = parseFloat(String($(radio === '0' ? '#hgt-0' : '#hgt-1').val()));
-        return this.units === UnitSystems.US ? ft2m(hgt) : hgt;
+        return getUnits() === UnitSystems.US ? ft2m(hgt) : hgt;
     }
 
     clearInputs(): void {
@@ -1769,7 +1221,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.link_chart.xAxis[0].update({
             labels: {
                 formatter:
-                    this.units === UnitSystems.US
+                    getUnits() === UnitSystems.US
                         ? function () {
                               return `${km2miles((this.value * scaling_factor) / 1000).toFixed(2)}`;
                           }
@@ -1778,17 +1230,17 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                           }
             },
             title: {
-                text: `Distance ${this.units === UnitSystems.US ? '[mi]' : '[km]'} - resolution ${
-                    this.units === UnitSystems.US
+                text: `Distance ${getUnits() === UnitSystems.US ? '[mi]' : '[km]'} - resolution ${
+                    getUnits() === UnitSystems.US
                         ? m2ft(this.data_resolution).toFixed(1)
                         : this.data_resolution
-                } ${this.units === UnitSystems.US ? '[ft]' : '[m]'}`
+                } ${getUnits() === UnitSystems.US ? '[ft]' : '[m]'}`
             }
         });
         this.link_chart.yAxis[0].update({
             labels: {
                 formatter:
-                    this.units === UnitSystems.US
+                    getUnits() === UnitSystems.US
                         ? function () {
                               return `${m2ft(this.value).toFixed(0)}`;
                           }
@@ -1797,7 +1249,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                           }
             },
             title: {
-                text: this.units === UnitSystems.US ? 'Elevation [ft]' : 'Elevation [m]'
+                text: getUnits() === UnitSystems.US ? 'Elevation [ft]' : 'Elevation [m]'
             }
         });
     }

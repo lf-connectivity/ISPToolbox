@@ -13,7 +13,8 @@ export enum LOSWSEvents {
     VIEWSHED_MSG = 'ws.viewshed_msg',
     AP_MSG = 'ws.ap_msg',
     VIEWSHED_PROGRESS_MSG = 'ws.viewshed_progress_msg',
-    VIEWSHED_UNEXPECTED_ERROR_MSG = 'ws.viewshed_unexpected_err_msg'
+    VIEWSHED_UNEXPECTED_ERROR_MSG = 'ws.viewshed_unexpected_err_msg',
+    STD_MSG = 'ws.std_msg'
 }
 
 export enum WS_AP_Events {
@@ -111,12 +112,10 @@ class LOSCheckWS {
     ws: WebSocket;
     networkName: string;
     pendingRequests: Array<string> = [];
-    message_handlers: Array<LOSCheckWSCallbacks>;
     ap_callback: AccesPointWSCallback;
     hash: string = '';
-    constructor(networkName: string, message_handlers: Array<LOSCheckWSCallbacks>) {
+    constructor(networkName: string) {
         this.networkName = networkName;
-        this.message_handlers = message_handlers;
         this.connect();
     }
 
@@ -158,11 +157,7 @@ class LOSCheckWS {
             const resp = JSON.parse(e.data) as WSResponse;
             switch (resp.type) {
                 case WS_AP_Events.STD_MSG:
-                    if (resp.hash === this.hash) {
-                        this.message_handlers.forEach((handler) => {
-                            handler(resp);
-                        });
-                    }
+                    PubSub.publish(LOSWSEvents.STD_MSG, resp);
                     break;
                 case WS_AP_Events.AP_STATUS:
                     PubSub.publish(LOSWSEvents.AP_MSG, resp);

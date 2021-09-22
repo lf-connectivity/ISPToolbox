@@ -138,6 +138,27 @@ export function createTrackShappedOrbitPath(
     return { targets, positions };
 }
 
+export function createCircularOrbitPath(
+    center: GeoJSON.Point,
+    height: number,
+    radius: number,
+    num_pts: number = 50
+) {
+    const positions: Array<[number, number, number]> = [];
+    const targets: Array<[number, number, number]> = [];
+    for (let i = 0; i <= num_pts; i++) {
+        const t = (2 * Math.PI * i) / num_pts;
+        targets.push([center.coordinates[0], center.coordinates[1], height]);
+        positions.push([
+            center.coordinates[0] + Math.sin(t) * radius,
+            center.coordinates[1] + Math.cos(t) * radius,
+            height + radius
+        ]);
+    }
+
+    return { targets, positions };
+}
+
 export function createLinkGeometry(
     tx: [number, number],
     rx: [number, number],
@@ -221,6 +242,13 @@ export function generateClippingVolume(
     const camera_height = Math.max(scale[0], scale[1]) / (2.0 * Math.tan(Math.PI / 12)) + bb[4];
     const camera = [position[0], position[1], camera_height];
 
+    return { position, scale, camera };
+}
+
+export function generateClippingVolumePoint(bb: Array<number>) {
+    const position = [(bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
+    const scale = [Math.abs(bb[4] - bb[5]), Math.abs(bb[0] - bb[2]), Math.abs(bb[1] - bb[3])];
+    const camera = [(bb[0] + bb[2]) / 2.0, (bb[1] + bb[3]) / 2.0, (bb[4] + bb[5]) / 2.0];
     return { position, scale, camera };
 }
 

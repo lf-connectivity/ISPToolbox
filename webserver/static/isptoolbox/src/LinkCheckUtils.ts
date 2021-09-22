@@ -1,5 +1,7 @@
 import { validateNumber, validateString } from './molecules/InputValidator';
 
+import { ft2m } from './LinkCalcUtils';
+
 const US_STATE_ABBREVIATIONS = {
     Alabama: 'AL',
     Alaska: 'AK',
@@ -111,3 +113,17 @@ export const validateLat = validateNumber.bind(undefined, MIN_LAT, MAX_LAT);
 export const validateRadius = validateNumber.bind(undefined, MIN_RADIUS, MAX_RADIUS);
 export const validateHeight = validateNumber.bind(undefined, MIN_HEIGHT, MAX_HEIGHT);
 export const validateName = validateString.bind(undefined, MAX_NAME_LEN);
+
+export enum UnitSystems {
+    US = 'US',
+    SI = 'SI'
+}
+
+export function getRadioHeightFromUI(radio: '0' | '1') {
+    const hgt = parseFloat(String($(radio === '0' ? '#hgt-0' : '#hgt-1').val()));
+    return getUnits() === UnitSystems.US ? ft2m(hgt) : hgt;
+}
+
+export function getUnits() {
+    return ((window as any).ISPTOOLBOX_SESSION_INFO as any).units as UnitSystems;
+}

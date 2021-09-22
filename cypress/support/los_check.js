@@ -33,7 +33,7 @@ Cypress.Commands.add("los_setup_tower_radio", () => {
   cy.get("#add-ap-btn").click();
   cy.wait(800);
   cy.get("#map").click(450, 200);
-  cy.wait(6500);
+  cy.wait(8500);
   cy.get("#map").click(220, 300);
   cy.wait(100);
   cy.contains("View Line of Sight").click();

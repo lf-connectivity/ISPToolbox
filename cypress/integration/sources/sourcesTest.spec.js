@@ -197,7 +197,7 @@ context("Sources checks for LOS", () => {
   });
 
   it("Radio tooltip in LOS Check page has the correct citation for Mapbox Geocoding", () => {
-    cy.los_setup_tower_radio();
+    cy.wait(1000);
     cy.los_click_radio();
 
     // Tooltip should be visible

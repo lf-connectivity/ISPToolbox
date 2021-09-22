@@ -24,26 +24,6 @@ function clickWithTestOptions(testOptions, x, y) {
   }
 }
 
-Cypress.Commands.add("los_setup_tower_radio", () => {
-  for (let i = 0; i < 12; i++) {
-    cy.get("#map").trigger("wheel", 700, 300, { deltaY: -50000 });
-    cy.wait(300);
-  }
-
-  cy.get("#add-ap-btn").click();
-  cy.wait(800);
-  cy.get("#map").click(450, 200);
-  cy.wait(8500);
-  cy.get("#map").click(220, 300);
-  cy.wait(100);
-  cy.contains("View Line of Sight").click();
-  cy.wait(1000);
-
-  cy.los_get_link_profile().should("be.visible");
-  cy.los_toggle_link_profile();
-  cy.los_get_link_profile().should("not.be.visible");
-});
-
 Cypress.Commands.add(
   "los_click_tower",
   setupTestOptions((testOptions) => {
@@ -69,8 +49,18 @@ Cypress.Commands.add(
   "los_add_other_tower",
   setupTestOptions((testOptions) => {
     cy.get("#add-ap-btn").click();
-    cy.wait(500);
+    cy.wait(1000);
     clickWithTestOptions(testOptions, 550, 300);
+  })
+);
+
+Cypress.Commands.add(
+  "los_delete_other_tower",
+  setupTestOptions((testOptions) => {
+    clickWithTestOptions(testOptions, 550, 300);
+    cy.wait(1000);
+    cy.get("button.mapbox-gl-draw_trash").click();
+    cy.wait(1000);
   })
 );
 

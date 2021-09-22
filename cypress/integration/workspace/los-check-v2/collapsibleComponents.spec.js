@@ -12,98 +12,90 @@ function reset() {
   cy.visit(LOS_CHECK_PAGE);
   cy.wait_mapbox();
   cy.close_nux();
-  cy.los_setup_tower_radio();
 }
 
-function testWorkflow(description, func, resetTest = false, only = false) {
+function testWorkflow(description, func, only = false) {
   let retfunc = only ? it.only : it;
-  if (!resetTest) {
-    return retfunc(description, func);
-  } else {
-    return retfunc(description, () => {
-      func();
-      reset();
-    });
-  }
+  return retfunc(description, func);
 }
 
 function mapboxStuffIntoLinkProfileViewTest(
   description,
   mapboxStuff,
-  resetTest = false
+  mapboxCleanup = undefined
 ) {
-  return testWorkflow(
-    description,
-    () => {
-      mapboxStuff();
-      cy.los_get_mapbox_tooltip().should("be.visible");
+  return testWorkflow(description, () => {
+    mapboxStuff();
+    cy.los_get_mapbox_tooltip().should("be.visible");
 
-      cy.los_toggle_link_profile();
-      cy.los_get_link_profile().should("be.visible");
+    cy.los_toggle_link_profile();
+    cy.los_get_link_profile().should("be.visible");
 
-      // Using this assertion instead of be.visible because mapbox is a third party library
-      // that does stuff to the DOM, and we only care about if it's hidden.
-      cy.los_get_mapbox_tooltip().should(not_exist_or_not_be_visible);
-    },
-    resetTest
-  );
+    // Using this assertion instead of be.visible because mapbox is a third party library
+    // that does stuff to the DOM, and we only care about if it's hidden.
+    cy.los_get_mapbox_tooltip().should(not_exist_or_not_be_visible);
+
+    if (mapboxCleanup) {
+      mapboxCleanup({ linkProfileOpen: true });
+    }
+  });
 }
 
 function linkProfileIntoMapboxStuffTest(
   description,
   mapboxStuff,
-  resetTest = false
+  mapboxCleanup = undefined
 ) {
-  return testWorkflow(
-    description,
-    () => {
-      cy.los_toggle_link_profile();
-      cy.los_get_link_profile().should("be.visible");
+  return testWorkflow(description, () => {
+    cy.los_toggle_link_profile();
+    cy.los_get_link_profile().should("be.visible");
 
-      mapboxStuff({ linkProfileOpen: true });
-      cy.los_get_mapbox_tooltip().should("be.visible");
-      cy.los_get_link_profile().should("not.be.visible");
-    },
-    resetTest
-  );
+    mapboxStuff({ linkProfileOpen: true });
+    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.los_get_link_profile().should("not.be.visible");
+
+    if (mapboxCleanup) {
+      mapboxCleanup();
+    }
+  });
 }
 
 function mapboxStuffIntoMapLayersSidebarTest(
   description,
   mapboxStuff,
-  resetTest = false
+  mapboxCleanup = undefined
 ) {
-  return testWorkflow(
-    description,
-    () => {
-      mapboxStuff();
-      cy.los_get_mapbox_tooltip().should("be.visible");
+  return testWorkflow(description, () => {
+    mapboxStuff();
+    cy.los_get_mapbox_tooltip().should("be.visible");
 
-      cy.los_toggle_map_layer_sidebar();
-      cy.los_get_map_layer_sidebar().should("be.visible");
-      cy.los_get_mapbox_tooltip().should("be.visible");
-    },
-    resetTest
-  );
+    cy.los_toggle_map_layer_sidebar();
+    cy.los_get_map_layer_sidebar().should("be.visible");
+    cy.los_get_mapbox_tooltip().should("be.visible");
+
+    if (mapboxCleanup) {
+      mapboxCleanup({ mapLayersOpen: true });
+    }
+  });
 }
 
 function mapLayersSidebarIntoMapboxStuffTest(
   description,
   mapboxStuff,
-  resetTest = false
+  mapboxCleanup = undefined
 ) {
-  return testWorkflow(
-    description,
-    () => {
-      cy.los_toggle_map_layer_sidebar();
-      cy.los_get_map_layer_sidebar().should("be.visible");
+  return testWorkflow(description, () => {
+    cy.los_toggle_map_layer_sidebar();
+    cy.los_get_map_layer_sidebar().should("be.visible");
 
-      mapboxStuff({ mapLayersOpen: true });
-      cy.los_get_mapbox_tooltip().should("be.visible");
-      cy.los_get_map_layer_sidebar().should("be.visible");
-    },
-    resetTest
-  );
+    mapboxStuff({ mapLayersOpen: true });
+    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.los_get_map_layer_sidebar().should("be.visible");
+
+    if (mapboxCleanup) {
+      mapboxCleanup({ mapLayersOpen: true });
+    }
+  });
 }
 
 // Not testing mapbox tooltips closing and reopening, because that's already tested by mapbox API.
@@ -149,7 +141,7 @@ context("LOS Check collapsible components", () => {
   mapboxStuffIntoLinkProfileViewTest(
     "Opening the link profile view after placing a new tower closes the tower tooltip.",
     cy.los_add_other_tower,
-    true
+    cy.los_delete_other_tower
   );
 
   /* ====================================
@@ -175,7 +167,7 @@ context("LOS Check collapsible components", () => {
   linkProfileIntoMapboxStuffTest(
     "Placing a new tower when the link profile view is open will close the link profile view",
     cy.los_add_other_tower,
-    true
+    cy.los_delete_other_tower
   );
 
   /* ====================================
@@ -201,7 +193,7 @@ context("LOS Check collapsible components", () => {
   mapboxStuffIntoMapLayersSidebarTest(
     "Opening the map layers sidebar after placing a new tower will NOT close the tower tooltip.",
     cy.los_add_other_tower,
-    true
+    cy.los_delete_other_tower
   );
 
   /* ====================================
@@ -226,7 +218,7 @@ context("LOS Check collapsible components", () => {
   mapLayersSidebarIntoMapboxStuffTest(
     "Placing a new tower when the map layers sidebar is open will NOT close the map layers sidebar",
     cy.los_add_other_tower,
-    true
+    cy.los_delete_other_tower
   );
 
   /* ====================================

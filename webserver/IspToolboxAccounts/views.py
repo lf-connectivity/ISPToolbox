@@ -1,4 +1,5 @@
 from django.contrib.auth import login, authenticate
+from django.contrib.gis.geos.point import Point
 from django.urls.base import reverse
 from django.views import View
 from IspToolboxAccounts.forms import IspToolboxUserCreationForm
@@ -12,7 +13,13 @@ from django.utils.http import (
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.http import Http404, JsonResponse
+from workspace import models as workspace_models
 from workspace.mixnins import SuperuserRequiredMixin
+import json
+
+
+TEST_AP = json.dumps({"coordinates":[-86.58242848006918,36.808415845040415],"type":"Point"})
+TEST_CPE = json.dumps({"coordinates":[-86.58538341719195,36.80738720733433],"type":"Point"})
 
 
 class CreateAccountView(View):
@@ -69,6 +76,43 @@ class IntegrationTestAccountCreationView(View):
                 password="zuuuuccccCCCC1"
             )
             login_user.save()
+
+            # Create dummy session
+            session = workspace_models.WorkspaceMapSession(
+                    owner=login_user)
+            session.save()
+            session.name = 'Test Workspace'
+            session.center = Point(-86.5817861024335, 36.80733577508586)
+            session.zoom = 15.74
+            session.save()
+
+            # Create dummy AP/CPE
+            ap = workspace_models.AccessPointLocation(
+                name='Test AP',
+                owner=login_user,
+                map_session=session,
+                geojson=TEST_AP,
+                max_radius=0.5
+            )
+            ap.save()
+
+            cpe = workspace_models.CPELocation(
+                name='123 Test Ave',
+                owner=login_user,
+                map_session=session,
+                geojson=TEST_CPE,
+                ap=ap
+            )
+            cpe.save()
+
+            link = workspace_models.APToCPELink(
+                ap=ap,
+                cpe=cpe,
+                owner=login_user,
+                map_session=session
+            )
+            link.save()
+
             return JsonResponse({'success': True})
 
     def get(self, request):

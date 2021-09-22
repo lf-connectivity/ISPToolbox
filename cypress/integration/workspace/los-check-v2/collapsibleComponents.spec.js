@@ -122,6 +122,10 @@ context("LOS Check collapsible components", () => {
     cy.los_toggle_link_profile();
   });
 
+  after(() => {
+    cy.login();
+  });
+
   /* ====================================
    *  MAPBOX STUFF INTO LINK PROFILE VIEW TESTS
    * ====================================

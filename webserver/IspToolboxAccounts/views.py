@@ -18,8 +18,24 @@ from workspace.mixnins import SuperuserRequiredMixin
 import json
 
 
-TEST_AP = json.dumps({"coordinates":[-86.58242848006918,36.808415845040415],"type":"Point"})
-TEST_CPE = json.dumps({"coordinates":[-86.58538341719195,36.80738720733433],"type":"Point"})
+TEST_AP = {
+    "coordinates": [
+        -86.58242848006918,
+        36.808415845040415
+    ],
+    "type": "Point"
+}
+
+TEST_CPE = {
+    "coordinates": [
+        -86.58538341719195,
+        36.80738720733433
+    ],
+    "type": "Point"
+}
+
+TEST_AP = json.dumps(TEST_AP)
+TEST_CPE = json.dumps(TEST_CPE)
 
 
 class CreateAccountView(View):

@@ -45,8 +45,7 @@ function mapboxStuffIntoLinkProfileViewTest(
       // that does stuff to the DOM, and we only care about if it's hidden.
       cy.los_get_mapbox_tooltip().should(not_exist_or_not_be_visible);
     },
-    resetTest,
-    true
+    resetTest
   );
 }
 

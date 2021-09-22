@@ -48,9 +48,10 @@ export function getSessionID(): null | string {
 }
 
 export function getInitialLockDragging(): boolean {
-    //@ts-ignore
     if (
+        // @ts-ignore
         window.ISPTOOLBOX_SESSION_INFO !== undefined &&
+        // @ts-ignore
         window.ISPTOOLBOX_SESSION_INFO.networkID !== undefined
     ) {
         //@ts-ignore

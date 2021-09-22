@@ -17,7 +17,7 @@ function reset() {
 
 function testWorkflow(description, func, resetTest = false, only = false) {
   let retfunc = only ? it.only : it;
-  if (resetTest) {
+  if (!resetTest) {
     return retfunc(description, func);
   } else {
     return retfunc(description, () => {
@@ -116,6 +116,11 @@ context("LOS Check collapsible components", () => {
   beforeEach(() => {
     Cypress.Cookies.preserveOnce("sessionid");
     cy.reload();
+    cy.wait_mapbox();
+    cy.wait(1500);
+    cy.los_click_tower();
+    cy.los_toggle_link_profile();
+    cy.los_toggle_link_profile();
   });
 
   /* ====================================

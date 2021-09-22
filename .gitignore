@@ -29,6 +29,7 @@ terraform.tfstate.d
 .vscode/
 
 # node
+package-lock.json
 node_modules/
 
 # latent script files

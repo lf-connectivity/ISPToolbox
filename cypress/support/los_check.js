@@ -27,7 +27,7 @@ function clickWithTestOptions(testOptions, x, y) {
 Cypress.Commands.add("los_setup_tower_radio", () => {
   for (let i = 0; i < 12; i++) {
     cy.get("#map").trigger("wheel", 700, 300, { deltaY: -50000 });
-    cy.wait(200);
+    cy.wait(300);
   }
 
   cy.get("#add-ap-btn").click();

@@ -15,11 +15,12 @@ function reset() {
   cy.los_setup_tower_radio();
 }
 
-function testWorkflow(description, func, resetTest = false) {
+function testWorkflow(description, func, resetTest = false, only = false) {
+  let retfunc = only ? it.only : it;
   if (resetTest) {
-    return it(description, func);
+    return retfunc(description, func);
   } else {
-    return it(description, () => {
+    return retfunc(description, () => {
       func();
       reset();
     });
@@ -44,7 +45,8 @@ function mapboxStuffIntoLinkProfileViewTest(
       // that does stuff to the DOM, and we only care about if it's hidden.
       cy.los_get_mapbox_tooltip().should(not_exist_or_not_be_visible);
     },
-    resetTest
+    resetTest,
+    true
   );
 }
 

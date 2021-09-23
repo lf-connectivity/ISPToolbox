@@ -1,6 +1,6 @@
 <div class="modal-footer">
     <nav class="d-flex">
-        <ul class="pagination">
+        <ul class="pagination" style="display: grid; grid-template-columns: 1fr 1fr;">
             {% if previous or next %}
             {% if previous %}
             <li class="page-item previous {{pagination_class_css}}" page-target="{{previous}}">

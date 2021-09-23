@@ -9,7 +9,8 @@ from django.conf import settings
 class IspToolboxUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['password1'].help_text = _('Use 8 or more characters with a mix of letters and numbers.')
+        self.fields['password1'].help_text = _(
+            'Use 8 or more characters with a mix of letters and numbers.')
         self.fields['password2'].help_text = _('')
         self.fields['password1'].label = "Password"
         self.fields['password2'].label = "Repeat Password"
@@ -17,23 +18,24 @@ class IspToolboxUserCreationForm(UserCreationForm):
         self.fields['password2'].label_suffix = ""
 
     email = forms.EmailField(
-                label="Email",
-                label_suffix="",
-                required=True,
-                widget=forms.TextInput(attrs={'placeholder': 'name@company.com'}))
+        label="Email",
+        label_suffix="",
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'name@company.com'}))
     first_name = forms.CharField(
-                label="First Name",
-                label_suffix="",
-                required=True)
+        label="First Name",
+        label_suffix="",
+        required=True)
     last_name = forms.CharField(
-                label="Last Name",
-                label_suffix="",
-                required=True)
+        label="Last Name",
+        label_suffix="",
+        required=True)
 
     registration_code = forms.CharField(
         label="Registration Code",
         required=True,
-        widget=forms.TextInput(attrs={'placeholder': 'Company Provided Registration Code'})
+        widget=forms.TextInput(
+            attrs={'placeholder': 'Company Provided Registration Code'})
     ) if not settings.ENABLE_ACCOUNT_CREATION else ''
 
     class Meta(UserCreationForm.Meta):
@@ -54,10 +56,10 @@ class IspToolboxUserAuthenticationForm(AuthenticationForm):
         self.fields['password'].label_suffix = ""
 
     username = forms.EmailField(
-            label="Email",
-            label_suffix="",
-            required=True,
-            widget=forms.TextInput(attrs={'placeholder': 'name@company.com'}))
+        label="Email",
+        label_suffix="",
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'name@company.com'}))
 
     error_css_class = "error"
     required_css_class = "required"
@@ -116,7 +118,8 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
 class IspToolboxUserPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['new_password1'].help_text = _('Use 8 or more characters with a mix of letters and numbers.')
+        self.fields['new_password1'].help_text = _(
+            'Use 8 or more characters with a mix of letters and numbers.')
         self.fields['new_password1'].label = "New Password"
         self.fields['new_password2'].label = "Repeat New Password"
         self.fields['new_password1'].label_suffix = ""
@@ -132,17 +135,23 @@ class IspToolboxUserInfoChangeForm(forms.ModelForm):
 class IspToolboxUserDeleteAccountForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['confirmation'].help_text = _('Type `permanently delete` to confirm')
+        self.fields['confirmation'].help_text = _(
+            'Type `permanently delete` to confirm')
 
     confirmation = forms.CharField(
-                required=True,
-                widget=forms.TextInput(attrs={'placeholder': 'permanently delete'}))
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'permanently delete'}))
+    confirmation_code_value = 'permanently delete'
+
+    def clean(self):
+        valid_input = self.cleaned_data.get(
+            'confirmation') == self.confirmation_code_value
+        if not valid_input:
+            self.add_error('confirmation', 'incorrect confirmation code')
 
     def try_delete(self, request):
-        valid_input = self.cleaned_data.get('confirmation') == 'permanently delete'
-        if valid_input:
-            request.user.delete()
-            return True
-        else:
-            self.add_error('confirmation', 'incorrect')
-            return False
+        request.user.delete()
+
+
+class IspToolboxAccessDataForm(forms.Form):
+    pass

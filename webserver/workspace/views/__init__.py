@@ -25,6 +25,8 @@ from .tour_views import NuxTourView
 from .sources_views import WorkspaceSourcesView
 from .visualization_views import PotreeVisualizationMetaView
 from .import_views import KMZImportView
+from .dyi_views import (DeleteYourInformationView)
+from .ayi_views import (AccessYourInformationView)
 
 import workspace.utils.import_utils
 

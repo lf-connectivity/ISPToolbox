@@ -55,6 +55,8 @@ urlpatterns = [
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout_view"),
     path('accounts/create/', CreateAccountView.as_view(),
          name="create_account_view"),
+    path('account/delete/', views.DeleteYourInformationView.as_view(), name="delete_your_information"),
+    path('account/access/', views.AccessYourInformationView.as_view(), name="access_your_information"),
     # Workspace Object Persistence
     path('workspace/api/ap-los/',
          views.AccessPointLocationListCreate.as_view(), name='ap'),

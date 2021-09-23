@@ -1,0 +1,40 @@
+{% extends 'workspace/pages/base.html' %}
+{% load i18n tz %}
+{% block title %}
+{% with title="Access Your Information - ISP Toolbox"%}
+{{block.super}}
+{% endwith %}
+{% endblock %}
+{% block content %}
+{% with page_obj=data_requests %}
+
+<div class="modal-dialog modal-xl modal-dialog-centered " role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">{% translate "Access Your Information"%}</h3>
+            <a class="my-auto mr-3" href="{{ request.get_full_path }}">{% include 'workspace/atoms/icons/arrow_repeat.html'%}</a>
+        </div>
+        <div class="modal-body">
+        <p>{% blocktranslate %} To request a copy of your ISP Toolbox data, click the "Request Data" button. Your data will be aggregated into a download and shown here when it is ready.{% endblocktranslate%}</p>
+            {% for job in page_obj %}
+                <div class="d-flex m-3">
+                    {% if job.data_dump%}
+                    <a class="btn btn-primary isptoolbox-btn" href="{{job.data_dump.url}}" target="_blank">download</a>
+                    {% else %}
+                    <div>{{job.task_result.status}}</div>
+                    {% endif %}
+                    <div class="ml-5 my-auto"><h5>{%translate 'created: '%}{{ job.created|localtime }}</h5></div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="modal-footer justify-content-between flex-column flex-lg-row pt-0">
+            {% include 'workspace/atoms/paginator_isptoolbox.html' %}
+            <form action="{% url 'workspace:access_your_information' %}" method="POST" >
+                {% csrf_token %}
+                <input type="submit" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0" value="{%translate 'Request Data'%}">
+            </form>
+        </div>
+    </div>
+</div>
+{% endwith %}
+{% endblock content %}

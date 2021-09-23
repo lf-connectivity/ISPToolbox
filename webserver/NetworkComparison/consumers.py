@@ -2,7 +2,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from .tasks import genPolySize, genBuildingCount, genClusteredBuildings, genAnchorInstitutions, genBuildingsMST
-from celery.task.control import revoke
+from webserver.celery import celery_app as app
 
 
 class NetworkCompConsumer(AsyncJsonWebsocketConsumer):
@@ -18,7 +18,7 @@ class NetworkCompConsumer(AsyncJsonWebsocketConsumer):
             Handles incoming json on the websocket
         '''
         # Cancel all old Network Comparison celery tasks and reset tasklist.
-        revoke(self.taskList, terminate=True)
+        app.control.revoke(self.taskList, terminate=True)
         self.taskList = []
         include = None
         feUUID = None

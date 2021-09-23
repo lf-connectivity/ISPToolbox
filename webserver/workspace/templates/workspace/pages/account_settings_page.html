@@ -1,5 +1,7 @@
 {% extends 'workspace/pages/base.html' %}
 
+{% load i18n %}
+
 {% block title %}
 {% with title="Account Settings - ISP Toolbox"%}
 {{block.super}}
@@ -106,36 +108,13 @@
 
     <div class="card mt-4">
         <div class="card-body">
-            <div class=" d-flex ">
-                <h1 class="pb-3">
-                    Delete Account
-                </h1>
+            <div class="card-header d-flex justify-content-between">
+                <h1>{% translate "Manage Your Information"%}</h1>
             </div>
-
-            <form action={{ request.path }} method="post" class="isptoolbox-form pb-3 d-none" id="deleteaccountform">
-                <p> Are you sure you want to delete your account? This is permanent.</p>
-                {% csrf_token %}
-                {{ delete_account_form }}
-                <div class="d-flex">
-                    <input class="btn isptoolbox-btn btn-danger" type="submit" name="delete_account" value="Confirm">
-                    <button class="btn isptoolbox-btn btn-secondary"
-                    onclick="
-                    document.getElementById('deleteaccountform').classList.add('d-none'); event.preventDefault();
-                    document.getElementById('delete_account_btn').classList.remove('d-none');
-                    "
-                        >
-                        Cancel
-                    </button>
-                </div>
-            </form>
-            <button class="btn isptoolbox-btn btn-danger" type="submit" id="delete_account_btn"
-              onclick="
-                document.getElementById('deleteaccountform').classList.remove('d-none');
-                document.getElementById('delete_account_btn').classList.add('d-none');
-            "
-                >
-                Delete Account
-            </button>
+            <div>
+                <a class="btn btn-primary isptoolbox-btn m-2 p-2" href="{% url 'workspace:access_your_information'%}">{% translate "Access Your Information"%}</a>
+                <a class="btn btn-danger isptoolbox-btn m-2 p-2" href="{% url 'workspace:delete_your_information'%}">{% translate "Delete Your Information"%}</a>
+            </div>
         </div>
     </div>
 </div>

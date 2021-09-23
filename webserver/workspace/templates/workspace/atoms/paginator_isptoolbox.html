@@ -1,0 +1,31 @@
+<nav class="d-flex">
+    <ul class="pagination my-auto">
+        {% if page_obj.has_previous %}
+            <span class="page-item previous ">
+            <a  href="?page=1">
+            <span class="page-link px-3 text-nowrap">{% include "workspace/atoms/icons/arrow_left_paginate.html"%} first </span></a>
+            </span>
+            <span class="page-item previous ">
+                <a href="?page={{ page_obj.previous_page_number }}"><span  class="page-link px-3"> previous </span></a>
+            </span>
+        {% endif %}
+        {% if page_obj.number %}
+        <span class="page-item disabled">
+            <span class="page-link px-3 text-nowrap">
+                {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </span>
+        {% endif %}
+
+        {% if page_obj.has_next %}
+            <span class="page-item next ">
+                <a href="?page={{ page_obj.next_page_number }}"><span class="page-link px-3" >next</span></a>
+            </span>
+            <span class="page-item next ">
+                <a href="?page={{ page_obj.paginator.num_pages }}">
+                <span class="page-link px-3 text-nowrap">last {% include "workspace/atoms/icons/arrow_right_paginate.html"%}</span>
+                </a>
+            </span>
+        {% endif %}
+    </ul>
+</nav>

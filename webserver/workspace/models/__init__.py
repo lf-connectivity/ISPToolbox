@@ -13,6 +13,9 @@ from .session_models import (
     NetworkMapPreferencesSerializer,
     WorkspaceMapSessionSerializer
 )
+from .ayi_dyi_models import (
+    AccessInformationJob, DeleteInformationJob
+)
 
 import workspace.utils.import_utils
 

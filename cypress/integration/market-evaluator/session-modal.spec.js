@@ -6,7 +6,7 @@ context("Work", () => {
 
   it("Test create session modal", () => {
     const session_name = "TESTSESSION";
-    const default_workspace_name = "Test Session";
+    const default_workspace_name = "Test Workspace";
 
     cy.visit("/pro/market/");
     cy.close_nux();

@@ -103,12 +103,16 @@ class WorkspaceMapSession(models.Model):
 
         if created:
             session.logging_fbid = int(request.GET.get('id', 0))
-        lat = request.GET.get('lat', None)
-        lon = request.GET.get('lon', None)
-        if lat is not None and lon is not None:
-            session.center = Point(x=float(lon), y=float(lat))
-            session.zoom = 14
-        session.save()
+            lat = request.GET.get('lat', None)
+            lon = request.GET.get('lon', None)
+            if lat is not None and lon is not None:
+                session.center = Point(x=float(lon), y=float(lat))
+                session.zoom = 14
+            session.save()
+        else:
+            # Delete all workspace features associated with session
+            for serializer in session.fks_serializers:
+                serializer.Meta.model.objects.filter(map_session=session).all().delete()
 
         return session, created
 

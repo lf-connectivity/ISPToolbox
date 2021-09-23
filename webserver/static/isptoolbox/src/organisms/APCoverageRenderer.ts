@@ -608,7 +608,7 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
                         } else {
                             const new_feat = createGeoJSONCircle(
                                 f.geometry,
-                                f.properties.radius,
+                                f.properties.radius ?? 0.1,
                                 f.id
                             );
                             geometries.push(new_feat.geometry);

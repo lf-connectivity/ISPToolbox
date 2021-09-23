@@ -4,5 +4,10 @@
     "retries": {
         "runMode": 2,
         "openMode": 1
-    } 
+    },
+    "env": {
+        "SNAPSHOT_BASE_DIRECTORY": "cypress/snapshots/base",
+        "SNAPSHOT_DIFF_DIRECTORY": "cypress/snapshots/diff",
+        "type": "actual"
+    }
 }

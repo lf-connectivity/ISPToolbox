@@ -1,9 +1,11 @@
 /// <reference types="cypress" />
-import './file_upload_cmds';
+import "./file_upload_cmds";
 
 import "@cypress/code-coverage/support";
 
 import "./los_check";
+import "./market_eval";
+import "./map";
 import "./nux";
 import "./pages";
 import "./assertions";
@@ -14,12 +16,18 @@ import "./viewports";
 import { LOGIN_PAGE } from "./pages";
 
 export * from "./los_check";
+export * from "./market_eval";
+export * from "./map";
 export * from "./nux";
 export * from "./pages";
 export * from "./assertions";
 export * from "./navbar";
 export * from "./sources_page";
 export * from "./viewports";
+
+const compareSnapshotCommand = require("cypress-visual-regression/dist/command");
+
+compareSnapshotCommand();
 
 Cypress.Commands.add("login", () => {
   // reset test accounts

@@ -7,6 +7,8 @@ from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
 
 from celery import shared_task
+from celery.utils.log import get_task_logger
+from traceback import format_exc
 from mmwave.lidar_utils.caching import lidar_cache_get, lidar_cache_set
 from mmwave.scripts.create_lidar_availability_preview import createOpenGraphPreviewImage
 from datetime import date
@@ -37,6 +39,7 @@ GOOGLE_MAPS_SAMPLE_LIMIT = 512
 DEFAULT_NUM_SAMPLES_PER_M = 1
 LINK_DISTANCE_LIMIT = 100000
 MAXIMUM_NUM_POINTS_RETURNED = 1024
+TASK_LOGGER = get_task_logger(__name__)
 
 
 def createSubLinkFromAoi(tx, rx, aoi=[0, 1]):
@@ -221,12 +224,12 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
 
         r = lidar_cache_get(tx, rx, aoi)
         if r and r['resolution'] >= resolution:
-            logging.info('lidar cache hit: resolution %s', r['resolution'])
+            TASK_LOGGER.info('lidar cache hit: resolution %s', r['resolution'])
             resp.update({k: r[k] for k in
                         ('lidar_profile', 'url', 'bb', 'source', 'tx', 'rx', 'aoi', 'resolution', 'res', 'dist')})
 
         else:
-            logging.info('lidar cache miss for resolution %s', resolution)
+            TASK_LOGGER.info('lidar cache miss for resolution %s', resolution)
 
             resp['dist'] = link_dist_m
             le = LidarEngine(
@@ -242,7 +245,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
             resp['rx'] = le.getRxLidarCoord()
             resp['aoi'] = aoi
             if resp['error'] is None:
-                logging.info(f'updating cache with resolution %s', resp['resolution'])
+                TASK_LOGGER.info(f'updating cache with resolution %s', resp['resolution'])
                 lidar_cache_set(tx, rx, aoi, resp)
         if (
             resp['error'] is None and
@@ -254,7 +257,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
     except LidarEngineException as e:
         resp['error'] = str(e)
     except Exception as e:
-        logging.error(f'Error during loading lidar profile: {e}')
+        TASK_LOGGER.error(f'Error during loading lidar profile: {e}')
         resp['error'] = 'An unexpected error occurred'
 
     del resp['resolution']
@@ -289,7 +292,7 @@ def getTerrainProfile(network_id, data):
         resp['terrain_profile'] = getElevationProfile(tx_sub, rx_sub)
         resp['aoi'] = aoi
     except Exception as e:
-        logging.error(f'Error occurred during generating terrain profile: {e}')
+        TASK_LOGGER.error(f'Error occurred during generating terrain profile: {e}')
         resp['error'] = str(e)
 
     async_to_sync(channel_layer.group_send)(channel_name, resp)

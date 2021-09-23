@@ -8,7 +8,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webserver.settings')
 # Sometimes autodiscover_tasks doesn't pick up all tasks.
 # In this case add the path to the include param.
 # TODO: move ISPToolboxApp tasks into python module w/ __init__.py and remove include keyword arg
-celery_app = Celery('webserver', include=['IspToolboxApp.tasks.MarketEvaluatorWebsocketTasks'])
+celery_app = Celery('webserver', include=[
+                    'IspToolboxApp.tasks.MarketEvaluatorWebsocketTasks'])
 celery_app.config_from_object('django.conf:settings', namespace='CELERY')
 celery_app.autodiscover_tasks()
 celery_app.conf.update(

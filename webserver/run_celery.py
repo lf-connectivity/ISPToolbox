@@ -4,7 +4,7 @@ from django.utils import autoreload
 def run_celery():
     from webserver import celery_app
 
-    celery_app.worker_main(["--beat", "-Awebserver", "--loglevel=info"])
+    celery_app.worker_main(["--beat", "--loglevel=info"])
 
 
 print("Starting celery worker with autoreload...")

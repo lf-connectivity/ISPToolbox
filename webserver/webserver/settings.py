@@ -119,6 +119,8 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     # Django Hijack
     'hijack',
+    # Celery Results Backend
+    'django_celery_results',
 ]
 
 if DEBUG:
@@ -397,7 +399,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Los_Angeles'
 
 USE_I18N = True
 
@@ -412,6 +414,8 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Los_Angeles'
+
+CELERY_RESULT_BACKEND = 'django-db'
 
 CACHES = {
     'default': {

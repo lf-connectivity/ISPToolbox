@@ -1,8 +1,7 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-from celery.task.control import revoke
 from mmwave import tasks as mmwave_tasks
 from workspace import tasks as workspace_tasks
-
+from webserver.celery import celery_app as app
 import enum
 
 
@@ -69,7 +68,7 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
             return tasks
 
         for task in get_tasks(self.tasks_to_revoke):
-            revoke(task, terminate=True)
+            app.control.revoke(task, terminate=True)
 
     # Receive message from WebSocket
     async def receive_json(self, text_data_json):
@@ -92,14 +91,16 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
                 old_tasks = self.tasks_to_revoke[LOSConsumerMessageType.LINK]
             else:
                 uuid = text_data_json.get('uuid')
-                old_tasks = self.tasks_to_revoke[LOSConsumerMessageType.AP].get(uuid, [])
+                old_tasks = self.tasks_to_revoke[LOSConsumerMessageType.AP].get(uuid, [
+                ])
 
             for old_task in old_tasks:
                 revoke(old_task, terminate=True)
             # start new tasks
             new_tasks = []
             for handler in handlers:
-                new_task = handler(self.network_id, text_data_json, self.user.id)
+                new_task = handler(
+                    self.network_id, text_data_json, self.user.id)
                 new_tasks.append(new_task.id)
 
             # update session tasks accordingly

@@ -8,11 +8,11 @@ from .tasks.MarketEvaluatorWebsocketTasks import (
 )
 from NetworkComparison.tasks import genPolySize
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
-from celery.task.control import revoke
 from asgiref.sync import sync_to_async
 from IspToolboxApp.util.validate_user_input import (
     validateUserInputMarketEvaluator, InvalidMarketEvaluatorRequest
 )
+from webserver.celery import celery_app as app
 
 
 class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
@@ -42,7 +42,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
 
     async def standard_polygon_request(self, content, uuid):
         # Cancel all old Market Evaluator celery tasks and reset tasklist.
-        revoke(self.taskList, terminate=True)
+        app.control.revoke(self.taskList, terminate=True)
         self.taskList = []
         include = None
         # Reduce Dimensions of Inputs to 2, Just in Case User uploads 3D

@@ -7,7 +7,6 @@ from IspToolboxApp.util.s3 import S3PublicExportMixin, writeMultipleS3Objects
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from workspace.models.network_models import AccessPointLocation
-from workspace.models.validators import validate_zoom_level
 from workspace.utils.geojson_circle import destination
 from mmwave.models import EPTLidarPointCloud, TileModel
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
@@ -28,6 +27,7 @@ import time
 import os
 import re
 from numpy import polyfit, polyval
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from workspace.utils.process_utils import celery_task_subprocess_check_output_wrapper
 
@@ -52,9 +52,9 @@ class Viewshed(models.Model, S3PublicExportMixin):
     )
     created = models.DateTimeField(auto_now_add=True)
     max_zoom = models.IntegerField(
-        default=17, validators=[validate_zoom_level])
+        default=17, validators=[MinValueValidator(0), MaxValueValidator(20)])
     min_zoom = models.IntegerField(
-        default=12, validators=[validate_zoom_level])
+        default=12, validators=[MinValueValidator(0), MaxValueValidator(20)])
 
     class CoverageStatus(models.TextChoices):
         VISIBLE = "VISIBLE"

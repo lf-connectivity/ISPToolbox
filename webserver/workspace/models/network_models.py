@@ -18,6 +18,7 @@ from django.contrib.sessions.models import Session
 import logging
 import numpy
 import math
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
@@ -99,10 +100,13 @@ class SessionWorkspaceModelMixin:
 
 class AccessPointLocation(WorkspaceFeature):
     name = models.CharField(max_length=50, default="Unnamed AP")
-    height = models.FloatField(default=30)
-    max_radius = models.FloatField(default=2)
+    height = models.FloatField(default=30, validators=[
+                               MinValueValidator(0), MaxValueValidator(1000)])
+    max_radius = models.FloatField(default=2, validators=[
+        MinValueValidator(0), MaxValueValidator(16)])
     no_check_radius = models.FloatField(default=0.01)
-    default_cpe_height = models.FloatField(default=1)
+    default_cpe_height = models.FloatField(default=1, validators=[
+        MinValueValidator(0), MaxValueValidator(1000)])
     cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)
 
     @property
@@ -202,7 +206,8 @@ class CPELocation(WorkspaceFeature):
         This height value is relative to the terrain in meters. When object is first created the height field
         is taken from the AP "default_cpe_height", it is then converted to DTM height. The following
         saves are all relative to terrain.
-        """
+        """, validators=[
+            MinValueValidator(0), MaxValueValidator(1000)]
     )
 
     @property
@@ -264,7 +269,8 @@ class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
 
 
 class APToCPELink(WorkspaceFeature):
-    frequency = models.FloatField(default=2.437)
+    frequency = models.FloatField(default=2.437, validators=[
+        MinValueValidator(0), MaxValueValidator(100)])
     ap = models.ForeignKey(AccessPointLocation,
                            on_delete=models.CASCADE, editable=False)
     cpe = models.ForeignKey(

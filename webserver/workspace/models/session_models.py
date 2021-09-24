@@ -8,7 +8,6 @@ from IspToolboxApp.Helpers.kmz_helpers import (
     convertKml, createWorkspaceSessionGeoJsonFromAirLinkKML, createWorkspaceSessionGeoJsonFromAirLinkKMZ
 )
 from workspace.models.model_constants import FeatureType
-from .validators import validate_zoom_level
 import uuid
 import json
 from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
@@ -23,6 +22,7 @@ from .network_models import (
 from rest_framework.validators import UniqueTogetherValidator
 from django.utils.translation import gettext as _
 from django.contrib.sessions.models import Session
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class WorkspaceMapSession(models.Model):
@@ -43,7 +43,8 @@ class WorkspaceMapSession(models.Model):
 
     # Map Preferences
     center = geo_models.PointField(default=Point(-97.03125, 36.59789))
-    zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
+    zoom = models.FloatField(default=3.75, validators=[
+                             MinValueValidator(0), MaxValueValidator(20)])
     lock_dragging = models.BooleanField(default=False)
 
     fks_serializers = [AccessPointSerializer, CPESerializer,
@@ -267,7 +268,8 @@ class NetworkMapPreferences(models.Model):
 
     # Map Preferences
     center = geo_models.PointField(default=Point(-97.03125, 36.59788913307022))
-    zoom = models.FloatField(default=3.75, validators=[validate_zoom_level])
+    zoom = models.FloatField(default=3.75, validators=[
+                             MinValueValidator(0), MaxValueValidator(20)])
 
     # Datetime Fields
     created = models.DateTimeField(auto_now_add=True)

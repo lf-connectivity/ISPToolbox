@@ -1,6 +1,5 @@
 import requests
 import json
-import logging
 import math
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
@@ -8,7 +7,6 @@ from django.contrib.gis.geos import LineString, Point
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from traceback import format_exc
 from mmwave.lidar_utils.caching import lidar_cache_get, lidar_cache_set
 from mmwave.scripts.create_lidar_availability_preview import createOpenGraphPreviewImage
 from datetime import date

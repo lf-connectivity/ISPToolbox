@@ -345,7 +345,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         </div>`
         });
         // Add Freq Toggle Callback
-        $('.freq-dropdown-item').click((event) => {
+        $('.freq-dropdown-item').on('click', (event) => {
             $('#freq-dropdown').text($(event.target).text());
             this.centerFreq = center_freq_values[event.target.id];
             $('.freq-dropdown-item').removeClass('active');
@@ -353,14 +353,21 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             if (this.selectedFeatureID) {
                 if (this.workspaceLinkSelected()) {
                     let link = this.draw.get(this.selectedFeatureID);
-
-                    // @ts-ignore
-                    link.properties.frequency = this.centerFreq;
-
-                    // @ts-ignore
-                    this.workspaceManager.features[link.properties.uuid].update(link);
+                    if (link) {
+                        this.draw.setFeatureProperty(
+                            this.selectedFeatureID,
+                            'frequency',
+                            this.centerFreq
+                        );
+                        link = this.draw.get(this.selectedFeatureID);
+                        this.map.fire('draw.update', { features: [link] });
+                    }
                 } else {
-                    this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', this.centerFreq);
+                    this.draw.setFeatureProperty(
+                        this.selectedFeatureID,
+                        'frequency',
+                        this.centerFreq
+                    );
                 }
             }
             this.updateLinkChart(true);
@@ -994,12 +1001,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.radio_names[1] = cpe.getFeatureProperty('name');
                 this.updateAnimationTitles();
             } else {
-                if (feat.properties.freq == undefined && this.selectedFeatureID) {
-                    this.draw.setFeatureProperty(this.selectedFeatureID, 'freq', DEFAULT_LINK_FREQ);
+                if (feat.properties.frequency === undefined && this.selectedFeatureID) {
+                    this.draw.setFeatureProperty(
+                        this.selectedFeatureID,
+                        'frequency',
+                        DEFAULT_LINK_FREQ
+                    );
                 }
-                if (center_freq_values_reverse.has(feat.properties.freq)) {
+                if (center_freq_values_reverse.has(feat.properties.frequency)) {
                     $('#freq-dropdown').text(
-                        center_freq_values_reverse.get(feat.properties.freq) as string
+                        center_freq_values_reverse.get(feat.properties.frequency) as string
                     );
                 }
 

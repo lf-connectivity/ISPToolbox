@@ -33,6 +33,16 @@ All of these frameworks have stellar open source documentation, so be sure to co
 - chmod 400 on .pem file
 - ssh using the isptoolbox.pem in the lastpass folder - ask a dev for the pem
 - install docker and docker compose
+
+## Docker Note: installing docker on amzn ami (yum package manager - aws package repository)
+
+The commands for installing docker on the AWS ami are slightly different than the official docker docs:
+
+```
+sudo yum update -y; sudo amazon-linux-extras install docker;
+sudo service docker start; sudo usermod -a -G docker ec2-user;
+```
+
 - ensure docker daemon is running (dockerd)
 - clone git repository
   - make sure you clone all submodules `git submodule update --init --recursive`

@@ -28,20 +28,6 @@ function anonymousSessionDataRetentionFlow() {
     return context(
       "Anonymous session data retention baseline screenshot generation",
       () => {
-        let baseDir;
-        let projectRoot;
-        let screenshotOptions;
-
-        beforeEach(() => {
-          baseDir = Cypress.env("SNAPSHOT_BASE_DIRECTORY");
-          projectRoot = Cypress.config("projectRoot");
-          screenshotOptions = {
-            onAfterScreenshot(el, props) {
-              cy.exec("ls -l");
-            },
-          };
-        });
-
         it("Market Evaluator baseline screenshots", () => {
           cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
           cy.wait_mapbox();

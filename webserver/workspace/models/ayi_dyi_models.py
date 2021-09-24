@@ -49,7 +49,7 @@ class AccessInformationJob(models.Model):
     def task_result(self):
         try:
             return TaskResult.objects.get(task_id=self.task_id)
-        except TaskResult.DoesNotExist as e:
+        except TaskResult.DoesNotExist:
             try:
                 return AsyncResult(self.task_id)
             except Exception:

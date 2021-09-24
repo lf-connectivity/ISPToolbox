@@ -3,7 +3,6 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from IspToolboxAccounts.forms import IspToolboxUserDeleteAccountForm
 from workspace.models import DeleteInformationJob
-from webserver.settings import AUTH_USER_MODEL
 from django.contrib.auth import logout
 
 

@@ -95,7 +95,7 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
                 ])
 
             for old_task in old_tasks:
-                revoke(old_task, terminate=True)
+                app.control.revoke(old_task, terminate=True)
             # start new tasks
             new_tasks = []
             for handler in handlers:

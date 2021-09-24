@@ -10,7 +10,7 @@ from celery.states import READY_STATES
 class AccessYourInformationView(LoginRequiredMixin, View):
     """
     This view allows users to download their information
-    We don't really have an obligation for it to be easily parseable - 
+    We don't really have an obligation for it to be easily parseable -
     so dumping everything into a json file is acceptable
     """
 

@@ -182,7 +182,7 @@ context("Navbar desktop size logged in views", () => {
   });
 });
 
-context.only("Navbar tablet size logged in views", () => {
+context("Navbar tablet size logged in views", () => {
   before(() => {
     cy.viewport(TABLET_SIZE);
     cy.login();
@@ -344,9 +344,14 @@ context.only("Navbar tablet size logged in views", () => {
 });
 
 context("Navbar mobile size logged in views", () => {
-  beforeEach(() => {
+  before(() => {
     cy.viewport(MOBILE_SIZE);
     cy.login();
+  });
+
+  beforeEach(() => {
+    cy.viewport(MOBILE_SIZE);
+    cy.preserve_session_cookie();
   });
 
   it("Market Evaluator Navbar", () => {

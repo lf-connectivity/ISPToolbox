@@ -38,9 +38,17 @@ All of these frameworks have stellar open source documentation, so be sure to co
 
 The commands for installing docker on the AWS ami are slightly different than the official docker docs:
 
+<em>these commands are if the user you are logged in as is `ec2-user`</em>
+
 ```
 sudo yum update -y; sudo amazon-linux-extras install docker;
 sudo service docker start; sudo usermod -a -G docker ec2-user;
+```
+
+To make the changes in docker group run this command:
+
+```
+exec sudo su - ec2-user
 ```
 
 - ensure docker daemon is running (dockerd)

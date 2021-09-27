@@ -58,6 +58,7 @@ jobs:
           name: coverage-frontend
           path: frontend_coverage/reports/lcov-report
       - name: Post-upload artifact removal for coverage
+        if: always()
         run: |
           sudo rm -rf /usr/src/app
           rm -rf coverage

@@ -42,6 +42,9 @@ Cypress.Commands.add("login", () => {
     cy.get("input[name=password]").type(`${user.password1}{enter}`);
   });
 
+  // Make sure sessionid cookie exists
+  cy.getCookie("sessionid").should("exist");
+
   // we should be redirected to homepage
   cy.url().should("include", "/pro");
 });

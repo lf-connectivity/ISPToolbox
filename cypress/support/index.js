@@ -46,6 +46,10 @@ Cypress.Commands.add("login", () => {
   cy.url().should("include", "/pro");
 });
 
+Cypress.Commands.add("preserve_session_cookie", () => {
+  Cypress.Cookies.preserveOnce("sessionid");
+});
+
 Cypress.Commands.add("create_session", () => {
   cy.visit("/pro/market/");
 });

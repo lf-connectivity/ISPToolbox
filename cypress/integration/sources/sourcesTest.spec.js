@@ -9,10 +9,19 @@ import {
 } from "../../support";
 
 context("Sources checks for Market Evaluator", () => {
-  beforeEach(() => {
+  before(() => {
     cy.login();
     cy.visit(MARKET_EVAL_PAGE);
     cy.wait_mapbox();
+    cy.close_nux();
+    cy.wait(1000);
+  });
+
+  afterEach(() => {
+    cy.preserve_session_cookie();
+    cy.visit(MARKET_EVAL_PAGE);
+    cy.wait_mapbox();
+    cy.wait(1000);
   });
 
   it("Clicking Sources in Market Evaluator page brings up sources page", () => {
@@ -178,14 +187,39 @@ context("Sources checks for Market Evaluator", () => {
 
     cy.url().should("include", MARKET_EVAL_SOURCES_PAGE);
   });
+
+  it("The CloudRF citation should be correct", () => {
+    cy.market_eval_click_tower();
+    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.get("button:contains('Plot Estimated Coverage')")
+      .then((button) => {
+        let match = button.text().match(/(\d+)/);
+        let num = match[1];
+
+        cy.visit(MARKET_EVAL_SOURCES_PAGE);
+        return cy.get(`#${FOOTNOTES_SECTION}-${num}`);
+      })
+      .footnote_text_should_match(
+        /^High-level line of sight is obtained via Cloud\-RF\. \(resolution is ~30m x 30m\)\. Data as of 2003\.$/
+      )
+      .footnote_should_have_link("Cloud-RF", "https://cloudrf.com/api/");
+  });
 });
 
 context("Sources checks for LOS", () => {
-  beforeEach(() => {
+  before(() => {
     cy.login();
     cy.visit(LOS_CHECK_PAGE);
     cy.wait_mapbox();
     cy.close_nux();
+    cy.wait(1000);
+  });
+
+  afterEach(() => {
+    cy.preserve_session_cookie();
+    cy.visit(LOS_CHECK_PAGE);
+    cy.wait_mapbox();
+    cy.wait(1000);
   });
 
   it("Click Sources in LOS Check page brings up sources page", () => {
@@ -197,7 +231,6 @@ context("Sources checks for LOS", () => {
   });
 
   it("Radio tooltip in LOS Check page has the correct citation for Mapbox Geocoding", () => {
-    cy.wait(2000);
     cy.los_click_radio();
 
     // Tooltip should be visible

@@ -19,10 +19,15 @@ import {
   MOBILE_SIZE,
 } from "../../support";
 
-context("Navbar desktop size logged in views", () => {
-  beforeEach(() => {
+context.only("Navbar desktop size logged in views", () => {
+  before(() => {
     cy.viewport(DESKTOP_SIZE);
     cy.login();
+  });
+
+  beforeEach(() => {
+    cy.viewport(DESKTOP_SIZE);
+    cy.preserve_session_cookie();
   });
 
   it("Market Evaluator Navbar", () => {

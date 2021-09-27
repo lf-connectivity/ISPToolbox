@@ -1,10 +1,7 @@
 from celery import shared_task
-from mmwave.lidar_utils.DSMEngine import DSMEngine
+from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from mmwave.models import DSMConversionJob, EPTLidarPointCloud
 import tempfile
-import os
-import time
-import random
 from area import area
 
 
@@ -26,34 +23,14 @@ def exportDSMData(DSMConversionJob_uuid):
             )
         )
     pt_clouds = query.all()
-    dsm_engine = DSMEngine(conversion.area_of_interest.envelope, pt_clouds)
-    t_estimate = create_time_estimate(conversion.area_of_interest[0].envelope)
-    start_time = time.time()
+    dsm_engine = DSMTileEngine(conversion.area_of_interest.envelope, pt_clouds)
 
     with tempfile.NamedTemporaryFile(suffix=".tif") as temp_fp:
         # Run the DSM generation in a separate process, monitor that process and keep the
         # user informed of it's status
-        process = dsm_engine.getDSM(conversion.resolution, temp_fp.name)
+        dsm_engine.getDSM(temp_fp.name)
         conversion.error = 'Loading data...'
         conversion.save(update_fields=['error'])
-        while process.poll() is None:
-            temp_fp.flush()
-            size = os.stat(temp_fp.name).st_size
-            if size > 0:
-                conversion.error = f'creating output file: {human_readable_size(size, 1)}'
-            else:
-                # select a random loading message and send to the client
-                status_msgs = ['loading', 'filtering', 'processing']
-                conversion.error = random.choice(status_msgs)
-                time_remaining = max((start_time + t_estimate) - time.time(), 0)
-                time_estimate = (
-                    f': approx time remaining - {int(time_remaining)} seconds'
-                    if time_remaining > 0 else ': should finish soon'
-                )
-                conversion.error = conversion.error + time_estimate
-
-            conversion.save(update_fields=['error'])
-            time.sleep(3)
         conversion.error = 'Uploading DSM'
         conversion.save(update_fields=['error'])
         conversion.write_object(temp_fp)

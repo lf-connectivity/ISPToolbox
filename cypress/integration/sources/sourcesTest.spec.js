@@ -11,21 +11,16 @@ import {
 context("Sources checks for Market Evaluator", () => {
   before(() => {
     cy.login();
-    cy.visit(MARKET_EVAL_PAGE);
-    cy.wait_mapbox();
-    cy.close_nux();
-    cy.wait(1000);
   });
 
-  afterEach(() => {
-    cy.preserve_session_cookie();
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce('sessionid');
     cy.visit(MARKET_EVAL_PAGE);
-    cy.wait_mapbox();
-    cy.wait(1000);
   });
 
   it("Clicking Sources in Market Evaluator page brings up sources page", () => {
     // Test that source link opens in new tab, and is in mapbox
+    cy.wait_mapbox();
     cy.get("#map")
       .contains("a", "Sources")
       .should("have.attr", "target", "_blank")

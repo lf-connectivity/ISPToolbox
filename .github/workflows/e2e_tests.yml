@@ -1,7 +1,7 @@
 name: E2E Cypress Testing
 on:
   pull_request:
-    types: [edited, review_requested]
+    types: [edited, opened]
     branches:
       - master
 jobs:

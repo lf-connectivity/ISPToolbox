@@ -40,3 +40,22 @@ Cypress.Commands.add(
     return subject;
   }
 );
+
+Cypress.Commands.add(
+  "should_have_sanitized_attr",
+  { prevSubject: true },
+  (subject, mode, attr_name, attr_val) => {
+    let sanitized_attr = subject
+      .attr(attr_name)
+      .trim()
+      .replaceAll(/\s+/gi, " ");
+    if (mode === "match") {
+      expect(sanitized_attr).match(attr_val);
+    } else if (mode === "equal") {
+      expect(sanitized_attr).equal(attr_val);
+    } else {
+      throw Error("Invalid mode");
+    }
+    return subject;
+  }
+);

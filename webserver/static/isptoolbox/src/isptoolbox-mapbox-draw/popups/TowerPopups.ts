@@ -581,7 +581,12 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
         // No lidar coverage and not plotting lidar coverage either
         else {
             return `
-                <button class='btn btn-primary isptoolbox-btn' id='${PLOT_COVERAGE_BUTTON_ID}'>Plot Estimated Coverage</button>
+                <button class='btn btn-primary isptoolbox-btn' id='${PLOT_COVERAGE_BUTTON_ID}'>
+                    Plot Estimated Coverage
+                    <sup>
+                        <span class="footnote--bracket">[</span>11<span class="footnote--bracket">]</span>
+                    </sup>
+                </button>
             `;
         }
     }

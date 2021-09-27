@@ -69,7 +69,7 @@ TOOLTIPS = {
     },
     'rdof': {
         'title': _('FCC Rural Digital Opportunity Fund (Closed)'),
-        'body': _("""TThe FCC has identified the highlighted areas 
+        'body': _("""The FCC has identified the highlighted areas 
         that are preliminarily determined to be eligible for the Rural 
         Digital Opportunity Fund Phase III auction (Auction 904).
         """),

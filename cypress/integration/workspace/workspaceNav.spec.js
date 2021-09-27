@@ -19,7 +19,7 @@ import {
   MOBILE_SIZE,
 } from "../../support";
 
-context.only("Navbar desktop size logged in views", () => {
+context("Navbar desktop size logged in views", () => {
   before(() => {
     cy.viewport(DESKTOP_SIZE);
     cy.login();
@@ -182,10 +182,15 @@ context.only("Navbar desktop size logged in views", () => {
   });
 });
 
-context("Navbar tablet size logged in views", () => {
-  beforeEach(() => {
+context.only("Navbar tablet size logged in views", () => {
+  before(() => {
     cy.viewport(TABLET_SIZE);
     cy.login();
+  });
+
+  beforeEach(() => {
+    cy.viewport(TABLET_SIZE);
+    cy.preserve_session_cookie();
   });
 
   it("Market Evaluator Navbar", () => {

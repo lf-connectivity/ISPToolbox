@@ -43,7 +43,7 @@ Cypress.Commands.add("login", () => {
   });
 
   // Make sure sessionid cookie exists
-  cy.getCookie("sessionid", { timeout: 45000 }).should("exist");
+  cy.getCookie("sessionid", { timeout: 90000 }).should("exist");
 
   // we should be redirected to homepage
   cy.url().should("include", "/pro");

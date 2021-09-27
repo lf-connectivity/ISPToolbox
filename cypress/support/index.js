@@ -40,10 +40,10 @@ Cypress.Commands.add("login", () => {
     // {enter} causes the form to submit
     cy.get("input[name=username]").type(user.email);
     cy.get("input[name=password]").type(`${user.password1}{enter}`);
-  });
 
-  // Make sure sessionid cookie exists
-  cy.getCookie("sessionid", { timeout: 90000 }).should("exist");
+    // Make sure sessionid cookie exists
+    cy.getCookie("sessionid", { timeout: 90000 }).should("exist");
+  });
 
   // we should be redirected to homepage
   cy.url().should("include", "/pro");

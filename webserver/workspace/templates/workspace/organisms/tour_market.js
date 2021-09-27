@@ -1,5 +1,7 @@
 {% load nux i18n %}
 const tour_dots = '<svg width="48" height="10" viewBox="0 0 48 10" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="5" r="5" fill="#EDEDED"/><circle cx="24" cy="5" r="5" fill="#A2A2A2"/><circle cx="43" cy="5" r="5" fill="#EDEDED"/></svg>';
+const style_dots = "btn px-4 ml-2";
+const tour_arrow_reverse = '<svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 15.0025L3.81916 8.5L10 1.9975L8.09717 0L0 8.5L8.09717 17L10 15.0025Z" fill="white"/></svg>';
 const tour_arrow = '<svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 1.9975L6.18084 8.5L0 15.0025L1.90283 17L10 8.5L1.90283 0L0 1.9975Z" fill="white"/></svg>';
 const tour = new Shepherd.Tour({
     defaultStepOptions: {
@@ -37,9 +39,9 @@ tour.addStep({
     classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: tour_dots,
+        text: tour_arrow_reverse,
         action: tour.back,
-        classes: 'btn px-4 ml-2'
+        classes: "btn btn-primary isptoolbox-btn py-3 px-4",
     },
     {
         text: tour_arrow,
@@ -57,9 +59,9 @@ tour.addStep({
     classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: tour_dots,
+        text: tour_arrow_reverse,
         action: tour.back,
-        classes: 'btn px-4 ml-2'
+        classes: 'btn btn-primary isptoolbox-btn py-3 px-4'
     },
     {
         text: tour_arrow,
@@ -77,9 +79,9 @@ tour.addStep({
     classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: tour_dots,
+        text: tour_arrow_reverse,
         action: tour.back,
-        classes: 'btn px-4 ml-2'
+        classes: 'btn btn-primary isptoolbox-btn py-3 px-4'
     },
     {
         text: tour_arrow,

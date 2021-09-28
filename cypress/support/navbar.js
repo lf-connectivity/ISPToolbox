@@ -156,10 +156,10 @@ Cypress.Commands.add(
         .should("be.visible")
         .should_have_sanitized_text(
           "equal",
-          "Upload File or Log In to pick up where you left off."
+          "Upload File or Sign In to save your work."
         )
         .within(() => {
-          cy.get("a:contains(Log In)")
+          cy.get("a:contains(Sign In)")
             .should("be.visible")
             .should("have.attr", "href", "/pro/accounts/sign-in/");
 

@@ -101,6 +101,7 @@ class MarketEvaluatorView(LoginRequiredMixin, View):
         context = {
             'session': session,
             'geojson': session.get_session_geojson(),
+            'workspace_account': True,
             'workspace_forms': WorkspaceForms(request, session),
             'units': 'US',
             'tool': 'market_evaluator',

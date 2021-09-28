@@ -111,9 +111,17 @@ class WorkspaceMapSession(models.Model):
                 session.zoom = 14
             session.save()
         else:
-            # Delete all workspace features associated with session
-            for serializer in session.fks_serializers:
-                serializer.Meta.model.objects.filter(map_session=session).all().delete()
+            # Disassociate session with current map session
+            session.session = None
+            session.save()
+
+            # Clone current map session
+            session.uuid = None
+            session.save()
+
+            # Associate session key with cloned map session
+            session.session = Session.objects.get(pk=request.session.session_key)
+            session.save()
 
         return session, created
 

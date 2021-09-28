@@ -2,7 +2,9 @@
 
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
+
 <div class="modal-body">
+  {% ordering %}
   <div class="theme-table open-workspace">
     <div class="thead">
       <div class="tr">

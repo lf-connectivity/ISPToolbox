@@ -5,7 +5,7 @@
   <table class="table table-sm table-hover" style="overflow-x: scroll">
     <thead class="thead-modal">
       <tr>
-        <th scope="col">#</th>
+        <th scope="col" class="number-class">#</th>
         <th scope="col">{% translate 'Name' %}
           {% if ordering == "name"%}
           <a name="" class="sort-ap" ordering-target="-name">
@@ -51,6 +51,7 @@
           </a>
           {% endif %}
         </th>
+   
         <th scope="col">{%translate "Last Modified"%}
           {% if ordering == "last_updated"%}
           <a class="sort-ap" ordering-target="-last_updated">
@@ -59,7 +60,7 @@
             </button>
           </a>
           {% else %}
-          <a class="sort-ap" ordering-target="last_updated">
+          <a class="sort-ap" ordering-target="last_updated" class="last-updated">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
             </button>

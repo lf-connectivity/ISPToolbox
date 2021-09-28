@@ -197,6 +197,7 @@ context("Navbar tablet size logged in views", () => {
 
   it("Market Evaluator Navbar", () => {
     cy.visit(MARKET_EVAL_PAGE);
+    cy.close_disclaimer();
     cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("be.visible.and.work_properly")
@@ -210,6 +211,7 @@ context("Navbar tablet size logged in views", () => {
 
   it("LOS Check Navbar", () => {
     cy.visit(LOS_CHECK_PAGE);
+    cy.close_disclaimer();
     cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("be.visible.and.work_properly")

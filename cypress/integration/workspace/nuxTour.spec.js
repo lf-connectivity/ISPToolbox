@@ -21,6 +21,7 @@ function create_logged_in_nux_test_case(
       cy.visit(page_url);
       cy.wait_mapbox();
 
+      cy.close_disclaimer();
       // Check Learn More link and button saying Take a Tour.
       cy.get_nux()
         .should("be.visible")
@@ -32,7 +33,6 @@ function create_logged_in_nux_test_case(
         )
         .nux_cta_button_should("have.text", "Take a Tour");
 
-      cy.close_disclaimer();
       cy.close_nux();
       cy.get_nux().should("not.exist");
 

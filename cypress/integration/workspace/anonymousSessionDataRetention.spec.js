@@ -31,7 +31,8 @@ function anonymousSessionDataRetentionFlow() {
         it("Market Evaluator baseline screenshots", () => {
           cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
           cy.wait_mapbox();
-
+          cy.close_disclaimer();
+          cy.close_nux();
           // Since we set the type env to base, this takes the screenshots and
           // doesn't compare them.
           cy.get("#map").compareSnapshot(MARKET_EVAL_INITIAL_MAP_NO_ITEMS);
@@ -40,10 +41,12 @@ function anonymousSessionDataRetentionFlow() {
           cy.wait_mapbox();
           cy.get("#map").compareSnapshot(MARKET_EVAL_FINAL_MAP_NO_ITEMS);
         });
-
+        
         it("LOS Check baseline screenshots", () => {
           cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
           cy.wait_mapbox();
+          cy.close_disclaimer();
+          cy.close_nux();
           cy.get("#map").compareSnapshot(LOS_CHECK_INITIAL_MAP_NO_ITEMS);
           cy.set_session_map_preferences();
           cy.reload();
@@ -51,54 +54,59 @@ function anonymousSessionDataRetentionFlow() {
           cy.get("#map").compareSnapshot(LOS_CHECK_FINAL_MAP_NO_ITEMS);
         });
       }
-    );
-  } else {
-    return context("Anonymous session data retention", () => {
-      it("Market Evaluator should preserve session zoom info and center", () => {
-        cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
-        cy.wait_mapbox();
-        cy.get("#map").compareSnapshot(MARKET_EVAL_INITIAL_MAP_NO_ITEMS);
-        cy.set_session_map_preferences();
-        cy.reload();
-        cy.wait_mapbox();
-        cy.get("#map").compareSnapshot(MARKET_EVAL_FINAL_MAP_NO_ITEMS);
+      );
+    } else {
+      return context("Anonymous session data retention", () => {
+        it("Market Evaluator should preserve session zoom info and center", () => {
+          cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
+          cy.wait_mapbox();
+          cy.close_disclaimer();
+          cy.close_nux();
+          cy.get("#map").compareSnapshot(MARKET_EVAL_INITIAL_MAP_NO_ITEMS);
+          cy.set_session_map_preferences();
+          cy.reload();
+          cy.wait_mapbox();
+          cy.get("#map").compareSnapshot(MARKET_EVAL_FINAL_MAP_NO_ITEMS);
+        });
+        
+        it("LOS Check should preserve session zoom info and center screenshots", () => {
+          cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
+          cy.wait_mapbox();
+          cy.close_disclaimer();
+          cy.close_nux();
+          cy.get("#map").compareSnapshot(LOS_CHECK_INITIAL_MAP_NO_ITEMS);
+          cy.set_session_map_preferences();
+          cy.reload();
+          cy.wait_mapbox();
+          cy.get("#map").compareSnapshot(LOS_CHECK_FINAL_MAP_NO_ITEMS);
+        });
+        
+        it("Market Evaluator should remove all items when reloading an anonymous session", () => {
+          cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
+          cy.set_session_map_preferences();
+          cy.reload();
+          cy.wait_mapbox();
+          cy.market_eval_add_other_tower();
+          cy.wait(1000);
+          cy.reload();
+          cy.wait_mapbox();
+          cy.get("#map").compareSnapshot(MARKET_EVAL_FINAL_MAP_NO_ITEMS);
+        });
+        
+        it("LOS Check should remove all items when reloading an anonymous session", () => {
+          cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
+          cy.set_session_map_preferences();
+          cy.reload();
+          cy.wait_mapbox();
+          cy.los_add_other_tower();
+          cy.wait(1000);
+          cy.reload();
+          cy.wait_mapbox();
+          cy.get("#map").compareSnapshot(LOS_CHECK_FINAL_MAP_NO_ITEMS);
+        });
       });
-
-      it("LOS Check should preserve session zoom info and center screenshots", () => {
-        cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
-        cy.wait_mapbox();
-        cy.get("#map").compareSnapshot(LOS_CHECK_INITIAL_MAP_NO_ITEMS);
-        cy.set_session_map_preferences();
-        cy.reload();
-        cy.wait_mapbox();
-        cy.get("#map").compareSnapshot(LOS_CHECK_FINAL_MAP_NO_ITEMS);
-      });
-
-      it("Market Evaluator should remove all items when reloading an anonymous session", () => {
-        cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
-        cy.set_session_map_preferences();
-        cy.reload();
-        cy.wait_mapbox();
-        cy.market_eval_add_other_tower();
-        cy.wait(1000);
-        cy.reload();
-        cy.wait_mapbox();
-        cy.get("#map").compareSnapshot(MARKET_EVAL_FINAL_MAP_NO_ITEMS);
-      });
-
-      it("LOS Check should remove all items when reloading an anonymous session", () => {
-        cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
-        cy.set_session_map_preferences();
-        cy.reload();
-        cy.wait_mapbox();
-        cy.los_add_other_tower();
-        cy.wait(1000);
-        cy.reload();
-        cy.wait_mapbox();
-        cy.get("#map").compareSnapshot(LOS_CHECK_FINAL_MAP_NO_ITEMS);
-      });
-    });
+    }
   }
-}
-
-anonymousSessionDataRetentionFlow();
+  
+  anonymousSessionDataRetentionFlow();
+  

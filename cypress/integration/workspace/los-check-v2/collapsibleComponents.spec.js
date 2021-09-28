@@ -11,6 +11,7 @@ function reset() {
   cy.login();
   cy.visit(LOS_CHECK_PAGE);
   cy.wait_mapbox();
+  cy.close_disclaimer();
   cy.close_nux();
 }
 

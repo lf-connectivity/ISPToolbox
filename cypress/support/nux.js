@@ -16,7 +16,7 @@ Cypress.Commands.add("open_nux", () => {
 });
 
 Cypress.Commands.add("get_nux", () => {
-  cy.get("div.shepherd-content");
+  cy.get("div.isptoolbox-tour");
 });
 
 Cypress.Commands.add(

@@ -8,6 +8,7 @@
 @use '../atoms/_double_sided_slider'
 @use '../molecules/_map-tooltips'
 @use '../molecules/_footnotes'
+@use '../molecules/modals'
 @use '../organisms/_map-view'
 @use '../atoms/_reconnecting_status'
 @use '../organisms/_market-eval-stats'
@@ -30,3 +31,9 @@
 
     #map
         min-height: calc(100vh - 50px)
+
+    @media (max-width: $breakpoint-md) 
+        .market-eval-container
+            flex-flow: column
+        #map
+            min-height: 500px

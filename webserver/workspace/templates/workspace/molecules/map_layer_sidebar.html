@@ -27,6 +27,11 @@
         </div>
     {% endif %}
     <div class="market_overlay--section-header mt-4"><h5>Your Layers</h5></div>
+    {% if layers.length == 0 %}
+    <div class="py-3">
+        <p>Place towers or select areas on the map to start building your layers.</p>
+    </div>
+    {% endif %}
     <div class='market_overlay--section' id='map-objects-section'>
     </div>
 </div>

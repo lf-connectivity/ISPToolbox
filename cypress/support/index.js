@@ -38,11 +38,13 @@ Cypress.Commands.add("login", () => {
 
   cy.fixture("login_fixture").then((user) => {
     // {enter} causes the form to submit
-    cy.get("input[name=username]").type(user.email);
-    cy.get("input[name=password]").type(`${user.password1}{enter}`);
+    cy.get("input[name=username]").should("be.visible").type(user.email);
+    cy.get("input[name=password]")
+      .should("be.visible")
+      .type(`${user.password1}{enter}`);
 
     cy.wait(3000);
-  
+
     // Make sure sessionid cookie exists
     cy.getCookie("sessionid", { timeout: 90000 }).should("exist");
   });

@@ -41,6 +41,8 @@ Cypress.Commands.add("login", () => {
     cy.get("input[name=username]").type(user.email);
     cy.get("input[name=password]").type(`${user.password1}{enter}`);
 
+    cy.wait(3000);
+  
     // Make sure sessionid cookie exists
     cy.getCookie("sessionid", { timeout: 90000 }).should("exist");
   });

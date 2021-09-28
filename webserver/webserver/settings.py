@@ -119,8 +119,10 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     # Django Hijack
     'hijack',
-    'sslserver',
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['sslserver']
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_collect')
 STATICFILES_DIRS = [

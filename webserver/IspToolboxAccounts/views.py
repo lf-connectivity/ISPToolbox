@@ -18,26 +18,6 @@ from workspace.mixnins import SuperuserRequiredMixin
 import json
 
 
-TEST_AP = {
-    "coordinates": [
-        -86.58242848006918,
-        36.808415845040415
-    ],
-    "type": "Point"
-}
-
-TEST_CPE = {
-    "coordinates": [
-        -86.58538341719195,
-        36.80738720733433
-    ],
-    "type": "Point"
-}
-
-TEST_AP = json.dumps(TEST_AP)
-TEST_CPE = json.dumps(TEST_CPE)
-
-
 class CreateAccountView(View):
     def post(self, request):
         form = IspToolboxUserCreationForm(request.POST)
@@ -77,6 +57,25 @@ class CreateAccountView(View):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class IntegrationTestAccountCreationView(View):
+    TEST_AP = {
+        "coordinates": [
+            -86.58242848006918,
+            36.808415845040415
+        ],
+        "type": "Point"
+    }
+
+    TEST_CPE = {
+        "coordinates": [
+            -86.58538341719195,
+            36.80738720733433
+        ],
+        "type": "Point"
+    }
+
+    TEST_AP = json.dumps(TEST_AP)
+    TEST_CPE = json.dumps(TEST_CPE)
+
     def post(self, request):
         if settings.PROD:
             raise Http404
@@ -95,7 +94,7 @@ class IntegrationTestAccountCreationView(View):
 
             # Create dummy session
             session = workspace_models.WorkspaceMapSession(
-                    owner=login_user)
+                owner=login_user)
             session.save()
             session.name = 'Test Workspace'
             session.center = Point(-86.5817861024335, 36.80733577508586)
@@ -107,7 +106,7 @@ class IntegrationTestAccountCreationView(View):
                 name='Test AP',
                 owner=login_user,
                 map_session=session,
-                geojson=TEST_AP,
+                geojson=self.TEST_AP,
                 max_radius=0.5
             )
             ap.save()
@@ -116,7 +115,7 @@ class IntegrationTestAccountCreationView(View):
                 name='123 Test Ave',
                 owner=login_user,
                 map_session=session,
-                geojson=TEST_CPE,
+                geojson=self.TEST_CPE,
                 ap=ap
             )
             cpe.save()

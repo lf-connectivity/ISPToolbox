@@ -173,6 +173,10 @@ export abstract class ISPToolboxAbstractAppPage {
 
             // Additional loading
             this.onMapLoad();
+
+            // Expose the mapbox interfaces
+            // @ts-ignore
+            window.mapbox_handles = { map: this.map, draw: this.draw };
         });
     }
 

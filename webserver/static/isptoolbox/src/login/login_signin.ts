@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(() => {
     function showLoginModal() {
         $('#signin_container').removeClass('d-none');
         $('#signup_container').addClass('d-none');

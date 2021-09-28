@@ -8,3 +8,20 @@ register = template.Library()
 @register.simple_tag
 def settings_value(key):
     return getattr(settings, key, "")
+
+
+class ProdFlag(template.Node):
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        if settings.PROD:
+            return self.nodelist.render(context)
+        return ''
+
+
+@register.tag(name="onlyprod")
+def onlyprod(parser, token):
+    nodelist = parser.parse(('endonlyprod',))
+    parser.delete_first_token()
+    return ProdFlag(nodelist)

@@ -1,7 +1,7 @@
 {% load nux i18n %}
 const tour = new Shepherd.Tour({
     defaultStepOptions: {
-        classes: '',
+        classes: 'isptoolbox-tour',
         scrollTo: true
     },
     useModalOverlay: true

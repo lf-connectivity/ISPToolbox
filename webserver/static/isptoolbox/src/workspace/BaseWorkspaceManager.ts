@@ -142,6 +142,7 @@ export abstract class BaseWorkspaceManager {
                     }
                 );
             }
+            console.log('added initial features');
 
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();

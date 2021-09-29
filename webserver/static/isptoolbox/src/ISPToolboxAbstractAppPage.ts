@@ -154,17 +154,6 @@ export abstract class ISPToolboxAbstractAppPage {
                 ];
             };
 
-            this.geocoder = new MapboxGeocoder({
-                accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl,
-                marker: isBeta() ? false : true,
-                countries: 'us, pr',
-                localGeocoder: latLngMatcher,
-                placeholder: 'Search for an address'
-            });
-
-            document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
-
             new MapboxSDKClient(mapboxgl.accessToken);
 
             $('#map-layers-btn').prop('disabled', false);
@@ -177,6 +166,17 @@ export abstract class ISPToolboxAbstractAppPage {
             // Expose the mapbox interfaces
             // @ts-ignore
             window.mapbox_handles = { map: this.map, draw: this.draw };
+
+            // Add Geocoder Last -> Allow Cypress Tests to Know We're ready
+            this.geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl,
+                marker: isBeta() ? false : true,
+                countries: 'us, pr',
+                localGeocoder: latLngMatcher,
+                placeholder: 'Search for an address'
+            });
+            document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
         });
     }
 

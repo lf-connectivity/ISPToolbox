@@ -13,9 +13,10 @@ context("Sources checks for Market Evaluator", () => {
     cy.login();
   });
 
-  beforeEach(() => {
-    Cypress.Cookies.preserveOnce('sessionid');
+  beforeEach(() =>{
+    cy.preserve_session_cookie();
     cy.visit(MARKET_EVAL_PAGE);
+    cy.wait_mapbox();
   });
 
   it("Clicking Sources in Market Evaluator page brings up sources page", () => {
@@ -184,6 +185,8 @@ context("Sources checks for Market Evaluator", () => {
   });
 
   it("The CloudRF citation should be correct", () => {
+    // TODO: achong - remove this wait - there is a setTimeout in the tower popup????
+    cy.wait(1000);
     cy.market_eval_click_tower();
     cy.los_get_mapbox_tooltip().should("be.visible");
     cy.get("button:contains('Plot Estimated Coverage')")

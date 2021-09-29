@@ -9,7 +9,6 @@ function marketEvalInfoTooltipsFlow(description, beforeFunc) {
     afterEach(() => {
       // Hide tooltips
       cy.get("#map").click();
-      cy.wait(1000);
     });
 
     it("The Buildings inside Coverage Area tooltip should be correct", () => {
@@ -152,7 +151,8 @@ marketEvalInfoTooltipsFlow(
   () => {
     cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
     cy.wait_mapbox();
-    cy.wait(1000);
+    cy.close_disclaimer();
+    cy.close_nux();
     cy.los_toggle_map_layer_sidebar();
   }
 );
@@ -163,8 +163,8 @@ marketEvalInfoTooltipsFlow(
     cy.login();
     cy.visit(MARKET_EVAL_PAGE);
     cy.wait_mapbox();
+    cy.close_disclaimer();
     cy.close_nux();
-    cy.wait(1000);
     cy.los_toggle_map_layer_sidebar();
   }
 );

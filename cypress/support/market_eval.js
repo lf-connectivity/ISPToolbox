@@ -2,52 +2,43 @@
 
 import { not_exist_or_not_be_visible } from ".";
 
-// These numbers were done through lots of trial/error to find a combination of numbers that worked.
-// Might not work once the building dataset changes.
-// TODO: Mock websocket responses out so nobody has to do guesswork in the future!!!
-
-function setupTestOptions(testFunc) {
-  return (options = {}) => {
-    let testOptions = { mapLayersOpen: false };
-    Object.assign(testOptions, options);
-    testFunc(testOptions);
-    cy.wait(500);
-  };
-}
-
-// Offsets only work with setup from los_setup_tower_radio
-function clickWithTestOptions(testOptions, x, y) {
-  if (testOptions.mapLayersOpen) {
-    cy.get("#map").click(x - 150, y);
-  } else {
-    cy.get("#map").click(x, y);
-  }
+function reverseCoordinatesToCanvas(coordinates){
+  cy.window().then((window)=>{
+    const coords = window.mapbox_handles.map.project(coordinates);
+    cy.get('#map').click(coords.x, coords.y);
+  })
 }
 
 Cypress.Commands.add(
   "market_eval_click_tower",
-  setupTestOptions((testOptions) => {
-    clickWithTestOptions(testOptions, 275, 200);
-  })
+  () => {
+    cy.fixture("session_fixture").then((session)=>{
+      reverseCoordinatesToCanvas(session.tower);
+    })
+  }
 );
 
 Cypress.Commands.add(
   "market_eval_add_other_tower",
-  setupTestOptions((testOptions) => {
-    cy.get("#add-ap-btn").click();
-    cy.wait(1000);
-    clickWithTestOptions(testOptions, 355, 250);
-  })
+  () => {
+    cy.fixture("session_fixture").then((session)=>{
+      cy.get("#add-ap-btn").click();
+      cy.wait(1000);
+      reverseCoordinatesToCanvas(session.add_tower);
+    })
+  }
 );
 
 Cypress.Commands.add(
   "market_eval_delete_other_tower",
-  setupTestOptions((testOptions) => {
-    clickWithTestOptions(testOptions, 355, 250);
-    cy.wait(1000);
-    cy.get("button.mapbox-gl-draw_trash").click();
-    cy.wait(1000);
-  })
+  () => {
+    cy.fixture("session_fixture").then((session)=>{
+      reverseCoordinatesToCanvas(session.add_tower);
+      cy.wait(1000);
+      cy.get("button.mapbox-gl-draw_trash").click();
+      cy.wait(1000);
+    })
+  }
 );
 
 Cypress.Commands.add("market_eval_click_info_tooltip", (text) => {
@@ -67,15 +58,10 @@ Cypress.Commands.add(
       header
     );
 
-    cy.wait(1000);
-    cy.market_eval_click_info_tooltip(tooltip_text);
     cy.get("div.popover div.popover-body p:first").should_have_sanitized_text(
       "equal",
       body
     );
-
-    cy.wait(1000);
-    cy.market_eval_click_info_tooltip(tooltip_text);
 
     // Check that no link exists if link is undefined
     if (!links.length) {

@@ -29,14 +29,14 @@ def main():
     print(filtered_df_poly.iloc[0])
     print(filtered_df_ap.iloc[0])
 
-    # Break Up Polygons into chunks
-    chunk_size = int(df.shape[0] / 10)
-    chunknum = 0
-    for start in range(0, df.shape[0], chunk_size):
-        df_subset = filtered_df_poly.iloc[start:start + chunk_size]
-        df_subset.to_csv(output_polygons.replace(
-            '_polygon.csv', f'_polygon{chunknum}.csv'), index=False)
-        chunknum += 1
+    # # Break Up Polygons into chunks
+    # chunk_size = int(df.shape[0] / 10)
+    # chunknum = 0
+    # for start in range(0, df.shape[0], chunk_size):
+    #     df_subset = filtered_df_poly.iloc[start:start + chunk_size]
+    #     df_subset.to_csv(output_polygons.replace(
+    #         '_polygon.csv', f'_polygon{chunknum}.csv'), index=False)
+    #     chunknum += 1
 
     filtered_df_poly.to_csv(output_polygons, index=False)
     filtered_df_ap.to_csv(output_aps, index=False)

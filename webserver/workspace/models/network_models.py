@@ -110,6 +110,14 @@ class AccessPointLocation(WorkspaceFeature):
     cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)
 
     @property
+    def lat(self):
+        return self.geojson.y
+
+    @property
+    def lng(self):
+        return self.geojson.x
+        
+    @property
     def radius(self):
         return self.max_radius
 
@@ -164,7 +172,8 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     feature_type = serializers.CharField(read_only=True)
     default_cpe_height_ft = serializers.FloatField(read_only=True)
     cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
-
+    lat = serializers.FloatField(read_only=True)
+    lng = serializers.FloatField(read_only=True)
     class Meta:
         model = AccessPointLocation
         exclude = ['owner', 'session', 'created']

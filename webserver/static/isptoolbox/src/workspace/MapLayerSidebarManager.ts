@@ -50,6 +50,15 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         this.map.on('idle', loadMapCallback);
     }
 
+    setZeroState(){
+        const features = this.draw.getAll();
+        if (features.features.length == 0){
+            $('#zerostate').removeClass('d-none');
+        } else {
+            $('#zerostate').addClass('d-none');
+        }
+    }
+
     setUserMapLayers() {
         // add building objects to sidebar
         let mapObjectsSection = document.getElementById('map-objects-section');

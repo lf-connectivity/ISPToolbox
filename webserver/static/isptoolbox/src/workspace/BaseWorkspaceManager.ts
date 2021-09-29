@@ -90,7 +90,6 @@ export abstract class BaseWorkspaceManager {
 
         let initialFeatures =
             getInitialFeatures() !== null ? getInitialFeatures().features : undefined;
-
         const addType = (
             featureType: WorkspaceFeatureTypes,
             featureClass: new (
@@ -144,6 +143,8 @@ export abstract class BaseWorkspaceManager {
             }
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
+            MapLayerSidebarManager.getInstance().setZeroState();
+
         }
 
         // Instantiate CRUD
@@ -211,6 +212,8 @@ export abstract class BaseWorkspaceManager {
 
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
+            MapLayerSidebarManager.getInstance().setZeroState();
+
 
             if (successFollowup) {
                 successFollowup(resp);
@@ -260,6 +263,8 @@ export abstract class BaseWorkspaceManager {
 
                             // Should probably be replaced with a pubsub event signal
                             MapLayerSidebarManager.getInstance().setUserMapLayers();
+                            MapLayerSidebarManager.getInstance().setZeroState();
+
                         });
                     }
                 });
@@ -313,6 +318,7 @@ export abstract class BaseWorkspaceManager {
                                         cpe.update(() => {
                                             // Should probably be replaced with a pubsub event signal
                                             MapLayerSidebarManager.getInstance().setUserMapLayers();
+                                            MapLayerSidebarManager.getInstance().setZeroState();
 
                                             this.updateFeatureAjaxHandlers[
                                                 WorkspaceFeatureTypes.CPE
@@ -336,6 +342,7 @@ export abstract class BaseWorkspaceManager {
                                 workspaceFeature.update(() => {
                                     // Should probably be replaced with a pubsub event signal
                                     MapLayerSidebarManager.getInstance().setUserMapLayers();
+                                    MapLayerSidebarManager.getInstance().setZeroState();
 
                                     // @ts-ignore
                                     this.updateFeatureAjaxHandlers[

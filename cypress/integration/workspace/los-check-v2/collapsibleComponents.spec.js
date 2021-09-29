@@ -249,7 +249,9 @@ context("LOS Check collapsible components", () => {
     cy.los_toggle_map_layer_sidebar();
     cy.los_get_map_layer_sidebar().should("be.visible");
 
-    cy.los_click_tower({ mapLayersOpen: true });
+    // TODO: achong - remove this wait - there is a setTimeout in the tower popup????
+    cy.wait(1000);
+    cy.los_click_tower();
     cy.los_get_mapbox_tooltip().should("be.visible");
     cy.los_get_map_layer_sidebar().should("be.visible");
 

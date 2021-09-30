@@ -51,9 +51,7 @@ Cypress.Commands.add(
   () => {
     cy.fixture("session_fixture").then((session)=>{
       reverseCoordinatesToCanvas(session.add_tower);
-      cy.wait(1000);
       cy.get("button.mapbox-gl-draw_trash").click();
-      cy.wait(1000);
     });
   }
 );

@@ -75,7 +75,7 @@ function mapboxStuffIntoMapLayersSidebarTest(
     cy.los_get_mapbox_tooltip().should("be.visible");
 
     if (mapboxCleanup) {
-      mapboxCleanup({ mapLayersOpen: true });
+      mapboxCleanup();
     }
   });
 }
@@ -89,12 +89,12 @@ function mapLayersSidebarIntoMapboxStuffTest(
     cy.los_toggle_map_layer_sidebar();
     cy.los_get_map_layer_sidebar().should("be.visible");
 
-    mapboxStuff({ mapLayersOpen: true });
+    mapboxStuff();
     cy.los_get_mapbox_tooltip().should("be.visible");
     cy.los_get_map_layer_sidebar().should("be.visible");
 
     if (mapboxCleanup) {
-      mapboxCleanup({ mapLayersOpen: true });
+      mapboxCleanup();
     }
   });
 }

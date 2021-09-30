@@ -78,4 +78,6 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
             });
         });
     }
+
+    onGeocoderLoad() {}
 }

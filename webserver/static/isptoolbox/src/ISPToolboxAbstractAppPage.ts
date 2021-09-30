@@ -177,6 +177,8 @@ export abstract class ISPToolboxAbstractAppPage {
                 placeholder: 'Search for an address'
             });
             document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
+
+            this.onGeocoderLoad();
         });
     }
 
@@ -206,4 +208,6 @@ export abstract class ISPToolboxAbstractAppPage {
     }
 
     abstract onMapLoad(): void;
+
+    abstract onGeocoderLoad(): void;
 }

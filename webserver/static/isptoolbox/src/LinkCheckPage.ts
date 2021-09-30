@@ -598,11 +598,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new MapLayerSidebarManager(this.map, this.draw);
         this.workspaceManager = new LOSCheckWorkspaceManager(this.map, this.draw);
         new ViewshedTool(this.map, this.draw);
-        this.locationMarker = new LinkCheckLocationSearchTool(
-            this.map,
-            this.workspaceManager,
-            this.geocoder
-        );
 
         // instantiate singletons
         new LOSCheckLinkProfileView();
@@ -898,6 +893,14 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.highlightCurrentPosition(false);
             }
         });
+    }
+
+    onGeocoderLoad(){
+        this.locationMarker = new LinkCheckLocationSearchTool(
+            this.map,
+            this.workspaceManager,
+            this.geocoder
+        );
     }
 
     workspaceLinkSelected(): boolean {

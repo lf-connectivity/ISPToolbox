@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 
 import csv
 
-from workspace.models import AccessPointLocation
+from workspace.models import AccessPointLocation, WorkspaceMapSession
 from workspace import models as workspace_models
 from workspace.forms import UploadTowerCSVForm, WorkspaceForms
 
@@ -33,29 +33,34 @@ class BulkUploadTowersView(LoginRequiredMixin, View):
         return redirect(request.GET.get('next', '/pro'))
 
 
-class EditNetworkView(LoginRequiredMixin, View):
+class EditNetworkView(View):
     def get(self, request, session_id=None, name=None):
-        if session_id is None:
-            if workspace_models.WorkspaceMapSession.objects.filter(owner=request.user).exists():
-                session = workspace_models.WorkspaceMapSession.objects.filter(
-                    owner=request.user
-                ).order_by('-last_updated').first()
-                return redirect('workspace:edit_network', session.uuid, session.name)
-            else:
-                session = workspace_models.WorkspaceMapSession(
-                    owner=request.user)
-                session.save()
-                return redirect('workspace:edit_network', session.uuid, session.name)
+        if request.user and request.user.is_authenticated:
+            workspace_account = True
+            if session_id is None:
+                if workspace_models.WorkspaceMapSession.objects.filter(owner=request.user).exists():
+                    session = workspace_models.WorkspaceMapSession.objects.filter(
+                        owner=request.user
+                    ).order_by('-last_updated').first()
+                    return redirect('workspace:edit_network', session.uuid, session.name)
+                else:
+                    session = workspace_models.WorkspaceMapSession(
+                        owner=request.user)
+                    session.save()
+                    return redirect('workspace:edit_network', session.uuid, session.name)
 
-        session = get_object_or_404(
-            workspace_models.WorkspaceMapSession,
-            owner=request.user,
-            uuid=session_id
-        )
+            session = get_object_or_404(
+                workspace_models.WorkspaceMapSession,
+                owner=request.user,
+                uuid=session_id
+            )
+        else:
+            workspace_account = False
+            session, _ = WorkspaceMapSession.get_or_create_demo_view(request)
 
         context = {
             'session': session,
-            'workspace_account': True,
+            'workspace_account': workspace_account,
             'geojson': session.get_session_geojson(),
             'workspace_forms': WorkspaceForms(request, session),
             'should_collapse_link_view': True,

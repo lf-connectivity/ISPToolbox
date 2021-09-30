@@ -45,22 +45,6 @@ class NetworkDemoView(View):
         return render(request, 'workspace/pages/demo_network.index.html', context)
 
 
-class MarketDemoView(View):
-    """
-    Demo view for market evaluator app
-    """
-    def get(self, request):
-        map_session, created = WorkspaceMapSession.get_or_create_demo_view(request)
-        context = {
-            'session': map_session,
-            'geojson': map_session.get_session_geojson(),
-            'tool': 'market_evaluator',
-            'title': 'Market Evaluator - ISP Toolbox',
-            'tooltips': TOOLTIPS
-        }
-        return render(request, 'workspace/pages/demo_market.index.html', context)
-
-
 @method_decorator(xframe_options_exempt, name='dispatch')
 class LOSCheckDemo(View):
     """

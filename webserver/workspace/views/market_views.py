@@ -79,29 +79,34 @@ class MarketEvaluatorSessionExportView(LoginRequiredMixin, View):
             return JsonResponse({}, status=400)
 
 
-class MarketEvaluatorView(LoginRequiredMixin, View):
+class MarketEvaluatorView(View):
     def get(self, request, session_id=None, name=None):
-        if session_id is None:
-            if workspace_models.WorkspaceMapSession.objects.filter(owner=request.user).exists():
-                session = workspace_models.WorkspaceMapSession.objects.filter(
-                    owner=request.user
-                ).order_by('-last_updated').first()
-                return redirect('workspace:market_eval', session.uuid, session.name)
-            else:
-                session = workspace_models.WorkspaceMapSession(
-                    owner=request.user)
-                session.save()
-                return redirect('workspace:market_eval', session.uuid, session.name)
+        if request.user and request.user.is_authenticated:
+            workspace_account = True
+            if session_id is None:
+                if workspace_models.WorkspaceMapSession.objects.filter(owner=request.user).exists():
+                    session = workspace_models.WorkspaceMapSession.objects.filter(
+                        owner=request.user
+                    ).order_by('-last_updated').first()
+                    return redirect('workspace:market_eval', session.uuid, session.name)
+                else:
+                    session = workspace_models.WorkspaceMapSession(
+                        owner=request.user)
+                    session.save()
+                    return redirect('workspace:market_eval', session.uuid, session.name)
 
-        session = workspace_models.WorkspaceMapSession.objects.filter(
-            owner=request.user,
-            uuid=session_id
-        ).get()
+            session = workspace_models.WorkspaceMapSession.objects.filter(
+                owner=request.user,
+                uuid=session_id
+            ).get()
+        else:
+            workspace_account = False
+            session, _ = WorkspaceMapSession.get_or_create_demo_view(request)
 
         context = {
             'session': session,
             'geojson': session.get_session_geojson(),
-            'workspace_account': True,
+            'workspace_account': workspace_account,
             'workspace_forms': WorkspaceForms(request, session),
             'units': 'US',
             'tool': 'market_evaluator',

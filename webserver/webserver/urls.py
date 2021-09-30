@@ -21,8 +21,7 @@ from django.conf.urls.static import static
 from rest_framework import routers
 from solar_sizing_tool.views import SolarSizingToolView
 from mmwave.views import (
-    LOSCheckDemo, DSMExportView, LatestLidarView, NetworkDemoView,
-    MarketDemoView
+    LOSCheckDemo, DSMExportView, LatestLidarView, NetworkDemoView
 )
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView
 from Overlay.views import OverlaySource
@@ -92,7 +91,6 @@ urlpatterns = [
          LatestLidarView.as_view(), name='demo-latest_gis'),
     path('demo/latest-gis-data/', LatestLidarView.as_view(),
          name='demo-latest_gis-nodate'),
-    path('demo/market-app/', MarketDemoView.as_view(), name='demo-market-app'),
     # Redirect
     path('', views.HomepageRedirect.as_view()),
     # Django Hijack

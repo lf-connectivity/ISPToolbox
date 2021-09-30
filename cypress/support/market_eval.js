@@ -2,44 +2,28 @@
 
 import { not_exist_or_not_be_visible } from ".";
 
-function reverseCoordinatesToCanvas(coordinates){
-  cy.window().then((window)=>{
-    const coords = window.mapbox_handles.map.project(coordinates);
-    cy.get('#map').click(coords.x, coords.y);
-  })
-}
+Cypress.Commands.add("market_eval_click_tower", () => {
+  cy.fixture("session_fixture").then((session) => {
+    cy.click_on_map(session.tower);
+  });
+});
 
-Cypress.Commands.add(
-  "market_eval_click_tower",
-  () => {
-    cy.fixture("session_fixture").then((session)=>{
-      reverseCoordinatesToCanvas(session.tower);
-    })
-  }
-);
+Cypress.Commands.add("market_eval_add_other_tower", () => {
+  cy.fixture("session_fixture").then((session) => {
+    cy.get("#add-ap-btn").click();
+    cy.wait(1000);
+    cy.click_point_on_map(session.add_tower);
+  });
+});
 
-Cypress.Commands.add(
-  "market_eval_add_other_tower",
-  () => {
-    cy.fixture("session_fixture").then((session)=>{
-      cy.get("#add-ap-btn").click();
-      cy.wait(1000);
-      reverseCoordinatesToCanvas(session.add_tower);
-    })
-  }
-);
-
-Cypress.Commands.add(
-  "market_eval_delete_other_tower",
-  () => {
-    cy.fixture("session_fixture").then((session)=>{
-      reverseCoordinatesToCanvas(session.add_tower);
-      cy.wait(1000);
-      cy.get("button.mapbox-gl-draw_trash").click();
-      cy.wait(1000);
-    })
-  }
-);
+Cypress.Commands.add("market_eval_delete_other_tower", () => {
+  cy.fixture("session_fixture").then((session) => {
+    cy.click_point_on_map(session.add_tower);
+    cy.wait(1000);
+    cy.get("button.mapbox-gl-draw_trash").click();
+    cy.wait(1000);
+  });
+});
 
 Cypress.Commands.add("market_eval_click_info_tooltip", (text) => {
   cy.get(`p:contains(${text})`)

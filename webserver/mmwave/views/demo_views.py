@@ -21,7 +21,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from workspace.models import WorkspaceMapSession
 from django.utils.translation import gettext as _
-from IspToolboxApp.views.MarketEvaluatorTooltips import TOOLTIPS
 
 
 @method_decorator(xframe_options_exempt, name='dispatch')

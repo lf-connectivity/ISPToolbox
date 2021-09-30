@@ -419,7 +419,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     selectedCPEs[0].properties.uuid
                 ) as CPE;
                 let mapboxClient = MapboxSDKClient.getInstance();
-                let lngLat = cpe.getFeatureGeometry().coordinates as [number, number];
+                let lngLat = cpe.getFeatureGeometry()?.coordinates as [number, number];
                 mapboxClient.reverseGeocode(lngLat, (resp: any) => {
                     cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
                         LinkCheckCPEClickCustomerConnectPopup,

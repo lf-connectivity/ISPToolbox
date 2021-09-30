@@ -10,15 +10,9 @@ import fail_svg from '../styles/fail-icon.svg';
 import {
     MIN_RADIUS,
     MAX_RADIUS,
-    MIN_LAT,
-    MAX_LAT,
-    MIN_LNG,
-    MAX_LNG,
     MAX_HEIGHT,
     MIN_HEIGHT,
     validateName,
-    validateLat,
-    validateLng,
     validateRadius,
     validateHeight
 } from '../../LinkCheckUtils';
@@ -100,8 +94,10 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
     setAccessPoint(accessPoint: AccessPoint) {
         this.accessPoint = accessPoint;
 
-        // @ts-ignore
-        this.setLngLat(accessPoint.getFeatureGeometryCoordinates());
+        if (this.accessPoint != undefined) {
+            const coords = accessPoint.getFeatureGeometryCoordinates();
+            this.setLngLat(coords as [number, number]);
+        }
     }
 
     isAPMoving() {
@@ -109,7 +105,11 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             return false;
         }
         let coords = this.accessPoint.getFeatureGeometryCoordinates();
-        return coords[0] !== this.lnglat[0] || coords[1] !== this.lnglat[1];
+        if (coords) {
+            return coords[0] !== this.lnglat[0] || coords[1] !== this.lnglat[1];
+        } else {
+            return false;
+        }
     }
 
     onAPUpdate(ap: AccessPoint) {
@@ -117,15 +117,19 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             this.refreshPopup();
             // Adjust lat/lng/height if they have been changed from bottom bar
             let coord = this.accessPoint.getFeatureGeometryCoordinates();
-            let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
-            if (coord_input != null) {
-                if (
-                    String(coord_input[0]) !== coord[1].toFixed(5) ||
-                    String(coord_input[1]) !== coord[0].toFixed(5)
-                ) {
-                    $(`#${LAT_LNG_INPUT_ID}`).val(`${coord[1].toFixed(5)}, ${coord[0].toFixed(5)}`);
-                    this.setLngLat([coord[0], coord[1]]);
-                    this.popup.setLngLat(this.lnglat);
+            if (coord) {
+                let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
+                if (coord_input != null) {
+                    if (
+                        String(coord_input[0]) !== coord[1].toFixed(5) ||
+                        String(coord_input[1]) !== coord[0].toFixed(5)
+                    ) {
+                        $(`#${LAT_LNG_INPUT_ID}`).val(
+                            `${coord[1].toFixed(5)}, ${coord[0].toFixed(5)}`
+                        );
+                        this.setLngLat([coord[0], coord[1]]);
+                        this.popup.setLngLat(this.lnglat);
+                    }
                 }
             }
 
@@ -235,6 +239,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
     }
 
     protected getHTML() {
+        const coords = this.accessPoint?.getFeatureGeometryCoordinates();
         return `
             <div class="tooltip--tower-summary">
                 <div class="title"> 
@@ -253,11 +258,13 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <div class="coordinates">
                                 <div class="data-with-unit">
                                     <input type='text'
-                                            value='${this.accessPoint
-                                                ?.getFeatureGeometryCoordinates()[1]
-                                                .toFixed(5)}, ${this.accessPoint
-            ?.getFeatureGeometryCoordinates()[0]
-            .toFixed(5)}'
+                                            value='${
+                                                coords
+                                                    ? `${coords[1].toFixed(5)}, ${coords[0].toFixed(
+                                                          5
+                                                      )}`
+                                                    : ''
+                                            }'
                                             id='${LAT_LNG_INPUT_ID}'
                                             placeholder='latitude, longitude'
                                             class="input--value"

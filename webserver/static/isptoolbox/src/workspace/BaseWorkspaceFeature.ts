@@ -149,12 +149,12 @@ export abstract class BaseWorkspaceFeature {
         return this.featureType;
     }
 
-    getFeatureData(): Feature<Geometry, any> {
-        return this.draw.get(this.mapboxId) as Feature<Geometry, any>;
+    getFeatureData(): Feature<Geometry, any> | undefined {
+        return this.draw.get(this.mapboxId);
     }
 
-    getFeatureGeometry(): Geometry {
-        return this.getFeatureData().geometry;
+    getFeatureGeometry(): Geometry | undefined {
+        return this.getFeatureData()?.geometry;
     }
 
     /**
@@ -228,7 +228,7 @@ export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
     }
 
     getFeatureGeometryCoordinates() {
-        return this.getFeatureGeometry().coordinates;
+        return this.getFeatureGeometry()?.coordinates;
     }
 }
 
@@ -267,7 +267,7 @@ export abstract class WorkspaceLineStringFeature extends BaseWorkspaceFeature {
     }
 
     getFeatureGeometryCoordinates() {
-        return this.getFeatureGeometry().coordinates;
+        return this.getFeatureGeometry()?.coordinates;
     }
 }
 

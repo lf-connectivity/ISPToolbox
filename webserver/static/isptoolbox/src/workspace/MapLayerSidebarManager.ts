@@ -50,21 +50,19 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         this.map.on('idle', loadMapCallback);
     }
 
-    setZeroState(){
-        const features = this.draw.getAll();
-        if (features.features.length == 0){
-            $('#zerostate').removeClass('d-none');
-        } else {
-            $('#zerostate').addClass('d-none');
-        }
-    }
-
     setUserMapLayers() {
         // add building objects to sidebar
         let mapObjectsSection = document.getElementById('map-objects-section');
 
         while (mapObjectsSection?.firstChild) {
             mapObjectsSection.removeChild(mapObjectsSection.firstChild);
+        }
+
+        const features = this.draw.getAll();
+        if (features.features.length == 0){
+            $('#zerostate').removeClass('d-none');
+        } else {
+            $('#zerostate').addClass('d-none');
         }
 
         // Towers, then coverage areas

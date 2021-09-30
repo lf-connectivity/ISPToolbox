@@ -143,7 +143,6 @@ export abstract class BaseWorkspaceManager {
             }
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
-            MapLayerSidebarManager.getInstance().setZeroState();
 
         }
 
@@ -212,8 +211,6 @@ export abstract class BaseWorkspaceManager {
 
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
-            MapLayerSidebarManager.getInstance().setZeroState();
-
 
             if (successFollowup) {
                 successFollowup(resp);
@@ -263,7 +260,6 @@ export abstract class BaseWorkspaceManager {
 
                             // Should probably be replaced with a pubsub event signal
                             MapLayerSidebarManager.getInstance().setUserMapLayers();
-                            MapLayerSidebarManager.getInstance().setZeroState();
 
                         });
                     }
@@ -318,7 +314,6 @@ export abstract class BaseWorkspaceManager {
                                         cpe.update(() => {
                                             // Should probably be replaced with a pubsub event signal
                                             MapLayerSidebarManager.getInstance().setUserMapLayers();
-                                            MapLayerSidebarManager.getInstance().setZeroState();
 
                                             this.updateFeatureAjaxHandlers[
                                                 WorkspaceFeatureTypes.CPE
@@ -342,7 +337,6 @@ export abstract class BaseWorkspaceManager {
                                 workspaceFeature.update(() => {
                                     // Should probably be replaced with a pubsub event signal
                                     MapLayerSidebarManager.getInstance().setUserMapLayers();
-                                    MapLayerSidebarManager.getInstance().setZeroState();
 
                                     // @ts-ignore
                                     this.updateFeatureAjaxHandlers[

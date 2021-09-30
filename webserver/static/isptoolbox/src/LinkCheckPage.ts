@@ -601,9 +601,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         // instantiate singletons
         new LOSCheckLinkProfileView();
-        new LinkCheckCustomerConnectPopup(this.map, this.draw, this.locationMarker);
-        new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
-        new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw, this.locationMarker);
+        new LinkCheckCustomerConnectPopup(this.map, this.draw);
+        new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw);
+        new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw);
         new LinkCheckTowerPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
 
@@ -895,7 +895,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         });
     }
 
-    onGeocoderLoad(){
+    onGeocoderLoad() {
         this.locationMarker = new LinkCheckLocationSearchTool(
             this.map,
             this.workspaceManager,

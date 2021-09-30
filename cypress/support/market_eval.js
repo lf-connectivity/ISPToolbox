@@ -4,7 +4,7 @@ import { not_exist_or_not_be_visible } from ".";
 
 Cypress.Commands.add("market_eval_click_tower", () => {
   cy.fixture("session_fixture").then((session) => {
-    cy.click_on_map(session.tower);
+    cy.click_point_on_map(session.tower);
   });
 });
 

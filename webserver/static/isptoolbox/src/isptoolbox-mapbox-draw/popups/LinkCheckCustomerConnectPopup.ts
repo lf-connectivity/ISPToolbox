@@ -51,7 +51,6 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     protected apConnectIndex: number;
     protected losStatus: BuildingCoverageStatus;
     protected buildingId: number;
-    protected marker: LinkCheckLocationSearchTool;
     protected ptpRowPrompt: string;
     private static _instance: LinkCheckCustomerConnectPopup;
 
@@ -60,9 +59,8 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
     GETTERS, SETTERS, AND CONSTRUCTORS
     ----------------------------------
     */
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, marker: LinkCheckLocationSearchTool) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         super(map, draw);
-        this.marker = marker;
         this.accessPoints = [];
         this.apDistances = new Map();
         this.buildingId = EMPTY_BUILDING_ID;
@@ -119,7 +117,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         this.losStatus = BuildingCoverageStatus.UNSERVICEABLE;
         this.apConnectIndex = 0;
         this.buildingId = EMPTY_BUILDING_ID;
-        this.marker.onPopupClose();
+        LinkCheckLocationSearchTool.getInstance().onPopupClose();
     }
 
     /*
@@ -377,7 +375,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
         //@ts-ignore
         this.draw.changeMode('draw_link', { start: this.lnglat });
         this.map.fire('draw.modechange', { mode: 'draw_link' });
-        this.marker.hide();
+        LinkCheckLocationSearchTool.getInstance().hide();
         this.hide();
     }
 
@@ -396,7 +394,7 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             }
         } as Feature<Point, any>;
         this.map.fire('draw.create', { features: [newCPE] });
-        this.marker.hide();
+        LinkCheckLocationSearchTool.getInstance().hide();
         this.hide();
     }
 
@@ -407,10 +405,14 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 type: 'Point',
                 coordinates: this.lnglat
             },
-            properties: {}
+            properties: {
+                // need a dummy amount for thing to be recognized as a tower.
+                // It only needs to be there for 0.1 seconds
+                radius: 0.1
+            }
         } as Feature<Point, any>;
         this.map.fire('draw.create', { features: [newAP] });
-        this.marker.hide();
+        LinkCheckLocationSearchTool.getInstance().hide();
         this.hide();
     }
 
@@ -497,8 +499,8 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
     private tooltipAction: boolean;
     private static _subclass_instance: LinkCheckVertexClickCustomerConnectPopup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, marker: LinkCheckLocationSearchTool) {
-        super(map, draw, marker);
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        super(map, draw);
         this.tooltipAction = false;
         if (!LinkCheckVertexClickCustomerConnectPopup._subclass_instance) {
             LinkCheckVertexClickCustomerConnectPopup._subclass_instance = this;
@@ -593,7 +595,7 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
             }
         } as Feature<Point, any>;
         this.map.fire('draw.create', { features: [newAP] });
-        this.marker.hide();
+        LinkCheckLocationSearchTool.getInstance().hide();
         this.hide();
     }
 }
@@ -602,8 +604,8 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
     private cpe: CPE;
     private static _subclass_instance: LinkCheckCPEClickCustomerConnectPopup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, marker: LinkCheckLocationSearchTool) {
-        super(map, draw, marker);
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        super(map, draw);
         this.ptpRowPrompt = 'PtP drawn to:';
         if (!LinkCheckCPEClickCustomerConnectPopup._subclass_instance) {
             LinkCheckCPEClickCustomerConnectPopup._subclass_instance = this;
@@ -680,7 +682,7 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
             let link = this.cpe.ap?.links.get(this.cpe);
             link?.switchAP(ap);
         }
-        this.marker.hide();
+        LinkCheckLocationSearchTool.getInstance().hide();
         this.hide();
     }
 

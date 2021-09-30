@@ -13,50 +13,55 @@ export class LinkCheckLocationSearchTool {
     private geocoder: any;
     private reverseGeocodeResponse: any;
     private isPopupOpen: boolean;
+    private static _instance: LinkCheckLocationSearchTool;
 
     constructor(map: mapboxgl.Map, workspaceManager: BaseWorkspaceManager, geocoder: any) {
-        this.workspaceManager = workspaceManager;
-        this.marker = new ClickableMarker({
-            draggable: true,
-            color: '#28F2BF'
-        });
-        this.isPopupOpen = false;
-        this.map = map;
-        this.geocoder = geocoder;
+        if (!LinkCheckLocationSearchTool._instance) {
+            LinkCheckLocationSearchTool._instance = this;
 
-        if (isBeta()) {
-            this.geocoder.on('result', ({ result }: any) => {
-                this.setLngLat(result.center);
-                this.show();
+            this.workspaceManager = workspaceManager;
+            this.marker = new ClickableMarker({
+                draggable: true,
+                color: '#28F2BF'
             });
+            this.isPopupOpen = false;
+            this.map = map;
+            this.geocoder = geocoder;
 
-            this.geocoder.on('clear', () => {
-                this.marker.remove();
-            });
-        }
+            if (isBeta()) {
+                this.geocoder.on('result', ({ result }: any) => {
+                    this.setLngLat(result.center);
+                    this.show();
+                });
 
-        // Clicking on point -> show popup on desktop
-        this.marker.onClick((e: any) => {
-            if (e.originalEvent.button == 0) {
-                this.showPopup();
+                this.geocoder.on('clear', () => {
+                    this.marker.remove();
+                });
             }
-        });
 
-        this.marker.on('dragstart', () => {
-            // have to do this so that after popup cleanup function we still remember if it was open or not
-            if (this.isPopupOpen) {
-                LinkCheckCustomerConnectPopup.getInstance().hide();
-                this.isPopupOpen = true;
-            }
-        });
-
-        this.marker.on('dragend', () => {
-            this.onLocationChange(() => {
-                if (this.isPopupOpen) {
+            // Clicking on point -> show popup on desktop
+            this.marker.onClick((e: any) => {
+                if (e.originalEvent.button == 0) {
                     this.showPopup();
                 }
             });
-        });
+
+            this.marker.on('dragstart', () => {
+                // have to do this so that after popup cleanup function we still remember if it was open or not
+                if (this.isPopupOpen) {
+                    LinkCheckCustomerConnectPopup.getInstance().hide();
+                    this.isPopupOpen = true;
+                }
+            });
+
+            this.marker.on('dragend', () => {
+                this.onLocationChange(() => {
+                    if (this.isPopupOpen) {
+                        this.showPopup();
+                    }
+                });
+            });
+        }
     }
 
     onPopupClose() {
@@ -102,5 +107,13 @@ export class LinkCheckLocationSearchTool {
         ) as LinkCheckCustomerConnectPopup;
         popup.show();
         this.isPopupOpen = true;
+    }
+
+    public static getInstance() {
+        if (!LinkCheckLocationSearchTool._instance) {
+            throw new Error('Not instantiated');
+        } else {
+            return LinkCheckLocationSearchTool._instance;
+        }
     }
 }

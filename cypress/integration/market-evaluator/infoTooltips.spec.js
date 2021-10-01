@@ -2,7 +2,7 @@
 
 import { MARKET_EVAL_PAGE } from "../../support";
 
-return context("Market Evaluator Info Tooltips", () => {
+context("Market Evaluator Info Tooltips", () => {
   before(() => {
     cy.visit(MARKET_EVAL_PAGE);
     cy.wait_mapbox();

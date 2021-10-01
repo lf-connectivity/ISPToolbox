@@ -101,6 +101,8 @@ class MarketEvaluatorView(View):
             ).get()
         else:
             workspace_account = False
+            if session_id:
+                return redirect('workspace:market_eval_entry')
             session, _ = WorkspaceMapSession.get_or_create_demo_view(request)
 
         context = {

@@ -39,9 +39,9 @@ tour.addStep({
     classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: tour_arrow_reverse,
+        text: tour_dots,
         action: tour.back,
-        classes: "btn btn-primary isptoolbox-btn py-3 px-4",
+        classes: "btn px-4 ml-2",
     },
     {
         text: tour_arrow,
@@ -59,9 +59,9 @@ tour.addStep({
     classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: tour_arrow_reverse,
+        text: tour_dots,
         action: tour.back,
-        classes: 'btn btn-primary isptoolbox-btn py-3 px-4'
+        classes: 'btn px-4 ml-2'
     },
     {
         text: tour_arrow,
@@ -79,9 +79,9 @@ tour.addStep({
     classes: 'footer-no-padding',
     cancelIcon: { enabled: true },
     buttons: [{
-        text: tour_arrow_reverse,
+        text: tour_dots,
         action: tour.back,
-        classes: 'btn btn-primary isptoolbox-btn py-3 px-4'
+        classes: 'btn px-4 ml-2'
     },
     {
         text: tour_arrow,

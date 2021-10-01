@@ -16,7 +16,7 @@ export class LinkCheckLocationSearchTool {
     private isPopupOpen: boolean;
     private static _instance: LinkCheckLocationSearchTool;
 
-    constructor(map: mapboxgl.Map, workspaceManager: BaseWorkspaceManager, geocoder: any) {
+    constructor(map: mapboxgl.Map, workspaceManager: BaseWorkspaceManager) {
         if (!LinkCheckLocationSearchTool._instance) {
             LinkCheckLocationSearchTool._instance = this;
 
@@ -27,18 +27,6 @@ export class LinkCheckLocationSearchTool {
             });
             this.isPopupOpen = false;
             this.map = map;
-            this.geocoder = geocoder;
-
-            if (isBeta()) {
-                this.geocoder.on('result', ({ result }: any) => {
-                    this.setLngLat(result.center);
-                    this.show();
-                });
-
-                this.geocoder.on('clear', () => {
-                    this.marker.remove();
-                });
-            }
 
             // Clicking on point -> show popup on desktop
             this.marker.onClick((e: any) => {

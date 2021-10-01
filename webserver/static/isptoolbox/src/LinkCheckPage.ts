@@ -388,6 +388,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         // instantiate singletons
         new LOSCheckLinkProfileView();
+        this.locationMarker = new LinkCheckLocationSearchTool(this.map, this.workspaceManager);
         new LinkCheckCustomerConnectPopup(this.map, this.draw);
         new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw);
         new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw);

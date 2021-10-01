@@ -100,42 +100,41 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         }
     }
 
-    isAPMoving() {
-        if (!this.accessPoint) {
-            return false;
-        }
-        let coords = this.accessPoint.getFeatureGeometryCoordinates();
-        if (coords) {
-            return coords[0] !== this.lnglat[0] || coords[1] !== this.lnglat[1];
-        } else {
-            return false;
-        }
-    }
-
     onAPUpdate(ap: AccessPoint) {
         if (this.accessPoint === ap) {
             this.refreshPopup();
             // Adjust lat/lng/height if they have been changed from bottom bar
             let coord = this.accessPoint.getFeatureGeometryCoordinates();
             if (coord) {
-                let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
-                if (coord_input != null) {
-                    if (
-                        String(coord_input[0]) !== coord[1].toFixed(5) ||
-                        String(coord_input[1]) !== coord[0].toFixed(5)
-                    ) {
-                        $(`#${LAT_LNG_INPUT_ID}`).val(
-                            `${coord[1].toFixed(5)}, ${coord[0].toFixed(5)}`
-                        );
-                        this.setLngLat([coord[0], coord[1]]);
-                        this.popup.setLngLat(this.lnglat);
-                    }
+                if (this.hasAPMoved()) {
+                    $(`#${LAT_LNG_INPUT_ID}`).val(`${coord[1].toFixed(5)}, ${coord[0].toFixed(5)}`);
+                    this.setLngLat([coord[0], coord[1]]);
+                    this.popup.setLngLat(this.lnglat);
                 }
             }
+        }
 
-            $(`#${HGT_INPUT_ID}`).val(this.getHeightValue());
-            $(`#${DELETE_ROW_DIV_ID}`).html(this.getDeleteRow());
-            this.setEventHandlers();
+        $(`#${HGT_INPUT_ID}`).val(this.getHeightValue());
+        $(`#${DELETE_ROW_DIV_ID}`).html(this.getDeleteRow());
+        this.setEventHandlers();
+    }
+
+    protected hasAPMoved() {
+        // Calculate things differently if popup is open or closed
+        let coord = this.accessPoint?.getFeatureGeometryCoordinates();
+        if (coord) {
+            if (this.popup.isOpen()) {
+                let coord_input = parseFormLatitudeLongitude(`#${LAT_LNG_INPUT_ID}`);
+                return (
+                    coord_input != null &&
+                    (String(coord_input[0]) !== coord[1].toFixed(5) ||
+                        String(coord_input[1]) !== coord[0].toFixed(5))
+                );
+            } else {
+                return this.lnglat[0] !== coord[0] || this.lnglat[1] !== coord[1];
+            }
+        } else {
+            return false;
         }
     }
 

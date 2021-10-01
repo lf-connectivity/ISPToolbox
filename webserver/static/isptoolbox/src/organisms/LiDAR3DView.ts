@@ -63,8 +63,8 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
     spacebarCallback: any;
     updateLinkHeight: any;
 
-    tx_loc_lidar: any;
-    rx_loc_lidar: any;
+    tx_loc_lidar: [number, number] | null = null;
+    rx_loc_lidar: [number, number] | null = null;
 
     // variables for handling offsets for hover point volume
     oldCamera: any = null;
@@ -456,13 +456,16 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
     ) {
         if (this.app._elevation.length > 1) {
             try {
-                if (this.currentView === '3d') {
+                if (this.currentView === '3d' && this.tx_loc_lidar && this.rx_loc_lidar) {
+                    // @ts-ignore
+                    const scene = window.viewer.scene;
+
                     const tx_h = getRadioHeightFromUI('0') + this.app._elevation[0];
                     const rx_h =
                         getRadioHeightFromUI('1') +
                         this.app._elevation[this.app._elevation.length - 1];
                     const pos = Math.max(Math.min(x / this.app._elevation.length, 1), 0);
-                    const { location, lookAt } = calculateLookVector(
+                    let { location, lookAt } = calculateLookVector(
                         this.tx_loc_lidar,
                         tx_h,
                         this.rx_loc_lidar,
@@ -477,6 +480,16 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
                         if (this.globalLinkAnimation.playing) {
                             this.globalLinkAnimation.pause();
                             this.setPlayPauseButton(true);
+                        } else {
+                            // Get the offset from lookat as the next camera location
+                            const pivot = scene.view.getPivot();
+                            const camera = scene.view.position;
+                            const offset = camera.clone().sub(pivot);
+                            location = [
+                                lookAt[0] + offset.x,
+                                lookAt[1] + offset.y,
+                                lookAt[2] + offset.z
+                            ];
                         }
 
                         // Set Resume Location
@@ -484,8 +497,6 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
                         const modified_t = pos * LINK_ORBIT_MULTIPLIER;
                         this.globalLinkAnimation.setResumeTime(modified_t);
                     }
-                    // @ts-ignore
-                    const scene = window.viewer.scene;
 
                     // Move Camera to Location
                     scene.view.position.set(location[0], location[1], location[2]);
@@ -498,11 +509,13 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
                         scene.scene.remove(this.hover3dDot);
                     }
 
-                    this.hover3dDot = createHoverPoint(
-                        lookAt,
-                        [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h],
-                        this.app.isOverlapping()
-                    );
+                    if (this.tx_loc_lidar) {
+                        this.hover3dDot = createHoverPoint(
+                            lookAt,
+                            [this.tx_loc_lidar[0], this.tx_loc_lidar[1], tx_h],
+                            this.app.isOverlapping()
+                        );
+                    }
 
                     scene.scene.add(this.hover3dDot);
                 }
@@ -558,7 +571,8 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
             const rx_h =
                 this.app.getRadioHeightFromUI('1') +
                 this.app._elevation[this.app._elevation.length - 1];
-            this.addLink(this.tx_loc_lidar, this.rx_loc_lidar, tx_h, rx_h);
+            if (this.tx_loc_lidar && this.rx_loc_lidar)
+                this.addLink(this.tx_loc_lidar, this.rx_loc_lidar, tx_h, rx_h);
         }
     }
 
@@ -599,8 +613,8 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
         }
     }
 
-    addLink(tx: any, rx: any, tx_h: any, rx_h: any) {
-        this.updateLinkHeight = (tx_h: any, rx_h: any, start_animation: boolean = false) => {
+    addLink(tx: [number, number], rx: [number, number], tx_h: number, rx_h: number) {
+        this.updateLinkHeight = (tx_h: number, rx_h: number, start_animation: boolean = false) => {
             // @ts-ignore
             let scene = window.viewer.scene;
             this.removeLink();

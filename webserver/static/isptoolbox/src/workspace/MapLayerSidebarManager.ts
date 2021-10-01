@@ -53,16 +53,8 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
     setUserMapLayers() {
         // add building objects to sidebar
         let mapObjectsSection = document.getElementById('map-objects-section');
-
         while (mapObjectsSection?.firstChild) {
             mapObjectsSection.removeChild(mapObjectsSection.firstChild);
-        }
-
-        const features = this.draw.getAll();
-        if (features.features.length == 0){
-            $('#zerostate').removeClass('d-none');
-        } else {
-            $('#zerostate').addClass('d-none');
         }
 
         // Towers, then coverage areas
@@ -95,6 +87,12 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
                 mapObjectsSection!.appendChild(elem);
             }
         );
+
+        mapObjectsSection = document.getElementById('map-objects-section');
+        $('#zerostate').addClass('d-none');
+        if (mapObjectsSection?.firstChild === null) {
+            $('#zerostate').removeClass('d-none');
+        }    
     }
 
     protected showComponent() {

@@ -39,6 +39,7 @@ import LOSCheckLinkProfileView from './organisms/LOSCheckLinkProfileView';
 import CollapsibleComponent from './atoms/CollapsibleComponent';
 import { LiDAR3DView } from './organisms/LiDAR3DView';
 import { createPopupFromVertexEvent } from './utils/GeocodeUtils';
+import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
 var _ = require('lodash');
 
@@ -58,9 +59,6 @@ const THREE = window.THREE;
 const SMALLEST_UPDATE = 1e-5;
 const LEFT_NAVIGATION_KEYS = ['ArrowLeft', 'Left', 'A', 'a'];
 const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D', 'd'];
-
-// @ts-ignore
-const MapboxGeocoder = window.MapboxGeocoder;
 
 const HOVER_POINT_SOURCE = 'hover-point-link-source';
 const HOVER_POINT_LAYER = 'hover-point-link-layer';
@@ -140,7 +138,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     oldCamera: any;
     oldTarget: any;
 
-    geocoder: typeof MapboxGeocoder;
+    geocoder: MapboxGeocoder;
 
     constructor(networkID: string, userRequestIdentity: string) {
         super(
@@ -404,7 +402,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             LinkCheckCPEClickCustomerConnectPopup,
             MapLayerSidebarManager
         ]);
-
         const prioritizeDirectSelect = function ({ features }: any) {
             if (features.length == 1 && features[0].geometry.type !== 'Point') {
                 this.draw.changeMode('direct_select', {
@@ -635,11 +632,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     }
 
     onGeocoderLoad() {
-        this.locationMarker = new LinkCheckLocationSearchTool(
-            this.map,
-            this.workspaceManager,
-            this.geocoder
-        );
+        this.locationMarker.setGeocoder(this.geocoder);
     }
 
     workspaceLinkSelected(): boolean {

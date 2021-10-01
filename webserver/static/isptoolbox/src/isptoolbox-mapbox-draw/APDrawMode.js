@@ -1,4 +1,5 @@
 import { getMessagePoint, addDrawingInstructions } from "./styles/drawing_instructions";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
 function _APDrawMode() {
     let mode = Object.assign({}, MapboxDraw.modes.draw_point);

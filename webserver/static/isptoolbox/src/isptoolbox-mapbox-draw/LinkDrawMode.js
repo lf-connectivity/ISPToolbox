@@ -1,5 +1,5 @@
 import { addDrawingInstructions, getMessageLink } from "./styles/drawing_instructions";
-
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
 function _LinkMode() {
     const link_mode = MapboxDraw.modes.draw_line_string;
 

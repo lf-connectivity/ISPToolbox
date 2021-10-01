@@ -8,7 +8,8 @@
       "strictNullChecks": true,
       "moduleResolution": "node",
       "allowJs": true,
-      "allowSyntheticDefaultImports": true
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true
     },
     "exclude" : [
         "node_modules"

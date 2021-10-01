@@ -5,12 +5,13 @@ import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { ClickableMarker } from '../molecules/ClickableMarker';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
+import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
 export class LinkCheckLocationSearchTool {
     private map: mapboxgl.Map;
     private marker: ClickableMarker;
     private workspaceManager: BaseWorkspaceManager;
-    private geocoder: any;
+    private geocoder: MapboxGeocoder | null = null;
     private reverseGeocodeResponse: any;
     private isPopupOpen: boolean;
     private static _instance: LinkCheckLocationSearchTool;
@@ -64,6 +65,20 @@ export class LinkCheckLocationSearchTool {
         }
     }
 
+    setGeocoder(geocoder: MapboxGeocoder) {
+        this.geocoder = geocoder;
+        if (isBeta()) {
+            this.geocoder.on('result', ({ result }: any) => {
+                this.setLngLat(result.center);
+                this.show();
+            });
+
+            this.geocoder.on('clear', () => {
+                this.marker.remove();
+            });
+        }
+    }
+
     onPopupClose() {
         this.isPopupOpen = false;
     }
@@ -75,7 +90,8 @@ export class LinkCheckLocationSearchTool {
     hide() {
         if (this.isPopupOpen) {
             this.marker.remove();
-            this.geocoder.clear();
+            //@ts-ignore
+            this.geocoder?.clear();
         }
     }
 
@@ -89,7 +105,7 @@ export class LinkCheckLocationSearchTool {
         let lngLat = [this.marker.getLngLat().lng, this.marker.getLngLat().lat];
         mapboxClient.reverseGeocode(lngLat, (response: any) => {
             let result = response.body.features;
-            this.geocoder.setInput(result[0].place_name);
+            this.geocoder?.setInput(result[0].place_name);
             this.reverseGeocodeResponse = response;
 
             if (followup) {

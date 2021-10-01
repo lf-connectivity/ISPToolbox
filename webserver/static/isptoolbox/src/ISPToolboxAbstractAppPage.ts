@@ -2,6 +2,7 @@
 import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 //@ts-ignore
 import styles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 import { combineStyles, load_custom_icons } from './isptoolbox-mapbox-draw/index';
@@ -16,13 +17,8 @@ import MapboxLockDraggingControl from './organisms/controls/MapboxLockDraggingCo
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
 
-const mapbox_draw_lib = window.MapboxDraw;
-
 //@ts-ignore
 const mapboxdrawstyles = combineStyles(styles, WorkspaceMapboxStyles);
-
-// @ts-ignore
-const MapboxGeocoder = window.MapboxGeocoder;
 
 const LOWEST_LAYER_SOURCE = 'lowest_layer_source';
 export const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
@@ -40,7 +36,7 @@ function addEventHandler(map: mapboxgl.Map, draw: MapboxDraw, id: string, mode: 
 export abstract class ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
     draw: MapboxDraw;
-    geocoder: typeof MapboxGeocoder;
+    geocoder: MapboxGeocoder;
 
     constructor(draw_modes: any, sources_page: string) {
         let { initial_map_center, initial_zoom } = this.initMapCenterAndZoom();
@@ -84,9 +80,8 @@ export abstract class ISPToolboxAbstractAppPage {
             });
 
             // Add a modified drawing control
-            this.draw = new mapbox_draw_lib({
+            this.draw = new MapboxDraw({
                 userProperties: true,
-                //@ts-ignore
                 modes: { ...MapboxDraw.modes, ...draw_modes },
                 displayControlsDefault: false,
                 controls: {},
@@ -170,9 +165,10 @@ export abstract class ISPToolboxAbstractAppPage {
             // Add Geocoder Last -> Allow Cypress Tests to Know We're ready
             this.geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl,
+                mapboxgl: this.map,
                 marker: isBeta() ? false : true,
                 countries: 'us, pr',
+                // @ts-ignore
                 localGeocoder: latLngMatcher,
                 placeholder: 'Search for an address'
             });

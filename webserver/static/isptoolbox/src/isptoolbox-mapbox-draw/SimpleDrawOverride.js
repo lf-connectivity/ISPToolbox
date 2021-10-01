@@ -1,6 +1,7 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
 import { createSupplementaryPointsForCircle, createSupplementaryPointsForGeojson, isUneditable } from './DrawModeUtils.js';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
 export function OverrideSimple() {
   const simple_select = MapboxDraw.modes.simple_select;

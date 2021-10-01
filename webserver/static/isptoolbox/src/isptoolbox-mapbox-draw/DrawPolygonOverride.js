@@ -1,4 +1,5 @@
 import { getMessagePolygon, addDrawingInstructions } from "./styles/drawing_instructions";
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
 function _OverrideDrawPolygon() {
     const draw_polygon = MapboxDraw.modes.draw_polygon;

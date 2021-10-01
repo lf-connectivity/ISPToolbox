@@ -37,7 +37,7 @@ export default class DSMExportApp {
             var geocoder = new MapboxGeocoder({
                 flyTo: false,
                 accessToken: mapboxgl.accessToken,
-                mapboxgl: mapboxgl,
+                mapboxgl: this.map,
                 placeholder: 'Search for an address'
             });
             // Teleport User to Location

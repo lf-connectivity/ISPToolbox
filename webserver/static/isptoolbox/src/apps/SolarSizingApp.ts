@@ -113,7 +113,7 @@ $(() => {
             //@ts-ignore
             new window.MapboxGeocoder({
                 accessToken: window.mapboxgl.accessToken,
-                mapboxgl: window.mapboxgl
+                mapboxgl: map
             }),
             'top-left'
         );

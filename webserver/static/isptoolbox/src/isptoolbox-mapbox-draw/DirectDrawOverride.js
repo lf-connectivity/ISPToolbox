@@ -6,6 +6,7 @@ import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_f
 import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_supplementary_points';
 import createVertex from '@mapbox/mapbox-gl-draw/src/lib/create_vertex';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
@@ -39,7 +40,7 @@ export function OverrideDirect(additionalFunctionality = {}) {
             }
 
             // Add a center point to geojson circle
-            if(geojson.properties.user_radius){
+            if (geojson.properties.user_radius) {
                 const center_vertex = createVertex(geojson.properties.id, geojson.properties.user_center, "0.4", false);
                 push(center_vertex);
             }
@@ -73,7 +74,7 @@ export function OverrideDirect(additionalFunctionality = {}) {
         if (additionalFunctionality.dragVertex) {
             additionalFunctionality.dragVertex(state, e);
         }
-        
+
         // Only allow editing of vertices that are editable.
         // This would include user draw PtP links.
         if (isUneditable(state.feature)) {
@@ -84,12 +85,12 @@ export function OverrideDirect(additionalFunctionality = {}) {
             this.doRender(state.feature.id);
             this.changeMode(Constants.modes.SIMPLE_SELECT);
             return;
-          }
+        }
 
         if (
             state.feature.properties.radius
         ) {
-            if(state.selectedCoordPaths.includes("0.4")){
+            if (state.selectedCoordPaths.includes("0.4")) {
                 moveFeatures(this.getSelected(), delta);
                 this.getSelected()
                     .filter(feature => feature.properties.radius)

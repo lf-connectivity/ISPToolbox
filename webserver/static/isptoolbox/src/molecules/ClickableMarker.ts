@@ -1,9 +1,7 @@
 // Shamelessly copied off of https://bl.ocks.org/chriswhong/8977c0d4e869e9eaf06b4e9fda80f3ab
+import * as MapboxGL from 'mapbox-gl';
 
-//@ts-ignore
-const mapboxgl = window.mapboxgl;
-
-export class ClickableMarker extends mapboxgl.Marker {
+export class ClickableMarker extends MapboxGL.Marker {
     private clickHandler: (e: any) => void;
 
     onClick(handleClick: (e: any) => void) {

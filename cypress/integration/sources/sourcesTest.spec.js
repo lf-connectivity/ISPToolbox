@@ -13,7 +13,7 @@ context("Sources checks for Market Evaluator", () => {
     cy.login();
   });
 
-  beforeEach(() =>{
+  beforeEach(() => {
     cy.preserve_session_cookie();
     cy.visit(MARKET_EVAL_PAGE);
     cy.wait_mapbox();
@@ -245,15 +245,6 @@ context("Sources checks for LOS", () => {
 });
 
 context("Miscellaneous uncited sources", () => {
-  it("The Market Evaluator Cloud RF source should be correct", () => {
-    cy.visit(MARKET_EVAL_SOURCES_PAGE);
-    cy.get(`#${FOOTNOTES_SECTION}`)
-      .footnote_text_should_match(
-        /High-level line of sight is obtained via Cloud-RF\. \(resolution is ~30m x 30m\)\. Data as of 2003\./
-      )
-      .footnote_should_have_link("Cloud-RF", "https://cloudrf.com/api/");
-  });
-
   it("The LOS Check lidar data source should be correct", () => {
     cy.visit(LOS_CHECK_SOURCES_PAGE);
     cy.get(`#${FOOTNOTES_SECTION}`)

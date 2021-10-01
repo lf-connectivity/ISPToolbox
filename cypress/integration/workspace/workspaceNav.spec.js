@@ -6,7 +6,7 @@ import {
   MARKET_EVAL_LOGGED_OUT_PAGE,
   LOS_CHECK_PAGE,
   LOS_CHECK_SOURCES_PAGE,
-  LOS_CHECK_LOGGED_OUT_PAGE,
+  LOS_CHECK_DEMO_PAGE,
   LOGIN_PAGE,
   TERMS_PAGE,
   COOKIE_POLICY_PAGE,
@@ -514,10 +514,10 @@ context("Navbar desktop size logged out views", () => {
   });
 
   it("Market Evaluator Navbar", () => {
-    cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
+    cy.visit(MARKET_EVAL_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Market Evaluator")
       .navbar_tool_help_button_should("be.visible.with.icon")
@@ -526,8 +526,8 @@ context("Navbar desktop size logged out views", () => {
       .navbar_account_dropdown_should("be.logged_out_view");
   });
 
-  it("LOS Check Navbar", () => {
-    cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
+  it("LOS Check Demo Navbar", () => {
+    cy.visit(LOS_CHECK_DEMO_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("not.exist.or.not.be.visible")
@@ -537,6 +537,19 @@ context("Navbar desktop size logged out views", () => {
       .navbar_beta_flag_should("be.visible.with.correct_text")
       .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
+
+  it("LOS Check Navbar", () => {
+    cy.visit(LOS_CHECK_PAGE);
+    cy.wait_mapbox();
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("be.visible.with.text", "LOS Check")
+      .navbar_tool_help_button_should("be.visible.with.icon")
+      .navbar_beta_flag_should("be.visible.with.correct_text")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("be.logged_out_view");
   });
 
   it("Sources pages Navbars", () => {
@@ -645,10 +658,10 @@ context("Navbar tablet size logged out views", () => {
   });
 
   it("Market Evaluator Navbar", () => {
-    cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
+    cy.visit(MARKET_EVAL_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Market Evaluator")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
@@ -657,8 +670,8 @@ context("Navbar tablet size logged out views", () => {
       .navbar_account_dropdown_should("be.logged_out_view");
   });
 
-  it("LOS Check Navbar", () => {
-    cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
+  it("LOS Check Demo Navbar", () => {
+    cy.visit(LOS_CHECK_DEMO_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("not.exist.or.not.be.visible")
@@ -668,6 +681,19 @@ context("Navbar tablet size logged out views", () => {
       .navbar_beta_flag_should("be.visible.with.correct_text")
       .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
+
+  it("LOS Check Navbar", () => {
+    cy.visit(LOS_CHECK_PAGE);
+    cy.wait_mapbox();
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("be.visible.with.text", "LOS Check")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
+      .navbar_beta_flag_should("be.visible.with.correct_text")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("be.logged_out_view");
   });
 
   it("Sources pages Navbars", () => {
@@ -776,10 +802,10 @@ context("Navbar mobile size logged out views", () => {
   });
 
   it("Market Evaluator Navbar", () => {
-    cy.visit(MARKET_EVAL_LOGGED_OUT_PAGE);
+    cy.visit(MARKET_EVAL_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
-      .navbar_back_button_should("be.visible")
+      .navbar_back_button_should("not.exist.or.not.be.visible")
       .navbar_logo_should_be("old_logo")
       .navbar_title_should("be.visible.with.text", "Market Evaluator")
       .navbar_tool_help_button_should("not.exist.or.not.be.visible")
@@ -788,8 +814,21 @@ context("Navbar mobile size logged out views", () => {
       .navbar_account_dropdown_should("not.exist.or.not.be.visible");
   });
 
+  it("LOS Check Demo Navbar", () => {
+    cy.visit(LOS_CHECK_DEMO_PAGE);
+    cy.wait_mapbox();
+    cy.get_navbar()
+      .navbar_back_button_should("not.exist.or.not.be.visible")
+      .navbar_logo_should_be("old_logo")
+      .navbar_title_should("be.visible.with.text", "LOS Check")
+      .navbar_tool_help_button_should("not.exist.or.not.be.visible")
+      .navbar_beta_flag_should("be.visible.with.correct_text")
+      .navbar_workspace_dropdown_should("not.exist.or.not.be.visible")
+      .navbar_account_dropdown_should("not.exist.or.not.be.visible");
+  });
+
   it("LOS Check Navbar", () => {
-    cy.visit(LOS_CHECK_LOGGED_OUT_PAGE);
+    cy.visit(LOS_CHECK_PAGE);
     cy.wait_mapbox();
     cy.get_navbar()
       .navbar_back_button_should("not.exist.or.not.be.visible")

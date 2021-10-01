@@ -99,6 +99,9 @@ urlpatterns = [
          views.SessionDeleteView.as_view()),
     path('workspace/api/session/delete/',
          views.SessionDeleteView.as_view(), name="session_delete"),
+    # Analytics
+    path('workspace/api/analytics/events/',
+         views.AnalyticsView.as_view(), name='analytics'),
     path('workspace/500/', views.Error500View, name='404'),
     # Potree Visualization
     path('workspace/api/visualization/<uuid:feature>/',

@@ -10,7 +10,7 @@ from .market_views import (
 from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
-    AccessPointCoverageStatsView, CoverageAreaCreate, CoverageAreaGet
+    AccessPointCoverageStatsView, CoverageAreaCreate, CoverageAreaGet, AnalyticsView
 
 )
 from .session_views import (

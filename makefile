@@ -23,6 +23,11 @@ debug_shell:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build django-app
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py shell
 
+db_shell:
+	@echo ----------------------------------------------STARTING DB SHELL----------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build django-app
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py dbshell
+
 default_objects:
 	@echo ----------------------------------------------CREATING SAMPLE OBJECTS----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py create_default_overlays

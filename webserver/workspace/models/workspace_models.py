@@ -18,7 +18,7 @@ class Employee(models.Model):
 
 class AnalyticsEvent(models.Model):
     url = models.TextField()
-    sessionId = models.CharField(max_length=255)
-    eventType = models.CharField(max_length=255)
+    session_id = models.CharField(max_length=255)
+    event_type = models.CharField(max_length=255)
 
 # class AnalyticsEventSerializer(serializers.ModelSerializer):

@@ -9,7 +9,7 @@ from gis_data.models import MsftBuildingOutlines
 from workspace.models import (
     AccessPointSerializer,
     CPESerializer, APToCPELinkSerializer, WorkspaceMapSessionSerializer,
-    WorkspaceMapSession, CoverageAreaSerializer
+    WorkspaceMapSession, CoverageAreaSerializer, AnalyticsEvent
 )
 from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters
@@ -270,13 +270,13 @@ class AnalyticsView(View):
         data = json.loads(request.body.decode("utf-8"))
 
         url = data.get('url')
-        session_id = data.get('sessionId')
-        event_type = data.get('eventType')
+        sessionId = data.get('sessionId')
+        eventType = data.get('eventType')
 
         event_data = {
             'url': url,
-            'session_id': session_id,
-            'event_type': event_type
+            'sessionId': sessionId,
+            'eventType': eventType
         }
 
         event_item = AnalyticsEvent.objects.create(**event_data)

@@ -12,7 +12,7 @@ from workspace.models import (
     WorkspaceMapSession, CoverageAreaSerializer, AnalyticsEvent
 )
 from rest_framework.permissions import AllowAny
-from rest_framework import generics, mixins, renderers, filters
+from rest_framework import generics, mixins, renderers, filters, serializers
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -264,19 +264,19 @@ class AccessPointCoverageStatsView(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class AnalyticsView(View):
+class AnalyticsView(View, mixins.ListModelMixin):
     def post(self, request):
 
         data = json.loads(request.body.decode("utf-8"))
 
         url = data.get('url')
-        sessionId = data.get('sessionId')
-        eventType = data.get('eventType')
+        session_id = data.get('sessionId')
+        event_type = data.get('eventType')
 
         event_data = {
             'url': url,
-            'sessionId': sessionId,
-            'eventType': eventType
+            'session_id': session_id,
+            'event_type': event_type
         }
 
         event_item = AnalyticsEvent.objects.create(**event_data)
@@ -285,5 +285,16 @@ class AnalyticsView(View):
         return JsonResponse(res, status=201)
 
     def get(self, request):
-        data = AnalyticsEvent.objects.all()
-        return JsonResponse(data, status=201)
+        queryset = AnalyticsEvent.objects.all()
+        serializer = AnalyticsSerializer(queryset, many=True)
+        return JsonResponse({"status": "success", "data": serializer.data})
+
+
+class AnalyticsSerializer(serializers.ModelSerializer):
+    session_id = serializers.CharField()
+    session_id = serializers.CharField()
+    event_type = serializers.CharField()
+
+    class Meta:
+        model = AnalyticsEvent
+        fields = ("__all__")

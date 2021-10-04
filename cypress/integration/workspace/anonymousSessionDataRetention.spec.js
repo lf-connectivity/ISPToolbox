@@ -77,7 +77,7 @@ context("Anonymous session data retention", () => {
       cy.wait(1000);
       cy.reload();
       cy.wait_mapbox();
-      cy.draw_features_should("be.empty");
+      cy.draw_get_features().should("be.empty");
     });
   });
 
@@ -91,7 +91,7 @@ context("Anonymous session data retention", () => {
       cy.wait(1000);
       cy.reload();
       cy.wait_mapbox();
-      cy.draw_features_should("be.empty");
+      cy.draw_get_features().should("be.empty");
     });
   });
 
@@ -105,7 +105,7 @@ context("Anonymous session data retention", () => {
       cy.wait(1000);
       cy.reload();
       cy.wait_mapbox();
-      cy.draw_features_should("be.empty");
+      cy.draw_get_features().should("be.empty");
     });
   });
 });

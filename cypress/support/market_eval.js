@@ -2,11 +2,11 @@
 
 import { not_exist_or_not_be_visible } from ".";
 
-OVERLAY_RDOF = "FCC Rural Digital Opportunity Fund";
-OVERLAY_CENSUS = "Census Blocks";
-OVERLAY_COMMUNITY_CONNECT = "Non-urban < 10/1 Mbps";
-OVERLAY_CBRS = "CBRS PAL Holders";
-OVERLAY_TRIBAL = "Tribal Lands";
+export const OVERLAY_RDOF = "FCC Rural Digital Opportunity Fund";
+export const OVERLAY_CENSUS = "Census Blocks";
+export const OVERLAY_COMMUNITY_CONNECT = "Non-urban < 10/1 Mbps";
+export const OVERLAY_CBRS = "CBRS PAL Holders";
+export const OVERLAY_TRIBAL = "Tribal Lands";
 
 Cypress.Commands.add("market_eval_click_tower", () => {
   cy.fixture("session_fixture").then((session) => {
@@ -16,18 +16,13 @@ Cypress.Commands.add("market_eval_click_tower", () => {
 
 Cypress.Commands.add("market_eval_add_other_tower", () => {
   cy.fixture("session_fixture").then((session) => {
-    cy.get("#add-ap-btn").click();
-    cy.wait(1000);
-    cy.click_point_on_map(session.add_tower);
+    cy.place_tower(session.add_tower);
   });
 });
 
 Cypress.Commands.add("market_eval_delete_other_tower", () => {
   cy.fixture("session_fixture").then((session) => {
-    cy.click_point_on_map(session.add_tower);
-    cy.wait(1000);
-    cy.get("button.mapbox-gl-draw_trash").click();
-    cy.wait(1000);
+    cy.delete_tower(session.add_tower);
   });
 });
 
@@ -40,10 +35,11 @@ Cypress.Commands.add("market_eval_click_info_tooltip", (text) => {
 });
 
 Cypress.Commands.add("market_eval_toggle_geo_overlay", (overlay) => {
-  cy.get(`p:contains(${overlay}`)
+  cy.get(`p:contains(${overlay})`)
     .parent()
     .within(() => {
-      cy.get("input[type='checkbox']").click();
+      cy.get("div.slider").click();
+      cy.wait(1000);
     });
 });
 

@@ -247,7 +247,7 @@ context("LOS Check collapsible components", () => {
 
   it("Opening the link profile view when a mapbox tooltip and the map layers sidebar is open will close everything but the link profile view.", () => {
     cy.toggle_map_layer_sidebar();
-    cy.map_layer_sidebar().should("be.visible");
+    cy.get_map_layer_sidebar().should("be.visible");
 
     // TODO: achong - remove this wait - there is a setTimeout in the tower popup????
     cy.wait(1000);

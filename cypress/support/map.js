@@ -44,3 +44,10 @@ Cypress.Commands.add("map_center_and_zoom_should_be", (center, zoom) => {
     expect(mapZoom).to.be.closeTo(zoom, ZOOM_THRESHOLD);
   });
 });
+
+Cypress.Commands.add("map_get_source_features", (source_id) => {
+  cy.window().then((window) => {
+    return window.mapbox_handles.map.getStyle().sources[source_id].data
+      .features;
+  });
+});

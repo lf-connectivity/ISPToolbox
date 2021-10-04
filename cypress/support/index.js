@@ -68,9 +68,3 @@ Cypress.Commands.add("create_session", () => {
 Cypress.Commands.add("wait_mapbox", () => {
   cy.get(".mapboxgl-ctrl-geocoder--input", { timeout: 9001 }).should("exist");
 });
-
-Cypress.Commands.add("reset_map_session", () => {
-  cy.request("PUT", "/test/accounts/").then((response) => {
-    expect(response.body).to.have.property("success", true);
-  });
-});

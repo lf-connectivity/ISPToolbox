@@ -19,17 +19,14 @@ Cypress.Commands.add("los_click_building", () => {
 });
 
 Cypress.Commands.add("los_add_other_tower", () => {
-  cy.get("#add-ap-btn").click();
-  cy.wait(1000);
   cy.fixture("session_fixture").then((session) => {
-    cy.click_point_on_map(session.add_tower);
+    cy.place_tower(session.add_tower);
   });
 });
 
 Cypress.Commands.add("los_delete_other_tower", () => {
   cy.fixture("session_fixture").then((session) => {
-    cy.click_point_on_map(session.add_tower);
-    cy.get("button.mapbox-gl-draw_trash").click();
+    cy.delete_tower(session.add_tower);
   });
 });
 

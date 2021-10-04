@@ -10,7 +10,7 @@
 <div class="account_settings">
     <div class="card mt-4">
         <div class="card-body">
-            <div class=" d-flex">
+            <div class=" d-flex align-items-start">
                 <h1 class="pb-3">
                     Update Account
                 </h1>
@@ -36,16 +36,42 @@
 
     <div class="card mt-4">
         <div class="card-body">
-            <div class=" d-flex">
+            <div class="d-flex align-items-start">
+                <h1 class="pb-3">
+                    Change Password
+                </h1>
+                <button class="btn btn-edit ap-edit-btn" type="submit"
+                onclick="document.getElementById('changepasswordform').removeAttribute('disabled')"
+
+                >
+                {% include 'workspace/atoms/pen_icon.html'%}
+            </button>
+            </div>
+
+            <form action={{ request.path }} method="post" class="pb-3">
+                <fieldset class="isptoolbox-form" disabled id="changepasswordform">
+                {% csrf_token %}
+                {{ password_form }}
+                <input class="btn isptoolbox-btn btn-primary mt-2" type="submit" name="change_password" value="Change Password">
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class=" d-flex align-items-start">
 
             <h1 class="pb-3">
                 User Info
             </h1>
-            <button class="btn isptoolbox-btn btn-secondary" type="submit"
-                    onclick="document.getElementById('account_info_form').removeAttribute('disabled')"
+                <button class="btn btn-edit ap-edit-btn" type="submit"
+                onclick="document.getElementById('account_info_form').removeAttribute('disabled')"
+
                 >
-                Edit
-                </button>
+                {% include 'workspace/atoms/pen_icon.html'%}
+            </button>
+                
             </div>
             <form action={{ request.path }} method="post" class="pb-3">
                 <fieldset class="isptoolbox-form" disabled id="account_info_form">
@@ -56,6 +82,28 @@
             </form>
         </div>
     </div>
+<!-- 
+    <div class="card mt-4">
+        <div class="card-body">
+            <h1 class="card-header">
+                Social
+            </h1>
+            <form method="post" class="isptoolbox-form pb-3">
+                {% csrf_token %}
+                {{ social_form }}
+            </form>
+        </div>
+    </div> -->
+
+    <!-- <div class="card">
+        <div class="card-body">
+            <h1 class="card-header">
+                Organization
+            </h1>
+        </div>
+
+    </div> -->
+
     <div class="card mt-4">
         <div class="card-body">
             <div class=" d-flex ">

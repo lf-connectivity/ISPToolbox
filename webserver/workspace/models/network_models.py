@@ -305,7 +305,20 @@ class APToCPELinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
 
 
 class CoverageArea(WorkspaceFeature):
+    class GeoOverlayType(models.TextChoices):
+        NONE = 'none',
+        RDOF = 'rdof',
+        CENSUS = 'census',
+        COMMUNITY_CONNECT = 'community_connect',
+        CBRS = 'cbrs',
+        TRIBAL = 'tribal'
+
     geojson = geo_models.GeometryField()
+    geo_overlay_type = models.CharField(
+        default=GeoOverlayType.NONE,
+        max_length=20,
+        choices=GeoOverlayType.choices
+    )
 
     @property
     def feature_type(self):

@@ -14,10 +14,6 @@ services:
       COVERAGE_RCFILE: "/usr/src/app/.coveragerc-base"
       COVERAGE_PROCESS_START: "/usr/src/app/.coveragerc-base"
       DEBUG: "TRUE"
-      POSTGRES_DB: "postgres"
-      DB_NAME: "django_test"
-      DB_USERNAME: "postgres"
-      DB_PASSWORD: "password"
     volumes:
       - ./webserver:/usr/src/app
       - ./coverage:/opt/coverage
@@ -35,7 +31,6 @@ services:
     environment:
       COVERAGE_RCFILE: "/usr/src/app/.coveragerc-base"
       COVERAGE_PROCESS_START: "/usr/src/app/.coveragerc-base"
-      POSTGRES_DB: "postgres"
     stop_signal: SIGINT
     volumes:
       - ./webserver:/usr/src/app

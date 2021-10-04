@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{%blocktranslate%}DSM Tile Checker{% endblocktranslate%}</h1>
+<p>{%blocktranslate%}Use this tool to check what datasets intersect the geometry and if DSM Tiles are available:{% endblocktranslate%}</p>
+{% if result %}
+{% for cloud in result.clouds%}
+<a href="{{cloud.admin_url}}">{{cloud.name}}</a> - {% if cloud.tile_exists %} has tile ✅ {% else %} no tile ❌{% endif %}
+{% endfor %}
+{% endif %}
+<form method="POST" action="{% url 'mmwave:tile-check'%}">
+<input type="text" value="37.32863, -97.57998" name="location"> <label>{%blocktranslate%}enter latitude longitude eg: "37.32863, -97.57998"{% endblocktranslate%}</label>
+{% csrf_token %}
+<input type="submit" value="Check">
+</form>
+{{block.super}}
+{% endblock content%}

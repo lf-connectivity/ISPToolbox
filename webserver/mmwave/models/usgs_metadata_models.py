@@ -7,6 +7,7 @@ from django.db.models.signals import post_delete
 from django.dispatch.dispatcher import receiver
 from IspToolboxApp.util import s3
 from storages.backends.s3boto3 import S3Boto3Storage
+from django.urls import reverse
 
 
 class EPTLidarPointCloudManager(models.Manager):
@@ -91,6 +92,10 @@ class EPTLidarPointCloud(models.Model):
             )
         )
         return query.all()
+
+    def admin_url(self):
+        info = (self._meta.app_label, self._meta.model_name)
+        return reverse('admin:%s_%s_change' % info, args=(self.pk,))
 
     @property
     def collection_start_date(self):

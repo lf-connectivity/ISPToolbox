@@ -6,7 +6,7 @@ DEFAULT_OUTPUT_ZOOM = 17
 
 
 # tile utils: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
-def deg2num(lat_deg: float, lon_deg: float, zoom: int) -> tuple:
+def deg2num(lat_deg: float, lon_deg: float, zoom: int = DEFAULT_OUTPUT_ZOOM) -> tuple:
     lat_rad = math.radians(lat_deg)
     n = 2.0 ** zoom
     xtile = int((lon_deg + 180.0) / 360.0 * n)

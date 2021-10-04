@@ -3,7 +3,7 @@ from .demo_views import (
     NetworkDemoView
 )
 from .admin_views import (
-    StartTilingJobView
+    StartTilingJobView, CheckLidarDSMAvailability
 )
 
 import workspace.utils.import_utils

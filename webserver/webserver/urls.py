@@ -69,7 +69,7 @@ urlpatterns = [
     path('mmwave-planner/', views.MMWavePlannerView.as_view(), name='mmwaveplanner'),
     path('help-center/', views.MMWaveHelpCenterView.as_view(),
          name='mmwaveplanner-helpcenter'),
-    path('', include('mmwave.urls')),
+    path('', include('mmwave.urls', namespace='mmwave')),
     # Path Overlay
     path('overlay/', OverlaySource.as_view(), name='overlay_source'),
     path('asn/', ASNElasticSearchView.as_view(), name="asn-search"),

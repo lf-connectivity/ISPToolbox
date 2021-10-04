@@ -4,7 +4,7 @@ type Event = {
     url: string;
 };
 
-console.log('analytics service ready');
+console.log('analytics service available');
 
 export const saveAnalyticsEvent = async (event: Event) => {
     const response = await fetch('/analytics/events', {

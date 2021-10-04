@@ -287,7 +287,7 @@ class AnalyticsView(View, mixins.ListModelMixin):
     def get(self, request):
         queryset = AnalyticsEvent.objects.all()
         serializer = AnalyticsSerializer(queryset, many=True)
-        return JsonResponse({"status": "success", "data": serializer.data})
+        return JsonResponse(serializer.data, safe=False)
 
 
 class AnalyticsSerializer(serializers.ModelSerializer):

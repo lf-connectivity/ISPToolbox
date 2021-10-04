@@ -20,5 +20,3 @@ class AnalyticsEvent(models.Model):
     url = models.TextField()
     session_id = models.CharField(max_length=255)
     event_type = models.CharField(max_length=255)
-
-# class AnalyticsEventSerializer(serializers.ModelSerializer):

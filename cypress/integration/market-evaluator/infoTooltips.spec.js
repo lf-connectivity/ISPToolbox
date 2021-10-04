@@ -8,7 +8,7 @@ context("Market Evaluator Info Tooltips", () => {
     cy.wait_mapbox();
     cy.close_disclaimer();
     cy.close_nux();
-    cy.los_toggle_map_layer_sidebar();
+    cy.toggle_map_layer_sidebar();
   });
 
   afterEach(() => {

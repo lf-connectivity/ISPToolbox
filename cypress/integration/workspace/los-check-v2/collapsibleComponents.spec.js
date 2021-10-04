@@ -70,8 +70,8 @@ function mapboxStuffIntoMapLayersSidebarTest(
     mapboxStuff();
     cy.los_get_mapbox_tooltip().should("be.visible");
 
-    cy.los_toggle_map_layer_sidebar();
-    cy.los_get_map_layer_sidebar().should("be.visible");
+    cy.toggle_map_layer_sidebar();
+    cy.get_map_layer_sidebar().should("be.visible");
     cy.los_get_mapbox_tooltip().should("be.visible");
 
     if (mapboxCleanup) {
@@ -86,12 +86,12 @@ function mapLayersSidebarIntoMapboxStuffTest(
   mapboxCleanup = undefined
 ) {
   return testWorkflow(description, () => {
-    cy.los_toggle_map_layer_sidebar();
-    cy.los_get_map_layer_sidebar().should("be.visible");
+    cy.toggle_map_layer_sidebar();
+    cy.get_map_layer_sidebar().should("be.visible");
 
     mapboxStuff();
     cy.los_get_mapbox_tooltip().should("be.visible");
-    cy.los_get_map_layer_sidebar().should("be.visible");
+    cy.get_map_layer_sidebar().should("be.visible");
 
     if (mapboxCleanup) {
       mapboxCleanup();
@@ -228,36 +228,36 @@ context("LOS Check collapsible components", () => {
    */
 
   it("Opening the link profile view when the map layers sidebar is open should close the sidebar", () => {
-    cy.los_toggle_map_layer_sidebar();
-    cy.los_get_map_layer_sidebar().should("be.visible");
+    cy.toggle_map_layer_sidebar();
+    cy.get_map_layer_sidebar().should("be.visible");
 
     cy.los_toggle_link_profile();
     cy.los_get_link_profile().should("be.visible");
-    cy.los_get_map_layer_sidebar().should("not.be.visible");
+    cy.get_map_layer_sidebar().should("not.be.visible");
   });
 
   it("Opening the map layers sidebar when the link profile view is open should close the link profile view", () => {
     cy.los_toggle_link_profile();
     cy.los_get_link_profile().should("be.visible");
 
-    cy.los_toggle_map_layer_sidebar();
+    cy.toggle_map_layer_sidebar();
     cy.los_get_link_profile().should("not.be.visible");
-    cy.los_get_map_layer_sidebar().should("be.visible");
+    cy.get_map_layer_sidebar().should("be.visible");
   });
 
   it("Opening the link profile view when a mapbox tooltip and the map layers sidebar is open will close everything but the link profile view.", () => {
-    cy.los_toggle_map_layer_sidebar();
-    cy.los_get_map_layer_sidebar().should("be.visible");
+    cy.toggle_map_layer_sidebar();
+    cy.map_layer_sidebar().should("be.visible");
 
     // TODO: achong - remove this wait - there is a setTimeout in the tower popup????
     cy.wait(1000);
     cy.los_click_tower();
     cy.los_get_mapbox_tooltip().should("be.visible");
-    cy.los_get_map_layer_sidebar().should("be.visible");
+    cy.get_map_layer_sidebar().should("be.visible");
 
     cy.los_toggle_link_profile();
     cy.los_get_link_profile().should("be.visible");
-    cy.los_get_map_layer_sidebar().should("not.be.visible");
+    cy.get_map_layer_sidebar().should("not.be.visible");
     cy.los_get_mapbox_tooltip().should(not_exist_or_not_be_visible);
   });
 });

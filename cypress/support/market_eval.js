@@ -2,6 +2,12 @@
 
 import { not_exist_or_not_be_visible } from ".";
 
+OVERLAY_RDOF = "FCC Rural Digital Opportunity Fund";
+OVERLAY_CENSUS = "Census Blocks";
+OVERLAY_COMMUNITY_CONNECT = "Non-urban < 10/1 Mbps";
+OVERLAY_CBRS = "CBRS PAL Holders";
+OVERLAY_TRIBAL = "Tribal Lands";
+
 Cypress.Commands.add("market_eval_click_tower", () => {
   cy.fixture("session_fixture").then((session) => {
     cy.click_point_on_map(session.tower);
@@ -30,6 +36,14 @@ Cypress.Commands.add("market_eval_click_info_tooltip", (text) => {
     .parent()
     .within(() => {
       cy.get('a[data-toggle="popover"]').click({ force: true });
+    });
+});
+
+Cypress.Commands.add("market_eval_toggle_geo_overlay", (overlay) => {
+  cy.get(`p:contains(${overlay}`)
+    .parent()
+    .within(() => {
+      cy.get("input[type='checkbox']").click();
     });
 });
 

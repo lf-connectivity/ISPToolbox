@@ -38,19 +38,10 @@ Cypress.Commands.add("los_toggle_link_profile", () => {
   cy.wait(500);
 });
 
-Cypress.Commands.add("los_toggle_map_layer_sidebar", () => {
-  cy.get("button#map-layers-btn").click();
-  cy.wait(500);
-});
-
 Cypress.Commands.add("los_get_link_profile", () => {
   cy.get("div#data-container");
 });
 
 Cypress.Commands.add("los_get_mapbox_tooltip", () => {
   cy.get("div.mapboxgl-popup-content");
-});
-
-Cypress.Commands.add("los_get_map_layer_sidebar", () => {
-  cy.get("div#map-layer-sidebar");
 });

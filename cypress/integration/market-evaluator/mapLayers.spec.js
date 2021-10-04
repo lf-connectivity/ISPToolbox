@@ -1,4 +1,4 @@
-import { MARKET_EVAL_PAGE } from "../../support";
+import { MARKET_EVAL_PAGE, OVERLAY_RDOF } from "../../support";
 
 context("Market Evaluator map layers", () => {
   before(() => {

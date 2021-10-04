@@ -26,6 +26,9 @@ services:
       DEBUG: "TRUE"
     volumes:
       - ./webserver:/usr/src/app
+  flower:
+    volumes:
+      - ./webserver:/usr/src/app
   node-app:
     ports:
       - 8020:8020

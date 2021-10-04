@@ -27,6 +27,7 @@ tour.addStep({
         classes: "btn btn-primary isptoolbox-btn",
     }]
 });
+{% if request.user.is_authenticated %}
 tour.addStep({
     id: 'example-step',
     text: "{% translate 'Use this session menu to switch between sessions or inspect and change session properties.' %}",
@@ -47,6 +48,7 @@ tour.addStep({
         classes: "btn btn-primary isptoolbox-btn py-3 px-4",
     }]
 });
+{% endif %}
 tour.addStep({
     id: 'example-step',
     text: "{% translate 'Add network elements: towers or point-to-point links can be placed on the map.' %}",

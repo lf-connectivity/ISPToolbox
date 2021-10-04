@@ -31,6 +31,9 @@ jobs:
           docker stop $(docker ps -a -f "name=isptoolbox_" -q)
           sudo mkdir -p /usr/src/app
           sudo cp -r webserver/static/* /usr/src/app
+      - name: Build Test Containers
+        run: |
+          make build_test
       - name: Cypress run
         uses: cypress-io/github-action@v2
         id: cypress

@@ -11,8 +11,6 @@ class AnalyticsService {
         this.sessionId = sessionId;
 
         window.addEventListener('beforeunload', (_e) => {
-            console.log('page load');
-            console.log(window.location.href);
             this.trackEvent({ eventType: 'pageview' });
         });
     }

@@ -26,12 +26,18 @@ export const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
 
 const SOURCES_PAGE_BASE_URL = '/pro/sources';
 
-function addEventHandler(map: mapboxgl.Map, draw: MapboxDraw, id: string, mode: string) {
+function addEventHandler(
+    map: mapboxgl.Map,
+    draw: MapboxDraw,
+    context: any,
+    id: string,
+    mode: string
+) {
     $(`#${id}`).click(() => {
         //@ts-ignore
         draw.changeMode(mode);
         map.fire('draw.modechange', { mode: mode });
-        this.analyticsService.trackEvent({ eventType: mode });
+        context.analyticsService.trackEvent({ eventType: mode });
     });
 }
 
@@ -109,7 +115,8 @@ export abstract class ISPToolboxAbstractAppPage {
             this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
             // Add buttons
-            let addEventHandlerMapDraw = addEventHandler.bind(null, this.map, this.draw);
+            const context = this;
+            let addEventHandlerMapDraw = addEventHandler.bind(null, this.map, this.draw, context);
 
             addEventHandlerMapDraw('add-link-btn', 'draw_link');
             addEventHandlerMapDraw('add-ap-btn', 'draw_ap');

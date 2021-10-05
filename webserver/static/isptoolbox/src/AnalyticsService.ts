@@ -10,7 +10,9 @@ class AnalyticsService {
     constructor(sessionId: string) {
         this.sessionId = sessionId;
 
-        window.addEventListener('load', (_e) => {
+        window.addEventListener('beforeunload', (_e) => {
+            console.log('page load');
+            console.log(window.location.href);
             this.trackEvent({ eventType: 'pageview' });
         });
     }

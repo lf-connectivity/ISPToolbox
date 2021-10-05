@@ -1,4 +1,4 @@
-from .workspace_models import ISPCompany, Employee, AnalyticsEvent
+from .workspace_models import ISPCompany, Employee, AnalyticsEvent, AnalyticsSerializer
 from .network_models import (
     AccessPointLocation, BuildingCoverage,
     AccessPointCoverageBuildings, Radio, PTPLink, CPELocation, APToCPELink,

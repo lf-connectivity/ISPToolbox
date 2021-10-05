@@ -9,7 +9,7 @@ from gis_data.models import MsftBuildingOutlines
 from workspace.models import (
     AccessPointSerializer,
     CPESerializer, APToCPELinkSerializer, WorkspaceMapSessionSerializer,
-    WorkspaceMapSession, CoverageAreaSerializer, AnalyticsEvent
+    WorkspaceMapSession, CoverageAreaSerializer, AnalyticsEvent, AnalyticsSerializer,
 )
 from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters, serializers
@@ -288,13 +288,3 @@ class AnalyticsView(View, mixins.ListModelMixin):
         queryset = AnalyticsEvent.objects.all()
         serializer = AnalyticsSerializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)
-
-
-class AnalyticsSerializer(serializers.ModelSerializer):
-    session_id = serializers.CharField()
-    session_id = serializers.CharField()
-    event_type = serializers.CharField()
-
-    class Meta:
-        model = AnalyticsEvent
-        fields = ("__all__")

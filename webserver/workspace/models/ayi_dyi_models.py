@@ -42,7 +42,8 @@ class AccessInformationJob(models.Model):
             return f'ayi-dev/{instance.id}/{filename}'
 
     data_dump = models.FileField(
-        storage=S3Boto3Storage(bucket_name=bucket_name),
+        storage=S3Boto3Storage(
+            location='', custom_domain=None, bucket_name=bucket_name),
         upload_to=access_your_info_path)
 
     @property

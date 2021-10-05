@@ -7,4 +7,4 @@ class WorkspaceConfig(AppConfig):
 
 
 class IspToolboxAdminConfig(AdminConfig):
-    default_site = 'workspace.admin.IspToolboxAdminSite'
+    default_site = 'workspace.adminsite.IspToolboxAdminSite'

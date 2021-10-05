@@ -37,7 +37,7 @@ const CPE_SERIALIZER_FIELDS = ['name', 'height', 'ap'];
 
 const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe'];
 
-const COVERAGE_AREA_FIELDS = ['geo_overlay_type'];
+const COVERAGE_AREA_FIELDS = ['name'];
 
 const LINK_AP_INDEX = 0;
 const LINK_CPE_INDEX = 1;

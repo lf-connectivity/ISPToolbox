@@ -6,21 +6,11 @@ import centroid from '@turf/centroid';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
 import CollapsibleComponent from '../atoms/CollapsibleComponent';
-import { GeoOverlayType } from '../molecules/MapboxGeoOverlay';
-
-const AREA_HEADERS = {
-    [GeoOverlayType.NONE]: 'Area',
-    [GeoOverlayType.RDOF]: 'RDOF Area',
-    [GeoOverlayType.CBRS]: 'CBRS Area',
-    [GeoOverlayType.CENSUS]: 'Census Block',
-    [GeoOverlayType.COMMUNITY_CONNECT]: 'Non-urban Area',
-    [GeoOverlayType.TRIBAL]: 'Tribal Area'
-};
 
 export class MapLayerSidebarManager extends CollapsibleComponent {
     hiddenAccessPointIds: Array<string>;
     hiddenCoverageAreas: { [workspaceId: string]: any };
-    polygonCounter: { [overlay in GeoOverlayType]: number };
+    polygonCounter: { [name: string]: number };
     workspaceIdToPolygonCounter: { [workspaceId: string]: number };
     map: MapboxGL.Map;
     draw: MapboxDraw;
@@ -33,14 +23,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         }
 
         MapLayerSidebarManager._instance = this;
-        this.polygonCounter = {
-            [GeoOverlayType.NONE]: 1,
-            [GeoOverlayType.RDOF]: 1,
-            [GeoOverlayType.CBRS]: 1,
-            [GeoOverlayType.CENSUS]: 1,
-            [GeoOverlayType.COMMUNITY_CONNECT]: 1,
-            [GeoOverlayType.TRIBAL]: 1
-        };
+        this.polygonCounter = {};
         this.hiddenAccessPointIds = [];
         this.hiddenCoverageAreas = {};
         this.workspaceIdToPolygonCounter = {};
@@ -88,19 +71,23 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.COVERAGE_AREA).forEach(
             (coverage: CoverageArea) => {
                 let polygonNumber;
-                let geoOverlayType = (coverage.getFeatureProperty('geo_overlay_type') ||
-                    GeoOverlayType.NONE) as GeoOverlayType;
+                let name = coverage.getFeatureProperty('name') || 'Area';
 
                 if (coverage.workspaceId in this.workspaceIdToPolygonCounter) {
                     polygonNumber = this.workspaceIdToPolygonCounter[coverage.workspaceId];
                 } else {
-                    polygonNumber = this.polygonCounter[geoOverlayType];
+                    if (!(name in this.polygonCounter)) {
+                        polygonNumber = 1;
+                        this.polygonCounter[name] = 1;
+                    } else {
+                        polygonNumber = this.polygonCounter[name];
+                    }
                     this.workspaceIdToPolygonCounter[coverage.workspaceId] = polygonNumber;
-                    this.polygonCounter[geoOverlayType]++;
+                    this.polygonCounter[name]++;
                 }
                 const elem = generateMapLayerSidebarRow(
                     coverage.getFeatureData(),
-                    `${AREA_HEADERS[geoOverlayType]} ${polygonNumber}`,
+                    `${name} ${polygonNumber}`,
                     this.clickHandler,
                     this.toggleHandler
                 );
@@ -112,7 +99,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         $('#zerostate').addClass('d-none');
         if (mapObjectsSection?.firstChild === null) {
             $('#zerostate').removeClass('d-none');
-        }    
+        }
     }
 
     protected showComponent() {

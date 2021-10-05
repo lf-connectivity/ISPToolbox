@@ -20,17 +20,8 @@ export type GeoOverlay = {
     outlineOnly: boolean;
 };
 
-export enum GeoOverlayType {
-    NONE = 'none',
-    RDOF = 'rdof',
-    CENSUS = 'census',
-    COMMUNITY_CONNECT = 'community_connect',
-    CBRS = 'cbrs',
-    TRIBAL = 'tribal'
-}
-
 abstract class MapboxGeoOverlay implements MapboxOverlay {
-    geoOverlayType: GeoOverlayType;
+    name: string;
     map: mapboxgl.Map;
     draw: MapboxDraw;
     sourceId: string;
@@ -48,7 +39,7 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
     boundMouseClickCallback: (e: any) => void;
 
     constructor(
-        type: GeoOverlayType,
+        name: string,
         map: mapboxgl.Map,
         draw: MapboxDraw,
         overlay: GeoOverlay,
@@ -57,7 +48,7 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
         popupClass: any,
         wsGeojsonEvent: MarketEvalWSEvents
     ) {
-        this.geoOverlayType = type;
+        this.name = name;
         this.map = map;
         this.draw = draw;
         this.sourceId = overlay.sourceId;
@@ -148,7 +139,7 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
                 properties: {
                     ...properties,
                     uneditable: true,
-                    geo_overlay_type: this.geoOverlayType,
+                    name: this.name,
                     feature_type: WorkspaceFeatureTypes.COVERAGE_AREA
                 },
                 id: ''
@@ -235,7 +226,7 @@ export class RdofGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            GeoOverlayType.RDOF,
+            'RDOF Area',
             map,
             draw,
             overlay,
@@ -260,7 +251,7 @@ export class CommunityConnectGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            GeoOverlayType.COMMUNITY_CONNECT,
+            'Non-urban Area',
             map,
             draw,
             overlay,
@@ -285,7 +276,7 @@ export class CbrsGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            GeoOverlayType.CBRS,
+            'CBRS Area',
             map,
             draw,
             overlay,
@@ -313,7 +304,7 @@ export class CensusBlocksGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            GeoOverlayType.CENSUS,
+            'Census Block',
             map,
             draw,
             overlay,
@@ -338,7 +329,7 @@ export class TribalGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            GeoOverlayType.TRIBAL,
+            'Tribal Area',
             map,
             draw,
             overlay,

@@ -1,4 +1,3 @@
-import { GeoOverlayType } from '../molecules/MapboxGeoOverlay';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
 export const generateMapLayerSidebarRow = (

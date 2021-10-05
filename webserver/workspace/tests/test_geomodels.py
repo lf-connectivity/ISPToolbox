@@ -266,8 +266,8 @@ DEFAULT_CPE_HEIGHT = 1.0
 DEFAULT_FREQUENCY = 2.4
 DEFAULT_UNEDITABLE = False
 DEFAULT_AP_CPE_LINK_UNEDITABLE = True
-DEFAULT_GEO_OVERLAY_TYPE = 'none'
-DEFAULT_GEO_OVERLAY_TYPE_MULTIPOLYGON = 'census'
+DEFAULT_COVERAGE_AREA_NAME = 'Area'
+DEFAULT_COVERAGE_AREA_NAME_MULTIPOLYGON = 'Census Block'
 
 
 ################################################################################
@@ -442,7 +442,7 @@ UPDATED_NAME = 'Test Object Two: Electric Boogaloo'
 UPDATED_HEIGHT = 100
 UPDATED_MAX_RADIUS = 2.42
 UPDATED_FREQUENCY = 5
-UPDATED_GEO_OVERLAY_TYPE = 'tribal'
+UPDATED_COVERAGE_AREA_NAME = 'tribal'
 
 
 ################################################################################
@@ -517,19 +517,19 @@ class WorkspaceBaseTestCase(TestCase):
 
         self.test_polygon_coverage_area = CoverageArea(
             owner=self.testuser,
+            name=DEFAULT_COVERAGE_AREA_NAME,
             map_session=self.test_session,
             geojson=DEFAULT_TEST_POLYGON,
-            uneditable=DEFAULT_UNEDITABLE,
-            geo_overlay_type=DEFAULT_GEO_OVERLAY_TYPE
+            uneditable=DEFAULT_UNEDITABLE
         )
         self.test_polygon_coverage_area.save()
 
         self.test_multipolygon_coverage_area = CoverageArea(
             owner=self.testuser,
+            name=DEFAULT_COVERAGE_AREA_NAME_MULTIPOLYGON,
             map_session=self.test_session,
             geojson=DEFAULT_TEST_MULTIPOLYGON,
-            uneditable=DEFAULT_UNEDITABLE,
-            geo_overlay_type=DEFAULT_GEO_OVERLAY_TYPE_MULTIPOLYGON
+            uneditable=DEFAULT_UNEDITABLE
         )
         self.test_multipolygon_coverage_area.save()
 
@@ -634,25 +634,25 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_POLYGON),
             'properties': {
+                'name': DEFAULT_COVERAGE_AREA_NAME,
                 'uuid': str(self.test_polygon_coverage_area.uuid),
                 'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.COVERAGE_AREA.value,
-                'uneditable': DEFAULT_UNEDITABLE,
-                'geo_overlay_type': DEFAULT_GEO_OVERLAY_TYPE
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
         expected_multipolygon = {
             'type': 'Feature',
             'geometry': json.loads(DEFAULT_TEST_MULTIPOLYGON),
             'properties': {
+                'name': DEFAULT_COVERAGE_AREA_NAME_MULTIPOLYGON,
                 'uuid': str(self.test_multipolygon_coverage_area.uuid),
                 'map_session': str(self.test_session.uuid),
                 'feature_type': FeatureType.COVERAGE_AREA.value,
-                'uneditable': DEFAULT_UNEDITABLE,
-                'geo_overlay_type': DEFAULT_GEO_OVERLAY_TYPE_MULTIPOLYGON
+                'uneditable': DEFAULT_UNEDITABLE
             }
         }
-        self.get_feature_collection_flow(CoverageAreaSerializer, [expected_polygon, expected_multipolygon])
+        self.get_feature_collection_flow(CoverageAreaSerializer, [expected_multipolygon, expected_polygon])
 
 
 class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
@@ -745,24 +745,24 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         new_area = {
             'geojson': DEFAULT_TEST_POLYGON,
             'uneditable': DEFAULT_UNEDITABLE,
-            'geo_overlay_type': DEFAULT_GEO_OVERLAY_TYPE
+            'name': DEFAULT_COVERAGE_AREA_NAME
         }
         area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
-        self.assertEqual(area.geo_overlay_type, DEFAULT_GEO_OVERLAY_TYPE)
+        self.assertEqual(area.name, DEFAULT_COVERAGE_AREA_NAME)
         self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_POLYGON)
 
     def test_create_multipolygon_coverage_area(self):
         new_area = {
             'geojson': DEFAULT_TEST_MULTIPOLYGON,
             'uneditable': DEFAULT_UNEDITABLE,
-            'geo_overlay_type': DEFAULT_GEO_OVERLAY_TYPE_MULTIPOLYGON
+            'name': DEFAULT_COVERAGE_AREA_NAME_MULTIPOLYGON
         }
         area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
-        self.assertEqual(area.geo_overlay_type, DEFAULT_GEO_OVERLAY_TYPE_MULTIPOLYGON)
+        self.assertEqual(area.name, DEFAULT_COVERAGE_AREA_NAME_MULTIPOLYGON)
         self.assertJSONEqual(area.geojson.json, DEFAULT_TEST_MULTIPOLYGON)
 
     def test_update_ap(self):
@@ -808,11 +808,11 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         area_id = self.test_polygon_coverage_area.uuid
         updated_area = {
             'geojson': UPDATED_TEST_POLYGON,
-            'geo_overlay_type': UPDATED_GEO_OVERLAY_TYPE
+            'name': UPDATED_COVERAGE_AREA_NAME
         }
         area = self.update_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
         self.assertEqual(area.owner, self.testuser)
-        self.assertEqual(area.geo_overlay_type, UPDATED_GEO_OVERLAY_TYPE)
+        self.assertEqual(area.name, UPDATED_COVERAGE_AREA_NAME)
         self.assertJSONEqual(area.geojson.json, UPDATED_TEST_POLYGON)
 
     def test_update_multipolygon_coverage_area(self):

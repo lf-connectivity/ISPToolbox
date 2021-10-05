@@ -7,8 +7,8 @@ Cypress.Commands.add("toggle_map_layer_sidebar", () => {
   // Repeatedly click on map layers button until visibility is changed or
   // it's tried too much.
   let clickMapLayerSidebar = (body, original_visibility, count = 0) => {
-    body.find("button#map-layers-btn").click();
-    setTimeout(() => {
+    cy.get("button#map-layers-btn").click();
+    cy.wait(500).then(() => {
       let visibility = body.find("div#map-layer-sidebar").is(":visible");
       if (visibility === original_visibility) {
         if (count > MAX_RETRIES) {
@@ -17,7 +17,7 @@ Cypress.Commands.add("toggle_map_layer_sidebar", () => {
           clickMapLayerSidebar(body, original_visibility, count + 1);
         }
       }
-    }, 500);
+    });
   };
 
   cy.get("body").then((body) => {

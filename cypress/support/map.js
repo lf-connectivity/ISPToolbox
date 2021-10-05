@@ -2,6 +2,7 @@
 
 const CENTER_THRESHOLD = 1e-6;
 const ZOOM_THRESHOLD = 1e-3;
+const MAX_RETRIES = 10;
 
 // Sets session map preferences. Center should be an array of at least 2 elements,
 // the first being longitude, and the second being latitude (everything ins lng lat in GIS)
@@ -56,4 +57,53 @@ Cypress.Commands.add("map_get_sources", () => {
   cy.window().then((window) => {
     return Object.keys(window.mapbox_handles.map.getStyle().sources);
   });
+});
+
+// click until popup appears and is in the right place
+Cypress.Commands.add("click_and_expect_popup", (point) => {
+  let clickTower = (body, count = 0) => {
+    cy.click_point_on_map(point);
+    cy.wait(500);
+    cy.window().then((window) => {
+      if (shouldClickAgain(window, body)) {
+        if (count > MAX_RETRIES) {
+          throw new Error("Failed to click on tower");
+        } else {
+          clickTower(body, count + 1);
+        }
+      }
+    });
+  };
+
+  let shouldClickAgain = (window, body) => {
+    // Can't find popup
+    if (body.find("div.mapboxgl-popup").length == 0) {
+      return true;
+    }
+
+    // popup in the right spot?
+    else {
+      let popupLocation = window.mapbox_handles.map.project(point);
+      let translate = `translate(${Math.round(popupLocation.x)}px, ${Math.round(
+        popupLocation.y
+      )}px)`;
+
+      console.log(
+        popupLocation,
+        translate,
+        body.find("div.mapboxgl-popup")[0].style.transform
+      );
+      return !body
+        .find("div.mapboxgl-popup")[0]
+        .style.transform.includes(translate);
+    }
+  };
+
+  cy.get("body").then((body) => {
+    clickTower(body);
+  });
+});
+
+Cypress.Commands.add("get_mapbox_tooltip", () => {
+  cy.get("div.mapboxgl-popup");
 });

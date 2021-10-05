@@ -27,14 +27,14 @@ function mapboxStuffIntoLinkProfileViewTest(
 ) {
   return testWorkflow(description, () => {
     mapboxStuff();
-    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.get_mapbox_tooltip().should("be.visible");
 
     cy.los_toggle_link_profile();
     cy.los_get_link_profile().should("be.visible");
 
     // Using this assertion instead of be.visible because mapbox is a third party library
     // that does stuff to the DOM, and we only care about if it's hidden.
-    cy.los_get_mapbox_tooltip().should(not_exist_or_not_be_visible);
+    cy.get_mapbox_tooltip().should(not_exist_or_not_be_visible);
 
     if (mapboxCleanup) {
       mapboxCleanup({ linkProfileOpen: true });
@@ -52,7 +52,7 @@ function linkProfileIntoMapboxStuffTest(
     cy.los_get_link_profile().should("be.visible");
 
     mapboxStuff({ linkProfileOpen: true });
-    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.get_mapbox_tooltip().should("be.visible");
     cy.los_get_link_profile().should("not.be.visible");
 
     if (mapboxCleanup) {
@@ -68,11 +68,11 @@ function mapboxStuffIntoMapLayersSidebarTest(
 ) {
   return testWorkflow(description, () => {
     mapboxStuff();
-    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.get_mapbox_tooltip().should("be.visible");
 
     cy.toggle_map_layer_sidebar();
     cy.get_map_layer_sidebar().should("be.visible");
-    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.get_mapbox_tooltip().should("be.visible");
 
     if (mapboxCleanup) {
       mapboxCleanup();
@@ -90,7 +90,7 @@ function mapLayersSidebarIntoMapboxStuffTest(
     cy.get_map_layer_sidebar().should("be.visible");
 
     mapboxStuff();
-    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.get_mapbox_tooltip().should("be.visible");
     cy.get_map_layer_sidebar().should("be.visible");
 
     if (mapboxCleanup) {
@@ -252,12 +252,12 @@ context("LOS Check collapsible components", () => {
     // TODO: achong - remove this wait - there is a setTimeout in the tower popup????
     cy.wait(1000);
     cy.los_click_tower();
-    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.get_mapbox_tooltip().should("be.visible");
     cy.get_map_layer_sidebar().should("be.visible");
 
     cy.los_toggle_link_profile();
     cy.los_get_link_profile().should("be.visible");
     cy.get_map_layer_sidebar().should("not.be.visible");
-    cy.los_get_mapbox_tooltip().should(not_exist_or_not_be_visible);
+    cy.get_mapbox_tooltip().should(not_exist_or_not_be_visible);
   });
 });

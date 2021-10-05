@@ -16,7 +16,7 @@ export const SOURCE_TRIBAL = "tribal-overlay";
 
 Cypress.Commands.add("market_eval_click_tower", () => {
   cy.fixture("session_fixture").then((session) => {
-    cy.click_point_on_map(session.tower);
+    cy.click_and_expect_popup(session.tower);
   });
 });
 

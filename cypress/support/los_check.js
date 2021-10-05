@@ -2,19 +2,19 @@
 
 Cypress.Commands.add("los_click_tower", () => {
   cy.fixture("session_fixture").then((session) => {
-    cy.click_point_on_map(session.tower);
+    cy.click_and_expect_popup(session.tower);
   });
 });
 
 Cypress.Commands.add("los_click_radio", () => {
   cy.fixture("session_fixture").then((session) => {
-    cy.click_point_on_map(session.cpe);
+    cy.click_and_expect_popup(session.cpe);
   });
 });
 
 Cypress.Commands.add("los_click_building", () => {
   cy.fixture("session_fixture").then((session) => {
-    cy.click_point_on_map(session.building);
+    cy.click_and_expect_popup(session.building);
   });
 });
 
@@ -37,8 +37,4 @@ Cypress.Commands.add("los_toggle_link_profile", () => {
 
 Cypress.Commands.add("los_get_link_profile", () => {
   cy.get("div#data-container");
-});
-
-Cypress.Commands.add("los_get_mapbox_tooltip", () => {
-  cy.get("div.mapboxgl-popup-content");
 });

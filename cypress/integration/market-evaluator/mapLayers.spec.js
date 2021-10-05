@@ -31,9 +31,9 @@ function geoOverlayLayerTestCase(
       cy.click_point_on_map(session[point_1]);
 
       // Wait for map layer objects to be created
-      cy.wait(1500);
+      cy.wait(2000);
       cy.click_point_on_map(session[point_2]);
-      cy.wait(1500);
+      cy.wait(2000);
       cy.market_eval_toggle_geo_overlay(overlay);
       cy.map_get_sources().should("not.include", source);
 

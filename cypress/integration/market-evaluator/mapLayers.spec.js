@@ -7,10 +7,17 @@ import {
   TOWER_ICON,
   COVERAGE_AREA_ICON,
   OVERLAY_CBRS,
+  SOURCE_RDOF,
+  SOURCE_CBRS,
+  SOURCE_CENSUS,
+  SOURCE_COMMUNITY_CONNECT,
+  SOURCE_TRIBAL,
+  OVERLAY_TRIBAL,
 } from "../../support";
 
 function geoOverlayLayerTestCase(
   overlay,
+  source,
   point_1,
   point_2,
   expected_area_prefix
@@ -18,6 +25,7 @@ function geoOverlayLayerTestCase(
   return () => {
     cy.fixture("map_layers_session_fixture").then((session) => {
       cy.market_eval_toggle_geo_overlay(overlay);
+      cy.map_get_sources().should("include", source);
 
       // Create map layer objects
       cy.click_point_on_map(session[point_1]);
@@ -27,6 +35,7 @@ function geoOverlayLayerTestCase(
       cy.click_point_on_map(session[point_2]);
       cy.wait(1500);
       cy.market_eval_toggle_geo_overlay(overlay);
+      cy.map_get_sources().should("not.include", source);
 
       // Assert map layer
       cy.get_user_map_layers_object(`${expected_area_prefix} 1`)
@@ -64,6 +73,46 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
     cy.user_map_layers_should_be_empty();
   });
 
+  it("Initial state should not display any overlays", () => {
+    cy.map_get_sources().should("not.have.members", [
+      SOURCE_RDOF,
+      SOURCE_CBRS,
+      SOURCE_CENSUS,
+      SOURCE_COMMUNITY_CONNECT,
+      SOURCE_TRIBAL,
+    ]);
+  });
+
+  it("Toggling one geo overlay layer unrenders every other geo overlay layer.", () => {
+    let testGeoOverlay = (overlay, source) => {
+      let sources = new Set([
+        SOURCE_RDOF,
+        SOURCE_CBRS,
+        SOURCE_CENSUS,
+        SOURCE_COMMUNITY_CONNECT,
+        SOURCE_TRIBAL,
+      ]);
+      sources.delete(source);
+
+      let expected_nonexistent_sources = Array.from(sources);
+
+      cy.market_eval_toggle_geo_overlay(overlay);
+      cy.map_get_sources()
+        .should("include", source)
+        .should("not.have.members", expected_nonexistent_sources);
+    };
+
+    [
+      [OVERLAY_RDOF, SOURCE_RDOF],
+      [OVERLAY_CBRS, SOURCE_CBRS],
+      [OVERLAY_CENSUS, SOURCE_CENSUS],
+      [OVERLAY_COMMUNITY_CONNECT, SOURCE_COMMUNITY_CONNECT],
+      [OVERLAY_TRIBAL, SOURCE_TRIBAL],
+    ].forEach((pair) => {
+      testGeoOverlay(pair[0], pair[1]);
+    });
+  });
+
   it("Drawing coverage areas should have the proper names/numbers", () => {
     cy.fixture("map_layers_session_fixture").then((session) => {
       cy.draw_coverage_area(session.coverage_area_1);
@@ -82,13 +131,20 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
 
   it(
     "RDOF map layers should be named and numbered correctly",
-    geoOverlayLayerTestCase(OVERLAY_RDOF, "rdof_1", "rdof_2", "RDOF Area")
+    geoOverlayLayerTestCase(
+      OVERLAY_RDOF,
+      SOURCE_RDOF,
+      "rdof_1",
+      "rdof_2",
+      "RDOF Area"
+    )
   );
 
   it(
     "Census map layers should be named and numbered correctly",
     geoOverlayLayerTestCase(
       OVERLAY_CENSUS,
+      SOURCE_CENSUS,
       "census_1",
       "census_2",
       "Census Block"
@@ -99,6 +155,7 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
     "Community Connect map layers should be named and numbered correctly",
     geoOverlayLayerTestCase(
       OVERLAY_COMMUNITY_CONNECT,
+      SOURCE_COMMUNITY_CONNECT,
       "community_connect_1",
       "community_connect_2",
       "Non-urban Area"
@@ -107,7 +164,13 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
 
   it(
     "CBRS map layers should be named and numbered correctly",
-    geoOverlayLayerTestCase(OVERLAY_CBRS, "cbrs_1", "cbrs_2", "CBRS Area")
+    geoOverlayLayerTestCase(
+      OVERLAY_CBRS,
+      SOURCE_CBRS,
+      "cbrs_1",
+      "cbrs_2",
+      "CBRS Area"
+    )
   );
 
   it("User map layers should have the proper icon and name for towers", () => {

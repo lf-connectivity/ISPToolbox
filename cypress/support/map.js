@@ -51,3 +51,9 @@ Cypress.Commands.add("map_get_source_features", (source_id) => {
       .features;
   });
 });
+
+Cypress.Commands.add("map_get_sources", () => {
+  cy.window().then((window) => {
+    return Object.keys(window.mapbox_handles.map.getStyle().sources);
+  });
+});

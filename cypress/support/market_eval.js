@@ -8,6 +8,12 @@ export const OVERLAY_COMMUNITY_CONNECT = "Non-urban < 10/1 Mbps";
 export const OVERLAY_CBRS = "CBRS PAL Holders";
 export const OVERLAY_TRIBAL = "Tribal Lands";
 
+export const SOURCE_RDOF = "rdof2020-overlay";
+export const SOURCE_CENSUS = "census-block-overlay";
+export const SOURCE_COMMUNITY_CONNECT = "community-connect-overlay";
+export const SOURCE_CBRS = "cbrs-overlay";
+export const SOURCE_TRIBAL = "tribal-overlay";
+
 Cypress.Commands.add("market_eval_click_tower", () => {
   cy.fixture("session_fixture").then((session) => {
     cy.click_point_on_map(session.tower);

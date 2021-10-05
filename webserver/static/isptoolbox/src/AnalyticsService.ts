@@ -1,20 +1,42 @@
-type Event = {
-    sessionId: string;
+interface Event {
     eventType: string;
-    url: string;
-};
+    sessionId?: string;
+    url?: string;
+}
 
-console.log('analytics service available');
+class AnalyticsService {
+    sessionId: string;
 
-export const saveAnalyticsEvent = async (event: Event) => {
-    const response = await fetch('/analytics/events', {
-        method: 'POST',
-        mode: 'same-origin',
-        credentials: 'same-origin',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(event)
-    });
-    return response.json();
-};
+    constructor(sessionId: string) {
+        this.sessionId = sessionId;
+
+        window.addEventListener('load', (_e) => {
+            this.trackEvent({ eventType: 'pageview' });
+        });
+    }
+
+    setSessionId = (sessionId: string) => {
+        this.sessionId = sessionId;
+    };
+
+    trackEvent = async (event: Event) => {
+        event.url = window.location.href;
+        if (this.sessionId) {
+            event.sessionId = this.sessionId;
+        }
+
+        const response = await fetch('/pro/workspace/api/analytics/events/', {
+            method: 'POST',
+            mode: 'same-origin',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(event)
+        });
+        const res = await response.json();
+        return res;
+    };
+}
+
+export default AnalyticsService;

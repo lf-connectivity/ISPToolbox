@@ -13,6 +13,7 @@ import { MapboxSDKClient } from './MapboxSDKClient';
 import { parseSearchBarLatitudeLongitude } from './utils/LatLngInputUtils';
 import { isBeta } from './LinkCheckUtils';
 import MapboxLockDraggingControl from './organisms/controls/MapboxLockDraggingControl';
+import AnalyticsService from './AnalyticsService';
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -36,7 +37,8 @@ function addEventHandler(map: mapboxgl.Map, draw: MapboxDraw, id: string, mode: 
 export abstract class ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
     draw: MapboxDraw;
-    geocoder: MapboxGeocoder;
+    geocoder: typeof MapboxGeocoder;
+    analyticsService: AnalyticsService;
 
     constructor(draw_modes: any, sources_page: string) {
         let { initial_map_center, initial_zoom } = this.initMapCenterAndZoom();
@@ -46,6 +48,7 @@ export abstract class ISPToolboxAbstractAppPage {
             initial_map_center = window.ISPTOOLBOX_SESSION_INFO.initialMapCenter.coordinates;
             // @ts-ignore
             initial_zoom = window.ISPTOOLBOX_SESSION_INFO.initialMapZoom;
+            // @ts-ignore
         } catch (err) {}
 
         this.map = new mapboxgl.Map({
@@ -176,6 +179,9 @@ export abstract class ISPToolboxAbstractAppPage {
 
             this.onGeocoderLoad();
         });
+
+        //@ts-ignore
+        this.analyticsService = new AnalyticsService(window.ISPTOOLBOX_SESSION_INFO.networkID);
     }
 
     initMapCenterAndZoom(): {

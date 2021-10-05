@@ -188,7 +188,7 @@ context("Sources checks for Market Evaluator", () => {
     // TODO: achong - remove this wait - there is a setTimeout in the tower popup????
     cy.wait(1000);
     cy.market_eval_click_tower();
-    cy.los_get_mapbox_tooltip().should("be.visible");
+    cy.get_mapbox_tooltip().should("be.visible");
     cy.get("button:contains('Plot Estimated Coverage')")
       .then((button) => {
         let match = button.text().match(/(\d+)/);

@@ -9,7 +9,6 @@ export function setCenterZoomPreferences(map: mapboxgl.Map) {
         // @ts-ignore
         const session_id = window.ISPTOOLBOX_SESSION_INFO.networkID;
         if (session_id !== undefined) {
-            console.log(`Center: (${center.lng}, ${center.lat})\tZoom: ${zoom}`);
             $.ajax({
                 url: `/pro/workspace/api/session/${session_id}/`,
                 data: { center: `SRID=4326;POINT (${center.lng} ${center.lat})`, zoom: zoom },
@@ -21,9 +20,6 @@ export function setCenterZoomPreferences(map: mapboxgl.Map) {
         }
     };
     map.on('moveend', _.debounce(requestChangeMapPreferences, 1000));
-    map.on('click', (e) => {
-        console.log(`Clicked on ${e.lngLat.lng}, ${e.lngLat.lat}`);
-    });
 }
 
 export function isUnitsUS() {

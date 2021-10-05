@@ -31,6 +31,7 @@ function addEventHandler(map: mapboxgl.Map, draw: MapboxDraw, id: string, mode: 
         //@ts-ignore
         draw.changeMode(mode);
         map.fire('draw.modechange', { mode: mode });
+        this.analyticsService.trackEvent({ eventType: mode });
     });
 }
 

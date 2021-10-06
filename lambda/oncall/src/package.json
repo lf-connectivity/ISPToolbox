@@ -1,0 +1,17 @@
+{
+  "name": "isptoolbox-oncall-lambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.1001.0"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "private": "true"
+}

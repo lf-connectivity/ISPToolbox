@@ -161,7 +161,7 @@ Cypress.Commands.add(
         .within(() => {
           cy.get("a:contains(Sign In)")
             .should("be.visible")
-            .should("have.attr", "href", "/pro/accounts/sign-in/");
+            .should("have.attr", "href").and('contain',"/pro/accounts/sign-in/");
 
           cy.get("a:contains(Upload File)").should("be.visible");
         });

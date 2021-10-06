@@ -5,7 +5,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect, render
 from mmwave import tasks as mmwave_tasks
 from mmwave import models
-from django.contrib.gis.geos import GEOSGeometry, Point
+from django.contrib.gis.geos import Point
 from mmwave.lidar_utils.SlippyTiles import deg2num, DEFAULT_OUTPUT_ZOOM
 from django.contrib import admin
 import logging

@@ -11,7 +11,7 @@ from rest_framework.schemas import get_schema_view
 app_name = 'workspace'
 urlpatterns = [
     path('', views.WorkspaceDashboard.as_view(), name='workspace_dashboard'),
-    path('signin', views.DefaultWorkspaceView.as_view(), name="sign_up_workspace"),
+    path('signin/', views.DefaultWorkspaceView.as_view(), name="sign_up_workspace"),
     path('optional-info/', views.OptionalInfoWorkspaceView.as_view(),
          name="optional_info"),
     path('optional-info/update/', views.OptionalInfoWorkspaceUpdateView.as_view(),
@@ -55,8 +55,10 @@ urlpatterns = [
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="logout_view"),
     path('accounts/create/', CreateAccountView.as_view(),
          name="create_account_view"),
-    path('account/delete/', views.DeleteYourInformationView.as_view(), name="delete_your_information"),
-    path('account/access/', views.AccessYourInformationView.as_view(), name="access_your_information"),
+    path('account/delete/', views.DeleteYourInformationView.as_view(),
+         name="delete_your_information"),
+    path('account/access/', views.AccessYourInformationView.as_view(),
+         name="access_your_information"),
     # Workspace Object Persistence
     path('workspace/api/ap-los/',
          views.AccessPointLocationListCreate.as_view(), name='ap'),

@@ -4,7 +4,7 @@
     <p class="onboarding_container--intro-copy large">Creating an account will give you the ability to save and reuse files across ISP Toolbox.</p>
 
     <div class="isp-signupform mx-auto">
-        <form action="{% url 'workspace:create_account_view' %}?next={{ request.get_full_path }}" method="post" class="isptoolbox-form pb-3">
+        <form action="{% url 'workspace:create_account_view' %}?next={{ request.get_full_path | urlencode }}" method="post" class="isptoolbox-form pb-3">
             {% csrf_token %}
             {% if sign_up_form.errors %}
                 {% for error in sign_up_form.non_field_errors %}

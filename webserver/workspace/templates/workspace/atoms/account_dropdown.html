@@ -72,7 +72,7 @@
       {% endif %}
       <a
         class="dropdown-item"
-        href="{% url 'workspace:logout_view' %}?next={% url 'workspace:workspace_dashboard' %}"
+        href="{% url 'workspace:logout_view' %}?next={{ {% url 'workspace:workspace_dashboard' %} | urlencode}}"
         >{% translate "Logout"%}</a
       >
     </div>
@@ -80,7 +80,7 @@
   {% else %} 
       <a href="#" data-toggle="modal" data-target="#importKMZModal">Upload File</a>
       &nbsp;or&nbsp;
-      <a href="{% url 'workspace:login_view' %}">Sign In</a>
+      <a href="{% url 'workspace:login_view' %}?next={{request.get_full_path | urlencode}}">Sign In</a>
       &nbsp;to save your work.
   {% endif %}
 </div>

@@ -37,7 +37,7 @@ class CreateAccountView(View):
                 require_https=self.request.is_secure()
             )
             if next_url is not None and url_is_safe:
-                return redirect(next_url)
+                return redirect(reverse('workspace:optional_info') + f'?next={next_url}')
             else:
                 return redirect(reverse('workspace:optional_info'))
         return render(

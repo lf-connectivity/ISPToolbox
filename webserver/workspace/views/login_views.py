@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,6 +18,8 @@ class WorkspaceDashboard(LoginRequiredMixin, View):
 
 class DefaultWorkspaceView(View):
     def get(self, request, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(reverse_lazy('workspace:workspace_dashboard'))
         showSurvey = (not request.user.is_anonymous) and not IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(
             owner=request.user
         ).exists()
@@ -40,7 +43,20 @@ class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        # Save the Form
+        original_response = super().form_valid(form)
+        # To complete the sign-up flow -> send user to the page they were finally trying to get to
+        next_url = self.request.POST.get(
+            'next', self.request.GET.get('next', None))
+        url_is_safe = url_has_allowed_host_and_scheme(
+            url=next_url,
+            allowed_hosts=self.request.get_host(),
+            require_https=self.request.is_secure()
+        )
+        if next_url is not None and url_is_safe:
+            return redirect(next_url)
+        else:
+            return original_response
 
     def get(self, request):
         if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists():

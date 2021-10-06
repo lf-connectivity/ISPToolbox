@@ -72,7 +72,8 @@
       {% endif %}
       <a
         class="dropdown-item"
-        href="{% url 'workspace:logout_view' %}?next={{ {% url 'workspace:workspace_dashboard' %} | urlencode}}"
+        {% url 'workspace:workspace_dashboard' as next_url %}
+        href="{% url 'workspace:logout_view' %}?next={{ next_url | urlencode}}"
         >{% translate "Logout"%}</a
       >
     </div>

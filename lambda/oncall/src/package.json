@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "axios": "^0.22.0",
+    "form-data": "^4.0.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.1001.0"

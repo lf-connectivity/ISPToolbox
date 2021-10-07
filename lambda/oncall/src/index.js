@@ -1,7 +1,9 @@
 'use strict';
 
 const querystring = require('querystring');
-const request_lib = require('request');
+var axios = require('axios');
+var FormData = require('form-data');
+
 // Load the AWS SDK
 var AWS = require('aws-sdk'),
     region = "us-west-1",
@@ -22,49 +24,53 @@ const getSecret = async () => {
     return { app_id: secrets[app_id_key], app_secret: secrets[app_secret_key] };
 };
 
-function alertOncall(msg, options) {
+async function alertOncall(msg, options) {
     if (!secret) {
         secret = await getSecret();
     }
     const app_id = secret.app_id;
     const app_secret = secret.app_secret;
-    var options = {
-        'method': 'POST',
-        'url': 'https://www.facebook.com/isptoolbox/admin_page/',
-        'headers': {
+
+    var data = new FormData();
+    data.append('app_id', app_id);
+    data.append('msg', msg);
+    data.append('call', options.call);
+    data.append('mail', options.mail);
+    data.append('sms', options.sms);
+    data.append('push', options.push);
+
+    var config = {
+        method: 'post',
+        url: 'https://www.facebook.com/isptoolbox/admin_page/',
+        headers: {
             'Authorization': `Bearer ${app_id}|${app_secret}`,
+            ...data.getHeaders()
         },
-        formData: {
-            'app_id': app_id,
-            'msg': msg,
-            'call': options.call,
-            'mail': options.mail,
-            'sms': options.sms,
-            'push': options.push
-        }
+        data: data
     };
-    request_lib(options, function (error, response) {
-        if (error) throw new Error(error);
-        console.log(response.body);
-    });
+    try {
+        const resp = await axios(config);
+        console.log(resp.data);
+    } catch (err) {
+        console.error(err)
+    }
 }
 
 /**
- * Check if user is allowed to access tile based on access token
+ * Send page to oncall for isptoolbox
  * @param {*} event 
  * @param {*} context
- * @param {*} callback
  * @returns 
  */
 exports.handler = async (event, context) => {
     const sns_msg = event.Records[0].Sns;
     const msg = `${sns_msg.Subject} - ${sns_msg.Message} - ${sns_msg.UnsubscribeUrl}`
     const default_options = {
-        'call': false,
-        'mail': true,
-        'sms': true,
-        'push': true,
+        'call': 'true',
+        'mail': 'true',
+        'sms': 'true',
+        'push': 'true',
     };
-    alertOncall(msg, default_options);
+    await alertOncall(msg, default_options);
     console.log(`Alerted Oncall: ${msg}`);
 };

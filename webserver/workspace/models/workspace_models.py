@@ -23,7 +23,7 @@ class AnalyticsEvent(models.Model):
 
 
 class AnalyticsSerializer(serializers.ModelSerializer):
-    session_id = serializers.CharField()
+    url = serializers.CharField()
     session_id = serializers.CharField()
     event_type = serializers.CharField()
 

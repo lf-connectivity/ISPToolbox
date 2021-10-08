@@ -12,9 +12,8 @@ from workspace.models import (
     WorkspaceMapSession, CoverageAreaSerializer, AnalyticsEvent, AnalyticsSerializer,
 )
 from rest_framework.permissions import AllowAny
-from rest_framework import generics, mixins, renderers, filters, serializers
+from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 import json
 

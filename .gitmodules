@@ -1,6 +1,3 @@
-[submodule "webserver/static/potree"]
-	path = webserver/static/potree
-	url = https://github.com/ISPToolbox/potree
 [submodule "webserver/static/mapbox-gl-draw-circle"]
 	path = webserver/static/mapbox-gl-draw-circle
 	url = https://github.com/ISPToolbox/mapbox-gl-draw-circle.git

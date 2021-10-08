@@ -313,8 +313,8 @@ class ViewshedTile(TileModel):
     viewshed = models.ForeignKey(Viewshed, on_delete=models.CASCADE)
     bucket_name = 'isptoolbox-tilesets'
 
-    # class Meta:
-    #     unique_together = [['x', 'y', 'zoom', 'viewshed']]
+    class Meta:
+        unique_together = [['x', 'y', 'zoom', 'viewshed']]
 
     def upload_to_path(instance, filename):
         prefix = "viewshed/tiles_test"

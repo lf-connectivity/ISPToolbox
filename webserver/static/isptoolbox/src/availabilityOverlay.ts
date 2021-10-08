@@ -1,21 +1,10 @@
 import * as MapboxGL from 'mapbox-gl';
 import { getCookie } from './utils/Cookie';
 import { djangoUrl } from './utils/djangoUrl';
-import { getVersion } from './utils/MapPreferences';
 var _ = require('lodash');
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
-
-const LOW_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'low-res-lidar-boundary-source';
-const LOW_RESOLUTION_LIDAR_AVAILABILITY_LAYER = 'low-res-lidar-boundary-layer';
-const HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'high-res-lidar-boundary-source';
-const HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER = 'high-res-lidar-boundary-layer';
-const DSM_UNAVAILABLE_SOURCE = 'dsm-unavailable-source';
-
-const MAPBOX_OVERLAY_URL = 'isptoolbox.highreslidarboundary';
-const MAPBOX_DSM_UNAVAILABLE_OVERLAY_URL = 'isptoolbox.dsm_unavailable_boundary';
-const MAPBOX_DSM_AVAILABLE_OVERLAY_URL = 'isptoolbox.dsm_available_boundary';
 const MAPBOX_OVERLAY_LAYER = 'original';
 const AVAILABILITY_PAINT_FILL_STYLE = {
     'fill-color': '#687B8B',
@@ -75,11 +64,11 @@ export default class LidarAvailabilityLayer {
     protected onMouseEnter(e: any) {
         // Change the cursor style as a UI indicator.
         this.map.getCanvas().style.cursor = 'pointer';
-        this.setPopup('Data Not<br>Available Here', e.lngLat);
+        this.setPopup('LiDAR Data Not<br>Available Here', e.lngLat);
     }
 
     protected onMouseMove(e: any) {
-        this.setPopup('Data Not<br>Available Here', e.lngLat);
+        this.setPopup('LiDAR Data Not<br>Available Here', e.lngLat);
     }
 
     protected onMouseLeave(e: any) {

@@ -112,10 +112,13 @@ export class AdminLidarAvailabilityLayer extends LidarAvailabilityLayer {
     }
 
     protected setPopup(message: string, lngLat: MapboxGL.LngLat) {
-        super.setPopup(`${message}<br>(${lngLat.lat}, ${lngLat.lng})`, lngLat);
+        super.setPopup(
+            `${message}<br>(${lngLat.lat.toFixed(5)}, ${lngLat.lng.toFixed(5)})`,
+            lngLat
+        );
     }
 
-    protected lookupLidarNames(lngLat: MapboxGL.LngLat) {
+    queryLocation(lngLat: MapboxGL.LngLat) {
         $.ajax({
             url: '/admin/tile-check/',
             data: JSON.stringify({ coords: [lngLat.lng, lngLat.lat] }),
@@ -169,10 +172,10 @@ export class AdminLidarAvailabilityLayer extends LidarAvailabilityLayer {
         this.setCloudNames = _.debounce((e: any) => {
             if (
                 this.map.queryRenderedFeatures(e.point, {
-                    layers: [SOURCES['dsm_available'].layer, SOURCES['dsm_unavailable'].layer]
-                }).length
+                    layers: [SOURCES['lidar_boundary'].layer]
+                }).length === 0
             ) {
-                this.lookupLidarNames(e.lngLat);
+                this.queryLocation(e.lngLat);
             }
         }, 300);
         sources.forEach((source) => {

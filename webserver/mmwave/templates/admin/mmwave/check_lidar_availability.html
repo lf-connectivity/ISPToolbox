@@ -25,10 +25,11 @@
     var ISPTOOLBOX_SESSION_INFO = {
       initialMapCenter: {
           type: 'Point',
-          coordinates: [-97.03125, 36.59789]
+          coordinates: {% if result %} [{{result.location.0}}, {{result.location.1}}] {% else %} [-97.03125, 36.59789] {% endif %}
       },
-      initialMapZoom: 3.75,
-      units: "US"
+      initialMapZoom: {% if result %} 12.75 {% else %} 3.75 {% endif %},
+      units: "US",
+      result: {% if result %} { lng: {{result.location.0}}, lat: {{result.location.1}} }{% else %} null {% endif %}
     };
   </script>
 {{block.super}}

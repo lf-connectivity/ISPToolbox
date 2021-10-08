@@ -40,7 +40,7 @@ class CheckLidarDSMAvailability(LoginRequiredMixin, View):
             for cld in clouds:
                 if cld.existsTile(tilex, tiley, DEFAULT_OUTPUT_ZOOM):
                     setattr(cld, 'tile_exists', True)
-            result = {'clouds': clouds}
+            result = {'clouds': clouds, 'location': [point.x, point.y]}
             context.update({'result': result})
             return render(request, 'admin/mmwave/check_lidar_availability.html', context=context)
         except Exception as e:

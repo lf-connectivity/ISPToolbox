@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http.response import JsonResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.contrib.admin.views.decorators import staff_member_required
@@ -9,6 +10,7 @@ from django.contrib.gis.geos import Point
 from mmwave.lidar_utils.SlippyTiles import deg2num, DEFAULT_OUTPUT_ZOOM
 from django.contrib import admin
 import logging
+import json
 
 
 @method_decorator(staff_member_required, name="dispatch")
@@ -44,3 +46,22 @@ class CheckLidarDSMAvailability(LoginRequiredMixin, View):
         except Exception as e:
             logging.error(e)
             return redirect(request.get_full_path())
+
+    def put(self, request):
+        request_json = json.loads(request.body.decode('utf-8'))
+        coords = request_json['coords']
+        point = Point(x=float(coords[0]), y=float(coords[1]))
+        clouds = models.EPTLidarPointCloud.query_intersect_aoi(
+            point)
+        tilex, tiley = deg2num(point.y, point.x)
+        for cld in clouds:
+            if cld.existsTile(tilex, tiley, DEFAULT_OUTPUT_ZOOM):
+                setattr(cld, 'tile_exists', True)
+        result = {'clouds': [
+            {
+                'name': cloud.name,
+                'exists': getattr(cloud, 'tile_exists', False)
+            } for cloud in clouds
+        ]}
+
+        return JsonResponse(result)

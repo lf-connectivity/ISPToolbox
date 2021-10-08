@@ -1,4 +1,8 @@
 import * as MapboxGL from 'mapbox-gl';
+import { getCookie } from './utils/Cookie';
+import { djangoUrl } from './utils/djangoUrl';
+import { getVersion } from './utils/MapPreferences';
+var _ = require('lodash');
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -7,12 +11,48 @@ const LOW_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'low-res-lidar-boundary-source'
 const LOW_RESOLUTION_LIDAR_AVAILABILITY_LAYER = 'low-res-lidar-boundary-layer';
 const HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE = 'high-res-lidar-boundary-source';
 const HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER = 'high-res-lidar-boundary-layer';
+const DSM_UNAVAILABLE_SOURCE = 'dsm-unavailable-source';
+
 const MAPBOX_OVERLAY_URL = 'isptoolbox.highreslidarboundary';
+const MAPBOX_DSM_UNAVAILABLE_OVERLAY_URL = 'isptoolbox.dsm_unavailable_boundary';
+const MAPBOX_DSM_AVAILABLE_OVERLAY_URL = 'isptoolbox.dsm_available_boundary';
 const MAPBOX_OVERLAY_LAYER = 'original';
 const AVAILABILITY_PAINT_FILL_STYLE = {
     'fill-color': '#687B8B',
     'fill-opacity': 0.77
 };
+
+const SOURCES = {
+    lidar_boundary: {
+        source: 'high-res-lidar-boundary-source',
+        layer: 'high-res-lidar-boundary-layer',
+        url: 'isptoolbox.highreslidarboundary',
+        fill_style: AVAILABILITY_PAINT_FILL_STYLE,
+        admin_message: 'LiDAR Data Not Available Here'
+    },
+    dsm_unavailable: {
+        source: 'dsm-unavailable-source',
+        layer: 'dsm-unavailable-layer',
+        url: 'isptoolbox.dsm_unavailable_boundary',
+        fill_style: {
+            'fill-color': '#f23e3e',
+            'fill-opacity': 0.3
+        },
+        admin_message: 'DSM Tiles Not Available Here'
+    },
+    dsm_available: {
+        source: 'dsm-available-source',
+        layer: 'dsm-available-layer',
+        url: 'isptoolbox.dsm_available_boundary',
+        fill_style: {
+            'fill-color': '#42B72a',
+            'fill-opacity': 0.3
+        },
+        admin_message: 'DSM Tiles Available Here'
+    }
+};
+
+type SourceType = 'lidar_boundary' | 'dsm_unavailable' | 'dsm_available';
 
 export default class LidarAvailabilityLayer {
     map: MapboxGL.Map;
@@ -24,39 +64,130 @@ export default class LidarAvailabilityLayer {
             closeOnClick: false,
             className: 'lidar-availability-popup'
         });
-        this.getHighResolutionTileSet();
+
+        this.setupLidarAvailability();
     }
 
-    getHighResolutionTileSet() {
-        this.map.addSource(HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE, {
+    protected setPopup(message: string, lngLat: MapboxGL.LngLat) {
+        this.popup.setLngLat(lngLat).setHTML(message).addTo(this.map);
+    }
+
+    protected onMouseEnter(e: any) {
+        // Change the cursor style as a UI indicator.
+        this.map.getCanvas().style.cursor = 'pointer';
+        this.setPopup('Data Not<br>Available Here', e.lngLat);
+    }
+
+    protected onMouseMove(e: any) {
+        this.setPopup('Data Not<br>Available Here', e.lngLat);
+    }
+
+    protected onMouseLeave(e: any) {
+        this.map.getCanvas().style.cursor = '';
+        this.popup.remove();
+    }
+
+    protected setupSource(source: SourceType) {
+        let info = SOURCES[source];
+        this.map.addSource(info.source, {
             type: 'vector',
-            url: `mapbox://${MAPBOX_OVERLAY_URL}` //TODO: replace with overlay url object from server
+            url: `mapbox://${info.url}` //TODO: replace with overlay url object from server
         });
         this.map.addLayer({
-            id: HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER,
+            id: info.layer,
             type: 'fill',
-            source: HIGH_RESOLUTION_LIDAR_AVAILABILITY_SOURCE,
+            source: info.source,
             'source-layer': MAPBOX_OVERLAY_LAYER, // TODO: replace with source-layer from overlay object django
             layout: {},
-            paint: AVAILABILITY_PAINT_FILL_STYLE
-        });
-        this.map.on('mouseenter', HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER, (e: any) => {
-            // Change the cursor style as a UI indicator.
-            this.map.getCanvas().style.cursor = 'pointer';
-            var description = 'LiDAR Data Not<br>Available Here';
-
-            // Populate the popup and set its coordinates
-            // based on the feature found.
-            this.popup.setLngLat(e.lngLat).setHTML(description).addTo(this.map);
+            paint: info.fill_style
         });
 
-        this.map.on('mousemove', HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER, (e: any) => {
-            this.popup.setLngLat(e.lngLat);
-        });
+        this.map.on('mouseenter', info.layer, this.onMouseEnter.bind(this));
+        this.map.on('mousemove', info.layer, this.onMouseMove.bind(this));
+        this.map.on('mouseleave', info.layer, this.onMouseLeave.bind(this));
+    }
 
-        this.map.on('mouseleave', HIGH_RESOLUTION_LODAR_AVAILABILITY_LAYER, (e: any) => {
-            this.map.getCanvas().style.cursor = '';
-            this.popup.remove();
+    protected setupLidarAvailability() {
+        let sources = ['lidar_boundary'] as Array<SourceType>;
+
+        sources.forEach((source) => {
+            this.setupSource(source);
+        });
+    }
+}
+
+export class AdminLidarAvailabilityLayer extends LidarAvailabilityLayer {
+    setCloudNames: any;
+    constructor(map: MapboxGL.Map) {
+        super(map);
+    }
+
+    protected setPopup(message: string, lngLat: MapboxGL.LngLat) {
+        super.setPopup(`${message}<br>(${lngLat.lat}, ${lngLat.lng})`, lngLat);
+    }
+
+    protected lookupLidarNames(lngLat: MapboxGL.LngLat) {
+        $.ajax({
+            url: '/admin/tile-check/',
+            data: JSON.stringify({ coords: [lngLat.lng, lngLat.lat] }),
+            method: 'PUT',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        }).done((resp) => {
+            console.log(resp);
+            let cloudsMsg = resp.clouds
+                .map((cloud: any) => {
+                    return `${cloud.name}: ${cloud.exists ? 'has tile ✅' : 'no tile ❌'}`;
+                })
+                .join('<br>');
+
+            this.setPopup(`Clouds:<br>${cloudsMsg}`, lngLat);
+        });
+    }
+
+    protected setPopupNoDebounce(e: any) {
+        ['lidar_boundary', 'dsm_available', 'dsm_unavailable'].forEach((type: SourceType) => {
+            if (
+                this.map.queryRenderedFeatures(e.point, {
+                    layers: [SOURCES[type].layer]
+                }).length
+            ) {
+                this.setPopup(SOURCES[type].admin_message, e.lngLat);
+            }
+        });
+    }
+
+    protected onMouseEnter(e: any) {
+        // Change the cursor style as a UI indicator.
+        this.map.getCanvas().style.cursor = 'pointer';
+        this.setPopupNoDebounce(e);
+        this.setCloudNames(e);
+    }
+
+    protected onMouseMove(e: any) {
+        this.setPopupNoDebounce(e);
+        this.setCloudNames(e);
+    }
+
+    protected onMouseLeave(e: any) {
+        super.onMouseLeave(e);
+        this.setCloudNames.cancel();
+    }
+
+    protected setupLidarAvailability() {
+        let sources = ['lidar_boundary', 'dsm_available', 'dsm_unavailable'] as Array<SourceType>;
+        this.setCloudNames = _.debounce((e: any) => {
+            if (
+                this.map.queryRenderedFeatures(e.point, {
+                    layers: [SOURCES['dsm_available'].layer, SOURCES['dsm_unavailable'].layer]
+                }).length
+            ) {
+                this.lookupLidarNames(e.lngLat);
+            }
+        }, 300);
+        sources.forEach((source) => {
+            this.setupSource(source);
         });
     }
 }

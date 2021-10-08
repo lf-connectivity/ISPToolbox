@@ -1,18 +1,35 @@
 {% extends "admin/base_site.html" %}
 {% load i18n %}
+{% load static %}
 
 {% block content %}
-<h1>{%blocktranslate%}DSM Tile Checker{% endblocktranslate%}</h1>
-<p>{%blocktranslate%}Use this tool to check what datasets intersect the geometry and if DSM Tiles are available:{% endblocktranslate%}</p>
-{% if result %}
-{% for cloud in result.clouds%}
-<a href="{{cloud.admin_url}}">{{cloud.name}}</a> - {% if cloud.tile_exists %} has tile ✅ {% else %} no tile ❌{% endif %}
-{% endfor %}
-{% endif %}
-<form method="POST" action="{% url 'mmwave:tile-check'%}">
-<input type="text" value="37.32863, -97.57998" name="location"> <label>{%blocktranslate%}enter latitude longitude eg: "37.32863, -97.57998"{% endblocktranslate%}</label>
-{% csrf_token %}
-<input type="submit" value="Check">
-</form>
+  {% include "workspace/molecules/page_header.html" %}
+  {% include "workspace/molecules/page_header_network.html" %}
+  {% include "workspace/atoms/mapbox_global_public_key.html" %}
+  {% include "workspace/organisms/map_view_base.html" %}
+  <h1>{%blocktranslate%}DSM Tile Checker{% endblocktranslate%}</h1>
+    <p>{%blocktranslate%}Use this tool to check what datasets intersect the geometry and if DSM Tiles are available:{% endblocktranslate%}</p>
+    {% if result %}
+    {% for cloud in result.clouds%}
+    <a href="{{cloud.admin_url}}">{{cloud.name}}</a> - {% if cloud.tile_exists %} has tile ✅ {% else %} no tile ❌{% endif %}
+    {% endfor %}
+    {% endif %}
+    <form method="POST" action="{% url 'mmwave:tile-check'%}">
+    <input type="text" value="37.32863, -97.57998" name="location"> <label>{%blocktranslate%}enter latitude longitude eg: "37.32863, -97.57998"{% endblocktranslate%}</label>
+    {% csrf_token %}
+    <input type="submit" value="Check">
+  </form>
+  <script async src="{% static "dsm_admin.min.js" %}"> </script>
+  <script type="text/javascript">
+    var networkID = "{{ networkID }}";
+    var ISPTOOLBOX_SESSION_INFO = {
+      initialMapCenter: {
+          type: 'Point',
+          coordinates: [-97.03125, 36.59789]
+      },
+      initialMapZoom: 3.75,
+      units: "US"
+    };
+  </script>
 {{block.super}}
 {% endblock content%}

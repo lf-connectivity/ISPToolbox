@@ -5,6 +5,7 @@ module.exports = {
         wireless_network: '/src/apps/wireless_network.app.ts',
         market_evaluator: '/src/apps/MarketEvaluatorApp.ts',
         dsm_app: '/src/apps/IspToolboxDSMApp.ts',
+        dsm_admin: '/src/apps/DSMAdminApp.ts',
         login_signup: '/src/login/login_signin.ts',
         latest_lidar: '/src/apps/LatestLiDARApp.ts',
         multiplayer_test: '/src/apps/MultiplayerDemoApp.ts',

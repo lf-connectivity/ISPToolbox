@@ -9,6 +9,7 @@ from gis_data.models.hrsl import HrslUsa15
 from towerlocator.helpers import getViewShed
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from django.contrib.humanize.templatetags.humanize import intcomma
+import logging
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -57,10 +58,14 @@ def genMedianIncome(pipeline_uuid, channelName, uuid, read_only=False):
     num_buildings = 0
     while not result.get('done', False):
         result = medianIncome(include, result, read_only=False)
-        averageMedianIncome = (
-            num_buildings * averageMedianIncome +
-            result.get('averageMedianIncome', 0) * result.get('numbuildings', 1)
-        ) / (num_buildings + result.get('numbuildings', 1))
+        try:
+            averageMedianIncome = (
+                num_buildings * averageMedianIncome +
+                result.get('averageMedianIncome', 0) * result.get('numbuildings', 1)
+            ) / (num_buildings + result.get('numbuildings', 1))
+        except ZeroDivisionError:
+            logging.error(f'uuid: {pipeline_uuid} - produced divide by zero error')
+            averageMedianIncome = 0
         num_buildings += result.get('numbuildings', 1)
         resp = {'averageMedianIncome': averageMedianIncome, 'done': result['done']}
         if 'error' in result:

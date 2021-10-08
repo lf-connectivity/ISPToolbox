@@ -141,15 +141,18 @@ class TileModel(models.Model, s3.S3PublicExportMixin):
     """
     Slippy Tile that points to binary blob with DSM data
     """
-    zoom = models.IntegerField()
-    x = models.IntegerField()
-    y = models.IntegerField()
+    zoom = models.IntegerField(db_index=True)
+    x = models.IntegerField(db_index=True)
+    y = models.IntegerField(db_index=True)
     created = models.DateTimeField(auto_now_add=True)
 
     bucket_name = 'isptoolbox-export-file'
     tile = models.FileField(
         storage=S3Boto3Storage(bucket_name=bucket_name),
     )
+
+    # class Meta:
+    #     unique_together = [['x', 'y', 'z']]
 
     def save_tile(self, content, save=True):
         return self.tile.save(self.get_s3_key(), content, save)
@@ -170,6 +173,9 @@ class LidarDSMTileModel(TileModel):
     """
     cld = models.ForeignKey(EPTLidarPointCloud, on_delete=models.CASCADE)
     bucket_name = 'isptoolbox-export-file'
+
+    # class Meta:
+    #     unique_together = [['x', 'y', 'zoom', 'cld']]
 
     def upload_to_path(instance, filename):
         prefix = "dsm/tiles_test"

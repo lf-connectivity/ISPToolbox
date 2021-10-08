@@ -14,11 +14,8 @@
     {% endblock %}
 
     <div class="workspace-container">
-      <div class="mobile-overlay-lock">
-        {% include "workspace/organisms/disable_mobile_use.html" %}
-      </div>
       {% block content %}
-      {% endblock %}
+      {% endblock content %}
     </div>
     {% block footer%}
     {% endblock %}

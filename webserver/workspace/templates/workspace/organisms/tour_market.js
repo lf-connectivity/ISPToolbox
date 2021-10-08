@@ -146,14 +146,12 @@ $(() => {
     disclaimer.start();
     {% endnux %}
     {% show_nux market_nux %}
-    if (!$('.mobile-overlay-lock').is(':visible')) {
-        if (disclaimer.isActive()) {
-            disclaimer.once('cancel', () => {
-                tour.start();
-            })
-        } else {
+    if (disclaimer.isActive()) {
+        disclaimer.once('cancel', () => {
             tour.start();
-        }
+        })
+    } else {
+        tour.start();
     }
     {% endnux %}
 

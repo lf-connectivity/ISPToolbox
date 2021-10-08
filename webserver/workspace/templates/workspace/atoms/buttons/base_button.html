@@ -2,7 +2,18 @@
     {{extra_params|default:''}} id="{{button_id}}" {% if button_draw_mode %} draw_mode="{{button_draw_mode}}"
     {% endif %}>
     {% if button_icon %}
-    <div style="margin-right: 1em">{% include button_icon %}</div>
+    <div>{% include button_icon %}</div>
     {% endif %}
-    {{button_text}}
+    <span id="{{button_id}}_txt" class="ml-3 d-none d-lg-block">{{button_text}}</span>
 </button>
+<script>
+$(()=>{
+    $('#{{button_id}}').mouseenter( (event) => {
+        $('#{{button_id}}_txt').removeClass('d-none');    
+    })
+    $('#{{button_id}}').mouseleave( (event) => {
+        $('#{{button_id}}_txt').addClass('d-none');         
+    })
+
+})
+</script>

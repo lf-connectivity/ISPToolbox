@@ -1,34 +1,11 @@
 @import ../theme
 
-.mobile-overlay-lock
-    display: none !important
-    background-color: rgba(0,0,0,0.8)
-    z-index: 2000
-    .heading-container
-        position: relative
-        margin-left: 30px
-    .stylistic-element
-        position: absolute
-        background-color: $brand-primary-color
-        height: 100%
-        width: 3px
-    .heading
-        color: $white-color
-        padding-top: calc(100vh*0.2)
-        margin: 0 30px
-        line-height: 2.8rem
-
 .website-content
     height: 100%
     .planner-map
         width: 100%
 
 @media (max-width: $breakpoint-md)
-    .mobile-overlay-lock
-        display: block !important
-        position: fixed
-        height: 100%
-        width: 100%
     .website-content
         overflow-y: auto
         flex-direction: column

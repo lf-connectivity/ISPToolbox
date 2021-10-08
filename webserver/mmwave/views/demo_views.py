@@ -29,8 +29,10 @@ class NetworkDemoView(View):
     Demo view for LOS check, allows iframing, Access Points - All Foreign Key'd on
     Django Session
     """
+
     def get(self, request):
-        map_session, created = WorkspaceMapSession.get_or_create_demo_view(request)
+        map_session, created = WorkspaceMapSession.get_or_create_demo_view(
+            request)
         context = {
             'session': map_session,
             'geojson': map_session.get_session_geojson(),
@@ -51,6 +53,7 @@ class LOSCheckDemo(View):
     Demo view for LOS check, allows iframing, limited functionality, renders suggestion
     to sign up and unlock full version
     """
+
     def get(self, request, network_id=None):
         fbid = int(request.GET.get('id', 0))
         networkID = uuid.uuid4()
@@ -58,7 +61,8 @@ class LOSCheckDemo(View):
         lon = request.GET.get('lon', None)
         units = request.GET.get('units', 'US')
         beta = request.GET.get('beta', False)
-        beta = True if isinstance(beta, str) and beta.lower() == 'true' else False
+        beta = True if isinstance(
+            beta, str) and beta.lower() == 'true' else False
 
         # Make a deep copy of the sample points to avoid changing the samples for other requests
         tx = copy.deepcopy(samples.sunflower['tx'])
@@ -81,6 +85,7 @@ class LOSCheckDemo(View):
             'workspace_account': False,
             'ptponly': True,
             'tool': 'market_evaluator',
+            'demo_network_view': True,
         }
 
         # we're in demo view: suggest user sign-in or create an account
@@ -97,6 +102,7 @@ class DSMExportView(View):
     Demo view for DSM App, allows iframing, limited functionality, renders suggestion
     to sign up and unlock full version
     """
+
     def get(self, request):
         lat = request.GET.get('lat', None)
         lon = request.GET.get('lon', None)
@@ -124,7 +130,8 @@ class CreateExportDSM(View):
             aoi_form = DSMExportAOIFileForm(request.POST, request.FILES)
             request_area = None
             if aoi_form.is_valid():
-                request_area = GEOSGeometry(json.dumps(aoi_form.convertToAOI()))
+                request_area = GEOSGeometry(
+                    json.dumps(aoi_form.convertToAOI()))
             else:
                 request_area = GEOSGeometry(json.dumps(
                     json.load(request).get('aoi', {})
@@ -180,13 +187,15 @@ class LatestLidarView(View):
         previous_month = month - 1 or 12
         previous_year = year if month - 1 else year - 1
         if previous_year >= 2021 and previous_month > 3:
-            previous_url = reverse('demo-latest_gis', kwargs={'month': previous_month, 'year': previous_year})
+            previous_url = reverse(
+                'demo-latest_gis', kwargs={'month': previous_month, 'year': previous_year})
         else:
             previous_url = None
         next_month = month + 1 if month + 1 <= 12 else 1
         next_year = year if month + 1 <= 12 else year + 1
         if datetime(year=next_year, month=next_month, day=1) <= datetime.today():
-            next_url = reverse('demo-latest_gis', kwargs={'month': next_month, 'year': next_year})
+            next_url = reverse('demo-latest_gis',
+                               kwargs={'month': next_month, 'year': next_year})
         else:
             next_url = None
 

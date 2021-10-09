@@ -153,6 +153,7 @@ class TileModel(models.Model, s3.S3PublicExportMixin):
 
     class Meta:
         unique_together = [['x', 'y', 'z']]
+        abstract = True
 
     def save_tile(self, content, save=True):
         return self.tile.save(self.get_s3_key(), content, save)
@@ -162,9 +163,6 @@ class TileModel(models.Model, s3.S3PublicExportMixin):
 
     def existsTile(self, **kwargs):
         return self.check_object()
-
-    class Meta:
-        abstract = True
 
 
 class LidarDSMTileModel(TileModel):

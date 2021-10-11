@@ -28,7 +28,7 @@ def convertPtCloudToDSMTiled(pk: int):
             createTileDSM.delay(tile, DEFAULT_OUTPUT_ZOOM, pk)
 
 
-@app.task(default_retry_delay=30, max_retries=3, time_limit=30, soft_time_limit=20)
+@app.task(default_retry_delay=30, max_retries=3, soft_time_limit=120)
 def createTileDSM(tile: tuple, z: int, pk: int):
     logger.info(f'creating tile: {(tile, z, pk)}')
     try:
@@ -48,5 +48,6 @@ def createTileDSM(tile: tuple, z: int, pk: int):
         lidartile.save()
         logger.info(f'done creating tile: {(tile, z, pk)}')
         return lidartile.pk
-    except SoftTimeLimitExceeded:
+    except SoftTimeLimitExceeded as e:
         logger.error(f'time limit exceeded: {(tile, z, pk)}')
+        raise e

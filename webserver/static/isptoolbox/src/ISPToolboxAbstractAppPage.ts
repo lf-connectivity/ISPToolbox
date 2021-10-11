@@ -44,7 +44,7 @@ function addEventHandler(
 export abstract class ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
     draw: MapboxDraw;
-    geocoder: typeof MapboxGeocoder;
+    geocoder: MapboxGeocoder;
     analyticsService: AnalyticsService;
 
     constructor(draw_modes: any, sources_page: string) {

@@ -262,7 +262,6 @@ class AccessPointCoverageStatsView(View):
         return JsonResponse(coverage.coverageStatistics())
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class AnalyticsView(View, mixins.ListModelMixin):
     def post(self, request):
 

@@ -1,3 +1,5 @@
+import { getCookie } from './utils/Cookie';
+
 interface Event {
     eventType: string;
     sessionId?: string;
@@ -30,7 +32,8 @@ class AnalyticsService {
             mode: 'same-origin',
             credentials: 'same-origin',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken') ?? ''
             },
             body: JSON.stringify(event)
         });

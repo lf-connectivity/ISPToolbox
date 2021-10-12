@@ -20,12 +20,15 @@ class AnalyticsEvent(models.Model):
     url = models.TextField()
     session_id = models.CharField(max_length=255)
     event_type = models.CharField(max_length=255)
+    created_at = models.CharField(max_length=255)
 
 
 class AnalyticsSerializer(serializers.ModelSerializer):
+    id = serializers.CharField()
     url = serializers.CharField()
     session_id = serializers.CharField()
     event_type = serializers.CharField()
+    created_at = serializers.CharField()
 
     class Meta:
         model = AnalyticsEvent

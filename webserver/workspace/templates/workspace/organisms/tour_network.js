@@ -126,12 +126,17 @@ $(() => {
     disclaimer.start();
     {% endnux %}
     {% show_nux network_nux %}
+    const start_tour = () => {
+        if ($("#tool_help_button").is(":visible")) {
+            tour.start();
+        }
+    }
     if (disclaimer.isActive()) {
         disclaimer.once('cancel', () => {
-            tour.start();
+            start_tour();
         })
     } else {
-        tour.start();
+        start_tour();
     }
     {% endnux %}
     $('#tool_help_button').on('click', () => {

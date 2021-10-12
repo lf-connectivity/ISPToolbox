@@ -274,7 +274,7 @@ class AnalyticsView(View, mixins.ListModelMixin):
             'url': url,
             'session_id': session_id,
             'event_type': event_type,
-            'created_at': time.time()
+            'created_at': int(time.time())
         }
 
         event_item = AnalyticsEvent.objects.create(**event_data)
@@ -283,7 +283,7 @@ class AnalyticsView(View, mixins.ListModelMixin):
         return JsonResponse(res, status=201)
 
     def get(self, request):
-        timestamp = request.get('after', 0)
+        timestamp = request.GET.get('after', 0)
         queryset = AnalyticsEvent.objects.filter(created_at__gte=timestamp)
         serializer = AnalyticsSerializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)

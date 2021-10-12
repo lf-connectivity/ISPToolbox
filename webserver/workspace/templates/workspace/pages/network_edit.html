@@ -45,5 +45,7 @@
 {% endblock %}
 
 {% block footer %}
-
+    {% if not demo_network_view %}
+      {% include 'workspace/molecules/network_disclaimer.html' %}
+    {% endif %}
 {% endblock footer %}

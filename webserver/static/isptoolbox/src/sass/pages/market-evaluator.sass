@@ -17,16 +17,16 @@
 
 .market-eval-container
     display: flex
-    flex-direction: row
+    flex-flow: column
     justify-content: flex-start
     align-items: center
     height: 100%
+    #map
+        min-height: 400px
+
+@media (min-width: $breakpoint-md)
+    .market-eval-container
+        flex-flow: row
 
     #map
         min-height: calc(100vh - 50px)
-
-@media (max-width: $breakpoint-md) 
-    .market-eval-container
-        flex-flow: column
-    #map
-        min-height: 500px

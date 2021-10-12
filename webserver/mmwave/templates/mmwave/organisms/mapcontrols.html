@@ -1,6 +1,6 @@
 <div id="switch-view-buttons" class="col d-flex justify-content-center">
     <div id="3d-controls" class="d-none">
-        <div style="position: absolute; bottom: 35px; left: 10px;">
+        <div style="position: absolute; bottom: 35px; left: 10px; z-index: 1020;">
             <button type="button" class="btn isptoolbox-btn btn-primary" id="3d-pause-play">
                 <div id="pause-button-3d">
                     <svg width="1em" height="1em" viewBox="0 0 16 16" style="margin-right: 0;" class="bi bi-pause-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -15,7 +15,7 @@
             </button>
         </div>
     </div>
-    <div class="d-flex justify-content-center" style="position: absolute; top: -30px">
+    <div class="d-flex justify-content-center" style="position: absolute; top: -30px; z-index: 1020;">
         <button type="button" class="btn isptoolbox-btn btn-primary btn-large" id="map-view-btn">
             Map View
         </button>
@@ -27,7 +27,7 @@
             3D View
         </button>
     </div>
-    <div id="point-cloud-loading-status" class="pt-cloud-loading row d-none" style="position: absolute; right: 1em; top: -2em;">
+    <div id="point-cloud-loading-status" class="pt-cloud-loading row d-none" style="position: absolute; right: 1em; top: -2em; z-index: 1020;">
         {% with spinner_style="height: 25px;" blink=True spinner_classes="mx-auto mb-3" %}  
             {% include "workspace/atoms/components/loading_spinner.html" %}
         {% endwith %}  

@@ -41,13 +41,25 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     }
 
     windowResizeCallback() {
-        const disclaimer_height = $('footer').outerHeight();
-        $('#map, .workspace-container').css(
-            'min-height',
-            `calc(100vh - 50px - ${disclaimer_height}px)`
-        );
+        const window_height = $(window).height() ?? 0;
+        const window_width = $(window).width() ?? 0;
+        const disclaimer_height = $('footer').outerHeight() ?? 0;
+
+        if (window_height - disclaimer_height - 50 < 400 || window_width < 768) {
+            $('#map, .workspace-container').css('min-height', `400px`);
+            $('#map-layer-sidebar').css('max-height', `400px`);
+        } else {
+            $('#map, .workspace-container').css(
+                'min-height',
+                `calc(100vh - 50px - ${disclaimer_height}px)`
+            );
+            $('#map-layer-sidebar').css(
+                'max-height',
+                `calc(100vh - 50px - ${disclaimer_height}px)`
+            );
+        }
         $('.workspace-container').css('height', `calc(100vh - 50px - ${disclaimer_height}px)`);
-        $('#map-layer-sidebar').css('max-height', `calc(100vh - 50px - ${disclaimer_height}px)`);
+
         if (this.map?.resize) {
             this.map.resize();
         }

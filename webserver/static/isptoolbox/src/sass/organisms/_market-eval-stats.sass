@@ -5,14 +5,12 @@
     flex-direction: row
 
 .market-stats-column
+    position: relative
+    width: 100%
+    max-width: none
+    overflow-y: visible
+
     background-color: $brand-theme-color
-    width: 25%
-    height: 100%
-    min-width: 350px
-    max-width: 400px
-    overflow-y: scroll
-    -ms-overflow-style: none
-    scrollbar-width: none
 
     &::-webkit-scrollbar
         display: none
@@ -26,13 +24,15 @@
         padding: 0
         margin-bottom: 0
 
-@media (max-width: $breakpoint-md)
+@media (min-width: $breakpoint-md)
     .market-stats-column
-        position: relative
-        width: 100%
-        max-width: none
-        overflow-y: visible
-        min-width: none
+        width: 25%
+        height: 100%
+        min-width: 350px
+        max-width: 400px
+        overflow-y: scroll
+        -ms-overflow-style: none
+        scrollbar-width: none
 
 .market-eval-section
     background-color: $white-color

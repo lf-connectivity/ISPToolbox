@@ -280,20 +280,20 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     }
 
     windowResizeCallback() {
-        const window_height = $(window).height();
-        const bottom_row_height = $('#bottom-row-link-view-container').height();
-        const disclaimer_height = $('footer').outerHeight(true);
-        const nav_height = $('#workspacenavelem').outerHeight(true);
-        let height =
-            window_height != null && bottom_row_height != null
-                ? window_height - bottom_row_height
-                : 0;
-        if (disclaimer_height && height) {
-            height -= disclaimer_height;
+        const window_height = $(window).height() ?? 0;
+        const window_width = $(window).width() ?? 0;
+        const bottom_row_height = $('#bottom-row-link-view-container').outerHeight(true) ?? 0;
+        const disclaimer_height = $('footer').outerHeight(true) ?? 0;
+        const nav_height = $('#workspacenavelem').outerHeight(true) ?? 0;
+        let height = window_height - bottom_row_height - disclaimer_height;
+        if (window_width <= 992) {
+            $('.workspace-container').css(
+                'min-height',
+                `calc(100vh - 50px - ${disclaimer_height}px)`
+            );
+            $('.workspace-container').css('height', `calc(100vh - 50px - ${disclaimer_height}px)`);
         }
-        $('.workspace-container').css('min-height', `calc(100vh - 50px - ${disclaimer_height}px)`);
-        $('.workspace-container').css('height', `calc(100vh - 50px - ${disclaimer_height}px)`);
-        height = nav_height != null ? height - nav_height : height;
+        height = height - nav_height;
         height = Math.max(height, 400);
         $('#map').height(height);
         if (this.map?.resize) {

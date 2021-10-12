@@ -20,6 +20,7 @@ import { hasCookie } from '../utils/Cookie';
 import { calculateMaximumFresnelRadius } from '../LinkCalcUtils';
 import { LinkCheckPage } from '../LinkCheckPage';
 import { calculateLookVector } from '../HoverMoveLocation3DView';
+import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 
 let potree = (window as any).Potree as null | typeof Potree;
 if (!(window as any).webgl2support) {
@@ -103,6 +104,8 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
         }
 
         $('#3D-view-btn').click(() => {
+            // TODO Cleanup achong: - hide maplayers cleanly
+            MapLayerSidebarManager.getInstance().hide();
             if (this.currentView === 'map') {
                 $('#3D-view-btn').addClass('btn-primary').removeClass('btn-secondary');
                 $('#map-view-btn').addClass('btn-secondary').removeClass('btn-primary');

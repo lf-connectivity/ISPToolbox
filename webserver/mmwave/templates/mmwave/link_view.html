@@ -1,8 +1,5 @@
-<div class="fixed-bottom link-view-bar">
+<div class="link-view-bar" style="z-index: 1020">
     {% include "mmwave/organisms/mapcontrols.html" %}
     {% include "mmwave/atoms/collapse_button.html" %}
     {% include "mmwave/molecules/link_profile.html" %}
-    {% if not demo_network_view %}
-    {% include 'workspace/molecules/network_disclaimer.html' %}
-    {% endif %}
 </div>

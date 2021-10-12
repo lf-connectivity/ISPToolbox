@@ -156,12 +156,18 @@ $(() => {
     {% endnux %}
 
     $('#tool_help_button').on('click', () => {
-        tour.cancel();
-        tour.start();
+        if (tour.isActive()) {
+            tour.cancel();
+        } else {
+            tour.start();
+        }
     });
     $('#disclaimer-link').on('click', () => {
-        disclaimer.cancel();
-        disclaimer.start();
+        if (disclaimer.isActive()) {
+            disclaimer.cancel();
+        } else {
+            disclaimer.start();
+        }
     });
 })
 

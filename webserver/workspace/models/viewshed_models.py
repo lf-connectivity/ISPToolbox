@@ -135,7 +135,11 @@ class Viewshed(models.Model, S3PublicExportMixin):
             if status_callback is not None:
                 status_callback("Loading DSM Data",
                                 self.__timeRemainingViewshed(0))
-            dsm_engine.getDSM(dsm_file.name)
+            try:
+                dsm_engine.getDSM(dsm_file.name)
+            except:
+                raise DSMAvailabilityException
+
             TASK_LOGGER.info(f'dsm download: {time.time() - start}')
             if status_callback is not None:
                 status_callback("Computing Coverage",
@@ -201,6 +205,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                 dsm_file.name, output_temp.name, DEFAULT_PROJECTION)
             filtered_command = shlex.split(raw_command)
             celery_task_subprocess_check_output_wrapper(filtered_command)
+
             TASK_LOGGER.info(f'compute viewshed: {time.time() - start}')
             start_tiling = time.time()
 
@@ -304,6 +309,10 @@ class Viewshed(models.Model, S3PublicExportMixin):
         raw_command = self.__createGdal2TileCommand(tif_filepath, outputfolder)
         filtered_command = shlex.split(raw_command)
         subprocess.check_output(filtered_command, encoding="UTF-8")
+
+
+class DSMAvailabilityException(Exception):
+    pass
 
 
 class ViewshedTile(TileModel):

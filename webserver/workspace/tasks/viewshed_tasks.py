@@ -1,6 +1,6 @@
 from celery.utils.log import get_task_logger
 from traceback import format_exc
-from workspace.models.viewshed_models import Viewshed
+from workspace.models.viewshed_models import DSMAvailabilityException, Viewshed
 import json
 import subprocess
 from webserver.celery import celery_app as app
@@ -32,6 +32,13 @@ def computeViewshedCoverage(network_id, data, user_id):
             'uuid': ap_uuid,
         }
         sendMessageToChannel(network_id, resp)
+    except DSMAvailabilityException as e:
+        resp = {
+            'type': 'ap.unexpected_error',
+            'msg': "Viewshed data is currently unavailable for this area. You can still view obstructions by placing a PtP Link to an outlined rooftop.",
+            'uuid': ap_uuid,
+        }
+        sendMessageToChannel(network_id, resp)
     except Exception as e:
         # Log this scheisse to cloudwatch
         TASK_LOGGER.error(f'Task failed: {str(e)}')
@@ -46,13 +53,20 @@ def computeViewshedCoverage(network_id, data, user_id):
 
 
 def create_progress_status_callback(network_id: str, ap_uuid: str):
-    def progress_status_callback(msg, time_remaining):
-        resp = {
-            'type': 'ap.viewshed_progress',
-            'progress': msg,
-            'time_remaining': time_remaining,
-            'uuid': ap_uuid,
-        }
+    def progress_status_callback(msg, time_remaining, type_msg='ap.viewshed_progress'):
+        if type_msg == 'ap.viewshed_progress':
+            resp = {
+                'type': type_msg,
+                'progress': msg,
+                'time_remaining': time_remaining,
+                'uuid': ap_uuid,
+            }
+        else:
+            resp = {
+                'type': type_msg,
+                'msg': msg,
+                'uuid': ap_uuid,
+            }
         sendMessageToChannel(network_id, resp)
     return progress_status_callback
 

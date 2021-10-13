@@ -53,20 +53,13 @@ def computeViewshedCoverage(network_id, data, user_id):
 
 
 def create_progress_status_callback(network_id: str, ap_uuid: str):
-    def progress_status_callback(msg, time_remaining, type_msg='ap.viewshed_progress'):
-        if type_msg == 'ap.viewshed_progress':
-            resp = {
-                'type': type_msg,
-                'progress': msg,
-                'time_remaining': time_remaining,
-                'uuid': ap_uuid,
-            }
-        else:
-            resp = {
-                'type': type_msg,
-                'msg': msg,
-                'uuid': ap_uuid,
-            }
+    def progress_status_callback(msg, time_remaining):
+        resp = {
+            'type': 'ap.viewshed_progress',
+            'progress': msg,
+            'time_remaining': time_remaining,
+            'uuid': ap_uuid,
+        }
         sendMessageToChannel(network_id, resp)
     return progress_status_callback
 

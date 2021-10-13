@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 from rest_framework import serializers
-from datetime import datetime
 
 
 class ISPCompany(models.Model):
@@ -29,7 +28,7 @@ class AnalyticsSerializer(serializers.ModelSerializer):
     url = serializers.CharField()
     session_id = serializers.CharField()
     event_type = serializers.CharField()
-    #created_at = serializers.CharField()
+    created_at = serializers.CharField()
 
     class Meta:
         model = AnalyticsEvent

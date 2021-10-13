@@ -285,6 +285,5 @@ class AnalyticsView(View, mixins.ListModelMixin):
         s = request.GET.get('after', '2020-01-01T01:00:00.000000-00:00')
         timestamp = dateutil.parser.parse(s)
         queryset = AnalyticsEvent.objects.filter(created_at__gte=timestamp)
-        # queryset = AnalyticsEvent.objects.all()
         serializer = AnalyticsSerializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)

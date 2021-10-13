@@ -1,7 +1,7 @@
 {% load rest_framework %}
 
 <tr class="tower-row">
-    <td class="tower-row-num" scope="row">{{ forloop.counter0|add:offset }}</td>
+    <td class="align-middle" scope="row">{{ forloop.counter0|add:offset }}</td>
     <td><input name="name" type="text" value="{{ ap.name }}" ap-uuid-target="{{ap.uuid}}" disabled></td>
     <td>
         <div class="input-group metric-input">
@@ -45,7 +45,7 @@
     <td><input name="latitude" type="text" value="{{ ap.lat }}" ap-uuid-target="{{ap.uuid}}" disabled></td>
     <td><input name="longitude" type="text" value="{{ ap.lng }}" ap-uuid-target="{{ap.uuid}}" disabled></td>
 
-    <td class="last-updated">{{ap.last_updated|lower}}</td>
+    <td class="align-middle">{{ap.last_updated|lower}}</td>
 
     <td>
         <div class="btn-group" role="group" aria-label="edit-btn-group">

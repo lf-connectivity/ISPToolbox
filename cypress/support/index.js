@@ -68,3 +68,16 @@ Cypress.Commands.add("create_session", () => {
 Cypress.Commands.add("wait_mapbox", () => {
   cy.get(".mapboxgl-ctrl-geocoder--input", { timeout: 9001 }).should("exist");
 });
+
+
+// https://github.com/quasarframework/quasar/issues/2233
+// Ignore ResizeObserver error
+const resizeObserverLoopErrRe = /^ResizeObserver loop limit exceeded/
+
+Cypress.on('uncaught:exception', (err) => {
+  if (resizeObserverLoopErrRe.test(err.message)) {
+    // returning false here prevents Cypress from
+    // failing the test
+    return false
+  }
+})

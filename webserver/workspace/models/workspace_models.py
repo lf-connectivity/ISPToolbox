@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from rest_framework import serializers
-import time
+from datetime import datetime
 
 
 class ISPCompany(models.Model):
@@ -21,7 +21,7 @@ class AnalyticsEvent(models.Model):
     url = models.TextField()
     session_id = models.CharField(max_length=255)
     event_type = models.CharField(max_length=255)
-    created_at = models.CharField(max_length=255, default=int(time.time()))
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
 
 class AnalyticsSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class AnalyticsSerializer(serializers.ModelSerializer):
     url = serializers.CharField()
     session_id = serializers.CharField()
     event_type = serializers.CharField()
-    created_at = serializers.CharField()
+    #created_at = serializers.CharField()
 
     class Meta:
         model = AnalyticsEvent

@@ -14,7 +14,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
 import json
-import time
+import dateutil.parser
 
 
 class WorkspacePerformCreateMixin:
@@ -274,7 +274,6 @@ class AnalyticsView(View, mixins.ListModelMixin):
             'url': url,
             'session_id': session_id,
             'event_type': event_type,
-            'created_at': int(time.time())
         }
 
         event_item = AnalyticsEvent.objects.create(**event_data)
@@ -283,7 +282,9 @@ class AnalyticsView(View, mixins.ListModelMixin):
         return JsonResponse(res, status=201)
 
     def get(self, request):
-        timestamp = request.GET.get('after', 0)
+        s = request.GET.get('after', '2020-01-01T01:00:00.000000-00:00')
+        timestamp = dateutil.parser.parse(s)
         queryset = AnalyticsEvent.objects.filter(created_at__gte=timestamp)
+        # queryset = AnalyticsEvent.objects.all()
         serializer = AnalyticsSerializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)

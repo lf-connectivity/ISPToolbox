@@ -72,12 +72,10 @@ Cypress.Commands.add("wait_mapbox", () => {
 
 // https://github.com/quasarframework/quasar/issues/2233
 // Ignore ResizeObserver error
-const resizeObserverLoopErrRe = /^ResizeObserver loop limit exceeded/
-
+const resizeObserverLoopErrRe = /^[^(ResizeObserver loop limit exceeded)]/
 Cypress.on('uncaught:exception', (err) => {
+  /* returning false here prevents Cypress from failing the test */
   if (resizeObserverLoopErrRe.test(err.message)) {
-    // returning false here prevents Cypress from
-    // failing the test
     return false
   }
 })

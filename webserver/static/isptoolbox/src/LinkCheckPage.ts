@@ -269,7 +269,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         // Add Resize-Window Callback
         this.windowResizeCallback();
         window.addEventListener('resize', this.windowResizeCallback.bind(this));
-        // @ts-ignore
         const resizeObserver = new ResizeObserver(() => {
             this.windowResizeCallback();
         });

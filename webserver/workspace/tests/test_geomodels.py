@@ -553,7 +553,8 @@ class WorkspaceBaseTestCase(TestCase):
 
 class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
     def get_feature_collection_flow(self, serializer, expected_features):
-        feature_collection = serializer.get_features_for_session(self.test_session)
+        feature_collection = serializer.get_features_for_session(
+            self.test_session)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(
             json.dumps(self.build_feature_collection(expected_features)),
@@ -563,9 +564,12 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
     def test_feature_types(self):
         self.assertTrue(self.test_ap.feature_type, FeatureType.AP.value)
         self.assertTrue(self.test_cpe.feature_type, FeatureType.CPE.value)
-        self.assertTrue(self.test_ap_cpe_link.feature_type, FeatureType.AP_CPE_LINK.value)
-        self.assertTrue(self.test_polygon_coverage_area.feature_type, FeatureType.COVERAGE_AREA.value)
-        self.assertTrue(self.test_multipolygon_coverage_area.feature_type, FeatureType.COVERAGE_AREA.value)
+        self.assertTrue(self.test_ap_cpe_link.feature_type,
+                        FeatureType.AP_CPE_LINK.value)
+        self.assertTrue(self.test_polygon_coverage_area.feature_type,
+                        FeatureType.COVERAGE_AREA.value)
+        self.assertTrue(self.test_multipolygon_coverage_area.feature_type,
+                        FeatureType.COVERAGE_AREA.value)
 
     def test_get_features_for_session_ap(self):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
@@ -587,6 +591,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                     'max_radius': DEFAULT_MAX_RADIUS,
                     'radius': DEFAULT_MAX_RADIUS,
                     'height_ft': expected_height_ft,
+                    'lat': json.loads(DEFAULT_AP_POINT)['coordinates'][1],
+                    'lng': json.loads(DEFAULT_AP_POINT)['coordinates'][0],
                     'cloudrf_coverage_geojson_json': None,
                     'default_cpe_height_ft': expected_default_cpe_height_ft,
                     'max_radius_miles': expected_max_radius_miles,
@@ -627,7 +633,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'uneditable': DEFAULT_AP_CPE_LINK_UNEDITABLE
             }
         }
-        self.get_feature_collection_flow(APToCPELinkSerializer, [expected_link])
+        self.get_feature_collection_flow(
+            APToCPELinkSerializer, [expected_link])
 
     def test_get_features_for_session_coverage_area(self):
         expected_polygon = {
@@ -652,7 +659,8 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 'uneditable': DEFAULT_UNEDITABLE
             }
         }
-        self.get_feature_collection_flow(CoverageAreaSerializer, [expected_multipolygon, expected_polygon])
+        self.get_feature_collection_flow(CoverageAreaSerializer, [
+                                         expected_multipolygon, expected_polygon])
 
 
 class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
@@ -688,8 +696,10 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
     def delete_geojson_model(self, model_cls, endpoint, model_id):
         """Uses the DELETE endpoint for the model class to delete the model, then test if its deleted."""
         num_user_models = len(model_cls.objects.filter(owner=self.testuser))
-        response = self.client.delete(f'{endpoint}/{model_id}/', HTTP_ACCEPT=JSON_CONTENT_TYPE)
-        new_num_user_models = len(model_cls.objects.filter(owner=self.testuser))
+        response = self.client.delete(
+            f'{endpoint}/{model_id}/', HTTP_ACCEPT=JSON_CONTENT_TYPE)
+        new_num_user_models = len(
+            model_cls.objects.filter(owner=self.testuser))
 
         self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
         self.assertFalse(model_cls.objects.filter(uuid=model_id).exists())
@@ -702,7 +712,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'height': DEFAULT_HEIGHT,
             'max_radius': DEFAULT_MAX_RADIUS
         }
-        ap = self.create_geojson_model(AccessPointLocation, AP_ENDPOINT, new_ap)
+        ap = self.create_geojson_model(
+            AccessPointLocation, AP_ENDPOINT, new_ap)
         self.assertEqual(ap.owner, self.testuser)
         self.assertEqual(ap.name, DEFAULT_NAME)
         self.assertJSONEqual(ap.geojson.json, DEFAULT_AP_POINT)
@@ -721,7 +732,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(cpe.owner, self.testuser)
         self.assertEqual(cpe.name, DEFAULT_NAME)
         self.assertJSONEqual(cpe.geojson.json, DEFAULT_CPE_POINT)
-        self.assertAlmostEqual(cpe.height, cpe.get_dsm_height() - cpe.get_dtm_height() + DEFAULT_HEIGHT, 8)
+        self.assertAlmostEqual(cpe.height, cpe.get_dsm_height(
+        ) - cpe.get_dtm_height() + DEFAULT_HEIGHT, 8)
         self.assertEqual(cpe.uneditable, DEFAULT_UNEDITABLE)
         self.assertEqual(cpe.ap, self.test_ap)
 
@@ -733,7 +745,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'cpe': self.test_cpe.uuid,
             'uneditable': DEFAULT_AP_CPE_LINK_UNEDITABLE
         }
-        link = self.create_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, new_link)
+        link = self.create_geojson_model(
+            APToCPELink, AP_CPE_LINK_ENDPOINT, new_link)
         self.assertEqual(link.owner, self.testuser)
         self.assertEqual(link.frequency, DEFAULT_FREQUENCY)
         self.assertJSONEqual(link.geojson.json, DEFAULT_TEST_LINESTRING)
@@ -747,7 +760,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'uneditable': DEFAULT_UNEDITABLE,
             'name': DEFAULT_COVERAGE_AREA_NAME
         }
-        area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
+        area = self.create_geojson_model(
+            CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
         self.assertEqual(area.name, DEFAULT_COVERAGE_AREA_NAME)
@@ -759,7 +773,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'uneditable': DEFAULT_UNEDITABLE,
             'name': DEFAULT_COVERAGE_AREA_NAME_MULTIPOLYGON
         }
-        area = self.create_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
+        area = self.create_geojson_model(
+            CoverageArea, COVERAGE_AREA_ENDPOINT, new_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.uneditable, DEFAULT_UNEDITABLE)
         self.assertEqual(area.name, DEFAULT_COVERAGE_AREA_NAME_MULTIPOLYGON)
@@ -773,7 +788,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'height': UPDATED_HEIGHT,
             'max_radius': UPDATED_MAX_RADIUS,
         }
-        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
+        ap = self.update_geojson_model(
+            AccessPointLocation, AP_ENDPOINT, ap_id, updated_ap)
         self.assertEqual(ap.owner, self.testuser)
         self.assertEqual(ap.name, UPDATED_NAME)
         self.assertJSONEqual(ap.geojson.json, UPDATED_TEST_POINT)
@@ -787,7 +803,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'geojson': UPDATED_TEST_POINT,
             'height': UPDATED_HEIGHT,
         }
-        cpe = self.update_geojson_model(CPELocation, CPE_ENDPOINT, cpe_id, updated_cpe)
+        cpe = self.update_geojson_model(
+            CPELocation, CPE_ENDPOINT, cpe_id, updated_cpe)
         self.assertEqual(cpe.owner, self.testuser)
         self.assertEqual(cpe.name, UPDATED_NAME)
         self.assertJSONEqual(cpe.geojson.json, UPDATED_TEST_POINT)
@@ -798,7 +815,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         updated_link = {
             'frequency': UPDATED_FREQUENCY,
         }
-        link = self.update_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, link_id, updated_link)
+        link = self.update_geojson_model(
+            APToCPELink, AP_CPE_LINK_ENDPOINT, link_id, updated_link)
         self.assertEqual(link.owner, self.testuser)
         self.assertEqual(link.frequency, UPDATED_FREQUENCY)
         self.assertEqual(link.ap, self.test_ap)
@@ -810,7 +828,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             'geojson': UPDATED_TEST_POLYGON,
             'name': UPDATED_COVERAGE_AREA_NAME
         }
-        area = self.update_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
+        area = self.update_geojson_model(
+            CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertEqual(area.name, UPDATED_COVERAGE_AREA_NAME)
         self.assertJSONEqual(area.geojson.json, UPDATED_TEST_POLYGON)
@@ -820,23 +839,29 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         updated_area = {
             'geojson': UPDATED_TEST_MULTIPOLYGON
         }
-        area = self.update_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
+        area = self.update_geojson_model(
+            CoverageArea, COVERAGE_AREA_ENDPOINT, area_id, updated_area)
         self.assertEqual(area.owner, self.testuser)
         self.assertJSONEqual(area.geojson.json, UPDATED_TEST_MULTIPOLYGON)
 
     def test_delete_geojson_models(self):
         # have to delete the AP CPE link first
-        self.delete_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, self.test_ap_cpe_link.uuid)
-        self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
-        self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
+        self.delete_geojson_model(
+            APToCPELink, AP_CPE_LINK_ENDPOINT, self.test_ap_cpe_link.uuid)
+        self.delete_geojson_model(
+            CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
+        self.delete_geojson_model(
+            AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT,
                                   self.test_polygon_coverage_area.uuid)
         self.delete_geojson_model(CoverageArea, COVERAGE_AREA_ENDPOINT,
                                   self.test_multipolygon_coverage_area.uuid)
 
     def test_delete_cpe(self):
-        self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
-        self.assertFalse(CPELocation.objects.filter(uuid=self.test_cpe.uuid).exists())
+        self.delete_geojson_model(
+            AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
+        self.assertFalse(CPELocation.objects.filter(
+            uuid=self.test_cpe.uuid).exists())
 
 
 class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
@@ -868,11 +893,14 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'ap': str(self.test_ap.uuid)
             }
         }
-        expected_feature_collection = self.build_feature_collection([expected_link, expected_cpe])
+        expected_feature_collection = self.build_feature_collection(
+            [expected_link, expected_cpe])
 
-        links = APToCPELinkSerializer.get_features_for_session(self.test_session)
+        links = APToCPELinkSerializer.get_features_for_session(
+            self.test_session)
         cpes = CPESerializer.get_features_for_session(self.test_session)
-        feature_collection = geojson_utils.merge_feature_collections(links, cpes)
+        feature_collection = geojson_utils.merge_feature_collections(
+            links, cpes)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
                              self.json_dumps(feature_collection))
@@ -891,14 +919,17 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
                 'uneditable': DEFAULT_AP_CPE_LINK_UNEDITABLE
             }
         }
-        expected_feature_collection = self.build_feature_collection([expected_link])
+        expected_feature_collection = self.build_feature_collection([
+                                                                    expected_link])
 
-        links = APToCPELinkSerializer.get_features_for_session(self.test_session)
+        links = APToCPELinkSerializer.get_features_for_session(
+            self.test_session)
         empty_feature_collection = {
             'type': 'FeatureCollection',
             'features': []
         }
-        feature_collection = geojson_utils.merge_feature_collections(links, empty_feature_collection)
+        feature_collection = geojson_utils.merge_feature_collections(
+            links, empty_feature_collection)
         self.trim_mtime_from_feature_collection(feature_collection)
         self.assertJSONEqual(json.dumps(expected_feature_collection),
                              self.json_dumps(feature_collection))
@@ -930,7 +961,8 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
             'cloudrf_coverage_geojson': DEFAULT_TEST_GEO_COLLECTION
         }
         new_ap.update(updated_ap)
-        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, new_ap)
+        ap = self.update_geojson_model(
+            AccessPointLocation, AP_ENDPOINT, ap_id, new_ap)
         self.assertEqual(ap.cloudrf_coverage_geojson, None)
 
     def update_ap_test_no_delete_cloudrf_flow(self, updated_ap, expected_cloudrf=DEFAULT_TEST_GEO_COLLECTION):
@@ -944,7 +976,8 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
             'cloudrf_coverage_geojson': DEFAULT_TEST_GEO_COLLECTION
         }
         new_ap.update(updated_ap)
-        ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, new_ap)
+        ap = self.update_geojson_model(
+            AccessPointLocation, AP_ENDPOINT, ap_id, new_ap)
         self.assertJSONEqual(
             expected_cloudrf,
             ap.cloudrf_coverage_geojson_json
@@ -990,7 +1023,8 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
         updated_ap = {
             'cloudrf_coverage_geojson': UPDATED_TEST_GEO_COLLECTION
         }
-        self.update_ap_test_no_delete_cloudrf_flow(updated_ap, UPDATED_TEST_GEO_COLLECTION)
+        self.update_ap_test_no_delete_cloudrf_flow(
+            updated_ap, UPDATED_TEST_GEO_COLLECTION)
 
     def test_update_uneditable_cloudrf_coverage(self):
         updated_ap = {

@@ -116,7 +116,7 @@ class AccessPointLocation(WorkspaceFeature):
     @property
     def lng(self):
         return self.geojson.x
-        
+
     @property
     def radius(self):
         return self.max_radius
@@ -174,6 +174,7 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
     lat = serializers.FloatField(read_only=True)
     lng = serializers.FloatField(read_only=True)
+
     class Meta:
         model = AccessPointLocation
         exclude = ['owner', 'session', 'created']

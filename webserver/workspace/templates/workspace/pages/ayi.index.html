@@ -9,28 +9,32 @@
 {% with page_obj=data_requests %}
 
 <div class="modal-dialog modal-xl modal-dialog-centered " role="document">
-    <div class="modal-content">
+    <div class="modal-content p-4">
         <div class="modal-header">
-            <h3 class="modal-title">{% translate "Access Your Information"%}</h3>
+            <h3 class="modal-title">{% translate "Download your data"%}</h3>
             <a class="my-auto mr-3" href="{{ request.get_full_path }}">{% include 'workspace/atoms/icons/arrow_repeat.html'%}</a>
         </div>
         <div class="modal-body">
-        <p>{% blocktranslate %} To request a copy of your ISP Toolbox data, click the "Request Data" button. Your data will be aggregated into a download and shown here when it is ready.{% endblocktranslate%}</p>
+        <h5>{% blocktranslate %}To request a copy of your ISP Toolbox data, click the “Request Data” button. Your data will be aggregated into a file shown here when it’s ready to download. {% endblocktranslate%}</h5>
             {% for job in page_obj %}
                 <div class="d-flex m-3">
                     {% if job.data_dump%}
-                    <a class="btn btn-primary isptoolbox-btn" href="{{job.data_dump.url}}" target="_blank">download</a>
+                    <a type="submit" class="btn btn-edit ap-edit-btn" href="{{job.data_dump.url}}" target="_blank">
+                        {% include 'workspace/atoms/icons/save_icon.html'%} Download
+                    </a>
                     {% else %}
-                    <div>{{job.task_result.status}}</div>
+                    <a type="submit" class="btn">
+                        {% include 'workspace/atoms/icons/loading_circle_spinner.html'%} Pending &nbsp;
+                    </a>
                     {% endif %}
-                    <div class="ml-5 my-auto"><h5>{%translate 'created: '%}{{ job.created|localtime }}</h5></div>
+                    <div class="ml-5 my-auto"><p class="mb-0"> <strong>NameofFile.filetype</strong>    &nbsp; &nbsp; {%translate 'created: '%}{{ job.created|localtime }}</p></div>
                 </div>
             {% endfor %}
         </div>
-        <div class="modal-footer justify-content-between flex-column flex-lg-row pt-0">
-            {% include 'workspace/atoms/paginator_isptoolbox.html' %}
+        <div class="p-3 flex-lg-row">
             <form action="{% url 'workspace:access_your_information' %}" method="POST" >
                 {% csrf_token %}
+            
                 <input type="submit" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0" value="{%translate 'Request Data'%}">
             </form>
         </div>

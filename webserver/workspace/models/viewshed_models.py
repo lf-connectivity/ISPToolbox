@@ -137,7 +137,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                                 self.__timeRemainingViewshed(0))
             try:
                 dsm_engine.getDSM(dsm_file.name)
-            except:
+            except Exception:
                 raise DSMAvailabilityException
 
             TASK_LOGGER.info(f'dsm download: {time.time() - start}')

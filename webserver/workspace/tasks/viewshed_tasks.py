@@ -32,10 +32,13 @@ def computeViewshedCoverage(network_id, data, user_id):
             'uuid': ap_uuid,
         }
         sendMessageToChannel(network_id, resp)
-    except DSMAvailabilityException as e:
+    except DSMAvailabilityException:
         resp = {
             'type': 'ap.unexpected_error',
-            'msg': "Viewshed data is currently unavailable for this area. You can still view obstructions by placing a PtP Link to an outlined rooftop.",
+            'msg': (
+                "Viewshed data is currently unavailable for this area. " +
+                "You can still view obstructions by placing a PtP Link to " +
+                "an outlined rooftop."),
             'uuid': ap_uuid,
         }
         sendMessageToChannel(network_id, resp)

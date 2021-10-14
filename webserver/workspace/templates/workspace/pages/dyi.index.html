@@ -10,19 +10,19 @@
 {% block content %}
 <form action="{% url 'workspace:delete_your_information' %}" method="POST" >
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-        <div class="modal-content">
+        <div class="modal-content p-3 w-75">
             <div class="modal-header">
-                <h3 class="modal-title">{% translate "Delete Your Account Permanently"%}</h3>
+                <h3 class="modal-title">{% translate "Delete ISP Toolbox account"%}</h3>
             </div>
             <div class="modal-body">
-                <p>{% blocktranslate %}If you wish to request account deletion - type the confirmation message and click on "Delete Account".<br><b>This is permanent and cannot be undone.</b>{% endblocktranslate%}</p>
+                <p>{% blocktranslate %}If you wish to delete your ISP Toolbox account, type the confirmation message and click on “Delete Account”. This is permanent and cannot be undone.{% endblocktranslate%}</p>
                 <div class="isptoolbox-form">
                 {% csrf_token %}
                 {{delete_account_form}}
                 </div>
             </div>
-            <div class="modal-footer">
-                <input type="submit" class="btn btn-danger isptoolbox-btn" value="{% translate 'Delete Account'%}">
+            <div class="p-3 flex-lg-row">
+                <input type="submit" class="btn btn-danger isptoolbox-btn mt-2 mt-lg-0" value="{% translate 'Delete Account'%}">
             </div>
         </div>
     </div>

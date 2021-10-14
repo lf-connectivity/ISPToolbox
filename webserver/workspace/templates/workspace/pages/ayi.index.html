@@ -9,15 +9,16 @@
 {% with page_obj=data_requests %}
 
 <div class="modal-dialog modal-xl modal-dialog-centered " role="document">
-    <div class="modal-content p-4">
+    <div class="modal-content p-2 w-75">
         <div class="modal-header">
-            <h3 class="modal-title">{% translate "Download your data"%}</h3>
+            <h3 class="modal-title">{% translate "Download your information"%}</h3>
             <a class="my-auto mr-3" href="{{ request.get_full_path }}">{% include 'workspace/atoms/icons/arrow_repeat.html'%}</a>
         </div>
+        <h4 class="modal-title px-3 py-3">{% translate "Get a copy of all your data from ISP Toolbox"%}</h4>
         <div class="modal-body">
-        <h5>{% blocktranslate %}To request a copy of your ISP Toolbox data, click the “Request Data” button. Your data will be aggregated into a file shown here when it’s ready to download. {% endblocktranslate%}</h5>
+        <p>{% blocktranslate %}To request a copy of your ISP Toolbox data, click the “Request Data” button. Your data will be aggregated into a file shown here when it’s ready to download. {% endblocktranslate%}</p>
             {% for job in page_obj %}
-                <div class="d-flex m-3">
+                <div class="d-flex my-3 py-2">
                     {% if job.data_dump%}
                     <a type="submit" class="btn btn-edit ap-edit-btn" href="{{job.data_dump.url}}" target="_blank">
                         {% include 'workspace/atoms/icons/save_icon.html'%} Download
@@ -27,14 +28,13 @@
                         {% include 'workspace/atoms/icons/loading_circle_spinner.html'%} Pending &nbsp;
                     </a>
                     {% endif %}
-                    <div class="ml-5 my-auto"><p class="mb-0"> <strong>NameofFile.filetype</strong>    &nbsp; &nbsp; {%translate 'created: '%}{{ job.created|localtime }}</p></div>
+                    <div class="ml-5 my-auto"><p class="mb-0"> <strong>FirstName_LastName.filetype</strong>    &nbsp; &nbsp; {%translate 'created '%}{{ job.created|localtime }}</p></div>
                 </div>
             {% endfor %}
         </div>
         <div class="p-3 flex-lg-row">
             <form action="{% url 'workspace:access_your_information' %}" method="POST" >
                 {% csrf_token %}
-            
                 <input type="submit" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0" value="{%translate 'Request Data'%}">
             </form>
         </div>

@@ -1,4 +1,4 @@
-import mapboxgl, * as MapboxGL from 'mapbox-gl';
+import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry } from 'geojson';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
@@ -75,7 +75,7 @@ export abstract class BaseWorkspaceFeature {
      * @param successFollowup Function to execute on successfully persisting new
      * object.
      */
-    create(successFollowup?: (resp: any) => void) {
+    create(successFollowup?: (resp: any) => void, revert?: () => void) {
         $.ajax({
             url: `${this.apiEndpoint}`,
             method: 'POST',
@@ -84,13 +84,20 @@ export abstract class BaseWorkspaceFeature {
                 'X-CSRFToken': getCookie('csrftoken'),
                 Accept: 'application/json'
             }
-        }).done((resp) => {
-            this.workspaceId = resp.uuid;
-            this.updateFeatureProperties(resp);
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        });
+        })
+            .done((resp) => {
+                this.workspaceId = resp.uuid;
+                this.updateFeatureProperties(resp);
+                if (successFollowup) {
+                    successFollowup(resp);
+                }
+            })
+            .fail((error) => {
+                this.draw.delete(this.mapboxId);
+                if (revert) {
+                    revert();
+                }
+            });
     }
 
     /**
@@ -100,7 +107,7 @@ export abstract class BaseWorkspaceFeature {
      * @returns A list of BaseWorkspaceFeature objects other than this one deleted by this function,
      * intended to fire additional Mapbox events.
      */
-    update(successFollowup?: (resp: any) => void) {
+    update(successFollowup?: (resp: any) => void, revert?: () => void) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'PATCH',
@@ -109,12 +116,18 @@ export abstract class BaseWorkspaceFeature {
                 'X-CSRFToken': getCookie('csrftoken'),
                 Accept: 'application/json'
             }
-        }).done((resp) => {
-            this.updateFeatureProperties(resp);
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        });
+        })
+            .done((resp) => {
+                this.updateFeatureProperties(resp);
+                if (successFollowup) {
+                    successFollowup(resp);
+                }
+            })
+            .fail((error) => {
+                if (revert) {
+                    revert();
+                }
+            });
     }
 
     /**
@@ -124,8 +137,7 @@ export abstract class BaseWorkspaceFeature {
      * @returns A list of BaseWorkspaceFeature objects other than this one deleted by this function,
      * intended to fire additional Mapbox events.
      */
-    delete(successFollowup?: (resp: any) => void) {
-        this.removeFeatureFromMap(this.mapboxId);
+    delete(successFollowup?: (resp: any) => void, revert?: () => void) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'DELETE',
@@ -133,11 +145,18 @@ export abstract class BaseWorkspaceFeature {
                 'X-CSRFToken': getCookie('csrftoken'),
                 Accept: 'application/json'
             }
-        }).done((resp) => {
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        });
+        })
+            .done((resp) => {
+                this.removeFeatureFromMap(this.mapboxId);
+                if (successFollowup) {
+                    successFollowup(resp);
+                }
+            })
+            .fail((error) => {
+                if (revert) {
+                    revert();
+                }
+            });
     }
 
     /**

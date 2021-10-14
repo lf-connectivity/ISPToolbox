@@ -79,6 +79,7 @@ class IspToolboxUserSignUpInfo(models.Model):
     )
     BUSINESS_TYPES = (
         ("wireless", _("Wireless")),
+        ("coax", _("Coax")),
         ("fiber", _("Fiber")),
     )
     ROLE_CHOICES = (

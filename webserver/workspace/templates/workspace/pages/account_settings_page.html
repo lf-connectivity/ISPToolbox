@@ -8,14 +8,19 @@
 {% endwith %}
 {% endblock %}
 {% block content %}
-<div class="container" style="margin-top: 50px;">
+<div class="container" style="margin-top: 100px;">
+<div class="d-flex justify-content-between">
+<h1> Manage Account</h1>
+<a class="btn btn-primary isptoolbox-btn m-2 p-2" href="{% url 'workspace:access_your_information'%}">{% translate "Access Your Information"%}</a>
+</div>
 <div class="account_settings">
-    <div class="card mt-4">
+    <div class="d-flex justify-content-between">
+    <div class="card mt-4 w-100">
         <div class="card-body">
             <div class=" d-flex align-items-start">
-                <h1 class="pb-3">
-                    Update Account
-                </h1>
+                <h3 class="pb-3 my-1">
+                    Account Information 
+                </h3>
                 <button class="btn btn-edit ap-edit-btn" type="submit"
                 onclick="document.getElementById('changeaccountinfoform').removeAttribute('disabled')"
 
@@ -34,39 +39,28 @@
             </form>
     
         </div>
-    </div>
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <div class="d-flex align-items-start">
-                <h1 class="pb-3">
-                    Change Password
-                </h1>
-                <button class="btn btn-edit ap-edit-btn" type="submit"
-                onclick="document.getElementById('changepasswordform').removeAttribute('disabled')"
-
-                >
-                {% include 'workspace/atoms/pen_icon.html'%}
-            </button>
+        <div class="card mt-4">
+            <div class="card-body">
+                    <h1 class="pb-3"></h1>
+                    <p><strong> Delete Account</strong></p>
+                    <p>If you wish to delete your account, you may do so by clicking on the link below. Deleting your account is permanent and will remove all content associated with it.</p>
+                <div>
+                    <a class="m-2" href="{% url 'workspace:delete_your_information'%}">{% translate "Delete Your Information"%}</a>
+            
+                </div>
             </div>
-
-            <form action={{ request.path }} method="post" class="pb-3">
-                <fieldset class="isptoolbox-form" disabled id="changepasswordform">
-                {% csrf_token %}
-                {{ password_form }}
-                <input class="btn isptoolbox-btn btn-primary mt-2" type="submit" name="change_password" value="Change Password">
-                </fieldset>
-            </form>
         </div>
     </div>
 
-    <div class="card mt-4">
+
+
+    <div class="card mt-4 w-100">
         <div class="card-body">
             <div class=" d-flex align-items-start">
 
-            <h1 class="pb-3">
-                User Info
-            </h1>
+            <h3 class="pb-3 my-1">
+                User Details
+            </h3>
                 <button class="btn btn-edit ap-edit-btn" type="submit"
                 onclick="document.getElementById('account_info_form').removeAttribute('disabled')"
 
@@ -106,16 +100,6 @@
 
     </div> -->
 
-    <div class="card mt-4">
-        <div class="card-body">
-            <div class="card-header d-flex justify-content-between">
-                <h1>{% translate "Manage Your Information"%}</h1>
-            </div>
-            <div>
-                <a class="btn btn-primary isptoolbox-btn m-2 p-2" href="{% url 'workspace:access_your_information'%}">{% translate "Access Your Information"%}</a>
-                <a class="btn btn-danger isptoolbox-btn m-2 p-2" href="{% url 'workspace:delete_your_information'%}">{% translate "Delete Your Information"%}</a>
-            </div>
-        </div>
-    </div>
+</div>
 </div>
 {% endblock %}

@@ -14,6 +14,7 @@ import "./map_layers";
 import "./navbar";
 import "./sources_page";
 import "./viewports";
+import "./disconnect_utils";
 
 import { LOGIN_PAGE } from "./pages";
 

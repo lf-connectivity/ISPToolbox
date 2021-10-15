@@ -233,22 +233,23 @@ class CoverageAreaGet(mixins.RetrieveModelMixin,
 class AccessPointCoverageResults(View):
     def get(self, request, uuid):
         ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
-        coverage = AccessPointCoverageBuildings.objects.filter(
-            ap=ap).order_by('-created').first()
+        coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
         features = []
-        for building in coverage.nearby_buildings.all():
-            feature = {
-                "type": "Feature",
-                "geometry": json.loads(
-                    MsftBuildingOutlines.objects.get(
-                        id=building.msftid).geog.json
-                ),
-                "properties": {
-                    "serviceable": building.status,
-                    "msftid": building.msftid
-                }
+        nearby = coverage.nearby_buildings.all()
+        nearby_ids = [b.msftid for b in nearby]
+        buildings = MsftBuildingOutlines.objects.filter(
+            id__in=nearby_ids).all()
+        features = [{
+            "type": "Feature",
+            "geometry": json.loads(
+                    building.geog.json
+            ),
+            "properties": {
+                "serviceable": b.status,
+                "msftid": b.msftid
             }
-            features.append(feature)
+        }
+            for b, building in zip(nearby, buildings)]
         fc = {'type': 'FeatureCollection', 'features': features}
         return JsonResponse(fc)
 
@@ -256,8 +257,7 @@ class AccessPointCoverageResults(View):
 class AccessPointCoverageStatsView(View):
     def get(self, request, uuid):
         ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
-        coverage = AccessPointCoverageBuildings.objects.filter(
-            ap=ap).order_by('-created').first()
+        coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
         return JsonResponse(coverage.coverageStatistics())
 
 

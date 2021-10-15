@@ -1,6 +1,5 @@
 @import ../theme
 
-
 .isptoolbox-form
     #id_company_website
         margin-bottom: 2rem
@@ -9,6 +8,7 @@
         margin-bottom: 2rem
         padding-left: 0px
         display: flex
+
     #id_individual_role
         list-style-type: none !important
         display: flex
@@ -31,6 +31,11 @@
         width: 30px
         margin-left: 1.5rem
 
+@media (min-width: $breakpoint-lg)
+    .manage-account
+        display: flex !important
+        justify-content: space-between
+
 @media (min-width: $breakpoint-md)
     .account_setting_form_container
         grid-template-columns: 1fr 1fr
@@ -42,3 +47,11 @@
         display: block
         padding: 10px
     
+    .manage-account
+        display: block
+
+    .delete-account
+        order:3
+    
+    .user-details
+        order:2

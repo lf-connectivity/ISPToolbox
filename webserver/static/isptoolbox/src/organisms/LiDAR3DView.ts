@@ -15,7 +15,7 @@ import { getRadioHeightFromUI } from '../LinkCheckUtils';
 // @ts-ignore
 const THREE = window.THREE;
 
-import { IMapboxDrawPlugin } from '../utils/MapboxDrawPlugin';
+import { IMapboxDrawPlugin } from '../utils/IMapboxDrawPlugin';
 import { hasCookie } from '../utils/Cookie';
 import { calculateMaximumFresnelRadius } from '../LinkCalcUtils';
 import { LinkCheckPage } from '../LinkCheckPage';

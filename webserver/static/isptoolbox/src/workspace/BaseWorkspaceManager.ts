@@ -9,6 +9,7 @@ import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CPE, APToCPELink, CoverageArea } from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
+import { IMapboxDrawPlugin } from '../utils/IMapboxDrawPlugin';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void | boolean;
 
@@ -16,7 +17,7 @@ function doNothingProcessor(): UpdateDeleteFeatureProcessor {
     return (workspaceFeature: BaseWorkspaceFeature) => {};
 }
 
-export abstract class BaseWorkspaceManager {
+export abstract class BaseWorkspaceManager extends IMapboxDrawPlugin {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
@@ -55,6 +56,7 @@ export abstract class BaseWorkspaceManager {
         if (BaseWorkspaceManager._instance) {
             throw Error('BaseWorkspaceManager initialized twice.');
         }
+        super(map, draw);
         BaseWorkspaceManager._instance = this;
 
         this.map = map;
@@ -143,13 +145,7 @@ export abstract class BaseWorkspaceManager {
             }
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
-
         }
-
-        // Instantiate CRUD
-        this.map.on('draw.create', this.saveFeatures.bind(this));
-        this.map.on('draw.delete', this.deleteFeatures.bind(this));
-        this.map.on('draw.update', this.updateFeatures.bind(this));
     }
 
     /**
@@ -223,11 +219,11 @@ export abstract class BaseWorkspaceManager {
         return this.supportedFeatureTypes.indexOf(featureType) > -1;
     }
 
-    protected saveFeatures({ features }: any) {
+    drawCreateCallback(event: { features: Array<GeoJSON.Feature> }) {
         const mode = String(this.draw.getMode());
 
         // Ignore features already saved in this.features
-        const unsavedFeatures = features.filter((feature: any) => {
+        const unsavedFeatures = event.features.filter((feature: any) => {
             return !feature.properties.uuid || !(feature.properties.uuid in this.features);
         });
 
@@ -243,10 +239,10 @@ export abstract class BaseWorkspaceManager {
      * Callback for when user deletes mapbox draw feature in workspace
      * @param features - Array of geojson features
      */
-    protected deleteFeatures({ features }: { features: Array<any> }) {
+    drawDeleteCallback(event: { features: Array<GeoJSON.Feature> }) {
         const deleteFeaturesOfType = (featureType: WorkspaceFeatureTypes) => {
             if (this.isSupportedFeatureType(featureType)) {
-                this.filterByType(features, featureType).forEach((feature: any) => {
+                this.filterByType(event.features, featureType).forEach((feature: any) => {
                     let workspaceFeature = this.features.get(
                         feature.properties.uuid
                     ) as BaseWorkspaceFeature;
@@ -260,7 +256,6 @@ export abstract class BaseWorkspaceManager {
 
                             // Should probably be replaced with a pubsub event signal
                             MapLayerSidebarManager.getInstance().setUserMapLayers();
-
                         });
                     }
                 });
@@ -274,16 +269,13 @@ export abstract class BaseWorkspaceManager {
         deleteFeaturesOfType(WorkspaceFeatureTypes.COVERAGE_AREA);
     }
 
-    protected updateFeatures({
-        features,
-        action
-    }: {
-        features: Array<any>;
+    drawUpdateCallback(event: {
+        features: Array<GeoJSON.Feature>;
         action: 'move' | 'change_coordinates';
     }) {
         // We don't need to do updates by type in a certain order, so a switch
         // statement will do.
-        features.forEach((feature: any) => {
+        event.features.forEach((feature: any) => {
             if (feature.properties.uuid) {
                 let workspaceFeature = this.features.get(
                     feature.properties.uuid

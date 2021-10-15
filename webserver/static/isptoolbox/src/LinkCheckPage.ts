@@ -31,7 +31,6 @@ import { LinkCheckLocationSearchTool } from './organisms/LinkCheckLocationSearch
 import { LinkCheckBasePopup } from './isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
 import { parseFormLatitudeLongitude } from './utils/LatLngInputUtils';
 import { ISPToolboxAbstractAppPage } from './ISPToolboxAbstractAppPage';
-import { WorkspacePointFeature } from './workspace/BaseWorkspaceFeature';
 import { LinkCheckRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
 import { ViewshedTool } from './organisms/ViewshedTool';
 import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
@@ -41,6 +40,7 @@ import { LiDAR3DView } from './organisms/LiDAR3DView';
 import { createPopupFromVertexEvent } from './utils/GeocodeUtils';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
+import { WorkspacePointFeature } from './workspace/WorkspacePointFeature';
 var _ = require('lodash');
 
 export enum LinkCheckEvents {

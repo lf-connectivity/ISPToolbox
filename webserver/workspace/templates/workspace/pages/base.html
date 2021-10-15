@@ -1,8 +1,7 @@
-{% spaceless%}
+{% spaceless %}
 <!DOCTYPE html>
 {% load static i18n %}
 <html lang="en">
-
 <head>
 {% block title %}<title>{% if title %}{% translate title %}{% else %}{% translate "ISP Toolbox" %}{% endif %}</title>{% endblock title %}
     {% include "workspace/organisms/default_header.html" %}
@@ -34,4 +33,4 @@
     </div>
 </body>
 </html>
-{%endspaceless%}
+{% endspaceless %}

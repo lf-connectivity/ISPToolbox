@@ -1,16 +1,14 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import { Feature, Geometry, Point, LineString, Polygon } from 'geojson';
-import {
-    BaseWorkspaceFeature,
-    WorkspaceLineStringFeature,
-    WorkspacePointFeature
-} from './BaseWorkspaceFeature';
+import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { isUnitsUS } from '../utils/MapPreferences';
 import { LinkCheckEvents } from '../LinkCheckPage';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';
 import { djangoUrl } from '../utils/djangoUrl';
+import { WorkspacePointFeature } from './WorkspacePointFeature';
+import { WorkspaceLineStringFeature } from './WorkspaceLineStringFeature';
 
 const AP_RESPONSE_FIELDS = [
     'name',
@@ -73,7 +71,6 @@ export class AccessPoint extends WorkspacePointFeature {
     }
 
     update(successFollowup?: (resp: any) => void) {
-        this.moveLinks(this.getFeatureGeometryCoordinates() as [number, number]);
         super.update((resp: any) => {
             let feature = this.draw.get(this.mapboxId);
             this.coverage = EMPTY_BUILDING_COVERAGE;
@@ -81,6 +78,7 @@ export class AccessPoint extends WorkspacePointFeature {
             // @ts-ignore
             this.draw.setFeatureProperty(this.mapboxId, 'radius', feature?.properties.max_radius);
             PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
+            this.moveLinks(this.getFeatureGeometryCoordinates() as [number, number]);
 
             if (successFollowup) {
                 successFollowup(resp);

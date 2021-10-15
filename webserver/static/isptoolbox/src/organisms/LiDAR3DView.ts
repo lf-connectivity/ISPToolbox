@@ -259,10 +259,11 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
                 cld.material.elevationRange = elevation_range;
             });
             resp.clouds.forEach((value: { name: string; url: string }, idx: number) => {
-                //@ts-ignore
-                const existing_pc_names: Array<string> = scene.pointclouds.map((cld) => {
-                    return cld.name;
-                });
+                const existing_pc_names: Array<string> = scene.pointclouds.map(
+                    (cld: { name: string }) => {
+                        return cld.name;
+                    }
+                );
                 if (!existing_pc_names.includes(value.name) && potree) {
                     potree.loadPointCloud(value.url, value.name, (e: any) => {
                         // @ts-ignore
@@ -568,10 +569,11 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
 
         // Check if we already added point cloud
         urls.forEach((url: string, idx: number) => {
-            //@ts-ignore
-            const existing_pc_names: Array<string> = scene.pointclouds.map((cld) => {
-                return cld.name;
-            });
+            const existing_pc_names: Array<string> = scene.pointclouds.map(
+                (cld: { name: string }) => {
+                    return cld.name;
+                }
+            );
             scene.pointclouds.forEach((cld: any) => {
                 cld.material.elevationRange = [bb[4], bb[5]];
             });

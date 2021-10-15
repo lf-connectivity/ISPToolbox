@@ -12,7 +12,6 @@
   {% endif %} {% endcomment %}
   {% include "workspace/atoms/mapbox_global_public_key.html" %}
   {% include "./map_view.html" %}
-  <script async src="{% static "wireless_network.min.js" %}"> </script>
   {% include "./3d_view.html" %}
   {% include "./link_view.html" %}
   <script type="text/javascript">
@@ -27,6 +26,7 @@
       units: "{{units}}",
     };
   </script>
+  <script async src="{% static "wireless_network.min.js" %}"> </script>
 </body>
 </html>
 {% endspaceless %}

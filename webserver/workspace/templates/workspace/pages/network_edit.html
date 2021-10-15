@@ -24,7 +24,6 @@
     {% include "mmwave/link_view.html" %}
   </div>
 
-  <script async src="{% static "wireless_network.min.js" %}"> </script>
   {{ geojson|json_script:"isp-map-features" }}
   
   {% include "workspace/organisms/nux_network.html" %}
@@ -42,6 +41,7 @@
     Clear or obstructed LiDAR data depends on changes in foliage or other obstructions.
   {% endcitation %}
 
+  <script async src="{% static "wireless_network.min.js" %}"> </script>
 {% endblock %}
 
 {% block footer %}

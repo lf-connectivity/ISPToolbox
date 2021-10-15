@@ -22,7 +22,8 @@ def createUserDataDownload(job_id: UUID):
     # Finally, write to temporary file and upload
     with tempfile.TemporaryFile() as tmp_fp:
         tmp_fp.write(data_dump.encode('utf-8'))
-        job.data_dump.save('dump.json', tmp_fp)
+        job.data_dump.save(
+            f'{job.owner.first_name}_{job.owner.last_name}.json', tmp_fp)
 
 
 @ app.task

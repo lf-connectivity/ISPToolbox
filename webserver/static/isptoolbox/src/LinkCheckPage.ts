@@ -381,9 +381,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         );
 
         new MapLayerSidebarManager(this.map, this.draw);
+        this.lidar3dview = new LiDAR3DView(this.map, this.draw, this, this.radio_names);
         this.workspaceManager = new LOSCheckWorkspaceManager(this.map, this.draw);
         new ViewshedTool(this.map, this.draw);
-        this.lidar3dview = new LiDAR3DView(this.map, this.draw, this, this.radio_names);
 
         // instantiate singletons
         new LOSCheckLinkProfileView();

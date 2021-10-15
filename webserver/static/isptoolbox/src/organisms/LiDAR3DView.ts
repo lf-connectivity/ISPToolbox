@@ -60,6 +60,7 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
     currentView: 'map' | '3d' = 'map';
     hover3dDot: any = null;
     currentMaterial: any;
+    last_selection: number | string | undefined = '';
 
     spacebarCallback: any;
     updateLinkHeight: any;
@@ -168,6 +169,33 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
     }
 
     drawSelectionChangeCallback(event: { features: Array<GeoJSON.Feature> }) {
+        // Mapbox will count dragging a point features as a selection change event
+        // Use this to determine if we are dragging or just selected a new feature
+        let dragging = false;
+        if (event.features.length === 1) {
+            if (event.features[0].id === this.last_selection) {
+                dragging = true;
+            } else {
+                this.last_selection = event.features[0].id;
+            }
+        } else {
+            this.last_selection = '';
+        }
+        if (event.features.length === 1) {
+            const feat = event.features[0];
+            if (
+                (feat.geometry.type === 'Point' && !dragging) ||
+                feat.geometry.type === 'LineString'
+            ) {
+                this.highlightFeature(feat);
+            }
+        }
+    }
+
+    drawUpdateCallback(event: {
+        features: Array<GeoJSON.Feature>;
+        action: 'move' | 'change_coordinates';
+    }) {
         if (event.features.length === 1) {
             const feat = event.features[0];
             if (feat.geometry.type === 'Point' || feat.geometry.type === 'LineString') {

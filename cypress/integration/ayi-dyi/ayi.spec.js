@@ -11,6 +11,6 @@ describe("Test Access Your Information Flow", () => {
     cy.get("input[type=submit]").click();
     cy.contains('Pending').should('be.visible');
     cy.reload();
-    cy.get('a').contains("download").should('be.visible');
+    cy.get('a').contains("Download").should('be.visible');
   });
 });

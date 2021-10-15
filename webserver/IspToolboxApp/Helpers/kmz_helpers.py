@@ -3,8 +3,7 @@ from zipfile import ZipFile
 from defusedxml import ElementTree
 import os
 from workspace.models.model_constants import FeatureType
-
-from rasterio.windows import shape
+from shapely.geometry import shape
 from IspToolboxApp.templates.errorMsg import kmz_err_msg
 import rasterio
 import rasterio.features

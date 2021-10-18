@@ -14,9 +14,9 @@
         margin-bottom: 7px
     input:not(.btn):not([type="file"]), select
         margin-bottom: 5px
-    select 
+    select
         color: $brand-dark-gray-color
-        background-image: url("data:image/svg+xml,%3Csvg width='12' height='6' viewBox='0 0 12 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.3254 0.620372L0.945767 0.294976L0.294976 1.05423L0.674604 1.37963L1.3254 0.620372ZM5.66667 5L5.34127 5.37963L5.66667 5.65854L5.99206 5.37963L5.66667 5ZM10.6587 1.37963L11.0384 1.05423L10.3876 0.294976L10.0079 0.620372L10.6587 1.37963ZM0.674604 1.37963L5.34127 5.37963L5.99206 4.62037L1.3254 0.620372L0.674604 1.37963ZM5.99206 5.37963L10.6587 1.37963L10.0079 0.620372L5.34127 4.62037L5.99206 5.37963Z' fill='%232D2D2D'/%3E%3C/svg%3E%0A")        
+        background-image: url("data:image/svg+xml,%3Csvg width='12' height='6' viewBox='0 0 12 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.3254 0.620372L0.945767 0.294976L0.294976 1.05423L0.674604 1.37963L1.3254 0.620372ZM5.66667 5L5.34127 5.37963L5.66667 5.65854L5.99206 5.37963L5.66667 5ZM10.6587 1.37963L11.0384 1.05423L10.3876 0.294976L10.0079 0.620372L10.6587 1.37963ZM0.674604 1.37963L5.34127 5.37963L5.99206 4.62037L1.3254 0.620372L0.674604 1.37963ZM5.99206 5.37963L10.6587 1.37963L10.0079 0.620372L5.34127 4.62037L5.99206 5.37963Z' fill='%232D2D2D'/%3E%3C/svg%3E%0A")
         background-repeat: no-repeat
         background-position: 97% 50%
         -moz-appearance: none
@@ -43,7 +43,7 @@
         font-size: $xsmall-font-size
         color: $mid-gray-color
         margin: 0
-    input:not(.btn):not([type="file"])
+    input:not(.btn):not([type="file"]):not([type="checkbox"])
         border: none
         border-bottom: 2px solid $brand-primary-color
         background-color: $light-gray-color
@@ -68,7 +68,7 @@
         margin-bottom: 0
 
 .isptoolbox-form
-    .file-upload-form 
+    .file-upload-form
         background-color: $light-gray-color
         color: $mid-gray-color
         border-bottom: 2px solid $brand-primary-color
@@ -102,7 +102,7 @@
         white-space: nowrap
         font-weight: bold
         padding: 10px 13px
-    
+
     label[for=id_kmz]
         display: none
 

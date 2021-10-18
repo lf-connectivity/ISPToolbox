@@ -76,22 +76,20 @@ class OptionalInfoWorkspaceUpdateView(LoginRequiredMixin, UpdateView):
 
 class AccountSettingsView(LoginRequiredMixin, View):
     def get(self, request, **kwargs):
+        context = {
+            'account_form': IspToolboxUserInfoChangeForm(instance=request.user),
+            'password_form': IspToolboxUserPasswordChangeForm(user=request.user),
+            'delete_account_form': IspToolboxUserDeleteAccountForm,
+            'optional_account_form':
+                IspToolboxUserSignUpInfoForm(
+                    instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get_or_create(
+                        owner=request.user)[0]
+            ),
+        }
         return render(
             request,
             'workspace/pages/account_settings_page.html',
-            {
-                'account_form': IspToolboxUserInfoChangeForm(instance=request.user),
-                'password_form': IspToolboxUserPasswordChangeForm(user=request.user),
-                'delete_account_form': IspToolboxUserDeleteAccountForm,
-                'optional_account_form': (
-                    IspToolboxUserSignUpInfoForm(
-                        instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(
-                            owner=request.user)
-                    )
-                    if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user).exists()
-                    else IspToolboxUserSignUpInfoForm
-                ),
-            }
+            context=context
         )
 
     def post(self, request, **kwargs):

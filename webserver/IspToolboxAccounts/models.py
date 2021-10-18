@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.sessions.models import Session
+from django.contrib.postgres.fields import ArrayField
 
 
 class UserManager(BaseUserManager):
@@ -100,14 +101,19 @@ class IspToolboxUserSignUpInfo(models.Model):
         null=True,
         max_length=50,
     )
-    individual_role = models.CharField(
-        null=True,
-        max_length=200,
-    )
-    company_goal = models.CharField(
-        null=True,
-        max_length=500,
-    )
+
+    business_type = ArrayField(models.CharField(
+        max_length=128,
+        choices=BUSINESS_TYPES,
+    ))
+    individual_role = ArrayField(models.CharField(
+        max_length=128,
+        choices=ROLE_CHOICES,
+    ))
+    company_goal = ArrayField(models.CharField(
+        max_length=128,
+        choices=GOAL_CHOICES,
+    ))
 
 
 class NewUserExperience(models.Model):

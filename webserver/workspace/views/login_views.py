@@ -82,8 +82,10 @@ class AccountSettingsView(LoginRequiredMixin, View):
             'delete_account_form': IspToolboxUserDeleteAccountForm,
             'optional_account_form':
                 IspToolboxUserSignUpInfoForm(
-                    instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get_or_create(
-                        owner=request.user)[0]
+                    instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(
+                        owner=request.user)
+                    if IspToolboxUserSignUpInfoForm.Meta.model.objects.filter(owner=request.user)
+                    else None
             ),
         }
         return render(

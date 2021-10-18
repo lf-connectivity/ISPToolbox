@@ -3,7 +3,7 @@
 {% else %}
   <div class="workspace-nav fixed-top pr-4" id="workspacenavelem">
 {% endif %}
-    <div class="d-flex">
+    <div class="d-flex h-100">
       {% if nav_is_app_page is True and not nav_app_page_skip_back_button and user.is_authenticated %}
         <a href="/pro/" class="back-icon py-auto px-3 mr-2" id="workspacenavelem-backbutton">
             <svg width="19" height="17" viewBox="0 0 19 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -11,16 +11,16 @@
             </svg>
         </a>
       {% endif %}
-        <div class="homepage-logo align-items-center d-flex mx-2">
+        <div class="homepage-logo align-items-center d-flex mx-2 h-100">
+          <a href="/pro/" class="align-items-center d-flex h-100">
           {% if nav_is_app_page is True %}
             {% include "workspace/atoms/isptoolbox_logo.html"%}
             <span class='ml-3 page-title'>{{ page_title|default:"ISP Toolbox Workspace" }}</span>
           {% else %}
             {% include "workspace/atoms/isptoolbox_logo_new.html"%}
           {% endif %}
-
-          <span class='ml-1 beta-mark'>[beta]</span>
-
+            <span class='ml-1 beta-mark'>[beta]</span>
+          </a>
           {% if nav_is_app_page is True and not nav_skip_tour_button %}
             <button class="btn my-auto px-0 d-flex" id="tool_help_button">
                 {% include "workspace/atoms/icons/question_mark_icon.html" %}

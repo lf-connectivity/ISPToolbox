@@ -16,9 +16,9 @@
             letter-spacing: 0.02em
             padding-right: 20px
     .title.success h6
-            color: $success-color
+        color: $success-color
     .title.fail h6
-            color: $error-color
+        color: $error-color
     .tooltip--cpe .title img
         margin-left: 6px
     .tooltip--towers .title img
@@ -99,19 +99,29 @@
         p
             line-height: 18px
 
-
 .mapboxgl-popup.map-tooltip
     input
-        background: darken($brand-dark-gray-color, 7%)
-        -webkit-appearance: none
-        border: 0
-        border-style: none
-        color: #fff
-        padding: 5px 3px 3px 3px
-        width: 100%
-        font-size: $small-font-size
-        box-sizing: border-box
-        border-bottom: 2px solid transparent
+        &[type="text"]
+            background: darken($brand-dark-gray-color, 7%)
+            -webkit-appearance: none
+            border: 0
+            border-style: none
+            color: #fff
+            padding: 5px 3px 3px 3px
+            width: 100%
+            font-size: $small-font-size
+            box-sizing: border-box
+            border-bottom: 2px solid transparent
+        &[type="number"]
+            background: darken($brand-dark-gray-color, 7%)
+            -webkit-appearance: none
+            border: 0
+            border-style: none
+            color: #fff
+            padding: 5px 3px 3px 3px
+            font-size: $small-font-size
+            box-sizing: border-box
+            border-bottom: 2px solid transparent
         &:focus
             outline: 0
             border-bottom: 2px solid $brand-primary-color
@@ -221,7 +231,7 @@
         li:last-of-type
             border-bottom: 0
             padding-bottom: 0
-    .overlay-tooltip 
+    .overlay-tooltip
         .mapboxgl-popup-label
             margin-right: 8px
         .mapboxgl-popup-row-header
@@ -229,7 +239,6 @@
             padding: 0.5rem 0.3rem 0.5rem 0.3rem !important
             &--mapboxgl-popup-header-label:last-of-type
                 text-align: right
-
 
 .map-tooltip .mapboxgl-popup-content
     background-color: $brand-dark-gray-color

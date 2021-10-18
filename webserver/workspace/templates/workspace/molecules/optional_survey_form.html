@@ -1,0 +1,38 @@
+<ol>
+{% for field in form %}
+    <li class="onboarding_container--question">
+        {{ field.label_tag }}
+        
+        {% if field.css_classes == 'required' %}
+            <span class="onboarding_container--required">(required)</span>
+        {% endif %}
+
+        {% if field.help_text %}
+            <p class="onboarding_container--description">{{ field.help_text|safe }}</p>
+        {% endif %}
+        
+        {% if not field.widget_type == 'checkboxselectmultiple' %}
+            {{ field }}
+        {% else %}
+            <div class="checklist--items">
+                <ul>                 
+                {% for checkboxselectmultiple in field %}
+                    <li>
+                        {{ checkboxselectmultiple.tag }}
+                        <label for="{{ checkboxselectmultiple.id_for_label }}">
+                            {{ checkboxselectmultiple.choice_label }}
+                        </label>
+                    </li>
+                {% endfor %}
+                </ul> 
+            </div>
+        {% endif %}
+
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <p class="onboarding_container--errors">{{ error|escape }}</p>
+            {% endfor %}
+        {% endif %}
+    </li>
+{% endfor %}
+</ol>

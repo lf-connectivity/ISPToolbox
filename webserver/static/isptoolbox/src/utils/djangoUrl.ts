@@ -7,7 +7,7 @@
 export function djangoUrl(name: string, ...args: any[]) {
     const urls = (window as any).Urls;
     if (urls !== undefined) {
-        return urls[name](args);
+        return urls[name](...args);
     } else {
         throw 'reverse URLS not found';
     }

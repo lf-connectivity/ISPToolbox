@@ -31,17 +31,15 @@
                     </form>
                 </div>
                 <hr>
-                <div class="delete-account mt-4">
-                    <div class="card-body">
+                <div class="delete-account">
+                    <div class="card-body py-0">
                         <h1 class="pb-3"></h1>
-                        <p><strong>{% translate "Delete Account"%}</strong></p>
-                        <p>{% blocktranslate %}If you wish to delete your account, you may do so by clicking on the link
-                            below. Deleting
-                            your account is permanent and will remove all content associated with
+                        <p><strong>{% translate "Delete ISP Toolbox Account"%}</strong></p>
+                        <p>{% blocktranslate %}If you wish to delete your ISP Toolbox account, you may do so by clicking on the link
+                            below. Deleting your account is permanent and will remove all content associated with
                             it.{% endblocktranslate%}</p>
                         <div>
-                            <a class="m-2"
-                                href="{% url 'workspace:delete_your_information'%}">{% translate "Delete Your Information"%}</a>
+                            <a href="{% url 'workspace:delete_your_information'%}">{% translate "Delete Your Information"%}</a>
                         </div>
                     </div>
                 </div>

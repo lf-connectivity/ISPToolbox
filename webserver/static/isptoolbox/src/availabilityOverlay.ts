@@ -1,6 +1,5 @@
 import * as MapboxGL from 'mapbox-gl';
 import { getCookie } from './utils/Cookie';
-import { djangoUrl } from './utils/djangoUrl';
 var _ = require('lodash');
 
 //@ts-ignore
@@ -109,6 +108,16 @@ export class AdminLidarAvailabilityLayer extends LidarAvailabilityLayer {
     setCloudNames: any;
     constructor(map: MapboxGL.Map) {
         super(map);
+
+        this.map.on('click', (e: any) => {
+            if (
+                this.map.queryRenderedFeatures(e.point, {
+                    layers: [SOURCES['lidar_boundary'].layer]
+                }).length === 0
+            ) {
+                this.queryLocation(e.lngLat);
+            }
+        });
     }
 
     protected setPopup(message: string, lngLat: MapboxGL.LngLat) {
@@ -154,30 +163,18 @@ export class AdminLidarAvailabilityLayer extends LidarAvailabilityLayer {
         // Change the cursor style as a UI indicator.
         this.map.getCanvas().style.cursor = 'pointer';
         this.setPopupNoDebounce(e);
-        this.setCloudNames(e);
     }
 
     protected onMouseMove(e: any) {
         this.setPopupNoDebounce(e);
-        this.setCloudNames(e);
     }
 
     protected onMouseLeave(e: any) {
         super.onMouseLeave(e);
-        this.setCloudNames.cancel();
     }
 
     protected setupLidarAvailability() {
         let sources = ['lidar_boundary', 'dsm_available', 'dsm_unavailable'] as Array<SourceType>;
-        this.setCloudNames = _.debounce((e: any) => {
-            if (
-                this.map.queryRenderedFeatures(e.point, {
-                    layers: [SOURCES['lidar_boundary'].layer]
-                }).length === 0
-            ) {
-                this.queryLocation(e.lngLat);
-            }
-        }, 300);
         sources.forEach((source) => {
             this.setupSource(source);
         });

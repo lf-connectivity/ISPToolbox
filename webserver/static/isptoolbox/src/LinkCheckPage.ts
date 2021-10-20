@@ -150,7 +150,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         // If it's a PtP link, open a popup if the user clicks on a vertex. This
                         // is the only way I could think of of implementing this at a granular
                         // sub-feature level.
-                        if (isBeta() && !state.feature.properties.radius && !state.dragMoving) {
+                        if (!state.feature.properties.radius && !state.dragMoving) {
                             // onVertex is called onMouseDown. We need to wait until mouseup to show the popup
                             // otherwise there will be a race condition with the reverseGeocode callback and the
                             // time when the user releases the mouse.
@@ -169,7 +169,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     },
                     dragVertex: (state: any, e: any) => {
                         // Abort and replace popup event listener if we are still dragging.
-                        if (popupAbortController !== null && isBeta()) {
+                        if (popupAbortController !== null) {
                             popupAbortController.abort();
                             popupAbortController = new AbortController();
 
@@ -191,7 +191,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 draw_ap: APDrawMode(),
                 draw_cpe: CPEDrawMode()
             },
-            'edit_network'
+            'edit_network',
+            false
         );
         this.networkID = networkID;
         this.userRequestIdentity = userRequestIdentity;
@@ -325,45 +326,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     onMapLoad() {
         // Popups
-        if (isBeta()) {
-            // Long press -> show popup on mobile
-            let onLongPress: any = undefined;
-            this.map.on('touchstart', (e: any) => {
-                if (onLongPress) {
-                    clearTimeout(onLongPress);
-                }
-                onLongPress = setTimeout(() => {
-                    let mapboxClient = MapboxSDKClient.getInstance();
-                    let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
-                    mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                            LinkCheckCustomerConnectPopup,
-                            lngLat,
-                            response
-                        );
-                        popup.show();
-                    });
-                }, 1000);
-            });
-
-            this.map.on('touchend', (e) => {
-                if (onLongPress) {
-                    clearTimeout(onLongPress);
-                }
-            });
-
-            this.map.on('touchcancel', (e) => {
-                if (onLongPress) {
-                    clearTimeout(onLongPress);
-                }
-            });
-
-            this.map.on('touchmove', (e) => {
-                if (onLongPress) {
-                    clearTimeout(onLongPress);
-                }
-            });
-        }
 
         this.map.on('draw.update', this.updateRadioLocation.bind(this));
         this.map.on('draw.create', this.updateRadioLocation.bind(this));

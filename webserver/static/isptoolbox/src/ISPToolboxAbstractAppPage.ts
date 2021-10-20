@@ -47,7 +47,7 @@ export abstract class ISPToolboxAbstractAppPage {
     geocoder: MapboxGeocoder;
     analyticsService: AnalyticsService;
 
-    constructor(draw_modes: any, sources_page: string) {
+    constructor(draw_modes: any, sources_page: string, marker: boolean) {
         let { initial_map_center, initial_zoom } = this.initMapCenterAndZoom();
 
         try {
@@ -176,8 +176,9 @@ export abstract class ISPToolboxAbstractAppPage {
             // Add Geocoder Last -> Allow Cypress Tests to Know We're ready
             this.geocoder = new MapboxGeocoder({
                 accessToken: mapboxgl.accessToken,
-                mapboxgl: this.map,
-                marker: isBeta() ? false : true,
+                // @ts-ignore
+                mapboxgl: mapboxgl,
+                marker: marker,
                 countries: 'us, pr',
                 // @ts-ignore
                 localGeocoder: latLngMatcher,

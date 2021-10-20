@@ -17,7 +17,8 @@ export class DSMAdminPage extends ISPToolboxAbstractAppPage {
                 simple_select: OverrideSimple(),
                 direct_select: OverrideDirect()
             },
-            'edit_network'
+            'edit_network',
+            true
         );
         this.windowResizeCallback();
         window.addEventListener('resize', this.windowResizeCallback);

@@ -1,5 +1,4 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
-import { isBeta } from '../LinkCheckUtils';
 import { LinkCheckBasePopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
 import { LinkCheckCustomerConnectPopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckCustomerConnectPopup';
 import { MapboxSDKClient } from '../MapboxSDKClient';
@@ -55,16 +54,14 @@ export class LinkCheckLocationSearchTool {
 
     setGeocoder(geocoder: MapboxGeocoder) {
         this.geocoder = geocoder;
-        if (isBeta()) {
-            this.geocoder.on('result', ({ result }: any) => {
-                this.setLngLat(result.center);
-                this.show();
-            });
+        this.geocoder.on('result', ({ result }: any) => {
+            this.setLngLat(result.center);
+            this.show();
+        });
 
-            this.geocoder.on('clear', () => {
-                this.marker.remove();
-            });
-        }
+        this.geocoder.on('clear', () => {
+            this.marker.remove();
+        });
     }
 
     onPopupClose() {

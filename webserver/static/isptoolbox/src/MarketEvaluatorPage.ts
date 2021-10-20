@@ -31,7 +31,8 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
                 draw_ap: APDrawMode(),
                 draw_polygon: OverrideDrawPolygon()
             },
-            'market_eval'
+            'market_eval',
+            true
         );
 
         new MarketEvaluatorWS([]);

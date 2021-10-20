@@ -13,7 +13,12 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import json
 from .secrets import get_secret
+from django.urls import reverse_lazy
 
+import base64
+import saml2
+import saml2.saml
+from IspToolboxAccounts import admin_sso_attribute_maps
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -128,6 +133,8 @@ INSTALLED_APPS = [
     'hijack',
     # Celery Results Backend
     'django_celery_results',
+    # SSO
+    'djangosaml2',
 ]
 
 if DEBUG:
@@ -160,6 +167,7 @@ if PROD:
 AUTHENTICATION_BACKENDS = (
     'IspToolboxAccounts.backends.EmailBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
+    'IspToolboxAccounts.backends.SSOAdminBackend'
 )
 
 LOGIN_REDIRECT_URL = "/pro"
@@ -260,6 +268,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'djangosaml2.middleware.SamlSessionMiddleware',
 ]
 
 CSP_INCLUDE_NONCE_IN = [
@@ -378,9 +387,9 @@ DATABASE_ROUTERS = ['gis_data.models.GISDataRouter']
 AUTH_USER_MODEL = "IspToolboxAccounts.User"
 
 # Change session cookie samesite attribute to None for iframe functionality
+SESSION_COOKIE_SECURE = True
 if PROD:
     SESSION_COOKIE_SAMESITE = 'None'
-    SESSION_COOKIE_SECURE = True
 
 
 # Password validation
@@ -437,4 +446,131 @@ CACHES = {
         },
         "KEY_PREFIX": "los"
     }
+}
+
+# FB admin SAML SSO, dev only for now
+
+SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'
+SAML_CREATE_UNKNOWN_USER = True
+SAML_IGNORE_LOGOUT_ERRORS = True
+SAML_HOSTNAME = 'isptoolbox.io' if PROD else 'localhost:8000'
+SAML_ATTRIBUTE_MAPPING = {
+    'Email': ('email', ),
+    'FirstName': ('first_name', ),
+    'LastName': ('last_name', ),
+}
+ACS_DEFAULT_REDIRECT_URL = reverse_lazy('admin:index')
+
+SAML_SECRETS = json.loads(get_secret("internal-fb-sso-certs",
+                                      aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+
+SAML_SIGNING_CERT_FILE = '/opt/admin_sso_signing.cert'
+SAML_SIGNING_KEY_FILE = '/opt/admin_sso_signing.key'
+SAML_LOCAL_METADATA_FILE = '/opt/admin_sso_metadata.xml'
+SAML_ATTRIBUTE_MAPS_DIR = admin_sso_attribute_maps.get_base_dir()
+
+SAML_IDP_URL = SAML_SECRETS['DevIdp']
+SAML_REMOTE_METADATA_URL = SAML_SECRETS['DevMetadataRemoteLink']
+
+# Cert and key are base 64 encoded in AWS Secrets Manager
+with open(SAML_SIGNING_CERT_FILE, 'w') as f:
+    f.write(base64.b64decode(SAML_SECRETS['DevPublicCertBase64']).decode('ascii'))
+
+# Private key isn't necessary except we need one, so here's a self signed key.
+with open(SAML_SIGNING_KEY_FILE, 'w') as f:
+    f.write(base64.b64decode(SAML_SECRETS['DummyPrivateKeyBase64']).decode('ascii'))
+
+with open(SAML_LOCAL_METADATA_FILE, 'w') as f:
+    f.write(base64.b64decode(SAML_SECRETS['DevMetadataXmlBase64']).decode('ascii'))
+
+SAML_CONFIG = {
+    # full path to the xmlsec1 binary programm
+    'xmlsec_binary': '/usr/bin/xmlsec1',
+
+    # your entity id, usually your subdomain plus the url to the metadata view
+    'entityid': f'https://{SAML_HOSTNAME}/saml2/metadata/',
+
+    # directory with attribute mapping
+    'attribute_map_dir': SAML_ATTRIBUTE_MAPS_DIR,
+
+    # Permits to have attributes not configured in attribute-mappings
+    # otherwise...without OID will be rejected
+    'allow_unknown_attributes': True,
+
+    # this block states what services we provide
+    'service': {
+        # we are just a lonely SP
+        'sp' : {
+            'name': 'ISP Toolbox Admin Page SP',
+            'name_id_format': saml2.saml.NAMEID_FORMAT_TRANSIENT,
+
+            # For Okta add signed logout requets. Enable this:
+            'logout_requests_signed': True,
+
+            'endpoints': {
+                # url and binding to the assetion consumer service view
+                # do not change the binding or service name
+                'assertion_consumer_service': [
+                    (f'https://{SAML_HOSTNAME}/saml2/acs/',
+                    saml2.BINDING_HTTP_POST),
+                ],
+                # url and binding to the single logout service view
+                # do not change the binding or service name
+                'single_logout_service': [
+                ],
+            },
+
+            'signing_algorithm':  saml2.xmldsig.SIG_RSA_SHA256,
+            'digest_algorithm':  saml2.xmldsig.DIGEST_SHA256,
+
+            # Mandates that the identity provider MUST authenticate the
+            # presenter directly rather than rely on a previous security context.
+            'force_authn': False,
+
+            # Enable AllowCreate in NameIDPolicy.
+            'name_id_format_allow_create': False,
+
+            # attributes that this project need to identify a user
+            'required_attributes': ['FirstName',
+                                    'LastName',
+                                    'Email'],
+
+            'want_response_signed': True,
+            'authn_requests_signed': True,
+            'logout_requests_signed': True,
+
+            # Indicates that Authentication Responses to this SP must
+            # be signed. If set to True, the SP will not consume
+            # any SAML Responses that are not signed.
+            'want_assertions_signed': True,
+
+            'only_use_keys_in_metadata': True,
+
+            # When set to true, the SP will consume unsolicited SAML
+            # Responses, i.e. SAML Responses for which it has not sent
+            # a respective SAML Authentication Request.
+            'allow_unsolicited': False,
+        },
+    },
+
+    # where the remote metadata is stored, local, remote or mdq server.
+    # One metadatastore or many ...
+    'metadata': {
+        'local': [SAML_LOCAL_METADATA_FILE],
+        'remote': [{"url": SAML_REMOTE_METADATA_URL},],
+    },
+
+    # set to 1 to output debugging information
+    'debug': 1 if DEBUG else 0,
+
+    # Signing
+    'key_file': SAML_SIGNING_KEY_FILE,  # private part
+    'cert_file': SAML_SIGNING_CERT_FILE,  # public part
+
+    # you can set multilanguage information here
+    'organization': {
+        'name': [('Facebook, Inc.', 'en')],
+        'url': [('https://isptoolbox.io', 'en')],
+    },
 }

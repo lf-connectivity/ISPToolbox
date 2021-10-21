@@ -35,6 +35,7 @@
         "@types/mapbox__mapbox-gl-geocoder": "^4.7.1",
         "@types/mapbox-gl": "^2.0.0",
         "@types/pubsub-js": "^1.8.2",
+        "circular-dependency-plugin": "^5.2.2",
         "file-loader": "^6.2.0",
         "prettier": "^2.3.2",
         "ts-loader": "^8.0.11",

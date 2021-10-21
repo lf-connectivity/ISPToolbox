@@ -30,7 +30,7 @@ Cypress.Commands.add(
 
     cy.window().then((window) => {
       const coords = window.mapbox_handles.map.project(xy);
-      cy.get("#map").click(coords.x, coords.y);
+      cy.get("#map").trigger('mouseover', coords.x, coords.y).click(coords.x, coords.y);
     });
   }
 );

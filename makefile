@@ -8,6 +8,10 @@ run_dev:
 	@echo ----------------------------------------------Start Development Server------------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 
+run_dev_ssl:
+	@echo ----------------------------------------------Start Development Server with SSL------------------------------------------
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run -p 0.0.0.0:8000:8000 -p 0.0.0.0:3000:3000 django-app python3 manage.py runsslserver 0.0.0.0:8000 --certificate cert.pem --key key.pem
+
 prod_migrate:
 	@echo ----------------------------------------------RUNNING DJANGO MIGRATIONS PROD----------------------------------------
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build django-app

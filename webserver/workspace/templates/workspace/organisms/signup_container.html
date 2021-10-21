@@ -1,4 +1,5 @@
 {% load socialaccount %}
+{% load static settings %}
 {% providers_media_js %}
 
 <div id="fb_sign_up_container" class="{% if not showSignUp or showEmailSignUp %}d-none{% endif %}">
@@ -19,10 +20,14 @@
         >
         </div>
         {% include 'workspace/atoms/terms_disclaimer.html' %}
-        {% include 'workspace/atoms/content_break.html' %}
-        <a href="#" id="signup_email">Sign Up with Email</a>
+        {% notprod %}
+            {% include 'workspace/atoms/content_break.html' %}
+            <a href="#" id="signup_email">Sign Up with Email</a>
+        {% endnotprod %}
     </div>
+    {% notprod %}
     <div class="container onboarding_container--other-options text-center">
         <p>Already have an account? <a href="#" class="dy_have_account">Sign in</a></p>
     </div>
+    {% endnotprod %}
 </div>

@@ -1,3 +1,5 @@
+{% load static settings %}
+
 <div id="signin_container" class="{% if showSignUp %}d-none{% endif %}">
 <div class="container signup_container onboarding_container">
     <h3>Welcome Back!</h3>
@@ -60,7 +62,9 @@
         </form>
     </div>
 </div>
+{% notprod %}
 <div class="container text-center">
     <p>Don’t have an account?<a href="#" id="no_act_yet"> Sign Up</a></p>
 </div>
+{% endnotprod %}
 </div>

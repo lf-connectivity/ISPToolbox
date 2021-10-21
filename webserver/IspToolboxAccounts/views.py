@@ -20,7 +20,6 @@ import json
 
 class CreateAccountView(View):
     def post(self, request):
-
         form = IspToolboxUserCreationForm(request.POST)
         if form.is_valid() and (settings.ENABLE_ACCOUNT_CREATION or (
                 form.cleaned_data.get(

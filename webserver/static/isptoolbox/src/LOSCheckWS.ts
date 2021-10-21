@@ -133,7 +133,10 @@ class LOSCheckWS {
 
     connect() {
         const protocol = location.protocol !== 'https:' ? 'ws://' : 'wss://';
-        const domain = location.protocol !== 'https:' ? location.host : 'isptoolbox.io';
+        const domain =
+            location.host === 'isptoolbox.io'
+                ? 'isptoolbox.io'
+                : location.host.split(':')[0] + ':8010'; // dev or prod, dev goes to port 8010
         this.ws = new WebSocket(protocol + domain + '/ws/los/' + this.networkName + '/');
 
         this.ws.onclose = (e) => {

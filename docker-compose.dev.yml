@@ -20,6 +20,14 @@ services:
       - 8000:8000
     depends_on:
       - static
+  websocket-app:
+    command: daphne -e ssl:8010:privateKey=key.pem:certKey=cert.pem webserver.asgi:application --access-log -
+    environment:
+      DEBUG: "TRUE"
+    volumes:
+      - ./webserver:/usr/src/app
+    ports:
+      - 8010:8010
   celery:
     command: /bin/sh -c "/usr/src/app/dev_entrypoint_celery.sh"
     environment:

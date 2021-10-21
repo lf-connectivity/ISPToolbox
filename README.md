@@ -128,7 +128,7 @@ You should have a copy of the integration test coverage under `coverage/htmlcov/
 
 this will startup the whole backend stack on your machine
 
-in VSCode forward port 8000 to your localhost (macbook)
+in VSCode forward ports 8000 AND 8010 to your localhost (macbook)
 
 ![Alt text](images/port_forwarding.png?raw=true "Title")
 

@@ -10,8 +10,8 @@ from .market_views import (
 from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
-    AccessPointCoverageStatsView, CoverageAreaCreate, CoverageAreaGet, AnalyticsView
-
+    AccessPointCoverageStatsView, CoverageAreaCreate, CoverageAreaGet, AnalyticsView,
+    AccessPointCoverageViewshedOverlayView
 )
 from .session_views import (
     SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView,
@@ -27,6 +27,7 @@ from .visualization_views import PotreeVisualizationMetaView
 from .import_views import KMZImportView
 from .dyi_views import (DeleteYourInformationView)
 from .ayi_views import (AccessYourInformationView)
+from .tower_form_views import (AccessPointLocationFormView)
 
 import workspace.utils.import_utils
 

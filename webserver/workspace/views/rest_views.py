@@ -1,4 +1,5 @@
 from django.contrib.sessions.models import Session
+from django.http.response import Http404
 from django.views import View
 from workspace.models import (
     AccessPointLocation, AccessPointCoverageBuildings
@@ -9,6 +10,7 @@ from workspace.models import (
     AccessPointSerializer,
     CPESerializer, APToCPELinkSerializer, WorkspaceMapSessionSerializer,
     WorkspaceMapSession, CoverageAreaSerializer, AnalyticsEvent, AnalyticsSerializer,
+    Viewshed
 )
 from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters
@@ -259,6 +261,19 @@ class AccessPointCoverageStatsView(View):
         ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
         coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
         return JsonResponse(coverage.coverageStatistics())
+
+
+class AccessPointCoverageViewshedOverlayView(View):
+    def get(self, request, **kwargs):
+        try:
+            ap = AccessPointLocation.get_rest_queryset(
+            request).get(uuid=kwargs.get('uuid'))
+            viewshed = Viewshed.objects.get(ap=ap)
+            if not viewshed.result_cached():
+                raise Http404("Overlay not cached")
+        except:
+            raise Http404
+        return JsonResponse(viewshed.getTilesetInfo())
 
 
 class AnalyticsView(View, mixins.ListModelMixin):

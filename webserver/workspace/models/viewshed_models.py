@@ -92,6 +92,14 @@ class Viewshed(models.Model, S3PublicExportMixin):
             prefix = "viewshed/tiles"
         return f"https://tiles.isptoolbox.io/{prefix}/{self.uuid}/{{z}}/{{y}}/{{x}}.png?access_token={self.createJWT()}"
 
+    def getTilesetInfo(self):
+        return {
+            'base_url': self.getBaseTileSetUrl(),
+            'maxzoom': self.max_zoom,
+            'minzoom': self.min_zoom,
+            'uuid': self.ap.uuid,
+        }
+
     def calculate_hash(self):
         """
         This function generates a hash to help cache viewshed results

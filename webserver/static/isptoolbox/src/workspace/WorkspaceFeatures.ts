@@ -17,7 +17,7 @@ const AP_RESPONSE_FIELDS = [
     'radius',
     'no_check_radius',
     'default_cpe_height',
-    'max_radius_miles',
+    'radius_miles',
     'height_ft',
     'default_cpe_height_ft',
     'cloudrf_coverage_geojson_json'

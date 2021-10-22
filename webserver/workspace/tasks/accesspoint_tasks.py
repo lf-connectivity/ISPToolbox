@@ -1,4 +1,3 @@
-from celery import shared_task
 from celery.utils.log import get_task_logger
 from workspace.models import (
     AccessPointLocation, AccessPointCoverageBuildings, BuildingCoverage
@@ -11,6 +10,7 @@ from workspace.tasks.websocket_utils import updateClientAPStatus
 
 import numpy as np
 import json
+from webserver.celery import celery_app as app
 
 
 ARC_SECOND_DEGREES = 1.0 / 60.0 / 60.0
@@ -19,13 +19,14 @@ INTERVAL_UPDATE_FRONTEND = 10
 TASK_LOGGER = get_task_logger(__name__)
 
 
-@shared_task
+@app.task
 def generateAccessPointCoverage(channel_id, request, user_id=None):
     """
     Calculate the coverage area of an access point location
     """
     ap = AccessPointLocation.objects.get(uuid=request['uuid'])
-    building_coverage, created = AccessPointCoverageBuildings.objects.get_or_create(ap=ap)
+    building_coverage, created = AccessPointCoverageBuildings.objects.get_or_create(
+        ap=ap)
     if created:
         building_coverage.save()
     # check if the result exists already
@@ -33,11 +34,13 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
         TASK_LOGGER.info('cache miss building coverage')
         new_hash = building_coverage.calculate_hash()
         # Get circle geometry
-        circle_json = json.dumps(createGeoJSONCircle(building_coverage.ap.geojson, building_coverage.ap.max_radius))
+        circle_json = json.dumps(createGeoJSONCircle(
+            building_coverage.ap.geojson, building_coverage.ap.max_radius))
         circle = GEOSGeometry(circle_json)
 
         # Find all buildings that intersect the access point radius
-        buildings = MsftBuildingOutlines.objects.filter(geog__intersects=circle).all()[0:LIMIT_BUILDINGS]
+        buildings = MsftBuildingOutlines.objects.filter(
+            geog__intersects=circle).all()[0:LIMIT_BUILDINGS]
         building_coverage.nearby_buildings.clear()
         nearby_buildings = []
         for building in buildings:
@@ -63,7 +66,8 @@ def checkBuildingServiceable(access_point, building):
     """
     building = MsftBuildingOutlines.objects.filter(id=building.msftid).get()
     building_center = building.geog.centroid
-    le = LidarEngine(LineString([access_point.geojson, building_center]), LidarResolution.ULTRA, 1024)
+    le = LidarEngine(LineString(
+        [access_point.geojson, building_center]), LidarResolution.ULTRA, 1024)
     profile = le.getProfile()
     return checkForObstructions(access_point, profile)
 

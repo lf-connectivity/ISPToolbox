@@ -11,3 +11,5 @@ class FeatureType(enum.Enum):
 
 # Number of feet in a meter
 M_2_FT = 3.28084
+
+KM_2_MI = 0.621371

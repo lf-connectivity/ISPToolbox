@@ -174,7 +174,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
         time_remaining = 0
         for i in range(step, len(polynomials)):
             time_remaining = time_remaining + \
-                polyval(polynomials[i], self.ap.max_radius_miles)
+                polyval(polynomials[i], self.ap.radius_miles)
         return time_remaining
 
     def __createRawGDALViewshedCommand(self, dsm_filepath, output_filepath, dsm_projection):

@@ -10,7 +10,7 @@
             {% if units == "SI" %}
                 value="{{ap.max_radius|floatformat:2}}"
             {% else %}
-                value="{{ap.max_radius_miles|floatformat:2}}"
+                value="{{ap.radius_miles|floatformat:2}}"
             {% endif %}
             >
             <span class="input-group-text">{% if units == "SI" %}

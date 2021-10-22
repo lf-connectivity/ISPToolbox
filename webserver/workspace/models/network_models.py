@@ -2,23 +2,30 @@ from django.contrib.gis.db.models.fields import GeometryField
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.conf import settings
-from rest_framework import serializers
-import uuid
 from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import GEOSGeometry, LineString
-import json
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
-from workspace.utils.geojson_circle import createGeoJSONCircle
-from .model_constants import FeatureType, M_2_FT
-from mmwave.tasks.link_tasks import getDTMPoint
-from mmwave.models import EPTLidarPointCloud
-from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from django.contrib.sessions.models import Session
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import pre_save, post_save
+from django.dispatch import receiver
+
+from rest_framework import serializers
+
 import logging
 import numpy
 import math
-from django.core.validators import MaxValueValidator, MinValueValidator
+import json
+import uuid
+
+from workspace.utils.geojson_circle import createGeoJSONCircle
+from .model_constants import KM_2_MI, FeatureType, M_2_FT
+from mmwave.tasks.link_tasks import getDTMPoint
+from mmwave.models import EPTLidarPointCloud
+from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
+
+
 
 BUFFER_DSM_EXPORT_KM = 0.5
 
@@ -97,16 +104,25 @@ class SessionWorkspaceModelMixin:
             'features': features
         }
 
+    def get_geojson_str(self, obj):
+        return obj.geojson.json
+
 
 class AccessPointLocation(WorkspaceFeature):
     name = models.CharField(max_length=50, default="Unnamed AP")
+    MAX_HEIGHT_M = 1000
+    MIN_HEIGHT_M = 0
     height = models.FloatField(default=30, validators=[
-                               MinValueValidator(0), MaxValueValidator(1000)])
+                               MinValueValidator(MIN_HEIGHT_M), MaxValueValidator(MAX_HEIGHT_M)])
+    MAX_RADIUS_KM = 16
+    MIN_RADIUS_KM = 0
     max_radius = models.FloatField(default=2, validators=[
-        MinValueValidator(0), MaxValueValidator(16)])
+        MinValueValidator(MIN_RADIUS_KM), MaxValueValidator(MAX_RADIUS_KM)])
     no_check_radius = models.FloatField(default=0.01)
+    MAX_CPE_HEIGHT_M = 1000
+    MIN_CPE_HEIGHT_M = 0
     default_cpe_height = models.FloatField(default=1, validators=[
-        MinValueValidator(0), MaxValueValidator(1000)])
+        MinValueValidator(MIN_CPE_HEIGHT_M), MaxValueValidator(MAX_CPE_HEIGHT_M)])
     cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)
 
     @property
@@ -121,25 +137,68 @@ class AccessPointLocation(WorkspaceFeature):
     def radius(self):
         return self.max_radius
 
+    @radius.setter
+    def radius(self, val):
+        self.max_radius = val
+
     @property
-    def max_radius_miles(self):
-        return self.max_radius * 0.621371
+    def radius_miles(self):
+        return self.max_radius * KM_2_MI
+
+    @radius_miles.setter
+    def radius_miles(self, val):
+        self.max_radius = val / KM_2_MI
+
+    @property
+    def units(self):
+        return self.map_session.units
 
     @property
     def height_ft(self):
         return self.height * M_2_FT
 
+    @height_ft.setter
+    def height_ft(self, val):
+        self.height = val / M_2_FT
+
     @property
     def default_cpe_height_ft(self):
         return self.default_cpe_height * M_2_FT
+
+    @default_cpe_height_ft.setter
+    def default_cpe_height_ft(self, val):
+        self.default_cpe_height = val / M_2_FT
 
     @property
     def feature_type(self):
         return FeatureType.AP.value
 
     @property
+    def coordinates(self):
+        return f'{self.geojson.y}, {self.geojson.x}'
+
+    @coordinates.setter
+    def coordinates(self, value):
+        coords = value.split(',')
+        self.geojson.x = float(coords[1])
+        self.geojson.y = float(coords[0])
+
+    @property
     def cloudrf_coverage_geojson_json(self):
         return self.cloudrf_coverage_geojson.json if self.cloudrf_coverage_geojson else None
+
+    @classmethod
+    def coordinates_validator(cls, value):
+        coords = value.split(',')
+        if len(coords) != 2:
+            raise ValidationError(
+                'Coordinates must contain two values seperated by a comma. Latitude, Longitude')
+        if float(coords[0]) > 90.0 or float(coords[0]) < -90.0:
+            raise ValidationError(
+                'Invalid latitude, latitude must be between -90 and 90.')
+        if float(coords[1]) > 180.0 or float(coords[1]) < -180.0:
+            raise ValidationError(
+                'Invalid longitude, longitude must be between -180 and 180.')
 
     def get_dtm_height(self) -> float:
         return getDTMPoint(self.geojson)
@@ -166,14 +225,29 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     lookup_field = 'uuid'
     last_updated = serializers.DateTimeField(
         format="%D", required=False, read_only=True)
-    height_ft = serializers.FloatField(read_only=True)
-    radius = serializers.FloatField(read_only=True)
-    max_radius_miles = serializers.FloatField(read_only=True)
+    height_ft = serializers.FloatField(required=False, validators=[
+        MinValueValidator(AccessPointLocation.MIN_HEIGHT_M * M_2_FT),
+        MaxValueValidator(AccessPointLocation.MAX_HEIGHT_M * M_2_FT)
+    ])
+    radius_miles = serializers.FloatField(required=False, validators=[
+        MinValueValidator(AccessPointLocation.MIN_RADIUS_KM * KM_2_MI),
+        MaxValueValidator(AccessPointLocation.MAX_RADIUS_KM * KM_2_MI)
+    ])
+    coordinates = serializers.CharField(required=False,
+                                        validators=[
+                                            AccessPointLocation.coordinates_validator
+                                        ]
+                                        )
+    geojson_str = serializers.SerializerMethodField()
     feature_type = serializers.CharField(read_only=True)
-    default_cpe_height_ft = serializers.FloatField(read_only=True)
+    default_cpe_height_ft = serializers.FloatField(required=False, validators=[
+        MinValueValidator(AccessPointLocation.MIN_CPE_HEIGHT_M * M_2_FT),
+        MaxValueValidator(AccessPointLocation.MAX_CPE_HEIGHT_M * M_2_FT)
+    ])
     cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
     lat = serializers.FloatField(read_only=True)
     lng = serializers.FloatField(read_only=True)
+    units = serializers.CharField(read_only=True)
 
     class Meta:
         model = AccessPointLocation
@@ -268,6 +342,7 @@ class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     height = serializers.FloatField(required=False)
     height_ft = serializers.FloatField(required=False)
     feature_type = serializers.CharField(read_only=True)
+    geojson_str = serializers.SerializerMethodField()
     ap = serializers.PrimaryKeyRelatedField(
         queryset=AccessPointLocation.objects.all(),
         pk_field=serializers.UUIDField()
@@ -300,6 +375,7 @@ class APToCPELinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     last_updated = serializers.DateTimeField(
         format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
+    geojson_str = serializers.SerializerMethodField()
     ap = serializers.PrimaryKeyRelatedField(
         queryset=AccessPointLocation.objects.all(),
         pk_field=serializers.UUIDField()
@@ -328,6 +404,7 @@ class CoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelM
     last_updated = serializers.DateTimeField(
         format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
+    geojson_str = serializers.SerializerMethodField()
 
     class Meta:
         model = CoverageArea
@@ -375,7 +452,7 @@ class AccessPointCoverageBuildings(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def calculate_hash(self):
-        return f'{self.ap.geojson.x},{self.ap.geojson.y},{self.ap.max_radius}'
+        return f'{self.ap.geojson.x},{self.ap.geojson.y},{self.ap.max_radius},{self.ap.height},{self.ap.default_cpe_height}'
 
     def result_cached(self):
         return self.hash == self.calculate_hash()

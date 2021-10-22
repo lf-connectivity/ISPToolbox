@@ -595,7 +595,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                     'lng': json.loads(DEFAULT_AP_POINT)['coordinates'][0],
                     'cloudrf_coverage_geojson_json': None,
                     'default_cpe_height_ft': expected_default_cpe_height_ft,
-                    'max_radius_miles': expected_max_radius_miles,
+                    'radius_miles': expected_max_radius_miles,
                     'uneditable': DEFAULT_UNEDITABLE
                 }
             }

@@ -1,0 +1,84 @@
+{% spaceless %}
+{% load rest_framework i18n %}
+{% if uuid %}
+<div class="tooltip--tower-summary">
+  <div class="title">
+    <h6>{% translate "Edit Tower" %}</h6>
+  </div>
+  <div>
+    <ul>
+      <form method="PATCH" action="." data-url="{% url 'workspace:ap-loc-form' uuid %}" id="tower_update_form">
+        {% csrf_token %}
+        <li class="name-row">
+          <input type='text' name="name" class="input--tower-name" value='{{ name }}' placeholder='Tower Name'>
+          {% if errors.name %}{% for error in errors.name %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
+          <div class="coordinates">
+            <div class="data-with-unit">
+              <input type='text' name="coordinates" value='{{ lat|floatformat:5 }}, {{lng|floatformat:5}}'
+                placeholder='latitude, longitude' class="input--value">
+            </div>
+          </div>
+        </li>
+        {% if errors.coordinates %}{% for error in errors.coordinates %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
+        <li>
+          <p class="label">{% translate "Access Point"%}<span>{% translate "Height Above Ground"%}</span></p>
+          <div class="data-with-unit">
+            <input type='number' name="{%if units == 'METRIC'%}height{%else%}height_ft{%endif%}" step="any"
+              value='{%if units == 'METRIC'%}{{ height|floatformat:1 }}{%else%}{{height_ft|floatformat:1}}{%endif%}'
+              class="input--value">
+            <span>{%if units == 'METRIC'%}m{%else%}ft{% endif %}</span>
+          </div>
+        </li>
+        {% if errors.height %}{% for error in errors.height %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
+        {% if errors.height_ft %}{% for error in errors.height_ft %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
+        <li>
+          <p class="label">{% translate "Customer Antenna"%}<span>{% translate "Height Above Surfaces"%}</span></p>
+          <div class="data-with-unit">
+            <input type='number' name="{%if units == 'METRIC'%}default_cpe_height{%else%}default_cpe_height_ft{%endif%}" step="any"
+              value='{%if units == 'METRIC'%}{{ default_cpe_height|floatformat:1 }}{%else%}{{default_cpe_height_ft|floatformat:1}}{%endif%}'
+              class="input--value">
+            <span>{%if units == 'METRIC'%}m{%else%}ft{% endif %}</span>
+          </div>
+        </li>
+        {% if errors.default_cpe_height %}{% for error in errors.default_cpe_height %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
+        {% if errors.default_cpe_height_ft %}{% for error in errors.default_cpe_height_ft %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
+        <li>
+          <p class="label">{% translate "Radius"%}</p>
+          <div class="data-with-unit">
+            <input type='number' name="{%if units == 'METRIC'%}radius{%else%}radius_miles{%endif%}" step="any"
+              value='{%if units == 'METRIC'%}{{ radius|floatformat:2 }}{%else%}{{ radius_miles|floatformat:2}}{%endif%}'
+              step='0.01' class="input--value">
+            <span>{%if units == 'METRIC'%}km{%else%}mi{% endif %}</span>
+          </div>
+        </li>
+        {% if errors.radius %}{% for error in errors.radius %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
+        {% if errors.radius_miles %}{% for error in errors.radius_miles %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
+        <li>
+          <input class="btn btn-primary isptoolbox-btn w-100" type="submit" name="submit" value="Update Tower">
+        </li>
+      </form>
+      <div id="stats-li-tower-popup">
+      {% if not coverage_stats %}
+      {% include 'workspace/atoms/starting_computation_msg.html' %}
+      {% endif %}
+      </div>
+      {% if coverage_stats %}
+      {% include 'workspace/atoms/coverage_stats_tower.html' %}
+      {% endif %}
+      <div class="d-flex node-edits" >
+        <a id='tower-delete-btn' href="#">{% translate 'Delete Tower'%}</a>
+        <p>{%translate "Last edited " %}{{ last_updated }}</p>
+      </div>
+    </ul>
+  </div>
+</div>
+{% else %}
+<div class="tooltip--tower-summary">
+  <div class="title">
+    <h6>{% translate "Edit Tower" %}</h6>
+  </div>
+  <p>{% translate "Could not find tower"%}</p>
+</div>
+{% endif %}
+
+{% endspaceless %}

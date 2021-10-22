@@ -1,0 +1,16 @@
+{% load i18n %}
+
+<div class="ap-stat">
+    <p class="ap-stat--label">{% translate "Est. Clear LOS"%}<span>{% translate "at least 1 point on rooftop"%}</span></p>
+    <p class="ap-stat--value" style="color: #34eb46;"><span class="ap-stat--icon mr-3">✅</span>{{coverage_stats.serviceable}}</p>
+</div>
+<div class="ap-stat">
+    <p class="ap-stat--label">{% translate "Est. Obstructed LOS"%}</p>
+    <p class="ap-stat--value" style="color: #ff2f00;"><span class="ap-stat--icon mr-3">🚫</span>{{coverage_stats.unserviceable}}</p>
+</div>
+{% if coverage_stats.unknown %}
+<div class="ap-stat">
+    <p class="ap-stat--label">{% translate "Est. Calculating / Unknown"%}</p>
+    <p class="ap-stat--value" style="color: #ccc;"><span class="ap-stat--icon mr-3">🤷‍♀️</span>{{coverage_stats.unknown}}</p>
+</div>
+{% endif %}

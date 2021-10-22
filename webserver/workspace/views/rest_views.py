@@ -267,11 +267,11 @@ class AccessPointCoverageViewshedOverlayView(View):
     def get(self, request, **kwargs):
         try:
             ap = AccessPointLocation.get_rest_queryset(
-            request).get(uuid=kwargs.get('uuid'))
+                request).get(uuid=kwargs.get('uuid'))
             viewshed = Viewshed.objects.get(ap=ap)
             if not viewshed.result_cached():
                 raise Http404("Overlay not cached")
-        except:
+        except Exception:
             raise Http404
         return JsonResponse(viewshed.getTilesetInfo())
 

@@ -44,7 +44,7 @@ class AccessPointLocationFormView(DestroyModelMixin, generics.GenericAPIView):
         try:
             serializer.save()
             context = serializer.data
-        except Exception as e:
+        except Exception:
             context.update({
                            'errors': serializer.errors})
         context.update(self.get_coverage_stats(instance))

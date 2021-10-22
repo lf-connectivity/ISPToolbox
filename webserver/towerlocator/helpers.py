@@ -3,6 +3,7 @@ import json
 import io
 from IspToolboxApp.Helpers.kmz_helpers import createPipelineFromKMZ
 from bots.github_issues import make_github_issue
+from celery.utils.log import get_task_logger
 from django.conf import settings
 
 from workspace.models import AccessPointLocation
@@ -13,6 +14,8 @@ cloud_rf_key = settings.CLOUDRF_KEY
 
 # https://api.cloudrf.com/
 headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+
+TASK_LOGGER = get_task_logger(__name__)
 
 
 def createCloudRFRequest(lat, lon, txh, rxh, rad):
@@ -90,6 +93,7 @@ def getViewShed(lat, lon, height, customerHeight, radius, apUuid=None):
         kmz_response = requests.get(resp['kmz'])
         kmz_file = io.BytesIO(kmz_response.content)
         coverage = createPipelineFromKMZ(kmz_file)
+
         resp = {
             'error': 0,
             'coverage': coverage
@@ -108,6 +112,8 @@ def getViewShed(lat, lon, height, customerHeight, radius, apUuid=None):
     except Exception as e:
         # if something goes wrong, create a github issue
         # TODO: check if a viewshed issue already exists
+        TASK_LOGGER.error(f'Could not create viewshed: {str(e)}\tLat:{lat}, Lng:{lon}')
+        TASK_LOGGER.error(f'Response: {json.dumps(resp)}')
         make_github_issue(
             title='Could not create viewshed',
             body=f"{lat},{lon},{json.dumps(resp)} error: {str(e)}",

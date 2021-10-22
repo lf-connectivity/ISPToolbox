@@ -25,6 +25,12 @@ services:
     depends_on:
       - static
 
+  websocket-app:
+    environment:
+      DEBUG: "TRUE"
+    ports:
+      - 8010:8010
+
   celery:
     entrypoint: ["/usr/bin/tini", "-g", "--"]
     command: ["/bin/sh", "-c", "/usr/src/app/test_entrypoint_celery.sh"]

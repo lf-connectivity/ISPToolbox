@@ -13,6 +13,7 @@ from uuid import uuid4
 from fastkml import kml as fastkml, styles
 from fastkml.geometry import Geometry
 
+
 ############################
 # KMZ PROCESSING FUNCTIONS #
 ############################
@@ -32,9 +33,12 @@ def createPipelineFromKMZ(file):
             # covert rasters to GeometryField
             geometries_raster = createGeoJsonsFromCoverageOverlays(
                 overlayProps, tempdir)
+
             # get polygons from KMZ
             geometries_polygon = createGeoJsonsFromKML(kmlfile)
-            geometries += geometries_raster + geometries_polygon
+
+            geometries.extend([g for g in geometries_raster + geometries_polygon if g])
+
         if not geometries:
             raise Exception(kmz_err_msg['no_geomtry'])
         geometry_collection = {

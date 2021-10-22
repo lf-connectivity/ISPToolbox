@@ -66,10 +66,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-        'daphne': {
-            'handlers': ['console'],
-            'level': 'DEBUG' if DEBUG else 'INFO'
-        },
     },
 }
 

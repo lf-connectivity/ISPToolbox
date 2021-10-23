@@ -12,7 +12,7 @@ cached-property==1.5.2
 celery==5.1.2
 certifi==2020.6.20
 channels-redis==3.2.0
-channels==3.0.3
+channels==3.0.4
 chardet==3.0.4
 click-didyoumean==0.0.3
 click-plugins==1.1.1

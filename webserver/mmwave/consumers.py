@@ -1,8 +1,11 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from mmwave import tasks as mmwave_tasks
 from workspace import tasks as workspace_tasks
+from workspace.models import WorkspaceMapSession
 from webserver.celery import celery_app as app
 import enum
+from asgiref.sync import sync_to_async
+import logging
 
 
 class LOSConsumerMessageType(enum.Enum):
@@ -31,8 +34,20 @@ msg_handlers = {
 class LOSConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.network_id = self.scope['url_route']['kwargs']['network_id']
-        self.network_group_name = 'los_check_%s' % self.network_id
         self.user = self.scope["user"]
+        self.session = self.scope["session"]
+
+        # Check if User is allowed in this channel
+        if (
+                (self.user.is_anonymous and not sync_to_async(WorkspaceMapSession.objects.filter(
+                    uuid=self.network_id, session=self.session.session_key))())
+            or (
+                    not self.user.is_anonymous and not sync_to_async(
+                        WorkspaceMapSession.objects.filter(uuid=self.network_id, owner=self.user).exists)()
+                )):
+            await self.close()
+
+        self.network_group_name = 'los_check_%s' % self.network_id
         self.tasks_to_revoke = {
             LOSConsumerMessageType.LINK: [],
             LOSConsumerMessageType.AP: {},

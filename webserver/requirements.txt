@@ -87,7 +87,7 @@ threadpoolctl==2.1.0
 tornado==6.1
 txaio==20.4.1
 uritemplate==3.0.1
-urllib3==1.26.5
+urllib3==1.25.10
 uvicorn==0.12.2
 uvloop==0.14.0
 vine==5.0.0

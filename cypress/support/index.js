@@ -46,13 +46,15 @@ Cypress.Commands.add("login", () => {
     cy.get("input[name=password]")
       .should("be.visible")
       .type(`${user.password1}{enter}`);
-    
-    // we should be redirected to homepage
-    cy.url().should("include", "/pro");
+
+    cy.wait(3000);
+
     // Make sure sessionid cookie exists
     cy.getCookie("sessionid", { timeout: 90000 }).should("exist");
   });
 
+  // we should be redirected to homepage
+  cy.url().should("include", "/pro");
 });
 
 Cypress.Commands.add("preserve_session_cookie", () => {

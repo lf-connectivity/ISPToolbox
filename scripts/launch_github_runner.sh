@@ -27,3 +27,6 @@ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 # Install Github Runner Service as Root
 sudo ./svc.sh install root
 sudo ./svc.sh start
+
+# Add crontab to ensure disk space is available
+# 0 1 * * * docker system prune --volumes -f

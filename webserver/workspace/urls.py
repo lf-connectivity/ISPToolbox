@@ -75,14 +75,6 @@ urlpatterns = [
     path('workspace/api/coverage-area/<uuid:uuid>/',
          views.CoverageAreaGet.as_view()),
     # Workspace
-    path('workspace/api/ap-loc-form-<uuid:uuid>/',
-         views.AccessPointLocationFormView.as_view(), name="ap-loc-form"),
-    path('workspace/api/ap-los/coverage/<uuid:uuid>/',
-         views.AccessPointCoverageResults.as_view(), name="viewshed_coverage"),
-    path('workspace/api/ap-los/coverage/stats/<uuid:uuid>/',
-         views.AccessPointCoverageStatsView.as_view(), name="viewshed_stats"),
-    path('workspace/api/ap-los/coverage/overlay/<uuid:uuid>/',
-         views.AccessPointCoverageViewshedOverlayView.as_view(), name="viewshed_overlay"),
     path('workspace/api/ap-los/coverage/<uuid:uuid>/',
          views.AccessPointCoverageResults.as_view()),
     path('workspace/api/ap-los/coverage/stats/<uuid:uuid>/',
@@ -103,6 +95,16 @@ urlpatterns = [
          views.SessionDeleteView.as_view()),
     path('workspace/api/session/delete/',
          views.SessionDeleteView.as_view(), name="session_delete"),
+    # Forms
+    path('workspace/form/ap-loc-form-<uuid:uuid>/',
+         views.AccessPointLocationFormView.as_view(), name="ap-loc-form"),
+    # Ajax
+    path('workspace/ajax/ap-los/coverage/<uuid:uuid>/',
+         views.AccessPointCoverageResults.as_view(), name="viewshed_coverage"),
+    path('workspace/ajax/ap-los/coverage/stats/<uuid:uuid>/',
+         views.AccessPointCoverageStatsView.as_view(), name="viewshed_stats"),
+    path('workspace/ajax/ap-los/coverage/overlay/<uuid:uuid>/',
+         views.AccessPointCoverageViewshedOverlayView.as_view(), name="viewshed_overlay"),
     # Analytics
     path('workspace/api/analytics/events/',
          views.AnalyticsView.as_view(), name='analytics'),

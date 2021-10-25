@@ -128,7 +128,7 @@ class IspToolboxUserPasswordChangeForm(PasswordChangeForm):
 
 class IspToolboxUserInfoChangeForm(forms.ModelForm):
     class Meta:
-        fields = ['email', 'first_name', 'last_name']
+        fields = ['first_name', 'last_name']
         model = User
 
 

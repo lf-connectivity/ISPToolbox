@@ -21,7 +21,7 @@ services:
     depends_on:
       - static
   websocket-app:
-    command: daphne -e ssl:8010:privateKey=key.pem:certKey=cert.pem webserver.asgi:application --access-log -
+    command: watchmedo auto-restart --directory=./ --pattern=*.py --recursive --  daphne -e ssl:8010:privateKey=key.pem:certKey=cert.pem webserver.asgi:application --access-log /dev/stdout
     environment:
       DEBUG: "TRUE"
     volumes:

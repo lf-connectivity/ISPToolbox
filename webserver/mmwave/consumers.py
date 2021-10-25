@@ -5,7 +5,6 @@ from workspace.models import WorkspaceMapSession
 from webserver.celery import celery_app as app
 import enum
 from asgiref.sync import sync_to_async
-import logging
 
 
 class LOSConsumerMessageType(enum.Enum):
@@ -38,13 +37,7 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
         self.session = self.scope["session"]
 
         # Check if User is allowed in this channel
-        if (
-                (self.user.is_anonymous and not sync_to_async(WorkspaceMapSession.objects.filter(
-                    uuid=self.network_id, session=self.session.session_key))())
-            or (
-                    not self.user.is_anonymous and not sync_to_async(
-                        WorkspaceMapSession.objects.filter(uuid=self.network_id, owner=self.user).exists)()
-                )):
+        if not sync_to_async(WorkspaceMapSession.ws_allowed_session)(self.network_id, self.user, self.session):
             await self.close()
 
         self.network_group_name = 'los_check_%s' % self.network_id

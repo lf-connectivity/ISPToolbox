@@ -18,7 +18,6 @@ from webserver.celery import celery_app as app
 class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
-        
         self.taskList = []
         self.authenticated = False
         self.funcSwitch = {

@@ -120,10 +120,18 @@ class WorkspaceMapSession(models.Model):
             session.save()
 
             # Associate session key with cloned map session
-            session.session = Session.objects.get(pk=request.session.session_key)
+            session.session = Session.objects.get(
+                pk=request.session.session_key)
             session.save()
 
         return session, created
+
+    @classmethod
+    def ws_allowed_session(cls, uuid, user, session):
+        if user.is_anonymous:
+            return cls.objects.filter(uuid=uuid, session=session.session_key).exists()
+        else:
+            return cls.objects.filter(uuid=uuid, owner=user).exists()
 
     def duplicate(self, new_name=None):
         """

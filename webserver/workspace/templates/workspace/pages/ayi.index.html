@@ -12,7 +12,6 @@
     <div class="modal-content p-2 w-75">
         <div class="modal-header">
             <h3 class="modal-title">{% translate "Download your information"%}</h3>
-            <a class="my-auto mr-3" href="{{ request.get_full_path }}">{% include 'workspace/atoms/icons/arrow_repeat.html'%}</a>
         </div>
         <h4 class="modal-title px-3 py-3">{% translate "Get a copy of all your data from ISP Toolbox"%}</h4>
         <div class="modal-body">
@@ -36,11 +35,15 @@
             {% endfor %}
         </div>
         <div class="p-3 flex-lg-row">
+            {% if page_obj.0.data_dump or page_obj|length == 0 %}
             <form action="{% url 'workspace:access_your_information' %}" method="POST">
                 {% csrf_token %}
                 <input type="submit" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0"
                     value="{%translate 'Request Data'%}">
             </form>
+            {% else %}
+            <a href="{% url 'workspace:access_your_information' %}" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0">{% translate "Refresh"%}</a>
+            {% endif %}
         </div>
     </div>
 </div>

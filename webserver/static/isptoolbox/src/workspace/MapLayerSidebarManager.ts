@@ -102,6 +102,12 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         }
     }
 
+    setAPVisibility(MBFeature: any, show: boolean) {
+        let id = String(MBFeature?.id);
+        this.toggleAPVisibility(id, show);
+        this.setCheckedStatus(MBFeature, show);
+    }
+
     protected showComponent() {
         //@ts-ignore
         $('#map-layer-sidebar').addClass('show');
@@ -141,17 +147,42 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
     private updateAPVisibility = (MBFeature: any, WSFeature: any) => {
         let id = String(MBFeature?.id);
 
-        if (this.hiddenAccessPointIds.includes(id)) {
-            let i = this.hiddenAccessPointIds.indexOf(id);
+        // getCheckedStatus returns the current checked status, not the future state.
+        this.toggleAPVisibility(id, !this.getCheckedStatus(MBFeature));
+        PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [WSFeature] });
+    };
+
+    private toggleAPVisibility(id: string, show: boolean) {
+        let i = this.hiddenAccessPointIds.indexOf(id);
+        if (show) {
+            // Remove if there
             if (i > -1) {
                 this.hiddenAccessPointIds.splice(i, 1);
             }
         } else {
-            this.hiddenAccessPointIds = [...this.hiddenAccessPointIds, id];
-        }
+            // Add if not there
+            if (i == -1) {
+                this.hiddenAccessPointIds = [...this.hiddenAccessPointIds, id];
 
-        PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [WSFeature] });
-    };
+                // Deselect tower
+                if (this.draw.getMode() == 'simple_select') {
+                    let selection = this.draw.getSelectedIds().filter((f: string) => f !== id);
+
+                    // @ts-ignore
+                    this.draw.changeMode('draw_ap', {}); //this is a hack that works in both ME and LOS
+                    this.draw.changeMode('simple_select', { featureIds: selection });
+                }
+            }
+        }
+    }
+
+    private getCheckedStatus(MBFeature: any) {
+        return $(`#switch-user-layer-${MBFeature?.id}`).prop('checked');
+    }
+
+    private setCheckedStatus(MBFeature: any, checked: boolean) {
+        $(`#switch-user-layer-${MBFeature?.id}`).prop('checked', checked);
+    }
 
     private toggleHandler = (e: any, uuid: string) => {
         const WSFeature = BaseWorkspaceManager.getFeatureByUuid(uuid);

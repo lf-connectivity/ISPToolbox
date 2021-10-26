@@ -25,7 +25,7 @@ export const generateMapLayerSidebarRow = (
     let toggle = document.createElement('label');
     toggle.classList.add('toggle-switch');
 
-    toggle.innerHTML = `<input type='checkbox' checked />`;
+    toggle.innerHTML = `<input type='checkbox' id="switch-user-layer-${feature.id}" checked />`;
     let slider = document.createElement('div');
     slider.classList.add('slider');
     slider.addEventListener('click', (e) => toggleHandler(e, feature.properties.uuid));

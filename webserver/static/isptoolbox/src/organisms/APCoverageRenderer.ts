@@ -34,6 +34,7 @@ import { GeometryCollection } from '@turf/helpers';
 import geojsonArea from '@mapbox/geojson-area';
 import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
+import { ViewshedTool } from './ViewshedTool';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -217,6 +218,12 @@ abstract class RadiusAndBuildingCoverageRenderer {
         if (dragging) {
             this.apPopup.hide();
         } else {
+            // Unhide hidden APs
+            features.forEach((f: any) => {
+                if (f.properties.feature_type === WorkspaceFeatureTypes.AP) {
+                    MapLayerSidebarManager.getInstance().setAPVisibility(f, true);
+                }
+            });
             this.sendCoverageRequest({ features });
             this.renderAPRadius();
             this.renderBuildings();
@@ -316,19 +323,11 @@ abstract class RadiusAndBuildingCoverageRenderer {
      */
     renderBuildings() {
         let fc = this.draw.getSelected();
-        let aps = fc.features.filter(
-            (f) =>
-                f.properties?.feature_type === WorkspaceFeatureTypes.AP ||
-                f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA
-        );
+        let aps = fc.features.filter(this.shouldRenderFeature);
         if (aps.length === 0) {
             fc = this.draw.getAll();
         }
-        const renderFeatures = fc.features.filter(
-            (f) =>
-                f.properties?.feature_type === WorkspaceFeatureTypes.AP ||
-                f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA
-        );
+        const renderFeatures = fc.features.filter(this.shouldRenderFeature);
         // Replace building features with selected
 
         const buildingSource = this.map.getSource(BUILDING_DATA_SOURCE);
@@ -353,6 +352,16 @@ abstract class RadiusAndBuildingCoverageRenderer {
             feat.properties?.cloudrf_coverage_geojson_json &&
             feat.properties?.cloudrf_coverage_geojson_json !== null
         );
+    }
+
+    protected shouldRenderFeature(f: any) {
+        if (f.properties?.feature_type === WorkspaceFeatureTypes.AP) {
+            return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(f.id);
+        } else if (f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA) {
+            return !(f.id in MapLayerSidebarManager.getInstance().hiddenCoverageAreas);
+        } else {
+            return false;
+        }
     }
 }
 
@@ -491,6 +500,18 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         });
     }
 
+    AP_updateCallback(msg: string, { features }: { features: Array<any> }) {
+        let viewshedTool = ViewshedTool.getInstance();
+        if (this.draw.get(viewshedTool.viewshed_feature_id as string)) {
+            viewshedTool.setVisibleLayer(
+                !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(
+                    viewshedTool.viewshed_feature_id as string
+                )
+            );
+        }
+        super.AP_updateCallback(msg, { features: features });
+    }
+
     accessPointStatusCallback(msg: string, message: AccessPointCoverageResponse) {
         $.ajax({
             url: `/pro/workspace/api/ap-los/coverage/${message.uuid}/`,
@@ -587,6 +608,8 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     sendCoverageRequest({ features }: any) {
         let geometries: Geometry[] = [];
 
+        features = this.draw.getSelected().features.filter(this.shouldRenderFeature);
+
         let featuresToProcess;
         if (features.length === 0) {
             featuresToProcess = this.draw.getAll().features;
@@ -597,7 +620,7 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         this.buildingOverlays.geometries = [];
 
         featuresToProcess.forEach((f: GeoJSON.Feature) => {
-            if (f.properties && f.properties.feature_type) {
+            if (f.properties && f.properties.feature_type && this.shouldRenderFeature(f)) {
                 switch (f.properties.feature_type) {
                     case WorkspaceFeatureTypes.AP:
                         if (this.cloudRFExists(f)) {

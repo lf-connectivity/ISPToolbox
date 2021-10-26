@@ -17,6 +17,7 @@ class DSMEngine:
         polygon: GEOSGeometry - (Geometry Collection)
         clouds: str - List of EPT Paths
     """
+
     def __init__(self, polygon: GEOSGeometry, clouds: Iterator[EPTLidarPointCloud], projection=3857):
         self.original_polygon = polygon
         self.transformed_polygon = polygon.transform(projection, clone=True)
@@ -41,7 +42,8 @@ class DSMEngine:
             for cloud in self.clouds:
                 with tempfile.NamedTemporaryFile(suffix=".tif", delete=False, dir=tmp_dir) as tmp_tif:
                     files.append(tmp_tif.name)
-                    query_json = self.__createQueryPipeline(resolution, tmp_tif.name, cloud)
+                    query_json = self.__createQueryPipeline(
+                        resolution, tmp_tif.name, cloud, filter_outliers)
                     command = shlex.split(
                         'pdal pipeline --stdin'
                     )
@@ -64,7 +66,7 @@ class DSMEngine:
         process = subprocess.Popen(cmd)
         return process
 
-    def __createQueryPipeline(self, resolution: float, outputfilepath: str, cloud: EPTLidarPointCloud):
+    def __createQueryPipeline(self, resolution: float, outputfilepath: str, cloud: EPTLidarPointCloud, filter_outliers: bool):
         """
         Creates the json string that pdal uses as a pipeline
         pdal docs: https://pdal.io/project/docs.html
@@ -72,7 +74,6 @@ class DSMEngine:
         (has a statistical filter for outlier points )
         """
         source = cloud.url
-        filter_outliers = cloud.noisy_data
 
         # If we are going to filter outlilers we should load data a little outside the boundary
         source_bounding_box = self.transformed_polygon

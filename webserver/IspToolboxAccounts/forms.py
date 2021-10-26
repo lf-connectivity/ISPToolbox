@@ -127,8 +127,20 @@ class IspToolboxUserPasswordChangeForm(PasswordChangeForm):
 
 
 class IspToolboxUserInfoChangeForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(IspToolboxUserInfoChangeForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            self.fields['email'].widget.attrs['readonly'] = True
+
+    def clean_email(self):
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            return instance.email
+        else:
+            return self.cleaned_data['email']
     class Meta:
-        fields = ['first_name', 'last_name']
+        fields = ['email','first_name', 'last_name']
         model = User
 
 

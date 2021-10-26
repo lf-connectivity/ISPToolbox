@@ -77,6 +77,7 @@ class OptionalInfoWorkspaceUpdateView(LoginRequiredMixin, UpdateView):
 class AccountSettingsView(LoginRequiredMixin, View):
     def get(self, request, **kwargs):
         context = {
+            'nav_include_account_dropdown': True,
             'account_form': IspToolboxUserInfoChangeForm(instance=request.user),
             'password_form': IspToolboxUserPasswordChangeForm(user=request.user),
             'delete_account_form': IspToolboxUserDeleteAccountForm,
@@ -96,6 +97,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
 
     def post(self, request, **kwargs):
         context = {
+            'nav_include_account_dropdown': True,
             'account_form': IspToolboxUserInfoChangeForm(request.POST, instance=request.user),
             'password_form': IspToolboxUserPasswordChangeForm(request.user, request.POST),
             'delete_account_form': IspToolboxUserDeleteAccountForm(request.POST),

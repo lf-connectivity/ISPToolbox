@@ -502,12 +502,9 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
 
     AP_updateCallback(msg: string, { features }: { features: Array<any> }) {
         let viewshedTool = ViewshedTool.getInstance();
-        if (this.draw.get(viewshedTool.viewshed_feature_id as string)) {
-            viewshedTool.setVisibleLayer(
-                !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(
-                    viewshedTool.viewshed_feature_id as string
-                )
-            );
+        let feature = this.draw.get(viewshedTool.viewshed_feature_id as string);
+        if (feature) {
+            viewshedTool.setVisibleLayer(this.shouldRenderFeature(feature));
         }
         super.AP_updateCallback(msg, { features: features });
     }

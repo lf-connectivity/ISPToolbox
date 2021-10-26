@@ -60,13 +60,14 @@ class LidarEngine:
     -------
     TODO: write documentation lol
     """
+
     def __init__(self, link, resolution, num_samples):
         self.link = link
         self.link.srid = 4326
         self.resolution = resolution
         self.num_samples = num_samples
         # TODO: all clouds must have same SRS
-        self.link_T = self.link.transform(3857, clone=True)
+        self.link_T = self.link.transform(31983, clone=True)
         self.segments = self.__getRelevantPointClouds()
         self.lidar_profile = self.__calculateLidarProfileMultiPointCloud()
 
@@ -120,7 +121,8 @@ class LidarEngine:
             else:
                 name = source_name
 
-            s_year, e_year = lidar_engine_queries.get_collection_years_for_project_id(name)
+            s_year, e_year = lidar_engine_queries.get_collection_years_for_project_id(
+                name)
 
             # if row not found, fall back on known info
             if not s_year:
@@ -140,7 +142,8 @@ class LidarEngine:
         Returns the most recent lidar dataset
         """
         # Search for year in URL data
-        years = [[int(yr) for yr in pattern_year.findall(cloud.url)] for cloud in clouds]
+        years = [[int(yr) for yr in pattern_year.findall(cloud.url)]
+                 for cloud in clouds]
         max_years = [max(year) if len(year) > 0 else 0 for year in years]
         return clouds[max_years.index(max(max_years))]
 
@@ -163,33 +166,41 @@ class LidarEngine:
         profiles = []
         for geometry, cloud in self.segments:
             if isinstance(geometry, LineString):
-                num_samples = int(self.__calculateLinkDistance(geometry) / total_link_dist * self.num_samples)
+                num_samples = int(self.__calculateLinkDistance(
+                    geometry) / total_link_dist * self.num_samples)
                 try:
-                    profile = self.__getProfileForLinkCloud(geometry, cloud, num_samples)
+                    profile = self.__getProfileForLinkCloud(
+                        geometry, cloud, num_samples)
                     profiles.append((geometry, profile))
                 except Exception as e:
-                    logging.error(f'failed to get profile for link {geometry.json}')
+                    logging.error(
+                        f'failed to get profile for link {geometry.json}')
                     logging.error(str(e))
                     profile = [float('nan')] * num_samples
                     profiles.append((geometry, profile))
 
             elif isinstance(geometry, MultiLineString):
                 for line in geometry:
-                    num_samples = int(self.__calculateLinkDistance(line) / total_link_dist * self.num_samples)
+                    num_samples = int(self.__calculateLinkDistance(
+                        line) / total_link_dist * self.num_samples)
                     try:
-                        profile = self.__getProfileForLinkCloud(line, cloud, num_samples)
+                        profile = self.__getProfileForLinkCloud(
+                            line, cloud, num_samples)
                         profiles.append((line, profile))
                     except Exception as e:
-                        logging.error(f'failed to get profile for link {geometry.json}')
+                        logging.error(
+                            f'failed to get profile for link {geometry.json}')
                         logging.error(str(e))
                         profile = [float('nan')] * num_samples
                         profiles.append((line, profile))
 
             else:
-                logging.error(f'LidarEngine: Geometry - not linestring or multistring: {geometry.json}')
+                logging.error(
+                    f'LidarEngine: Geometry - not linestring or multistring: {geometry.json}')
         # Combine Profiles into single profile
         profiles = sorted(profiles, key=self.__helperSortingFunction)
-        combined_profile = [hgt for geometry, subprofile in profiles for hgt in subprofile]
+        combined_profile = [hgt for geometry,
+                            subprofile in profiles for hgt in subprofile]
         # Convert NaN to closest value
         data = np.asarray(combined_profile)
         mask = np.isnan(data)
@@ -197,7 +208,8 @@ class LidarEngine:
             raise LidarEngineException("""LiDAR data not available in this region.
         Please try at a later date as our data routinely gets updated.""")
         else:
-            data[mask] = np.interp(np.flatnonzero(mask), np.flatnonzero(~mask), data[~mask])
+            data[mask] = np.interp(np.flatnonzero(
+                mask), np.flatnonzero(~mask), data[~mask])
             return data.tolist()
 
     def __getProfileForLinkCloud(self, link, cloud, num_samples=None):
@@ -235,7 +247,8 @@ class LidarEngine:
 
         cloud = self.__selectLatestProfile(pt_clouds)
 
-        profile = self.__getProfileForLinkCloud(self.link, cloud, self.num_samples)
+        profile = self.__getProfileForLinkCloud(
+            self.link, cloud, self.num_samples)
         return profile
 
     def __pointCloudNameSortingFunction(self, cloud):
@@ -258,7 +271,8 @@ class LidarEngine:
             )
         )
         pt_clouds = query.all()
-        sorted_pt_clouds = sorted(pt_clouds, key=self.__pointCloudNameSortingFunction, reverse=True)
+        sorted_pt_clouds = sorted(
+            pt_clouds, key=self.__pointCloudNameSortingFunction, reverse=True)
 
         segments = []
 

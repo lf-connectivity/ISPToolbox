@@ -139,8 +139,9 @@ class IspToolboxUserInfoChangeForm(forms.ModelForm):
             return instance.email
         else:
             return self.cleaned_data['email']
+
     class Meta:
-        fields = ['email','first_name', 'last_name']
+        fields = ['email', 'first_name', 'last_name']
         model = User
 
 

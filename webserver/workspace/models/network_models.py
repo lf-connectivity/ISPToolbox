@@ -7,8 +7,7 @@ from django.contrib.gis.geos import GEOSGeometry, LineString
 from django.contrib.sessions.models import Session
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from rest_framework import serializers
@@ -24,7 +23,6 @@ from .model_constants import KM_2_MI, FeatureType, M_2_FT
 from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
-
 
 
 BUFFER_DSM_EXPORT_KM = 0.5

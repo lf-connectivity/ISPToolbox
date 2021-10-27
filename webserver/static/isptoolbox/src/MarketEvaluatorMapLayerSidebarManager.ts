@@ -189,6 +189,20 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
 
         this.populateOverlays();
 
+        this.map.on('sourcedata', (event: MapboxGL.MapDataEvent) => {
+            if (event.dataType === 'source') {
+                const id = event.sourceId;
+                const layer = Object.entries(geoOverlays)
+                    .filter((l) => l[1].sourceId === event.sourceId)
+                    .map((l) => l[0])[0];
+                if (event.isSourceLoaded) {
+                    $(`#switch-${layer}`).attr('data-loaded', '');
+                } else {
+                    $(`#switch-${layer}`).attr('data-loaded', null);
+                }
+            }
+        });
+
         for (const lString in this.sources) {
             const layerKey: GeoLayerString = lString as GeoLayerString;
             $(`#switch-${layerKey}`).on('click', () => {

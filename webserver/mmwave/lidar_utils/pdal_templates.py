@@ -58,16 +58,18 @@ def takeMaxHeightAtDistance(distance, heights):
 
 
 def getLidarPointsAroundLink(
-            ept_path, link, ept_transform, resolution,
-            num_samples, interpolation_step=DEFAULT_INTERPOLATION_STEP, link_buffer=3,
-            use_outlier_filter=True
-        ):
-    link_length = geopy_distance(lonlat(link[0][0], link[0][1]), lonlat(link[1][0], link[1][1])).meters
+    ept_path, link, ept_transform, resolution,
+    num_samples, interpolation_step=DEFAULT_INTERPOLATION_STEP, link_buffer=3,
+    use_outlier_filter=True
+):
+    link_length = geopy_distance(
+        lonlat(link[0][0], link[0][1]), lonlat(link[1][0], link[1][1])).meters
     # TODO achong: - create link buffer based on LIDAR cloud reference frame units
     # link_buffer = 3 -> 3 meters for EPSG:3857
     link_T = link.transform(ept_transform, clone=True)
     bb_link_buffer = link_T.buffer(link_buffer)
-    bounding_box = ([bb_link_buffer.extent[0], bb_link_buffer.extent[2]], [bb_link_buffer.extent[1], bb_link_buffer.extent[3]])
+    bounding_box = ([bb_link_buffer.extent[0], bb_link_buffer.extent[2]], [
+                    bb_link_buffer.extent[1], bb_link_buffer.extent[3]])
     query_json = f"""{{
         "pipeline": [
             {{
@@ -75,7 +77,7 @@ def getLidarPointsAroundLink(
                 "filename": "{ept_path}",
                 "bounds": "{bounding_box}",
                 "resolution" : {resolution},
-                "polygon": ["{link_T.buffer(link_buffer).wkt}/ EPSG: 3857"]
+                "polygon": ["{link_T.buffer(link_buffer).wkt}/ EPSG: {ept_transform}"]
             }},
             {(
                 json.dumps(DEFAULT_FILTERS['outlier']) + ',' +
@@ -99,9 +101,11 @@ def getLidarPointsAroundLink(
     y_idx = pipeline.arrays[0].dtype.names.index('Y')
     z_idx = pipeline.arrays[0].dtype.names.index('Z')
 
-    pts = [[link_T.project_normalized(Point(pt[x_idx], pt[y_idx]))*link_length, pt[z_idx]] for pt in arr]
+    pts = [[link_T.project_normalized(
+        Point(pt[x_idx], pt[y_idx]))*link_length, pt[z_idx]] for pt in arr]
     # Average Duplicate Points
-    dsts, hgts = takeMaxHeightAtDistance([pt[0] for pt in pts], [pt[1] for pt in pts])
+    dsts, hgts = takeMaxHeightAtDistance(
+        [pt[0] for pt in pts], [pt[1] for pt in pts])
 
     # Resample Output Profile
     new_samples = np.linspace(0, link_length, num_samples)

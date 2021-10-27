@@ -67,8 +67,8 @@ class LidarEngine:
         self.resolution = resolution
         self.num_samples = num_samples
         # TODO: all clouds must have same SRS
-        self.link_T = self.link.transform(31983, clone=True)
         self.segments = self.__getRelevantPointClouds()
+        self.link_T = self.link.transform(self.getProjection(), clone=True)
         self.lidar_profile = self.__calculateLidarProfileMultiPointCloud()
 
     def getUrls(self):
@@ -92,6 +92,19 @@ class LidarEngine:
 
     def getSegmentProfile(self, link, cloud, resolution):
         return []
+
+    def getProjection(self) -> int:
+        """
+        We can only render one transform in potree - let's pick the longest one
+        """
+        self.segments.sort(
+            key=lambda segment: self.__calculateLinkDistance(segment[0]), reverse=True)
+        if len(self.segments) > 0:
+            cld = self.segments[0][1]
+            return cld.srs
+        else:
+            # Default Projection for USGS Lidar Datasets
+            return 3857
 
     def combineResultingProfiles(self):
         """

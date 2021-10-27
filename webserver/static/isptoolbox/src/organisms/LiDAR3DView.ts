@@ -104,6 +104,28 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
             });
         }
 
+        $('#pt-cld-attribute').on('click', (event) => {
+            if (potree) {
+                let material = $(event.currentTarget).attr('data-material-attribute');
+                if (material === 'elevation') {
+                    material = 'rgba';
+                    $(event.currentTarget).children('.bi-droplet').addClass('d-none');
+                    $(event.currentTarget).children('.bi-droplet-fill').removeClass('d-none');
+                } else {
+                    material = 'elevation';
+                    $(event.currentTarget).children('.bi-droplet').removeClass('d-none');
+                    $(event.currentTarget).children('.bi-droplet-fill').addClass('d-none');
+                }
+                $(event.currentTarget).attr('data-material-attribute', material);
+                
+                //@ts-ignore
+                const scene = window.viewer.scene;
+                scene.pointclouds.forEach((cld: any) => {
+                    cld.material.activeAttributeName = material;
+                });
+            }
+        });
+
         $('#3D-view-btn').click(() => {
             // TODO Cleanup achong: - hide maplayers cleanly
             MapLayerSidebarManager.getInstance().hide();

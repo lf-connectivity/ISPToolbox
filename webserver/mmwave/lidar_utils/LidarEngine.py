@@ -204,7 +204,11 @@ class LidarEngine:
         if num_samples is None:
             num_samples = self.num_samples
         lidar_profile, _, _, _ = getLidarPointsAroundLink(
-            cloud.url, link, cloud.srs, resolution=self.resolution, num_samples=num_samples)
+            cloud.url, link, cloud.srs,
+            resolution=self.resolution,
+            num_samples=num_samples,
+            use_outlier_filter=cloud.noisy_data
+        )
         return lidar_profile
 
     def __calculateLidarProfileSinglePC(self):

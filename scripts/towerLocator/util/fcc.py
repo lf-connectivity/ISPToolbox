@@ -24,7 +24,7 @@ def retrieveDataMaps():
             with ZipFile(zip_file, 'r') as zipfile:
                 zipfile.extractall(tempdir)
             print('    DONE: Extract Files\n')
-        print('STEP 3. Mapping CO.dat & RA.dat')
+        print('STEP 3. Mapping CO.dat & RA.dat & EN.dat')
         co_map = dict()
         co_path = f'{tempdir}/CO.dat'
         with open(co_path) as fread:
@@ -57,17 +57,33 @@ def retrieveDataMaps():
                 if len(lst) <= 8:
                     continue
                 registration_number = lst[3].strip()
+                system_identifier = lst[4].strip()
                 status_code = lst[8].strip()
                 n = len(lst)
                 structure_type = '' if n <= 32 else lst[32].strip()
                 overall_height_above_ground = '' if n <= 30 else lst[30].strip()
                 height_without_appurtenaces = '' if n <= 28 else lst[28].strip()
-                if registration_number and status_code in ('C', 'G'):
+                if registration_number:
                     ra_map[registration_number] = {
                         'status_code': status_code,
                         'structure_type': structure_type,
+                        'system_identifier': system_identifier,
                         'overall_height_above_ground': overall_height_above_ground,
                         'height_without_appurtenaces': height_without_appurtenaces
                         }
-        print('    DONE: Mapping CO.dat & RA.dat\n')
-    return {'co_map': co_map, 'ra_map': ra_map}
+
+        en_map = dict()
+        en_path = f'{tempdir}/EN.dat'
+        with open(en_path, encoding='ISO-8859-15') as fread:
+            lines = [line.split('|') for line in fread.readlines()]
+            for lst in lines:
+                if len(lst) <= 10:
+                    continue
+                registration_number = lst[3].strip()
+                owner_name = lst[9].strip()
+                if registration_number and owner_name:
+                    en_map[registration_number] = {
+                        'owner_name': owner_name
+                        }
+        print('    DONE: Mapping CO.dat & RA.dat & EN.dat\n')
+    return {'co_map': co_map, 'ra_map': ra_map, 'en_map': en_map}

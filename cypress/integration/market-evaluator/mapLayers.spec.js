@@ -31,9 +31,7 @@ function geoOverlayLayerTestCase(
       cy.click_point_on_map(session[point_1]);
 
       // Wait for map layer objects to be created
-      cy.wait(2000);
       cy.click_point_on_map(session[point_2]);
-      cy.wait(2000);
       cy.market_eval_toggle_geo_overlay(overlay);
       cy.map_get_sources().should("not.include", source);
 
@@ -116,7 +114,6 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
   it("Drawing coverage areas should have the proper names/numbers", () => {
     cy.fixture("map_layers_session_fixture").then((session) => {
       cy.draw_coverage_area(session.coverage_area_1);
-      cy.wait(500);
       cy.draw_coverage_area(session.coverage_area_2);
 
       cy.get_user_map_layers_object(`Area 1`)
@@ -188,20 +185,16 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
       // Add RDOFs
       cy.market_eval_toggle_geo_overlay(OVERLAY_RDOF);
       cy.click_point_on_map(session.rdof_1);
-      cy.wait(1500);
       cy.click_point_on_map(session.rdof_2);
-      cy.wait(1500);
       cy.market_eval_toggle_geo_overlay(OVERLAY_RDOF);
 
       // Add 1 Census
       cy.market_eval_toggle_geo_overlay(OVERLAY_CENSUS);
       cy.click_point_on_map(session.census_1);
-      cy.wait(1500);
       cy.market_eval_toggle_geo_overlay(OVERLAY_CENSUS);
 
       // Draw 2 coverage areas
       cy.draw_coverage_area(session.coverage_area_1);
-      cy.wait(500);
       cy.draw_coverage_area(session.coverage_area_2);
 
       cy.get_user_map_layers_object(`RDOF Area 1`)
@@ -252,7 +245,6 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
       cy.draw_coverage_area(session.coverage_area_1);
 
       // Wait until mapbox API finishes processing
-      cy.wait(500);
       cy.draw_get_features().should("have.length", 1);
 
       cy.get_user_map_layers_object("Area 1").toggle_user_map_layers_feature();

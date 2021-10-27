@@ -109,7 +109,6 @@ context("LOS Check collapsible components", () => {
     Cypress.Cookies.preserveOnce("sessionid");
     cy.reload();
     cy.wait_mapbox();
-    cy.wait(1500);
     cy.los_click_tower();
     cy.los_toggle_link_profile();
     cy.los_toggle_link_profile();

@@ -52,7 +52,6 @@ Cypress.Commands.add(
   (subject) => {
     cy.wrap(subject).within(() => {
       cy.get("div.slider").click();
-      cy.wait(500);
     });
   }
 );

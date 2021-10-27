@@ -7,6 +7,7 @@ from django.contrib.gis.geos import GEOSGeometry, LineString
 from django.contrib.sessions.models import Session
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
@@ -111,16 +112,36 @@ class AccessPointLocation(WorkspaceFeature):
     MAX_HEIGHT_M = 1000
     MIN_HEIGHT_M = 0
     height = models.FloatField(default=30, validators=[
-                               MinValueValidator(MIN_HEIGHT_M), MaxValueValidator(MAX_HEIGHT_M)])
+        MinValueValidator(
+            MIN_HEIGHT_M,
+            message=_(
+                'Ensure this value is greater than or equal to %(limit_value)s m.')
+        ),
+        MaxValueValidator(
+            MAX_HEIGHT_M,
+            message=_(
+                'Ensure this value is less than or equal to %(limit_value)s. m')
+        )]
+    )
     MAX_RADIUS_KM = 16
     MIN_RADIUS_KM = 0
     max_radius = models.FloatField(default=2, validators=[
-        MinValueValidator(MIN_RADIUS_KM), MaxValueValidator(MAX_RADIUS_KM)])
+        MinValueValidator(MIN_RADIUS_KM,
+                          message=_('Ensure this value is greater than or equal to %(limit_value)s km.')),
+        MaxValueValidator(MAX_RADIUS_KM,
+                          message=_('Ensure this value is less than or equal to %(limit_value)s. km'))
+    ]
+    )
     no_check_radius = models.FloatField(default=0.01)
     MAX_CPE_HEIGHT_M = 1000
     MIN_CPE_HEIGHT_M = 0
     default_cpe_height = models.FloatField(default=1, validators=[
-        MinValueValidator(MIN_CPE_HEIGHT_M), MaxValueValidator(MAX_CPE_HEIGHT_M)])
+        MinValueValidator(MIN_CPE_HEIGHT_M,
+                          message=_('Ensure this value is greater than or equal to %(limit_value)s m.')),
+        MaxValueValidator(MAX_CPE_HEIGHT_M,
+                          message=_('Ensure this value is less than or equal to %(limit_value)s. m'))
+    ]
+    )
     cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)
 
     @property
@@ -224,12 +245,16 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     last_updated = serializers.DateTimeField(
         format="%D", required=False, read_only=True)
     height_ft = serializers.FloatField(required=False, validators=[
-        MinValueValidator(AccessPointLocation.MIN_HEIGHT_M * M_2_FT),
-        MaxValueValidator(AccessPointLocation.MAX_HEIGHT_M * M_2_FT)
+        MinValueValidator(AccessPointLocation.MIN_HEIGHT_M * M_2_FT,
+                          message=_('Ensure this value is greater than or equal to %(limit_value)s ft.')),
+        MaxValueValidator(AccessPointLocation.MAX_HEIGHT_M * M_2_FT,
+                          message=_('Ensure this value is less than or equal to %(limit_value)s ft.'))
     ])
     radius_miles = serializers.FloatField(required=False, validators=[
-        MinValueValidator(AccessPointLocation.MIN_RADIUS_KM * KM_2_MI),
-        MaxValueValidator(AccessPointLocation.MAX_RADIUS_KM * KM_2_MI)
+        MinValueValidator(AccessPointLocation.MIN_RADIUS_KM * KM_2_MI, message=_(
+            'Ensure this value is greater than or equal to %(limit_value)s mi.')),
+        MaxValueValidator(AccessPointLocation.MAX_RADIUS_KM * KM_2_MI, message=_(
+            'Ensure this value is less than or equal to %(limit_value)s mi.'))
     ])
     coordinates = serializers.CharField(required=False,
                                         validators=[
@@ -239,8 +264,16 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     geojson_str = serializers.SerializerMethodField()
     feature_type = serializers.CharField(read_only=True)
     default_cpe_height_ft = serializers.FloatField(required=False, validators=[
-        MinValueValidator(AccessPointLocation.MIN_CPE_HEIGHT_M * M_2_FT),
-        MaxValueValidator(AccessPointLocation.MAX_CPE_HEIGHT_M * M_2_FT)
+        MinValueValidator(
+            AccessPointLocation.MIN_CPE_HEIGHT_M * M_2_FT,
+            message=_(
+                'Ensure this value is greater than or equal to %(limit_value)s ft.')
+        ),
+        MaxValueValidator(
+            AccessPointLocation.MAX_CPE_HEIGHT_M * M_2_FT,
+            message=_(
+                'Ensure this value is less than or equal to %(limit_value)s ft.')
+        )
     ])
     cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
     lat = serializers.FloatField(read_only=True)

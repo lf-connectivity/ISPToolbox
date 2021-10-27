@@ -163,7 +163,7 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
   );
 
   /**
-   * CBRS Test is Flakey
+   * CBRS Test is Flakey - county areas slow async tasks
    */
   // it(
   //   "CBRS map layers should be named and numbered correctly",

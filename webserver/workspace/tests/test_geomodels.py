@@ -575,12 +575,13 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         expected_height_ft = DEFAULT_HEIGHT * 3.28084
         expected_default_cpe_height_ft = DEFAULT_CPE_HEIGHT * 3.28084
         expected_max_radius_miles = DEFAULT_MAX_RADIUS * 0.621371
-
+        coords = json.loads(DEFAULT_AP_POINT)['coordinates']
         expected_aps = [
             {
                 'type': 'Feature',
                 'geometry': json.loads(DEFAULT_AP_POINT),
                 'properties': {
+                    'coordinates': f'{coords[1]}, {coords[0]}',
                     'name': DEFAULT_NAME,
                     'height': DEFAULT_HEIGHT,
                     'uuid': str(self.test_ap.uuid),
@@ -589,10 +590,9 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                     'default_cpe_height': DEFAULT_CPE_HEIGHT,
                     'feature_type': FeatureType.AP.value,
                     'max_radius': DEFAULT_MAX_RADIUS,
-                    'radius': DEFAULT_MAX_RADIUS,
                     'height_ft': expected_height_ft,
-                    'lat': json.loads(DEFAULT_AP_POINT)['coordinates'][1],
-                    'lng': json.loads(DEFAULT_AP_POINT)['coordinates'][0],
+                    'lat': coords[1],
+                    'lng': coords[0],
                     'cloudrf_coverage_geojson_json': None,
                     'default_cpe_height_ft': expected_default_cpe_height_ft,
                     'radius_miles': expected_max_radius_miles,

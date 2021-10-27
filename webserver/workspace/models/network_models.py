@@ -103,9 +103,6 @@ class SessionWorkspaceModelMixin:
             'features': features
         }
 
-    def get_geojson_str(self, obj):
-        return obj.geojson.json
-
 
 class AccessPointLocation(WorkspaceFeature):
     name = models.CharField(max_length=50, default="Unnamed AP")
@@ -167,10 +164,6 @@ class AccessPointLocation(WorkspaceFeature):
     @radius_miles.setter
     def radius_miles(self, val):
         self.max_radius = val / KM_2_MI
-
-    @property
-    def units(self):
-        return self.map_session.units
 
     @property
     def height_ft(self):
@@ -261,7 +254,6 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
                                             AccessPointLocation.coordinates_validator
                                         ]
                                         )
-    geojson_str = serializers.SerializerMethodField()
     feature_type = serializers.CharField(read_only=True)
     default_cpe_height_ft = serializers.FloatField(required=False, validators=[
         MinValueValidator(
@@ -278,7 +270,6 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
     lat = serializers.FloatField(read_only=True)
     lng = serializers.FloatField(read_only=True)
-    units = serializers.CharField(read_only=True)
 
     class Meta:
         model = AccessPointLocation
@@ -373,7 +364,6 @@ class CPESerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     height = serializers.FloatField(required=False)
     height_ft = serializers.FloatField(required=False)
     feature_type = serializers.CharField(read_only=True)
-    geojson_str = serializers.SerializerMethodField()
     ap = serializers.PrimaryKeyRelatedField(
         queryset=AccessPointLocation.objects.all(),
         pk_field=serializers.UUIDField()
@@ -406,7 +396,6 @@ class APToCPELinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     last_updated = serializers.DateTimeField(
         format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
-    geojson_str = serializers.SerializerMethodField()
     ap = serializers.PrimaryKeyRelatedField(
         queryset=AccessPointLocation.objects.all(),
         pk_field=serializers.UUIDField()
@@ -435,7 +424,6 @@ class CoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelM
     last_updated = serializers.DateTimeField(
         format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
-    geojson_str = serializers.SerializerMethodField()
 
     class Meta:
         model = CoverageArea

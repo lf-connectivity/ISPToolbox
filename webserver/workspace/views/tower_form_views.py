@@ -32,6 +32,7 @@ class AccessPointLocationFormView(DestroyModelMixin, generics.GenericAPIView):
         serializer = self.get_serializer(instance)
         context = serializer.data.copy()
         context.update(self.get_coverage_stats(instance))
+        context.update({'units': instance.map_session.units})
         return render(request, self.template_name, context)
 
     def patch(self, request, *args, **kwargs):
@@ -48,6 +49,7 @@ class AccessPointLocationFormView(DestroyModelMixin, generics.GenericAPIView):
             context.update({
                            'errors': serializer.errors})
         context.update(self.get_coverage_stats(instance))
+        context.update({'units': instance.map_session.units})
         return render(request, self.template_name, context)
 
     def delete(self, request, *args, **kwargs):

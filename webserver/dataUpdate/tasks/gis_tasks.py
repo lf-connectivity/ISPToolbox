@@ -27,6 +27,7 @@ def updateCCData():
 def updateCbrsData():
     updateCbrs()
 
+
 @shared_task
 def updateASRTowerData():
     update_asr_towers()

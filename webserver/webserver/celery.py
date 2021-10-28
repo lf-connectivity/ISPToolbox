@@ -54,11 +54,6 @@ def setup_periodic(sender, **kwargs):
             name="lidar_wesm_update"
         )
         sender.add_periodic_task(
-            crontab(minute=0, hour=0),
-            dataUpdate_tasks.updateASRTowerData.s(),
-            name="update_asr_towers"
-        )
-        sender.add_periodic_task(
             crontab(minute=0, hour=0, day_of_month=[7]),
             dataUpdate_tasks.updateElasticSearchIndex.s(),
             name="update_elastic_search_asn"

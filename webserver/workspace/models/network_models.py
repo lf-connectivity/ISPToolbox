@@ -107,7 +107,7 @@ class SessionWorkspaceModelMixin:
 class AccessPointLocation(WorkspaceFeature):
     name = models.CharField(max_length=50, default="Unnamed AP")
     MAX_HEIGHT_M = 1000
-    MIN_HEIGHT_M = 0
+    MIN_HEIGHT_M = 0.1
     height = models.FloatField(default=30, validators=[
         MinValueValidator(
             MIN_HEIGHT_M,

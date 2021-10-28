@@ -310,7 +310,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                                        value='${
                                            isUnitsUS()
                                                ? this.accessPoint
-                                                     ?.getFeatureProperty('max_radius_miles')
+                                                     ?.getFeatureProperty('radius_miles')
                                                      .toFixed(2)
                                                : this.accessPoint
                                                      ?.getFeatureProperty('max_radius')

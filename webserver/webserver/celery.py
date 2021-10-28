@@ -24,9 +24,9 @@ celery_app.conf.task_routes = {
 # These are all the tasks we want to run periodically
 @celery_app.on_after_finalize.connect
 def setup_periodic(sender, **kwargs):
+    import mmwave.tasks as mmwave_tasks
+    import dataUpdate.tasks as dataUpdate_tasks
     if settings.PROD:
-        import mmwave.tasks as mmwave_tasks
-        import dataUpdate.tasks as dataUpdate_tasks
         # TODO: make jobs database backed with `django-celery-beat`
         sender.add_periodic_task(
             crontab(minute=0, hour=20),
@@ -52,6 +52,11 @@ def setup_periodic(sender, **kwargs):
             crontab(minute=0, hour=20),
             mmwave_tasks.pull_latest_pointcloud_metadata.s(),
             name="lidar_wesm_update"
+        )
+        sender.add_periodic_task(
+            crontab(minute=0, hour=0),
+            dataUpdate_tasks.updateAsrTowers.s(),
+            name="update_asr_towers"
         )
         sender.add_periodic_task(
             crontab(minute=0, hour=0, day_of_month=[7]),

@@ -17,7 +17,6 @@ from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from dataUpdate.models import Source
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
 from isptoolbox_storage.storage import S3ManifestStorage
-from mmwave.scripts.load_lidar_boundaries import getOverlayFromS3
 
 # flake8: noqa
 ASR_REGISTRATION_URL = 'https://wireless2.fcc.gov/UlsApp/AsrSearch/asrRegistration.jsp'

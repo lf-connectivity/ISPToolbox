@@ -94,18 +94,17 @@ class LidarEngine:
         return []
 
     def getProjection(self) -> int:
-        return 3857
-        # """
-        # We can only render one transform in potree - let's pick the longest one
-        # """
-        # self.segments.sort(
-        #     key=lambda segment: self.__calculateLinkDistance(segment[0]), reverse=True)
-        # if len(self.segments) > 0:
-        #     cld = self.segments[0][1]
-        #     return cld.srs
-        # else:
-        #     # Default Projection for USGS Lidar Datasets
-        #     return 3857
+        """
+        We can only render one transform in potree - let's pick the longest one
+        """
+        self.segments.sort(
+            key=lambda segment: self.__calculateLinkDistance(segment[0]), reverse=True)
+        if len(self.segments) > 0:
+            cld = self.segments[0][1]
+            return cld.srs
+        else:
+            # Default Projection for USGS Lidar Datasets
+            return 3857
 
     def combineResultingProfiles(self):
         """

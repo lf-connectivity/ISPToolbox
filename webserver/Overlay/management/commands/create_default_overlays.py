@@ -12,8 +12,8 @@ def create_sample_overlays():
         rdof[0].save()
         tower = Overlay.objects.get_or_create(
             type='tower',
-            source_url="mapbox://victorleefb.9l1ok6po",
-            source_layer="towerLocator-3rfxut"
+            source_url="mapbox://isptoolbox.asr-towers",
+            source_layer="original"
         )
         tower[0].save()
         communityConnect = Overlay.objects.get_or_create(

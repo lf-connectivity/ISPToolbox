@@ -1,5 +1,5 @@
 """
-ASGI config for deep_gis project.
+ASGI config for ISP Toolbox Project
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

@@ -470,7 +470,6 @@ SAML_SIGNING_KEY_FILE = '/opt/admin_sso_signing.key'
 SAML_LOCAL_METADATA_FILE = '/opt/admin_sso_metadata.xml'
 SAML_ATTRIBUTE_MAPS_DIR = admin_sso_attribute_maps.get_base_dir()
 
-SAML_IDP_URL = SAML_SECRETS['DevIdp']
 SAML_REMOTE_METADATA_URL = SAML_SECRETS['DevMetadataRemoteLink']
 
 # Cert and key are base 64 encoded in AWS Secrets Manager

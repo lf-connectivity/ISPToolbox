@@ -4,7 +4,7 @@
   <div class="workspace-nav fixed-top pr-4" id="workspacenavelem">
 {% endif %}
     <div class="d-flex h-100">
-      {% if nav_is_app_page is True and not nav_app_page_skip_back_button and user.is_authenticated %}
+      {% if not nav_app_page_skip_back_button and user.is_authenticated %}
         <a href="{% url 'workspace:workspace_dashboard' %}" class="back-icon py-auto px-3 mr-2" id="workspacenavelem-backbutton">
             <svg width="19" height="17" viewBox="0 0 19 17" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18.7858 8.5L2.71433 8.5M9.1429 16L2.00005 8.5L9.1429 1" stroke="#2D2D2D" stroke-width="2"/>

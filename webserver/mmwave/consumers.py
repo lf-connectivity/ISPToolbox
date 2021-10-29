@@ -21,10 +21,10 @@ class LOSConsumerMessageType(enum.Enum):
 
 
 msg_handlers = {
-    LOSConsumerMessageType.LINK: [mmwave_tasks.getLinkInfo.delay],
+    LOSConsumerMessageType.LINK: [mmwave_tasks.getLinkInfo],
     LOSConsumerMessageType.AP: [
-        workspace_tasks.generateAccessPointCoverage.delay,
-        workspace_tasks.computeViewshedCoverage.delay
+        workspace_tasks.generateAccessPointCoverage,
+        workspace_tasks.computeViewshedCoverage
     ],
     LOSConsumerMessageType.ERROR: None,
 }
@@ -107,7 +107,7 @@ class LOSConsumer(AsyncJsonWebsocketConsumer):
             # start new tasks
             new_tasks = []
             for handler in handlers:
-                new_task = handler(
+                new_task = handler.delay(
                     self.network_id, text_data_json, self.user.id)
                 new_tasks.append(new_task.id)
 

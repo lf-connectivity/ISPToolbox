@@ -16,21 +16,21 @@ from django.core.asgi import get_asgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webserver.settings')
 django_asgi_app = get_asgi_application()
 
-from channels.auth import AuthMiddlewareStack # noqa
-from channels.security.websocket import AllowedHostsOriginValidator# noqa
-from channels.routing import ProtocolTypeRouter, URLRouter # noqa
-import IspToolboxApp.routing # noqa
-import mmwave.routing # noqa
-import NetworkComparison.routing # noqa
+from channels.auth import AuthMiddlewareStack
+from channels.security.websocket import AllowedHostsOriginValidator
+from channels.routing import ProtocolTypeRouter, URLRouter
+from IspToolboxApp.routing import websocket_urlpatterns as ispt_urls
+from mmwave.routing import websocket_urlpatterns as mmwave_urls
+from NetworkComparison.routing import websocket_urlpatterns as nc_urls
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter(
-                mmwave.routing.websocket_urlpatterns +
-                NetworkComparison.routing.websocket_urlpatterns +
-                IspToolboxApp.routing.websocket_urlpatterns
+                ispt_urls +
+                mmwave_urls +
+                nc_urls
                 # add additional urlpatterns to this array with ' + \'
             )
         )

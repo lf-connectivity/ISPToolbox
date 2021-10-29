@@ -18,8 +18,6 @@ from django.conf.urls import (
 )
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls.base import reverse_lazy
-from django.views.generic.base import RedirectView
 from rest_framework import routers
 from solar_sizing_tool.views import SolarSizingToolView
 from mmwave.views import (
@@ -32,7 +30,7 @@ from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateN
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
-from django.urls import path, include, re_path
+from django.urls import path, include
 
 from IspToolboxApp import views
 from django.views.decorators.cache import cache_page

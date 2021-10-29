@@ -27,7 +27,7 @@ services:
   celery:
     image: isptoolbox-celery
     build: ./webserver
-    command: celery --app webserver worker --beat -l info
+    command: celery --app webserver worker -l info
     depends_on:
       - redis
       - postgres

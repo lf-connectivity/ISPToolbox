@@ -3,6 +3,7 @@ from django.db.models import Q
 
 from djangosaml2.backends import Saml2Backend
 
+
 class EmailBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
@@ -12,6 +13,7 @@ class EmailBackend(ModelBackend):
         else:
             if user.check_password(password) and self.user_can_authenticate(user):
                 return user
+
 
 class SSOAdminBackend(Saml2Backend):
     def save_user(self, user, *args, **kwargs):

@@ -49,8 +49,7 @@ class IspToolboxSuperUserAdmin(admin.ModelAdmin):
 admin.site.register(models.IspToolboxUserSignUpInfo)
 
 
-# Redirect admin login through SAML, with 403 forbidden if user is not a 
-# superuser
+# Redirect admin login through SAML, with 403 forbidden if user is not a superuser
 def admin_test(user):
     if user.is_active:
         if user.is_staff:

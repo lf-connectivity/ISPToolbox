@@ -462,8 +462,8 @@ SAML_ATTRIBUTE_MAPPING = {
 ACS_DEFAULT_REDIRECT_URL = reverse_lazy('admin:index')
 
 SAML_SECRETS = json.loads(get_secret("internal-fb-sso-certs",
-                                      aws_access_key_id=AWS_ACCESS_KEY_ID,
-                                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+                                     aws_access_key_id=AWS_ACCESS_KEY_ID,
+                                     aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
 
 SAML_SIGNING_CERT_FILE = '/opt/admin_sso_signing.cert'
 SAML_SIGNING_KEY_FILE = '/opt/admin_sso_signing.key'
@@ -500,7 +500,7 @@ SAML_CONFIG = {
     # this block states what services we provide
     'service': {
         # we are just a lonely SP
-        'sp' : {
+        'sp': {
             'name': 'ISP Toolbox Admin Page SP',
             'name_id_format': saml2.saml.NAMEID_FORMAT_TRANSIENT,
 
@@ -512,7 +512,7 @@ SAML_CONFIG = {
                 # do not change the binding or service name
                 'assertion_consumer_service': [
                     (f'https://{SAML_HOSTNAME}/saml2/acs/',
-                    saml2.BINDING_HTTP_POST),
+                     saml2.BINDING_HTTP_POST),
                 ],
                 # url and binding to the single logout service view
                 # do not change the binding or service name
@@ -557,7 +557,7 @@ SAML_CONFIG = {
     # One metadatastore or many ...
     'metadata': {
         'local': [SAML_LOCAL_METADATA_FILE],
-        'remote': [{"url": SAML_REMOTE_METADATA_URL},],
+        'remote': [{"url": SAML_REMOTE_METADATA_URL}],
     },
 
     # set to 1 to output debugging information

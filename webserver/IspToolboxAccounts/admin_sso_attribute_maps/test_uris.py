@@ -1,8 +1,5 @@
 __author__ = 'rolandh'
 
-import os
-import os.path
-
 EDUPERSON_OID = "urn:oid:1.3.6.1.4.1.5923.1.1.1."
 X500ATTR_OID = "urn:oid:2.5.4."
 NOREDUPERSON_OID = "urn:oid:1.3.6.1.4.1.2428.90.1."

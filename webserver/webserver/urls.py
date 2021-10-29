@@ -142,9 +142,9 @@ else:
     ]
 
 if settings.DEBUG:
-     urlpatterns += [
-          path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2')),
-     ]
+    urlpatterns += [
+        path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2')),
+    ]
 
 
 urlpatterns += reverse_url

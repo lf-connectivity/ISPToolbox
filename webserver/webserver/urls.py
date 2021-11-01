@@ -43,6 +43,8 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
+    # Admin SSO
+    path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2')),
     # Health Check Endpoint
     path('elb-status/', views.HealthCheckView.as_view()),
     path('gis/osmBuildings/', views.BuildingsView.as_view(), name='osmBuildings'),
@@ -139,11 +141,6 @@ else:
              reverse_views.urls_json, name='js_reverse_json'),
         path('reversejs/jsreverse.js',
              reverse_views.urls_js, name='js_reverse'),
-    ]
-
-if settings.DEBUG:
-    urlpatterns += [
-        path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2')),
     ]
 
 

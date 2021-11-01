@@ -461,7 +461,8 @@ SAML_ATTRIBUTE_MAPPING = {
 }
 ACS_DEFAULT_REDIRECT_URL = reverse_lazy('admin:index')
 
-SAML_SECRETS = json.loads(get_secret("internal-fb-sso-certs",
+SAML_SECRETS_LOCATION = 'prod/admin-sso' if PROD else 'dev/admin-sso'
+SAML_SECRETS = json.loads(get_secret(SAML_SECRETS_LOCATION,
                                      aws_access_key_id=AWS_ACCESS_KEY_ID,
                                      aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
 
@@ -470,18 +471,18 @@ SAML_SIGNING_KEY_FILE = '/opt/admin_sso_signing.key'
 SAML_LOCAL_METADATA_FILE = '/opt/admin_sso_metadata.xml'
 SAML_ATTRIBUTE_MAPS_DIR = admin_sso_attribute_maps.get_base_dir()
 
-SAML_REMOTE_METADATA_URL = SAML_SECRETS['DevMetadataRemoteLink']
+SAML_REMOTE_METADATA_URL = SAML_SECRETS['MetadataRemoteLink']
 
 # Cert and key are base 64 encoded in AWS Secrets Manager
 with open(SAML_SIGNING_CERT_FILE, 'w') as f:
-    f.write(base64.b64decode(SAML_SECRETS['DevPublicCertBase64']).decode('ascii'))
+    f.write(base64.b64decode(SAML_SECRETS['PublicCertBase64']).decode('ascii'))
 
 # Private key isn't necessary except we need one, so here's a self signed key.
 with open(SAML_SIGNING_KEY_FILE, 'w') as f:
-    f.write(base64.b64decode(SAML_SECRETS['DummyPrivateKeyBase64']).decode('ascii'))
+    f.write(base64.b64decode(SAML_SECRETS['PrivateKeyBase64']).decode('ascii'))
 
 with open(SAML_LOCAL_METADATA_FILE, 'w') as f:
-    f.write(base64.b64decode(SAML_SECRETS['DevMetadataXmlBase64']).decode('ascii'))
+    f.write(base64.b64decode(SAML_SECRETS['MetadataXmlBase64']).decode('ascii'))
 
 SAML_CONFIG = {
     # full path to the xmlsec1 binary programm

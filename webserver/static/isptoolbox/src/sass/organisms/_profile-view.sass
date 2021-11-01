@@ -84,7 +84,9 @@ body
     @media screen and (min-width: $breakpoint-lg) and ( min-height: 800px)
         .view-container-3d
             position: relative
-
+    @media screen and (min-width: $breakpoint-lg)
+        #potree_render_area
+            position: relative !important
     @media screen and (max-width: $breakpoint-lg-max)
         #potree_render_area
             position: static

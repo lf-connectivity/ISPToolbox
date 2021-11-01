@@ -57,11 +57,25 @@ exec sudo su - ec2-user
 - `make setup_dev` to build docker containers - these will have volume mounts - this enables hot reloading code, only re-run this if you've added an npm module or modified the pip/conda dependencies
 - `make run_dev` to run locally on localhost:8000
 
-### Running locally with https
+## Running locally with https
 
-- Follow the steps outlined [here](https://medium.com/@millienakiganda/creating-an-ssl-certificate-for-localhost-in-django-framework-45290d905b88)
-- move generated cert.pem and key.pem files to webserver/ directory
-- `make run_dev_ssl` to run locally with https
+1. install mkcert - On your laptop (macbook)
+
+   1. `brew install mkcert`
+
+   1. run chown command
+
+   1. `brew install mkcert`
+
+   1. `mkcert -install`
+
+   1. `mkcert -cert-file cert.pem -key-file key.pem 0.0.0.0 localhost 127.0.0.1 ::1`
+
+   1. `open .`
+
+1. copy .pem files to ec2 instance - On your ec2 instance
+
+   1. drag and drop cert.pem and key.pem into your ec2 instance `ISPToolbox/webserver/`
 
 ## Make command list
 

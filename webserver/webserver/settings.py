@@ -12,9 +12,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 import json
-from .secrets import get_secret
-from django.urls import reverse_lazy
+import datetime
 
+from .secrets import get_secret
+
+from django.urls import reverse_lazy
 import base64
 import saml2
 import saml2.saml
@@ -433,6 +435,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Los_Angeles'
 
 CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_EXPIRES = datetime.timedelta(days=30)
+CELERY_TASK_TRACK_STARTED = True
 
 CACHES = {
     'default': {
@@ -482,7 +486,8 @@ with open(SAML_SIGNING_KEY_FILE, 'w') as f:
     f.write(base64.b64decode(SAML_SECRETS['PrivateKeyBase64']).decode('ascii'))
 
 with open(SAML_LOCAL_METADATA_FILE, 'w') as f:
-    f.write(base64.b64decode(SAML_SECRETS['MetadataXmlBase64']).decode('ascii'))
+    f.write(base64.b64decode(
+        SAML_SECRETS['MetadataXmlBase64']).decode('ascii'))
 
 SAML_CONFIG = {
     # full path to the xmlsec1 binary programm

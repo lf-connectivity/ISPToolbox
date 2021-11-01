@@ -28,7 +28,7 @@ class AccessYourInformationView(LoginRequiredMixin, View):
         if AccessInformationJob.objects.filter(owner=request.user).exists():
             latest = AccessInformationJob.objects.filter(
                 owner=request.user).order_by('-created').first()
-            if latest.task_result is None or latest.task_result.status in READY_STATES:
+            if latest.data_dump or latest.task_result is None or latest.task_result.status in READY_STATES:
                 self.create_download_job(request)
         else:
             self.create_download_job(request)

@@ -2,7 +2,7 @@
 import * as MapboxGL from 'mapbox-gl';
 import { MapboxSDKClient } from './MapboxSDKClient.js';
 import { createLinkChart } from './link_profile.js';
-import LOSCheckWS, { LOSWSEvents } from './LOSCheckWS';
+import LOSCheckWS from './LOSCheckWS';
 import { createLinkProfile, findLidarObstructions, km2miles, m2ft, ft2m } from './LinkCalcUtils';
 import { LinkStatus } from './LinkObstructions';
 import {
@@ -12,9 +12,16 @@ import {
     CPEDrawMode,
     APDrawMode
 } from './isptoolbox-mapbox-draw/index';
+import { LinkCheckEvents } from './workspace/WorkspaceConstants';
 import LidarAvailabilityLayer from './availabilityOverlay';
-import { LOSWSHandlers } from './LOSCheckWS';
-import type { LOSCheckResponse, LinkResponse, TerrainResponse, LidarResponse } from './LOSCheckWS';
+import {
+    LOSWSEvents,
+    LOSWSHandlers,
+    LOSCheckResponse,
+    LinkResponse,
+    TerrainResponse,
+    LidarResponse
+} from './workspace/WorkspaceConstants';
 import { isUnitsUS } from './utils/MapPreferences';
 import PubSub from 'pubsub-js';
 import { LOSCheckWorkspaceManager } from './workspace/LOSCheckWorkspaceManager';
@@ -42,12 +49,6 @@ import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
 import { WorkspacePointFeature } from './workspace/WorkspacePointFeature';
 var _ = require('lodash');
-
-export enum LinkCheckEvents {
-    SET_INPUTS = 'link.set_inputs',
-    CLEAR_INPUTS = 'link.clear_inputs',
-    SHOW_INPUTS = 'link.show_inputs'
-}
 
 type HighChartsExtremesEvent = {
     min: number | undefined;

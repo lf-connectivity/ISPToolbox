@@ -1,8 +1,11 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl from 'mapbox-gl';
 import PubSub from 'pubsub-js';
-import { LOSWSEvents, ViewShedResponse } from '../LOSCheckWS';
-import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import {
+    LOSWSEvents,
+    ViewShedResponse,
+    WorkspaceFeatureTypes
+} from '../workspace/WorkspaceConstants';
 import { EMPTY_LAYER_AFTER_BUILDING } from './APCoverageRenderer';
 
 export enum ViewshedEvents {

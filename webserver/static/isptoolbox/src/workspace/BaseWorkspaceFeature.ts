@@ -1,6 +1,6 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { Feature, Geometry, Point } from 'geojson';
+import { Feature, Geometry } from 'geojson';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
@@ -195,39 +195,5 @@ export abstract class BaseWorkspaceFeature {
         serialization.geojson = JSON.stringify(this.featureData.geometry);
         serialization.map_session = getSessionID();
         return serialization;
-    }
-}
-
-/**
- * Abstract class containing point-specific functions for Workspace objects.
- */
-export abstract class WorkspacePointFeature extends BaseWorkspaceFeature {
-    /**
-     * Moves the selected feature to the specified lat/long coordinates. To be
-     * used by other Workspace feature classes for programatically moving objects
-     * in response to other things moving, not as an extension for the Mapbox API.
-     *
-     * @param newCoords New coordinates (lat/long)
-     */
-    move(newCoords: [number, number]) {
-        let feature = this.draw.get(this.mapboxId);
-
-        // @ts-ignore
-        feature.geometry.coordinates = newCoords;
-        // @ts-ignore
-        this.draw.add(feature);
-        this.map.fire('draw.update', { features: [feature], action: 'move' });
-    }
-
-    getFeatureData(): Feature<Point, any> {
-        return super.getFeatureData() as Feature<Point, any>;
-    }
-
-    getFeatureGeometry(): Point {
-        return super.getFeatureGeometry() as Point;
-    }
-
-    getFeatureGeometryCoordinates() {
-        return this.getFeatureGeometry()?.coordinates;
     }
 }

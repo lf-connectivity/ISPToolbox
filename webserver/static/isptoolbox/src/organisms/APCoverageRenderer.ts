@@ -10,7 +10,8 @@ import {
     WorkspaceFeatureTypes
 } from '../workspace/WorkspaceConstants';
 import { AccessPoint, CoverageArea, CPE } from '../workspace/WorkspaceFeatures';
-import LOSCheckWS, { AccessPointCoverageResponse, LOSWSEvents } from '../LOSCheckWS';
+import LOSCheckWS from '../LOSCheckWS';
+import { AccessPointCoverageResponse, LOSWSEvents } from '../workspace/WorkspaceConstants';
 import { LOSCheckWorkspaceManager } from '../workspace/LOSCheckWorkspaceManager';
 import {
     LinkCheckTowerPopup,

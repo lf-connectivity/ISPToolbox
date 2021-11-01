@@ -18,7 +18,11 @@ import {
 } from '../../LinkCheckUtils';
 import { sanitizeString } from '../../molecules/InputValidator';
 import { parseFormLatitudeLongitude } from '../../utils/LatLngInputUtils';
-import { LOSWSEvents, ViewshedProgressResponse, ViewshedUnexpectedError } from '../../LOSCheckWS';
+import {
+    LOSWSEvents,
+    ViewshedProgressResponse,
+    ViewshedUnexpectedError
+} from '../../workspace/WorkspaceConstants';
 import MarketEvaluatorWS, {
     MarketEvalWSEvents,
     MarketEvalWSRequestType,

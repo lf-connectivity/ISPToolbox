@@ -2,7 +2,7 @@ import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import { Feature, Geometry, Point, LineString, Polygon } from 'geojson';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { isUnitsUS } from '../utils/MapPreferences';
-import { LinkCheckEvents } from '../LinkCheckPage';
+import { LinkCheckEvents } from './WorkspaceConstants';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';

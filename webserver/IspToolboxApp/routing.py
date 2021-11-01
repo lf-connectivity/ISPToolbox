@@ -1,7 +1,8 @@
 from django.urls import re_path
 
-from . import consumers
+from IspToolboxApp.consumers import MarketEvaluatorConsumer
 
 websocket_urlpatterns = [
-    re_path(r'ws/market-evaluator/', consumers.MarketEvaluatorConsumer.as_asgi()),
+    re_path(r'ws/market-evaluator/',
+            MarketEvaluatorConsumer.as_asgi()),
 ]

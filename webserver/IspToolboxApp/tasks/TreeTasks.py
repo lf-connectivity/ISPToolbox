@@ -1,4 +1,4 @@
-from celery import shared_task
+from webserver.celery import celery_app as app
 from IspToolboxApp.tasks.building_outline_task.building_outline_task import getTiles, getTileImages
 import pickle
 # import detectree as dtr
@@ -6,7 +6,7 @@ import tempfile
 import boto3
 
 
-@shared_task
+@app.task
 def createTreeGeoTiff(id):
     # Load design
 

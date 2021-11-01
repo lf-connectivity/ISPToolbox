@@ -1,14 +1,14 @@
-from celery import shared_task
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, \
     checkIfIncomeProvidersAvailable, queryBuildingOutlines
 from django.contrib.gis.geos import GEOSGeometry
 import json
+from webserver.celery import celery_app as app
 
 from datetime import datetime
 
 
-@shared_task
+@app.task
 def genMarketEvaluatorData(uuid):
     msftBuildingsAvailable = genPrecomputedBuilingsAvailable(uuid)
     if msftBuildingsAvailable:
@@ -31,7 +31,7 @@ def genMarketEvaluatorData(uuid):
     return uuid
 
 
-@shared_task
+@app.task
 def genPrecomputedBuilingsAvailable(uuid):
     pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
     pipelineStatus.buildingPrecomputed = checkIfPrecomputedBuildingsAvailable(
@@ -47,7 +47,7 @@ def genPrecomputedBuilingsAvailable(uuid):
     return pipelineStatus.buildingPrecomputed
 
 
-@shared_task
+@app.task
 def genBuildingOutlines(uuid):
     pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
 
@@ -88,7 +88,7 @@ def genBuildingOutlines(uuid):
     return None
 
 
-@shared_task
+@app.task
 def genServiceProviders(uuid):
     pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
     pipelineStatus.serviceProviderComplete = datetime.now()
@@ -96,7 +96,7 @@ def genServiceProviders(uuid):
     return None
 
 
-@shared_task
+@app.task
 def genMedianIncome(uuid):
     pipelineStatus = MarketEvaluatorPipeline.objects.get(pk=uuid)
     pipelineStatus.genMarketEvaluatorIncome()

@@ -3,7 +3,7 @@ from dataUpdate.models import Source
 from dataUpdate.tasks import updateCCData, updateMlabData, updateCbrsData
 
 
-# Dict of update functions as celery tasks (with @shared_task annotation)
+# Dict of update functions as celery tasks (with @app.task annotation)
 UPDATE_FN = {
     'CBRS': updateCbrsData,
     'MLAB': updateMlabData,

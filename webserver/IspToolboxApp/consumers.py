@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
-from .tasks.MarketEvaluatorWebsocketTasks import (
+from IspToolboxApp.tasks.MarketEvaluatorWebsocketTasks import (
     genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow,
     genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getCensusBlockGeog,
     getTowerViewShed, getTribalGeog, genPopulation

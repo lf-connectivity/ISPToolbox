@@ -1,4 +1,4 @@
-from celery import shared_task
+from webserver.celery import celery_app as app
 from IspToolboxApp.models.MarketingConvertModels import MarketingPinConversion
 import datetime
 import heapq
@@ -41,7 +41,8 @@ def createPin(radius_km, center):
 def findNextPinAdd(polygon):
     try:
         center = polylabel(wkb.loads(bytes(polygon.wkb)), arc_second_degrees)
-        pin_options = [calcPinCost(polygon, center, radius_km) for radius_km in radius_options]
+        pin_options = [calcPinCost(polygon, center, radius_km)
+                       for radius_km in radius_options]
         _, pin, radius_km = min(pin_options)
         return pin, radius_km
     except Exception as e:
@@ -85,7 +86,8 @@ def differenceIncludeExclude(include, exclude):
             if not exclude_p.valid:
                 exclude_p = exclude_p.buffer(0)
             try:
-                coverage_area_polygon = coverage_area_polygon.difference(exclude_p)
+                coverage_area_polygon = coverage_area_polygon.difference(
+                    exclude_p)
             except Exception as e:
                 logging.error(str(e))
         coverage_area_polygons.append(coverage_area_polygon)
@@ -147,7 +149,7 @@ def convertPolygonToPins(include, exclude, num_pins):
     return include_output_pins, output_msg
 
 
-@shared_task
+@app.task
 def ConvertPins(uuid):
     conversion = MarketingPinConversion.objects.get(uuid=uuid)
     try:

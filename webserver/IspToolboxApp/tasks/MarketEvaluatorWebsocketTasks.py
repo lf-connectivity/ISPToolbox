@@ -1,4 +1,3 @@
-from celery import shared_task
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, broadbandNow, mlabSpeed, \
@@ -10,6 +9,7 @@ from towerlocator.helpers import getViewShed
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from django.contrib.humanize.templatetags.humanize import intcomma
 import logging
+from webserver.celery import celery_app as app
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -22,9 +22,10 @@ def sync_send(channelName, consumer, value, uuid):
     async_to_sync(channel_layer.send)(channelName, resp)
 
 
-@shared_task
+@app.task
 def genBuildings(pipeline_uuid, channelName, uuid, read_only=False):
-    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    include = MarketEvaluatorPipeline.objects.get(
+        uuid=pipeline_uuid).include_geojson.json
     buildings_available = checkIfPrecomputedBuildingsAvailable(include, None)
     if buildings_available:
         # We can query microsoft buildings with an offset and send results as we generate them.
@@ -50,9 +51,10 @@ def genBuildings(pipeline_uuid, channelName, uuid, read_only=False):
         sync_send(channelName, 'building.overlays', resp, uuid)
 
 
-@shared_task
+@app.task
 def genMedianIncome(pipeline_uuid, channelName, uuid, read_only=False):
-    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    include = MarketEvaluatorPipeline.objects.get(
+        uuid=pipeline_uuid).include_geojson.json
     result = {}
     averageMedianIncome = 0
     num_buildings = 0
@@ -61,42 +63,49 @@ def genMedianIncome(pipeline_uuid, channelName, uuid, read_only=False):
         try:
             averageMedianIncome = (
                 num_buildings * averageMedianIncome +
-                result.get('averageMedianIncome', 0) * result.get('numbuildings', 1)
+                result.get('averageMedianIncome', 0) *
+                result.get('numbuildings', 1)
             ) / (num_buildings + result.get('numbuildings', 1))
         except ZeroDivisionError:
-            logging.error(f'uuid: {pipeline_uuid} - produced divide by zero error')
+            logging.error(
+                f'uuid: {pipeline_uuid} - produced divide by zero error')
             averageMedianIncome = 0
         num_buildings += result.get('numbuildings', 1)
-        resp = {'averageMedianIncome': averageMedianIncome, 'done': result['done']}
+        resp = {'averageMedianIncome': averageMedianIncome,
+                'done': result['done']}
         if 'error' in result:
             resp['error'] = result['error']
         sync_send(channelName, 'median.income', resp, uuid)
 
 
-@shared_task
+@app.task
 def genServiceProviders(pipeline_uuid, channelName, uuid, read_only=False):
-    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    include = MarketEvaluatorPipeline.objects.get(
+        uuid=pipeline_uuid).include_geojson.json
     result = serviceProviders(include, read_only)
     sync_send(channelName, 'service.providers', result, uuid)
 
 
-@shared_task
+@app.task
 def genBroadbandNow(pipeline_uuid, channelName, uuid, read_only=False):
-    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    include = MarketEvaluatorPipeline.objects.get(
+        uuid=pipeline_uuid).include_geojson.json
     result = broadbandNow(include, read_only)
     sync_send(channelName, 'broadband.now', result, uuid)
 
 
-@shared_task
+@app.task
 def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
-    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    include = MarketEvaluatorPipeline.objects.get(
+        uuid=pipeline_uuid).include_geojson.json
     result = mlabSpeed(include, read_only)
     sync_send(channelName, 'median.speeds', result, uuid)
 
 
-@shared_task
+@app.task
 def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
-    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson
+    include = MarketEvaluatorPipeline.objects.get(
+        uuid=pipeline_uuid).include_geojson
     try:
         result = HrslUsa15.get_intersection_population(include, read_only)
         returnval = {
@@ -111,37 +120,37 @@ def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
     sync_send(channelName, 'population', returnval, uuid)
 
 
-@shared_task
+@app.task
 def getGrantGeog(grantId, channelName, uuid):
     result = grantGeog(grantId)
     sync_send(channelName, 'grant.geog', result, uuid)
 
 
-@shared_task
+@app.task
 def getZipGeog(zipcode, channelName, uuid):
     result = zipGeog(zipcode)
     sync_send(channelName, 'zip.geog', result, uuid)
 
 
-@shared_task
+@app.task
 def getCountyGeog(statecode, countycode, channelName, uuid):
     result = countyGeog(statecode, countycode)
     sync_send(channelName, 'county.geog', result, uuid)
 
 
-@shared_task
+@app.task
 def getCensusBlockGeog(blockcode, channelName, uuid):
     result = censusBlockGeog(blockcode)
     sync_send(channelName, 'censusblock.geog', result, uuid)
 
 
-@shared_task
+@app.task
 def getTribalGeog(geoid, channelName, uuid):
     result = tribalGeog(geoid)
     sync_send(channelName, 'tribal.geog', result, uuid)
 
 
-@shared_task
+@app.task
 def getTowerViewShed(lat, lon, height, customerHeight, radius, channelName, uuid, apUuid=None):
     result = getViewShed(lat, lon, height, customerHeight, radius, apUuid)
     sync_send(channelName, 'tower.viewshed', result, uuid)

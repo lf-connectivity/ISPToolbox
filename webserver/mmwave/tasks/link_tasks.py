@@ -5,12 +5,11 @@ from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
 from django.contrib.gis.geos import LineString, Point
 
-from celery import shared_task
+from webserver.celery import celery_app as app
 from celery.utils.log import get_task_logger
 from mmwave.lidar_utils.caching import lidar_cache_get, lidar_cache_set
 from mmwave.scripts.create_lidar_availability_preview import createOpenGraphPreviewImage
 from datetime import date
-from webserver.celery import celery_app as app
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -18,8 +17,8 @@ import traceback
 
 from gis_data.models import MsftBuildingOutlines
 from mmwave.lidar_utils.LidarEngine import (
-        LidarEngine, LidarResolution, LIDAR_RESOLUTION_DEFAULTS,
-        LIDAR_RESOLUTION_MAX_LINK_LENGTH, LidarEngineException
+    LidarEngine, LidarResolution, LIDAR_RESOLUTION_DEFAULTS,
+    LIDAR_RESOLUTION_MAX_LINK_LENGTH, LidarEngineException
 )
 from mmwave.lidar_utils.show_latest_pt_clouds import createNewPointCloudAvailability
 from shapely.geometry import LineString as shapely_LineString
@@ -78,7 +77,8 @@ def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
     path = str(tx.y) + ',' + str(tx.x) + '|' + str(rx.y) + ',' + str(rx.x)
     params = {'key': google_maps_api_key, 'path': path, 'samples': samples}
     try:
-        r = requests.get('https://maps.googleapis.com/maps/api/elevation/json', params=params)
+        r = requests.get(
+            'https://maps.googleapis.com/maps/api/elevation/json', params=params)
         elevation_resp = r.json()
         profile = [
             {
@@ -98,7 +98,8 @@ def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
 def getDTMPoint(pt: Point) -> float:
     try:
         params = {'key': google_maps_api_key, 'locations': f'{pt.y},{pt.x}'}
-        r = requests.get('https://maps.googleapis.com/maps/api/elevation/json', params=params)
+        r = requests.get(
+            'https://maps.googleapis.com/maps/api/elevation/json', params=params)
         elevation_resp = r.json()
         return elevation_resp['results'][0]['elevation']
     except Exception:
@@ -114,7 +115,8 @@ def createLinkProfile(tx, rx, num_samples=MAXIMUM_NUM_POINTS_RETURNED):
     """
     link = LineString([tx, rx])
     shapely_link = shapely_LineString(link)
-    samples_points = [shapely_link.interpolate(i/float(num_samples - 1), normalized=True) for i in range(num_samples)]
+    samples_points = [shapely_link.interpolate(
+        i/float(num_samples - 1), normalized=True) for i in range(num_samples)]
     return [Point(pt.x, pt.y) for pt in samples_points], link
 
 
@@ -125,7 +127,8 @@ def getBuildingProfile(tx, rx):
     """
     link_profile, link = createLinkProfile(tx, rx)
     # Query Buildings between point A and B
-    buildings = MsftBuildingOutlines.objects.filter(geog__intersects=link).values('geog', 'gid').all()
+    buildings = MsftBuildingOutlines.objects.filter(
+        geog__intersects=link).values('geog', 'gid').all()
 
     # Return list of building intersections with gid to indicate intersection
     building_profile = []
@@ -142,11 +145,12 @@ def getBuildingProfile(tx, rx):
 
 
 def genLinkDistance(tx, rx):
-    requested_link_dist = geopy_distance(lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters
+    requested_link_dist = geopy_distance(
+        lonlat(tx.x, tx.y), lonlat(rx.x, rx.y)).meters
     return requested_link_dist
 
 
-@shared_task
+@app.task
 def getLinkInfo(network_id, data, user_id=None):
     """
         Validates the link the client sends
@@ -185,7 +189,7 @@ def getLinkInfo(network_id, data, user_id=None):
     async_to_sync(channel_layer.group_send)(channel_name, resp)
 
 
-@shared_task
+@app.task
 def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
     """
         Async Task to load LiDAR data profile and send to client,
@@ -243,7 +247,8 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
             resp['rx'] = le.getRxLidarCoord()
             resp['aoi'] = aoi
             if resp['error'] is None:
-                TASK_LOGGER.info(f'updating cache with resolution %s', resp['resolution'])
+                TASK_LOGGER.info(
+                    f'updating cache with resolution %s', resp['resolution'])
                 lidar_cache_set(tx, rx, aoi, resp)
         if (
             resp['error'] is None and
@@ -262,7 +267,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
     async_to_sync(channel_layer.group_send)(channel_name, resp)
 
 
-@shared_task
+@app.task
 def getTerrainProfile(network_id, data):
     """
         This async task gets the elevation profile between point A and B from Google's
@@ -290,7 +295,8 @@ def getTerrainProfile(network_id, data):
         resp['terrain_profile'] = getElevationProfile(tx_sub, rx_sub)
         resp['aoi'] = aoi
     except Exception as e:
-        TASK_LOGGER.error(f'Error occurred during generating terrain profile: {e}')
+        TASK_LOGGER.error(
+            f'Error occurred during generating terrain profile: {e}')
         resp['error'] = str(e)
 
     async_to_sync(channel_layer.group_send)(channel_name, resp)

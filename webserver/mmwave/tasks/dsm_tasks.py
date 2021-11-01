@@ -1,27 +1,28 @@
-from celery import shared_task
+from webserver.celery import celery_app as app
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from mmwave.models import DSMConversionJob, EPTLidarPointCloud
 import tempfile
 from area import area
 
 
-@shared_task
+@app.task
 def exportDSMData(DSMConversionJob_uuid):
     """
     Load the conversion job from the uuid, try to run the conversion
     and if successful upload to S3
     """
-    conversion = DSMConversionJob.objects.filter(uuid=DSMConversionJob_uuid).get()
+    conversion = DSMConversionJob.objects.filter(
+        uuid=DSMConversionJob_uuid).get()
     query = (
-            EPTLidarPointCloud.objects.filter(
-                high_resolution_boundary__isnull=True,
-                boundary__intersects=conversion.area_of_interest
-            ) |
-            EPTLidarPointCloud.objects.filter(
-                high_resolution_boundary__isnull=False,
-                high_resolution_boundary__intersects=conversion.area_of_interest
-            )
+        EPTLidarPointCloud.objects.filter(
+            high_resolution_boundary__isnull=True,
+            boundary__intersects=conversion.area_of_interest
+        ) |
+        EPTLidarPointCloud.objects.filter(
+            high_resolution_boundary__isnull=False,
+            high_resolution_boundary__intersects=conversion.area_of_interest
         )
+    )
     pt_clouds = query.all()
     dsm_engine = DSMTileEngine(conversion.area_of_interest.envelope, pt_clouds)
 

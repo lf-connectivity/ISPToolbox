@@ -1,4 +1,4 @@
-from celery import shared_task
+from webserver.celery import celery_app as app
 from area import area
 from django.db import connections
 from NetworkComparison.util import squaredMetersToMiles
@@ -22,7 +22,7 @@ def sync_send(channelName, consumer, value, uuid):
     async_to_sync(channel_layer.send)(channelName, resp)
 
 
-@shared_task
+@app.task
 def genBuildingCount(include, channelName, uuid):
     '''
         Computes the count of buildings in applicable include geometry.
@@ -44,7 +44,7 @@ def genBuildingCount(include, channelName, uuid):
         sync_send(channelName, "building.count", str(buildingCount), uuid)
 
 
-@shared_task
+@app.task
 def genPolySize(pipeline_uuid, channelName, uuid, read_only=False):
     '''
         Computes the area in applicable include geometry in miles squared.
@@ -56,12 +56,13 @@ def genPolySize(pipeline_uuid, channelName, uuid, read_only=False):
         Result sent:
         <String>: Area of applicable area in miles squared
     '''
-    include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson.json
+    include = MarketEvaluatorPipeline.objects.get(
+        uuid=pipeline_uuid).include_geojson.json
     polygonArea = squaredMetersToMiles(area(include))
     sync_send(channelName, "polygon.area", str(polygonArea), uuid)
 
 
-@shared_task
+@app.task
 def genClusteredBuildings(include, distance, minpoints, channelName, uuid):
     '''
         Computes building clusters in applicable include geometry as GeoJSON.
@@ -91,13 +92,13 @@ def genClusteredBuildings(include, distance, minpoints, channelName, uuid):
         sync_send(channelName, "building.clusters", geometries, uuid)
 
 
-@shared_task
+@app.task
 def genBuildingsMST(include, channelName, uuid):
     graph = getBuildingsMST(include)
     sync_send(channelName, "building.min.span", graph, uuid)
 
 
-@shared_task
+@app.task
 def genAnchorInstitutions(include, channelName, uuid):
     aoi = GEOSGeometry(include)
     anchor_inst = fetchAnchorInstitutions(aoi)

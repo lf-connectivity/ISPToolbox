@@ -5,7 +5,6 @@ from django.http.request import HttpRequest
 from django.core.exceptions import PermissionDenied
 from django.urls.base import reverse_lazy
 from IspToolboxAccounts import models
-from django.conf import settings
 
 
 @admin.register(models.User)

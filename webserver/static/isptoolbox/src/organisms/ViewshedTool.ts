@@ -7,6 +7,9 @@ import {
     WorkspaceFeatureTypes
 } from '../workspace/WorkspaceConstants';
 import { EMPTY_LAYER_AFTER_BUILDING } from './APCoverageRenderer';
+import { getCookie } from '../utils/Cookie';
+import { djangoUrl } from '../utils/djangoUrl';
+import { IMapboxDrawPlugin } from '../utils/IMapboxDrawPlugin';
 
 export enum ViewshedEvents {
     VS_REQUEST = 'vs.request',
@@ -17,21 +20,22 @@ export enum ViewshedEvents {
 
 const VIEWSHED_TILE_OVERLAY_SOURCE = 'isptoolbox.viewshedoverlay-tile-source';
 const VIEWSHED_TILE_OVERLAY_LAYER = 'isptoolbox.viewshedoverlay-tile-layer';
-export class ViewshedTool {
+export class ViewshedTool extends IMapboxDrawPlugin {
     map: mapboxgl.Map;
     draw: MapboxDraw;
     viewshed_feature_id: string | number | null = null;
     static _instance: ViewshedTool;
+    last_selection: string | number | undefined;
+    dragging = false;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        super(map, draw);
         if (ViewshedTool._instance) {
             throw Error('This singleton has already been instantiated, use getInstance.');
         }
         this.map = map;
         this.draw = draw;
         PubSub.subscribe(LOSWSEvents.VIEWSHED_MSG, this.updateViewshedImage.bind(this));
-        this.map.on('draw.selectionchange', this.drawSelectionChangeCallback.bind(this));
-        this.map.on('draw.delete', this.drawDeleteCallback.bind(this));
         this.map.on('sourcedata', (e) => {
             if (
                 e.isSourceLoaded &&
@@ -52,7 +56,8 @@ export class ViewshedTool {
         }
     }
 
-    drawSelectionChangeCallback({ features }: { features: Array<GeoJSON.Feature> }): void {
+    drawUpdateCallback(event: { features: Array<GeoJSON.Feature>; action: string }) {
+        const features = event.features;
         if (
             features.length > 0 &&
             !features.some((f) => {
@@ -64,9 +69,53 @@ export class ViewshedTool {
         ) {
             this.setVisibleLayer(false);
         }
+        if (features.length === 1) {
+            const feat = features[0];
+            if (feat.properties?.feature_type === WorkspaceFeatureTypes.AP) {
+                this.requestViewshedOverlay(feat.properties.uuid);
+            }
+        }
     }
 
-    drawDeleteCallback({ features }: { features: Array<GeoJSON.Feature> }): void {
+    drawSelectionChangeCallback(event: { features: Array<GeoJSON.Feature> }) {
+        const features = event.features;
+        this.dragging = false;
+        if (features.length === 1) {
+            if (features[0].id === this.last_selection) {
+                this.dragging = true;
+            } else {
+                this.last_selection = features[0].id;
+            }
+        } else {
+            this.last_selection = '';
+        }
+
+        if (
+            features.length > 0 &&
+            !features.some((f) => {
+                return this.viewshed_feature_id === f?.id;
+            }) &&
+            features.some((f) => {
+                return f.properties?.feature_type === WorkspaceFeatureTypes.AP;
+            })
+        ) {
+            this.setVisibleLayer(false);
+        }
+
+        if (this.dragging) {
+            this.setVisibleLayer(false);
+        } else {
+            if (features.length === 1) {
+                const feat = features[0];
+                if (feat.properties?.feature_type === WorkspaceFeatureTypes.AP) {
+                    this.requestViewshedOverlay(feat.properties.uuid);
+                }
+            }
+        }
+    }
+
+    drawDeleteCallback(event: { features: Array<GeoJSON.Feature> }) {
+        const features = event.features;
         if (
             features.some((f) => {
                 return this.viewshed_feature_id === f?.id;
@@ -85,6 +134,19 @@ export class ViewshedTool {
                 setVisible ? 'visible' : 'none'
             );
         }
+    }
+
+    requestViewshedOverlay(uuid: string) {
+        $.ajax({
+            url: djangoUrl('workspace:viewshed_overlay', uuid),
+            success: (resp) => {
+                this.updateViewshedImage('', resp);
+            },
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
     }
 
     updateViewshedImage(msg: string, data: ViewShedResponse) {

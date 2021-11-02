@@ -456,7 +456,7 @@ CACHES = {
 SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'
 SAML_CREATE_UNKNOWN_USER = True
 SAML_IGNORE_LOGOUT_ERRORS = True
-SAML_HOSTNAME = 'localhost' if PROD else 'localhost:8000'
+SAML_HOSTNAME = 'isptoolbox.io' if PROD else 'localhost:8000'
 SAML_ATTRIBUTE_MAPPING = {
     'Email': ('email', ),
     'FirstName': ('first_name', ),

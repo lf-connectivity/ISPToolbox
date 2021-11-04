@@ -35,6 +35,7 @@ import geojsonArea from '@mapbox/geojson-area';
 import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import { ViewshedTool } from './ViewshedTool';
+import { miles2km } from '../LinkCalcUtils';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -271,9 +272,10 @@ abstract class RadiusAndBuildingCoverageRenderer {
         let aps = this.draw
             .getAll()
             .features.filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP);
+
         // Render all APs.
         aps.forEach((feat: any) => {
-            if (feat && feat.properties.radius) {
+            if (feat && (feat.properties.radius || feat.properties.radius_miles)) {
                 if (feat.geometry.type === 'Point') {
                     let new_feat;
                     if (this.renderCloudRF && this.cloudRFExists(feat)) {
@@ -287,11 +289,9 @@ abstract class RadiusAndBuildingCoverageRenderer {
                             properties: {}
                         } as Feature<GeometryCollection, GeoJsonProperties>;
                     } else {
-                        new_feat = createGeoJSONCircle(
-                            feat.geometry,
-                            feat.properties.radius,
-                            feat.id
-                        );
+                        let radius =
+                            feat.properties.radius || miles2km(feat.properties.radius_miles);
+                        new_feat = createGeoJSONCircle(feat.geometry, radius, feat.id);
                     }
 
                     // @ts-ignore

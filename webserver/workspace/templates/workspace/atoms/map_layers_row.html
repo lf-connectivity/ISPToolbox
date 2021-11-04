@@ -2,11 +2,15 @@
 
 <div class="market_overlay--row">
 	<p class="market_overlay--label">
-		{% include "workspace/atoms/icons/swatch.html" with swatchType=swatchType %}
+		{% include "workspace/atoms/icons/swatch.html" with swatchType=swatchType swatchTypeTwo=swatchTypeTwo %}
 		<span>
 			{{ layerName }}
 			{% citation sources id=layerName href=sources_page_url footnote_id=footnote_id %}
-				{{ citation }} {% source_link "US" sourceId %}. {% source_last_updated "US" sourceId %}
+				{{ citation }} {% source_link "US" sourceId %}.
+				{% if additionalCitation %}
+					{{ additionalCitation | safe }}.
+				{% endif %}
+				{% source_last_updated "US" sourceId %}
 			{% endcitation %}
 		</span>
 	</p>

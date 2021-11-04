@@ -10,10 +10,24 @@ body
         border: solid 1px darken($light-gray-color, 9%)
         box-sizing: content-box
 
-    .swatch_rdof 
+    .multiswatch
+        display: flex
+        margin: 0 15px 0 0
+        flex-direction: column
+        min-width: 6px
+        width: 6px
+        gap: 5px
+
+    .swatch_asr_good
+        background: #71b3b8
+
+    .swatch_asr_bad
+        background: #a2a2a2
+
+    .swatch_rdof
         background: #9540ea
 
-    .swatch_non_urban 
+    .swatch_non_urban
         background: #ea625a
 
     .swatch_cbrs
@@ -21,6 +35,6 @@ body
 
     .swatch_census_blocks
         background: #f0f2f5
-    
+
     .swatch_tribal
         background: #ff4d00

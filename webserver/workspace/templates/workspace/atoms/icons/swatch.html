@@ -1,1 +1,8 @@
-<span class="layer-swatch {{ swatchType }}"></span>
+{% if swatchTypeTwo %}
+<span class="multiswatch">
+    <span class="layer-swatch {{ swatchType }}"></span>
+    <span class="layer-swatch {{ swatchTypeTwo }}"></span>
+</span>
+{% else %}
+    <span class="layer-swatch {{ swatchType }}"></span>
+{% endif %}

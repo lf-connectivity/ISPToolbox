@@ -590,7 +590,7 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
                 <button class='btn btn-primary isptoolbox-btn' id='${PLOT_COVERAGE_BUTTON_ID}'>
                     Plot Estimated Coverage
                     <sup>
-                        <span class="footnote--bracket">[</span>11<span class="footnote--bracket">]</span>
+                        <span class="footnote--bracket">[</span>12<span class="footnote--bracket">]</span>
                     </sup>
                 </button>
             `;

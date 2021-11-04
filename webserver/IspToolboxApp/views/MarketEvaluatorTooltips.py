@@ -67,6 +67,14 @@ TOOLTIPS = {
         'link': 'https://support.measurementlab.net/help/en-us/10-data/26-how-does-m-lab-identify-the-locations-of-tests-how-precise-is-the-location-information',
         'linkDesc':  _('See Data Source'),
     },
+    'asr': {
+        'title': _('ASR Tower Locations'),
+        'body': _("""This overlay displays where towers and antenna structures
+        can be found.
+        """),
+        'link': 'https://www.fcc.gov/uls/transactions/daily-weekly',
+        'linkDesc': _('See Data Source')
+    },
     'rdof': {
         'title': _('FCC Rural Digital Opportunity Fund (Closed)'),
         'body': _("""The FCC has identified the highlighted areas 

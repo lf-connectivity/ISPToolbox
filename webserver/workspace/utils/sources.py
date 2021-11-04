@@ -61,9 +61,9 @@ _ISP_TOOLBOX_US_SOURCES = {
         link='https://www.openstreetmap.org/copyright',
         title='\u00A9 OpenStreetMap contributors',
     ),
-    'TOWERS': ISPToolboxSource(
+    'ASR': ISPToolboxSource(
         link='https://www.fcc.gov/uls/transactions/daily-weekly',
-        title='FCC Weekly Database',
+        title='FCC ULS & ASR Weekly Public Access Files',
         last_updated=datetime.date(2020, 10, 1)
     ),
     'RURAL': ISPToolboxSource(

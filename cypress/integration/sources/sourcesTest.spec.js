@@ -184,6 +184,23 @@ context("Sources checks for Market Evaluator", () => {
     cy.url().should("include", MARKET_EVAL_SOURCES_PAGE);
   });
 
+  it("The ASR towers citation should be correct", () => {
+    cy.get_footnote_by_text("ASR Tower Locations")
+      .footnote_text_should_match(
+        /^ASR Tower Location data is obtained via FCC ULS & ASR Weekly Public Access Files\. Please refer directly to the source \(by clicking Registration # displayed in the tool\) for exact height measurements\. To learn more about tower status as displayed in the tool \(e\.g\.\, \"Cancelled\,\" \"Constructed\,\" \"Dismantled\,\" \"Granted\,\" \"Terminated\"\) please refer to the FCC ASR Registration Report\. \[Last Updated [a-zA-Z]{3} \d{4}\]$/
+      )
+      .footnote_should_have_link(
+        "FCC ULS & ASR Weekly Public Access Files",
+        "https://www.fcc.gov/uls/transactions/daily-weekly"
+      )
+      .footnote_should_have_link(
+        "FCC ASR Registration Report",
+        "https://wireless2.fcc.gov/helpfiles/AsrHelp/help-registrationdetail.html"
+      );
+
+    cy.url().should("include", MARKET_EVAL_SOURCES_PAGE);
+  });
+
   it("The CloudRF citation should be correct", () => {
     // TODO: achong - remove this wait - there is a setTimeout in the tower popup????
     cy.wait(1000);

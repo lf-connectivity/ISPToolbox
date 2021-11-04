@@ -98,6 +98,15 @@ context("Market Evaluator Info Tooltips", () => {
     );
   });
 
+  it("The ASR Towers tooltip should be correct", () => {
+    cy.market_eval_info_tooltip_should_be(
+      "ASR Tower Locations",
+      "ASR Tower Locations",
+      "This overlay displays where towers and antenna structures can be found.",
+      ["https://www.fcc.gov/uls/transactions/daily-weekly"]
+    );
+  });
+
   it("The Census Blocks tooltip should be correct", () => {
     cy.market_eval_info_tooltip_should_be(
       "Census Blocks",

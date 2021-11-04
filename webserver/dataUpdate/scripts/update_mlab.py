@@ -8,7 +8,7 @@ COUNTRIES = ['US', 'BR', 'CA']
 def updateMlab():
     from dataUpdate.models import Source
     from django.conf import settings
-    if not settings.DEBUG:
+    if True:  # nocommit!!!!
         try:
             country_filter = ", ".join(
                 [f'"{country}"' for country in COUNTRIES])
@@ -57,9 +57,9 @@ def updateMlab():
             # Upsert query for updating rows in mlabs database table
             dbQuery = """
                         BEGIN;
-                        INSERT INTO standardized_mlab (up, down, postalcode)
-                        VALUES ({}, {}, '{}')
-                        ON CONFLICT (postalcode) DO
+                        INSERT INTO standardized_mlab (up, down, postalcode, iso2, geom)
+                        VALUES ({}, {}, '{}', '{}', {})
+                        ON CONFLICT (postalcode, iso2) DO
                         UPDATE SET up = {}, down = {};
                         COMMIT;
                     """
@@ -76,7 +76,7 @@ def updateMlab():
             query_job = bqclient.query(bqQuery)
             for row in query_job:
                 cursor.execute(dbQuery.format(
-                    row['med_up'], row['med_down'], row['postal'], row['med_up'], row['med_down']))
+                    row['med_up'], row['med_down'], row['postal'], row['ISO2'], f"POINT({row['lng']}, {row['lat']})", row['med_up'], row['med_down']))
             # Update source last updated objects
             complete = datetime.now()
             for country in COUNTRIES:

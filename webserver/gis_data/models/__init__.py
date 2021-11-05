@@ -7,7 +7,7 @@ from .CensusShapes import (
     TribalLands,
 )
 from .MsftBuildingOutlines import MsftBuildingOutlines
-from .hrsl import HrslUsa15
+from .hrsl import HrslUsa15, HrslBra15
 
 __all__ = [
     "GISDataRouter",
@@ -18,4 +18,5 @@ __all__ = [
     "Tl2020UsCensusBlocks",
     "TribalLands",
     "HrslUsa15",
+    "HrslBra15",
 ]

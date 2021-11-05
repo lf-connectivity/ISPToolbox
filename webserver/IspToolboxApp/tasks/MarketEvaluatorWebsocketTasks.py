@@ -1,22 +1,10 @@
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from IspToolboxApp.Helpers.MarketEvaluatorFunctions import (
-    serviceProviders,
-    broadbandNow,
-    grantGeog,
-    zipGeog,
-    countyGeog,
-    medianIncome,
-    censusBlockGeog,
-    tribalGeog,
-)
-from IspToolboxApp.Helpers.MarketEvaluatorHelpers import (
-    checkIfPrecomputedBuildingsAvailable,
-    getMicrosoftBuildingsOffset,
-    getOSMBuildings,
-)
-from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlabGlobal
-from gis_data.models.hrsl import HrslUsa15
+from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, broadbandNow, mlabSpeed, \
+    grantGeog, zipGeog, countyGeog, medianIncome, censusBlockGeog, tribalGeog
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
+    getOSMBuildings
+from gis_data.models.hrsl import HrslUsa15, HrslBra15
 from towerlocator.helpers import getViewShed
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from django.contrib.humanize.templatetags.humanize import intcomma
@@ -118,8 +106,13 @@ def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
 def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson
     try:
-        result = HrslUsa15.get_intersection_population(include, read_only)
-        returnval = {"population": intcomma(int(result[0])), "error": 0}
+        population = 0
+        population += HrslUsa15.get_intersection_population(include, read_only)
+        population += HrslBra15.get_intersection_population(include, read_only)
+        returnval = {
+            'population': intcomma(population),
+            'error': 0
+        }
     except Exception:
         returnval = {"population": "error", "error": -1}
     sync_send(channelName, "population", returnval, uuid)

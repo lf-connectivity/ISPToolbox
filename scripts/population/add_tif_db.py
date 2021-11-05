@@ -5,6 +5,7 @@ import glob
 import shlex
 import shutil
 import datetime
+import subprocess
 
 # Let's not try to crash the thing.
 CONCURRENCY_LIMIT = 15
@@ -100,17 +101,17 @@ def unzip_file(file):
 
 @parallel_command_step(CONVERT_STEP, concurrency_limit=5)
 def convert_to_float32(file):
-    return f'gdal_translate -ot Float32 -a_nodata 0 {file} {TRANSLATED_PATH}/{os.path.basename(file)}'
+    return f'gdal_translate -ot Float32 -a_nodata 0 -co compress=lzw {file} {TRANSLATED_PATH}/{os.path.basename(file)}'
 
 
 @parallel_command_step(CREATE_TABLE_STEP)
 def create_table_sql(file):
-    return f'raster2pgsql -p -I {file} {SQL_TABLE}', f'{TRANSLATED_PATH}create.sql'
+    return f'raster2pgsql -s 4326 -p -I {file} {SQL_TABLE}', f'{TRANSLATED_PATH}create.sql'
 
 
 @parallel_command_step(CREATE_SQL_STEP, concurrency_limit=3)
 def create_sql_file(file):
-    return f'raster2pgsql -t auto -I -a {file} {SQL_TABLE}', f'{file}-exec.sql'
+    return f'raster2pgsql -s 4326 -t auto -I -a {file} {SQL_TABLE}', f'{file}-exec.sql'
 
 
 # Be sure to have your environment variables set properly, and your password set up
@@ -124,13 +125,17 @@ def execute_create_table(file):
     return f'psql -h {host} -U {user} -d {db} -p {port} -f {file}'
 
 
-@parallel_command_step(EXEC_SQL_STEP, concurrency_limit=6)
-def execute_sql(file):
+def insert_into_table(file):
     host = os.environ['PGHOST']
     port = os.environ['PGPORT']
     user = os.environ['PGUSER']
     db = os.environ['PGDATABASE']
     return f'psql -h {host} -U {user} -d {db} -p {port} -f {file}'
+
+
+@parallel_command_step(EXEC_SQL_STEP, concurrency_limit=6)
+def execute_sql(file):
+    insert_into_table(file)
 
 
 @parallel_command_step(EXEC_SQL_CMD_STEP, concurrency_limit=6)
@@ -171,8 +176,11 @@ async def main():
     if len(files) > 0:
         await execute_create_table([files[0]])
 
+    # Perform Insert Operations on Table
     files = glob.glob(f'{TRANSLATED_PATH}*-exec.sql')
-    await execute_sql(files)
+    for file in files:
+        process = subprocess.Popen(shlex.split(insert_into_table(file)))
+        process.wait()
 
     await execute_sql_cmd(f'UPDATE {SQL_TABLE} SET rast = ST_SetSRID(rast, 4326);')
 

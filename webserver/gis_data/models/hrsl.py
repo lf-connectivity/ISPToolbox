@@ -43,7 +43,10 @@ class HrslUsa15(models.Model):
             cursor.execute(
                 query, [area_of_interest.ewkb, area_of_interest.ewkb])
             res = cursor.fetchone()
-            return res
+            if res[0] is None:
+                return 0
+            else:
+                return int(res[0])
 
 
 class HrslBra15(models.Model):
@@ -79,10 +82,13 @@ class HrslBra15(models.Model):
                         ST_GeomFromEWKB(%s)
                     )
             )
-            SELECT (ST_SummaryStatsAgg(raster_data.intersect, 1, false)).sum FROM raster_data;
+            SELECT (ST_SummaryStatsAgg(raster_data.intersect, 1, true)).sum FROM raster_data;
         """
         with connections[HrslBra15.objects.db].cursor() as cursor:
             cursor.execute(
                 query, [area_of_interest.ewkb, area_of_interest.ewkb])
             res = cursor.fetchone()
-            return res
+            if res[0] is None:
+                return 0
+            else:
+                return int(res[0])

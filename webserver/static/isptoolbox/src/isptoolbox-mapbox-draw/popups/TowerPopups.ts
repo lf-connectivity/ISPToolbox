@@ -426,7 +426,7 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
             <div align="center">
                 ${LOADING_SVG}
                 <p align="center bold">${
-                    this.progress_message ? this.progress_message : 'Starting Computation'
+                    this.progress_message ? this.progress_message : 'Finalizing results'
                 }</p>
                 <p align="center">${this.formatTimeRemaining()}</p>
             </div>

@@ -141,7 +141,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
         with tempfile.NamedTemporaryFile(mode='w+b', suffix=".tif") as dsm_file:
             start = time.time()
             if status_callback is not None:
-                status_callback("Loading DSM Data",
+                status_callback("Loading coverage data",
                                 self.__timeRemainingViewshed(0))
             try:
                 dsm_engine.getDSM(dsm_file.name)
@@ -150,7 +150,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
             TASK_LOGGER.info(f'dsm download: {time.time() - start}')
             if status_callback is not None:
-                status_callback("Computing Coverage",
+                status_callback("Computing line of sight",
                                 self.__timeRemainingViewshed(1))
             self.__renderViewshed(
                 dsm_file=dsm_file, status_callback=status_callback)
@@ -244,7 +244,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
             TASK_LOGGER.info(f'finished tiling: {time.time() - start}')
             size = 0
             if status_callback is not None:
-                status_callback("Uploading Result",
+                status_callback("Loading results",
                                 self.__timeRemainingViewshed(4))
             start = time.time()
             paths = []

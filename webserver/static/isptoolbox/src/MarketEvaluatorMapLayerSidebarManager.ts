@@ -14,6 +14,7 @@ import {
     RdofOverlayPopup,
     TribalOverlayPopup
 } from './isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
+import { ASRTowerOverlay } from './molecules/ASRTowerOverlay';
 import {
     CbrsGeoOverlay,
     CensusBlocksGeoOverlay,
@@ -25,7 +26,8 @@ import {
 import MapboxOverlay from './molecules/MapboxOverlay';
 import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
 
-type GeoLayerString = 'rdof' | 'communityConnect' | 'cbrs' | 'censusBlocks' | 'tribal';
+type GeoOverlayString = 'rdof' | 'communityConnect' | 'cbrs' | 'censusBlocks' | 'tribal';
+type OverlayString = GeoOverlayString | 'tower';
 
 type OverlaySourceLayer = {
     rdof: {
@@ -63,7 +65,7 @@ type accum = {
     'tribal-overlay-fills': number;
 };
 
-const geoOverlays: { [key in GeoLayerString]: GeoOverlay } = {
+const geoOverlays: { [key in GeoOverlayString]: GeoOverlay } = {
     rdof: {
         sourceId: 'rdof2020-overlay',
         fills: 'rdof2020-overlay-fills',
@@ -173,8 +175,8 @@ const overlay = {
 
 export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSidebarManager {
     sources: OverlaySourceLayer;
-    activeGeoSource: GeoLayerString | null;
-    overlays: { [key in GeoLayerString]: MapboxOverlay };
+    activeGeoSource: OverlayString | null;
+    overlays: { [key in OverlayString | 'tower']: MapboxOverlay };
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super(map, draw);
@@ -186,6 +188,16 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
         new CbrsOverlayPopup(this.map, this.draw);
         new CensusBlocksOverlayPopup(this.map, this.draw);
         new TribalOverlayPopup(this.map, this.draw);
+
+        this.mapboxLoadTowerIcon('tower-pin-bad');
+        this.mapboxLoadTowerIcon('tower-pin-good');
+        this.mapboxLoadTowerIcon('tower-pin-simple-bad');
+        this.mapboxLoadTowerIcon('tower-pin-simple-good');
+
+        this.mapboxLoadTowerIcon('tower-pin-selected-bad');
+        this.mapboxLoadTowerIcon('tower-pin-selected-good');
+        this.mapboxLoadTowerIcon('tower-pin-selected-simple-bad');
+        this.mapboxLoadTowerIcon('tower-pin-selected-simple-good');
 
         this.populateOverlays();
 
@@ -204,7 +216,7 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
         });
 
         for (const lString in this.sources) {
-            const layerKey: GeoLayerString = lString as GeoLayerString;
+            const layerKey: OverlayString = lString as OverlayString;
             $(`#switch-${layerKey}`).on('click', () => {
                 if (this.activeGeoSource === layerKey) {
                     // Toggled off, remove source
@@ -244,6 +256,16 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
                     geoOverlays.rdof,
                     this.sources.rdof.sourceUrl,
                     this.sources.rdof.sourceLayer
+                ),
+                tower: new ASRTowerOverlay(
+                    this.map,
+                    this.draw,
+                    overlay.layer.tower,
+                    overlay.sourceId.tower,
+                    this.sources.tower.sourceUrl,
+                    this.sources.tower.sourceLayer,
+                    overlay.layer.towerSelected,
+                    overlay.sourceId.towerSelected
                 ),
                 communityConnect: new CommunityConnectGeoOverlay(
                     this.map,
@@ -317,5 +339,18 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
                 }
             }
         }
+    }
+
+    private mapboxLoadTowerIcon(imageName: string) {
+        let filename = `${imageName}-2x.png`;
+        this.map.loadImage(`/static/isptoolbox/images/${filename}`, (error: any, image: any) => {
+            if (error) {
+                throw error;
+            }
+
+            if (image) {
+                this.map.addImage(imageName, image, { pixelRatio: 2 });
+            }
+        });
     }
 }

@@ -8,7 +8,7 @@ COUNTRIES = ['US', 'BR', 'CA']
 def updateMlab():
     from dataUpdate.models import Source
     from django.conf import settings
-    if settings.DEBUG:
+    if not settings.DEBUG:
         try:
             country_filter = ", ".join(
                 [f'"{country}"' for country in COUNTRIES])

@@ -2,47 +2,57 @@ from dataUpdate.util.clients import dbClient, bqClient
 from dataUpdate.util.mail import sendNotifyEmail
 from datetime import datetime
 
+COUNTRIES = ['US', 'BR', 'CA']
+
 
 def updateMlab():
     from dataUpdate.models import Source
     from django.conf import settings
     if not settings.DEBUG:
         try:
-            bqQuery = """
-                        #standardSQL
-                        with dl as (
-                        SELECT
-                            fhoffa.x.median(ARRAY_AGG(downloads.a.MeanThroughputMbps)) AS med_down,
-                            downloads.client.Geo.PostalCode as postal
-                        FROM
-                            measurement-lab.ndt.unified_downloads as downloads
-                        WHERE
-                            (downloads.client.Geo.CountryName = "Canada" OR downloads.client.Geo.CountryName = "United States")
-                            AND downloads.date >= '2020-01-01'
-                            AND downloads.client.Geo.CountryCode IS NOT NULL
-                            AND downloads.client.Geo.CountryCode != ""
-                            AND downloads.client.Geo.region IS NOT NULL
-                            AND downloads.client.Geo.region != ""
-                        GROUP BY postal
-                        ),
-                        ul as (
-                        SELECT
-                            fhoffa.x.median(ARRAY_AGG(uploads.a.MeanThroughputMbps)) AS med_up,
-                            client.Geo.PostalCode as postal
-                        FROM
-                            measurement-lab.ndt.unified_uploads as uploads
-                        WHERE
-                            (uploads.client.Geo.CountryName = "Canada" OR uploads.client.Geo.CountryName = "United States")
-                            AND uploads.date >= '2020-01-01'
-                            AND client.Geo.CountryCode IS NOT NULL
-                            AND client.Geo.CountryCode != ""
-                            AND client.Geo.region IS NOT NULL
-                            AND client.Geo.region != ""
-                        GROUP BY postal
-                        )
-                        SELECT med_up, med_down, dl.postal from dl, ul
-                        WHERE dl.postal = ul.postal;
-                    """
+            country_filter = ", ".join(
+                [f'"{country}"' for country in COUNTRIES])
+            bqQuery = f"""
+                #standardSQL
+                with dl as (
+                SELECT
+                    fhoffa.x.median(ARRAY_AGG(downloads.a.MeanThroughputMbps)) AS med_down,
+                    downloads.client.Geo.PostalCode as postal,
+                    downloads.client.Geo.CountryCode as ISO2,
+                    downloads.client.Geo.Latitude as lat,
+                    downloads.client.Geo.Longitude as lng,
+                FROM
+                    measurement-lab.ndt.unified_downloads as downloads
+                WHERE
+                    downloads.client.Geo.CountryCode in ({country_filter})
+                    AND downloads.date >= '2020-01-01'
+                    AND downloads.client.Geo.CountryCode IS NOT NULL
+                    AND downloads.client.Geo.CountryCode != ""
+                    AND downloads.client.Geo.region IS NOT NULL
+                    AND downloads.client.Geo.region != ""
+                GROUP BY postal, ISO2, lat, lng
+                ),
+                ul as (
+                SELECT
+                    fhoffa.x.median(ARRAY_AGG(uploads.a.MeanThroughputMbps)) AS med_up,
+                    client.Geo.PostalCode as postal,
+                    client.Geo.CountryCode as ISO2,
+                    client.Geo.Latitude as lat,
+                    client.Geo.Longitude as lng,
+                FROM
+                    measurement-lab.ndt.unified_uploads as uploads
+                WHERE
+                    client.Geo.CountryCode in ({country_filter})
+                    AND uploads.date >= '2020-01-01'
+                    AND client.Geo.CountryCode IS NOT NULL
+                    AND client.Geo.CountryCode != ""
+                    AND client.Geo.region IS NOT NULL
+                    AND client.Geo.region != ""
+                GROUP BY postal, ISO2, lat, lng
+                )
+                SELECT med_up, med_down, dl.postal, dl.ISO2, dl.lat, dl.lng from dl, ul
+                WHERE dl.postal = ul.postal AND dl.ISO2 = ul.ISO2 AND dl.lat = ul.lat AND dl.lng = ul.lng;
+            """
 
             # Upsert query for updating rows in mlabs database table
             dbQuery = """
@@ -65,21 +75,22 @@ def updateMlab():
             bqclient = bqClient()
             query_job = bqclient.query(bqQuery)
             for row in query_job:
-                cursor.execute(dbQuery.format(row['med_up'], row['med_down'], row['postal'], row['med_up'], row['med_down']))
+                cursor.execute(dbQuery.format(
+                    row['med_up'], row['med_down'], row['postal'], row['med_up'], row['med_down']))
             # Update source last updated objects
             complete = datetime.now()
-            s_ca = Source.objects.get_or_create(source_id='MLAB', source_country='CA')
-            s_us = Source.objects.get_or_create(source_id='MLAB', source_country='US')
-            s_ca[0].last_updated = complete
-            s_us[0].last_updated = complete
-            s_ca[0].save()
-            s_us[0].save()
+            for country in COUNTRIES:
+                s, _ = Source.objects.get_or_create(
+                    source_id='MLAB', source_country=country)
+                s.last_update = complete
+                s.save()
             try:
                 sendNotifyEmail(successSubject, successMessage)
             except Exception as e:
                 # Notification is doomed :(
                 # But we don't want to throw an exception and trigger the failure email so just return
-                print("MLab update success notification email failed due to error: " + str(e))
+                print(
+                    "MLab update success notification email failed due to error: " + str(e))
                 return
         except Exception as e:
             sendNotifyEmail(failSubject, failMessage.format(str(e)))

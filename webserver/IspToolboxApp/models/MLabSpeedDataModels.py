@@ -15,11 +15,14 @@ class MlabUszip1052020(models.Model):
     # Field name made lowercase.
     state = models.CharField(db_column='State', max_length=5)
     # Field name made lowercase.
-    zipcode = models.DecimalField(db_column='Zipcode', max_digits=65535, decimal_places=65535)
+    zipcode = models.DecimalField(
+        db_column='Zipcode', max_digits=65535, decimal_places=65535)
     # Field name made lowercase. Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
-    download_mbit_s_field = models.DecimalField(db_column='Download (Mbit/s)', max_digits=65535, decimal_places=65535)
+    download_mbit_s_field = models.DecimalField(
+        db_column='Download (Mbit/s)', max_digits=65535, decimal_places=65535)
     # Field name made lowercase. Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
-    upload_mbit_s_field = models.DecimalField(db_column='Upload (Mbit/s)', max_digits=65535, decimal_places=65535)
+    upload_mbit_s_field = models.DecimalField(
+        db_column='Upload (Mbit/s)', max_digits=65535, decimal_places=65535)
 
     class Meta:
         managed = False
@@ -27,9 +30,14 @@ class MlabUszip1052020(models.Model):
 
 
 class StandardizedMlab(models.Model):
-    down = models.DecimalField(db_column='down', max_digits=65535, decimal_places=65535, blank=True, null=True)
-    up = models.DecimalField(db_column='up', max_digits=65535, decimal_places=65535, blank=True, null=True)
-    postalcode = models.CharField(db_column='postalcode', max_length=10, blank=True, null=True)
+    down = models.DecimalField(
+        db_column='down', max_digits=65535, decimal_places=65535, blank=True, null=True)
+    up = models.DecimalField(
+        db_column='up', max_digits=65535, decimal_places=65535, blank=True, null=True)
+    postalcode = models.CharField(
+        db_column='postalcode', max_length=10, blank=True, null=True)
+    iso2 = models.CharField(max_length=2, blank=True, null=True)
+    geom = models.PointField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -91,7 +99,6 @@ class StandardizedMlab(models.Model):
                 ]
 
 
-
 class StandardizedPostal(models.Model):
     gid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, blank=True, null=True)
@@ -101,3 +108,28 @@ class StandardizedPostal(models.Model):
     class Meta:
         managed = False
         db_table = 'standardized_postal'
+
+
+class Gadm36Bra2(models.Model):
+    """
+    Gadm Boundaries for Brazil
+    """
+    gid = models.AutoField(primary_key=True)
+    gid_0 = models.CharField(max_length=80, blank=True, null=True)
+    name_0 = models.CharField(max_length=80, blank=True, null=True)
+    gid_1 = models.CharField(max_length=80, blank=True, null=True)
+    name_1 = models.CharField(max_length=80, blank=True, null=True)
+    nl_name_1 = models.CharField(max_length=80, blank=True, null=True)
+    gid_2 = models.CharField(max_length=80, blank=True, null=True)
+    name_2 = models.CharField(max_length=80, blank=True, null=True)
+    varname_2 = models.CharField(max_length=80, blank=True, null=True)
+    nl_name_2 = models.CharField(max_length=80, blank=True, null=True)
+    type_2 = models.CharField(max_length=80, blank=True, null=True)
+    engtype_2 = models.CharField(max_length=80, blank=True, null=True)
+    cc_2 = models.CharField(max_length=80, blank=True, null=True)
+    hasc_2 = models.CharField(max_length=80, blank=True, null=True)
+    geom = models.MultiPolygonField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'gadm36_bra_2'

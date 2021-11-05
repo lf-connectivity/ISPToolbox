@@ -1,7 +1,7 @@
 import csv
 import requests
 from dataUpdate.util.clients import dbClient
-from dataUpdate.util.mail import sendNotifyEmail
+from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from datetime import datetime
 from isptoolbox_storage.mapbox.upload_tileset import newTilesetMTS
 
@@ -96,7 +96,7 @@ def updateCBRSTable(counties):
             price,
             companies,
             licenseCounts
-            )
+        )
         )
 
 
@@ -157,7 +157,8 @@ def updateCbrs():
                 if county in counties:
                     counties[county].add(companyName, price)
                 else:
-                    counties[county] = CBRSCountyStats(countyName, countyCode, stateCode, price, companyName)
+                    counties[county] = CBRSCountyStats(
+                        countyName, countyCode, stateCode, price, companyName)
             maxCompanies = 0
             for key in counties:
                 maxCompanies = max(maxCompanies, counties[key].companyCount())
@@ -166,15 +167,17 @@ def updateCbrs():
             print("Updating overlay", flush=True)
             updateCBRSOverlay()
             complete = datetime.now()
-            s_us = Source.objects.get_or_create(source_id='CBRS', source_country='US')
+            s_us = Source.objects.get_or_create(
+                source_id='CBRS', source_country='US')
             s_us[0].last_updated = complete
             s_us[0].save()
             try:
-                sendNotifyEmail(successSubject, successMessage)
+                sendEmailToISPToolboxOncall(successSubject, successMessage)
             except Exception as e:
                 # Notification is doomed :(
                 # But we don't want to throw an exception and trigger the failure email so just return
-                print("CBRS update success notification email failed due to error: " + str(e))
+                print(
+                    "CBRS update success notification email failed due to error: " + str(e))
                 return
     except Exception as e:
-        sendNotifyEmail(failSubject, failMessage.format(str(e)))
+        sendEmailToISPToolboxOncall(failSubject, failMessage.format(str(e)))

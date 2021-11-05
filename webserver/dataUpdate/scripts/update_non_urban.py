@@ -1,6 +1,6 @@
 from datetime import datetime
 from dataUpdate.util.clients import dbClient
-from dataUpdate.util.mail import sendNotifyEmail
+from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from isptoolbox_storage.mapbox.upload_tileset import newTilesetMTS
 
 # flake8: noqa
@@ -56,18 +56,20 @@ def update_community_connect():
         geojson = cursor.fetchone()[0]
         newTilesetMTS(geojson, "non_urban_overlay_MTS", 3, 9)
         complete = datetime.now()
-        s_us = Source.objects.get_or_create(source_id='NON_URBAN_OVERLAY', source_country='US')
+        s_us = Source.objects.get_or_create(
+            source_id='NON_URBAN_OVERLAY', source_country='US')
         s_us[0].last_updated = complete
         s_us[0].save()
         try:
-            sendNotifyEmail(successSubject, successMessage)
+            sendEmailToISPToolboxOncall(successSubject, successMessage)
         except Exception as e:
             # Notification is doomed :(
             # But we don't want to throw an exception and trigger the failure email so just return
-            print("non-urban overlay update success notification email failed due to error: " + str(e))
+            print(
+                "non-urban overlay update success notification email failed due to error: " + str(e))
             return
     except Exception as e:
-        sendNotifyEmail(failSubject, failMessage.format(str(e)))
+        sendEmailToISPToolboxOncall(failSubject, failMessage.format(str(e)))
 
 
 if __name__ == "__main__":

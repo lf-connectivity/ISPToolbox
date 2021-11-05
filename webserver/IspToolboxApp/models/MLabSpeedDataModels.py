@@ -110,6 +110,21 @@ class StandardizedPostal(models.Model):
         db_table = 'standardized_postal'
 
 
+class StandardizedMlabGlobal(models.Model):
+    down = models.DecimalField(
+        max_digits=65535, decimal_places=65535, blank=True, null=True)
+    up = models.DecimalField(
+        max_digits=65535, decimal_places=65535, blank=True, null=True)
+    postalcode = models.CharField(max_length=10, blank=True, null=True)
+    iso2 = models.CharField(max_length=2, blank=True, null=True)
+    geom = models.PointField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'standardized_mlab_global'
+        unique_together = (('postalcode', 'iso2'),)
+
+
 class Gadm36Bra2(models.Model):
     """
     Gadm Boundaries for Brazil

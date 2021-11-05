@@ -1,5 +1,5 @@
 from dataUpdate.util.clients import dbClient, bqClient
-from dataUpdate.util.mail import sendNotifyEmail
+from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from datetime import datetime
 
 COUNTRIES = ['US', 'BR', 'CA']
@@ -8,7 +8,7 @@ COUNTRIES = ['US', 'BR', 'CA']
 def updateMlab():
     from dataUpdate.models import Source
     from django.conf import settings
-    if True:  # nocommit!!!!
+    if settings.DEBUG:
         try:
             country_filter = ", ".join(
                 [f'"{country}"' for country in COUNTRIES])
@@ -57,8 +57,8 @@ def updateMlab():
             # Upsert query for updating rows in mlabs database table
             dbQuery = """
                         BEGIN;
-                        INSERT INTO standardized_mlab (up, down, postalcode, iso2, geom)
-                        VALUES ({}, {}, '{}', '{}', {})
+                        INSERT INTO standardized_mlab_global (up, down, postalcode, iso2, geom)
+                        VALUES ({}, {}, '{}', '{}',  ST_GeomFromText('{}', 4326))
                         ON CONFLICT (postalcode, iso2) DO
                         UPDATE SET up = {}, down = {};
                         COMMIT;
@@ -76,7 +76,11 @@ def updateMlab():
             query_job = bqclient.query(bqQuery)
             for row in query_job:
                 cursor.execute(dbQuery.format(
-                    row['med_up'], row['med_down'], row['postal'], row['ISO2'], f"POINT({row['lng']}, {row['lat']})", row['med_up'], row['med_down']))
+                    row['med_up'], row['med_down'],
+                    row['postal'], row['ISO2'],
+                    f"POINT({row['lng']} {row['lat']})",
+                    row['med_up'], row['med_down'])
+                )
             # Update source last updated objects
             complete = datetime.now()
             for country in COUNTRIES:
@@ -85,7 +89,7 @@ def updateMlab():
                 s.last_update = complete
                 s.save()
             try:
-                sendNotifyEmail(successSubject, successMessage)
+                sendEmailToISPToolboxOncall(successSubject, successMessage)
             except Exception as e:
                 # Notification is doomed :(
                 # But we don't want to throw an exception and trigger the failure email so just return
@@ -93,4 +97,5 @@ def updateMlab():
                     "MLab update success notification email failed due to error: " + str(e))
                 return
         except Exception as e:
-            sendNotifyEmail(failSubject, failMessage.format(str(e)))
+            sendEmailToISPToolboxOncall(
+                failSubject, failMessage.format(str(e)))

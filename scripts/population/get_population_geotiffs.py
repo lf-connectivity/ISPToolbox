@@ -9,7 +9,8 @@ CONCURRENCY_LIMIT = 10
 
 countries = {
     'usa': {
-        'host_url': 'https://data.humdata.org/dataset/united-states-high-resolution-population-density-maps-demographic-estimates'
+        'host_url':
+        'https://data.humdata.org/dataset/united-states-high-resolution-population-density-maps-demographic-estimates'
     },
     'bra': {
         'host_url': 'https://data.humdata.org/dataset/brazil-high-resolution-population-density-maps-demographic-estimates'

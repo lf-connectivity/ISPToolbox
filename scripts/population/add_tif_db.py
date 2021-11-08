@@ -26,7 +26,7 @@ EXEC_SQL_CMD_STEP = 'exec_sql_cmd'
 
 COUNTRY = 'bra'
 if COUNTRY is None:
-    raise NotImplemented('Missing country name')
+    raise NotImplementedError('Missing country name')
 
 SQL_TABLE = f'hrsl_{COUNTRY}_1_5'
 

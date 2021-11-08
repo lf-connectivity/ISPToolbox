@@ -7,10 +7,20 @@ import os
 # No crashing
 CONCURRENCY_LIMIT = 10
 
+countries = {
+    'usa': {
+        'host_url': 'https://data.humdata.org/dataset/united-states-high-resolution-population-density-maps-demographic-estimates'
+    },
+    'bra': {
+        'host_url': 'https://data.humdata.org/dataset/brazil-high-resolution-population-density-maps-demographic-estimates'
+    }
+}
+country = 'usa'
+
 # Use this script to get the links to the geotiffs and download to output path
 base_url = 'https://data.humdata.org'
 
-host_url = 'https://data.humdata.org/dataset/united-states-high-resolution-population-density-maps-demographic-estimates'
+host_url = countries.get(country).get('host_url')
 output_path = os.path.expanduser('~/hrsl/')
 
 
@@ -36,7 +46,7 @@ async def main():
 
     for link in links:
         href = link.attrib.get('href')
-        if 'population_usa' in href:
+        if f'population_{country}' in href:
             download_link = base_url + href
             dl_links.append(download_link)
 

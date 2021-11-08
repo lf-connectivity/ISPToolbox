@@ -13,6 +13,8 @@ UNTRANSLATED_PATH = os.path.expanduser('~/hrsl/')
 TRANSLATED_PATH = os.path.expanduser('~/hrsl/translate/')
 PROGRESS_PATH = os.path.expanduser('~/hrsl/progress/')
 
+COUNTRY = None
+
 UNZIP_STEP = 'unzip'
 CONVERT_STEP = 'convert_float32'
 CREATE_TABLE_STEP = 'create_table'
@@ -20,7 +22,12 @@ CREATE_SQL_STEP = 'create_sql'
 EXEC_CREATE_TABLE_STEP = 'exec_create_table'
 EXEC_SQL_STEP = 'exec_sql'
 EXEC_SQL_CMD_STEP = 'exec_sql_cmd'
-SQL_TABLE = 'hrsl_usa_1_5'
+
+COUNTRY = 'bra'
+if COUNTRY is None:
+    raise NotImplemented('Missing country name')
+
+SQL_TABLE = f'hrsl_{COUNTRY}_1_5'
 
 
 # RUN https://gist.github.com/johnjreiser/24c8267d8fa0a866fdf352f1911a1c40 before starting
@@ -167,7 +174,7 @@ async def main():
     files = glob.glob(f'{TRANSLATED_PATH}*-exec.sql')
     await execute_sql(files)
 
-    await execute_sql_cmd('UPDATE hrsl_usa_1_5 SET rast = ST_SetSRID(rast, 4326);')
+    await execute_sql_cmd(f'UPDATE {SQL_TABLE} SET rast = ST_SetSRID(rast, 4326);')
 
     print('Finished setting up DB.')
     shutil.rmtree(PROGRESS_PATH)

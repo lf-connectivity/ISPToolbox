@@ -9,16 +9,13 @@ from gis_data.models import MsftBuildingOutlines
 from workspace.models import (
     AccessPointSerializer,
     CPESerializer, APToCPELinkSerializer, WorkspaceMapSessionSerializer,
-    WorkspaceMapSession, CoverageAreaSerializer, AnalyticsEvent, AnalyticsSerializer,
+    WorkspaceMapSession, CoverageAreaSerializer,
     Viewshed
 )
 from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
 import json
-import dateutil.parser
-from django.core.exceptions import PermissionDenied
-from django.conf import settings
 
 from workspace.utils.api_validate_request import validate_auth_header
 
@@ -278,34 +275,3 @@ class AccessPointCoverageViewshedOverlayView(View):
         except Exception:
             raise Http404
         return JsonResponse(viewshed.getTilesetInfo())
-
-
-class AnalyticsView(View, mixins.ListModelMixin):
-    def post(self, request):
-
-        data = json.loads(request.body.decode("utf-8"))
-
-        url = data.get('url')
-        session_id = data.get('sessionId')
-        event_type = data.get('eventType')
-
-        event_data = {
-            'url': url,
-            'session_id': session_id,
-            'event_type': event_type,
-        }
-
-        event_item = AnalyticsEvent.objects.create(**event_data)
-
-        res = {"message": f"New Analytics Event item saved. id: {event_item.id}"}
-        return JsonResponse(res, status=201)
-
-    def get(self, request):
-        if request.user.is_superuser or validate_auth_header(request):
-            s = request.GET.get('after', '2020-01-01T01:00:00.000000-00:00')
-            timestamp = dateutil.parser.parse(s)
-            queryset = AnalyticsEvent.objects.filter(created_at__gte=timestamp)
-            serializer = AnalyticsSerializer(queryset, many=True)
-            return JsonResponse(serializer.data, safe=False)
-        else:
-            raise PermissionDenied

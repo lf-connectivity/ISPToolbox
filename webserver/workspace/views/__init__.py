@@ -10,7 +10,7 @@ from .market_views import (
 from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
-    AccessPointCoverageStatsView, CoverageAreaCreate, CoverageAreaGet, AnalyticsView,
+    AccessPointCoverageStatsView, CoverageAreaCreate, CoverageAreaGet,
     AccessPointCoverageViewshedOverlayView
 )
 from .session_views import (
@@ -28,6 +28,7 @@ from .import_views import KMZImportView
 from .dyi_views import (DeleteYourInformationView)
 from .ayi_views import (AccessYourInformationView)
 from .tower_form_views import (AccessPointLocationFormView)
+from .www_views import (AnalyticsView)
 
 import workspace.utils.import_utils
 

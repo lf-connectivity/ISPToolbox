@@ -118,7 +118,7 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         apUuid = content.get('apUuid', None)
         getTowerViewShed.delay(
             lat, lon, height, customerHeight, radius, self.channel_name, uuid, apUuid)
-    
+
     async def asr_viewshed_request(self, content, uuid):
         lat = content['lat']
         lon = content['lon']
@@ -165,6 +165,6 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
 
     async def polygon_area(self, event):
         await self.send_json(event)
-    
+
     async def asr_geog(self, event):
         await self.send_json(event)

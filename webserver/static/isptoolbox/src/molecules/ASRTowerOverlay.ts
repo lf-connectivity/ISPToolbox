@@ -128,14 +128,11 @@ export class ASRTowerOverlay implements MapboxOverlay {
         let height = roundToDecimalPlaces(ft2m(data.height), 2);
         let radius = roundToDecimalPlaces(miles2km(data.radius), 2);
         let [lat, lng] = [data.featureProperties.latitude, data.featureProperties.longitude];
-        console.log(
-            `Sending viewshed request with height ${height}, lat ${lat}, lon ${lng}, and radius ${radius}`
-        );
         MarketEvaluatorWS.getInstance().sendASRViewshedRequest(
-            data.height,
+            height,
             lat,
             lng,
-            data.radius,
+            radius,
             this.selectedTowerId as string
         );
     }

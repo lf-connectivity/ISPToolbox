@@ -63,9 +63,15 @@ def setup_periodic(sender, **kwargs):
             dataUpdate_tasks.updateElasticSearchIndex.s(),
             name="update_elastic_search_asn"
         )
-        # Execute once at midnight on the first day of every month servertime (probably UTC)
+        # Execute once at midnight on
+        # the first day of every month servertime - settings.py default timezone
         sender.add_periodic_task(
             crontab(minute=0, hour=0, day_of_month=[3]),
             dataUpdate_tasks.updateGISData.s(),
             name="update_gis_data"
+        )
+        sender.add_periodic_task(
+            crontab(minute=0, hour=5, day_of_month=[1]),
+            mmwave_tasks.create_los_engagemnet_csv.s(),
+            name="los_engagement_csv"
         )

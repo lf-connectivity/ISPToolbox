@@ -1,9 +1,7 @@
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode, \
     checkIfPrecomputedIncomeAvailable, select_gis_database
-from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlab, StandardizedPostal
 from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty, Tl2020UsCensusBlocks, TribalLands
 from django.db import connections
-
 
 
 def serviceProviders(include, read_only):
@@ -53,7 +51,7 @@ def genServiceProvidersCanada(include, read_only=False):
         return resp
 
 
-def medianIncome(include, result = {}, read_only=False):
+def medianIncome(include, result={}, read_only=False):
     precomputedAvailable = checkIfPrecomputedIncomeAvailable(include, None)
     done = False
     if precomputedAvailable:
@@ -68,10 +66,16 @@ def medianIncome(include, result = {}, read_only=False):
                 if row_dict.get('numbuildings', 0) == 0:
                     done = True
 
-                averageMedianIncome = float(row_dict['avgincome2018']) if row_dict['avgincome2018'] is not None else 0
-                return {'averageMedianIncome': averageMedianIncome, 'max_gid' : row_dict['max_gid'], 'numbuildings': row_dict['numbuildings'], 'done' : done}
+                averageMedianIncome = float(
+                    row_dict['avgincome2018']) if row_dict['avgincome2018'] is not None else 0
+                return {
+                    'averageMedianIncome': averageMedianIncome,
+                    'max_gid': row_dict['max_gid'],
+                    'numbuildings': row_dict['numbuildings'],
+                    'done': done
+                }
         except BaseException as e:
-            return {'averageMedianIncome': 0, 'error': str(e), 'done' : done}
+            return {'averageMedianIncome': 0, 'error': str(e), 'done': done}
     else:
         done = True
         query_skeleton = income_skeleton_simple
@@ -83,9 +87,9 @@ def medianIncome(include, result = {}, read_only=False):
                 cursor.execute(query_skeleton, query_arguments)
                 results = cursor.fetchone()
                 averageMedianIncome = results[0]
-            return {'averageMedianIncome': averageMedianIncome, 'done' : done}
+            return {'averageMedianIncome': averageMedianIncome, 'done': done}
         except BaseException as e:
-            return {'averageMedianIncome': 0, 'error': str(e), 'done' : done}
+            return {'averageMedianIncome': 0, 'error': str(e), 'done': done}
 
 
 def broadbandNow(include, read_only):
@@ -101,59 +105,6 @@ def broadbandNow(include, read_only):
 
         return {'bbnPriceRange': price_range}
 
-# flake8: noqa
-def mlabSpeed(include, read_only):
-    mlab_query = f"""
-        WITH intersecting_geog AS
-        (
-            SELECT *, ST_Area(ST_Intersection(geog, ST_GeomFromGeoJSON(%s)))/ST_Area(ST_GeomFromGeoJSON(%s)::geography) as pct_area
-            FROM {StandardizedPostal._meta.db_table}
-            WHERE ST_Intersects(
-                geog,
-                ST_GeomFromGeoJSON(%s)
-            )
-        )
-        SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)", pct_area
-        FROM {StandardizedMlab._meta.db_table}
-            INNER JOIN intersecting_geog
-            ON
-            postalcode =
-            intersecting_geog.code"""
-    mlab_query_fallback = f"""
-        WITH intersecting_geog AS
-        (
-            SELECT * FROM {StandardizedPostal._meta.db_table}
-            WHERE ST_Intersects(
-                geog,
-                ST_GeomFromGeoJSON(%s)
-            )
-        )
-        SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)"
-        FROM {StandardizedMlab._meta.db_table}
-            INNER JOIN intersecting_geog
-            ON
-            postalcode =
-            intersecting_geog.code
-    """
-    try:
-        with connections[select_gis_database(read_only)].cursor() as cursor:
-            cursor.execute(mlab_query, [include, include, include])
-            columns = [col[0] for col in cursor.description]
-            return [
-                dict(zip(columns, [str(i) for i in row]))
-                for row in cursor.fetchall()
-            ]
-    # Above query can fail due to self-intersecting polygons in complex multipolygon geometry cases.
-    # In this case fallback to a simple average.
-    except Exception:
-        with connections[select_gis_database(read_only)].cursor() as cursor:
-            cursor.execute(mlab_query_fallback, [include])
-            columns = [col[0] for col in cursor.description]
-            return [
-                dict(zip(columns, [str(i) for i in row]))
-                for row in cursor.fetchall()
-            ]
-
 
 def grantGeog(cbgid):
     try:
@@ -167,7 +118,7 @@ def grantGeog(cbgid):
                 'error': 0,
                 'cbgid': result[0],
                 'geojson': result[1]
-                }
+            }
     except BaseException:
         resp = {'error': -2}
     return resp
@@ -199,6 +150,7 @@ def countyGeog(statecode, countycode):
         resp = {'error': -2}
     return resp
 
+
 def censusBlockGeog(blockcode):
     '''
         Returns census block geojson for provided blockcode.
@@ -211,6 +163,7 @@ def censusBlockGeog(blockcode):
         resp = {'error': -2}
     return resp
 
+
 def tribalGeog(geoid):
     '''
         Returns tribal area geojson for provided geoid.
@@ -222,6 +175,7 @@ def tribalGeog(geoid):
     except BaseException:
         resp = {'error': -2}
     return resp
+
 
 broadbandnow_skeleton = """
 SELECT MIN(bbn.minprice_broadband_plan_terrestrial),
@@ -272,7 +226,7 @@ ON ST_intersects(subdivided_request.include_subdivide, geog)
     ORDER BY gid ASC
     LIMIT 10000
 ),
-unnested_intersecting_footprints AS 
+unnested_intersecting_footprints AS
 (
     SELECT intersected_buildings.*, UNNEST(microsoftfootprint2tracts.tractgids) AS tractgid
     FROM intersected_buildings LEFT JOIN

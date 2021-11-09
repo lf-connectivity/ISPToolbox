@@ -1,6 +1,6 @@
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, broadbandNow, mlabSpeed, \
+from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, broadbandNow, \
     grantGeog, zipGeog, countyGeog, medianIncome, censusBlockGeog, tribalGeog
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
     getOSMBuildings

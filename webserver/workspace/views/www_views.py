@@ -35,7 +35,6 @@ class AnalyticsView(View, mixins.ListModelMixin):
             'session_id': session_id,
             'event_type': event_type,
         }
-
         AnalyticsEvent.objects.create(**event_data)
         return HttpResponse(status=201)
 

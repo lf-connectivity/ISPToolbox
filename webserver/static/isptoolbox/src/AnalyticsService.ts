@@ -37,8 +37,6 @@ class AnalyticsService {
             },
             body: JSON.stringify(event)
         });
-        const res = await response.json();
-        return res;
     };
 }
 

@@ -200,3 +200,8 @@ export function m2ft(m: number): number {
 export function ft2m(ft: number): number {
     return ft / 3.28084;
 }
+
+export function roundToDecimalPlaces(num: number, decimalPlaces: number) {
+    let multiplier = 10 ** decimalPlaces;
+    return Math.round(num * multiplier) / multiplier;
+}

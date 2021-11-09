@@ -14,7 +14,8 @@ export enum MarketEvalWSRequestType {
     COUNTY = 'county',
     CENSUS_BLOCK = 'census_block',
     TRIBAL = 'tribal',
-    VIEWSHED = 'viewshed'
+    VIEWSHED = 'viewshed',
+    ASR_VIEWSHED = 'asr_viewshed'
 }
 
 export enum MarketEvalWSEvents {
@@ -484,6 +485,32 @@ class MarketEvaluatorWS {
             lon,
             radius,
             apUuid
+        });
+    }
+
+    /**
+     * Requests CloudRF viewshed associated with given parameters.
+     * @param height Height in meters
+     * @param lat latitude as float
+     * @param lon longitude as float
+     * @param radius Radius in km
+     * @param registrationNumber ASR registration number
+     * @returns The request-identifying UUID
+     */
+    sendASRViewshedRequest(
+        height: number,
+        lat: number,
+        lon: number,
+        radius: number,
+        registrationNumber: string
+    ): UUID {
+        return this.sendJsonWithUUID({
+            request_type: MarketEvalWSRequestType.ASR_VIEWSHED,
+            height,
+            lat,
+            lon,
+            radius,
+            registrationNumber
         });
     }
 }

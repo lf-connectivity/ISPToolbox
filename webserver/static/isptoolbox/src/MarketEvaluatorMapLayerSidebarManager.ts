@@ -8,6 +8,7 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import MapboxGL from 'mapbox-gl';
 import {
+    ASROverlayPopup,
     CbrsOverlayPopup,
     CensusBlocksOverlayPopup,
     CommunityConnectOverlayPopup,
@@ -188,6 +189,7 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
         new CbrsOverlayPopup(this.map, this.draw);
         new CensusBlocksOverlayPopup(this.map, this.draw);
         new TribalOverlayPopup(this.map, this.draw);
+        new ASROverlayPopup(this.map, this.draw);
 
         this.mapboxLoadTowerIcon('tower-pin-bad');
         this.mapboxLoadTowerIcon('tower-pin-good');

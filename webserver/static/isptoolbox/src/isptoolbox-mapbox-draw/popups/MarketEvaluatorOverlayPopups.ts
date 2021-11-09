@@ -1,5 +1,15 @@
 import mapboxgl from 'mapbox-gl';
-import { LinkCheckBasePopup } from './LinkCheckBasePopup';
+import { m2ft, roundToDecimalPlaces } from '../../LinkCalcUtils';
+import { MAX_RADIUS, MIN_RADIUS } from '../../LinkCheckUtils';
+import { validateNumber } from '../../molecules/InputValidator';
+import { ASREvents, ASRLoadingState } from '../../workspace/WorkspaceConstants';
+import { LinkCheckBasePopup, LOADING_SVG } from './LinkCheckBasePopup';
+import pass_svg from '../styles/pass-icon.svg';
+
+const ASR_HEIGHT_INPUT = 'asr-input-height-asr-popup';
+const ASR_RADIUS_INPUT = 'asr-input-radius-asr-popup';
+const ASR_COVERAGE_BUTTON_LI = 'asr-li-coverage-btn-asr-popup';
+const ASR_COVERAGE_BUTTON = 'asr-btn-coverage-asr-popup';
 
 abstract class MarketEvaluatorBaseOverlayPopup extends LinkCheckBasePopup {
     protected featureProperties: any | undefined;
@@ -354,5 +364,206 @@ export class TribalOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
                 </ul>
             </div>
       `;
+    }
+}
+
+export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
+    protected state: ASRLoadingState;
+    protected towerRadius: number | undefined;
+    protected towerHeight: number | undefined;
+    static _instance: ASROverlayPopup;
+
+    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+        if (ASROverlayPopup._instance) {
+            return ASROverlayPopup._instance;
+        }
+        super(map, draw);
+        ASROverlayPopup._instance = this;
+    }
+
+    cleanup() {
+        super.cleanup();
+        this.towerRadius = undefined;
+        this.towerHeight = undefined;
+        this.state = ASRLoadingState.STANDBY;
+    }
+
+    setFeature(feature: any) {
+        super.setFeature(feature);
+        this.state = this.featureProperties.loading_state || ASRLoadingState.STANDBY;
+        this.towerRadius = this.featureProperties.tower_radius_miles || 3;
+        this.towerHeight =
+            this.featureProperties.tower_height_ft ||
+            roundToDecimalPlaces(m2ft(this.featureProperties.height_without_appurtenaces), 2);
+    }
+
+    getHTML() {
+        const statusClass = ['C', 'G'].includes(this.featureProperties.status_code)
+            ? 'good'
+            : 'bad';
+        const towerHeightMax = roundToDecimalPlaces(
+            m2ft(this.featureProperties.height_without_appurtenaces),
+            2
+        );
+        return `
+        <div class="overlay-tooltip">
+            <div class="title"> 
+                <h6>${this.featureProperties.owner_name}</h6>
+            </div>
+            <ul>
+                <li class="mapboxgl-popup-row">
+                    <p class="mapboxgl-popup-label">Registration #</p>
+                    <p class="mapboxgl-popup-data">
+                        <a href="${this.featureProperties.fcc_url}" target="_blank">
+                            ${this.featureProperties.registration_number}
+                            <span class="link-arrow-svg">
+                                <svg
+                                    width="19"
+                                    height="19"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                    d="M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432"
+                                    stroke="#c2d8ec"
+                                    strokeWidth="1.5px"
+                                    />
+                                </svg>
+                            </span>
+                        </a>
+                    </p>
+                </li>
+
+                <li class="mapboxgl-popup-row">
+                    <p class="mapboxgl-popup-label">Status</p>
+                    <div class="mapboxgl-popup-tower-status-data">
+                        <span class="tower-status-swatch status-${statusClass}"></span>
+                        <p class="tower-status-label status-${statusClass}">
+                            ${this.featureProperties.status}
+                        </p>
+                    </p>
+                </li>
+
+                <li class="mapboxgl-popup-row">
+                    <p class="mapboxgl-popup-label">Height w/o Attachment</p>
+                    <p class="mapboxgl-popup-data">
+                        ${towerHeightMax} ft
+                    </p>
+                </li>
+
+                <li class="mapboxgl-popup-row">
+                    <p class="mapboxgl-popup-label">Install Height</p>
+                    <div class="data-with-unit">
+                        <input type="number"
+                                value="${this.towerHeight}"
+                                id='${ASR_HEIGHT_INPUT}'
+                                min='0.1' max='${towerHeightMax}'
+                                class="input--value"
+                        >
+                        <span>ft</span>
+                    </div>
+                </li>
+
+                <li class="mapboxgl-popup-row">
+                    <p class="mapboxgl-popup-label">Prop. Radius</p>
+                    <div class="data-with-unit">
+                        <input type="number"
+                                value="${this.towerRadius}"
+                                id="${ASR_RADIUS_INPUT}"
+                                min="${MIN_RADIUS}" max="${MAX_RADIUS}"
+                                class="input--value"
+                        >
+                        <span>mi</span>
+                    </div>
+                </li>
+
+                <li class="mapboxgl-popup-button-row" id="${ASR_COVERAGE_BUTTON_LI}"">
+                    ${this.getButtonRowHTML()}
+                </li>
+            </ul>
+    </div>
+        `;
+    }
+
+    setEventHandlers() {
+        $(`#${ASR_COVERAGE_BUTTON}`).on('click', () => {
+            let height = parseFloat(String($(`#${ASR_HEIGHT_INPUT}`).val()));
+            let radius = parseFloat(String($(`#${ASR_RADIUS_INPUT}`).val()));
+            let maxHeight = roundToDecimalPlaces(
+                m2ft(this.featureProperties.height_without_appurtenaces),
+                2
+            );
+
+            // input validation on height/radius
+            height = validateNumber(0.1, maxHeight, height, ASR_HEIGHT_INPUT);
+            radius = validateNumber(0.1, MAX_RADIUS, radius, ASR_RADIUS_INPUT);
+
+            PubSub.publish(ASREvents.PLOT_LIDAR_COVERAGE, {
+                featureProperties: this.featureProperties,
+                height: height,
+                radius: radius
+            });
+
+            this.towerHeight = height;
+            this.towerRadius = radius;
+            this.state = ASRLoadingState.LOADING_COVERAGE;
+            this.refreshButtonRow();
+        });
+
+        $(`#${ASR_HEIGHT_INPUT}`).on('input', () => {
+            if (this.state !== ASRLoadingState.STANDBY) {
+                this.state = ASRLoadingState.STANDBY;
+                this.refreshButtonRow();
+            }
+        });
+
+        $(`#${ASR_RADIUS_INPUT}`).on('input', () => {
+            if (this.state !== ASRLoadingState.STANDBY) {
+                this.state = ASRLoadingState.STANDBY;
+                this.refreshButtonRow();
+            }
+        });
+    }
+
+    protected getButtonRowHTML() {
+        switch (this.state) {
+            case ASRLoadingState.STANDBY:
+                return `
+                    <button class='btn btn-primary isptoolbox-btn' id='${ASR_COVERAGE_BUTTON}'>
+                        Plot Estimated Coverage
+                        <sup>
+                            <span class="footnote--bracket">[</span>12<span class="footnote--bracket">]</span>
+                        </sup>
+                    </button>
+                `;
+            case ASRLoadingState.LOADING_COVERAGE:
+                return `
+                    <div align="center">
+                        ${LOADING_SVG}
+                        <p align="center bold" class="mt-1">Plotting Lidar Coverage</p>
+                    </div>
+                `;
+            case ASRLoadingState.LOADED_COVERAGE:
+                return `
+                    <div align="center">
+                        <img src="${pass_svg}" width="20" height="25">
+                        <p align="center bold" class="mt-1">Tower Coverage Plotted</p>
+                    </div>
+                `;
+        }
+    }
+
+    protected refreshButtonRow() {
+        if (this.popup.isOpen()) {
+            $(`#${ASR_COVERAGE_BUTTON_LI}`).html(this.getButtonRowHTML());
+            this.setEventHandlers();
+        }
+    }
+
+    static getInstance() {
+        if (ASROverlayPopup._instance) {
+            return ASROverlayPopup._instance;
+        } else {
+            throw new Error('No Instance of ASRPopup instantiated.');
+        }
     }
 }

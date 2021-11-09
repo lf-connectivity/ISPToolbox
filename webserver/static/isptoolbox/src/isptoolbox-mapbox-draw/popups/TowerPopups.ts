@@ -1,6 +1,6 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { LinkCheckBasePopup } from './LinkCheckBasePopup';
+import { LinkCheckBasePopup, LOADING_SVG } from './LinkCheckBasePopup';
 import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { isUnitsUS } from '../../utils/MapPreferences';
 import { ft2m, miles2km } from '../../LinkCalcUtils';
@@ -41,33 +41,6 @@ const PLOT_COVERAGE_BUTTON_ID = 'plot-estimated-coverage-button-tower-popup';
 const COVERAGE_LI_ID = 'coverage-li-tower-popup';
 const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
 const DELETE_ROW_DIV_ID = 'delete-tower-row-tower-popup';
-
-const LOADING_SVG = `
-    <svg
-    class="loader-logo" 
-    width="25"
-    height="25"
-    viewBox="0 0 157 120"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg">
-    <rect
-        width="23.9455"
-        height="119.727"
-        transform="matrix(-1 0 0 1 90.5199 0)"
-        fill="#A8B0B7"
-    />
-    <path
-        class="WispLoadingIcon_animatingRectangle"
-        d="M0.124794 0H46.7554V35.288L0.124794 0Z"
-        fill="#A8B0B7"
-    />
-    <path
-        class="WispLoadingIcon_animatingRectangle"
-        d="M156.97 0H110.339V35.288L156.97 0Z"
-        fill="#A8B0B7"
-    />
-    </svg>
-`;
 
 enum ImperialToMetricConversion {
     FT_TO_M = 'ft2m',

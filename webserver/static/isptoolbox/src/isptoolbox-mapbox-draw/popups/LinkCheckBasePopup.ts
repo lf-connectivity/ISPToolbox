@@ -5,6 +5,33 @@ import CollapsibleComponent from '../../atoms/CollapsibleComponent';
 
 const DEFAULT_LNGLAT: [number, number] = [0.0, 0.0];
 
+export const LOADING_SVG = `
+    <svg
+    class="loader-logo" 
+    width="25"
+    height="25"
+    viewBox="0 0 157 120"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <rect
+        width="23.9455"
+        height="119.727"
+        transform="matrix(-1 0 0 1 90.5199 0)"
+        fill="#A8B0B7"
+    />
+    <path
+        class="WispLoadingIcon_animatingRectangle"
+        d="M0.124794 0H46.7554V35.288L0.124794 0Z"
+        fill="#A8B0B7"
+    />
+    <path
+        class="WispLoadingIcon_animatingRectangle"
+        d="M156.97 0H110.339V35.288L156.97 0Z"
+        fill="#A8B0B7"
+    />
+    </svg>
+`;
+
 export abstract class LinkCheckBasePopup extends CollapsibleComponent {
     protected map: mapboxgl.Map;
     protected draw: MapboxDraw;

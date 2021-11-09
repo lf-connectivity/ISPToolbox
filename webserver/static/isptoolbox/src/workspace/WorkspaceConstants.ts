@@ -6,6 +6,16 @@ export enum WorkspaceEvents {
     NO_ITEMS = 'workspace.no_items'
 }
 
+export enum ASREvents {
+    PLOT_LIDAR_COVERAGE = 'asr.lidar_coverage'
+}
+
+export enum ASRLoadingState {
+    STANDBY = 'asr_tooltip.standby',
+    LOADING_COVERAGE = 'asr_tooltip.loading',
+    LOADED_COVERAGE = 'asr_tooltip.loaded'
+}
+
 export enum WorkspaceFeatureTypes {
     AP = 'access_point',
     CPE = 'cpe',

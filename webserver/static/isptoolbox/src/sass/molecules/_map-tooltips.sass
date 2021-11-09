@@ -231,6 +231,9 @@
         li:last-of-type
             border-bottom: 0
             padding-bottom: 0
+        a
+            color: #c2d8ec
+            margin-right: 0
     .overlay-tooltip
         .mapboxgl-popup-label
             margin-right: 8px
@@ -239,6 +242,28 @@
             padding: 0.5rem 0.3rem 0.5rem 0.3rem !important
             &--mapboxgl-popup-header-label:last-of-type
                 text-align: right
+        .mapboxgl-popup-tower-status-data
+            display: flex
+            justify-content: flex-end
+            .tower-status-swatch
+                height: 15px
+                margin-right: 5px
+                min-width: 6px
+                width: 6px
+                &.status-good
+                    background: #71b3b8
+                &.status-bad
+                    background: #a2a2a2
+            .tower-status-label
+                font-weight: bold
+                &.status-good
+                    color: #71b3b8
+                &.status-bad
+                    color: #a2a2a2
+        .mapboxgl-popup-button-row
+            justify-content: center
+            button
+                width: 100%
 
 .map-tooltip .mapboxgl-popup-content
     background-color: $brand-dark-gray-color

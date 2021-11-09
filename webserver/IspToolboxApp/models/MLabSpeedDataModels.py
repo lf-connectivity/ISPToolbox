@@ -9,6 +9,7 @@
 # GENERATED USING: python manage.py inspectdb --database gis_data mlab_uszip_10_5_2020
 from django.contrib.gis.db import models
 from django.db import connections
+from django.contrib.gis.geos import GEOSGeometry
 
 
 class MlabUszip1052020(models.Model):
@@ -123,6 +124,115 @@ class StandardizedMlabGlobal(models.Model):
         managed = False
         db_table = 'standardized_mlab_global'
         unique_together = (('postalcode', 'iso2'),)
+
+    @staticmethod
+    def genPostalCodeSpeeds(area_of_interest: GEOSGeometry, read_only=True):
+        mlab_query = f"""
+            WITH intersecting_geog_zip AS
+            (
+                SELECT *
+                FROM (
+                    SELECT *,
+                        ST_Area(ST_Intersection(geog, ST_GeomFromEWKB(%s)))/ST_Area(ST_GeomFromEWKB(%s)::geography) as pct_area
+                    FROM {StandardizedPostal._meta.db_table}
+                    WHERE ST_Intersects(
+                        geog,
+                        ST_GeomFromEWKB(%s)
+                    )
+                ) AS intersecting_geog
+                INNER JOIN {StandardizedMlabGlobal._meta.db_table}
+                ON
+                postalcode =
+                intersecting_geog.code
+            ), intersecting_geog_gadm AS 
+            (
+                SELECT
+                    {StandardizedMlabGlobal._meta.db_table}.*,
+                    gadm_intersect.*
+                FROM (
+                    SELECT *, {Gadm36Bra2._meta.db_table}.geom as geom_gadm,
+                        ST_Area(
+                            ST_Intersection({Gadm36Bra2._meta.db_table}.geom, ST_GeomFromEWKB(%s))
+                        )/ST_Area(
+                            ST_GeomFromEWKB(%s)
+                        ) as pct_area
+                    FROM {Gadm36Bra2._meta.db_table}
+                    WHERE ST_Intersects(
+                        {Gadm36Bra2._meta.db_table}.geom,
+                        ST_GeomFromEWKB(%s)
+                    )
+                ) AS gadm_intersect
+                JOIN {StandardizedMlabGlobal._meta.db_table}
+                    ON ST_Contains(gadm_intersect.geom_gadm, {StandardizedMlabGlobal._meta.db_table}.geom)
+            )
+            SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)", pct_area 
+            FROM 
+            intersecting_geog_zip
+            UNION ALL
+            SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)", pct_area 
+            FROM 
+            intersecting_geog_gadm  
+        """
+        mlab_query_fallback = f"""
+            WITH intersecting_geog_zip AS
+            (
+                SELECT *
+                FROM (
+                    SELECT *
+                    FROM {StandardizedPostal._meta.db_table}
+                    WHERE ST_Intersects(
+                        geog,
+                        ST_GeomFromEWKB(%s)
+                    )
+                ) AS intersecting_geog
+                INNER JOIN {StandardizedMlabGlobal._meta.db_table}
+                ON
+                postalcode =
+                intersecting_geog.code
+            ), intersecting_geog_gadm AS 
+            (
+                SELECT
+                    {StandardizedMlabGlobal._meta.db_table}.*,
+                    gadm_intersect.*
+                FROM (
+                    SELECT
+                        *, {Gadm36Bra2._meta.db_table}.geom as geom_gadm
+                    FROM {Gadm36Bra2._meta.db_table}
+                    WHERE ST_Intersects(
+                        {Gadm36Bra2._meta.db_table}.geom,
+                        ST_GeomFromEWKB(%s)
+                    )
+                ) AS gadm_intersect
+                JOIN {StandardizedMlabGlobal._meta.db_table}
+                    ON ST_Contains(gadm_intersect.geom_gadm, {StandardizedMlabGlobal._meta.db_table}.geom)
+            )
+            SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)" 
+            FROM 
+            intersecting_geog_zip
+            UNION ALL
+            SELECT postalcode as "Zipcode", down as "Download (Mbit/s)", up as "Upload (Mbit/s)" 
+            FROM 
+            intersecting_geog_gadm  
+        """
+        try:
+            with connections['gis_data'].cursor() as cursor:
+                aoi = area_of_interest.ewkb
+                cursor.execute(mlab_query, [aoi, aoi, aoi, aoi, aoi, aoi])
+                columns = [col[0] for col in cursor.description]
+                return [
+                    dict(zip(columns, [str(i) for i in row]))
+                    for row in cursor.fetchall()
+                ]
+        # Above query can fail due to self-intersecting polygons in complex multipolygon geometry cases.  In this case fallback to a simple average.
+        except Exception:
+            with connections['gis_data'].cursor() as cursor:
+                aoi = area_of_interest.ewkb
+                cursor.execute(mlab_query_fallback, [aoi, aoi])
+                columns = [col[0] for col in cursor.description]
+                return [
+                    dict(zip(columns, [str(i) for i in row]))
+                    for row in cursor.fetchall()
+                ]
 
 
 class Gadm36Bra2(models.Model):

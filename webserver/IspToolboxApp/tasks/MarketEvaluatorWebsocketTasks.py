@@ -4,6 +4,7 @@ from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, bro
     grantGeog, zipGeog, countyGeog, medianIncome, censusBlockGeog, tribalGeog
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
     getOSMBuildings
+from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlabGlobal
 from gis_data.models.hrsl import HrslUsa15
 from towerlocator.helpers import getViewShed
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
@@ -97,8 +98,8 @@ def genBroadbandNow(pipeline_uuid, channelName, uuid, read_only=False):
 @app.task
 def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
-        uuid=pipeline_uuid).include_geojson.json
-    result = mlabSpeed(include, read_only)
+        uuid=pipeline_uuid).include_geojson
+    result = StandardizedMlabGlobal.genPostalCodeSpeeds(include, read_only)
     sync_send(channelName, 'median.speeds', result, uuid)
 
 

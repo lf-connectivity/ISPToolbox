@@ -20,6 +20,8 @@ import dateutil.parser
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 
+from workspace.utils.api_validate_request import validate_auth_header
+
 
 class WorkspacePerformCreateMixin:
     """
@@ -279,10 +281,6 @@ class AccessPointCoverageViewshedOverlayView(View):
 
 
 class AnalyticsView(View, mixins.ListModelMixin):
-    def validate_auth_header(self, request):
-        expected_token = f'Bearer {settings.SOCIAL_AUTH_FACEBOOK_KEY}|{settings.ASN_CURL_SECRET}'
-        return request.headers.get('Authorization', None) == expected_token
-
     def post(self, request):
 
         data = json.loads(request.body.decode("utf-8"))
@@ -303,7 +301,7 @@ class AnalyticsView(View, mixins.ListModelMixin):
         return JsonResponse(res, status=201)
 
     def get(self, request):
-        if request.user.is_superuser or self.validate_auth_header(request):
+        if request.user.is_superuser or validate_auth_header(request):
             s = request.GET.get('after', '2020-01-01T01:00:00.000000-00:00')
             timestamp = dateutil.parser.parse(s)
             queryset = AnalyticsEvent.objects.filter(created_at__gte=timestamp)

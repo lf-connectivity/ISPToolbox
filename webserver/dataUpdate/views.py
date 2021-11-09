@@ -6,6 +6,7 @@ from dataUpdate.models import Source
 from django.conf import settings
 from django.core.cache import cache
 from dataUpdate.scripts.load_asn_elasticsearch import queryASNElasticCache
+from workspace.utils.api_validate_request import validate_auth_header
 
 
 class CountrySourceUpdatedView(View):
@@ -31,14 +32,11 @@ class CountrySourceUpdatedView(View):
 
 
 class ASNElasticSearchView(View):
-    def validate_auth_header(self, request):
-        expected_token = f'Bearer {settings.SOCIAL_AUTH_FACEBOOK_KEY}|{settings.ASN_CURL_SECRET}'
-        return request.headers.get('Authorization', None) == expected_token
-
     def get(self, request):
-        if request.user.is_superuser or self.validate_auth_header(request):
+        if request.user.is_superuser or validate_auth_header(request):
             query = request.GET.get('query', None)
-            context = {'error': None, 'query': query, 'results': None, 'cached': 'True'}
+            context = {'error': None, 'query': query,
+                       'results': None, 'cached': 'True'}
             if query is not None:
                 try:
                     key = 'asn-es-' + query
@@ -46,7 +44,8 @@ class ASNElasticSearchView(View):
                     if result is None:
                         result = queryASNElasticCache(query)
                         context.update({'cached': 'False'})
-                        cache.set(key, result, 60 * 60 * 24)  # cache result for 1 day
+                        # cache result for 1 day
+                        cache.set(key, result, 60 * 60 * 24)
                     context.update({
                         'results': result
                     })

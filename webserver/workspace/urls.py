@@ -108,6 +108,8 @@ urlpatterns = [
     # Analytics
     path('workspace/api/analytics/events/',
          views.AnalyticsView.as_view(), name='analytics'),
+    path('workspace/api/analytics/network/interventions/',
+         views.NetworkToolInterventionsView.as_view()),
     path('workspace/500/', views.Error500View, name='404'),
     # Potree Visualization
     path('workspace/api/visualization/<uuid:feature>/',

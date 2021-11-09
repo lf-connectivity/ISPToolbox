@@ -28,7 +28,7 @@ from .import_views import KMZImportView
 from .dyi_views import (DeleteYourInformationView)
 from .ayi_views import (AccessYourInformationView)
 from .tower_form_views import (AccessPointLocationFormView)
-from .www_views import (AnalyticsView)
+from .www_views import (AnalyticsView, NetworkToolInterventionsView)
 
 import workspace.utils.import_utils
 

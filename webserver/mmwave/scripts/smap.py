@@ -17,6 +17,11 @@ LIMIT_M = 100_000
 bucket_name = 'isptoolbox-export-file'
 
 
+def create_filepath_engagement_data(date):
+    return 'smap/' + date.strftime('%Y-%m-%d') + \
+        ":isptoolbox-los-engagement.csv"
+
+
 def flatten(t):
     return [item for sublist in t for item in sublist]
 
@@ -75,8 +80,7 @@ def create_los_engagemnet_csv():
         for row in link_isp_map:
             writer.writerow(row)
         s3storage = S3Boto3Storage(bucket_name=bucket_name, location='')
-        path = 'smap/' + datetime.datetime.now().strftime('%Y-%m-%d') + \
-            ":isptoolbox-los-engagement.csv"
+        path = create_filepath_engagement_data(datetime.datetime.now())
         tmp_file.seek(0)
         with open(tmp_file.name, mode='r') as f:
             s3storage.save(path, ContentFile(f.read().encode('utf-8')))

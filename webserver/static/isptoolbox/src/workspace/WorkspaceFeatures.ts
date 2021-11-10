@@ -40,7 +40,7 @@ const COVERAGE_AREA_FIELDS = ['name'];
 const LINK_AP_INDEX = 0;
 const LINK_CPE_INDEX = 1;
 
-const ASR_TOWER_COVERAGE_WORKSPACE_ID = 'tower';
+export const ASR_TOWER_COVERAGE_WORKSPACE_ID = 'tower';
 
 export class AccessPoint extends WorkspacePointFeature {
     readonly links: Map<CPE, APToCPELink>; // mapbox ID

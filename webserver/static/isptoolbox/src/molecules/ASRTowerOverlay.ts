@@ -8,7 +8,9 @@ import MarketEvaluatorWS, {
     MarketEvalWSEvents,
     MarketEvalWSRequestType
 } from '../MarketEvaluatorWS';
+import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 import { ASREvents, ASRLoadingState, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import { ASR_TOWER_COVERAGE_WORKSPACE_ID } from '../workspace/WorkspaceFeatures';
 import MapboxOverlay from './MapboxOverlay';
 
 const TOWER_ZOOM_THRESHOLD = 12;
@@ -90,6 +92,10 @@ export class ASRTowerOverlay implements MapboxOverlay {
         e.preventDefault();
         if (e.features && e.features.length) {
             let feature = e.features[0];
+            MapLayerSidebarManager.getInstance().setFeatureVisibility(
+                ASR_TOWER_COVERAGE_WORKSPACE_ID,
+                true
+            );
             this.showPopup(feature);
         }
     }
@@ -126,12 +132,13 @@ export class ASRTowerOverlay implements MapboxOverlay {
         event.features.forEach((feat: any) => {
             if (feat.properties && 'asr_status' in feat.properties) {
                 this.selectedTowerMapboxId = undefined;
+                this.popup.hide();
 
                 // need to distinguish between deletion and hiding in map layer
                 if (
                     !(
                         feat.properties.uuid in
-                        MarketEvaluatorMapLayerSidebarManager.getInstance().hiddenCoverageAreas
+                        MapLayerSidebarManager.getInstance().hiddenCoverageAreas
                     )
                 ) {
                     this.setSelected(undefined);
@@ -160,6 +167,9 @@ export class ASRTowerOverlay implements MapboxOverlay {
                 loading_state: ASRLoadingState.LOADING_COVERAGE
             }
         });
+
+        // needed to counteract the hidePopup from the draw delete callback
+        this.showPopup(this.selectedTower);
 
         // Send request to websocket
         let height = roundToDecimalPlaces(ft2m(data.height), 2);

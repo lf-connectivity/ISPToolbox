@@ -223,7 +223,10 @@ abstract class RadiusAndBuildingCoverageRenderer {
             // Unhide hidden APs
             features.forEach((f: any) => {
                 if (f.properties.feature_type === WorkspaceFeatureTypes.AP) {
-                    MapLayerSidebarManager.getInstance().setAPVisibility(f, true);
+                    MapLayerSidebarManager.getInstance().setFeatureVisibility(
+                        f.properties.uuid,
+                        true
+                    );
                 }
             });
             this.sendCoverageRequest({ features });

@@ -6,6 +6,7 @@ import centroid from '@turf/centroid';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
 import CollapsibleComponent from '../atoms/CollapsibleComponent';
+import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 
 export class MapLayerSidebarManager extends CollapsibleComponent {
     hiddenAccessPointIds: Array<string>;
@@ -102,10 +103,24 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         }
     }
 
-    setAPVisibility(MBFeature: any, show: boolean) {
-        let id = String(MBFeature?.id);
-        this.toggleAPVisibility(id, show);
-        this.setCheckedStatus(MBFeature, show);
+    setFeatureVisibility(WSId: string, show: boolean) {
+        const WSFeature = BaseWorkspaceManager.getFeatureByUuid(WSId);
+        if (WSFeature) {
+            const MBFeature = this.draw.get(WSFeature.mapboxId);
+            const MBId = (MBFeature ? MBFeature.id : undefined) as string | undefined;
+
+            switch (WSFeature.featureType) {
+                case WorkspaceFeatureTypes.COVERAGE_AREA:
+                    this.toggleCoverageAreaVisibility(MBId, WSFeature, show);
+                    break;
+                case WorkspaceFeatureTypes.AP:
+                    this.toggleAPVisibility(MBId as string, show);
+                    break;
+                default:
+                    return;
+            }
+            this.setCheckedStatus(WSFeature, show);
+        }
     }
 
     protected showComponent() {
@@ -129,44 +144,63 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
     }
 
     private updateCoverageAreaVisibility = (MBFeature: any, WSFeature: any) => {
-        if (!MBFeature) {
-            const MBFeature = this.hiddenCoverageAreas[WSFeature.workspaceId];
-            //@ts-ignore
-            let mapboxId = this.draw.add(MBFeature)[0];
-            WSFeature.mapboxId = mapboxId;
-            this.map.fire('draw.create', { features: [MBFeature] });
-            delete this.hiddenCoverageAreas[WSFeature.workspaceId];
-        } else {
-            MBFeature.properties.hidden = true;
-            this.hiddenCoverageAreas[WSFeature.workspaceId] = MBFeature;
-            this.draw.delete(MBFeature.id);
-            this.map.fire('draw.delete', { features: [MBFeature] });
-        }
+        let id = MBFeature?.id;
+
+        // getCheckedStatus returns the current checked status, not the future state.
+        this.toggleCoverageAreaVisibility(id, WSFeature, !this.getCheckedStatus(WSFeature));
     };
 
     private updateAPVisibility = (MBFeature: any, WSFeature: any) => {
         let id = String(MBFeature?.id);
 
         // getCheckedStatus returns the current checked status, not the future state.
-        this.toggleAPVisibility(id, !this.getCheckedStatus(MBFeature));
+        this.toggleAPVisibility(id, !this.getCheckedStatus(WSFeature));
         PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [WSFeature] });
     };
 
-    private toggleAPVisibility(id: string, show: boolean) {
-        let i = this.hiddenAccessPointIds.indexOf(id);
+    private toggleCoverageAreaVisibility(
+        MBId: string | undefined,
+        WSFeature: BaseWorkspaceFeature,
+        show: boolean
+    ) {
+        let MBFeature: any | undefined;
         if (show) {
-            // Remove if there
+            if (!MBId) {
+                MBFeature = this.hiddenCoverageAreas[WSFeature.workspaceId];
+                //@ts-ignore
+                let mapboxId = this.draw.add(MBFeature)[0];
+                WSFeature.mapboxId = mapboxId;
+                this.map.fire('draw.create', { features: [MBFeature] });
+                delete this.hiddenCoverageAreas[WSFeature.workspaceId];
+            }
+        } else {
+            if (MBId) {
+                MBFeature = this.draw.get(MBId);
+                if (MBFeature) {
+                    MBFeature.properties.hidden = true;
+                    this.hiddenCoverageAreas[WSFeature.workspaceId] = MBFeature;
+                    this.draw.delete(MBFeature.id);
+                    this.map.fire('draw.delete', { features: [MBFeature] });
+                }
+            }
+        }
+    }
+
+    private toggleAPVisibility(MBId: string, show: boolean) {
+        let i = this.hiddenAccessPointIds.indexOf(MBId);
+        if (show) {
+            // Remove from hiddenAccessPointIds if there
             if (i > -1) {
                 this.hiddenAccessPointIds.splice(i, 1);
             }
         } else {
-            // Add if not there
+            // Add to hiddenAccessPointIds if not there
             if (i == -1) {
-                this.hiddenAccessPointIds = [...this.hiddenAccessPointIds, id];
+                this.hiddenAccessPointIds = [...this.hiddenAccessPointIds, MBId];
 
                 // Deselect tower
                 if (this.draw.getMode() == 'simple_select') {
-                    let selection = this.draw.getSelectedIds().filter((f: string) => f !== id);
+                    let selection = this.draw.getSelectedIds().filter((f: string) => f !== MBId);
 
                     // @ts-ignore
                     this.draw.changeMode('draw_ap', {}); //this is a hack that works in both ME and LOS
@@ -176,12 +210,12 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         }
     }
 
-    private getCheckedStatus(MBFeature: any) {
-        return $(`#switch-user-layer-${MBFeature?.id}`).prop('checked');
+    private getCheckedStatus(WSFeature: BaseWorkspaceFeature) {
+        return $(`#switch-user-layer-${WSFeature.workspaceId}`).prop('checked');
     }
 
-    private setCheckedStatus(MBFeature: any, checked: boolean) {
-        $(`#switch-user-layer-${MBFeature?.id}`).prop('checked', checked);
+    private setCheckedStatus(WSFeature: BaseWorkspaceFeature, checked: boolean) {
+        $(`#switch-user-layer-${WSFeature.workspaceId}`).prop('checked', checked);
     }
 
     private toggleHandler = (e: any, uuid: string) => {

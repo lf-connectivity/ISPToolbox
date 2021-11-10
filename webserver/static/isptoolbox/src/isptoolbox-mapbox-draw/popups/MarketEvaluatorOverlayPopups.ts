@@ -494,8 +494,8 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
             );
 
             // input validation on height/radius
-            height = validateNumber(0.1, maxHeight, height, ASR_HEIGHT_INPUT);
-            radius = validateNumber(0.1, MAX_RADIUS, radius, ASR_RADIUS_INPUT);
+            height = validateNumber(1, maxHeight, height, ASR_HEIGHT_INPUT);
+            radius = validateNumber(1, MAX_RADIUS, radius, ASR_RADIUS_INPUT);
 
             PubSub.publish(ASREvents.PLOT_LIDAR_COVERAGE, {
                 featureProperties: this.featureProperties,
@@ -516,11 +516,11 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
                     this.refreshButtonRow();
                 }
 
-                const val = String($(`#${id}`).val());
-                if (val) {
-                    $(`#${ASR_COVERAGE_BUTTON}`).prop('disabled', false);
-                } else {
+                const val = parseFloat(String($(`#${id}`).val()));
+                if (isNaN(val)) {
                     $(`#${ASR_COVERAGE_BUTTON}`).prop('disabled', true);
+                } else {
+                    $(`#${ASR_COVERAGE_BUTTON}`).prop('disabled', false);
                 }
             };
         };

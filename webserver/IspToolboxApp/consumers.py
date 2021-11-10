@@ -167,6 +167,3 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
 
     async def polygon_area(self, event):
         await self.send_json(event)
-
-    async def asr_geog(self, event):
-        await self.send_json(event)

@@ -29,8 +29,8 @@ def Error403View(request, exception, **kwargs):
 
 def AdminGeneric403View(request, **kwargs):
     """
-    404 if user is superuser - else raise 403
+    404 if user is staff - else raise 403
     """
-    if request.user.is_superuser:
+    if request.user.is_staff:
         raise Http404
     raise PermissionDenied

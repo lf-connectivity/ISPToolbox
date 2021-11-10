@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf.urls import (
-    handler404, handler500, url
+    handler404, handler500, handler403, url
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -26,11 +26,11 @@ from mmwave.views import (
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView
 from Overlay.views import OverlaySource
 from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView
-
+from workspace.views import AdminGeneric403View
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 from IspToolboxApp import views
 from django.views.decorators.cache import cache_page
@@ -107,6 +107,10 @@ urlpatterns = [
 
     # Accounts / All Auth
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="account_logout"),
+
+    # 403 Any request starting with admin
+    re_path(r'admin/.*', AdminGeneric403View),
+
 ] + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

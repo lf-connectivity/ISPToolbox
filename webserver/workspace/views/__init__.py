@@ -17,7 +17,9 @@ from .session_views import (
     SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView,
     SessionSaveAsView,
 )
-from .error_views import Error500View, Error404View, Error403View
+from .error_views import (
+    Error500View, Error404View, Error403View, AdminGeneric403View
+)
 from .social_views import FBDeauthorizeSocialView, FBDataDeletionView
 from .legal_views import DataPolicy, Cookies, TermsOfService
 from .multiplayer_views import MultiplayerTestView

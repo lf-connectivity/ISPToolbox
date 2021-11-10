@@ -5,6 +5,7 @@ import { validateNumber } from '../../molecules/InputValidator';
 import { ASREvents, ASRLoadingState } from '../../workspace/WorkspaceConstants';
 import { LinkCheckBasePopup, LOADING_SVG } from './LinkCheckBasePopup';
 import pass_svg from '../styles/pass-icon.svg';
+import { ASRViewshedGeojsonResponse, MarketEvalWSEvents } from '../../MarketEvaluatorWS';
 
 const ASR_HEIGHT_INPUT = 'asr-input-height-asr-popup';
 const ASR_RADIUS_INPUT = 'asr-input-radius-asr-popup';
@@ -378,6 +379,10 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
             return ASROverlayPopup._instance;
         }
         super(map, draw);
+        PubSub.subscribe(
+            MarketEvalWSEvents.ASR_CLOUDRF_VIEWSHED_MSG,
+            this.viewshedMessageCallback.bind(this)
+        );
         ASROverlayPopup._instance = this;
     }
 
@@ -509,19 +514,24 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
             this.refreshButtonRow();
         });
 
-        $(`#${ASR_HEIGHT_INPUT}`).on('input', () => {
-            if (this.state !== ASRLoadingState.STANDBY) {
-                this.state = ASRLoadingState.STANDBY;
-                this.refreshButtonRow();
-            }
-        });
+        const inputChangeCallback = (id: string) => {
+            return () => {
+                if (this.state !== ASRLoadingState.STANDBY) {
+                    this.state = ASRLoadingState.STANDBY;
+                    this.refreshButtonRow();
+                }
 
-        $(`#${ASR_RADIUS_INPUT}`).on('input', () => {
-            if (this.state !== ASRLoadingState.STANDBY) {
-                this.state = ASRLoadingState.STANDBY;
-                this.refreshButtonRow();
-            }
-        });
+                const val = String($(`#${id}`).val());
+                if (val) {
+                    $(`#${ASR_COVERAGE_BUTTON}`).prop('disabled', false);
+                } else {
+                    $(`#${ASR_COVERAGE_BUTTON}`).prop('disabled', true);
+                }
+            };
+        };
+
+        $(`#${ASR_HEIGHT_INPUT}`).on('input', inputChangeCallback(ASR_HEIGHT_INPUT));
+        $(`#${ASR_RADIUS_INPUT}`).on('input', inputChangeCallback(ASR_RADIUS_INPUT));
     }
 
     protected getButtonRowHTML() {
@@ -556,6 +566,17 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
         if (this.popup.isOpen()) {
             $(`#${ASR_COVERAGE_BUTTON_LI}`).html(this.getButtonRowHTML());
             this.setEventHandlers();
+        }
+    }
+
+    protected viewshedMessageCallback(msg: string, response: ASRViewshedGeojsonResponse) {
+        let towerId = response.registrationNumber;
+        if (response.error === 0 && towerId === this.featureProperties?.registration_number) {
+            this.state = ASRLoadingState.LOADED_COVERAGE;
+            this.refreshButtonRow();
+        } else if (response.error !== 0) {
+            this.state = ASRLoadingState.STANDBY;
+            this.refreshButtonRow();
         }
     }
 

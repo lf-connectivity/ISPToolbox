@@ -8,8 +8,8 @@ import MarketEvaluatorWS, {
 } from '../MarketEvaluatorWS';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
-import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
+import { ASREvents, WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
+import { AccessPoint, ASRTowerCoverageArea, CoverageArea } from './WorkspaceFeatures';
 
 const SUPPORTED_FEATURE_TYPES = [WorkspaceFeatureTypes.COVERAGE_AREA, WorkspaceFeatureTypes.AP];
 
@@ -26,7 +26,13 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
     initSaveFeatureHandlers() {
         const saveCoverageArea = (feature: any) => {
             if (!feature.properties.hidden === true) {
-                let polygon = new CoverageArea(this.map, this.draw, feature);
+                let polygon;
+                if ('asr_status' in feature.properties) {
+                    polygon = new ASRTowerCoverageArea(this.map, this.draw, feature);
+                } else {
+                    polygon = new CoverageArea(this.map, this.draw, feature);
+                }
+
                 this.saveWorkspaceFeature(polygon);
             }
         };

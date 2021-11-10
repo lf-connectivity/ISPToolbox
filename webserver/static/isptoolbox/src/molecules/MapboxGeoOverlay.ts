@@ -144,6 +144,8 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
                 },
                 id: ''
             };
+
+            console.log(newFeature);
             // @ts-ignore
             let id = this.draw.add(newFeature)[0];
             newFeature.id = id;

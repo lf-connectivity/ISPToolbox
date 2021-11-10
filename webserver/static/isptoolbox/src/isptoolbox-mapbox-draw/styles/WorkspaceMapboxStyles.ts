@@ -115,8 +115,24 @@ export const WorkspaceMapboxStyles = [
             ['==', 'active', 'false']
         ],
         paint: {
-            'fill-color': '#1172A9',
-            'fill-outline-color': '#1172A9',
+            'fill-color': [
+                'match',
+                ['get', 'user_asr_status'],
+                'good',
+                '#1197A9',
+                'bad',
+                '#A2A2A2',
+                '#1172A9'
+            ],
+            'fill-outline-color': [
+                'match',
+                ['get', 'user_asr_status'],
+                'good',
+                '#1197A9',
+                'bad',
+                '#A2A2A2',
+                '#1172A9'
+            ],
             'fill-opacity': 0.4
         }
     },
@@ -130,8 +146,24 @@ export const WorkspaceMapboxStyles = [
             ['==', 'active', 'true']
         ],
         paint: {
-            'fill-color': '#5692d1',
-            'fill-outline-color': '#5692d1',
+            'fill-color': [
+                'match',
+                ['get', 'user_asr_status'],
+                'good',
+                '#11a984',
+                'bad',
+                '#e3e3e3',
+                '#5692d1'
+            ],
+            'fill-outline-color': [
+                'match',
+                ['get', 'user_asr_status'],
+                'good',
+                '#11a984',
+                'bad',
+                '#e3e3e3',
+                '#5692d1'
+            ],
             'fill-opacity': 0.4
         }
     },
@@ -332,15 +364,54 @@ export const WorkspaceMapboxStyles = [
     // polygon outline stroke
     // This doesn't style the first edge of the polygon, which uses the line stroke styling instead
     {
-        id: 'gl-draw-polygon-stroke-active',
+        id: 'gl-draw-polygon-stroke-inactive',
         type: 'line',
-        filter: ['all', ['==', '$type', 'Polygon'], ['!=', 'mode', 'static']],
+        filter: [
+            'all',
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static'],
+            ['==', 'active', 'false']
+        ],
         layout: {
             'line-cap': 'round',
             'line-join': 'round'
         },
         paint: {
-            'line-color': '#1172A9',
+            'line-color': [
+                'match',
+                ['get', 'user_asr_status'],
+                'good',
+                '#1197A9',
+                'bad',
+                '#A2A2A2',
+                '#1172A9'
+            ],
+            'line-width': 4
+        }
+    },
+    {
+        id: 'gl-draw-polygon-stroke-active',
+        type: 'line',
+        filter: [
+            'all',
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static'],
+            ['==', 'active', 'true']
+        ],
+        layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        paint: {
+            'line-color': [
+                'match',
+                ['get', 'user_asr_status'],
+                'good',
+                '#11a984',
+                'bad',
+                '#e3e3e3',
+                '#5692d1'
+            ],
             'line-width': 4
         }
     },

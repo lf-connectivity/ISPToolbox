@@ -40,6 +40,8 @@ const COVERAGE_AREA_FIELDS = ['name'];
 const LINK_AP_INDEX = 0;
 const LINK_CPE_INDEX = 1;
 
+const ASR_TOWER_COVERAGE_WORKSPACE_ID = 'tower';
+
 export class AccessPoint extends WorkspacePointFeature {
     readonly links: Map<CPE, APToCPELink>; // mapbox ID
     coverage: BuildingCoverage;
@@ -348,5 +350,33 @@ export class CoverageArea extends BaseWorkspaceFeature {
     setCoverage(coverage: Array<any>) {
         this.coverage = new BuildingCoverage(coverage);
         this.awaitingCoverage = false;
+    }
+}
+
+// Do not save ASR tower coverage area coverage
+export class ASRTowerCoverageArea extends CoverageArea {
+    create(successFollowup?: (resp: any) => void) {
+        this.workspaceId = ASR_TOWER_COVERAGE_WORKSPACE_ID;
+
+        this.setFeatureProperty('uuid', ASR_TOWER_COVERAGE_WORKSPACE_ID);
+        this.setFeatureProperty('feature_type', WorkspaceFeatureTypes.COVERAGE_AREA);
+
+        if (successFollowup) {
+            successFollowup(undefined);
+        }
+    }
+
+    update(successFollowup?: (resp: any) => void) {
+        PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
+
+        if (successFollowup) {
+            successFollowup(undefined);
+        }
+    }
+
+    delete(successFollowup?: (resp: any) => void) {
+        if (successFollowup) {
+            successFollowup(undefined);
+        }
     }
 }

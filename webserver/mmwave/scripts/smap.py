@@ -38,7 +38,7 @@ def create_los_engagement_data_dump():
                 circ_rx = createGeoJSONCircle(link.rx, dist/1000)
                 link_isp_map.update({link.fbid: link_isp_map.get(
                     link.fbid, []) + [circ_rx, circ_tx]})
-        except:
+        except Exception:
             logging.error('failed to convert link to intervention')
             logging.error(
                 f'{(lonlat(link.tx.x, link.tx.y), lonlat(link.rx.x, link.rx.y))}')

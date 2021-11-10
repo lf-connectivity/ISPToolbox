@@ -3,7 +3,6 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from dataUpdate.models import Source
-from django.conf import settings
 from django.core.cache import cache
 from dataUpdate.scripts.load_asn_elasticsearch import queryASNElasticCache
 from workspace.utils.api_validate_request import validate_auth_header

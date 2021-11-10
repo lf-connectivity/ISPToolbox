@@ -17,8 +17,6 @@ from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
 import json
 
-from workspace.utils.api_validate_request import validate_auth_header
-
 
 class WorkspacePerformCreateMixin:
     """

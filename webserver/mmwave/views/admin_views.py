@@ -65,8 +65,3 @@ class CheckLidarDSMAvailability(LoginRequiredMixin, View):
         ]}
 
         return JsonResponse(result)
-
-
-class LidarDSMEngagement(View):
-    def get(self, request):
-        return JsonResponse(result)

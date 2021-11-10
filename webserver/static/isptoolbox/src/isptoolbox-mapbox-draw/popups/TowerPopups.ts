@@ -589,7 +589,7 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
     }
 
     protected onWSViewshedMsg(msg: string, response: ViewshedGeojsonResponse) {
-        if (response.ap_uuid === this.accessPoint?.workspaceId) {
+        if (response.ap_uuid && response.ap_uuid === this.accessPoint?.workspaceId) {
             let coords = this.accessPoint.getFeatureGeometryCoordinates() as [number, number];
 
             // Fly to AP if AP isn't on map. We center the AP horizontally, but place it

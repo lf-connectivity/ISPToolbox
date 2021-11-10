@@ -5,7 +5,6 @@ import { validateNumber } from '../../molecules/InputValidator';
 import { ASREvents, ASRLoadingState } from '../../workspace/WorkspaceConstants';
 import { LinkCheckBasePopup, LOADING_SVG } from './LinkCheckBasePopup';
 import pass_svg from '../styles/pass-icon.svg';
-import { ASRViewshedGeojsonResponse, MarketEvalWSEvents } from '../../MarketEvaluatorWS';
 
 const ASR_HEIGHT_INPUT = 'asr-input-height-asr-popup';
 const ASR_RADIUS_INPUT = 'asr-input-radius-asr-popup';
@@ -379,10 +378,6 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
             return ASROverlayPopup._instance;
         }
         super(map, draw);
-        PubSub.subscribe(
-            MarketEvalWSEvents.ASR_CLOUDRF_VIEWSHED_MSG,
-            this.viewshedMessageCallback.bind(this)
-        );
         ASROverlayPopup._instance = this;
     }
 
@@ -566,17 +561,6 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
         if (this.popup.isOpen()) {
             $(`#${ASR_COVERAGE_BUTTON_LI}`).html(this.getButtonRowHTML());
             this.setEventHandlers();
-        }
-    }
-
-    protected viewshedMessageCallback(msg: string, response: ASRViewshedGeojsonResponse) {
-        let towerId = response.registrationNumber;
-        if (response.error === 0 && towerId === this.featureProperties?.registration_number) {
-            this.state = ASRLoadingState.LOADED_COVERAGE;
-            this.refreshButtonRow();
-        } else if (response.error !== 0) {
-            this.state = ASRLoadingState.STANDBY;
-            this.refreshButtonRow();
         }
     }
 

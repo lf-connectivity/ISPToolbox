@@ -66,7 +66,7 @@ def createCloudRFRequest(lat, lon, txh, rxh, rad):
     }
 
 
-def getViewShed(lat, lon, height, customerHeight, radius, apUuid=None):
+def getViewShed(lat, lon, height, customerHeight, radius, apUuid=None, registrationNumber=None):
     '''
         Gets a viewshed (json polygon coverage) from an access point:
 
@@ -100,11 +100,16 @@ def getViewShed(lat, lon, height, customerHeight, radius, apUuid=None):
         }
 
         # .io for Market Eval v2: coverage is stringified json
-        if apUuid:
-            ap = AccessPointLocation.objects.get(uuid=apUuid)
-            ap.cloudrf_coverage_geojson = json.dumps(coverage)
-            ap.save()
-            resp['ap_uuid'] = apUuid
+        if apUuid or registrationNumber:
+            if apUuid:
+                ap = AccessPointLocation.objects.get(uuid=apUuid)
+                ap.cloudrf_coverage_geojson = json.dumps(coverage)
+                ap.save()
+                resp['ap_uuid'] = apUuid
+
+            if registrationNumber:
+                resp['registration_number'] = registrationNumber
+
             resp['coverage'] = json.dumps(coverage)
 
         return resp

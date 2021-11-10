@@ -152,14 +152,16 @@ def getTribalGeog(geoid, channelName, uuid):
 
 
 @app.task
-def getTowerViewShed(lat, lon, height, customerHeight, radius, channelName, uuid, apUuid=None):
-    result = getViewShed(lat, lon, height, customerHeight, radius, apUuid)
+def getTowerViewShed(
+    lat,
+    lon,
+    height,
+    customerHeight,
+    radius,
+    channelName,
+    uuid,
+    apUuid=None,
+    registration_number=None
+):
+    result = getViewShed(lat, lon, height, customerHeight, radius, apUuid, registration_number)
     sync_send(channelName, 'tower.viewshed', result, uuid)
-
-
-@app.task
-def getASRTowerViewshed(lat, lon, height, radius, registrationNumber, channelName, uuid):
-    DEFAULT_CUSTOMER_HEIGHT = 10  # checked the www code
-    result = getViewShed(lat, lon, height, DEFAULT_CUSTOMER_HEIGHT, radius)
-    result['registrationNumber'] = registrationNumber
-    sync_send(channelName, 'asr.geog', result, uuid)

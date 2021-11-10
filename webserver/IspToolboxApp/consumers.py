@@ -3,7 +3,7 @@ import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from IspToolboxApp.tasks.MarketEvaluatorWebsocketTasks import (
     genBuildings, genMedianIncome, genServiceProviders, genBroadbandNow,
-    genMedianSpeeds, getASRTowerViewshed, getGrantGeog, getZipGeog, getCountyGeog, getCensusBlockGeog,
+    genMedianSpeeds, getGrantGeog, getZipGeog, getCountyGeog, getCensusBlockGeog,
     getTowerViewShed, getTribalGeog, genPopulation
 )
 from NetworkComparison.tasks import genPolySize
@@ -117,15 +117,17 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         radius = content['radius']
         apUuid = content.get('apUuid', None)
         getTowerViewShed.delay(
-            lat, lon, height, customerHeight, radius, self.channel_name, uuid, apUuid)
+            lat, lon, height, customerHeight, radius, self.channel_name, uuid, apUuid=apUuid)
 
     async def asr_viewshed_request(self, content, uuid):
+        DEFAULT_CUSTOMER_HEIGHT = 10  # looked at the www code
         lat = content['lat']
         lon = content['lon']
         height = content['height']
         radius = content['radius']
         registrationNumber = content['registrationNumber']
-        getASRTowerViewshed.delay(lat, lon, height, radius, registrationNumber, self.channel_name, uuid)
+        getTowerViewShed.delay(lat, lon, height, DEFAULT_CUSTOMER_HEIGHT,
+            radius, self.channel_name, uuid, registration_number=registrationNumber)
 
     async def building_overlays(self, event):
         await self.send_json(event)

@@ -111,10 +111,12 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
     }
 
     onViewshedMsg(msg: string, response: ViewshedGeojsonResponse) {
-        let ap = this.features.get(response.ap_uuid) as AccessPoint;
-        if (ap) {
-            ap.setFeatureProperty('cloudrf_coverage_geojson_json', response.coverage);
-            PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [ap.getFeatureData()] });
+        if (response.ap_uuid) {
+            let ap = this.features.get(response.ap_uuid) as AccessPoint;
+            if (ap) {
+                ap.setFeatureProperty('cloudrf_coverage_geojson_json', response.coverage);
+                PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [ap.getFeatureData()] });
+            }
         }
     }
 }

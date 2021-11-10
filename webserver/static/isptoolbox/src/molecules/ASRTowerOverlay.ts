@@ -4,7 +4,7 @@ import { ASROverlayPopup } from '../isptoolbox-mapbox-draw/popups/MarketEvaluato
 import { ft2m, miles2km, roundToDecimalPlaces } from '../LinkCalcUtils';
 import MarketEvaluatorMapLayerSidebarManager from '../MarketEvaluatorMapLayerSidebarManager';
 import MarketEvaluatorWS, {
-    ASRViewshedGeojsonResponse,
+    ViewshedGeojsonResponse,
     MarketEvalWSEvents,
     MarketEvalWSRequestType
 } from '../MarketEvaluatorWS';
@@ -67,7 +67,7 @@ export class ASRTowerOverlay implements MapboxOverlay {
 
         PubSub.subscribe(ASREvents.PLOT_LIDAR_COVERAGE, this.plotLidarCoverageCallback.bind(this));
         PubSub.subscribe(
-            MarketEvalWSEvents.ASR_CLOUDRF_VIEWSHED_MSG,
+            MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG,
             this.viewshedMessageCallback.bind(this)
         );
     }
@@ -174,48 +174,64 @@ export class ASRTowerOverlay implements MapboxOverlay {
         );
     }
 
-    viewshedMessageCallback(msg: string, response: ASRViewshedGeojsonResponse) {
-        let towerId = response.registrationNumber;
-        if (
-            response.error === 0 &&
-            towerId === this.selectedTower?.properties.registration_number
-        ) {
-            const asrStatus = ['C', 'G'].includes(this.selectedTower?.properties.status_code)
-                ? 'good'
-                : 'bad';
+    viewshedMessageCallback(msg: string, response: ViewshedGeojsonResponse) {
+        if (response.registration_number && response.coverage) {
+            let towerId = response.registration_number;
+            if (
+                response.error === 0 &&
+                towerId === this.selectedTower?.properties.registration_number
+            ) {
+                const asrStatus = ['C', 'G'].includes(this.selectedTower?.properties.status_code)
+                    ? 'good'
+                    : 'bad';
 
-            // disregard the non-polygons in the response coverage
-            let multipolygonCoords: Array<[number, number]> = [];
-            response.coverage.geometries.forEach((geom: any) => {
-                if (geom.type === 'Polygon') {
-                    multipolygonCoords.push(geom.coordinates);
+                // disregard the non-polygons in the response coverage
+                let multipolygonCoords: Array<[number, number]> = [];
+                let coverage = JSON.parse(response.coverage);
+                coverage.geometries.forEach((geom: any) => {
+                    if (geom.type === 'Polygon') {
+                        multipolygonCoords.push(geom.coordinates);
+                    }
+                });
+
+                const newFeature = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'MultiPolygon',
+                        coordinates: multipolygonCoords
+                    },
+                    properties: {
+                        uneditable: true,
+                        name: 'ASR Tower Coverage',
+                        feature_type: WorkspaceFeatureTypes.COVERAGE_AREA,
+                        asr_status: asrStatus
+                    },
+                    id: ''
+                };
+
+                // @ts-ignore
+                this.selectedTowerMapboxId = this.draw.add(newFeature)[0];
+                newFeature.id = this.selectedTowerMapboxId;
+                this.map.fire('draw.create', { features: [newFeature] });
+                this.draw.changeMode('simple_select', { featureIds: [this.selectedTowerMapboxId] });
+                this.map.fire('draw.selectionchange', { features: [newFeature] });
+
+                this.selectedTower.properties.loading_state = ASRLoadingState.LOADED_COVERAGE;
+                this.setSelected(this.selectedTower);
+
+                // Fly to coverage area if it isn't on map. We center the AP horizontally, but place it
+                // 65% of the way down on the screen so the tooltip fits.
+                let coords = this.selectedTower.geometry.coordinates;
+                if (!this.map.getBounds().contains(coords)) {
+                    let south = this.map.getBounds().getSouth();
+                    let north = this.map.getBounds().getNorth();
+                    this.map.flyTo({
+                        center: [coords[0], coords[1] + +0.15 * (north - south)]
+                    });
                 }
-            });
 
-            const newFeature = {
-                type: 'Feature',
-                geometry: {
-                    type: 'MultiPolygon',
-                    coordinates: multipolygonCoords
-                },
-                properties: {
-                    uneditable: true,
-                    name: 'ASR Tower Coverage',
-                    feature_type: WorkspaceFeatureTypes.COVERAGE_AREA,
-                    asr_status: asrStatus
-                },
-                id: ''
-            };
-
-            // @ts-ignore
-            this.selectedTowerMapboxId = this.draw.add(newFeature)[0];
-            newFeature.id = this.selectedTowerMapboxId;
-            this.map.fire('draw.create', { features: [newFeature] });
-            this.draw.changeMode('simple_select', { featureIds: [this.selectedTowerMapboxId] });
-            this.map.fire('draw.selectionchange', { features: [newFeature] });
-
-            this.selectedTower.properties.loading_state = ASRLoadingState.LOADED_COVERAGE;
-            this.setSelected(this.selectedTower);
+                this.showPopup(this.selectedTower);
+            }
         }
     }
 

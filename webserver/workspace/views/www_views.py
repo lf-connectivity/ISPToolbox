@@ -9,7 +9,6 @@ from django.views import View
 import dateutil.parser
 from django.core.exceptions import PermissionDenied
 from rest_framework import mixins
-from django.conf import settings
 import json
 from django.http import HttpResponse, JsonResponse
 
@@ -37,12 +36,11 @@ class AnalyticsView(View, mixins.ListModelMixin):
             'event_type': event_type,
         }
 
-        event_item = AnalyticsEvent.objects.create(**event_data)
-
+        AnalyticsEvent.objects.create(**event_data)
         return HttpResponse(status=201)
 
     def get(self, request):
-        if request.user.is_superuser or self.validate_auth_header(request):
+        if request.user.is_staff or validate_auth_header(request):
             s = request.GET.get('after', '2020-01-01T01:00:00.000000-00:00')
             timestamp = dateutil.parser.parse(s)
             queryset = AnalyticsEvent.objects.filter(created_at__gte=timestamp)
@@ -54,7 +52,7 @@ class AnalyticsView(View, mixins.ListModelMixin):
 
 class NetworkToolInterventionsView(View):
     def get(self, request):
-        if request.user.is_superuser or validate_auth_header(request):
+        if request.user.is_staff or validate_auth_header(request):
             s = request.GET.get('date', '2021-11-09')
             timestamp = dateutil.parser.parse(s)
             path = create_filepath_engagement_data(timestamp.date())
@@ -63,7 +61,7 @@ class NetworkToolInterventionsView(View):
             try:
                 engagement_data = storage.open(path)
                 return HttpResponse(engagement_data.read())
-            except:
+            except Exception:
                 raise Http404
         else:
             raise PermissionDenied

@@ -11,11 +11,11 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="isptoolbox-form inline-field-group mx-auto">
+          <div class="isptoolbox-form inline-field-group mx-auto align-items-center">
             {% csrf_token %}
             {{ workspace_forms.save_as_session }}
             <input type="text" value="{{session.uuid}}" hidden name="session">
-            <input type="submit" class="btn btn-primary isptoolbox-btn inline-button" value="Save">
+            <input type="submit" class="btn btn-primary isptoolbox-btn inline-button mx-2" value="Save">
           </div>
           <p class="error d-none"></p>
         </div>

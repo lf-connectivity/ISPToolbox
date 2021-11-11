@@ -60,11 +60,11 @@ class NewWorkspaceSessionFromKMZForm(forms.Form):
     file = forms.FileField(
         widget=CustomFileInput(
             attrs={
-                'accept': 'application/vnd.google-earth.kml+xml, application/vnd.google-earth.kmz, .geojson'},
+                'accept': 'application/vnd.google-earth.kml+xml, application/vnd.google-earth.kmz, .geojson, application/json'},
         ),
         help_text="Files Accepted: KML, KMZ and Geojson. Max Upload Size: 1MB",
         validators=[validators.FileExtensionValidator(
-            ['geojson', 'kml', 'kmz'])]
+            ['geojson', 'kml', 'kmz', 'json'])]
     )
 
 

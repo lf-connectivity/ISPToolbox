@@ -122,6 +122,20 @@
             font-size: $small-font-size
             box-sizing: border-box
             border-bottom: 2px solid transparent
+        &[readonly]
+            background: lighten($brand-dark-gray-color, 5%)
+            -webkit-appearance: none
+            border: 0
+            border-style: none
+            color: darken(#fff, 10%)
+            padding: 5px 3px 3px 3px
+            width: 100%
+            font-size: $small-font-size
+            box-sizing: border-box
+            border-bottom: 2px solid transparent
+            &:focus
+                outline: 0
+                border-bottom: 2px solid transparent
         &:focus
             outline: 0
             border-bottom: 2px solid $brand-primary-color
@@ -164,6 +178,7 @@
                 margin: 0
                 text-align: left
                 padding-left: 7px
+
             .data-with-unit
                 flex-grow: 1
             .comma
@@ -231,9 +246,6 @@
         li:last-of-type
             border-bottom: 0
             padding-bottom: 0
-        a
-            color: #c2d8ec
-            margin-right: 0
     .overlay-tooltip
         .mapboxgl-popup-label
             margin-right: 8px
@@ -242,6 +254,9 @@
             padding: 0.5rem 0.3rem 0.5rem 0.3rem !important
             &--mapboxgl-popup-header-label:last-of-type
                 text-align: right
+        .asr-registration-link
+            color: #c2d8ec
+            margin-right: 0
         .mapboxgl-popup-tower-status-data
             display: flex
             justify-content: flex-end
@@ -262,8 +277,14 @@
                     color: #a2a2a2
         .mapboxgl-popup-button-row
             justify-content: center
+            display: flex
+            flex-flow: column
+            align-items: center
             button
                 width: 100%
+            a
+                font-size: $small-font-size
+                margin-top: 12px
 
 .map-tooltip .mapboxgl-popup-content
     background-color: $brand-dark-gray-color

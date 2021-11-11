@@ -10,6 +10,7 @@ const ASR_HEIGHT_INPUT = 'asr-input-height-asr-popup';
 const ASR_RADIUS_INPUT = 'asr-input-radius-asr-popup';
 const ASR_COVERAGE_BUTTON_LI = 'asr-li-coverage-btn-asr-popup';
 const ASR_COVERAGE_BUTTON = 'asr-btn-coverage-asr-popup';
+const ASR_TOWER_LINK = 'asr-a-tower-asr-popup';
 
 abstract class MarketEvaluatorBaseOverlayPopup extends LinkCheckBasePopup {
     protected featureProperties: any | undefined;
@@ -414,7 +415,10 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
                 <li class="mapboxgl-popup-row">
                     <p class="mapboxgl-popup-label">Registration #</p>
                     <p class="mapboxgl-popup-data">
-                        <a href="${this.featureProperties.fcc_url}" target="_blank">
+                        <a href="${this.featureProperties.fcc_url}"
+                            class="asr-registration-link"
+                            target="_blank"
+                            >
                             ${this.featureProperties.registration_number}
                             <span class="link-arrow-svg">
                                 <svg
@@ -485,7 +489,7 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     }
 
     setEventHandlers() {
-        $(`#${ASR_COVERAGE_BUTTON}`).on('click', () => {
+        const validateHeightAndRadius = () => {
             let height = parseFloat(String($(`#${ASR_HEIGHT_INPUT}`).val()));
             let radius = parseFloat(String($(`#${ASR_RADIUS_INPUT}`).val()));
             let maxHeight = roundToDecimalPlaces(
@@ -497,16 +501,33 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
             height = validateNumber(1, maxHeight, height, ASR_HEIGHT_INPUT);
             radius = validateNumber(1, MAX_RADIUS, radius, ASR_RADIUS_INPUT);
 
-            PubSub.publish(ASREvents.PLOT_LIDAR_COVERAGE, {
-                featureProperties: this.featureProperties,
-                height: height,
-                radius: radius
-            });
-
             this.towerHeight = height;
             this.towerRadius = radius;
+        };
+
+        $(`#${ASR_COVERAGE_BUTTON}`).on('click', () => {
+            validateHeightAndRadius();
+
+            PubSub.publish(ASREvents.PLOT_LIDAR_COVERAGE, {
+                featureProperties: this.featureProperties,
+                height: this.towerHeight,
+                radius: this.towerRadius
+            });
+
             this.state = ASRLoadingState.LOADING_COVERAGE;
             this.refreshButtonRow();
+        });
+
+        $(`#${ASR_TOWER_LINK}`).on('click', () => {
+            validateHeightAndRadius();
+
+            PubSub.publish(ASREvents.SAVE_ASR_TOWER, {
+                featureProperties: this.featureProperties,
+                height: this.towerHeight,
+                radius: this.towerRadius
+            });
+
+            this.hide();
         });
 
         const inputChangeCallback = (id: string) => {
@@ -530,9 +551,10 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     }
 
     protected getButtonRowHTML() {
+        let html;
         switch (this.state) {
             case ASRLoadingState.STANDBY:
-                return `
+                html = `
                     <button class='btn btn-primary isptoolbox-btn' id='${ASR_COVERAGE_BUTTON}'>
                         Plot Estimated Coverage
                         <sup>
@@ -540,21 +562,28 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
                         </sup>
                     </button>
                 `;
+                break;
             case ASRLoadingState.LOADING_COVERAGE:
-                return `
+                html = `
                     <div align="center">
                         ${LOADING_SVG}
                         <p align="center bold" class="mt-1">Plotting Lidar Coverage</p>
                     </div>
                 `;
+                break;
             case ASRLoadingState.LOADED_COVERAGE:
-                return `
+                html = `
                     <div align="center">
                         <img src="${pass_svg}" width="20" height="25">
                         <p align="center bold" class="mt-1">Tower Coverage Plotted</p>
                     </div>
                 `;
+                break;
         }
+        html += `
+            <a class="link" id="${ASR_TOWER_LINK}">Save as Tower</a>
+        `;
+        return html;
     }
 
     protected refreshButtonRow() {

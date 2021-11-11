@@ -7,7 +7,8 @@ export enum WorkspaceEvents {
 }
 
 export enum ASREvents {
-    PLOT_LIDAR_COVERAGE = 'asr.lidar_coverage'
+    PLOT_LIDAR_COVERAGE = 'asr.lidar_coverage',
+    SAVE_ASR_TOWER = 'asr.save_tower'
 }
 
 export enum ASRLoadingState {
@@ -61,6 +62,12 @@ export enum LOSWSHandlers {
     TERRAIN = 'terrain',
     LINK = 'link'
 }
+
+export type ASREvent = {
+    featureProperties: any;
+    height: number;
+    radius: number;
+};
 
 export type LinkResponse = {
     type: 'standard.message';

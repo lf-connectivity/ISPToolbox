@@ -212,6 +212,12 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         );
 
         createCoordinateChangeCallback(LAT_LNG_INPUT_ID);
+
+        // For ASR/uneditable towers, no changing location
+        if (this.accessPoint?.getFeatureProperty('uneditable')) {
+            $(`#${NAME_INPUT_ID}`).prop('readonly', true);
+            $(`#${LAT_LNG_INPUT_ID}`).prop('readonly', true);
+        }
     }
 
     protected getHTML() {

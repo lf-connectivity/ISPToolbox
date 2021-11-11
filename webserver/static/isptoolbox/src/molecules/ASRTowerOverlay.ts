@@ -9,7 +9,12 @@ import MarketEvaluatorWS, {
     MarketEvalWSRequestType
 } from '../MarketEvaluatorWS';
 import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
-import { ASREvents, ASRLoadingState, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import {
+    ASREvent,
+    ASREvents,
+    ASRLoadingState,
+    WorkspaceFeatureTypes
+} from '../workspace/WorkspaceConstants';
 import { ASR_TOWER_COVERAGE_WORKSPACE_ID } from '../workspace/WorkspaceFeatures';
 import MapboxOverlay from './MapboxOverlay';
 
@@ -68,6 +73,7 @@ export class ASRTowerOverlay implements MapboxOverlay {
         this.boundDrawDeleteCallback = this.drawDeleteCallback.bind(this);
 
         PubSub.subscribe(ASREvents.PLOT_LIDAR_COVERAGE, this.plotLidarCoverageCallback.bind(this));
+        PubSub.subscribe(ASREvents.SAVE_ASR_TOWER, this.saveASRTowerCallback.bind(this));
         PubSub.subscribe(
             MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG,
             this.viewshedMessageCallback.bind(this)
@@ -147,10 +153,7 @@ export class ASRTowerOverlay implements MapboxOverlay {
         });
     }
 
-    plotLidarCoverageCallback(
-        msg: string,
-        data: { height: number; featureProperties: any; radius: number }
-    ) {
+    plotLidarCoverageCallback(msg: string, data: ASREvent) {
         this.removeExistingCoverageArea();
 
         // Set selected tower
@@ -182,6 +185,31 @@ export class ASRTowerOverlay implements MapboxOverlay {
             radius,
             data.featureProperties.registration_number
         );
+    }
+
+    saveASRTowerCallback(msg: string, data: ASREvent) {
+        // Deselect all towers
+        this.removeExistingCoverageArea();
+        this.setSelected(undefined);
+
+        // Create tower
+        const newAP = {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [data.featureProperties.longitude, data.featureProperties.latitude]
+            },
+            properties: {
+                height: roundToDecimalPlaces(ft2m(data.height), 2),
+                max_radius: roundToDecimalPlaces(miles2km(data.radius), 2),
+                name: `ASR #${data.featureProperties.registration_number}`,
+                feature_type: WorkspaceFeatureTypes.AP,
+                center: [data.featureProperties.longitude, data.featureProperties.latitude],
+                uneditable: true
+            }
+        };
+
+        this.map.fire('draw.create', { features: [newAP] });
     }
 
     viewshedMessageCallback(msg: string, response: ViewshedGeojsonResponse) {

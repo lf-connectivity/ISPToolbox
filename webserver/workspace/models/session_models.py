@@ -10,6 +10,8 @@ from IspToolboxApp.Helpers.kmz_helpers import (
 from workspace.models.model_constants import FeatureType
 import uuid
 import json
+import tempfile
+from osgeo import gdal
 from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
 from .network_models import (
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
@@ -94,6 +96,17 @@ class WorkspaceMapSession(models.Model):
         fcs = [serializer.get_features_for_session(
             self) for serializer in self.fks_serializers]
         return geojson_utils.merge_feature_collections(*fcs)
+
+    def get_session_kml(self):
+        geojson = self.get_session_geojson()
+        with tempfile.NamedTemporaryFile("w", prefix=self.uuid.hex, suffix=".geojson") as tmp_file_geojson:
+            tmp_file_geojson.write(json.dumps(
+                geojson, default=lambda x: x.hex if isinstance(x, uuid.UUID) else None))
+
+            with tempfile.NamedTemporaryFile('w', prefix=self.uuid.hex, suffix='.kml') as tmp_file:
+                gdal.VectorTranslate(tmp_file.name, tmp_file_geojson.name)
+                with open(tmp_file.name, 'r') as kml_output:
+                    return kml_output.read()
 
     @classmethod
     def get_or_create_demo_view(cls, request):

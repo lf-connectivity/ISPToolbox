@@ -89,15 +89,25 @@ class SessionDeleteView(
         return self.destroy(request, *args, **kwargs)
 
 
-class SessionDownloadView(LoginRequiredMixin, View):
+class SessionDownloadGeoJSONView(LoginRequiredMixin, View):
     def get(self, request, session_uuid=None):
         session = get_object_or_404(
             WorkspaceMapSession, owner=request.user, uuid=session_uuid)
-        geojson = session.get_session_geojson(request)
+        geojson = session.get_session_geojson()
         geojson_str = json.dumps(
-            geojson, default=lambda x: x.hex if isinstance(x, UUID) else None),
+            geojson, default=lambda x: x.hex if isinstance(x, UUID) else None)
         response = HttpResponse(geojson_str, content_type='csv')
         response['Content-Disposition'] = f'attachment; filename="{session.name}.geojson"'
+        return response
+
+
+class SessionDownloadKMZView(LoginRequiredMixin, View):
+    def get(self, request, session_uuid=None):
+        session = get_object_or_404(
+            WorkspaceMapSession, owner=request.user, uuid=session_uuid)
+        kml = session.get_session_kml()
+        response = HttpResponse(kml, content_type='csv')
+        response['Content-Disposition'] = f'attachment; filename="{session.name}.kml"'
         return response
 
 

@@ -14,8 +14,8 @@ from .rest_views import (
     AccessPointCoverageViewshedOverlayView
 )
 from .session_views import (
-    SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadView,
-    SessionSaveAsView,
+    SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadGeoJSONView,
+    SessionDownloadKMZView, SessionSaveAsView,
 )
 from .error_views import (
     Error500View, Error404View, Error403View, AdminGeneric403View

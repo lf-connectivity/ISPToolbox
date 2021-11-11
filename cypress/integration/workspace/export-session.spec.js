@@ -16,7 +16,6 @@ describe("Test Exporting Workspace Session", () => {
 
         // Assert that session kml file is downloaded
         const kml_url = cy.get('a').contains('KML').invoke('attr', 'href').then(href => {
-            cy.log(href);
             cy.request({
                 url: href,
                 encoding: 'base64'
@@ -30,7 +29,6 @@ describe("Test Exporting Workspace Session", () => {
 
         // Assert that session geojson file is downloaded
         const geojson_url = cy.get('a').contains('GeoJSON').invoke('attr', 'href').then(href => {
-            cy.log(href);
             cy.request({
                 url: href,
                 encoding: 'base64'

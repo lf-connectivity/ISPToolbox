@@ -13,6 +13,7 @@ import json
 import tempfile
 from osgeo import gdal
 from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
+from workspace.utils.import_session import convert_file_to_workspace_session, flatten_geometry
 from .network_models import (
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
     CoverageAreaSerializer
@@ -189,6 +190,53 @@ class WorkspaceMapSession(models.Model):
 
     def kml_key(self):
         return f'kml/ISPTOOLBOX_{self.name}_{self.uuid}.kml'
+
+    @classmethod
+    def importFile(cls, request):
+        file = request.FILES.get('file', None)
+        fc = convert_file_to_workspace_session(file)
+        session = WorkspaceMapSession(name=request.POST.get(
+            'name', None), owner=request.user)
+        session.save()
+        try:
+            ap_dict = {}
+            for f in fc.get('features', []):
+                geom = f.get('geometry', {})
+                f_str = json.dumps({key: geom[key]
+                                    for key in ['type', 'coordinates']})
+                geos_geom = GEOSGeometry(f_str)
+                hgt = None
+                if geos_geom.hasz:
+                    geos_geom, hgt = flatten_geometry(geos_geom)
+                if geos_geom.geom_type == 'Polygon':
+                    CoverageAreaSerializer.Meta.model(
+                        owner=request.user, map_session=session, geojson=geos_geom).save()
+                elif geos_geom.geom_type == 'Point':
+                    if geom.get('properties', {}).get('type', None) == FeatureType.CPE:
+                        cpe = CPESerializer.Meta.model(
+                            owner=request.user, map_session=session,
+                            geojson=geos_geom,
+                            height=geom.get('properties', {}).get('height', hgt if hgt else 0))
+                        cpe.save()
+                        ap_uuid = ap_dict.get(
+                            geom.get('properties', {}).get('ap', None), None)
+                        APToCPELinkSerializer.Meta.model(
+                            owner=request.user, map_session=session,
+                            ap=ap_uuid, cpe=cpe
+                        ).save()
+                    else:
+                        ap = AccessPointSerializer.Meta.model(
+                            owner=request.user, map_session=session,
+                            geojson=geos_geom,
+                            height=geom.get('properties', {}).get('height', 0))
+                        ap.save()
+                        ap_dict.update({
+                            geom.get('properties', {}).get('id', None): ap
+                        })
+        except Exception as e:
+            session.delete()
+            raise e
+        return session
 
     @classmethod
     def importKMZ(cls, request):

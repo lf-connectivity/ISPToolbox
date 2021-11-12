@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.translation import gettext
 
 
-class KMZImportView(LoginRequiredMixin, View):
+class SessionFileImportView(LoginRequiredMixin, View):
     """
     This endpoint is used to turn KMZ files into workspace sessions
     - there are many possible tags that KMZ files can have
@@ -18,7 +18,7 @@ class KMZImportView(LoginRequiredMixin, View):
         form = NewWorkspaceSessionFromKMZForm(
             request.POST, files=request.FILES)
         try:
-            session = WorkspaceMapSession.importKMZ(request)
+            session = WorkspaceMapSession.importFile(request)
             return redirect(reverse('workspace:edit_network', args=[session.pk, session.name]))
         except Exception as e:
             # name of session already exists? TODO: duplicate unique constraint error handling

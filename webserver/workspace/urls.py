@@ -118,7 +118,7 @@ urlpatterns = [
          views.PotreeVisualizationMetaView.as_view(), name="potree_viz"),
     # Workspace Session Import
     path('workspace/session/upload/kmz/',
-         views.KMZImportView.as_view(), name='session_import_kmz'),
+         views.SessionFileImportView.as_view(), name='session_import_kmz'),
     # Facebook SDK Login
     path('fb/deauthorize-callback/',
          views.FBDeauthorizeSocialView.as_view(), name="fb_deauthorize"),

@@ -26,7 +26,7 @@ from .multiplayer_views import MultiplayerTestView
 from .tour_views import NuxTourView
 from .sources_views import WorkspaceSourcesView
 from .visualization_views import PotreeVisualizationMetaView
-from .import_views import KMZImportView
+from .import_views import SessionFileImportView
 from .dyi_views import (DeleteYourInformationView)
 from .ayi_views import (AccessYourInformationView)
 from .tower_form_views import (AccessPointLocationFormView)

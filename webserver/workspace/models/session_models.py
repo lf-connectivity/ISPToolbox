@@ -5,7 +5,7 @@ from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import Point, GeometryCollection, GEOSGeometry
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getMicrosoftBuildings
 from IspToolboxApp.Helpers.kmz_helpers import (
-    convertKml, createWorkspaceSessionGeoJsonFromAirLinkKML, createWorkspaceSessionGeoJsonFromAirLinkKMZ
+    convertKml
 )
 from workspace.models.model_constants import FeatureType
 import uuid

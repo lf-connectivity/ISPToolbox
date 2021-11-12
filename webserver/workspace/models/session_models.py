@@ -238,52 +238,6 @@ class WorkspaceMapSession(models.Model):
             raise e
         return session
 
-    @classmethod
-    def importKMZ(cls, request):
-        file = request.FILES.get('file', None)
-        feats = []
-        if file.name.endswith('.kmz'):
-            feats = createWorkspaceSessionGeoJsonFromAirLinkKMZ(file)
-        elif file.name.endswith('.kml'):
-            feats = createWorkspaceSessionGeoJsonFromAirLinkKML(file)
-        session = WorkspaceMapSession(name=request.POST.get(
-            'name', None), owner=request.user)
-        session.save()
-        try:
-            ap_dict = {}
-            for f in feats:
-                f_str = json.dumps({key: f[key]
-                                   for key in ['type', 'coordinates']})
-                if f.get('type', None) == 'Polygon':
-                    CoverageAreaSerializer.Meta.model(
-                        owner=request.user, map_session=session, geojson=GEOSGeometry(f_str)).save()
-                elif f.get('type', None) == 'Point':
-                    if f.get('properties', {}).get('type', None) == FeatureType.AP:
-                        ap = AccessPointSerializer.Meta.model(
-                            owner=request.user, map_session=session,
-                            geojson=GEOSGeometry(f_str),
-                            height=f.get('properties', {}).get('height', 0))
-                        ap.save()
-                        ap_dict.update({
-                            f.get('properties', {}).get('id', None): ap
-                        })
-                    elif f.get('properties', {}).get('type', None) == FeatureType.CPE:
-                        cpe = CPESerializer.Meta.model(
-                            owner=request.user, map_session=session,
-                            geojson=GEOSGeometry(f_str),
-                            height=f.get('properties', {}).get('height', 0))
-                        cpe.save()
-                        ap_uuid = ap_dict.get(
-                            f.get('properties', {}).get('ap', None), None)
-                        APToCPELinkSerializer.Meta.model(
-                            owner=request.user, map_session=session,
-                            ap=ap_uuid, cpe=cpe
-                        ).save()
-        except Exception as e:
-            session.delete()
-            raise e
-        return session
-
     def exportKMZ(self, export_format):
         geo_list = []
         gc = []

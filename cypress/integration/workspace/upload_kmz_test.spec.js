@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 
 describe("Test Upload KMZ File", () => {
-  before(() => {});
+  before(() => { });
 
   beforeEach(() => {
     cy.login();
@@ -9,7 +9,7 @@ describe("Test Upload KMZ File", () => {
 
   it("Verify error is shown if session name taken", function () {
     cy.visit("/pro/network/edit/");
-    cy.visit("/pro/workspace/session/upload/kmz/");
+    cy.visit("/pro/workspace/session/upload/");
     cy.get("input[name=name]").type("Test Workspace");
     cy.get("input[name=file]").attachFile({
       filePath: "file_inputs/kml_test_fixture.kml",
@@ -19,7 +19,7 @@ describe("Test Upload KMZ File", () => {
   });
 
   it("Verify error is shown if invalid kml file is used", function () {
-    cy.visit("/pro/workspace/session/upload/kmz/");
+    cy.visit("/pro/workspace/session/upload/");
     cy.get("input[name=name]").type("upload test");
     cy.get("input[name=file]").attachFile({
       filePath: "file_inputs/invalid_kml_test_fixture.kml",
@@ -30,7 +30,7 @@ describe("Test Upload KMZ File", () => {
 
   it("Verify valid kml can be processed and session is created", function () {
     const session_name = "upload_test";
-    cy.visit("/pro/workspace/session/upload/kmz/");
+    cy.visit("/pro/workspace/session/upload/");
     cy.get("input[name=name]").type(session_name);
     cy.get("input[name=file]").attachFile({
       filePath: "file_inputs/kml_test_fixture.kml",

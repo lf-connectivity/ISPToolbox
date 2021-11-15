@@ -345,14 +345,22 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
 
     private mapboxLoadTowerIcon(imageName: string) {
         let filename = `${imageName}-2x.png`;
-        this.map.loadImage(`/static/isptoolbox/images/${filename}`, (error: any, image: any) => {
-            if (error) {
-                throw error;
-            }
+        const domain =
+            location.host === 'isptoolbox.io'
+                ? 'https://static.isptoolbox.io'
+                : `https://${location.host.split(':')[0]}:8000`; // dev or prod
 
-            if (image) {
-                this.map.addImage(imageName, image, { pixelRatio: 2 });
+        this.map.loadImage(
+            `${domain}/static/isptoolbox/images/${filename}`,
+            (error: any, image: any) => {
+                if (error) {
+                    throw error;
+                }
+
+                if (image) {
+                    this.map.addImage(imageName, image, { pixelRatio: 2 });
+                }
             }
-        });
+        );
     }
 }

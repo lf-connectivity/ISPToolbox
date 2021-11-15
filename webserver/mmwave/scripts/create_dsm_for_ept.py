@@ -40,7 +40,7 @@ def createTileDSM(tile: tuple, z: int, pk: int):
         )
         boundary_tile = getBoundaryofTile(x, y, DEFAULT_OUTPUT_ZOOM)
         # If tile is valid run computation
-        if created or not lidartile.tile.name:
+        if created or not lidartile.tile.name or lidartile.tile.size == 0:
             engine = DSMEngine(boundary_tile, [cloud])
             with tempfile.NamedTemporaryFile(suffix='.tif') as tmp_tif:
                 engine.getDSM(1.0, tmp_tif.name)

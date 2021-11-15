@@ -591,7 +591,8 @@ export class LinkCheckVertexClickCustomerConnectPopup extends LinkCheckCustomerC
             },
             properties: {
                 cpeLngLats: cpeLngLats,
-                ptpLinksToRemove: ptpLinksToRemove
+                ptpLinksToRemove: ptpLinksToRemove,
+                radius: 0.1 // lol
             }
         } as Feature<Point, any>;
         this.map.fire('draw.create', { features: [newAP] });

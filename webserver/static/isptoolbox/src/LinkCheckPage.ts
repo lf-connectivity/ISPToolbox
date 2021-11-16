@@ -44,7 +44,6 @@ import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
 import LOSCheckLinkProfileView from './organisms/LOSCheckLinkProfileView';
 import CollapsibleComponent from './atoms/CollapsibleComponent';
 import { LiDAR3DView } from './organisms/LiDAR3DView';
-import { createPopupFromVertexEvent } from './utils/GeocodeUtils';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
 import { WorkspacePointFeature } from './workspace/WorkspacePointFeature';
@@ -141,50 +140,19 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     geocoder: MapboxGeocoder;
 
+    showVertexDebounce: any;
+
     constructor(networkID: string, userRequestIdentity: string) {
         super(
             {
                 draw_link: LinkMode(),
                 simple_select: OverrideSimple(),
                 direct_select: OverrideDirect({
-                    onVertex: (state: any, e: any) => {
-                        // If it's a PtP link, open a popup if the user clicks on a vertex. This
-                        // is the only way I could think of of implementing this at a granular
-                        // sub-feature level.
-                        if (!state.feature.properties.radius && !state.dragMoving) {
-                            // onVertex is called onMouseDown. We need to wait until mouseup to show the popup
-                            // otherwise there will be a race condition with the reverseGeocode callback and the
-                            // time when the user releases the mouse.
-                            popupAbortController = new AbortController();
-
-                            window.addEventListener(
-                                'mouseup',
-                                createPopupFromVertexEvent(state, e),
-                                {
-                                    once: true,
-                                    // @ts-ignore
-                                    signal: popupAbortController.signal
-                                }
-                            );
-                        }
-                    },
                     dragVertex: (state: any, e: any) => {
-                        // Abort and replace popup event listener if we are still dragging.
-                        if (popupAbortController !== null) {
-                            popupAbortController.abort();
-                            popupAbortController = new AbortController();
-
-                            window.addEventListener(
-                                'mouseup',
-                                createPopupFromVertexEvent(state, e),
-                                {
-                                    once: true,
-                                    // @ts-ignore
-                                    signal: popupAbortController.signal
-                                }
-                            );
-                        }
                         if (!state.feature.properties.radius) {
+                            if (this.showVertexDebounce) {
+                                this.showVertexDebounce.cancel();
+                            }
                             LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
                         }
                     }
@@ -376,7 +344,36 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 });
             }
         };
-        this.map.on('draw.selectionchange', this.updateRadioLocation.bind(this));
+
+        this.showVertexDebounce = _.debounce((e: any) => {
+            let featureCoords = e.features[0].geometry.coordinates;
+            let pointCoords = e.points[0].geometry.coordinates;
+            let selectedVertex =
+                pointCoords[0] === featureCoords[0][0] && pointCoords[1] === featureCoords[0][1]
+                    ? 0
+                    : 1;
+
+            let mapboxClient = MapboxSDKClient.getInstance();
+            let vertexLngLat = e.features[0].geometry.coordinates[selectedVertex];
+            mapboxClient.reverseGeocode(vertexLngLat, (response: any) => {
+                let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                    LinkCheckVertexClickCustomerConnectPopup,
+                    vertexLngLat,
+                    response
+                );
+                popup.setSelectedFeatureId(e.features[0].id);
+                popup.setSelectedVertex(selectedVertex);
+                popup.show();
+            });
+        }, 100);
+
+        this.map.on('draw.selectionchange', (e: any) => {
+            // on click vertex, show vertex tooltip and not link profile.
+            if (this.vertexSelected(e)) {
+                this.showVertexDebounce(e);
+            }
+            this.updateRadioLocation(e);
+        });
         this.map.on('draw.selectionchange', prioritizeDirectSelect.bind(this));
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
         this.map.on('draw.selectionchange', this.showInputs.bind(this));
@@ -610,6 +607,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         }
     }
 
+    vertexSelected(update: any): boolean {
+        return Boolean(
+            this.draw.getMode() === 'direct_select' &&
+                update.points &&
+                update.points.length === 1 &&
+                update.features &&
+                update.features.length === 1
+        );
+    }
+
     removeLinkHalo: (features: Array<MapboxGL.MapboxGeoJSONFeature>) => void = (features) => {
         const contains_selected =
             features.filter((feat) => {
@@ -647,12 +654,14 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             update.features[0].properties.radius === undefined &&
             update.features[0].geometry.type !== 'Point'
         ) {
-            // Don't pop up the link profile view if it was an AP/customer link that was moved.
+            // Don't pop up the link profile view if it was an AP/customer link that was moved,
+            // or if it was a vertex that moved
             if (
                 !(
                     update.features[0].properties.feature_type ===
                         WorkspaceFeatureTypes.AP_CPE_LINK && update.action === 'move'
-                )
+                ) &&
+                !this.vertexSelected(update)
             ) {
                 LOSCheckLinkProfileView.getInstance().show();
             }

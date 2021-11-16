@@ -365,7 +365,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 popup.setSelectedVertex(selectedVertex);
                 popup.show();
             });
-        }, 100);
+        }, 175);
 
         this.map.on('draw.selectionchange', (e: any) => {
             // on click vertex, show vertex tooltip and not link profile.

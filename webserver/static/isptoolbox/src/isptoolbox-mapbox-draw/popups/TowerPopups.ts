@@ -446,6 +446,7 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
         if (data.uuid === this.accessPoint?.workspaceId) {
             this.error = data.msg;
             this.stopTimer();
+            this.refreshPopup();
         }
     }
 

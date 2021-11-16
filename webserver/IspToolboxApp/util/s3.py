@@ -132,13 +132,17 @@ def findPointCloudPrefix(prefix: str, name: str):
     Use this method to find the production prefix of the point cloud tiles in s3
     TODO achong: replace with better s3 keys
     """
-    objs = s3_client.list_objects_v2(
+    paginator = s3_client.get_paginator('list_objects')
+    result = paginator.paginate(
         Bucket=bucket_name, Prefix=prefix, Delimiter='/')
-    cloud = list(
-        filter(lambda x: name in x['Prefix'], objs.get('CommonPrefixes', [])))
-    if len(cloud) > 0:
-        return cloud[0]['Prefix']
+    for prefix in result.search('CommonPrefixes'):
+        if name in prefix.get('Prefix'):
+            return prefix.get('Prefix')
     return ''
+
+
+def getObjectSize(object_name, bucket_name=bucket_name):
+    return s3_client.head_object(Bucket=bucket_name, Key=object_name).get('ContentLength', 0)
 
 
 def checkObjectExists(object_name, bucket_name=bucket_name):

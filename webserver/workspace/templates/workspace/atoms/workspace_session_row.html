@@ -17,13 +17,13 @@
     <p class="td-column tower-count desktop-only">{{session.number_of_towers}}</p>
     <p class="td-column last-edit"><span class="mobile-only">Last Edited:&nbsp;</span>{{session.last_updated}}</p>
     <p class="td-column actions d-flex flex-row">
-        <button type="button" class="session-edit-btn session-btn" data-target="{{session.uuid}}">
+        <button type="button" class="session-edit-btn session-btn" title="Edit session name" data-target="{{session.uuid}}">
             {% include 'workspace/atoms/pen_icon.html'%}
         </button>
-        <button class="session-save-btn session-btn d-none" data-target="{{session.uuid}}">
+        <button class="session-save-btn session-btn d-none" title="Save session name" data-target="{{session.uuid}}">
             {% include 'workspace/atoms/icons/save_icon.html'%}
         </button>
-        <button type="button" class="session-delete-btn session-btn" data-target="{{session.uuid}}">
+        <button type="button" class="session-delete-btn session-btn" title="Delete session" data-target="{{session.uuid}}">
             {% include 'workspace/atoms/trash_icon.html'%}
         </button>
     </p>

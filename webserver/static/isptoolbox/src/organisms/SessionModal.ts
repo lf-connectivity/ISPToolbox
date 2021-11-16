@@ -1,7 +1,7 @@
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
 import { getToolURL } from '../utils/ToolURL';
-import { djangoUrl } from '../utils/djangoUrl';
+import { addHoverTooltip } from './HoverTooltip';
 
 export class SessionModal {
     constructor() {
@@ -101,6 +101,11 @@ export class SessionModal {
                 console.log({ ordering, page });
                 this.showModalCallback(undefined, page, ordering);
             });
+
+            // Hover tooltips for save/edit/delete
+            addHoverTooltip('.session-save-btn');
+            addHoverTooltip('.session-edit-btn');
+            addHoverTooltip('.session-delete-btn');
         });
     }
 }

@@ -14,6 +14,7 @@ import { parseSearchBarLatitudeLongitude } from './utils/LatLngInputUtils';
 import { isBeta } from './LinkCheckUtils';
 import MapboxLockDraggingControl from './organisms/controls/MapboxLockDraggingControl';
 import AnalyticsService from './AnalyticsService';
+import { addHoverTooltip } from './organisms/HoverTooltip';
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -189,11 +190,7 @@ export abstract class ISPToolboxAbstractAppPage {
             this.onGeocoderLoad();
 
             // Add hover tooltips all static elements
-            // @ts-ignore
-            $('button[title]').tooltip({
-                delay: { show: 500, hide: 100 },
-                placement: 'left'
-            });
+            addHoverTooltip('button[title]', 'left');
         });
 
         //@ts-ignore

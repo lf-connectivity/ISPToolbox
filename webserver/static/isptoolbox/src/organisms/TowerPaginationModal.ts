@@ -2,6 +2,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl from 'mapbox-gl';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID, isUnitsUS } from '../utils/MapPreferences';
+import { addHoverTooltip } from './HoverTooltip';
 
 export class TowerPaginationModal {
     selector: string = '#accessPointModal';
@@ -127,5 +128,10 @@ export class TowerPaginationModal {
             $(`input[ap-uuid-target='${uuid}']`).prop('disabled', true);
             $(`.ap-edit-btn[data-target='${uuid}']`).removeClass('d-none');
         });
+
+        // Hover tooltips for save/edit/delete
+        addHoverTooltip('.ap-save-edit-btn');
+        addHoverTooltip('.ap-edit-btn');
+        addHoverTooltip('.ap-delete-btn');
     }
 }

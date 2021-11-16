@@ -20,11 +20,13 @@ class DSMTileEngine:
     def __init__(self, polygon: GEOSGeometry, clouds: Iterable[EPTLidarPointCloud]):
         self.polygon = polygon
         # Sort by collection start date to make sure latest data is shown first
-        self.clouds = sorted(clouds, key=lambda cld: cld.collection_start_date, reverse=True)
+        self.clouds = sorted(
+            clouds, key=lambda cld: cld.collection_start_date, reverse=True)
 
     def getDSM(self, output_filepath):
         start = time.time()
-        tiles = SlippyTiles.getTiles(self.polygon, SlippyTiles.DEFAULT_OUTPUT_ZOOM)
+        tiles = SlippyTiles.getTiles(
+            self.polygon, SlippyTiles.DEFAULT_OUTPUT_ZOOM)
         with tempfile.TemporaryDirectory() as tmp_dir:
             jobs = []
             tifs = []
@@ -33,24 +35,29 @@ class DSMTileEngine:
                 for cloud in self.clouds:
                     # if cloud.existsTile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM):
                     with tempfile.NamedTemporaryFile(suffix='.tif', delete=False, dir=tmp_dir) as tmp_tif:
-                        jobs.append(cloud.get_s3_key_tile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES))
+                        jobs.append(cloud.get_s3_key_tile(
+                            x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES))
                         tifs.append(tmp_tif.name)
                         break
-            TASK_LOGGER.info(f'Time to generate jobs: {time.time() - start} jobs:{ len(jobs)}')
+            TASK_LOGGER.info(
+                f'Time to generate jobs: {time.time() - start} jobs:{ len(jobs)}')
             readMultipleS3Objects(jobs, tifs)
             TASK_LOGGER.info(f'Finished: {time.time() - start} ')
-            cmd = shlex.split(f'gdal_merge.py -o {output_filepath} -of GTiff {" ".join(tifs)}')
+            cmd = shlex.split(
+                f'gdal_merge.py -o {output_filepath} -of GTiff {" ".join(tifs)}')
             celery_task_subprocess_check_output_wrapper(cmd)
 
     def getSurfaceHeight(self, pt: Point) -> float:
         # get tile coordinates x,y,z
-        tile_x, tile_y = SlippyTiles.deg2num(pt[1], pt[0], SlippyTiles.DEFAULT_OUTPUT_ZOOM)
+        tile_x, tile_y = SlippyTiles.deg2num(
+            pt[1], pt[0], SlippyTiles.DEFAULT_OUTPUT_ZOOM)
         # read the tile from s3
         with tempfile.NamedTemporaryFile(suffix='.tif') as tmp_tif:
             found_tif = False
             for cloud in self.clouds:
                 if cloud.existsTile(tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES):
-                    cloud.getTile(tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, tmp_tif, old_path=USE_OLD_TILES)
+                    cloud.getTile(
+                        tile_x, tile_y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, tmp_tif, old_path=USE_OLD_TILES)
                     found_tif = True
                     transformed_pt = pt.transform(cloud.srs, clone=True)
                     break

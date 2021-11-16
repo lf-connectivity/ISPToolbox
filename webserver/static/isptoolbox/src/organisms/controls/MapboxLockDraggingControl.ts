@@ -105,6 +105,8 @@ export default class MapboxLockDraggingControl {
         this._path = this.draw.options.lockDragging
             ? LOCK_POLYGON_TRUE_ICON
             : LOCK_POLYGON_FALSE_ICON;
+
+        this._button.setAttribute('title', 'Lock or unlock map shapes');
         this._svg.appendChild(this._path);
     }
 }

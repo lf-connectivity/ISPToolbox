@@ -187,6 +187,13 @@ export abstract class ISPToolboxAbstractAppPage {
             document.getElementById('geocoder')?.appendChild(this.geocoder.onAdd(this.map));
 
             this.onGeocoderLoad();
+
+            // Add hover tooltips all static elements
+            // @ts-ignore
+            $('button[title]').tooltip({
+                delay: { show: 500, hide: 100 },
+                placement: 'left'
+            });
         });
 
         //@ts-ignore

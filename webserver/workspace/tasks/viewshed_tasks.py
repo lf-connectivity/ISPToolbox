@@ -24,7 +24,7 @@ def computeViewshedCoverage(network_id, data, user_id):
         calculateCoverage(ap_uuid, user_id)
         # Update the Client
         updateClientAPStatus(network_id, ap_uuid, user_id)
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
         # Already logged
         resp = {
             'type': 'ap.unexpected_error',
@@ -32,7 +32,8 @@ def computeViewshedCoverage(network_id, data, user_id):
             'uuid': ap_uuid,
         }
         sendMessageToChannel(network_id, resp)
-    except DSMAvailabilityException:
+        raise e
+    except DSMAvailabilityException as e:
         resp = {
             'type': 'ap.unexpected_error',
             'msg': (
@@ -42,6 +43,7 @@ def computeViewshedCoverage(network_id, data, user_id):
             'uuid': ap_uuid,
         }
         sendMessageToChannel(network_id, resp)
+        raise e
     except Exception as e:
         # Log this scheisse to cloudwatch
         TASK_LOGGER.error(f'Task failed: {str(e)}')
@@ -53,6 +55,7 @@ def computeViewshedCoverage(network_id, data, user_id):
             'uuid': ap_uuid,
         }
         sendMessageToChannel(network_id, resp)
+        raise e
 
 
 def create_progress_status_callback(network_id: str, ap_uuid: str):

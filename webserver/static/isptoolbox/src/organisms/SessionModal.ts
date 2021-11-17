@@ -62,7 +62,7 @@ export class SessionModal {
                 })
                     .done(() => {
                         if (uuid === getSessionID()) {
-                            window.location.replace('/pro/network/edit/<uuid:session_id>/');
+                            window.location.replace(`/pro/network/edit/${uuid}/`);
                         }
                     })
                     .always(() => {

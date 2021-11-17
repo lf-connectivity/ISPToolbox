@@ -15,5 +15,7 @@ admin.site.register(models.MultiplayerSession)
 admin.site.register(models.ViewshedTile)
 admin.site.register(models.WorkspaceMapSession)
 
+admin.site.register(models.PointToPointLink)
+
 admin.site.register(models.AccessInformationJob)
 admin.site.register(models.DeleteInformationJob)

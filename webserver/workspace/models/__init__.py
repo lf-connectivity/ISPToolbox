@@ -4,7 +4,7 @@ from .network_models import (
     AccessPointCoverageBuildings, Radio, PTPLink, CPELocation, APToCPELink,
     CoverageArea, CoverageAreaSerializer,
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
-    WorkspaceFeature,
+    WorkspaceFeature, PointToPointLink, PointToPointLinkSerializer
 )
 from .viewshed_models import Viewshed, ViewshedTile
 from .multiplayer_models import MultiplayerSession

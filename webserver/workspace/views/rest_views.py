@@ -10,7 +10,7 @@ from workspace.models import (
     AccessPointSerializer,
     CPESerializer, APToCPELinkSerializer, WorkspaceMapSessionSerializer,
     WorkspaceMapSession, CoverageAreaSerializer,
-    Viewshed
+    Viewshed, PointToPointLinkSerializer
 )
 from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters
@@ -183,6 +183,39 @@ class APToCPELinkGet(WorkspacePerformCreateMixin,
                      WorkspaceFeatureGetQuerySetMixin,
                      generics.GenericAPIView):
     serializer_class = APToCPELinkSerializer
+    lookup_field = 'uuid'
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+class PointToPointLinkCreate(WorkspacePerformCreateMixin,
+                             mixins.CreateModelMixin,
+                             generics.GenericAPIView):
+    serializer_class = PointToPointLinkSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+
+class PointToPointLinkGet(WorkspacePerformCreateMixin,
+                          mixins.RetrieveModelMixin,
+                          mixins.DestroyModelMixin,
+                          mixins.UpdateModelMixin,
+                          WorkspaceFeatureGetQuerySetMixin,
+                          generics.GenericAPIView):
+    serializer_class = PointToPointLinkSerializer
     lookup_field = 'uuid'
     permission_classes = [AllowAny]
 

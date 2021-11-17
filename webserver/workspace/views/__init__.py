@@ -11,7 +11,7 @@ from .rest_views import (
     AccessPointLocationListCreate, AccessPointLocationGet, AccessPointCoverageResults,
     CPELocationCreate, CPELocationGet, APToCPELinkCreate, APToCPELinkGet,
     AccessPointCoverageStatsView, CoverageAreaCreate, CoverageAreaGet,
-    AccessPointCoverageViewshedOverlayView
+    AccessPointCoverageViewshedOverlayView, PointToPointLinkGet, PointToPointLinkCreate,
 )
 from .session_views import (
     SessionCreateUpdateView, SessionListView, SessionDeleteView, SessionDownloadGeoJSONView,

@@ -410,6 +410,27 @@ class APToCPELinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
         exclude = ['owner', 'session', 'created']
 
 
+class PointToPointLink(WorkspaceFeature):
+    frequency = models.FloatField(default=2.437, validators=[
+        MinValueValidator(0), MaxValueValidator(100)])
+    geojson = geo_models.LineStringField(validators=[])
+
+    @property
+    def feature_type(self):
+        return FeatureType.PTP_LINK.value
+
+
+class PointToPointLinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
+    lookup_field = 'uuid'
+    last_updated = serializers.DateTimeField(
+        format="%m/%d/%Y %-I:%M%p", required=False)
+    feature_type = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = APToCPELink
+        exclude = ['owner', 'session', 'created']
+
+
 class CoverageArea(WorkspaceFeature):
     name = models.CharField(max_length=50, default="Area")
     geojson = geo_models.GeometryField()

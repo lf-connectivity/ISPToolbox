@@ -142,7 +142,11 @@ def findPointCloudPrefix(prefix: str, name: str):
 
 
 def getObjectSize(object_name, bucket_name=bucket_name):
-    return s3_client.head_object(Bucket=bucket_name, Key=object_name).get('ContentLength', 0)
+    try:
+        return s3_client.head_object(
+            Bucket=bucket_name, Key=object_name).get('ContentLength', 0)
+    except:
+        return None
 
 
 def checkObjectExists(object_name, bucket_name=bucket_name):

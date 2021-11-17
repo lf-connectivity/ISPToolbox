@@ -411,9 +411,52 @@ class APToCPELinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
 
 
 class PointToPointLink(WorkspaceFeature):
-    frequency = models.FloatField(default=2.437, validators=[
+    MAX_HEIGHT_M = 1000
+    MIN_HEIGHT_M = 0.1
+    frequency = models.FloatField(default=5.4925, validators=[
         MinValueValidator(0), MaxValueValidator(100)])
     geojson = geo_models.LineStringField(validators=[])
+
+    radio0hgt = models.FloatField(default=18.29, validators=[
+        MinValueValidator(
+            MIN_HEIGHT_M,
+            message=_(
+                'Ensure this value is greater than or equal to %(limit_value)s m.')
+        ),
+        MaxValueValidator(
+            MAX_HEIGHT_M,
+            message=_(
+                'Ensure this value is less than or equal to %(limit_value)s. m')
+        )]
+    )
+    radio1hgt = models.FloatField(default=18.29, validators=[
+        MinValueValidator(
+            MIN_HEIGHT_M,
+            message=_(
+                'Ensure this value is greater than or equal to %(limit_value)s m.')
+        ),
+        MaxValueValidator(
+            MAX_HEIGHT_M,
+            message=_(
+                'Ensure this value is less than or equal to %(limit_value)s. m')
+        )]
+    )
+
+    @property
+    def radio0hgt_ft(self):
+        return self.radio0hgt * M_2_FT
+
+    @radio0hgt_ft.setter
+    def radio0hgt_ft(self, val):
+        self.radio0hgt = val / M_2_FT
+
+    @property
+    def radio1hgt_ft(self):
+        return self.radio1hgt * M_2_FT
+
+    @radio1hgt_ft.setter
+    def radio1hgt_ft(self, val):
+        self.radio1hgt = val / M_2_FT
 
     @property
     def feature_type(self):
@@ -425,6 +468,18 @@ class PointToPointLinkSerializer(serializers.ModelSerializer, SessionWorkspaceMo
     last_updated = serializers.DateTimeField(
         format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
+    radio0hgt_ft = serializers.FloatField(required=False, validators=[
+        MinValueValidator(PointToPointLink.MIN_HEIGHT_M * M_2_FT,
+                          message=_('Ensure this value is greater than or equal to %(limit_value)s ft.')),
+        MaxValueValidator(PointToPointLink.MAX_HEIGHT_M * M_2_FT,
+                          message=_('Ensure this value is less than or equal to %(limit_value)s ft.'))
+    ])
+    radio1hgt_ft = serializers.FloatField(required=False, validators=[
+        MinValueValidator(PointToPointLink.MIN_HEIGHT_M * M_2_FT,
+                          message=_('Ensure this value is greater than or equal to %(limit_value)s ft.')),
+        MaxValueValidator(PointToPointLink.MAX_HEIGHT_M * M_2_FT,
+                          message=_('Ensure this value is less than or equal to %(limit_value)s ft.'))
+    ])
 
     class Meta:
         model = PointToPointLink

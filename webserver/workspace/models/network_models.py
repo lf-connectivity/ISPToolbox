@@ -427,7 +427,7 @@ class PointToPointLinkSerializer(serializers.ModelSerializer, SessionWorkspaceMo
     feature_type = serializers.CharField(read_only=True)
 
     class Meta:
-        model = APToCPELink
+        model = PointToPointLink
         exclude = ['owner', 'session', 'created']
 
 

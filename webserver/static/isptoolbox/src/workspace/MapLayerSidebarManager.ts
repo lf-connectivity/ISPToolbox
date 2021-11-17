@@ -98,7 +98,8 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
 
         mapObjectsSection = document.getElementById('map-objects-section');
         $('#zerostate').addClass('invisible'); // on default don't show anyhing 
-        $('#zerostate').css('height', '0px'); 
+        $('#zerostate').css('max-height', '0px'); // on default don't show anyhing 
+        $('#map-objects-section').addClass('mt-n4');
         if (mapObjectsSection?.firstChild === null) {
             $('#zerostate').addClass('visible'); //if no items in layers, show the error message
             $('#zerostate').removeClass('invisible');

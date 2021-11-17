@@ -33,12 +33,13 @@ class DSMTileEngine:
             for tile in tiles:
                 x, y = tile
                 for cloud in self.clouds:
-                    # if cloud.existsTile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM):
-                    with tempfile.NamedTemporaryFile(suffix='.tif', delete=False, dir=tmp_dir) as tmp_tif:
-                        jobs.append(cloud.get_s3_key_tile(
-                            x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES))
-                        tifs.append(tmp_tif.name)
-                        break
+                    # Check for overlapping tiles
+                    if cloud.existsTile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM):
+                        with tempfile.NamedTemporaryFile(suffix='.tif', delete=False, dir=tmp_dir) as tmp_tif:
+                            jobs.append(cloud.get_s3_key_tile(
+                                x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES))
+                            tifs.append(tmp_tif.name)
+                            break
             TASK_LOGGER.info(
                 f'Time to generate jobs: {time.time() - start} jobs:{ len(jobs)}')
             readMultipleS3Objects(jobs, tifs)

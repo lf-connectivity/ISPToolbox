@@ -126,11 +126,16 @@ class EPTLidarPointCloud(models.Model):
             return s3.findPointCloudPrefix('dsm/tiles/', self.name)
 
     def existsTile(self, x, y, z, **kwargs):
-        # Use or statement to allow development machines to get tiles
-        return (
-            LidarDSMTileModel.objects.filter(cld=self, x=x, y=y, zoom=z).exists() or
-            s3.checkObjectExists(self.get_s3_key_tile(x, y, z, **kwargs))
-        )
+        if settings.PROD:
+            return LidarDSMTileModel.objects.filter(cld=self, x=x, y=y, zoom=z).exists()
+        # Check S3 - we are in local environment - lidar dsm tile models not populated
+        else:
+            size = s3.getObjectSize(
+                self.get_s3_key_tile(x, y, z, **kwargs))
+            if size is None:
+                return False
+            else:
+                return size > 0
 
     # TODO achong: remove
     def getTile(self, x, y, z, fp, **kwargs):

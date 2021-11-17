@@ -1,6 +1,7 @@
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
 import { getToolURL } from '../utils/ToolURL';
+import { djangoUrl } from '../utils/djangoUrl';
 
 export class SessionModal {
     constructor() {
@@ -62,7 +63,9 @@ export class SessionModal {
                 })
                     .done(() => {
                         if (uuid === getSessionID()) {
-                            window.location.replace(`/pro/network/edit/${uuid}/`);
+                            window.location.replace(
+                                djangoUrl('workspace:edit_network_by_uuid', uuid)
+                            );
                         }
                     })
                     .always(() => {

@@ -145,7 +145,7 @@ def getObjectSize(object_name, bucket_name=bucket_name):
     try:
         return s3_client.head_object(
             Bucket=bucket_name, Key=object_name).get('ContentLength', 0)
-    except:
+    except Exception:
         return None
 
 

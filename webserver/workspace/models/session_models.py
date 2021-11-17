@@ -16,7 +16,7 @@ from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
 from workspace.utils.import_session import convert_file_to_workspace_session, flatten_geometry
 from .network_models import (
     AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
-    CoverageAreaSerializer
+    CoverageAreaSerializer, PointToPointLinkSerializer
 )
 from workspace import geojson_utils
 from .network_models import (
@@ -51,7 +51,8 @@ class WorkspaceMapSession(models.Model):
     lock_dragging = models.BooleanField(default=False)
 
     fks_serializers = [AccessPointSerializer, CPESerializer,
-                       APToCPELinkSerializer, CoverageAreaSerializer]
+                       APToCPELinkSerializer, CoverageAreaSerializer,
+                       PointToPointLinkSerializer]
     UNIQUE_TOGETHER_ERROR = _(
         "You already have a session with that name, please write a different name.")
 
@@ -179,6 +180,11 @@ class WorkspaceMapSession(models.Model):
             cpe.save()
             old_feature_map.update({old_uuid: cpe})
 
+        for link in self.pointtopointlink_set.all():
+            link.uuid = None
+            link.map_session = new_instance
+            link.save()
+
         for link in self.aptocpelink_set.all():
             new_link = APToCPELink(
                 owner=self.owner, map_session=new_instance, ap=old_feature_map[link.ap.uuid],
@@ -233,6 +239,12 @@ class WorkspaceMapSession(models.Model):
                         ap_dict.update({
                             geom.get('properties', {}).get('id', None): ap
                         })
+                elif geos_geom.geom_type == 'LineString':
+                    ptp = PointToPointLinkSerializer.Meta.model(
+                        owner=request.user, map_session=session,
+                        geojson=geos_geom,
+                    )
+                    ptp.save()
         except Exception as e:
             session.delete()
             raise e

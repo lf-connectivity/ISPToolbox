@@ -38,20 +38,18 @@
     .actions
         width: 10%
         text-align: right
+        margin-left: 1rem
     .session-btn
         border: 0
         background: transparent
         width: 40px
         height: 40px
+        margin-left: 1rem
         svg path
             stroke: $mid-gray-color-2
             transition: 0.2s all ease-in-out
         &:focus
             outline: 0
-    .session-delete-btn
-        &:hover svg path,
-        &:focus svg path
-            stroke: $error-color
     .desktop-only
         display: inline-block
     .mobile-only
@@ -68,6 +66,7 @@
             width: 25%
         .actions
             width: 10%
+            margin-left: 1rem
 
 // small screen and smaller
 @media (max-width: $breakpoint-md)

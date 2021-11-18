@@ -946,6 +946,7 @@ class WorkspacePTPLinkTestCase(WorkspaceRestViewsTestCase):
         )
         self.assertRaises(ValidationError, ptp.full_clean)
 
+
 class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
     def setUp(self):
         super(WorkspaceCloudRfCoverageTestCase, self).setUp()

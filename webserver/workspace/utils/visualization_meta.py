@@ -26,19 +26,34 @@ def get_workspace_potree_visualization_metadata(feature: models.WorkspaceFeature
     return metadata
 
 
-def PotreeMetaLine(feature: models.APToCPELink, srs):
+def PotreeMetaLine(feature: models.WorkspaceFeature, srs: int):
     """
     Get metadata necessary to render line in potree
     """
     geometry_T = feature.geojson.transform(srs, clone=True)
     bb = geometry_T.extent
-    tx = json.loads(feature.ap.geojson.transform(srs, clone=True).json)
-    rx = json.loads(feature.cpe.geojson.transform(srs, clone=True).json)
+    if isinstance(feature, models.APToCPELink):
+        heights = [feature.ap.height, feature.cpe.height],
+        dtms = [feature.ap.get_dtm_height(), feature.cpe.get_dtm_height()]
+        names = [feature.ap.name, feature.cpe.name]
+        tx = json.loads(feature.ap.geojson.transform(srs, clone=True).json)
+        rx = json.loads(feature.cpe.geojson.transform(srs, clone=True).json)
+    elif isinstance(feature, models.PointToPointLink):
+        heights = [feature.radio0hgt, feature.radio1hgt]
+        dtms = feature.get_dtm_heights()
+        names = ['radio0', 'radio1']
+        rx = json.loads(
+            Point(feature.geojson[1], srid=feature.geojson.srid).transform(srs, clone=True).json)
+        tx = json.loads(
+            Point(feature.geojson[0], srid=feature.geojson.srid).transform(srs, clone=True).json)
+    else:
+        raise Exception('Unknown Linestring feature type')
+
     metadata = {
         'type': 'LineString',
-        'heights': [feature.ap.height, feature.cpe.height],
-        'dtms': [feature.ap.get_dtm_height(), feature.cpe.get_dtm_height()],
-        'names': [feature.ap.name, feature.cpe.name],
+        'heights': heights,
+        'dtms': dtms,
+        'names': names,
         'bb': bb,
         'tx': tx,
         'rx': rx,

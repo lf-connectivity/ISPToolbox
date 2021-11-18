@@ -1,4 +1,6 @@
+from typing import List
 from django.contrib.gis.db.models.fields import GeometryField
+from django.contrib.gis.geos.point import Point
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.conf import settings
@@ -464,6 +466,12 @@ class PointToPointLink(WorkspaceFeature):
     @property
     def feature_type(self):
         return FeatureType.PTP_LINK.value
+
+    def get_dtm_heights(self) -> List[float]:
+        return [
+            getDTMPoint(Point(self.geojson[0], srid=self.geojson.srid)),
+            getDTMPoint(Point(self.geojson[1], srid=self.geojson.srid))
+        ]
 
 
 class PointToPointLinkSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):

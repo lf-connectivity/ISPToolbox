@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.contrib.gis.geos.linestring import LineString
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from rest_framework.test import APIClient
@@ -8,7 +10,7 @@ from uuid import UUID
 from workspace import geojson_utils
 from workspace.models import (
     AccessPointLocation, CPELocation, APToCPELink, WorkspaceMapSession,
-    CoverageArea
+    CoverageArea, PointToPointLink
 )
 from workspace.models.model_constants import FeatureType, M_2_FT
 from workspace.models import (
@@ -934,6 +936,15 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         self.assertJSONEqual(json.dumps(expected_feature_collection),
                              self.json_dumps(feature_collection))
 
+
+class WorkspacePTPLinkTestCase(WorkspaceRestViewsTestCase):
+    def test_long_linestring_validation(self):
+        ptp = PointToPointLink(
+            owner=self.testuser,
+            map_session=self.test_session,
+            geojson=LineString((0, 0), (1, 1), (2, 3))
+        )
+        self.assertRaises(ValidationError, ptp.full_clean)
 
 class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
     def setUp(self):

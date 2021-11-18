@@ -18,6 +18,7 @@ import numpy
 import math
 import json
 import uuid
+from workspace.models.validators import validate_ptp_link_geometry
 
 from workspace.utils.geojson_circle import createGeoJSONCircle
 from .model_constants import KM_2_MI, FeatureType, M_2_FT
@@ -415,7 +416,9 @@ class PointToPointLink(WorkspaceFeature):
     MIN_HEIGHT_M = 0.1
     frequency = models.FloatField(default=5.4925, validators=[
         MinValueValidator(0), MaxValueValidator(100)])
-    geojson = geo_models.LineStringField(validators=[])
+    geojson = geo_models.LineStringField(validators=[
+        validate_ptp_link_geometry
+    ])
 
     radio0hgt = models.FloatField(default=18.29, validators=[
         MinValueValidator(

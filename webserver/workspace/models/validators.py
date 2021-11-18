@@ -1,3 +1,4 @@
+from django.contrib.gis.geos.linestring import LineString
 from django.core.exceptions import ValidationError
 
 
@@ -6,3 +7,8 @@ def validate_zoom_level(zoom):
         raise ValidationError('Zoom must be a positive number')
     elif zoom > 20:
         raise ValidationError('Zoom must be less than 20')
+
+
+def validate_ptp_link_geometry(value: LineString):
+    if len(value) != 2:
+        raise ValidationError('PtP Link consists of two points')

@@ -390,6 +390,9 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
                 this.accessPoint.getFeatureProperty('unknown') === 0
             ) {
                 return `
+                    <div>
+                    <hr style="#4B4B4B solid 1px">
+                    <span>These calculations are based on the tower specs.</span>
                     <div class="ap-stat">
                         <p class="ap-stat--label">Est. Clear LOS<span>at least 1 point on rooftop</span></p>
                         <p class="ap-stat--value" style="color: ${
@@ -407,6 +410,8 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
                             <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('unserviceable')}
                         </p>
+                    </div>
+                    <hr style="#4B4B4B solid 1px">
                     </div>
             `;
             }

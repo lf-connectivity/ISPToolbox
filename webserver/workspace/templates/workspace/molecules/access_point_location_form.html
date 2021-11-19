@@ -51,6 +51,9 @@
             <span>{%if units == 'METRIC'%}km{%else%}mi{% endif %}</span>
           </div>
         </li>
+        <div>
+          <span>Legend</span> 
+        </div>
         {% if errors.radius %}{% for error in errors.radius %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
         {% if errors.radius_miles %}{% for error in errors.radius_miles %}<label class="error">{{error|stringformat:'s'}}</label>{% endfor %}{% endif %}
         <li>

@@ -29,4 +29,4 @@ sudo ./svc.sh install root
 sudo ./svc.sh start
 
 # Add crontab to ensure disk space is available
-# 0 1 * * * docker system prune --volumes -f
+(crontab -l ; echo "0 1 * * * docker system prune --volumes -f") | crontab -

@@ -30,10 +30,6 @@ export * from "./navbar";
 export * from "./sources_page";
 export * from "./viewports";
 
-const compareSnapshotCommand = require("cypress-visual-regression/dist/command");
-
-compareSnapshotCommand();
-
 Cypress.Commands.add("login", () => {
   // reset test accounts
   cy.request("POST", "/test/accounts/").then((response) => {

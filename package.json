@@ -7,8 +7,7 @@
     "@cypress/code-coverage": "^3.9.11",
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "cypress": "^8.4.1",
-    "cypress-file-upload": "^5.0.8",
-    "cypress-visual-regression": "^1.6.1"
+    "cypress-file-upload": "^5.0.8"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -2,7 +2,7 @@ import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import * as _ from 'lodash';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
-import { AccessPoint, APToCPELink, CPE } from './WorkspaceFeatures';
+import { AccessPoint, APToCPELink, CPE, PointToPointLink } from './WorkspaceFeatures';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { BuildingCoverageStatus } from './BuildingCoverage';
 import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
@@ -13,7 +13,8 @@ import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 const SUPPORTED_FEATURE_TYPES = [
     WorkspaceFeatureTypes.AP_CPE_LINK,
     WorkspaceFeatureTypes.AP,
-    WorkspaceFeatureTypes.CPE
+    WorkspaceFeatureTypes.CPE,
+    WorkspaceFeatureTypes.PTP_LINK,
 ];
 
 export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
@@ -49,6 +50,13 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
                 this.createApFeature(feature);
             }
         };
+
+        this.saveFeatureDrawModeHandlers.draw_link = (feature: GeoJSON.Feature<GeoJSON.LineString>) => {
+            if(feature.properties?.feature_type === WorkspaceFeatureTypes.PTP_LINK){
+                const ptp = new PointToPointLink(this.map, this.draw, feature);
+                this.saveWorkspaceFeature(ptp, (resp) => {});
+            }
+        }
     }
 
     initDeleteFeatureHandlers() {

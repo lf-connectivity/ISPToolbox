@@ -47,6 +47,7 @@ import { LiDAR3DView } from './organisms/LiDAR3DView';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
 import { WorkspacePointFeature } from './workspace/WorkspacePointFeature';
+import { feature } from '@turf/helpers';
 var _ = require('lodash');
 
 type HighChartsExtremesEvent = {
@@ -86,7 +87,7 @@ Object.keys(center_freq_values).forEach((k: string) => {
 });
 
 const DEFAULT_LINK_FREQ = center_freq_values['5 GHz'];
-const DEFAULT_RADIO_HEIGHT = 60;
+const DEFAULT_RADIO_HEIGHT = ft2m(60);
 const DEFAULT_RADIO_0_NAME = 'radio_0';
 const DEFAULT_RADIO_1_NAME = 'radio_1';
 
@@ -125,7 +126,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     hover3dDot: any;
     linkProfileHoverPosition: number;
-    selectedFeatureID: string | null;
+    selectedFeatureID: string | undefined | null;
 
     datasets: Map<LOSWSHandlers, Array<string>>;
     link_status: LinkStatus;
@@ -518,13 +519,13 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.updateLinkChart(true);
                 if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
                     if (this.workspaceLinkSelected()) {
-                        // @ts-ignore
                         let link = this.draw.get(this.selectedFeatureID);
                         let ap = LOSCheckWorkspaceManager.getFeatureByUuid(link?.properties?.ap);
                         ap.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
                         this.map.fire('draw.update', { features: [ap.getFeatureData()] });
                     } else {
-                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', height);
+                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', isUnitsUS() ? ft2m(height) : height);
+                        this.map.fire('draw.update', { features: [this.draw.get(this.selectedFeatureID)] });
                     }
                 }
             }, 500)
@@ -535,13 +536,13 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.updateLinkChart(true);
                 if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
                     if (this.workspaceLinkSelected()) {
-                        // @ts-ignore
                         let link = this.draw.get(this.selectedFeatureID);
                         let cpe = LOSCheckWorkspaceManager.getFeatureByUuid(link?.properties?.cpe);
                         cpe.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
                         this.map.fire('draw.update', { features: [cpe.getFeatureData()] });
                     } else {
-                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', height);
+                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', isUnitsUS() ? ft2m(height) : height);
+                        this.map.fire('draw.update', { features: [this.draw.get(this.selectedFeatureID)] });
                     }
                 }
             }, 500)
@@ -646,19 +647,19 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         $('#data-container').collapse('show');
     }
 
-    updateRadioLocation(update: any) {
+    updateRadioLocation(update: {features : Array<GeoJSON.Feature>, action : undefined | 'move'}) {
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
         if (
             update.features.length &&
-            update.features[0].properties.radius === undefined &&
+            update.features[0].properties?.radius === undefined &&
             update.features[0].geometry.type !== 'Point'
         ) {
             // Don't pop up the link profile view if it was an AP/customer link that was moved,
             // or if it was a vertex that moved
             if (
                 !(
-                    update.features[0].properties.feature_type ===
+                    update.features[0].properties?.feature_type ===
                         WorkspaceFeatureTypes.AP_CPE_LINK && update.action === 'move'
                 ) &&
                 !this.vertexSelected(update)
@@ -666,12 +667,12 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 LOSCheckLinkProfileView.getInstance().show();
             }
             const feat = update.features[0];
-            this.selectedFeatureID = feat.id;
+            this.selectedFeatureID = String(feat.id);
 
             // Workspace AP-CPE link frequency, heights, and name
             if (
-                feat.properties.feature_type &&
-                feat.properties.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
+                feat.properties?.feature_type &&
+                feat.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
             ) {
                 if (center_freq_values_reverse.has(feat.properties.frequency)) {
                     $('#freq-dropdown').text(
@@ -703,52 +704,57 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.radio_names[1] = cpe.getFeatureProperty('name');
                 this.lidar3dview?.updateAnimationTitles();
             } else {
-                if (feat.properties.frequency === undefined && this.selectedFeatureID) {
+                if (feat.properties?.frequency === undefined && this.selectedFeatureID) {
                     this.draw.setFeatureProperty(
                         this.selectedFeatureID,
                         'frequency',
                         DEFAULT_LINK_FREQ
                     );
                 }
-                if (center_freq_values_reverse.has(feat.properties.frequency)) {
+                if (center_freq_values_reverse.has(feat.properties?.frequency)) {
                     $('#freq-dropdown').text(
-                        center_freq_values_reverse.get(feat.properties.frequency) as string
+                        center_freq_values_reverse.get(feat.properties?.frequency) as string
                     );
                 }
 
-                let radio0hgt = feat.properties.radio0hgt;
+                let radio0hgt = isUnitsUS() ? feat.properties?.radio0hgt : feat.properties?.radio0hgt_ft;
                 if (radio0hgt == undefined && this.selectedFeatureID) {
                     radio0hgt = DEFAULT_RADIO_HEIGHT;
-                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', radio0hgt);
+                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', isUnitsUS() ? ft2m(radio0hgt) : radio0hgt);
+                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt_ft', m2ft(radio0hgt));
                 }
-                $('#hgt-0').val(radio0hgt);
-                let radio1hgt = feat.properties.radio1hgt;
-                if (feat.properties.radio1hgt == undefined && this.selectedFeatureID) {
+                $('#hgt-0').val(Math.round(isUnitsUS() ? m2ft(radio0hgt) : radio0hgt));
+                let radio1hgt = isUnitsUS() ? feat.properties?.radio1hgt : feat.properties?.radio1hgt_ft;
+                if (feat.properties?.radio1hgt == undefined && this.selectedFeatureID) {
                     radio1hgt = DEFAULT_RADIO_HEIGHT;
-                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', radio1hgt);
+                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', isUnitsUS() ? ft2m(radio1hgt) : radio1hgt);
+                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt_ft', m2ft(radio1hgt));
                 }
-                $('#hgt-1').val(radio1hgt);
+                $('#hgt-1').val(Math.round(isUnitsUS() ? m2ft(radio1hgt) : radio1hgt));
                 $('#radio_name-0').text(DEFAULT_RADIO_0_NAME);
                 $('#radio_name-1').text(DEFAULT_RADIO_1_NAME);
                 this.radio_names[0] = DEFAULT_RADIO_0_NAME;
                 this.radio_names[1] = DEFAULT_RADIO_1_NAME;
                 this.lidar3dview?.updateAnimationTitles();
             }
+            if(feat.geometry.type === 'LineString')
+            {
+                $('#lat-lng-0').val(
+                    `${feat.geometry.coordinates[0][1].toFixed(
+                        5
+                    )}, ${feat.geometry.coordinates[0][0].toFixed(5)}`
+                );
+                $('#lat-lng-1').val(
+                    `${feat.geometry.coordinates[1][1].toFixed(
+                        5
+                    )}, ${feat.geometry.coordinates[1][0].toFixed(5)}`
+                );
+            
 
-            $('#lat-lng-0').val(
-                `${feat.geometry.coordinates[0][1].toFixed(
-                    5
-                )}, ${feat.geometry.coordinates[0][0].toFixed(5)}`
-            );
-            $('#lat-lng-1').val(
-                `${feat.geometry.coordinates[1][1].toFixed(
-                    5
-                )}, ${feat.geometry.coordinates[1][0].toFixed(5)}`
-            );
-
-            const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
-            if (selected_link_source.type === 'geojson') {
-                selected_link_source.setData(feat.geometry);
+                const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+                if (selected_link_source.type === 'geojson') {
+                    selected_link_source.setData(feat);
+                }
             }
 
             this.updateLinkChart();

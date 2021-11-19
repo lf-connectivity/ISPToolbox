@@ -21,7 +21,7 @@ function _LinkMode() {
 
             line = this.newFeature({
                 type: 'Feature',
-                properties: {},
+                properties: { feature_type: 'ptp_link' },
                 geometry: {
                     type: 'LineString',
                     coordinates: [start]
@@ -31,7 +31,7 @@ function _LinkMode() {
         } else {
             line = this.newFeature({
                 type: 'Feature',
-                properties: {},
+                properties: { feature_type: 'ptp_link' },
                 geometry: {
                     type: 'LineString',
                     coordinates: []

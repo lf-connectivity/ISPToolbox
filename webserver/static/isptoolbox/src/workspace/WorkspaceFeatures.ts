@@ -35,6 +35,8 @@ const CPE_SERIALIZER_FIELDS = ['name', 'height', 'ap'];
 
 const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe'];
 
+const PTP_LINK_FIELDS = ['frequency', 'radio0hgt', 'radio1hgt'];
+
 const COVERAGE_AREA_FIELDS = ['name'];
 
 const LINK_AP_INDEX = 0;
@@ -311,6 +313,24 @@ export class APToCPELink extends WorkspaceLineStringFeature {
                 newAP.getFeatureGeometryCoordinates() as [number, number]
             );
         }
+    }
+}
+
+export class PointToPointLink extends WorkspaceLineStringFeature {
+    constructor(
+        map: MapboxGL.Map,
+        draw: MapboxDraw,
+        featureData: Feature<LineString, any> | string,
+    ) {
+        super(
+            map,
+            draw,
+            featureData,
+            djangoUrl('workspace:ptp-link'),
+            PTP_LINK_FIELDS,
+            PTP_LINK_FIELDS,
+            WorkspaceFeatureTypes.PTP_LINK
+        );
     }
 }
 

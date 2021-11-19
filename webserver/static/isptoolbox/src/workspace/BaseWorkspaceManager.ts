@@ -7,7 +7,7 @@ import { SessionModal } from '../organisms/SessionModal';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
-import { AccessPoint, CPE, APToCPELink, CoverageArea } from './WorkspaceFeatures';
+import { AccessPoint, CPE, APToCPELink, CoverageArea, PointToPointLink } from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 import { IMapboxDrawPlugin } from '../utils/IMapboxDrawPlugin';
 
@@ -119,7 +119,7 @@ export abstract class BaseWorkspaceManager extends IMapboxDrawPlugin {
                 feature.properties.radius = feature.properties.max_radius;
                 feature.properties.center = feature.geometry.coordinates;
             });
-
+            addType(WorkspaceFeatureTypes.PTP_LINK, PointToPointLink);
             addType(WorkspaceFeatureTypes.CPE, CPE);
             addType(WorkspaceFeatureTypes.COVERAGE_AREA, CoverageArea);
 

@@ -1,0 +1,21 @@
+{% load i18n %}
+<div class="modal theme-modal fade" id="sessionDel" tabindex="-1" role="dialog" aria-labelledby="sessionDelTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="sessionDelTitle">
+                    {% blocktranslate %}Are you sure you want to delete the session ''?{% endblocktranslate %}
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+                </button>
+            </div>
+            <div class="modal-footer">
+                <input hidden type="text" name="uuid">
+                <button type="button" class="btn btn-primary isptoolbox-btn negative" data-dismiss="modal"
+                    id="session-delete-confirm-btn">{% translate "Confirm"%}</button>
+            </div>
+        </div>
+    </div>
+</div>

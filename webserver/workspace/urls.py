@@ -98,8 +98,6 @@ urlpatterns = [
     path('workspace/api/session/list/',
          views.SessionListView.as_view(), name="session_list"),
     path('workspace/api/session/delete/<uuid:uuid>/',
-         views.SessionDeleteView.as_view()),
-    path('workspace/api/session/delete/',
          views.SessionDeleteView.as_view(), name="session_delete"),
     # Forms
     path('workspace/form/ap-loc-form-<uuid:uuid>/',

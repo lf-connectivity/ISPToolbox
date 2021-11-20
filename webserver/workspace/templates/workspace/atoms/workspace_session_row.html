@@ -23,7 +23,11 @@
         <button class="btn session-save-btn ap-save-edit-btn d-none" data-target="{{session.uuid}}">
             {% include 'workspace/atoms/icons/save_icon.html'%}
         </button>
-        <button type="button" class="btn btn-edit session-delete-btn ap-delete-btn" data-target="{{session.uuid}}">
+        <button type="button" class="session-delete-btn session-btn"
+            title="Delete session"
+            data-target="{{session.uuid}}"
+            data-target-name="{{session.name}}"
+        >
             {% include 'workspace/atoms/trash_icon.html'%}
         </button>
     </p>

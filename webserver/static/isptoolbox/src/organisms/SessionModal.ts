@@ -74,25 +74,38 @@ export class SessionModal {
             });
             // Delete Button Callback
             $('.session-delete-btn').on('click', (event) => {
+                // @ts-ignore
+                $('#paginationNetworkModal').modal('hide');
+                // @ts-ignore
+                $('#sessionDel').modal('show');
                 const uuid = event.currentTarget.getAttribute('data-target');
-                if (typeof uuid === 'string') {
-                    $.ajax({
-                        url: `/pro/workspace/api/session/delete/${uuid}/`,
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                            Accept: 'application/json'
-                        }
-                    }).done(() => {
-                        if (uuid === getSessionID()) {
-                            window.location.replace('/pro/network/edit/');
-                        } else {
-                            const ordering = this.getCurrentOrdering();
-                            const page = this.getCurrentPage();
-                            this.showModalCallback(null, page, ordering);
-                        }
-                    });
+                const name = event.currentTarget.getAttribute('data-target-name');
+                // Update modal text
+                if(typeof name === 'string')
+                {
+                    // TODO: i18n
+                    $('#sessionDelTitle').text(`Are you sure you want to delete the session '${name}'?`);
                 }
+                const delete_submit_callback = () => {$.ajax({
+                    url: djangoUrl('workspace:session_delete', uuid),
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        Accept: 'application/json'
+                    }
+                }).done(() => {
+                    if (uuid === getSessionID()) {
+                        window.location.replace('/pro/network/edit/');
+                    }
+                })};
+                // Add Callback to Modal Submit
+                const delForm = $('#sessionDel').find('#session-delete-confirm-btn');
+                delForm.on("click", delete_submit_callback);
+
+                $('#sessionDel').on('hidden.bs.modal', (e) => {
+                    // Remove callback on modal close
+                    delForm.off('click', delete_submit_callback);
+                });
             });
             // Ordering Button Callbacks
             $('.sort-ap').on('click', (e: any) => {

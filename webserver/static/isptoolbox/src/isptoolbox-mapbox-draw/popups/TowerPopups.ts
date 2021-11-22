@@ -116,7 +116,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         }
     }
 
-    protected cleanup() {}
+    protected cleanup() { }
 
     protected getHeightValue() {
         return Math.round(
@@ -234,19 +234,18 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                                 class="input--tower-name" 
                                 id='${NAME_INPUT_ID}' 
                                 value='${sanitizeString(
-                                    this.accessPoint?.getFeatureProperty('name')
-                                )}' 
+            this.accessPoint?.getFeatureProperty('name')
+        )}' 
                                 placeholder='Tower Name'>
                             <div class="coordinates">
                                 <div class="data-with-unit">
                                     <input type='text'
-                                            value='${
-                                                coords
-                                                    ? `${coords[1].toFixed(5)}, ${coords[0].toFixed(
-                                                          5
-                                                      )}`
-                                                    : ''
-                                            }'
+                                            value='${coords
+                ? `${coords[1].toFixed(5)}, ${coords[0].toFixed(
+                    5
+                )}`
+                : ''
+            }'
                                             id='${LAT_LNG_INPUT_ID}'
                                             placeholder='latitude, longitude'
                                             class="input--value"
@@ -271,14 +270,14 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(
-                                           isUnitsUS()
-                                               ? this.accessPoint?.getFeatureProperty(
-                                                     'default_cpe_height_ft'
-                                                 )
-                                               : this.accessPoint?.getFeatureProperty(
-                                                     'default_cpe_height'
-                                                 )
-                                       )}'
+                isUnitsUS()
+                    ? this.accessPoint?.getFeatureProperty(
+                        'default_cpe_height_ft'
+                    )
+                    : this.accessPoint?.getFeatureProperty(
+                        'default_cpe_height'
+                    )
+            )}'
                                        id='${CPE_HGT_INPUT_ID}'
                                        min='${MIN_HEIGHT}' max='${MAX_HEIGHT}'
                                        class="input--value"
@@ -290,15 +289,14 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <p class="label">Radius</p>
                             <div class="data-with-unit">
                                 <input type='number'
-                                       value='${
-                                           isUnitsUS()
-                                               ? this.accessPoint
-                                                     ?.getFeatureProperty('radius_miles')
-                                                     .toFixed(2)
-                                               : this.accessPoint
-                                                     ?.getFeatureProperty('max_radius')
-                                                     .toFixed(2)
-                                       }'
+                                       value='${isUnitsUS()
+                ? this.accessPoint
+                    ?.getFeatureProperty('radius_miles')
+                    .toFixed(2)
+                : this.accessPoint
+                    ?.getFeatureProperty('max_radius')
+                    .toFixed(2)
+            }'
                                        id='${RADIUS_INPUT_ID}'
                                        min='${MIN_RADIUS}' max='${MAX_RADIUS}' step='0.01'
                                        class="input--value"
@@ -320,15 +318,14 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         return '';
     }
 
-    protected refreshPopup(): void {}
+    protected refreshPopup(): void { }
 
     protected getDeleteRow() {
         return `
             <a id="${TOWER_DELETE_BUTTON_ID}" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
-            ${
-                this.accessPoint && this.accessPoint.getFeatureProperty('last_updated')
-                    ? `<p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>`
-                    : ''
+            ${this.accessPoint && this.accessPoint.getFeatureProperty('last_updated')
+                ? `<p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>`
+                : ''
             }
         `;
     }
@@ -390,28 +387,35 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
                 this.accessPoint.getFeatureProperty('unknown') === 0
             ) {
                 return `
-                    <div>
-                    <hr style="#4B4B4B solid 1px">
-                    <span>These calculations are based on the tower specs.</span>
                     <div class="ap-stat">
-                        <p class="ap-stat--label">Est. Clear LOSS<span>at least 1 point on rooftop</span></p>
-                        <p class="ap-stat--value" style="color: ${
-                            StyleConstants.SERVICEABLE_BUILDINGS_COLOR
-                        }">
+                    <p style="font-size: 0.75rem">These calculations are based on the tower specs.</p>
+                    </div>
+                    <div class="ap-stat">
+                        <p class="ap-stat--label">Est. Clear LOS<span>at least 1 point on rooftop</span></p>
+                        <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR
+                    }">
                             <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('serviceable')}
                         </p>
                     </div>
                     <div class="ap-stat">
                         <p class="ap-stat--label">Est. Obstructed LOS</p>
-                        <p class="ap-stat--value" style="color: ${
-                            StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR
-                        }">
+                        <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR
+                    }">
                             <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('unserviceable')}
                         </p>
                     </div>
-                    <hr style="#4B4B4B solid 1px">
+                    <div class="ap-stat">
+                    <p class="ap-stat--label text-white">Results Legend</span> 
+                    <div class="d-flex align-items-center">
+                    <div style="width: 10px; height: 10px; background-color:#7C848D"></div>
+                    <span class="ap stat--value text-white m-1">clear</span> 
+                    </div>
+                    <div class="d-flex align-items-center">
+                    <div style="width: 10px; height: 10px; background-color:#44474C"></div>
+                    <span class="ap stat--value text-white m-1">obstructed</span> 
+                    <div>
                     </div>
             `;
             }
@@ -420,8 +424,7 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
             return `
             <div align="center">
                 ${LOADING_SVG}
-                <p align="center bold">${
-                    this.progress_message ? this.progress_message : 'Finalizing results'
+                <p align="center bold">${this.progress_message ? this.progress_message : 'Finalizing results'
                 }</p>
                 <p align="center">${this.formatTimeRemaining()}</p>
             </div>

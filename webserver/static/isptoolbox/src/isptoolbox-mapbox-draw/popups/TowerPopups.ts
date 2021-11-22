@@ -394,7 +394,7 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
                     <hr style="#4B4B4B solid 1px">
                     <span>These calculations are based on the tower specs.</span>
                     <div class="ap-stat">
-                        <p class="ap-stat--label">Est. Clear LOS<span>at least 1 point on rooftop</span></p>
+                        <p class="ap-stat--label">Est. Clear LOSS<span>at least 1 point on rooftop</span></p>
                         <p class="ap-stat--value" style="color: ${
                             StyleConstants.SERVICEABLE_BUILDINGS_COLOR
                         }">

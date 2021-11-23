@@ -215,7 +215,6 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
 
         // For ASR/uneditable towers, no changing location
         if (this.accessPoint?.getFeatureProperty('uneditable')) {
-            $(`#${NAME_INPUT_ID}`).prop('readonly', true);
             $(`#${LAT_LNG_INPUT_ID}`).prop('readonly', true);
         }
     }

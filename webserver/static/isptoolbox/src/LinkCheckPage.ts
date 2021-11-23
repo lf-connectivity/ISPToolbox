@@ -524,8 +524,14 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         ap.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
                         this.map.fire('draw.update', { features: [ap.getFeatureData()] });
                     } else {
-                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', isUnitsUS() ? ft2m(height) : height);
-                        this.map.fire('draw.update', { features: [this.draw.get(this.selectedFeatureID)] });
+                        this.draw.setFeatureProperty(
+                            this.selectedFeatureID,
+                            'radio0hgt',
+                            isUnitsUS() ? ft2m(height) : height
+                        );
+                        this.map.fire('draw.update', {
+                            features: [this.draw.get(this.selectedFeatureID)]
+                        });
                     }
                 }
             }, 500)
@@ -541,8 +547,14 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         cpe.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
                         this.map.fire('draw.update', { features: [cpe.getFeatureData()] });
                     } else {
-                        this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', isUnitsUS() ? ft2m(height) : height);
-                        this.map.fire('draw.update', { features: [this.draw.get(this.selectedFeatureID)] });
+                        this.draw.setFeatureProperty(
+                            this.selectedFeatureID,
+                            'radio1hgt',
+                            isUnitsUS() ? ft2m(height) : height
+                        );
+                        this.map.fire('draw.update', {
+                            features: [this.draw.get(this.selectedFeatureID)]
+                        });
                     }
                 }
             }, 500)
@@ -647,7 +659,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         $('#data-container').collapse('show');
     }
 
-    updateRadioLocation(update: {features : Array<GeoJSON.Feature>, action : undefined | 'move'}) {
+    updateRadioLocation(update: { features: Array<GeoJSON.Feature>; action: undefined | 'move' }) {
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
         if (
@@ -668,6 +680,27 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             }
             const feat = update.features[0];
             this.selectedFeatureID = String(feat.id);
+
+            if (feat.geometry.type === 'LineString') {
+                $('#lat-lng-0').val(
+                    `${feat.geometry.coordinates[0][1].toFixed(
+                        5
+                    )}, ${feat.geometry.coordinates[0][0].toFixed(5)}`
+                );
+                $('#lat-lng-1').val(
+                    `${feat.geometry.coordinates[1][1].toFixed(
+                        5
+                    )}, ${feat.geometry.coordinates[1][0].toFixed(5)}`
+                );
+
+                $('#lat-lng-0').prop('readonly', false);
+                $('#lat-lng-1').prop('readonly', false);
+
+                const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
+                if (selected_link_source.type === 'geojson') {
+                    selected_link_source.setData(feat);
+                }
+            }
 
             // Workspace AP-CPE link frequency, heights, and name
             if (
@@ -698,6 +731,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     )
                 );
 
+                if (ap.getFeatureProperty('uneditable')) {
+                    $('#lat-lng-0').prop('readonly', true);
+                }
+
                 $('#radio_name-0').text(ap.getFeatureProperty('name'));
                 $('#radio_name-1').text(cpe.getFeatureProperty('name'));
                 this.radio_names[0] = ap.getFeatureProperty('name');
@@ -717,18 +754,38 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     );
                 }
 
-                let radio0hgt = isUnitsUS() ? feat.properties?.radio0hgt : feat.properties?.radio0hgt_ft;
+                let radio0hgt = isUnitsUS()
+                    ? feat.properties?.radio0hgt
+                    : feat.properties?.radio0hgt_ft;
                 if (radio0hgt == undefined && this.selectedFeatureID) {
                     radio0hgt = DEFAULT_RADIO_HEIGHT;
-                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt', isUnitsUS() ? ft2m(radio0hgt) : radio0hgt);
-                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio0hgt_ft', m2ft(radio0hgt));
+                    this.draw.setFeatureProperty(
+                        this.selectedFeatureID,
+                        'radio0hgt',
+                        isUnitsUS() ? ft2m(radio0hgt) : radio0hgt
+                    );
+                    this.draw.setFeatureProperty(
+                        this.selectedFeatureID,
+                        'radio0hgt_ft',
+                        m2ft(radio0hgt)
+                    );
                 }
                 $('#hgt-0').val(Math.round(isUnitsUS() ? m2ft(radio0hgt) : radio0hgt));
-                let radio1hgt = isUnitsUS() ? feat.properties?.radio1hgt : feat.properties?.radio1hgt_ft;
+                let radio1hgt = isUnitsUS()
+                    ? feat.properties?.radio1hgt
+                    : feat.properties?.radio1hgt_ft;
                 if (feat.properties?.radio1hgt == undefined && this.selectedFeatureID) {
                     radio1hgt = DEFAULT_RADIO_HEIGHT;
-                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt', isUnitsUS() ? ft2m(radio1hgt) : radio1hgt);
-                    this.draw.setFeatureProperty(this.selectedFeatureID, 'radio1hgt_ft', m2ft(radio1hgt));
+                    this.draw.setFeatureProperty(
+                        this.selectedFeatureID,
+                        'radio1hgt',
+                        isUnitsUS() ? ft2m(radio1hgt) : radio1hgt
+                    );
+                    this.draw.setFeatureProperty(
+                        this.selectedFeatureID,
+                        'radio1hgt_ft',
+                        m2ft(radio1hgt)
+                    );
                 }
                 $('#hgt-1').val(Math.round(isUnitsUS() ? m2ft(radio1hgt) : radio1hgt));
                 $('#radio_name-0').text(DEFAULT_RADIO_0_NAME);
@@ -736,25 +793,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.radio_names[0] = DEFAULT_RADIO_0_NAME;
                 this.radio_names[1] = DEFAULT_RADIO_1_NAME;
                 this.lidar3dview?.updateAnimationTitles();
-            }
-            if(feat.geometry.type === 'LineString')
-            {
-                $('#lat-lng-0').val(
-                    `${feat.geometry.coordinates[0][1].toFixed(
-                        5
-                    )}, ${feat.geometry.coordinates[0][0].toFixed(5)}`
-                );
-                $('#lat-lng-1').val(
-                    `${feat.geometry.coordinates[1][1].toFixed(
-                        5
-                    )}, ${feat.geometry.coordinates[1][0].toFixed(5)}`
-                );
-            
-
-                const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
-                if (selected_link_source.type === 'geojson') {
-                    selected_link_source.setData(feat);
-                }
             }
 
             this.updateLinkChart();

@@ -23,6 +23,10 @@
         border: none
         padding: .375rem 0
         text-align: right
+        &[readonly]
+            background-color: $light-gray-color
+            color: $disabled-gray
+            box-shadow: 8px 0px $light-gray-color, -8px 0px $light-gray-color
     .input-with-unit
         align-items: baseline
         background-color: $white-color

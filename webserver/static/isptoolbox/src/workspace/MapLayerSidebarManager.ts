@@ -7,6 +7,7 @@ import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
 import CollapsibleComponent from '../atoms/CollapsibleComponent';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
+import { BaseTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 
 export class MapLayerSidebarManager extends CollapsibleComponent {
     hiddenAccessPointIds: Array<string>;
@@ -58,7 +59,22 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
             mapObjectsSection.removeChild(mapObjectsSection.firstChild);
         }
 
-        // Towers, then coverage areas
+        // Towers, then coverage areas.
+
+        // Sort towers by name
+        let towers = BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.AP);
+        towers.sort((first: BaseWorkspaceFeature, second: BaseWorkspaceFeature) => {
+            let firstName = first.getFeatureProperty('name');
+            let secondName = second.getFeatureProperty('name');
+
+            if (firstName > secondName) {
+                return 1;
+            } else if (firstName == secondName) {
+                return 0;
+            } else {
+                return -1;
+            }
+        });
         BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.AP).forEach((ap: AccessPoint) => {
             const elem = generateMapLayerSidebarRow(
                 ap.getFeatureData(),
@@ -97,8 +113,8 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         );
 
         mapObjectsSection = document.getElementById('map-objects-section');
-        $('#zerostate').addClass('invisible'); // on default don't show anyhing 
-        $('#zerostate').css('max-height', '0px'); // on default don't show anyhing 
+        $('#zerostate').addClass('invisible'); // on default don't show anyhing
+        $('#zerostate').css('max-height', '0px'); // on default don't show anyhing
         $('#map-objects-section').addClass('mt-n4');
         if (mapObjectsSection?.firstChild === null) {
             $('#zerostate').addClass('visible'); //if no items in layers, show the error message
@@ -156,6 +172,11 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
     private updateAPVisibility = (MBFeature: any, WSFeature: any) => {
         let id = String(MBFeature?.id);
 
+        let popup = BaseTowerPopup.getInstance();
+        if (popup.getAccessPoint() && popup.getAccessPoint() === WSFeature) {
+            popup.hide();
+        }
+
         // getCheckedStatus returns the current checked status, not the future state.
         this.toggleAPVisibility(id, !this.getCheckedStatus(WSFeature));
         PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [WSFeature] });
@@ -201,13 +222,13 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
             if (i == -1) {
                 this.hiddenAccessPointIds = [...this.hiddenAccessPointIds, MBId];
 
-                // Deselect tower
-                if (this.draw.getMode() == 'simple_select') {
-                    let selection = this.draw.getSelectedIds().filter((f: string) => f !== MBId);
-
-                    // @ts-ignore
-                    this.draw.changeMode('draw_ap', {}); //this is a hack that works in both ME and LOS
-                    this.draw.changeMode('simple_select', { featureIds: selection });
+                // Deselect tower if it is selected
+                if (
+                    this.draw.getMode() == 'simple_select' &&
+                    this.draw.getSelectedIds().includes(MBId)
+                ) {
+                    let newSelection = this.draw.getSelectedIds().filter((f: string) => f !== MBId);
+                    this.setSelection(newSelection);
                 }
             }
         }
@@ -219,6 +240,14 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
 
     private setCheckedStatus(WSFeature: BaseWorkspaceFeature, checked: boolean) {
         $(`#switch-user-layer-${WSFeature.workspaceId}`).prop('checked', checked);
+    }
+
+    private setSelection(MBIds: Array<string>) {
+        if (this.draw.getMode() == 'simple_select') {
+            // @ts-ignore
+            this.draw.changeMode('draw_ap', {}); //this is a hack that works in both ME and LOS
+            this.draw.changeMode('simple_select', { featureIds: MBIds });
+        }
     }
 
     private toggleHandler = (e: any, uuid: string) => {
@@ -249,8 +278,19 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
             } else {
                 let ap = feature as AccessPoint;
                 coordinates = ap.getFeatureGeometryCoordinates() as [number, number];
+
+                // Show tooltip if AP is visible
+                let popup = BaseTowerPopup.getInstance();
+                popup.hide();
+                if (this.getCheckedStatus(ap)) {
+                    popup.setAccessPoint(ap);
+                    popup.show();
+                }
+
+                // Change selection to nothing if hidden, AP if shown
+                this.setSelection(this.getCheckedStatus(ap) ? [ap.mapboxId] : []);
             }
-            // POSSIBLE TODO - Select tower on fly to?
+
             this.map.flyTo({
                 center: coordinates
             });

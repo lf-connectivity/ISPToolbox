@@ -59,6 +59,7 @@ CONVERSION_FORMULAS.set(ImperialToMetricConversion.MI_TO_KM, (input: number) => 
 
 export abstract class BaseTowerPopup extends LinkCheckBasePopup {
     protected accessPoint?: AccessPoint;
+    protected static _instance: BaseTowerPopup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         super(map, draw);
@@ -115,7 +116,9 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         }
     }
 
-    protected cleanup() {}
+    protected cleanup() {
+        console.trace();
+    }
 
     protected getHeightValue() {
         return Math.round(
@@ -331,21 +334,28 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
             }
         `;
     }
+
+    static getInstance() {
+        if (BaseTowerPopup._instance) {
+            return BaseTowerPopup._instance;
+        } else {
+            throw new Error('No instance of BaseTowerPopup instantiated.');
+        }
+    }
 }
 
 export class LinkCheckTowerPopup extends BaseTowerPopup {
-    private static _instance: LinkCheckTowerPopup;
     private progress_message: string | null;
     private time_remaining: number | null;
     private error: string | null;
     private interval: NodeJS.Timeout | null;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
-        if (LinkCheckTowerPopup._instance) {
-            return LinkCheckTowerPopup._instance;
+        if (BaseTowerPopup._instance) {
+            return BaseTowerPopup._instance as LinkCheckTowerPopup;
         }
         super(map, draw);
-        LinkCheckTowerPopup._instance = this;
+        BaseTowerPopup._instance = this;
         this.progress_message = null;
         this.time_remaining = null;
         this.error = null;
@@ -358,8 +368,8 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
     }
 
     static getInstance() {
-        if (LinkCheckTowerPopup._instance) {
-            return LinkCheckTowerPopup._instance;
+        if (BaseTowerPopup._instance) {
+            return BaseTowerPopup._instance as LinkCheckTowerPopup;
         } else {
             throw new Error('No instance of LinkCheckTowerPopup instantiated.');
         }
@@ -487,14 +497,12 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
 }
 
 export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
-    private static _instance: MarketEvaluatorTowerPopup;
-
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
-        if (MarketEvaluatorTowerPopup._instance) {
-            return MarketEvaluatorTowerPopup._instance;
+        if (BaseTowerPopup._instance) {
+            return BaseTowerPopup._instance as MarketEvaluatorTowerPopup;
         }
         super(map, draw);
-        MarketEvaluatorTowerPopup._instance = this;
+        BaseTowerPopup._instance = this;
         PubSub.subscribe(MarketEvalWSEvents.SEND_REQUEST, this.onWSRequestSendOrCancel.bind(this));
         PubSub.subscribe(
             MarketEvalWSEvents.REQUEST_CANCELLED,
@@ -504,8 +512,8 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
     }
 
     static getInstance() {
-        if (MarketEvaluatorTowerPopup._instance) {
-            return MarketEvaluatorTowerPopup._instance;
+        if (BaseTowerPopup._instance) {
+            return BaseTowerPopup._instance as MarketEvaluatorTowerPopup;
         } else {
             throw new Error('No instance of MarketEvaluatorTowerPopup instantiated.');
         }

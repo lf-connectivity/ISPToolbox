@@ -267,6 +267,9 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
 
     private clickHandler = (uuid: string) => {
         const feature = BaseWorkspaceManager.getFeatureByUuid(uuid);
+        const popup = BaseTowerPopup.getInstance();
+        popup.hide();
+
         if (feature) {
             let coordinates;
             if (feature.getFeatureType() == WorkspaceFeatureTypes.COVERAGE_AREA) {
@@ -280,16 +283,14 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
                 coordinates = ap.getFeatureGeometryCoordinates() as [number, number];
 
                 // Show tooltip if AP is visible
-                let popup = BaseTowerPopup.getInstance();
-                popup.hide();
                 if (this.getCheckedStatus(ap)) {
                     popup.setAccessPoint(ap);
                     popup.show();
                 }
-
-                // Change selection to nothing if hidden, AP if shown
-                this.setSelection(this.getCheckedStatus(ap) ? [ap.mapboxId] : []);
             }
+
+            // Change selection to nothing if hidden, object if shown
+            this.setSelection(this.getCheckedStatus(feature) ? [feature.mapboxId] : []);
 
             this.map.flyTo({
                 center: coordinates

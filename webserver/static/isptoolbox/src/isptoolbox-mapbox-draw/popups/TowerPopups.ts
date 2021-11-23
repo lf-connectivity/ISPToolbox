@@ -116,9 +116,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         }
     }
 
-    protected cleanup() {
-        console.trace();
-    }
+    protected cleanup() {}
 
     protected getHeightValue() {
         return Math.round(

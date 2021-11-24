@@ -13,10 +13,9 @@
         <div class="modal-header">
             <h3 class="modal-title">{% translate "Download your information"%}</h3>
         </div>
-        <h4 class="modal-title px-3 py-3">{% translate "Get a copy of all your data from ISP Toolbox"%}</h4>
+        <h4 class="modal-title px-3 py-3">{% translate "Get a copy of your data from ISP Toolbox"%}</h4>
         <div class="modal-body">
-            <p>{% blocktranslate %}To request a copy of your ISP Toolbox data, click the “Request Data” button. Your
-                data will be aggregated into a file shown here when it’s ready to download. {% endblocktranslate%}</p>
+            <p>{% blocktranslate %}To request a copy of your ISP Toolbox data, click the “Request Data” button. Your data will be provided in a file shown here when it's ready to download. {% endblocktranslate%}</p>
             {% for job in page_obj %}
             <div class="d-flex my-3 py-2">
                 {% if job.data_dump%}

@@ -372,6 +372,7 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
 
     protected getAdditionalInfo() {
         return `
+            <hr style="border-top: 1px solid #595959; margin-bottom: 0rem;">
             <li class="stat-row" id='${STATS_LI_ID}'>
                 ${this.getStatsHTML()}
             </li>
@@ -388,7 +389,7 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
             ) {
                 return `
                     <div class="ap-stat">
-                    <p style="font-size: 0.75rem">These calculations are based on the tower specs.</p>
+                    <p style="font-size: 0.75rem">These results are based on inputted specs.</p>
                     </div>
                     <div class="ap-stat">
                         <p class="ap-stat--label">Est. Clear LOS<span>at least 1 point on rooftop</span></p>

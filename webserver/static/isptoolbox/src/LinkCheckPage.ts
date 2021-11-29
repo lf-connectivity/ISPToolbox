@@ -371,9 +371,13 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
         this.map.on('draw.selectionchange', this.showInputs.bind(this));
         this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
-        PubSub.subscribe(WorkspaceEvents.AP_SELECTED, () => {
-            LOSCheckLinkProfileView.getInstance().show();
-        });
+        this.map.on('draw.selectionchange', ({features} : {features : Array<GeoJSON.Feature>}) => {
+            if(features.length === 1 ){
+                if(features[0].properties?.feature_type === WorkspaceFeatureTypes.AP) {
+                    LOSCheckLinkProfileView.getInstance().show();
+                }
+            }
+        })
         PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));

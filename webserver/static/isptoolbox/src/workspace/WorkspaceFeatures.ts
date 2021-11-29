@@ -190,7 +190,6 @@ export class CPE extends WorkspacePointFeature {
     update(successFollowup?: (resp: any) => void) {
         this.moveLink(this.getFeatureGeometryCoordinates() as [number, number]);
         super.update((resp: any) => {
-            PubSub.publish(WorkspaceEvents.AP_SELECTED, { features: [this.getFeatureData()] });
             if (successFollowup) {
                 successFollowup(resp);
             }

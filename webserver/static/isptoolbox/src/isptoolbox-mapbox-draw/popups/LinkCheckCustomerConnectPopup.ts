@@ -169,11 +169,10 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             <div class="tooltip--cpe">
                 <div id="${STATUS_MESSAGE_DIV_ID}" class="${statusElements.divClass}">
                     <h6>${statusElements.message}                    
-                        <img src=${
-                            this.losStatus === BuildingCoverageStatus.UNKNOWN
-                                ? ''
-                                : statusElements.icon
-                        } >
+                        <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN
+                ? ''
+                : statusElements.icon
+            } >
                     </h6>
                 </div>
 
@@ -186,16 +185,14 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 <div class="description section">
                     <div class="draw-ptp-row">
                         <p class="small">${this.ptpRowPrompt}</p>
-                        ${
-                            this.accessPoints.length > 1
-                                ? `<a id='${SWITCH_TOWER_LINK_ID}' class="link">Switch</a>`
-                                : ''
-                        }
+                        ${this.accessPoints.length > 1
+                ? `<a id='${SWITCH_TOWER_LINK_ID}' class="link">Switch</a>`
+                : ''
+            }
                     </div>
                     <div id="${RADIO_TOWER_CONNECT_DIV_ID}">
-                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${
-            isUnitsUS() ? 'mi' : 'km'
-        }</p>
+                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'
+            }</p>
                     </div>
                 </div>
                 ${this.getButtonRowHTML()}
@@ -434,17 +431,15 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                     $(`#${STATUS_MESSAGE_DIV_ID}`).attr('class', statusElements.divClass);
                     $(`#${STATUS_MESSAGE_DIV_ID}`).html(`
                         <h6>${statusElements.message}
-                            <img src=${
-                                this.losStatus === BuildingCoverageStatus.UNKNOWN
-                                    ? ''
-                                    : statusElements.icon
-                            } >
+                            <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN
+                            ? ''
+                            : statusElements.icon
+                        } >
                         </h6>
                     `);
                     $(`#${RADIO_TOWER_CONNECT_DIV_ID}`).html(`
-                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${
-                        isUnitsUS() ? 'mi' : 'km'
-                    }</p>
+                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'
+                        }</p>
                     `);
                     return false;
                 } else {

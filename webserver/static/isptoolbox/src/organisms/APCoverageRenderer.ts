@@ -402,7 +402,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             'draw.selectionchange',
             ({ features }: { features: Array<GeoJSON.Feature> }) => {
                 let cpePopup = LinkCheckCPEClickCustomerConnectPopup.getInstance();
-            // Show tooltip if only one CPE is selected.
+                // Show tooltip if only one CPE is selected.
                 let dragging = false;
                 if (features.length === 1) {
                     if (features[0].id === this.last_selection) {
@@ -410,30 +410,35 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                         cpePopup.hide();
                     } else {
                         const selectedCPEs = features.filter(f => f.properties?.feature_type === WorkspaceFeatureTypes.CPE);
-            if (selectedCPEs.length === 1) {
+                        if (selectedCPEs.length === 1) {
                             this.last_selection = features[0].id as string;
-                let cpe = BaseWorkspaceManager.getFeatureByUuid(
+                            let cpe = BaseWorkspaceManager.getFeatureByUuid(
                                 selectedCPEs[0].properties?.uuid
-                ) as CPE;
-                let mapboxClient = MapboxSDKClient.getInstance();
+                            ) as CPE;
+                            let mapboxClient = MapboxSDKClient.getInstance();
                             let lngLat = cpe.getFeatureGeometry().coordinates as [number, number];
-                mapboxClient.reverseGeocode(lngLat, (resp: any) => {
-                    cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                        LinkCheckCPEClickCustomerConnectPopup,
-                        lngLat,
-                        resp
-                    );
-                    cpePopup.hide();
-                    cpePopup.setCPE(cpe);
-                    cpePopup.show();
-                });
+                            mapboxClient.reverseGeocode(lngLat, (resp: any) => {
+                                const selected_after_callback = this.draw.getSelected().features;
+                                if (
+                                    selected_after_callback.length === 1 &&
+                                    selected_after_callback.some(f => f.properties?.uuid === selectedCPEs[0].properties?.uuid)) {
+                                    cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                                        LinkCheckCPEClickCustomerConnectPopup,
+                                        lngLat,
+                                        resp
+                                    );
+                                    cpePopup.hide();
+                                    cpePopup.setCPE(cpe);
+                                    cpePopup.show();
+                                }
+                            });
                         }
                     }
                 } else {
                     this.last_selection = '';
-                cpePopup.hide();
-            }
+                    cpePopup.hide();
                 }
+            }
         );
     }
 

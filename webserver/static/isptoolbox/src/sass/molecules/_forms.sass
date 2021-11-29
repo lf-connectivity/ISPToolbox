@@ -7,7 +7,6 @@
         font-family: Basis Grotesque Pro
         font-size: $base-font-size
         line-height: 135%
-        display: flex !important
         letter-spacing: 0.01em
         text-align: left
         color: $brand-dark-gray-color
@@ -54,10 +53,10 @@
             border-bottom: 2px solid $brand-secondary-color
             outline: 0
     &.inline-field-group
-        display: flex
-        flex-flow: row
+        display: block
         label
-            display: none
+            display: block
+            align-self: flex-start
         input:not(.btn)
             flex: 1
         input:not(.btn):not([type="file"])

@@ -630,22 +630,20 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
         if (!this.popup.isOpen()) {
             // Find the building ID by rendering the entire area, then doing a query on underlying building ID.
             // We set a delay on showing tooltip to allow time for building coverage to render.
-            setTimeout(() => {
-                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {
-                    layers: [BUILDING_LAYER]
-                })[0];
-                if (building) {
-                    this.setBuildingId(building.properties?.msftid);
-                }
-                super.showComponent();
-                // Add delete btn event handler
-                $(`#cpe-delete-btn`)
-                    .off()
-                    .on('click', () => {
-                        this.hide();
-                        this.cpe.delete();
-                    });
-            }, 50);
+            let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {
+                layers: [BUILDING_LAYER]
+            })[0];
+            if (building) {
+                this.setBuildingId(building.properties?.msftid);
+            }
+            super.showComponent();
+            // Add delete btn event handler
+            $(`#cpe-delete-btn`)
+                .off()
+                .on('click', () => {
+                    this.hide();
+                    this.cpe.delete();
+                });
         }
     }
 

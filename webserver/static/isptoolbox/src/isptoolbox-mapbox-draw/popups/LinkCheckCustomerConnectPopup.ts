@@ -630,7 +630,6 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
         if (!this.popup.isOpen()) {
             // Find the building ID by rendering the entire area, then doing a query on underlying building ID.
             // We set a delay on showing tooltip to allow time for building coverage to render.
-            this.changeSelection([]);
             setTimeout(() => {
                 let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {
                     layers: [BUILDING_LAYER]
@@ -651,7 +650,6 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
     }
 
     cleanup() {
-        this.changeSelection([this.cpe]);
         super.cleanup();
     }
 

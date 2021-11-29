@@ -371,7 +371,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
         this.map.on('draw.selectionchange', this.showInputs.bind(this));
         this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
-        this.map.on('draw.selectionchange', ({features} : {features : Array<GeoJSON.Feature>}) => {
+        this.map.on('draw.update', ({features, action} : {features : Array<GeoJSON.Feature>, action: 'move' | 'change_coordinates'}) => {
             if(features.length === 1 ){
                 if(features[0].properties?.feature_type === WorkspaceFeatureTypes.AP) {
                     LOSCheckLinkProfileView.getInstance().show();

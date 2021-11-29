@@ -15,8 +15,8 @@
             {% csrf_token %}
             {{ workspace_forms.save_as_session }}
             <input type="text" value="{{session.uuid}}" hidden name="session">
-            <input type="submit" class="btn btn-primary isptoolbox-btn inline-button mx-2" value="Save">
           </div>
+          <input type="submit" class="btn btn-primary isptoolbox-btn inline-button modal-btn" value="Save">
           <p class="error d-none"></p>
         </div>
       </div>

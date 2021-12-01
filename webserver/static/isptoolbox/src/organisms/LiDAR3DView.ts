@@ -15,7 +15,7 @@ import { getRadioHeightFromUI } from '../LinkCheckUtils';
 // @ts-ignore
 const THREE = window.THREE;
 
-import { IMapboxDrawPlugin } from '../utils/IMapboxDrawPlugin';
+import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { hasCookie } from '../utils/Cookie';
 import { calculateMaximumFresnelRadius } from '../LinkCalcUtils';
 import { LinkCheckPage } from '../LinkCheckPage';
@@ -54,7 +54,7 @@ export type MetadataPotreeVizResponse =
     | MetadataPotreeVizLineResponse
     | MetadataPotreeVizPointResponse;
 
-export class LiDAR3DView extends IMapboxDrawPlugin {
+export class LiDAR3DView implements IMapboxDrawPlugin {
     clippingVolume: any = null;
     globalLinkAnimation: any;
     currentView: 'map' | '3d' = 'map';
@@ -83,7 +83,7 @@ export class LiDAR3DView extends IMapboxDrawPlugin {
         private app: LinkCheckPage,
         private radio_names: [string, string]
     ) {
-        super(map, draw);
+        initializeMapboxDrawInterface(this, map);
         if (potree) {
             const numNodesLoadingChangedCallback = (num_nodes: number) => {
                 if (num_nodes > 0 && this.currentView === '3d') {

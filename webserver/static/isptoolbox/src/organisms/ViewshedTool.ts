@@ -9,7 +9,7 @@ import {
 import { EMPTY_LAYER_AFTER_BUILDING } from './APCoverageRenderer';
 import { getCookie } from '../utils/Cookie';
 import { djangoUrl } from '../utils/djangoUrl';
-import { IMapboxDrawPlugin } from '../utils/IMapboxDrawPlugin';
+import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 
 export enum ViewshedEvents {
     VS_REQUEST = 'vs.request',
@@ -20,7 +20,7 @@ export enum ViewshedEvents {
 
 const VIEWSHED_TILE_OVERLAY_SOURCE = 'isptoolbox.viewshedoverlay-tile-source';
 const VIEWSHED_TILE_OVERLAY_LAYER = 'isptoolbox.viewshedoverlay-tile-layer';
-export class ViewshedTool extends IMapboxDrawPlugin {
+export class ViewshedTool implements IMapboxDrawPlugin {
     map: mapboxgl.Map;
     draw: MapboxDraw;
     viewshed_feature_id: string | number | null = null;
@@ -29,7 +29,7 @@ export class ViewshedTool extends IMapboxDrawPlugin {
     dragging = false;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
-        super(map, draw);
+        initializeMapboxDrawInterface(this, map);
         if (ViewshedTool._instance) {
             throw Error('This singleton has already been instantiated, use getInstance.');
         }

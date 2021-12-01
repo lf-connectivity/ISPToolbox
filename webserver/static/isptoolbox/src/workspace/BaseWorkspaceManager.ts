@@ -9,7 +9,7 @@ import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CPE, APToCPELink, CoverageArea, PointToPointLink } from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
-import { IMapboxDrawPlugin } from '../utils/IMapboxDrawPlugin';
+import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void | boolean;
 
@@ -17,7 +17,7 @@ function doNothingProcessor(): UpdateDeleteFeatureProcessor {
     return (workspaceFeature: BaseWorkspaceFeature) => {};
 }
 
-export abstract class BaseWorkspaceManager extends IMapboxDrawPlugin {
+export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
@@ -56,7 +56,7 @@ export abstract class BaseWorkspaceManager extends IMapboxDrawPlugin {
         if (BaseWorkspaceManager._instance) {
             throw Error('BaseWorkspaceManager initialized twice.');
         }
-        super(map, draw);
+        initializeMapboxDrawInterface(this, map);
         BaseWorkspaceManager._instance = this;
 
         this.map = map;

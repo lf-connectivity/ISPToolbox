@@ -17,6 +17,8 @@ from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
 import json
 
+from workspace.tasks.coverage_tasks import calculateCoverage
+
 
 class WorkspacePerformCreateMixin:
     """
@@ -287,7 +289,8 @@ class AccessPointCoverageResults(View):
             ),
             "properties": {
                 "serviceable": b.status,
-                "msftid": b.msftid
+                "msftid": b.msftid,
+                "cpe_location": json.loads(b.cpe_location.json) if b.cpe_location else None
             }
         }
             for b in nearby]

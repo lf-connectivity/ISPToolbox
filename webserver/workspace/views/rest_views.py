@@ -17,8 +17,6 @@ from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
 import json
 
-from workspace.tasks.coverage_tasks import calculateCoverage
-
 
 class WorkspacePerformCreateMixin:
     """

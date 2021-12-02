@@ -6,6 +6,8 @@ import tempfile
 import rasterio
 from rasterio import mask
 from shapely import wkt
+from django.contrib.gis.geos import Point
+import numpy as np
 
 VISIBLE_PIXEL_VALUE = 255
 
@@ -36,10 +38,15 @@ def calculateCoverage(access_point_id: str, user_id: str) -> None:
                     out_image, out_transform = mask.mask(
                         ds, [building_polygon], crop=True
                     )
+                    cpe_location = np.argmax(out_image)
+                    max_index_i, max_index_j, max_index_k = np.unravel_index(cpe_location, out_image.shape)
+                    max_value = out_image[max_index_i, max_index_j, max_index_k]
+                    if max_value:
+                        loc = rasterio.transform.xy(out_transform, max_index_i, max_index_j)
+                        building.cpe_location = Point(*loc)
                     serviceable = (out_image == VISIBLE_PIXEL_VALUE).any()
                     if serviceable:
                         building.status = BuildingCoverage.CoverageStatus.SERVICEABLE
-                        building.save(update_fields=['status'])
                     else:
                         building.status = BuildingCoverage.CoverageStatus.UNSERVICEABLE
-                        building.save(update_fields=['status'])
+                    building.save(update_fields=['status', 'cpe_location'])

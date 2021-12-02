@@ -152,6 +152,42 @@ abstract class RadiusAndBuildingCoverageRenderer {
         this.map.on('draw.delete', this.drawDeleteCallback.bind(this));
         this.map.on('draw.selectionchange', this.drawSelectionChangeCallback.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.AP_updateCallback.bind(this));
+
+        const onClickAP = (e: any) => {
+            // Show tooltip if only one AP is selected.
+            const selectedAPs = this.workspaceManager.filterByType(
+                this.draw.getSelected().features,
+                WorkspaceFeatureTypes.AP
+            );
+            if (selectedAPs.length === 1) {
+                let ap = BaseWorkspaceManager.getFeatureByUuid(
+                    selectedAPs[0].properties.uuid
+                ) as AccessPoint;
+                // Setting this timeout so the natural mouseclick close popup trigger resolves
+                // before this one
+                setTimeout(() => {
+                    this.apPopup.hide();
+                    this.apPopup.setAccessPoint(ap);
+                    this.apPopup.show();
+                }, 1);
+            } else if (selectedAPs.length > 1) {
+                this.apPopup.hide();
+            }
+        };
+
+        // Keep trying to load the AP onClick event handler until we can find layers
+        // to do this, then stop.
+        const loadOnClick = () => {
+            this.map.getStyle().layers?.forEach((layer: any) => {
+                if (layer.id.includes('gl-draw-point-ap')) {
+                    this.map.on('click', layer.id, onClickAP);
+                    this.renderBuildings();
+                    this.renderAPRadius();
+                    this.map.off('idle', loadOnClick);
+                }
+            });
+        };
+        this.map.on('idle', loadOnClick);
     }
 
     /**
@@ -167,28 +203,15 @@ abstract class RadiusAndBuildingCoverageRenderer {
         this.renderBuildings();
     }
 
-    drawSelectionChangeCallback({ features }: { features: Array<GeoJSON.Feature> }) {
+    drawSelectionChangeCallback({ features }: { features: Array<any> }) {
         // Mapbox will count dragging a point features as a selection change event
         // Use this to determine if we are dragging or just selected a new feature
         let dragging = false;
         if (features.length === 1) {
             if (features[0].id === this.last_selection) {
                 dragging = true;
-                // Hide AP tooltip if user is dragging AP.
-                this.apPopup.hide();
             } else {
-                const selectedAPs = this.workspaceManager.filterByType(
-                    features,
-                    WorkspaceFeatureTypes.AP
-                );
-                if (selectedAPs.length === 1) {
-                    this.last_selection = features[0].id as string;
-                    let ap = BaseWorkspaceManager.getFeatureByUuid(
-                        selectedAPs[0].properties.uuid
-                    ) as AccessPoint;
-                    this.apPopup.setAccessPoint(ap);
-                    this.apPopup.show();
-                }
+                this.last_selection = features[0].id;
             }
         } else {
             this.last_selection = '';
@@ -348,7 +371,6 @@ abstract class RadiusAndBuildingCoverageRenderer {
 
 export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     ws: LOSCheckWS;
-    last_selection: string = '';
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw, ws: LOSCheckWS) {
         super(map, draw, LOSCheckWorkspaceManager, LinkCheckTowerPopup);
@@ -398,48 +420,45 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             this.map.getCanvas().style.cursor = '';
         });
 
-        this.map.on(
-            'draw.selectionchange',
-            ({ features }: { features: Array<GeoJSON.Feature> }) => {
-                let cpePopup = LinkCheckCPEClickCustomerConnectPopup.getInstance();
-                // Show tooltip if only one CPE is selected.
-                let dragging = false;
-                if (features.length === 1) {
-                    if (features[0].id === this.last_selection) {
-                        dragging = true;
-                        cpePopup.hide();
-                    } else {
-                        const selectedCPEs = features.filter(f => f.properties?.feature_type === WorkspaceFeatureTypes.CPE);
-                        if (selectedCPEs.length === 1) {
-                            this.last_selection = features[0].id as string;
-                            let cpe = BaseWorkspaceManager.getFeatureByUuid(
-                                selectedCPEs[0].properties?.uuid
-                            ) as CPE;
-                            let mapboxClient = MapboxSDKClient.getInstance();
-                            let lngLat = cpe.getFeatureGeometry().coordinates as [number, number];
-                            mapboxClient.reverseGeocode(lngLat, (resp: any) => {
-                                const selected_after_callback = this.draw.getSelected().features;
-                                if (
-                                    selected_after_callback.length === 1 &&
-                                    selected_after_callback.some(f => f.properties?.uuid === selectedCPEs[0].properties?.uuid)) {
-                                    cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                                        LinkCheckCPEClickCustomerConnectPopup,
-                                        lngLat,
-                                        resp
-                                    );
-                                    cpePopup.hide();
-                                    cpePopup.setCPE(cpe);
-                                    cpePopup.show();
-                                }
-                            });
-                        }
-                    }
-                } else {
-                    this.last_selection = '';
+        const onClickCPE = (e: any) => {
+            // Show tooltip if only one CPE is selected.
+            const selectedCPEs = this.workspaceManager.filterByType(
+                this.draw.getSelected().features,
+                WorkspaceFeatureTypes.CPE
+            );
+            let cpePopup = LinkCheckCPEClickCustomerConnectPopup.getInstance();
+            if (selectedCPEs.length === 1) {
+                let cpe = BaseWorkspaceManager.getFeatureByUuid(
+                    selectedCPEs[0].properties.uuid
+                ) as CPE;
+                let mapboxClient = MapboxSDKClient.getInstance();
+                let lngLat = cpe.getFeatureGeometry()?.coordinates as [number, number];
+                mapboxClient.reverseGeocode(lngLat, (resp: any) => {
+                    cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                        LinkCheckCPEClickCustomerConnectPopup,
+                        lngLat,
+                        resp
+                    );
                     cpePopup.hide();
-                }
+                    cpePopup.setCPE(cpe);
+                    cpePopup.show();
+                });
+            } else if (selectedCPEs.length > 1) {
+                cpePopup.hide();
             }
-        );
+        };
+
+        // Keep trying to load the AP onClick event handler until we can find layers
+        // to do this, then stop.
+        const loadCPEOnClick = () => {
+            this.map.getStyle().layers?.forEach((layer: any) => {
+                if (layer.id.includes('gl-draw-point-cpe')) {
+                    this.map.on('click', layer.id, onClickCPE);
+                    this.map.off('idle', loadCPEOnClick);
+                }
+            });
+        };
+        this.map.on('idle', loadCPEOnClick);
     }
 
     addBuildingLayer() {

@@ -47,6 +47,7 @@ import { LiDAR3DView } from './organisms/LiDAR3DView';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
 import { WorkspacePointFeature } from './workspace/WorkspacePointFeature';
+import { feature } from '@turf/helpers';
 var _ = require('lodash');
 
 type HighChartsExtremesEvent = {

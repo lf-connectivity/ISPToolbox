@@ -169,10 +169,11 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
             <div class="tooltip--cpe">
                 <div id="${STATUS_MESSAGE_DIV_ID}" class="${statusElements.divClass}">
                     <h6>${statusElements.message}                    
-                        <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN
-                ? ''
-                : statusElements.icon
-            } >
+                        <img src=${
+                            this.losStatus === BuildingCoverageStatus.UNKNOWN
+                                ? ''
+                                : statusElements.icon
+                        } >
                     </h6>
                 </div>
 
@@ -185,14 +186,16 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                 <div class="description section">
                     <div class="draw-ptp-row">
                         <p class="small">${this.ptpRowPrompt}</p>
-                        ${this.accessPoints.length > 1
-                ? `<a id='${SWITCH_TOWER_LINK_ID}' class="link">Switch</a>`
-                : ''
-            }
+                        ${
+                            this.accessPoints.length > 1
+                                ? `<a id='${SWITCH_TOWER_LINK_ID}' class="link">Switch</a>`
+                                : ''
+                        }
                     </div>
                     <div id="${RADIO_TOWER_CONNECT_DIV_ID}">
-                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'
-            }</p>
+                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${
+            isUnitsUS() ? 'mi' : 'km'
+        }</p>
                     </div>
                 </div>
                 ${this.getButtonRowHTML()}
@@ -431,15 +434,17 @@ export class LinkCheckCustomerConnectPopup extends LinkCheckBasePopup {
                     $(`#${STATUS_MESSAGE_DIV_ID}`).attr('class', statusElements.divClass);
                     $(`#${STATUS_MESSAGE_DIV_ID}`).html(`
                         <h6>${statusElements.message}
-                            <img src=${this.losStatus === BuildingCoverageStatus.UNKNOWN
-                            ? ''
-                            : statusElements.icon
-                        } >
+                            <img src=${
+                                this.losStatus === BuildingCoverageStatus.UNKNOWN
+                                    ? ''
+                                    : statusElements.icon
+                            } >
                         </h6>
                     `);
                     $(`#${RADIO_TOWER_CONNECT_DIV_ID}`).html(`
-                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${isUnitsUS() ? 'mi' : 'km'
-                        }</p>
+                        <p><span class="bold">${apName}</span> - ${apDist?.toFixed(2)} ${
+                        isUnitsUS() ? 'mi' : 'km'
+                    }</p>
                     `);
                     return false;
                 } else {
@@ -625,24 +630,28 @@ export class LinkCheckCPEClickCustomerConnectPopup extends LinkCheckCustomerConn
         if (!this.popup.isOpen()) {
             // Find the building ID by rendering the entire area, then doing a query on underlying building ID.
             // We set a delay on showing tooltip to allow time for building coverage to render.
-            let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {
-                layers: [BUILDING_LAYER]
-            })[0];
-            if (building) {
-                this.setBuildingId(building.properties?.msftid);
-            }
-            super.showComponent();
-            // Add delete btn event handler
-            $(`#cpe-delete-btn`)
-                .off()
-                .on('click', () => {
-                    this.hide();
-                    this.cpe.delete();
-                });
+            this.changeSelection([]);
+            setTimeout(() => {
+                let building = this.map.queryRenderedFeatures(this.map.project(this.lnglat), {
+                    layers: [BUILDING_LAYER]
+                })[0];
+                if (building) {
+                    this.setBuildingId(building.properties?.msftid);
+                }
+                super.showComponent();
+                // Add delete btn event handler
+                $(`#cpe-delete-btn`)
+                    .off()
+                    .on('click', () => {
+                        this.hide();
+                        this.cpe.delete();
+                    });
+            }, 50);
         }
     }
 
     cleanup() {
+        this.changeSelection([this.cpe]);
         super.cleanup();
     }
 

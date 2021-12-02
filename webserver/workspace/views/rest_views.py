@@ -276,7 +276,7 @@ class AccessPointCoverageResults(View):
         nearby_ids = [b.msftid for b in nearby]
         buildings = MsftBuildingOutlines.objects.filter(
             id__in=nearby_ids).all()
-        buildings = {b.id : b.geog for b in buildings}
+        buildings = {b.id: b.geog for b in buildings}
         features = [{
             "type": "Feature",
             "geometry": json.loads(

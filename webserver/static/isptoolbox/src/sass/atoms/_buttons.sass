@@ -4,6 +4,7 @@ body
     .isptoolbox-btn
         border-radius: 0 !important
         display: flex
+        width: fit-content !important
         align-items: center
         font-size: $small-font-size
         line-height: 14px
@@ -20,12 +21,15 @@ body
         &.btn-secondary:hover
             background: $brand-primary-color !important
             color: white !important
+    .modal-save-btn
+        float: right
+        margin-top: 2rem
     .btn:hover
         background: $brand-secondary-color !important
     .isptoolbox-btn.large
         padding: 13px
     .isptoolbox-btn.large:hover
-        background: red !important
+        background: $brand-secondary-color !important
     .isptoolbox-btn.negative
         color: $white-color !important
         border-color: $error-color !important

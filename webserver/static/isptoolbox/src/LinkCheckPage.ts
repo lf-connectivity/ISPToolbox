@@ -47,7 +47,7 @@ import { LiDAR3DView } from './organisms/LiDAR3DView';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
 import { WorkspacePointFeature } from './workspace/WorkspacePointFeature';
-import { feature } from '@turf/helpers';
+import { LinkCheckPTPOverlay, HOVER_POINT_SOURCE} from './LinkCheckPTPOverlay';
 var _ = require('lodash');
 
 type HighChartsExtremesEvent = {
@@ -61,11 +61,6 @@ const SMALLEST_UPDATE = 1e-5;
 const LEFT_NAVIGATION_KEYS = ['ArrowLeft', 'Left', 'A', 'a'];
 const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D', 'd'];
 
-const HOVER_POINT_SOURCE = 'hover-point-link-source';
-const HOVER_POINT_LAYER = 'hover-point-link-layer';
-const SELECTED_LINK_SOURCE = 'selected-link-source';
-const SELECTED_LINK_LAYER = 'selected-link-layer';
-export const LOWEST_LAYER_LAYER = 'lowest_layer_layer';
 
 const center_freq_values: { [key: string]: number } = {
     '2.4 GHz': 2.437,
@@ -98,9 +93,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     selected_feature: any;
     link_chart: any;
     locationMarker: LinkCheckLocationSearchTool;
-
     lidarAvailabilityLayer: LidarAvailabilityLayer;
-
     workspaceManager: LOSCheckWorkspaceManager;
     profileWS: LOSCheckWS;
     currentLinkHash: any;
@@ -295,8 +288,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     }
 
     onMapLoad() {
-        // Popups
-
         this.map.on('draw.update', this.updateRadioLocation.bind(this));
         this.map.on('draw.create', this.updateRadioLocation.bind(this));
 
@@ -312,6 +303,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             this.setExtremes.bind(this)
         );
 
+        new LinkCheckPTPOverlay(this.map, this.draw);
         new MapLayerSidebarManager(this.map, this.draw);
         this.lidar3dview = new LiDAR3DView(this.map, this.draw, this, this.radio_names);
         this.workspaceManager = new LOSCheckWorkspaceManager(this.map, this.draw);
@@ -428,86 +420,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             });
             this.selectedFeatureID = features.length ? features[0] : null;
 
-            this.map.addSource(SELECTED_LINK_SOURCE, {
-                type: 'geojson',
-                data: {
-                    type: 'FeatureCollection',
-                    features: [
-                        {
-                            type: 'Feature',
-                            properties: {},
-                            geometry: {
-                                type: 'LineString',
-                                coordinates: [
-                                    [tx_lng, tx_lat],
-                                    [rx_lng, rx_lat]
-                                ]
-                            }
-                        }
-                    ]
-                }
-            });
-        } else {
-            this.map.addSource(SELECTED_LINK_SOURCE, {
-                type: 'geojson',
-                data: {
-                    type: 'FeatureCollection',
-                    features: []
-                }
-            });
         }
-        // Add Data Sources to Help User Understand Map
-
-        // Selected Link Layer
-        this.map.addLayer(
-            {
-                id: SELECTED_LINK_LAYER,
-                type: 'line',
-                source: SELECTED_LINK_SOURCE,
-                layout: {
-                    'line-cap': 'round'
-                },
-                paint: {
-                    'line-color': '#FFFFFF',
-                    'line-width': 7
-                }
-            },
-            LOWEST_LAYER_LAYER
-        );
-        this.map.addSource(HOVER_POINT_SOURCE, {
-            type: 'geojson',
-            data: {
-                type: 'FeatureCollection',
-                features: []
-            }
-        });
-
-        // HOVER POINT MAP LAYERS
-        this.map.addLayer(
-            {
-                id: `${HOVER_POINT_LAYER}_halo`,
-                type: 'circle',
-                source: HOVER_POINT_SOURCE,
-                paint: {
-                    'circle-radius': 7,
-                    'circle-color': '#FFFFFF'
-                }
-            },
-            LOWEST_LAYER_LAYER
-        );
-
-        this.map.addLayer(
-            {
-                id: HOVER_POINT_LAYER,
-                type: 'circle',
-                source: HOVER_POINT_SOURCE,
-                paint: {
-                    'circle-radius': 5,
-                    'circle-color': '#3887be'
-                }
-            },
-            LOWEST_LAYER_LAYER
-        );
+        
 
         this.updateLinkProfile();
         this.link_chart.redraw();
@@ -585,12 +499,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                                     //@ts-ignore
                                     feat.geometry.coordinates[coord1] = coords;
                                     this.draw.add(feat);
-                                    const selected_link_source =
-                                        this.map.getSource(SELECTED_LINK_SOURCE);
-                                    if (selected_link_source.type === 'geojson') {
-                                        //@ts-ignore
-                                        selected_link_source.setData(feat.geometry);
-                                    }
+                                    this.map.fire('draw.create', {features: [feat]});
                                 }
                                 this.updateLinkProfile();
                                 this.map.setCenter(coords);
@@ -630,18 +539,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         );
     }
 
-    removeLinkHalo: (features: Array<MapboxGL.MapboxGeoJSONFeature>) => void = (features) => {
-        const contains_selected =
-            features.filter((feat) => {
-                return feat.id === this.selectedFeatureID;
-            }).length > 0;
-        if (contains_selected) {
-            const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
-            if (selected_link_source.type === 'geojson') {
-                selected_link_source.setData({ type: 'FeatureCollection', features: [] });
-            }
-        }
-    };
 
     setInputs(
         msg: string,
@@ -695,11 +592,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
                 $('#lat-lng-0').prop('readonly', false);
                 $('#lat-lng-1').prop('readonly', false);
-
-                const selected_link_source = this.map.getSource(SELECTED_LINK_SOURCE);
-                if (selected_link_source.type === 'geojson') {
-                    selected_link_source.setData(feat);
-                }
             }
 
             // Workspace AP-CPE link frequency, heights, and name
@@ -801,10 +693,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     }
 
     deleteDrawingCallback({ features }: any) {
-        this.removeLinkHalo(features);
         PubSub.publish(LinkCheckEvents.CLEAR_INPUTS);
     }
-
     highLightPointOnGround({ x, y }: { x: number; y: number }) {
         const integer_X = Math.round(x);
         if (this._coords !== null && integer_X < this._coords.length && integer_X >= 0) {
@@ -898,7 +788,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         }
         this.highlightCurrentPosition(true);
     }
-
     /*
     Toggles whether or not the current x-axis point is highlighted in the link profile chart.
     */

@@ -23,6 +23,7 @@ export abstract class WorkspaceLineStringFeature extends BaseWorkspaceFeature {
             let newFeature = { ...feature };
             newFeature.geometry.coordinates[index] = newCoords;
             this.draw.add(newFeature);
+            this.map.fire('draw.update', {features: [newFeature]});
         }
     }
 

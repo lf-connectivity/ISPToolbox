@@ -13,8 +13,8 @@
                 <div class="modal-body">
                     <div class="me-hide-on-export">
                         <p>{%translate "Select layers to export"%}</p>
-                        <div class="p-3 mb-2 isptoolbox-form d-flex flex-row justify-content-between"
-                            style="background: #F5F4F4; border-top: 2px solid #5692D1;">
+                        <div class="mb-2 isptoolbox-form d-flex flex-row justify-content-between"
+                            >
                             {% csrf_token %}
                             {{ workspace_forms.market_eval_export }}
                         </div>

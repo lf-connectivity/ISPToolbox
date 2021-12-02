@@ -265,6 +265,9 @@ class CoverageAreaGet(mixins.RetrieveModelMixin,
 
 
 class AccessPointCoverageResults(View):
+    class EMPTY_BUILDING:
+        json = {"type": "Polygon", "coordinates": []}
+
     def get(self, request, uuid):
         ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
         coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
@@ -273,17 +276,21 @@ class AccessPointCoverageResults(View):
         nearby_ids = [b.msftid for b in nearby]
         buildings = MsftBuildingOutlines.objects.filter(
             id__in=nearby_ids).all()
+        buildings = {b.id : b.geog for b in buildings}
         features = [{
             "type": "Feature",
             "geometry": json.loads(
-                    building.geog.json
+                b.geog.json if b.geog else
+                buildings.get(
+                    b.msftid, AccessPointCoverageResults.EMPTY_BUILDING()
+                ).json
             ),
             "properties": {
                 "serviceable": b.status,
                 "msftid": b.msftid
             }
         }
-            for b, building in zip(nearby, buildings)]
+            for b in nearby]
         fc = {'type': 'FeatureCollection', 'features': features}
         return JsonResponse(fc)
 

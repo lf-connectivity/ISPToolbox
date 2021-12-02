@@ -531,6 +531,7 @@ class BuildingCoverage(models.Model):
         choices=CoverageStatus.choices
     )
     height_margin = models.FloatField(blank=True, default=0.0)
+    cpe_location = geo_models.PointField(null=True, blank=True)
 
 
 class AccessPointCoverageBuildings(models.Model):

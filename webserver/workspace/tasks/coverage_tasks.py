@@ -38,9 +38,11 @@ def calculateCoverage(access_point_id: str, user_id: str) -> None:
                     out_image, out_transform = mask.mask(
                         ds, [building_polygon], crop=True
                     )
+                    # Find the highest point in the cropped image and make that the recommended
+                    # installation location for the CPE
                     cpe_location = np.argmax(out_image)
-                    max_index_i, max_index_j, max_index_k = np.unravel_index(cpe_location, out_image.shape)
-                    max_value = out_image[max_index_i, max_index_j, max_index_k]
+                    max_index_k, max_index_i, max_index_j = np.unravel_index(cpe_location, out_image.shape)
+                    max_value = out_image[max_index_k, max_index_i, max_index_j]
                     if max_value:
                         loc = rasterio.transform.xy(out_transform, max_index_i, max_index_j)
                         building.cpe_location = Point(*loc)

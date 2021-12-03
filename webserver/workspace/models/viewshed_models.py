@@ -185,8 +185,13 @@ class Viewshed(models.Model, S3PublicExportMixin):
         """
         transformed_observer = self.ap.geojson.transform(
             dsm_projection, clone=True)
+        self.mode = Viewshed.CoverageStatus.GROUND
+        self.save(update_fields=['mode'])
         transformed_height = self.translate_dtm_height_to_dsm_height()
-        return f"""gdal_viewshed -b 1 -ov 1
+        output_value = 1
+        if self.mode != Viewshed.CoverageStatus.NORMAL:
+            output_value = -1
+        return f"""gdal_viewshed -b 1 -ov {output_value}
             -oz {transformed_height} -tz {self.ap.default_cpe_height} -md {self.__calculateRadiusViewshed()}
             -ox {transformed_observer.x} -oy {transformed_observer.y} -om {self.mode}
             {dsm_filepath} {output_filepath}
@@ -269,17 +274,32 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
     def __colorizeOutputViewshed(self, tif_viewshed_tempfile, output_colorized_tempfile):
         with rasterio.open(tif_viewshed_tempfile.name) as src:
-            meta = src.meta.copy()
-            meta.update({
-                'count': 4
-            })
-            with rasterio.open(output_colorized_tempfile.name, 'w', **meta) as dst:
-                layer = src.read(1)
-                for i in range(1, 5):
-                    new_layer = np.zeros(layer.shape, dtype=np.uint8)
-                    if i == 4:
-                        new_layer[layer == 0] = 128
-                    dst.write(new_layer, indexes=i)
+            if self.mode == Viewshed.CoverageStatus.NORMAL:
+                meta = src.meta.copy()
+                meta.update({
+                    'count': 4
+                })
+                with rasterio.open(output_colorized_tempfile.name, 'w', **meta) as dst:
+                    layer = src.read(1)
+                    for i in range(1, 5):
+                        new_layer = np.zeros(layer.shape, dtype=np.uint8)
+                        if i == 4:
+                            new_layer[layer == 0] = 128
+                        dst.write(new_layer, indexes=i)
+            if self.mode == Viewshed.CoverageStatus.GROUND:
+                meta = src.meta.copy()
+                meta.update({
+                    'count': 4,
+                    'dtype': rasterio.uint8
+                })
+                with rasterio.open(output_colorized_tempfile.name, 'w', **meta) as dst:
+                    layer = src.read(1)
+                    for i in range(1, 5):
+                        new_layer = np.zeros(layer.shape, dtype=np.uint8)
+                        if i == 4:
+                            new_layer[layer >= self.ap.default_cpe_height] = 128
+                        dst.write(new_layer, indexes=i)
+                
 
     def __reprojectViewshed(self, output_temp):
         # Load Output Viewshed TIF File

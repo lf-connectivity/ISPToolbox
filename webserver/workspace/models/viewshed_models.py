@@ -297,7 +297,6 @@ class Viewshed(models.Model, S3PublicExportMixin):
                         if i == 4:
                             new_layer[layer >= self.ap.default_cpe_height] = 128
                         dst.write(new_layer, indexes=i)
-                
 
     def __reprojectViewshed(self, output_temp):
         # Load Output Viewshed TIF File

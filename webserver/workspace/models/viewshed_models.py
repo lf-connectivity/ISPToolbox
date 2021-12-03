@@ -63,7 +63,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
         NORMAL = "NORMAL"
 
     mode = models.CharField(
-        default=CoverageStatus.NORMAL,
+        default=CoverageStatus.GROUND,
         max_length=20,
         choices=CoverageStatus.choices
     )
@@ -185,8 +185,6 @@ class Viewshed(models.Model, S3PublicExportMixin):
         """
         transformed_observer = self.ap.geojson.transform(
             dsm_projection, clone=True)
-        self.mode = Viewshed.CoverageStatus.GROUND
-        self.save(update_fields=['mode'])
         transformed_height = self.translate_dtm_height_to_dsm_height()
         output_value = 1
         if self.mode != Viewshed.CoverageStatus.NORMAL:

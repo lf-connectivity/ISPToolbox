@@ -390,8 +390,14 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     let building = this.map.queryRenderedFeatures(e.point, {
                         layers: [BUILDING_LAYER]
                     })[0];
-                    let buildingId = building.properties?.msftid;
                     let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+                    if(building.properties?.cpe_location){
+                        const parsed_location = JSON.parse(building.properties.cpe_location);
+                        if(parsed_location !== null){
+                            lngLat = parsed_location.coordinates;
+                        }
+                    }
+                    let buildingId = building.properties?.msftid;
                     let mapboxClient = MapboxSDKClient.getInstance();
                     mapboxClient.reverseGeocode(lngLat, (response: any) => {
                         let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(

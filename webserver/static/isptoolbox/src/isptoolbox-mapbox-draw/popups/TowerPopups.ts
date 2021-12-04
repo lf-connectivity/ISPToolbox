@@ -445,7 +445,7 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
             ) {
                 return `
                     <div class="ap-stat">
-                    <p style="font-size: 0.75rem">These results are based on inputted specs.</p>
+                    <p style="font-size: 0.75rem; color: white">These results are based on inputted specs.</p>
                     </div>
                     <div class="ap-stat">
                         <p class="ap-stat--label">Est. Clear LOS<span>at least 1 point on rooftop</span></p>

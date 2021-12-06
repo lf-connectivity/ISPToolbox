@@ -1,0 +1,19 @@
+{% load i18n %}
+<div class="alert alert-warning fade" role="alert" id="connection_issues_alert"
+style="position: absolute; margin-top: 1em; left: 50%; transform: translate(-50%, 0%); z-index: 1080;">
+  <strong>{% translate "Offline:"%}</strong> {% translate "ISP Toolbox is not connected"%}
+</div>
+<div class="alert alert-danger" role="alert" id="ajax-failed_alert"
+style="position: absolute; margin-top: 1em; left: 50%; transform: translate(-50%, 0%); z-index: 1080;">
+  <strong>{% translate "Operation Failed:"%}</strong> {% translate "Try again later"%}
+</div>
+<script>
+const updateNetworkStatus = () => {
+  const el = $('#connection_issues_alert');
+  window.navigator.onLine ? el.removeClass('show') :  el.addClass('show');
+  console.log(window.navigator.onLine ? 'online' : 'offline');
+}
+updateNetworkStatus();
+window.addEventListener('offline', updateNetworkStatus);
+window.addEventListener('online', updateNetworkStatus);
+</script>

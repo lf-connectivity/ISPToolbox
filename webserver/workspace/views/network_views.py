@@ -1,7 +1,5 @@
-from django.contrib.sessions.models import Session
 from django.shortcuts import render, redirect
 from django.views import View
-from django.http import JsonResponse
 from django.contrib.gis.geos import Point
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404

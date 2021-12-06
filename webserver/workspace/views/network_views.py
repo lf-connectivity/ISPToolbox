@@ -1,3 +1,4 @@
+from django.contrib.sessions.models import Session
 from django.shortcuts import render, redirect
 from django.views import View
 from django.http import JsonResponse
@@ -10,27 +11,28 @@ import csv
 from workspace.models import AccessPointLocation, WorkspaceMapSession
 from workspace import models as workspace_models
 from workspace.forms import UploadTowerCSVForm, WorkspaceForms
+from workspace.models.model_constants import KM_2_MI, M_2_FT
 
 
 class BulkUploadTowersView(LoginRequiredMixin, View):
     def post(self, request):
-        if not request.user.is_anonymous:
-            try:
-                csv_file = request.FILES.get('file', None)
-                decoded_file = csv_file.read().decode('utf-8').splitlines()
-                for row in csv.DictReader(decoded_file, delimiter=','):
-                    _, created = AccessPointLocation.objects.update_or_create(
-                        owner=request.user,
-                        name=row['Name'],
-                        location=Point(
-                            y=float(row['Latitude']), x=float(row['Longitude'])),
-                        height=float(row['Height(ft)']),
-                        max_radius=float(row['Radius(mi)']),
-                    )
-                return redirect(request.GET.get('next', '/pro'))
-            except Exception as e:
-                return JsonResponse({'error': str(e)})
-        return redirect(request.GET.get('next', '/pro'))
+        try:
+            csv_file = request.FILES.get('file', None)
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+            for row in csv.DictReader(decoded_file, delimiter=','):
+                _, created = AccessPointLocation.objects.update_or_create(
+                    owner=request.user,
+                    name=row['Name'],
+                    geojson=Point(
+                        y=float(row['Latitude']), x=float(row['Longitude'])),
+                    height=float(row['Height(ft)']) / M_2_FT,
+                    max_radius=float(row['Radius(mi)']) / KM_2_MI,
+                    session_id=request.session.session_key,
+                    map_session_id=request.POST.get('map_session', None)
+                )
+            return redirect(request.GET.get('next', '/pro'))
+        except Exception as e:
+            raise e
 
 
 class EditNetworkView(View):

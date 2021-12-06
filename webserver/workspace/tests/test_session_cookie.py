@@ -1,5 +1,4 @@
 from django.contrib.gis.geos.point import Point
-from django.contrib.sessions.models import Session
 from django.urls import reverse
 from django.test import TestCase
 from django.test import Client
@@ -23,7 +22,7 @@ class TestCookieBasedSession(TestCase):
         response = self.client.get('/demo/network-app/')
         self.assertTrue(response.status_code == 200)
         num_sessions = WorkspaceMapSession.objects.filter(
-            session=Session.objects.get(pk=self.client.session.session_key)
+            session_id=self.client.session.session_key
         ).count()
         self.assertGreater(num_sessions, 0)
 
@@ -75,8 +74,7 @@ class TestPrivacyCookieBasedSession(TestCase):
         response = self.cookie_client.get('/demo/network-app/')
         self.assertEqual(response.status_code, 200)
         self.network_cookie = WorkspaceMapSession.objects.filter(
-            session=Session.objects.get(
-                pk=self.cookie_client.session.session_key)
+            session_id=self.cookie_client.session.session_key
         ).first()
         return super().setUp()
 

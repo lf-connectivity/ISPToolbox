@@ -1,4 +1,3 @@
-from django.contrib.sessions.models import Session
 from django.http.response import JsonResponse
 from workspace.models import (
     WorkspaceMapSession, WorkspaceMapSessionSerializer
@@ -41,10 +40,10 @@ class SessionCreateUpdateView(
     def perform_create(self, serializer):
         user = None if self.request.user.is_anonymous else self.request.user
         session = (
-            Session.objects.get(pk=self.request.session.session_key)
+            self.request.session.session_key
             if self.request.session is not None else None
         )
-        serializer.save(owner=user, session=session)
+        serializer.save(owner=user, session_id=session)
 
 
 class SessionListView(

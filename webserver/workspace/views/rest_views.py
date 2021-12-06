@@ -1,4 +1,3 @@
-from django.contrib.sessions.models import Session
 from django.http.response import Http404
 from django.views import View
 from workspace.models import (
@@ -27,11 +26,11 @@ class WorkspacePerformCreateMixin:
     def perform_create(self, serializer):
         session = None
         if self.request.session and self.request.session.session_key is not None:
-            session = Session.objects.get(pk=self.request.session.session_key)
+            session = self.request.session.session_key
         user = self.request.user
         if self.request.user.is_anonymous:
             user = None
-        serializer.save(owner=user, session=session)
+        serializer.save(owner=user, session_id=session)
 
 
 class WorkspaceFeatureGetQuerySetMixin:

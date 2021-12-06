@@ -4,24 +4,27 @@ from rest_framework import serializers
 from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import Point, GeometryCollection, GEOSGeometry
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getMicrosoftBuildings
-from IspToolboxApp.Helpers.kmz_helpers import (
-    convertKml
-)
+from IspToolboxApp.Helpers.kmz_helpers import convertKml
 from workspace.models.model_constants import FeatureType
 import uuid
 import json
 import tempfile
 from osgeo import gdal
 from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
-from workspace.utils.import_session import convert_file_to_workspace_session, flatten_geometry
+from workspace.utils.import_session import (
+    convert_file_to_workspace_session,
+    flatten_geometry,
+)
 from .network_models import (
-    AccessPointSerializer, CPESerializer, APToCPELinkSerializer,
-    CoverageAreaSerializer, PointToPointLinkSerializer
+    AccessPointSerializer,
+    CPESerializer,
+    APToCPELinkSerializer,
+    CoverageAreaSerializer,
+    PointToPointLinkSerializer,
+    AccessPointSectorSerializer,
 )
 from workspace import geojson_utils
-from .network_models import (
-    AccessPointLocation, APToCPELink
-)
+from .network_models import AccessPointLocation, APToCPELink
 from rest_framework.validators import UniqueTogetherValidator
 from django.utils.translation import gettext as _
 from django.contrib.sessions.models import Session
@@ -32,29 +35,38 @@ class WorkspaceMapSession(models.Model):
     """
     This model represents a workspace map session
     """
-    name = models.CharField(max_length=63, default="untitled workspace")
-    uuid = models.UUIDField(
-        default=uuid.uuid4, primary_key=True, editable=False)
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL,
-                              on_delete=models.CASCADE, null=True)
+    name = models.CharField(max_length=63, default="untitled workspace")
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
+    )
     session = models.ForeignKey(
-        Session, on_delete=models.SET_NULL, blank=True, null=True)
+        Session, on_delete=models.SET_NULL, blank=True, null=True
+    )
 
     created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
     # Map Preferences
     center = geo_models.PointField(default=Point(-97.03125, 36.59789))
-    zoom = models.FloatField(default=3.75, validators=[
-                             MinValueValidator(0), MaxValueValidator(20)])
+    zoom = models.FloatField(
+        default=3.75, validators=[MinValueValidator(0), MaxValueValidator(20)]
+    )
     lock_dragging = models.BooleanField(default=False)
 
-    fks_serializers = [AccessPointSerializer, CPESerializer,
-                       APToCPELinkSerializer, CoverageAreaSerializer,
-                       PointToPointLinkSerializer]
+    fks_serializers = [
+        AccessPointSerializer,
+        CPESerializer,
+        AccessPointSectorSerializer,
+        APToCPELinkSerializer,
+        CoverageAreaSerializer,
+        PointToPointLinkSerializer,
+    ]
     UNIQUE_TOGETHER_ERROR = _(
-        "You already have a session with that name, please write a different name.")
+        "You already have a session with that name, please write a different name."
+    )
 
     class UnitPreferences(models.TextChoices):
         METRIC = "METRIC"
@@ -72,13 +84,14 @@ class WorkspaceMapSession(models.Model):
         This property is to support JS files that use US, METRIC - TODO update JS to use metric/imperial
         """
         if self.units == self.UnitPreferences.IMPERIAL:
-            return 'US'
+            return "US"
         else:
-            return 'METRIC'
+            return "METRIC"
 
     # Logging
     logging_fbid = models.BigIntegerField(
-        null=True, default=None, help_text="fbid for logging purposes, don't trust")
+        null=True, default=None, help_text="fbid for logging purposes, don't trust"
+    )
 
     class Meta:
         unique_together = [["owner", "name"]]
@@ -92,22 +105,34 @@ class WorkspaceMapSession(models.Model):
         user = None
         if request.user.is_authenticated:
             user = request.user
-        return (cls.objects.filter(owner=user) | cls.objects.filter(session=request.session))
+        return cls.objects.filter(owner=user) | cls.objects.filter(
+            session=request.session
+        )
 
     def get_session_geojson(self):
-        fcs = [serializer.get_features_for_session(
-            self) for serializer in self.fks_serializers]
+        fcs = [
+            serializer.get_features_for_session(self)
+            for serializer in self.fks_serializers
+        ]
         return geojson_utils.merge_feature_collections(*fcs)
 
     def get_session_kml(self):
         geojson = self.get_session_geojson()
-        with tempfile.NamedTemporaryFile("w", prefix=self.uuid.hex, suffix=".geojson") as tmp_file_geojson:
-            tmp_file_geojson.write(json.dumps(
-                geojson, default=lambda x: x.hex if isinstance(x, uuid.UUID) else None))
+        with tempfile.NamedTemporaryFile(
+            "w", prefix=self.uuid.hex, suffix=".geojson"
+        ) as tmp_file_geojson:
+            tmp_file_geojson.write(
+                json.dumps(
+                    geojson,
+                    default=lambda x: x.hex if isinstance(x, uuid.UUID) else None,
+                )
+            )
 
-            with tempfile.NamedTemporaryFile('w', prefix=self.uuid.hex, suffix='.kml') as tmp_file:
+            with tempfile.NamedTemporaryFile(
+                "w", prefix=self.uuid.hex, suffix=".kml"
+            ) as tmp_file:
                 gdal.VectorTranslate(tmp_file.name, tmp_file_geojson.name)
-                with open(tmp_file.name, 'r') as kml_output:
+                with open(tmp_file.name, "r") as kml_output:
                     return kml_output.read()
 
     @classmethod
@@ -118,9 +143,9 @@ class WorkspaceMapSession(models.Model):
         )
 
         if created:
-            session.logging_fbid = int(request.GET.get('id', 0))
-            lat = request.GET.get('lat', None)
-            lon = request.GET.get('lon', None)
+            session.logging_fbid = int(request.GET.get("id", 0))
+            lat = request.GET.get("lat", None)
+            lon = request.GET.get("lon", None)
             if lat is not None and lon is not None:
                 session.center = Point(x=float(lon), y=float(lat))
                 session.zoom = 14
@@ -135,8 +160,7 @@ class WorkspaceMapSession(models.Model):
             session.save()
 
             # Associate session key with cloned map session
-            session.session = Session.objects.get(
-                pk=request.session.session_key)
+            session.session = Session.objects.get(pk=request.session.session_key)
             session.save()
 
         return session, created
@@ -156,11 +180,9 @@ class WorkspaceMapSession(models.Model):
         for field in self._meta.fields:
             kwargs[field.name] = getattr(self, field.name)
 
-        kwargs.pop('uuid')
+        kwargs.pop("uuid")
         if new_name is not None:
-            kwargs.update(
-                {'name': new_name}
-            )
+            kwargs.update({"name": new_name})
         new_instance = self.__class__(**kwargs)
         new_instance.save()
         # now you have id for the new instance so you can
@@ -172,6 +194,13 @@ class WorkspaceMapSession(models.Model):
             ap.map_session = new_instance
             ap.save()
             old_feature_map.update({old_uuid: ap})
+
+        for sector in self.accesspointsector_set.all():
+            old_uuid = sector.uuid
+            sector.uuid = None
+            sector.map_session = new_instance
+            sector.save()
+            old_feature_map.update({old_uuid: sector})
 
         for cpe in self.cpelocation_set.all():
             old_uuid = cpe.uuid
@@ -185,63 +214,80 @@ class WorkspaceMapSession(models.Model):
             link.map_session = new_instance
             link.save()
 
+        # TODO: Get rid of if statement once sectors launch
         for link in self.aptocpelink_set.all():
-            new_link = APToCPELink(
-                owner=self.owner, map_session=new_instance, ap=old_feature_map[link.ap.uuid],
-                cpe=old_feature_map[link.cpe.uuid]
-            )
+            if link.ap:
+                new_link = APToCPELink(
+                    owner=self.owner,
+                    map_session=new_instance,
+                    ap=old_feature_map[link.ap.uuid],
+                    cpe=old_feature_map[link.cpe.uuid],
+                )
+            else:
+                new_link = APToCPELink(
+                    owner=self.owner,
+                    map_session=new_instance,
+                    sector=old_feature_map[link.sector.uuid],
+                    cpe=old_feature_map[link.cpe.uuid],
+                )
             new_link.save()
 
         return new_instance
 
     def kml_key(self):
-        return f'kml/ISPTOOLBOX_{self.name}_{self.uuid}.kml'
+        return f"kml/ISPTOOLBOX_{self.name}_{self.uuid}.kml"
 
     @classmethod
     def importFile(cls, request):
-        file = request.FILES.get('file', None)
+        file = request.FILES.get("file", None)
         fc = convert_file_to_workspace_session(file)
-        session = WorkspaceMapSession(name=request.POST.get(
-            'name', None), owner=request.user)
+        session = WorkspaceMapSession(
+            name=request.POST.get("name", None), owner=request.user
+        )
         session.save()
         try:
             ap_dict = {}
-            for f in fc.get('features', []):
-                geom = f.get('geometry', {})
-                f_str = json.dumps({key: geom[key]
-                                    for key in ['type', 'coordinates']})
+            for f in fc.get("features", []):
+                geom = f.get("geometry", {})
+                f_str = json.dumps({key: geom[key] for key in ["type", "coordinates"]})
                 geos_geom = GEOSGeometry(f_str)
                 hgt = None
                 if geos_geom.hasz:
                     geos_geom, hgt = flatten_geometry(geos_geom)
-                if geos_geom.geom_type == 'Polygon':
+                if geos_geom.geom_type == "Polygon":
                     CoverageAreaSerializer.Meta.model(
-                        owner=request.user, map_session=session, geojson=geos_geom).save()
-                elif geos_geom.geom_type == 'Point':
-                    if geom.get('properties', {}).get('type', None) == FeatureType.CPE:
+                        owner=request.user, map_session=session, geojson=geos_geom
+                    ).save()
+                elif geos_geom.geom_type == "Point":
+                    if geom.get("properties", {}).get("type", None) == FeatureType.CPE:
                         cpe = CPESerializer.Meta.model(
-                            owner=request.user, map_session=session,
+                            owner=request.user,
+                            map_session=session,
                             geojson=geos_geom,
-                            height=geom.get('properties', {}).get('height', hgt if hgt else 0))
+                            height=geom.get("properties", {}).get(
+                                "height", hgt if hgt else 0
+                            ),
+                        )
                         cpe.save()
                         ap_uuid = ap_dict.get(
-                            geom.get('properties', {}).get('ap', None), None)
+                            geom.get("properties", {}).get("ap", None), None
+                        )
                         APToCPELinkSerializer.Meta.model(
-                            owner=request.user, map_session=session,
-                            ap=ap_uuid, cpe=cpe
+                            owner=request.user, map_session=session, ap=ap_uuid, cpe=cpe
                         ).save()
                     else:
                         ap = AccessPointSerializer.Meta.model(
-                            owner=request.user, map_session=session,
+                            owner=request.user,
+                            map_session=session,
                             geojson=geos_geom,
-                            height=geom.get('properties', {}).get('height', 0))
+                            height=geom.get("properties", {}).get("height", 0),
+                        )
                         ap.save()
-                        ap_dict.update({
-                            geom.get('properties', {}).get('id', None): ap
-                        })
-                elif geos_geom.geom_type == 'LineString':
+                        ap_dict.update({geom.get("properties", {}).get("id", None): ap})
+                elif geos_geom.geom_type == "LineString":
                     ptp = PointToPointLinkSerializer.Meta.model(
-                        owner=request.user, map_session=session,
+                        owner=request.user,
+                        map_session=session,
                         geojson=geos_geom,
                     )
                     ptp.save()
@@ -253,28 +299,28 @@ class WorkspaceMapSession(models.Model):
     def exportKMZ(self, export_format):
         geo_list = []
         gc = []
-        coverage_areas = {'layer': 'coverage areas', 'geometries': []}
+        coverage_areas = {"layer": "coverage areas", "geometries": []}
         for coverage_area in self.coveragearea_set.all():
             coverage = json.loads(coverage_area.geojson.json)
             gc.append(coverage_area.geojson)
-            coverage_areas['geometries'].append(coverage)
+            coverage_areas["geometries"].append(coverage)
 
         geo_list.append(coverage_areas)
 
-        towers = {'layer': 'towers', 'geometries': []}
+        towers = {"layer": "towers", "geometries": []}
         for ap in self.accesspointlocation_set.all():
             ap_coverage = ap.getDSMExtentRequired()
             gc.append(ap_coverage)
-            towers['geometries'].append(json.loads(ap_coverage.json))
+            towers["geometries"].append(json.loads(ap_coverage.json))
 
-        buildings = {'layer': 'buildings', 'geometries': None}
-        buildings['geometries'] = getMicrosoftBuildings(
+        buildings = {"layer": "buildings", "geometries": None}
+        buildings["geometries"] = getMicrosoftBuildings(
             GeometryCollection(gc).json, None
-        )['buildings']['geometries']
+        )["buildings"]["geometries"]
 
-        if export_format.cleaned_data['buildings']:
+        if export_format.cleaned_data["buildings"]:
             geo_list.append(buildings)
-        if export_format.cleaned_data['drawn_area']:
+        if export_format.cleaned_data["drawn_area"]:
             geo_list.append(towers)
 
         kml = convertKml(geo_list)
@@ -292,12 +338,12 @@ class WorkspaceMapSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WorkspaceMapSession
-        exclude = ['session', 'logging_fbid']
+        exclude = ["session", "logging_fbid"]
         validators = [
             UniqueTogetherValidator(
                 queryset=WorkspaceMapSession.objects.all(),
                 fields=["owner", "name"],
-                message=WorkspaceMapSession.UNIQUE_TOGETHER_ERROR
+                message=WorkspaceMapSession.UNIQUE_TOGETHER_ERROR,
             )
         ]
 
@@ -306,13 +352,14 @@ class NetworkMapPreferences(models.Model):
     """
     This model stores the user's last location during a map session
     """
-    owner = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     # Map Preferences
     center = geo_models.PointField(default=Point(-97.03125, 36.59788913307022))
-    zoom = models.FloatField(default=3.75, validators=[
-                             MinValueValidator(0), MaxValueValidator(20)])
+    zoom = models.FloatField(
+        default=3.75, validators=[MinValueValidator(0), MaxValueValidator(20)]
+    )
 
     # Datetime Fields
     created = models.DateTimeField(auto_now_add=True)
@@ -324,4 +371,4 @@ class NetworkMapPreferencesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NetworkMapPreferences
-        fields = '__all__'
+        fields = "__all__"

@@ -74,12 +74,12 @@ export abstract class BaseWorkspaceFeature {
      * things after object persistence.
      *
      * @param successFollowup Function to execute on successfully persisting new
-     * @param revert Function to execute on failure of ajax request
+     * @param errorFollowup Function to execute on failure of ajax request
      * object.
      */
     create(
         successFollowup?: (resp: any) => void,
-        revert?: () => void
+        errorFollowup?: () => void
     ) {
         $.ajax({
             url: `${this.apiEndpoint}`,
@@ -100,8 +100,8 @@ export abstract class BaseWorkspaceFeature {
             .fail((error) => {
                 renderAjaxOperationFailed();
                 this.draw.delete(this.mapboxId);
-                if (revert) {
-                    revert();
+                if (errorFollowup) {
+                    errorFollowup();
                 }
             });
     }
@@ -110,11 +110,11 @@ export abstract class BaseWorkspaceFeature {
      * Updates the object in the backend with new information. Calls successFollowup if defined.
      *
      * @param successFollowup Function to execute on successfully updating object
-     * @param revert Function to execute on failure of ajax request
+     * @param errorFollowup Function to execute on failure of ajax request
      */
     update(
         successFollowup?: (resp: any) => void,
-        revert?: () => void
+        errorFollowup?: () => void
     ) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
@@ -133,8 +133,8 @@ export abstract class BaseWorkspaceFeature {
             })
             .fail((error) => {
                 renderAjaxOperationFailed();
-                if (revert) {
-                    revert();
+                if (errorFollowup) {
+                    errorFollowup();
                 }
             });
     }
@@ -143,11 +143,11 @@ export abstract class BaseWorkspaceFeature {
      * Deletes the object in the backend. Calls successFollowup if defined.
      *
      * @param successFollowup Function to execute on successfully deleting object
-     * @param revert Function to execute on failure of ajax request
+     * @param errorFollowup Function to execute on failure of ajax request
      */
     delete(
         successFollowup?: (resp: any) => void,
-        revert?: () => void
+        errorFollowup?: () => void
     ) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
@@ -165,8 +165,8 @@ export abstract class BaseWorkspaceFeature {
             })
             .fail((error) => {
                 renderAjaxOperationFailed();
-                if (revert) {
-                    revert();
+                if (errorFollowup) {
+                    errorFollowup();
                 }
             });
     }

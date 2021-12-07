@@ -723,6 +723,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(sector.radius, DEFAULT_MAX_RADIUS)
         self.assertEqual(sector.heading, DEFAULT_HEADING)
         self.assertEqual(sector.azimuth, DEFAULT_AZIMUTH)
+        self.assertEqual(sector.feature_type, FeatureType.AP_SECTOR.value)
 
     def test_create_cpe(self):
         new_cpe = {

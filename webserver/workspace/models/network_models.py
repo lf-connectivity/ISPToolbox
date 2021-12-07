@@ -385,6 +385,14 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
                 "cloudrf_coverage_geojson", instance.cloudrf_coverage_geojson
             )
 
+        # On AP move, update all associated sectors' cloudrf coverage
+        if not numpy.allclose(
+            new_point, json.loads(instance.geojson.json)["coordinates"]
+        ):
+            AccessPointSector.objects.filter(ap=instance).update(
+                cloudrf_coverage_geojson=None
+            )
+
         validated_data["cloudrf_coverage_geojson"] = new_cloudrf
         return super(AccessPointSerializer, self).update(instance, validated_data)
 
@@ -535,19 +543,36 @@ class AccessPointSector(WorkspaceFeature):
     def feature_type(self):
         return FeatureType.AP_SECTOR.value
 
+    def get_sector_geojson_json(self, buffer_radius=0):
+        center = self.ap.geojson
+        start_bearing = (self.heading - self.azimuth / 2) % 360
+        end_bearing = (self.heading + self.azimuth / 2) % 360
+        return createGeoJSONSector(
+            center, self.radius + buffer_radius, start_bearing, end_bearing
+        )
+
     @property
     def geojson(self):
-        center = self.ap.geojson
-        if math.isclose(self.azimuth, 360):
-            sector_geojson_json = createGeoJSONCircle(center, self.radius)
-        else:
-            start_bearing = (self.heading - self.azimuth / 2) % 360
-            end_bearing = (self.heading + self.azimuth / 2) % 360
-            sector_geojson_json = createGeoJSONSector(
-                center, self.radius, start_bearing, end_bearing
-            )
+        return Polygon(*self.get_sector_geojson_json()["coordinates"])
 
-        return Polygon(*sector_geojson_json["coordinates"])
+    def get_dtm_height(self) -> float:
+        return getDTMPoint(self.ap.geojson)
+
+    def getDSMExtentRequired(self):
+        """
+        Get the AOI necessary to render AP location
+        """
+        geo_sector = self.get_sector_geojson_json()
+        aoi = GEOSGeometry(json.dumps(geo_sector))
+        return aoi
+
+    def createDSMJobEnvelope(self):
+        """
+        Get the suggest aoi to export w/ buffer
+        """
+        geo_sector = self.get_sector_geojson_json(buffer_radius=BUFFER_DSM_EXPORT_KM)
+        aoi = GEOSGeometry(json.dumps(geo_sector))
+        return aoi.envelope
 
 
 class AccessPointSectorSerializer(
@@ -625,7 +650,7 @@ class AccessPointSectorSerializer(
         new_height = validated_data.get("height", instance.height)
         new_heading = validated_data.get("heading", instance.heading)
         new_azimuth = validated_data.get("azimuth", instance.azimuth)
-        new_distance = validated_data.get("distance", instance.distance)
+        new_radius = validated_data.get("radius", instance.radius)
         new_cpe_height = validated_data.get(
             "default_cpe_height", instance.default_cpe_height
         )
@@ -634,7 +659,7 @@ class AccessPointSectorSerializer(
             not math.isclose(new_height, instance.height)
             or not math.isclose(new_heading, instance.heading)
             or not math.isclose(new_azimuth, instance.azimuth)
-            or not math.isclose(new_distance, instance.distance)
+            or not math.isclose(new_radius, instance.radius)
             or not math.isclose(new_cpe_height, instance.default_cpe_height)
         ):
             new_cloudrf = None

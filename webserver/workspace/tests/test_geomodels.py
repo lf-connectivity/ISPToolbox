@@ -238,6 +238,51 @@ UPDATED_TEST_MULTIPOLYGON = {
 }
 UPDATED_TEST_MULTIPOLYGON = json.dumps(UPDATED_TEST_MULTIPOLYGON)
 
+# I cheated for this and found it out ahead of time. Verfied that this looks
+# right via geojson.io though.
+UPDATED_TEST_SECTOR = {
+    "type": "Polygon",
+    "coordinates": [
+        [
+            [-121.777777777777004, 38.987777777777772],
+            [-121.780218853567021, 39.009458488264812],
+            [-121.777319514548225, 39.009538416369153],
+            [-121.774425096916715, 39.00938479542571],
+            [-121.771566684211422, 39.008999275197837],
+            [-121.768774972253908, 39.0083859958104],
+            [-121.76607993864863, 39.007551543168397],
+            [-121.763510520098933, 39.006504878045071],
+            [-121.761094301046228, 39.005257239611169],
+            [-121.758857217010842, 39.003822024454259],
+            [-121.75682327584741, 39.002214642403239],
+            [-121.755014299925762, 39.000452350723549],
+            [-121.753449692013447, 38.998554068482306],
+            [-121.752146227370517, 38.996540173095326],
+            [-121.751117874275678, 38.994432281258938],
+            [-121.750375644886972, 38.992253016635509],
+            [-121.749927478006001, 38.990025766801601],
+            [-121.749778154963977, 38.98777443207991],
+            [-121.749929249486385, 38.985523168959922],
+            [-121.75037911202439, 38.983296130866442],
+            [-121.75112288866886, 38.9811172090592],
+            [-121.752152574392142, 38.97900977644143],
+            [-121.753457099996652, 38.976996437019928],
+            [-121.755022451792158, 38.975098783694463],
+            [-121.756831822678677, 38.973337166961798],
+            [-121.758865792983244, 38.971730476999831],
+            [-121.76110253908864, 38.970295941450985],
+            [-121.763518067604394, 38.969048941055405],
+            [-121.766086472566741, 38.968002845091178],
+            [-121.76878021291806, 38.967168868367715],
+            [-121.77157040730917, 38.966555951287859],
+            [-121.774427143090975, 38.966170664249034],
+            [-121.777319796218066, 38.966017137395063],
+            [-121.780217358676296, 38.966097016462051],
+            [-121.777777777777004, 38.987777777777772],
+        ]
+    ],
+}
+
 UPDATED_TEST_GEO_COLLECTION = {
     "type": "GeometryCollection",
     "geometries": [
@@ -260,8 +305,8 @@ UPDATED_TEST_GEO_COLLECTION = json.dumps(UPDATED_TEST_GEO_COLLECTION)
 UPDATED_NAME = "Test Object Two: Electric Boogaloo"
 UPDATED_HEIGHT = 100
 UPDATED_MAX_RADIUS = 2.42
-UPDATED_HEADING = 50.0
-UPDATED_AZIMUTH = 200.0
+UPDATED_HEADING = 90.0
+UPDATED_AZIMUTH = 190.0
 UPDATED_FREQUENCY = 5
 UPDATED_COVERAGE_AREA_NAME = "tribal"
 
@@ -271,6 +316,7 @@ UPDATED_COVERAGE_AREA_NAME = "tribal"
 ################################################################################
 
 AP_ENDPOINT = "/pro/workspace/api/ap-los"
+SECTOR_ENDPOINT = "/pro/workspace/api/ap-sector"
 CPE_ENDPOINT = "/pro/workspace/api/cpe"
 AP_CPE_LINK_ENDPOINT = "/pro/workspace/api/ap-cpe-link"
 COVERAGE_AREA_ENDPOINT = "/pro/workspace/api/coverage-area"
@@ -656,6 +702,28 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(ap.max_radius, DEFAULT_MAX_RADIUS)
         self.assertEqual(ap.uneditable, DEFAULT_UNEDITABLE)
 
+    def test_create_sector(self):
+        new_sector = {
+            "name": DEFAULT_NAME,
+            "ap": self.test_ap.uuid,
+            "height": DEFAULT_HEIGHT,
+            "heading": DEFAULT_HEADING,
+            "azimuth": DEFAULT_AZIMUTH,
+            "frequency": DEFAULT_FREQUENCY,
+            "radius": DEFAULT_MAX_RADIUS,
+        }
+        sector = self.create_geojson_model(
+            AccessPointSector, SECTOR_ENDPOINT, new_sector
+        )
+        self.assertEqual(sector.owner, self.testuser)
+        self.assertEqual(sector.name, DEFAULT_NAME)
+        self.assertJSONEqual(sector.geojson.json, DEFAULT_TEST_SECTOR)
+        self.assertEqual(sector.ap, self.test_ap)
+        self.assertEqual(sector.height, DEFAULT_HEIGHT)
+        self.assertEqual(sector.radius, DEFAULT_MAX_RADIUS)
+        self.assertEqual(sector.heading, DEFAULT_HEADING)
+        self.assertEqual(sector.azimuth, DEFAULT_AZIMUTH)
+
     def test_create_cpe(self):
         new_cpe = {
             "name": DEFAULT_NAME,
@@ -811,6 +879,28 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(ap.height, UPDATED_HEIGHT)
         self.assertEqual(ap.max_radius, UPDATED_MAX_RADIUS)
 
+    def test_update_sector(self):
+        sector_id = self.test_sector.uuid
+        updated_sector = {
+            "name": UPDATED_NAME,
+            "height": UPDATED_HEIGHT,
+            "radius": UPDATED_MAX_RADIUS,
+            "heading": UPDATED_HEADING,
+            "azimuth": UPDATED_AZIMUTH,
+            "frequency": UPDATED_FREQUENCY,
+        }
+        sector = self.update_geojson_model(
+            AccessPointSector, SECTOR_ENDPOINT, sector_id, updated_sector
+        )
+        self.assertJSONEqual(sector.geojson.json, UPDATED_TEST_SECTOR)
+        self.assertEqual(sector.owner, self.testuser)
+        self.assertEqual(sector.name, UPDATED_NAME)
+        self.assertEqual(sector.height, UPDATED_HEIGHT)
+        self.assertEqual(sector.radius, UPDATED_MAX_RADIUS)
+        self.assertEqual(sector.heading, UPDATED_HEADING)
+        self.assertEqual(sector.azimuth, UPDATED_AZIMUTH)
+        self.assertEqual(sector.frequency, UPDATED_FREQUENCY)
+
     def test_update_items_not_exist(self):
         id = str(uuid4())
         data = {
@@ -890,6 +980,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             APToCPELink, AP_CPE_LINK_ENDPOINT, self.test_ap_cpe_link.uuid
         )
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
+        self.delete_geojson_model(AccessPointSector, SECTOR_ENDPOINT, self.test_sector.uuid)
         self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(
             CoverageArea, COVERAGE_AREA_ENDPOINT, self.test_polygon_coverage_area.uuid
@@ -1044,6 +1135,7 @@ class WorkspacePTPLinkTestCase(WorkspaceRestViewsTestCase):
         self.assertRaises(ValidationError, ptp.full_clean)
 
 
+# TODO: Remove the AP cloudrf TCs once we launch Workspace and AP Sectors
 class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
     def setUp(self):
         super(WorkspaceCloudRfCoverageTestCase, self).setUp()
@@ -1059,7 +1151,22 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
         )
         self.test_ap_with_cloudrf.save()
 
-    def update_ap_test_delete_cloudrf_flow(self, updated_ap):
+        self.test_sector_with_cloudrf = AccessPointSector(
+            owner=self.testuser,
+            name=DEFAULT_SECTOR_NAME,
+            map_session=self.test_session,
+            ap=self.test_ap_with_cloudrf,
+            height=DEFAULT_HEIGHT,
+            heading=DEFAULT_HEADING,
+            azimuth=DEFAULT_AZIMUTH,
+            default_cpe_height=DEFAULT_CPE_HEIGHT,
+            radius=DEFAULT_MAX_RADIUS,
+            frequency=DEFAULT_FREQUENCY,
+            cloudrf_coverage_geojson=DEFAULT_TEST_GEO_COLLECTION,
+        )
+        self.test_sector_with_cloudrf.save()
+
+    def update_ap_test_delete_cloudrf_flow(self, updated_ap={}):
         ap_id = self.test_ap_with_cloudrf.uuid
         new_ap = {
             "name": DEFAULT_NAME,
@@ -1067,7 +1174,6 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
             "height": DEFAULT_HEIGHT,
             "max_radius": DEFAULT_MAX_RADIUS,
             "uneditable": DEFAULT_UNEDITABLE,
-            "cloudrf_coverage_geojson": DEFAULT_TEST_GEO_COLLECTION,
         }
         new_ap.update(updated_ap)
         ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, new_ap)
@@ -1083,15 +1189,53 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
             "height": DEFAULT_HEIGHT,
             "max_radius": DEFAULT_MAX_RADIUS,
             "uneditable": DEFAULT_UNEDITABLE,
-            "cloudrf_coverage_geojson": DEFAULT_TEST_GEO_COLLECTION,
         }
         new_ap.update(updated_ap)
         ap = self.update_geojson_model(AccessPointLocation, AP_ENDPOINT, ap_id, new_ap)
         self.assertJSONEqual(expected_cloudrf, ap.cloudrf_coverage_geojson_json)
 
+    def update_sector_test_delete_cloudrf_flow(self, updated_sector={}):
+        sector_id = self.test_sector_with_cloudrf.uuid
+        new_sector = {
+            "name": DEFAULT_NAME,
+            "height": DEFAULT_HEIGHT,
+            "heading": DEFAULT_HEADING,
+            "azimuth": DEFAULT_AZIMUTH,
+            "frequency": DEFAULT_FREQUENCY,
+            "radius": DEFAULT_MAX_RADIUS,
+            "uneditable": DEFAULT_UNEDITABLE,
+        }
+        new_sector.update(updated_sector)
+        sector = self.update_geojson_model(
+            AccessPointSector, SECTOR_ENDPOINT, sector_id, new_sector
+        )
+        self.assertEqual(sector.cloudrf_coverage_geojson, None)
+
+    def update_sector_test_no_delete_cloudrf_flow(
+        self, updated_sector={}, expected_cloudrf=DEFAULT_TEST_GEO_COLLECTION
+    ):
+        sector_id = self.test_sector_with_cloudrf.uuid
+        new_sector = {
+            "name": DEFAULT_NAME,
+            "height": DEFAULT_HEIGHT,
+            "heading": DEFAULT_HEADING,
+            "azimuth": DEFAULT_AZIMUTH,
+            "frequency": DEFAULT_FREQUENCY,
+            "radius": DEFAULT_MAX_RADIUS,
+            "uneditable": DEFAULT_UNEDITABLE,
+        }
+        new_sector.update(updated_sector)
+        sector = self.update_geojson_model(
+            AccessPointSector, SECTOR_ENDPOINT, sector_id, new_sector
+        )
+        self.assertJSONEqual(expected_cloudrf, sector.cloudrf_coverage_geojson_json)
+
     def test_update_ap_location_delete_cloudrf(self):
         updated_ap = {"geojson": UPDATED_TEST_POINT}
         self.update_ap_test_delete_cloudrf_flow(updated_ap)
+
+        # Test that the cloudRF coverage for the associated sector is gone
+        self.update_sector_test_delete_cloudrf_flow()
 
     def test_update_ap_height_delete_cloudrf(self):
         updated_ap = {"height": UPDATED_HEIGHT}
@@ -1119,9 +1263,51 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
             updated_ap, UPDATED_TEST_GEO_COLLECTION
         )
 
-    def test_update_uneditable_cloudrf_coverage(self):
+    def test_update_ap_uneditable_cloudrf_coverage(self):
         updated_ap = {"uneditable": not DEFAULT_UNEDITABLE}
         self.update_ap_test_no_delete_cloudrf_flow(updated_ap)
+
+    def test_update_sector_height_delete_cloudrf(self):
+        updated_sector = {"height": UPDATED_HEIGHT}
+        self.update_sector_test_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_heading_delete_cloudrf(self):
+        updated_sector = {"heading": UPDATED_HEADING}
+        self.update_sector_test_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_azimuth_delete_cloudrf(self):
+        updated_sector = {"azimuth": UPDATED_AZIMUTH}
+        self.update_sector_test_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_default_cpe_height_delete_cloudrf(self):
+        updated_sector = {"default_cpe_height": UPDATED_HEIGHT}
+        self.update_sector_test_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_radius_delete_cloudrf(self):
+        updated_sector = {"radius": UPDATED_MAX_RADIUS}
+        self.update_sector_test_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_name_no_delete_cloudrf(self):
+        updated_sector = {"name": UPDATED_NAME}
+        self.update_sector_test_no_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_frequency_no_delete_cloudrf(self):
+        updated_sector = {"frequency": UPDATED_FREQUENCY}
+        self.update_sector_test_no_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_height_epsilon_no_delete_cloudrf(self):
+        updated_sector = {"height": DEFAULT_HEIGHT + 1e-10}
+        self.update_sector_test_no_delete_cloudrf_flow(updated_sector)
+
+    def test_update_ap_cloudrf_coverage(self):
+        updated_ap = {"cloudrf_coverage_geojson": UPDATED_TEST_GEO_COLLECTION}
+        self.update_ap_test_no_delete_cloudrf_flow(
+            updated_ap, UPDATED_TEST_GEO_COLLECTION
+        )
+
+    def test_update_sector_uneditable_cloudrf_coverage(self):
+        updated_sector = {"uneditable": not self.test_sector_with_cloudrf.uneditable}
+        self.update_sector_test_no_delete_cloudrf_flow(updated_sector)
 
     def test_save_cloudrf_coverage(self):
         ap = AccessPointLocation.objects.get(uuid=self.test_ap.uuid)
@@ -1130,4 +1316,11 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
 
         self.assertJSONEqual(
             DEFAULT_TEST_GEO_COLLECTION, ap.cloudrf_coverage_geojson_json
+        )
+
+        sector = AccessPointSector.objects.get(uuid=self.test_sector.uuid)
+        sector.cloudrf_coverage_geojson = DEFAULT_TEST_GEO_COLLECTION
+        sector.save()
+        self.assertJSONEqual(
+            DEFAULT_TEST_GEO_COLLECTION, sector.cloudrf_coverage_geojson_json
         )

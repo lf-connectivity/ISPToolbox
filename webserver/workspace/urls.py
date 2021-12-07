@@ -66,6 +66,8 @@ urlpatterns = [
          views.AccessPointLocationGet.as_view(), name="get_ap_network"),
     path('workspace/api/cpe/', views.CPELocationCreate.as_view(), name="cpe"),
     path('workspace/api/cpe/<uuid:uuid>/', views.CPELocationGet.as_view()),
+    path('workspace/api/ap-sector/', views.AccessPointSectorCreate.as_view(), name="ap_sector"),
+    path('workspace/api/ap-sector/<uuid:uuid>/', views.AccessPointSectorGet.as_view()),
     path('workspace/api/ap-cpe-link/',
          views.APToCPELinkCreate.as_view(), name="ap-cpe-link"),
     path('workspace/api/ap-cpe-link/<uuid:uuid>/',

@@ -49,6 +49,10 @@ def createGeoJSONSector(center, radius, start_bearing, end_bearing, steps=64):
     center - latitude, longitude
     radius - km
     """
+    # If start and end bearings are the same, we assume it's a circle, not a line.
+    if start_bearing == end_bearing:
+        return createGeoJSONCircle(center, radius)
+
     center_coords = [center[0], center[1]]
     coordinates = [center_coords]
 

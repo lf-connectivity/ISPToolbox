@@ -1258,12 +1258,6 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
         updated_ap = {"height": DEFAULT_HEIGHT + 1e-10}
         self.update_ap_test_no_delete_cloudrf_flow(updated_ap)
 
-    def test_update_ap_cloudrf_coverage(self):
-        updated_ap = {"cloudrf_coverage_geojson": UPDATED_TEST_GEO_COLLECTION}
-        self.update_ap_test_no_delete_cloudrf_flow(
-            updated_ap, UPDATED_TEST_GEO_COLLECTION
-        )
-
     def test_update_ap_uneditable_cloudrf_coverage(self):
         updated_ap = {"uneditable": not DEFAULT_UNEDITABLE}
         self.update_ap_test_no_delete_cloudrf_flow(updated_ap)

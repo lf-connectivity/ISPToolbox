@@ -17,6 +17,7 @@
   {% url 'workspace:sources' sources_page='market_eval' as sources_page_url %}
   
   <div class="website-content">
+    {% include "workspace/atoms/connection_issues_alert.html" %}
     <div class="market-eval-container">
       {% include "market_evaluator/organisms/market_stats_column.html" with footnote_id="footnotes-section" %}
       <div class="map-container-network order-1 order-md-2" style="width: 100%;">

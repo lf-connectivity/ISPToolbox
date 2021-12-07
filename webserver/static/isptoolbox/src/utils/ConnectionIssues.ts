@@ -3,7 +3,5 @@ export function renderFailedConnectionIssues() {
 }
 
 export function renderAjaxOperationFailed() {
-    $("#ajax-failed_alert").fadeTo(2000, 500).slideUp(500, function(){
-        $("#ajax-failed_alert").slideUp(500);
-    });
+    $("#ajax-failed_alert").fadeTo(3000, 500).slideUp(500);
 }

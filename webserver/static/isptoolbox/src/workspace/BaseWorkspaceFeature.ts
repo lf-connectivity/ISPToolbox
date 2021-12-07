@@ -4,6 +4,7 @@ import { Feature, Geometry } from 'geojson';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
+import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 
 const BASE_WORKSPACE_SERIALIZED_FIELDS = ['uneditable'];
 const BASE_WORKSPACE_RESPONSE_FIELDS = ['uuid', 'feature_type', 'last_updated', 'uneditable'];
@@ -73,9 +74,13 @@ export abstract class BaseWorkspaceFeature {
      * things after object persistence.
      *
      * @param successFollowup Function to execute on successfully persisting new
+     * @param revert Function to execute on failure of ajax request
      * object.
      */
-    create(successFollowup?: (resp: any) => void, revert?: () => void) {
+    create(
+        successFollowup?: (resp: any) => void,
+        revert: () => void = renderAjaxOperationFailed
+    ) {
         $.ajax({
             url: `${this.apiEndpoint}`,
             method: 'POST',
@@ -104,10 +109,12 @@ export abstract class BaseWorkspaceFeature {
      * Updates the object in the backend with new information. Calls successFollowup if defined.
      *
      * @param successFollowup Function to execute on successfully updating object
-     * @returns A list of BaseWorkspaceFeature objects other than this one deleted by this function,
-     * intended to fire additional Mapbox events.
+     * @param revert Function to execute on failure of ajax request
      */
-    update(successFollowup?: (resp: any) => void, revert?: () => void) {
+    update(
+        successFollowup?: (resp: any) => void,
+        revert: () => void = renderAjaxOperationFailed
+    ) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'PATCH',
@@ -134,10 +141,12 @@ export abstract class BaseWorkspaceFeature {
      * Deletes the object in the backend. Calls successFollowup if defined.
      *
      * @param successFollowup Function to execute on successfully deleting object
-     * @returns A list of BaseWorkspaceFeature objects other than this one deleted by this function,
-     * intended to fire additional Mapbox events.
+     * @param revert Function to execute on failure of ajax request
      */
-    delete(successFollowup?: (resp: any) => void, revert?: () => void) {
+    delete(
+        successFollowup?: (resp: any) => void,
+        revert: () => void = renderAjaxOperationFailed
+    ) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'DELETE',

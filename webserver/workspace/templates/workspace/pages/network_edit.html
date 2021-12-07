@@ -17,6 +17,7 @@
   {% url 'workspace:sources' sources_page='workspace:edit_network' as sources_page_url %}
   
   <div class="website-content los-content">
+    {% include "workspace/atoms/connection_issues_alert.html" %}
     <div class="map-container-network">
       {% include "mmwave/map_view.html" %}   
     </div>

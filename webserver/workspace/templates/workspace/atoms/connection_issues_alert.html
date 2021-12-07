@@ -1,11 +1,11 @@
 {% load i18n %}
-<div class="alert alert-warning fade" role="alert" id="connection_issues_alert"
-style="position: absolute; margin-top: 1em; left: 50%; transform: translate(-50%, 0%); z-index: 1080;">
+<div style="position: absolute; margin-top: 1em; left: 50%; transform: translate(-50%, 0%); z-index: 1080;">
+<div class="alert alert-warning fade" role="alert" id="connection_issues_alert">
   <strong>{% translate "Offline:"%}</strong> {% translate "ISP Toolbox is not connected"%}
 </div>
-<div class="alert alert-danger" role="alert" id="ajax-failed_alert"
-style="position: absolute; margin-top: 1em; left: 50%; transform: translate(-50%, 0%); z-index: 1080;">
+<div class="alert alert-danger fade" role="alert" id="ajax-failed_alert">
   <strong>{% translate "Operation Failed:"%}</strong> {% translate "Try again later"%}
+</div>
 </div>
 <script>
 const updateNetworkStatus = () => {

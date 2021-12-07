@@ -1,17 +1,16 @@
 {% load i18n %}
 <div style="position: absolute; margin-top: 1em; left: 50%; transform: translate(-50%, 0%); z-index: 1080;">
-<div class="alert alert-warning fade" role="alert" id="connection_issues_alert">
-  <strong>{% translate "Offline:"%}</strong> {% translate "ISP Toolbox is not connected"%}
-</div>
-<div class="alert alert-danger fade" role="alert" id="ajax-failed_alert">
-  <strong>{% translate "Operation Failed:"%}</strong> {% translate "Try again later"%}
-</div>
+  <div class="alert alert-warning text-center fade" role="alert" id="connection_issues_alert">
+    {% include "workspace/atoms/icons/alert_icon_warning.html" %} <strong class="ml-3">{% translate "Offline:"%}</strong> {% translate "ISP Toolbox is not connected"%}
+  </div>
+  <div class="alert alert-danger text-center fade" role="alert" id="ajax-failed_alert">
+    {% include "workspace/atoms/icons/alert_icon_error.html" %} <strong class="ml-3">{% translate "Operation Failed:"%}</strong> {% translate "Try again later"%}
+  </div>
 </div>
 <script>
 const updateNetworkStatus = () => {
   const el = $('#connection_issues_alert');
   window.navigator.onLine ? el.removeClass('show') :  el.addClass('show');
-  console.log(window.navigator.onLine ? 'online' : 'offline');
 }
 updateNetworkStatus();
 window.addEventListener('offline', updateNetworkStatus);

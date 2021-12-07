@@ -79,7 +79,7 @@ export abstract class BaseWorkspaceFeature {
      */
     create(
         successFollowup?: (resp: any) => void,
-        revert: () => void = renderAjaxOperationFailed
+        revert?: () => void
     ) {
         $.ajax({
             url: `${this.apiEndpoint}`,
@@ -98,6 +98,7 @@ export abstract class BaseWorkspaceFeature {
                 }
             })
             .fail((error) => {
+                renderAjaxOperationFailed();
                 this.draw.delete(this.mapboxId);
                 if (revert) {
                     revert();
@@ -113,7 +114,7 @@ export abstract class BaseWorkspaceFeature {
      */
     update(
         successFollowup?: (resp: any) => void,
-        revert: () => void = renderAjaxOperationFailed
+        revert?: () => void
     ) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
@@ -131,6 +132,7 @@ export abstract class BaseWorkspaceFeature {
                 }
             })
             .fail((error) => {
+                renderAjaxOperationFailed();
                 if (revert) {
                     revert();
                 }
@@ -145,7 +147,7 @@ export abstract class BaseWorkspaceFeature {
      */
     delete(
         successFollowup?: (resp: any) => void,
-        revert: () => void = renderAjaxOperationFailed
+        revert?: () => void
     ) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
@@ -162,6 +164,7 @@ export abstract class BaseWorkspaceFeature {
                 }
             })
             .fail((error) => {
+                renderAjaxOperationFailed();
                 if (revert) {
                     revert();
                 }

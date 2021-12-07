@@ -10,6 +10,7 @@ import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, CPE, APToCPELink, CoverageArea, PointToPointLink } from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
+import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void | boolean;
 
@@ -17,9 +18,17 @@ function doNothingProcessor(): UpdateDeleteFeatureProcessor {
     return (workspaceFeature: BaseWorkspaceFeature) => {};
 }
 
+enum CRUDOperation {
+    CREATE = 1,
+    READ,
+    UPDATE,
+    DELETE,
+  }
+
 export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     map: MapboxGL.Map;
     draw: MapboxDraw;
+    previousState: GeoJSON.FeatureCollection = {type: "FeatureCollection", features: []};
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
     readonly features: Map<string, BaseWorkspaceFeature>; // Map from workspace UUID to feature
     protected static _instance: BaseWorkspaceManager;
@@ -40,6 +49,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
     private towerModal: TowerPaginationModal;
     private sessionModal: SessionModal;
+    
 
     /**
      * Initializes a WorkspaceManager base object
@@ -146,6 +156,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
         }
+        this.previousState = this.draw.getAll();
     }
 
     /**
@@ -207,7 +218,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
-
+            this.acceptNewState();
             if (successFollowup) {
                 successFollowup(resp);
             }
@@ -249,13 +260,14 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
                     // Delete pre-ajax call stuff
                     let retval = this.deleteFeaturePreAjaxHandlers[featureType](workspaceFeature);
-
                     if (retval !== false) {
                         workspaceFeature.delete((resp) => {
                             this.features.delete(feature.properties.uuid);
-
                             // Should probably be replaced with a pubsub event signal
                             MapLayerSidebarManager.getInstance().setUserMapLayers();
+                            this.acceptNewState();
+                        }, () => {
+                            this.revertOperation(event.features, CRUDOperation.DELETE);
                         });
                     }
                 });
@@ -264,6 +276,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
         // Delete links before everything else, to prevent random 404s.
         deleteFeaturesOfType(WorkspaceFeatureTypes.AP_CPE_LINK);
+        deleteFeaturesOfType(WorkspaceFeatureTypes.PTP_LINK);
         deleteFeaturesOfType(WorkspaceFeatureTypes.AP);
         deleteFeaturesOfType(WorkspaceFeatureTypes.CPE);
         deleteFeaturesOfType(WorkspaceFeatureTypes.COVERAGE_AREA);
@@ -273,6 +286,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
         features: Array<GeoJSON.Feature>;
         action: 'move' | 'change_coordinates';
     }) {
+        console.log(event);
         // We don't need to do updates by type in a certain order, so a switch
         // statement will do.
         event.features.forEach((feature: any) => {
@@ -287,6 +301,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                             // Need to do this otherwise name change won't work.
                             let cpe = this.features.get(feature.properties.uuid) as CPE;
                             let mapboxClient = MapboxSDKClient.getInstance();
+                            // ?????
                             mapboxClient.reverseGeocode(
                                 feature.geometry.coordinates,
                                 (response: any) => {
@@ -306,12 +321,15 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                                         cpe.update(() => {
                                             // Should probably be replaced with a pubsub event signal
                                             MapLayerSidebarManager.getInstance().setUserMapLayers();
-
+                                            this.acceptNewState();
                                             this.updateFeatureAjaxHandlers[
                                                 WorkspaceFeatureTypes.CPE
                                             ].post_update(workspaceFeature);
-                                        });
+                                        }, () => {this.revertOperation(event.features, CRUDOperation.UPDATE)});
                                     }
+                                }, (error: any) => {
+                                    renderAjaxOperationFailed();
+                                    this.revertOperation(event.features, CRUDOperation.UPDATE);
                                 }
                             );
                         }
@@ -334,6 +352,9 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                                     this.updateFeatureAjaxHandlers[
                                         feature.properties.feature_type
                                     ].post_update(workspaceFeature);
+                                    this.acceptNewState();
+                                }, ()=>{
+                                    this.revertOperation(event.features, CRUDOperation.UPDATE);
                                 });
                             }
                         }
@@ -341,6 +362,35 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                 }
             }
         });
+    }
+
+    acceptNewState() {
+        console.log("accept new state");
+        this.previousState = this.draw.getAll();
+    }
+
+    revertOperation(features: Array<GeoJSON.Feature>, operation: CRUDOperation){
+        console.log("reverting operation");
+        features.forEach((revert_f) => {
+            const feat = this.previousState.features.find(f => f.id === revert_f.id);
+            console.log(feat);
+            switch(operation){
+                case CRUDOperation.CREATE:
+                    if(revert_f?.id)
+                        this.draw.delete(String(revert_f?.id));
+                    break;
+                case CRUDOperation.READ:
+                    break;
+                case CRUDOperation.UPDATE:
+                    if(feat)
+                        this.draw.add(feat);
+                    break;
+                case CRUDOperation.DELETE:
+                    if(feat)
+                        this.draw.add(feat);
+                    break;
+            }
+        })
     }
 
     static getInstance(): BaseWorkspaceManager {

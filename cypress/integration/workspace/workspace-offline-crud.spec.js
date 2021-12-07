@@ -49,7 +49,7 @@ context('Work', () => {
         cy.goOnline();
 
         cy.window().then((win) => {
-        	expect(win.mapbox_handles.draw.getAll().features.length).to.equal(3);
+        	expect(win.mapbox_handles.draw.getAll().features.length).to.equal(1);
 		})
     });
 })

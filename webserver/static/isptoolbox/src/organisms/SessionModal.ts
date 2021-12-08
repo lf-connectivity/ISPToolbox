@@ -73,7 +73,7 @@ export class SessionModal {
                     });
             });
             // Delete Button Callback
-            $('.session-delete-btn').on('click', (event) => {
+            $('.ap-delete-btn').on('click', (event) => {
                 // @ts-ignore
                 $('#paginationNetworkModal').modal('hide');
                 // @ts-ignore

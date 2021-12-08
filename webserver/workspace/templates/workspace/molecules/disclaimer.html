@@ -10,8 +10,13 @@
     <div class="my-1 my-auto-md mx-1 d-flex flex-row justify-content-around justify-content-normal-md">
         <a style="color: white; font-size: 0.75em;
         " class="mx-1 my-auto" id="disclaimer-link" href="#Disclaimer" >{% trans "Disclaimer"%}</a>
-        <a style="color: white; font-size: 0.75em;
-        " class="mx-1 my-auto" href="{% url 'workspace:sources' sources_page='market_eval' %}" >{% trans "Sources"%}</a>
+        {% if tool == 'market_evaluator' %}
+        <a style="color: white; font-size: 0.75em;" class="mx-1 my-auto" href="{% url 'workspace:sources' sources_page='market_eval' %}">{% trans "Sources"%}</a>
+        {% endif %}     
+        {% if tool == 'los_check' %}
+        <a style="color: white; font-size: 0.75em;" class="mx-1 my-auto" href="{% url 'workspace:sources' sources_page='edit_network' %}">{% trans "Sources"%}</a>
+        {% endif %}           
+        <!-- href="{% url 'workspace:sources' sources_page='market_eval' %}" -->
         <a style="color: white; font-size: 0.75em;
         " class="mx-1 my-auto" href="{% url 'workspace:terms' %}" target="_blank">{% trans "Terms"%}</a>
         <a style="color: white; font-size: 0.75em;

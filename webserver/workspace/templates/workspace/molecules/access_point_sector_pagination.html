@@ -1,0 +1,125 @@
+{% load rest_framework i18n %}
+{% if results %}
+{% with ordering=results.serializer.context.ordering units=request.GET.units %}
+<div class="modal-body isptoolbox-form">
+  <table class="table table-sm table-hover" style="overflow-x: scroll">
+    <thead class="thead-modal">
+      <tr>
+        <th scope="col" class="pl-2">#</th>
+        <th scope="col">{% translate 'Name' %}
+          {% if ordering == "name"%}
+          <a name="" class="sort-ap" ordering-target="-name">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' %}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap" ordering-target="name">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+            </button>
+          </a>
+          {% endif %}
+        </th>
+
+        <th scope="col">{% translate "Radius"%}
+          {% if ordering == "max_radius"%}
+          <a class="sort-ap" ordering-target="-max_radius">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' %}
+            </button>
+          </a>
+          {% else %}
+          <a class="sort-ap" ordering-target="max_radius">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html'  with flip=True %}
+            </button>
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col">{% translate "Height"%}
+          {% if ordering == "height"%}
+          <a class="sort-ap" ordering-target="-height">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' %}
+            </button>
+          </a>
+          {% else %}
+          <a class="sort-ap" ordering-target="height">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
+            </button>
+          </a>
+          {% endif %}
+        </th>
+   
+        <th scope="col">{% translate 'Latitude' %}
+          {% if ordering == "lat"%}
+          <a name="" class="sort-ap" ordering-target="-lat">
+            <button class="btn">
+              {% include 'workspace/atoms/arrow_icon.html' %}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap" ordering-target="lat">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+            </button>
+          </a>
+          {% endif %}
+        </th>
+
+        <th scope="col">{% translate 'Longitude' %}
+          {% if ordering == "lng"%}
+          <a name="" class="sort-ap" ordering-target="-lng">
+            <button class="btn">
+              {% include 'workspace/atoms/arrow_icon.html' %}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap" ordering-target="lng">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+            </button>
+          </a>
+          {% endif %}
+        </th>
+
+        <th scope="col" style="width: 160px;">{%translate "Last Modified"%}
+          {% if ordering == "last_updated"%}
+          <a class="sort-ap" ordering-target="-last_updated">
+            <button class="btn">
+              {% include 'workspace/atoms/arrow_icon.html' %}
+            </button>
+          </a>
+          {% else %}
+          <a class="sort-ap" ordering-target="last_updated" class="last-updated">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
+            </button>
+          </a>
+          {% endif %}
+        </th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ap in results %}
+      {% include 'workspace/atoms/access_point_row.html' %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <input class="d-none" id="ap-modal-ordering" value="{{ordering}}">
+  <input class="d-none" id="ap-modal-page-num" value="{{current}}">
+</div>
+{% include 'workspace/atoms/pagination_page_nav.html' with pagination_class_css="ap-modal-page-change" %}
+{% endwith %}
+{% else %}
+<div class="modal-body">
+  <div class="text-center">
+    {% include 'workspace/atoms/missing_icon.html' %}
+    <h3>{% translate "No access points"%}</h3>
+    <p>{% translate "To get started: place an access point on the map or select bulk import."%}</p>
+  </div>
+</div>
+{% endif %}

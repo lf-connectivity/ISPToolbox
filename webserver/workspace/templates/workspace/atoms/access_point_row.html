@@ -49,6 +49,9 @@
 
     <td>
         <div class="btn-group" role="group" aria-label="edit-btn-group">
+        <button type="button" class="btn btn-edit ap-edit-btn" title="View Access Points" data-target="{{ap.uuid}}">
+            {% include 'workspace/atoms/tower_icon.html'%}
+        </button>
         <button type="button" class="btn d-none ap-save-edit-btn" title="Save tower" id="ap-save-edit-{{ap.uuid}}"  data-target="{{ap.uuid}}">
             {% include 'workspace/atoms/icons/save_icon.html'%}
         </button>
@@ -58,6 +61,7 @@
         <button type="button" class="btn btn-edit ap-delete-btn" title="Delete tower" data-target="{{ap.uuid}}">
             {% include 'workspace/atoms/trash_icon.html'%}
         </button>
+
         </div>
     </td>
 </tr>

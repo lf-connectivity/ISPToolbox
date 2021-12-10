@@ -406,6 +406,7 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
 class AccessPointSector(WorkspaceFeature):
     name = models.CharField(max_length=50, default="Unnamed AP Sector")
     heading = models.FloatField(
+        default=ModelLimits.HEADING.default,
         validators=[
             MinValueValidator(
                 ModelLimits.HEADING.min,
@@ -423,6 +424,7 @@ class AccessPointSector(WorkspaceFeature):
     )
 
     azimuth = models.FloatField(
+        default=ModelLimits.AZIMUTH.default,
         validators=[
             MinValueValidator(
                 ModelLimits.AZIMUTH.min,
@@ -640,6 +642,7 @@ class AccessPointSectorSerializer(
     ap = serializers.PrimaryKeyRelatedField(
         queryset=AccessPointLocation.objects.all(), pk_field=serializers.UUIDField()
     )
+    geojson_json = serializers.SerializerMethodField()
     cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
 
     class Meta:
@@ -677,6 +680,9 @@ class AccessPointSectorSerializer(
             return None
         else:
             return obj.cloudrf_coverage_geojson.json
+
+    def get_geojson_json(self, obj):
+        return obj.geojson.json
 
 
 class CPELocation(WorkspaceFeature):

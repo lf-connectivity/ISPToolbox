@@ -37,6 +37,7 @@ import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import { ViewshedTool } from './ViewshedTool';
 import { miles2km } from '../LinkCalcUtils';
+import { isBeta } from '../LinkCheckUtils';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -56,6 +57,7 @@ const INACTIVE_AP = 'false';
 
 const IS_HIDDEN_AP = 'hidden';
 
+// TODO: Remove RenderCloudRF option from here, it will go into WorkspaceManager
 abstract class RadiusAndBuildingCoverageRenderer {
     map: mapboxgl.Map;
     draw: MapboxDraw;
@@ -230,6 +232,8 @@ abstract class RadiusAndBuildingCoverageRenderer {
                 }
             });
             this.sendCoverageRequest({ features });
+
+            // TODO: Unbeta this!!!
             this.renderAPRadius();
             this.renderBuildings();
         }
@@ -266,59 +270,62 @@ abstract class RadiusAndBuildingCoverageRenderer {
      * Renders access point circles
      */
     renderAPRadius() {
-        const circle_feats: { [id: string]: Feature<Geometry, GeoJsonProperties> } = {};
-        let fc = this.draw.getSelected();
-        let selectedAPs = new Set(
-            fc.features
-                .filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP)
-                .map((f) => f.id)
-        );
-        let aps = this.draw
-            .getAll()
-            .features.filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP);
-
-        // Render all APs.
-        aps.forEach((feat: any) => {
-            if (feat && (feat.properties.radius || feat.properties.radius_miles)) {
-                if (feat.geometry.type === 'Point') {
-                    let new_feat;
-                    if (this.renderCloudRF && this.cloudRFExists(feat)) {
-                        // CloudRF coverage is a geometrycollection; turn this into a feature.
-                        let geometryCollection = JSON.parse(
-                            feat.properties?.cloudrf_coverage_geojson_json
-                        );
-                        new_feat = {
-                            type: 'Feature',
-                            geometry: geometryCollection,
-                            properties: {}
-                        } as Feature<GeometryCollection, GeoJsonProperties>;
-                    } else {
-                        let radius =
-                            feat.properties.radius || miles2km(feat.properties.radius_miles);
-                        new_feat = createGeoJSONCircle(feat.geometry, radius, feat.id);
-                    }
-
-                    // @ts-ignore
-                    new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
-                        ? ACTIVE_AP
-                        : INACTIVE_AP;
-
-                    if (
-                        !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(feat.id)
-                    ) {
-                        circle_feats[feat.id] = new_feat;
+        // TODO: DELETE THIS WE DON'T NEED IT AFTER AP SECTOR LAUNCH
+        if (!isBeta()) {
+            const circle_feats: { [id: string]: Feature<Geometry, GeoJsonProperties> } = {};
+            let fc = this.draw.getSelected();
+            let selectedAPs = new Set(
+                fc.features
+                    .filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP)
+                    .map((f) => f.id)
+            );
+            let aps = this.draw
+                .getAll()
+                .features.filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP);
+    
+            // Render all APs.
+            aps.forEach((feat: any) => {
+                if (feat && (feat.properties.radius || feat.properties.radius_miles)) {
+                    if (feat.geometry.type === 'Point') {
+                        let new_feat;
+                        if (this.renderCloudRF && this.cloudRFExists(feat)) {
+                            // CloudRF coverage is a geometrycollection; turn this into a feature.
+                            let geometryCollection = JSON.parse(
+                                feat.properties?.cloudrf_coverage_geojson_json
+                            );
+                            new_feat = {
+                                type: 'Feature',
+                                geometry: geometryCollection,
+                                properties: {}
+                            } as Feature<GeometryCollection, GeoJsonProperties>;
+                        } else {
+                            let radius =
+                                feat.properties.radius || miles2km(feat.properties.radius_miles);
+                            new_feat = createGeoJSONCircle(feat.geometry, radius, feat.id);
+                        }
+    
+                        // @ts-ignore
+                        new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
+                            ? ACTIVE_AP
+                            : INACTIVE_AP;
+    
+                        if (
+                            !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(feat.id)
+                        ) {
+                            circle_feats[feat.id] = new_feat;
+                        }
                     }
                 }
-            }
-        });
-
-        // Replace radius features with selected
-        const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
-        if (radiusSource.type === 'geojson') {
-            radiusSource.setData({
-                type: 'FeatureCollection',
-                features: Object.values(circle_feats)
             });
+    
+            // Replace radius features with selected
+            const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
+            if (radiusSource.type === 'geojson') {
+                radiusSource.setData({
+                    type: 'FeatureCollection',
+                    features: Object.values(circle_feats)
+                });
+            }
         }
     }
 

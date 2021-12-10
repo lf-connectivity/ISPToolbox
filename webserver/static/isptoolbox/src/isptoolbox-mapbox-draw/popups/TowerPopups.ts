@@ -3,7 +3,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { LinkCheckBasePopup, LOADING_SVG } from './LinkCheckBasePopup';
 import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { isUnitsUS } from '../../utils/MapPreferences';
-import { ft2m, miles2km } from '../../LinkCalcUtils';
+import { ft2m, miles2km, roundToDecimalPlaces } from '../../LinkCalcUtils';
 import * as StyleConstants from '../styles/StyleConstants';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
@@ -14,20 +14,23 @@ import {
     MIN_HEIGHT,
     validateName,
     validateRadius,
-    validateHeight
+    validateHeight,
+    isBeta
 } from '../../LinkCheckUtils';
 import { sanitizeString } from '../../molecules/InputValidator';
 import { parseFormLatitudeLongitude } from '../../utils/LatLngInputUtils';
 import {
     LOSWSEvents,
     ViewshedProgressResponse,
-    ViewshedUnexpectedError
+    ViewshedUnexpectedError,
+    WorkspaceFeatureTypes
 } from '../../workspace/WorkspaceConstants';
 import MarketEvaluatorWS, {
     MarketEvalWSEvents,
     MarketEvalWSRequestType,
     ViewshedGeojsonResponse
 } from '../../MarketEvaluatorWS';
+import { applyChanges } from 'automerge';
 
 var _ = require('lodash');
 
@@ -41,6 +44,8 @@ const PLOT_COVERAGE_BUTTON_ID = 'plot-estimated-coverage-button-tower-popup';
 const COVERAGE_LI_ID = 'coverage-li-tower-popup';
 const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
 const DELETE_ROW_DIV_ID = 'delete-tower-row-tower-popup';
+
+const PLACE_SECTOR_BUTTON_ID = 'place-sector-btn-tower-popup';
 
 enum ImperialToMetricConversion {
     FT_TO_M = 'ft2m',
@@ -116,7 +121,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         }
     }
 
-    protected cleanup() { }
+    protected cleanup() {}
 
     protected getHeightValue() {
         return Math.round(
@@ -218,9 +223,59 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         if (this.accessPoint?.getFeatureProperty('uneditable')) {
             $(`#${LAT_LNG_INPUT_ID}`).prop('readonly', true);
         }
+
+        // Beta stuff
+        if (isBeta()) {
+            $(`#${PLACE_SECTOR_BUTTON_ID}`)
+                .off()
+                .on('click', () => {
+                    // Create two random sectors if there aren't any
+                    if (this.accessPoint && !this.accessPoint.sectors.size) {
+                        for (let i = 0; i < 2; i++) {
+                            let heading = roundToDecimalPlaces(Math.random() * 360.0, 1);
+                            let azimuth = roundToDecimalPlaces(
+                                (Math.random() * 360 + 0.1) % 360,
+                                1
+                            );
+                            let newSector = {
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: this.lnglat
+                                },
+                                properties: {
+                                    feature_type: WorkspaceFeatureTypes.SECTOR,
+                                    ap: this.accessPoint.workspaceId,
+                                    heading: heading,
+                                    azimuth: azimuth,
+                                    radius: 1,
+                                    height: 100,
+                                    default_cpe_height: 3,
+                                    frequency: 2.437,
+                                    name: 'Random Sector',
+                                    uneditable: true
+                                }
+                            };
+
+                            console.log(newSector);
+                            this.map.fire('draw.create', { features: [newSector] });
+                        }
+                    }
+                });
+        }
     }
 
     protected getHTML() {
+        if (isBeta()) {
+            return `
+                <div class="tooltip--tower-summary">
+                    <button class='btn btn-primary isptoolbox-btn' id='${PLACE_SECTOR_BUTTON_ID}'>
+                        Place Random Sector
+                    </button>
+                </div>
+            `;
+        }
+
         const coords = this.accessPoint?.getFeatureGeometryCoordinates();
         return `
             <div class="tooltip--tower-summary">
@@ -234,18 +289,19 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                                 class="input--tower-name" 
                                 id='${NAME_INPUT_ID}' 
                                 value='${sanitizeString(
-            this.accessPoint?.getFeatureProperty('name')
-        )}' 
+                                    this.accessPoint?.getFeatureProperty('name')
+                                )}' 
                                 placeholder='Tower Name'>
                             <div class="coordinates">
                                 <div class="data-with-unit">
                                     <input type='text'
-                                            value='${coords
-                ? `${coords[1].toFixed(5)}, ${coords[0].toFixed(
-                    5
-                )}`
-                : ''
-            }'
+                                            value='${
+                                                coords
+                                                    ? `${coords[1].toFixed(5)}, ${coords[0].toFixed(
+                                                          5
+                                                      )}`
+                                                    : ''
+                                            }'
                                             id='${LAT_LNG_INPUT_ID}'
                                             placeholder='latitude, longitude'
                                             class="input--value"
@@ -270,14 +326,14 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(
-                isUnitsUS()
-                    ? this.accessPoint?.getFeatureProperty(
-                        'default_cpe_height_ft'
-                    )
-                    : this.accessPoint?.getFeatureProperty(
-                        'default_cpe_height'
-                    )
-            )}'
+                                           isUnitsUS()
+                                               ? this.accessPoint?.getFeatureProperty(
+                                                     'default_cpe_height_ft'
+                                                 )
+                                               : this.accessPoint?.getFeatureProperty(
+                                                     'default_cpe_height'
+                                                 )
+                                       )}'
                                        id='${CPE_HGT_INPUT_ID}'
                                        min='${MIN_HEIGHT}' max='${MAX_HEIGHT}'
                                        class="input--value"
@@ -289,14 +345,15 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             <p class="label">Radius</p>
                             <div class="data-with-unit">
                                 <input type='number'
-                                       value='${isUnitsUS()
-                ? this.accessPoint
-                    ?.getFeatureProperty('radius_miles')
-                    .toFixed(2)
-                : this.accessPoint
-                    ?.getFeatureProperty('max_radius')
-                    .toFixed(2)
-            }'
+                                       value='${
+                                           isUnitsUS()
+                                               ? this.accessPoint
+                                                     ?.getFeatureProperty('radius_miles')
+                                                     .toFixed(2)
+                                               : this.accessPoint
+                                                     ?.getFeatureProperty('max_radius')
+                                                     .toFixed(2)
+                                       }'
                                        id='${RADIUS_INPUT_ID}'
                                        min='${MIN_RADIUS}' max='${MAX_RADIUS}' step='0.01'
                                        class="input--value"
@@ -318,14 +375,15 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         return '';
     }
 
-    protected refreshPopup(): void { }
+    protected refreshPopup(): void {}
 
     protected getDeleteRow() {
         return `
             <a id="${TOWER_DELETE_BUTTON_ID}" data-toggle="modal" data-target="#apDeleteModal">Delete Tower</a>
-            ${this.accessPoint && this.accessPoint.getFeatureProperty('last_updated')
-                ? `<p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>`
-                : ''
+            ${
+                this.accessPoint && this.accessPoint.getFeatureProperty('last_updated')
+                    ? `<p>Last edited ${this.accessPoint.getFeatureProperty('last_updated')}</p>`
+                    : ''
             }
         `;
     }
@@ -393,16 +451,18 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
                     </div>
                     <div class="ap-stat">
                         <p class="ap-stat--label">Est. Clear LOS<span>at least 1 point on rooftop</span></p>
-                        <p class="ap-stat--value" style="color: ${StyleConstants.SERVICEABLE_BUILDINGS_COLOR
-                    }">
+                        <p class="ap-stat--value" style="color: ${
+                            StyleConstants.SERVICEABLE_BUILDINGS_COLOR
+                        }">
                             <span class="ap-stat--icon"><img src="${pass_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('serviceable')}
                         </p>
                     </div>
                     <div class="ap-stat">
                         <p class="ap-stat--label">Est. Obstructed LOS</p>
-                        <p class="ap-stat--value" style="color: ${StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR
-                    }">
+                        <p class="ap-stat--value" style="color: ${
+                            StyleConstants.UNSERVICEABLE_BUILDINGS_COLOR
+                        }">
                             <span class="ap-stat--icon"><img src="${fail_svg}"/></span>
                             ${this.accessPoint.getFeatureProperty('unserviceable')}
                         </p>
@@ -425,7 +485,8 @@ export class LinkCheckTowerPopup extends BaseTowerPopup {
             return `
             <div align="center">
                 ${LOADING_SVG}
-                <p align="center bold">${this.progress_message ? this.progress_message : 'Finalizing results'
+                <p align="center bold">${
+                    this.progress_message ? this.progress_message : 'Finalizing results'
                 }</p>
                 <p align="center">${this.formatTimeRemaining()}</p>
             </div>

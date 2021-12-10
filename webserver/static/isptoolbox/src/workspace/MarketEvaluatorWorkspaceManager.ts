@@ -9,9 +9,18 @@ import MarketEvaluatorWS, {
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
-import { AccessPoint, ASRTowerCoverageArea, CoverageArea } from './WorkspaceFeatures';
+import {
+    AccessPoint,
+    AccessPointSector,
+    ASRTowerCoverageArea,
+    CoverageArea
+} from './WorkspaceFeatures';
 
-const SUPPORTED_FEATURE_TYPES = [WorkspaceFeatureTypes.COVERAGE_AREA, WorkspaceFeatureTypes.AP];
+const SUPPORTED_FEATURE_TYPES = [
+    WorkspaceFeatureTypes.COVERAGE_AREA,
+    WorkspaceFeatureTypes.AP,
+    WorkspaceFeatureTypes.SECTOR
+];
 
 export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
     map: MapboxGL.Map;
@@ -31,7 +40,14 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
                     polygon = new ASRTowerCoverageArea(this.map, this.draw, feature);
                 } else {
                     if (feature.geometry.type == 'Point') {
-                        polygon = new AccessPoint(this.map, this.draw, feature);
+                        if (
+                            feature.properties &&
+                            feature.properties.feature_type === WorkspaceFeatureTypes.SECTOR
+                        ) {
+                            polygon = new AccessPointSector(this.map, this.draw, feature);
+                        } else {
+                            polygon = new AccessPoint(this.map, this.draw, feature);
+                        }
                     } else {
                         polygon = new CoverageArea(this.map, this.draw, feature);
                     }

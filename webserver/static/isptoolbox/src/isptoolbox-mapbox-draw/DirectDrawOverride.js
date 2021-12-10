@@ -1,16 +1,22 @@
 import { renderLinkEnds } from './LinkDrawMode.js';
-import { createSupplementaryPointsForGeojson, createSupplementaryPointsForCircle, createGeoJSONCircle, lineDistance, isUneditable } from './DrawModeUtils.js';
+import {
+    createSupplementaryPointsForGeojson,
+    createSupplementaryPointsForCircle,
+    createGeoJSONCircle,
+    lineDistance,
+    isUneditable
+} from './DrawModeUtils.js';
 import * as Constants from '@mapbox/mapbox-gl-draw/src/constants';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import constrainFeatureMovement from '@mapbox/mapbox-gl-draw/src/lib/constrain_feature_movement';
 import createSupplementaryPoints from '@mapbox/mapbox-gl-draw/src/lib/create_supplementary_points';
 import createVertex from '@mapbox/mapbox-gl-draw/src/lib/create_vertex';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 /**
  * Mapbox Draw Doesn't natively support drawing circles or plotting two point line strings
- * 
+ *
  * By overwritting some of the draw methods we can get the behavior we need
  */
 function isShiftDown(e) {
@@ -25,25 +31,12 @@ export function OverrideDirect(additionalFunctionality = {}) {
             geojson.properties.active = Constants.activeStates.ACTIVE;
             renderLinkEnds(geojson, push);
             push(geojson);
-            let supplementaryPoints;
-            if (geojson.properties.user_radius) {
-                supplementaryPoints = createSupplementaryPointsForCircle(geojson);
-            }
-            else {
-                // no rendering midpoints for lines but for polygons and other things yes
-                supplementaryPoints = createSupplementaryPointsForGeojson(geojson, {
-                    map: this.map,
-                    midpoints: (geojson.geometry.type !== Constants.geojsonTypes.LINE_STRING),
-                    selectedPaths: state.selectedCoordPaths,
-                    uneditable: isUneditable(this.getFeature(geojson.properties.id))
-                });
-            }
-
-            // Add a center point to geojson circle
-            if (geojson.properties.user_radius) {
-                const center_vertex = createVertex(geojson.properties.id, geojson.properties.user_center, "0.4", false);
-                push(center_vertex);
-            }
+            let supplementaryPoints = createSupplementaryPointsForGeojson(geojson, {
+                map: this.map,
+                midpoints: geojson.geometry.type !== Constants.geojsonTypes.LINE_STRING,
+                selectedPaths: state.selectedCoordPaths,
+                uneditable: isUneditable(this.getFeature(geojson.properties.id))
+            });
             supplementaryPoints.forEach(push);
         } else {
             geojson.properties.active = Constants.activeStates.INACTIVE;
@@ -66,9 +59,12 @@ export function OverrideDirect(additionalFunctionality = {}) {
             state.selectedCoordPaths.push(about.coord_path);
         }
 
-        const selectedCoordinates = this.pathsToCoordinates(state.featureId, state.selectedCoordPaths);
+        const selectedCoordinates = this.pathsToCoordinates(
+            state.featureId,
+            state.selectedCoordPaths
+        );
         this.setSelectedCoordinates(selectedCoordinates);
-    }
+    };
 
     direct_select.dragVertex = function (state, e, delta) {
         if (additionalFunctionality.dragVertex) {
@@ -87,15 +83,13 @@ export function OverrideDirect(additionalFunctionality = {}) {
             return;
         }
 
-        if (
-            state.feature.properties.radius
-        ) {
-            if (state.selectedCoordPaths.includes("0.4")) {
+        if (state.feature.properties.radius) {
+            if (state.selectedCoordPaths.includes('0.4')) {
                 moveFeatures(this.getSelected(), delta);
                 this.getSelected()
-                    .filter(feature => feature.properties.radius)
-                    .map(circle => circle.properties.center)
-                    .forEach(center => {
+                    .filter((feature) => feature.properties.radius)
+                    .map((circle) => circle.properties.center)
+                    .forEach((center) => {
                         center[0] += delta.lng;
                         center[1] += delta.lat;
                     });
@@ -110,30 +104,26 @@ export function OverrideDirect(additionalFunctionality = {}) {
                 state.feature.properties.radius = radius;
             }
         } else {
-            const selectedCoords = state.selectedCoordPaths.map(coord_path =>
-                state.feature.getCoordinate(coord_path),
+            const selectedCoords = state.selectedCoordPaths.map((coord_path) =>
+                state.feature.getCoordinate(coord_path)
             );
-            const selectedCoordPoints = selectedCoords.map(coords => ({
+            const selectedCoordPoints = selectedCoords.map((coords) => ({
                 type: Constants.geojsonTypes.FEATURE,
                 properties: {},
                 geometry: {
                     type: Constants.geojsonTypes.POINT,
-                    coordinates: coords,
-                },
+                    coordinates: coords
+                }
             }));
 
-            const constrainedDelta = constrainFeatureMovement(
-                selectedCoordPoints,
-                delta,
-            );
+            const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
             for (let i = 0; i < selectedCoords.length; i++) {
                 const coord = selectedCoords[i];
 
                 state.feature.updateCoordinate(
-
                     state.selectedCoordPaths[i],
                     coord[0] + constrainedDelta.lng,
-                    coord[1] + constrainedDelta.lat,
+                    coord[1] + constrainedDelta.lat
                 );
             }
         }
@@ -147,24 +137,22 @@ export function OverrideDirect(additionalFunctionality = {}) {
         // deselect uneditable features, and only move those that are editable.
         // Links are uneditable; users should move APs and CPEs instead.
         const selected = this.getSelected();
-        const editableFeatures = this.getSelected().filter(
-            feature => !isUneditable(feature)
-        );
+        const editableFeatures = this.getSelected().filter((feature) => !isUneditable(feature));
         this.clearSelectedFeatures();
         this.clearSelectedCoordinates();
-        selected.forEach(feature => this.doRender(feature.id));
+        selected.forEach((feature) => this.doRender(feature.id));
 
         if (editableFeatures.length > 0) {
-            editableFeatures.forEach(feature => this.select(feature.id));
+            editableFeatures.forEach((feature) => this.select(feature.id));
         } else {
             this.changeMode('simple_select');
         }
 
         moveFeatures(this.getSelected(), delta);
         this.getSelected()
-            .filter(feature => feature.properties.radius)
-            .map(circle => circle.properties.center)
-            .forEach(center => {
+            .filter((feature) => feature.properties.radius)
+            .map((circle) => circle.properties.center)
+            .forEach((center) => {
                 center[0] += delta.lng;
                 center[1] += delta.lat;
             });

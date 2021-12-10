@@ -18,10 +18,11 @@ export enum ASRLoadingState {
 
 export enum WorkspaceFeatureTypes {
     AP = 'access_point',
+    SECTOR = 'sector',
     CPE = 'cpe',
     AP_CPE_LINK = 'ap_cpe_link',
     COVERAGE_AREA = 'coverage_area',
-    PTP_LINK = 'ptp_link',
+    PTP_LINK = 'ptp_link'
 }
 
 export enum WorkspaceTools {

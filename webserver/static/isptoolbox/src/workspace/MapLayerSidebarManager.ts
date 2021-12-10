@@ -75,6 +75,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
                 return -1;
             }
         });
+
         BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.AP).forEach((ap: AccessPoint) => {
             const elem = generateMapLayerSidebarRow(
                 ap.getFeatureData(),

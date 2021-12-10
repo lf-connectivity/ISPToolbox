@@ -4,7 +4,7 @@ import { Feature, Geometry } from 'geojson';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
-import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
+import { AccessPointSector } from './WorkspaceFeatures';
 
 const BASE_WORKSPACE_SERIALIZED_FIELDS = ['uneditable'];
 const BASE_WORKSPACE_RESPONSE_FIELDS = ['uuid', 'feature_type', 'last_updated', 'uneditable'];

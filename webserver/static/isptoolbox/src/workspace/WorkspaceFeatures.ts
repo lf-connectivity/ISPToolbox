@@ -1,5 +1,13 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
-import { Feature, Geometry, Point, LineString, Polygon } from 'geojson';
+import {
+    Feature,
+    Geometry,
+    Point,
+    LineString,
+    Polygon,
+    MultiPolygon,
+    GeoJsonProperties
+} from 'geojson';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { isUnitsUS } from '../utils/MapPreferences';
 import { LinkCheckEvents } from './WorkspaceConstants';
@@ -9,6 +17,8 @@ import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';
 import { djangoUrl } from '../utils/djangoUrl';
 import { WorkspacePointFeature } from './WorkspacePointFeature';
 import { WorkspaceLineStringFeature } from './WorkspaceLineStringFeature';
+import { WorkspacePolygonFeature } from './WorkspacePolygonFeature';
+import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 
 const AP_RESPONSE_FIELDS = [
     'name',
@@ -30,6 +40,33 @@ const AP_SERIALIZER_FIELDS = [
     'default_cpe_height'
 ];
 
+const SECTOR_RESPONSE_FIELDS = [
+    'name',
+    'height',
+    'radius',
+    'default_cpe_height',
+    'heading',
+    'azimuth',
+    'height_ft',
+    'radius_miles',
+    'default_cpe_height_ft',
+    'ap',
+    'frequency',
+    'cloudrf_coverage_geojson_json',
+    'geojson_json'
+];
+
+const SECTOR_SERIALIZER_FIELDS = [
+    'name',
+    'height',
+    'radius',
+    'default_cpe_height',
+    'heading',
+    'azimuth',
+    'frequency',
+    'ap'
+];
+
 const CPE_RESPONSE_FIELDS = ['name', 'height', 'height_ft', 'ap'];
 const CPE_SERIALIZER_FIELDS = ['name', 'height', 'ap'];
 
@@ -46,6 +83,7 @@ export const ASR_TOWER_COVERAGE_WORKSPACE_ID = 'tower';
 
 export class AccessPoint extends WorkspacePointFeature {
     readonly links: Map<CPE, APToCPELink>; // mapbox ID
+    readonly sectors: Map<string, AccessPointSector>;
     coverage: BuildingCoverage;
     awaitingCoverage: boolean;
 
@@ -60,6 +98,7 @@ export class AccessPoint extends WorkspacePointFeature {
             WorkspaceFeatureTypes.AP
         );
         this.links = new Map();
+        this.sectors = new Map();
         this.coverage = EMPTY_BUILDING_COVERAGE;
         this.awaitingCoverage = false;
     }
@@ -83,6 +122,7 @@ export class AccessPoint extends WorkspacePointFeature {
             this.draw.setFeatureProperty(this.mapboxId, 'radius', feature?.properties.max_radius);
             PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
             this.moveLinks(this.getFeatureGeometryCoordinates() as [number, number]);
+            this.updateSectors();
 
             if (successFollowup) {
                 successFollowup(resp);
@@ -107,12 +147,22 @@ export class AccessPoint extends WorkspacePointFeature {
             }
         });
         this.links.clear();
-        super.delete(successFollowup, errorFollowup);
+
+        this.sectors.forEach((sector) => {
+            let deletedSector = sector.getFeatureData();
+            this.removeFeatureFromMap(sector.mapboxId);
+
+            if (deletedSector) {
+                this.map.fire('draw.delete', { features: [deletedSector] });
+            }
+        });
+        super.delete(successFollowup);
     }
 
     move(newCoords: [number, number]) {
         super.move(newCoords);
         this.moveLinks(newCoords);
+        this.updateSectors();
     }
 
     awaitNewCoverage() {
@@ -158,10 +208,152 @@ export class AccessPoint extends WorkspacePointFeature {
             link.moveVertex(LINK_AP_INDEX, newCoords);
         });
     }
+
+    private updateSectors() {
+        this.sectors.forEach((sector) => {
+            sector.update();
+        });
+    }
+}
+
+// TODO: hook up CPEs to AP sectors
+export class AccessPointSector extends WorkspacePolygonFeature {
+    readonly links: Map<CPE, APToCPELink>; // mapbox ID
+    ap: AccessPoint;
+    coverage: BuildingCoverage;
+    awaitingCoverage: boolean;
+    renderCloudRf: boolean;
+
+    constructor(
+        map: MapboxGL.Map,
+        draw: MapboxDraw,
+        featureData: Feature<Geometry, any>,
+        renderCloudRf: boolean = false
+    ) {
+        super(
+            map,
+            draw,
+            featureData,
+            djangoUrl('workspace:ap_sector'),
+            SECTOR_RESPONSE_FIELDS,
+            SECTOR_SERIALIZER_FIELDS,
+            WorkspaceFeatureTypes.SECTOR
+        );
+        this.coverage = EMPTY_BUILDING_COVERAGE;
+        this.awaitingCoverage = false;
+        this.links = new Map();
+
+        let apUUID = this.getFeatureProperty('ap');
+        let ap = BaseWorkspaceManager.getFeatureByUuid(apUUID) as AccessPoint;
+        this.ap = ap;
+        this.renderCloudRf = renderCloudRf;
+
+        // Case where AP sector is preloaded
+        this.setAP();
+        this.setGeojson();
+    }
+
+    create(successFollowup?: (resp: any) => void) {
+        super.create((resp) => {
+            // Case where AP sector is created in session
+            this.setAP();
+            this.setGeojson();
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        });
+    }
+
+    update(successFollowup?: (resp: any) => void) {
+        super.update((resp: any) => {
+            this.setGeojson();
+            this.moveLinks(this.ap.getFeatureGeometryCoordinates() as [number, number]);
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        });
+    }
+
+    delete(successFollowup?: (resp: any) => void) {
+        this.links.forEach((link, cpe) => {
+            cpe.sector = undefined;
+
+            // Link is already deleted in backend because of cascading delete
+            let deletedLink = link.getFeatureData();
+            this.removeFeatureFromMap(link.mapboxId);
+            let deletedCPE = cpe.getFeatureData();
+            this.removeFeatureFromMap(cpe.mapboxId);
+
+            // Yes, this should probably be moved into its own function, but when
+            // I do that it doesn't work as intended. ¯\_(ツ)_/¯
+            if (deletedLink) {
+                this.map.fire('draw.delete', { features: [deletedLink, deletedCPE] });
+            }
+        });
+        this.links.clear();
+
+        // Remove from AP object
+        this.ap.sectors.delete(this.workspaceId);
+        super.delete(successFollowup);
+    }
+
+    awaitNewCoverage() {
+        this.coverage = EMPTY_BUILDING_COVERAGE;
+        this.awaitingCoverage = true;
+    }
+
+    setCoverage(coverage: Array<any>) {
+        this.coverage = new BuildingCoverage(coverage);
+        this.awaitingCoverage = false;
+    }
+
+    private setGeojson() {
+        // Set coverage to cloud RF???
+        // TODO: Make CloudRF Coverage a multipolygon
+        let geometry: any;
+        let new_feat: any;
+        if (
+            this.renderCloudRf &&
+            this.getFeatureProperty('cloudrf_coverage_geojson_json') &&
+            this.getFeatureProperty('cloudrf_coverage_geojson_json') !== null
+        ) {
+            geometry = JSON.parse(this.getFeatureProperty('cloudrf_coverage_geojson_json'));
+        } else if (
+            this.getFeatureProperty('geojson_json') &&
+            this.getFeatureProperty('geojson_json') !== null
+        ) {
+            geometry = JSON.parse(this.getFeatureProperty('geojson_json'));
+        }
+
+        if (geometry) {
+            new_feat = {
+                type: 'Feature',
+                geometry: geometry,
+                properties: this.getFeatureData().properties,
+                id: this.mapboxId
+            } as Feature<MultiPolygon, GeoJsonProperties>;
+
+            this.draw.add(new_feat);
+        }
+    }
+
+    private setAP() {
+        // Case if AP sector is preloaded
+        if (this.workspaceId && !this.ap.sectors.has(this.workspaceId)) {
+            this.ap.sectors.set(this.workspaceId, this);
+        }
+    }
+
+    private moveLinks(newCoords: [number, number]) {
+        this.links.forEach((link) => {
+            link.moveVertex(LINK_AP_INDEX, newCoords);
+        });
+    }
 }
 
 export class CPE extends WorkspacePointFeature {
     ap?: AccessPoint;
+    sector?: AccessPointSector;
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw, featureData: Feature<Geometry, any>) {
         super(
@@ -324,7 +516,7 @@ export class PointToPointLink extends WorkspaceLineStringFeature {
     constructor(
         map: MapboxGL.Map,
         draw: MapboxDraw,
-        featureData: Feature<LineString, any> | string,
+        featureData: Feature<LineString, any> | string
     ) {
         super(
             map,

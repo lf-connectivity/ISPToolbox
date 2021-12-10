@@ -2,7 +2,13 @@ import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import * as _ from 'lodash';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
-import { AccessPoint, APToCPELink, CPE, PointToPointLink } from './WorkspaceFeatures';
+import {
+    AccessPoint,
+    AccessPointSector,
+    APToCPELink,
+    CPE,
+    PointToPointLink
+} from './WorkspaceFeatures';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { BuildingCoverageStatus } from './BuildingCoverage';
 import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
@@ -15,6 +21,7 @@ const SUPPORTED_FEATURE_TYPES = [
     WorkspaceFeatureTypes.AP,
     WorkspaceFeatureTypes.CPE,
     WorkspaceFeatureTypes.PTP_LINK,
+    WorkspaceFeatureTypes.SECTOR
 ];
 
 export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
@@ -41,7 +48,11 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
                     });
                 });
             } else if (feature.properties.radius) {
-                this.createApFeature(feature);
+                if (feature.properties.feature_type === WorkspaceFeatureTypes.SECTOR) {
+                    this.saveWorkspaceFeature(new AccessPointSector(this.map, this.draw, feature));
+                } else {
+                    this.createApFeature(feature);
+                }
             }
         };
 
@@ -51,12 +62,14 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
             }
         };
 
-        this.saveFeatureDrawModeHandlers.draw_link = (feature: GeoJSON.Feature<GeoJSON.LineString>) => {
-            if(feature.properties?.feature_type === WorkspaceFeatureTypes.PTP_LINK){
+        this.saveFeatureDrawModeHandlers.draw_link = (
+            feature: GeoJSON.Feature<GeoJSON.LineString>
+        ) => {
+            if (feature.properties?.feature_type === WorkspaceFeatureTypes.PTP_LINK) {
                 const ptp = new PointToPointLink(this.map, this.draw, feature);
                 this.saveWorkspaceFeature(ptp, (resp) => {});
             }
-        }
+        };
     }
 
     initDeleteFeatureHandlers() {

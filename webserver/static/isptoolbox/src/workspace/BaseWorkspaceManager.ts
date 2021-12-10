@@ -7,7 +7,14 @@ import { SessionModal } from '../organisms/SessionModal';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
-import { AccessPoint, CPE, APToCPELink, CoverageArea, PointToPointLink } from './WorkspaceFeatures';
+import {
+    AccessPoint,
+    CPE,
+    APToCPELink,
+    CoverageArea,
+    PointToPointLink,
+    AccessPointSector
+} from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
@@ -31,6 +38,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     previousState: GeoJSON.FeatureCollection = {type: "FeatureCollection", features: []};
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
     readonly features: Map<string, BaseWorkspaceFeature>; // Map from workspace UUID to feature
+    renderCloudRf: boolean;
     protected static _instance: BaseWorkspaceManager;
 
     // Event handlers for specific workspace feature types
@@ -61,7 +69,8 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     constructor(
         map: MapboxGL.Map,
         draw: MapboxDraw,
-        supportedFeatureTypes: Array<WorkspaceFeatureTypes>
+        supportedFeatureTypes: Array<WorkspaceFeatureTypes>,
+        renderCloudRf: boolean = false
     ) {
         if (BaseWorkspaceManager._instance) {
             throw Error('BaseWorkspaceManager initialized twice.');
@@ -77,6 +86,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
         this.features = new Map();
         this.supportedFeatureTypes = supportedFeatureTypes;
+        this.renderCloudRf = renderCloudRf;
 
         this.saveFeatureDrawModeHandlers = {};
         this.initSaveFeatureHandlers();
@@ -124,7 +134,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
         // Add initial features
         if (initialFeatures) {
-            // APs, CPEs, and Coverage areas before PtP links
+            // APs, CPEs, and Coverage areas before PtP links and coverage areas
             addType(WorkspaceFeatureTypes.AP, AccessPoint, (feature: any) => {
                 feature.properties.radius = feature.properties.max_radius;
                 feature.properties.center = feature.geometry.coordinates;
@@ -132,6 +142,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
             addType(WorkspaceFeatureTypes.PTP_LINK, PointToPointLink);
             addType(WorkspaceFeatureTypes.CPE, CPE);
             addType(WorkspaceFeatureTypes.COVERAGE_AREA, CoverageArea);
+            addType(WorkspaceFeatureTypes.SECTOR, AccessPointSector);
 
             if (supportedFeatureTypes.includes(WorkspaceFeatureTypes.AP_CPE_LINK)) {
                 this.filterByType(initialFeatures, WorkspaceFeatureTypes.AP_CPE_LINK).forEach(
@@ -153,6 +164,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                     }
                 );
             }
+
             // Should probably be replaced with a pubsub event signal
             MapLayerSidebarManager.getInstance().setUserMapLayers();
         }
@@ -276,7 +288,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
         // Delete links before everything else, to prevent random 404s.
         deleteFeaturesOfType(WorkspaceFeatureTypes.AP_CPE_LINK);
-        deleteFeaturesOfType(WorkspaceFeatureTypes.PTP_LINK);
+        deleteFeaturesOfType(WorkspaceFeatureTypes.SECTOR);
         deleteFeaturesOfType(WorkspaceFeatureTypes.AP);
         deleteFeaturesOfType(WorkspaceFeatureTypes.CPE);
         deleteFeaturesOfType(WorkspaceFeatureTypes.COVERAGE_AREA);

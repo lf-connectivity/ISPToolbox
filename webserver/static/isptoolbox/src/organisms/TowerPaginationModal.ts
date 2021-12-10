@@ -62,6 +62,39 @@ export class TowerPaginationModal {
             });
     }
 
+
+    getAccessPointSectors(
+        data:
+            {
+                ordering: undefined | string;
+                page: undefined | string;
+                session: string | null | undefined;
+                ap: string;
+              }
+    ) {
+        if (data != null) {
+            data['session'] = getSessionID();
+        }
+        $('#ap-list-modal-body-loading').removeClass('d-none');
+        $('#ap-list-modal-body').addClass('d-none');
+        $.get(
+            '/pro/workspace/api/ap-sector/',
+            data ? data : '',
+            (result) => {
+                console.log(result)
+                $('#ap-list-modal-body-loading').addClass('d-none');
+                $('#ap-list-modal-body').html(result).removeClass('d-none');
+                $('#accessPointModalLabel').html('Access Points');
+                $('#tower-breadcrumb').removeClass('d-none');
+            },
+            'html'
+        )
+            .fail(() => {})
+            .done(() => {
+                console.log('Add sector callbacks later')
+            });
+    }
+
     addModalCallbacks() {
         $('.sort-ap').on('click', (event) => {
             const ordering = event.currentTarget.getAttribute('ordering-target') as string;
@@ -86,6 +119,13 @@ export class TowerPaginationModal {
             }
         });
 
+        $(`.ap-sector-btn`).on('click', (event) => {
+            const uuid = event.currentTarget.getAttribute('data-target');
+            if (typeof uuid === 'string') {
+               this.getAccessPointSectors({ordering:undefined, page:"1", session: undefined, ap: uuid})
+            }
+        });
+
         $('.ap-edit-btn').on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');
             event.currentTarget.classList.add('d-none');
@@ -94,6 +134,7 @@ export class TowerPaginationModal {
                 $(`#ap-save-edit-${uuid}`).removeClass('d-none');
             }
         });
+
 
         $('.ap-save-edit-btn').on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');

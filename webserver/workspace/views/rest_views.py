@@ -85,6 +85,17 @@ class SessionFilter(filters.BaseFilterBackend):
         else:
             return queryset
 
+class AccessPointFilter(filters.BaseFilterBackend):
+    """
+    This filter allows LIST endpoints to filter based on ap uuid
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        ap = request.GET.get("ap", None)
+        if ap is not None:
+            return queryset.filter(ap=ap)
+        else:
+            return queryset
 
 class AccessPointLocationListCreate(
     WorkspaceFeatureGetQuerySetMixin,
@@ -119,7 +130,6 @@ class AccessPointLocationListCreate(
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
-
 
 class AccessPointLocationGet(
     mixins.RetrieveModelMixin,
@@ -282,14 +292,38 @@ class CoverageAreaGet(
 
 
 class AccessPointSectorCreate(
-    WorkspacePerformCreateMixin, mixins.CreateModelMixin, generics.GenericAPIView
+    WorkspaceFeatureGetQuerySetMixin,
+    WorkspacePerformCreateMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    generics.GenericAPIView,
 ):
     serializer_class = AccessPointSectorSerializer
     permission_classes = [AllowAny]
 
+    renderer_classes = [
+        renderers.TemplateHTMLRenderer,
+        renderers.JSONRenderer,
+        renderers.BrowsableAPIRenderer,
+    ]
+    template_name = "workspace/molecules/access_point_sector_pagination.html"
+
+    pagination_class = pagination.IspToolboxCustomAjaxPagination
+
+    filter_backends = [filters.OrderingFilter, SessionFilter, AccessPointFilter]
+    ordering_fields = ["name", "last_updated", "height", "radius"]
+    ordering = ["-last_updated"]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"ordering": self.request.GET.get("ordering", self.ordering[0])})
+        return context
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
-
 
 class AccessPointSectorGet(
     mixins.RetrieveModelMixin,

@@ -440,12 +440,29 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_multipolygon_coverage_area.save()
 
     def build_feature_collection(self, features):
-        return {"type": "FeatureCollection", "features": features}
+        feature_collection = {"type": "FeatureCollection", "features": features}
+        self.normalize_json_strings_from_feature_collection(feature_collection)
+        return feature_collection
 
     def trim_mtime_from_feature_collection(self, feature_collection):
         for feature in feature_collection["features"]:
             if "properties" in feature and "last_updated" in feature["properties"]:
                 del feature["properties"]["last_updated"]
+
+    def normalize_json_strings_from_feature_collection(self, feature_collection):
+        """
+        Normalize JSON strings so that different strings that say the same thing
+        don't trip up unit tests
+        """
+        for feature in feature_collection["features"]:
+            if "properties" in feature:
+                for prop in feature["properties"]:
+                    if "_json" in prop:
+                        feature["properties"][prop] = (
+                            json.dumps(json.loads(feature["properties"][prop]))
+                            if feature["properties"][prop]
+                            else None
+                        )
 
     def json_dumps(self, data):
         """
@@ -460,6 +477,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
     def get_feature_collection_flow(self, serializer, expected_features):
         feature_collection = serializer.get_features_for_session(self.test_session)
         self.trim_mtime_from_feature_collection(feature_collection)
+        self.normalize_json_strings_from_feature_collection(feature_collection)
         self.assertJSONEqual(
             json.dumps(self.build_feature_collection(expected_features)),
             self.json_dumps(feature_collection),
@@ -572,6 +590,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                 "radius_miles": expected_distance_miles,
                 "uneditable": DEFAULT_AP_SECTOR_UNEDITABLE,
                 "cloudrf_coverage_geojson_json": None,
+                "geojson_json": json.dumps(json.loads(DEFAULT_TEST_SECTOR)),
             },
         }
         self.get_feature_collection_flow(AccessPointSectorSerializer, [expected_sector])
@@ -981,7 +1000,9 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
             APToCPELink, AP_CPE_LINK_ENDPOINT, self.test_ap_cpe_link.uuid
         )
         self.delete_geojson_model(CPELocation, CPE_ENDPOINT, self.test_cpe.uuid)
-        self.delete_geojson_model(AccessPointSector, SECTOR_ENDPOINT, self.test_sector.uuid)
+        self.delete_geojson_model(
+            AccessPointSector, SECTOR_ENDPOINT, self.test_sector.uuid
+        )
         self.delete_geojson_model(AccessPointLocation, AP_ENDPOINT, self.test_ap.uuid)
         self.delete_geojson_model(
             CoverageArea, COVERAGE_AREA_ENDPOINT, self.test_polygon_coverage_area.uuid

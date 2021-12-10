@@ -256,8 +256,6 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                                     uneditable: true
                                 }
                             };
-
-                            console.log(newSector);
                             this.map.fire('draw.create', { features: [newSector] });
                         }
                     }

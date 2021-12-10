@@ -10,13 +10,8 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="isptoolbox-form">
-            {% csrf_token %}
-            {{ workspace_forms.save_as_session }}
-            <input type="text" value="{{session.uuid}}" hidden name="session">
-          </div>
+          <h1> hello </h1>
           <input type="submit" class="btn btn-primary isptoolbox-btn modal-btn" value="Save">
-          <p class="error d-none"></p>
         </div>
       </div>
     </div>

@@ -5,7 +5,6 @@
   <table class="table table-sm table-hover" style="overflow-x: scroll">
     <thead class="thead-modal">
       <tr>
-        <th scope="col" class="pl-2">#</th>
         <th scope="col">{% translate 'Name' %}
           {% if ordering == "name"%}
           <a name="" class="sort-ap" ordering-target="-name">
@@ -22,7 +21,7 @@
           {% endif %}
         </th>
 
-        <th scope="col">{% translate "Radius"%}
+        <th scope="col">{% translate "Heading"%}
           {% if ordering == "max_radius"%}
           <a class="sort-ap" ordering-target="-max_radius">
             <button class="btn arrow">
@@ -37,7 +36,7 @@
           </a>
           {% endif %}
         </th>
-        <th scope="col">{% translate "Height"%}
+        <th scope="col">{% translate "Beamwidth Azimuth"%}
           {% if ordering == "height"%}
           <a class="sort-ap" ordering-target="-height">
             <button class="btn arrow">
@@ -53,7 +52,7 @@
           {% endif %}
         </th>
    
-        <th scope="col">{% translate 'Latitude' %}
+        <th scope="col">{% translate 'Height' %}
           {% if ordering == "lat"%}
           <a name="" class="sort-ap" ordering-target="-lat">
             <button class="btn">
@@ -69,7 +68,23 @@
           {% endif %}
         </th>
 
-        <th scope="col">{% translate 'Longitude' %}
+        <th scope="col">{% translate 'Radius' %}
+          {% if ordering == "lng"%}
+          <a name="" class="sort-ap" ordering-target="-lng">
+            <button class="btn">
+              {% include 'workspace/atoms/arrow_icon.html' %}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap" ordering-target="lng">
+            <button class="btn arrow">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+            </button>
+          </a>
+          {% endif %}
+        </th>
+
+        <th scope="col">{% translate 'Frequency' %}
           {% if ordering == "lng"%}
           <a name="" class="sort-ap" ordering-target="-lng">
             <button class="btn">
@@ -105,7 +120,7 @@
     </thead>
     <tbody>
       {% for ap in results %}
-      {% include 'workspace/atoms/access_point_row.html' %}
+      {% include 'workspace/atoms/access_point_sector_row.html' %}
       {% endfor %}
     </tbody>
   </table>
@@ -113,13 +128,14 @@
   <input class="d-none" id="ap-modal-page-num" value="{{current}}">
 </div>
 {% include 'workspace/atoms/pagination_page_nav.html' with pagination_class_css="ap-modal-page-change" %}
+
 {% endwith %}
-{% else %}
+{%else %}
 <div class="modal-body">
   <div class="text-center">
     {% include 'workspace/atoms/missing_icon.html' %}
-    <h3>{% translate "No access points"%}</h3>
-    <p>{% translate "To get started: place an access point on the map or select bulk import."%}</p>
+    <h3>{% translate "No access point sectors on this tower yet."%}</h3>
+    <p>{% translate "To get started: place an access point sector via the tower tooltip."%}</p>
   </div>
 </div>
 {% endif %}

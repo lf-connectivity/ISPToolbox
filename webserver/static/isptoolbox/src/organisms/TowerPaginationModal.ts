@@ -86,6 +86,8 @@ export class TowerPaginationModal {
                 $('#ap-list-modal-body').html(result).removeClass('d-none');
                 $('#accessPointModalLabel').html('Access Points');
                 $('#tower-breadcrumb').removeClass('d-none');
+                //TODO: on close of a tower or clicking back to "Tower Name" link in breadcrumb, 
+                //the name of modal should change back to the original "Tower Locations" and not display breadcrumb.  
             },
             'html'
         )

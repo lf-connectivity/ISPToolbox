@@ -86,6 +86,7 @@ export class TowerPaginationModal {
                 $('#ap-list-modal-body').html(result).removeClass('d-none');
                 $('#accessPointModalLabel').html('Access Points');
                 $('#tower-breadcrumb').removeClass('d-none');
+                //TODO: add selected tower row as name in breadcrumb 
                 //TODO: on close of a tower or clicking back to "Tower Name" link in breadcrumb, 
                 //the name of modal should change back to the original "Tower Locations" and not display breadcrumb.  
             },
@@ -176,5 +177,6 @@ export class TowerPaginationModal {
         addHoverTooltip('.ap-save-edit-btn');
         addHoverTooltip('.ap-edit-btn');
         addHoverTooltip('.ap-delete-btn');
+        addHoverTooltip('.ap-sector-btn');
     }
 }

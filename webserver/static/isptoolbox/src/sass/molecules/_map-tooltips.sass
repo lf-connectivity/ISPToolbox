@@ -84,7 +84,7 @@
             flex-flow: row
             justify-content: space-between
             align-items: center
-            padding: 10px
+            padding: 0.75rem
             transition: 0.15s ease-in-out all
             cursor: pointer
             p
@@ -107,7 +107,7 @@
             border: 0
             border-style: none
             color: #fff
-            padding: 5px 3px 3px 3px
+            padding: 0.25rem
             width: 100%
             font-size: $small-font-size
             box-sizing: border-box
@@ -118,7 +118,7 @@
             border: 0
             border-style: none
             color: #fff
-            padding: 5px 3px 3px 3px
+            padding: 0.25rem
             font-size: $small-font-size
             box-sizing: border-box
             border-bottom: 2px solid transparent
@@ -128,7 +128,7 @@
             border: 0
             border-style: none
             color: darken(#fff, 10%)
-            padding: 5px 3px 3px 3px
+            padding: 0.25rem
             width: 100%
             font-size: $small-font-size
             box-sizing: border-box
@@ -143,6 +143,7 @@
                 border-bottom-color: $error-color
         &:focus + span
             border-bottom: 2px solid $brand-primary-color
+        
     /* Chrome, Safari, Edge, Opera */
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button
@@ -152,9 +153,9 @@
     input[type=number]
         -moz-appearance: textfield
     .input--tower-name
-        padding-left: 7px
+        padding-left: 0.5rem !important
     .input--value
-        padding: 5px 3px 3px 3px
+        padding: 0.25rem
         text-align: right
         width: 50px
         margin-left: 10px
@@ -162,7 +163,7 @@
         .name-row
             display: block
         .input--tower-name
-            margin-top: 5px
+            margin-top: 0.25rem
         .label
             margin-bottom: 0
             span
@@ -177,8 +178,7 @@
                 width: 100%
                 margin: 0
                 text-align: left
-                padding-left: 7px
-
+                padding-left: 0.5rem
             .data-with-unit
                 flex-grow: 1
             .comma
@@ -196,7 +196,7 @@
             display: flex
             flex-flow: row
             justify-content: space-between
-            padding: 0.6rem 0 0 0
+            padding: 0.25rem 0.25rem 0.25rem 0
             width: 100%
             &--label
                 margin-bottom: 0
@@ -214,14 +214,14 @@
         display: flex
         flex-flow: row
         justify-content: space-between
-        margin-top: 13px
+        margin-top: 1rem
         width: 100%
     .data-with-unit
         display: flex
         span
             background: darken($brand-dark-gray-color, 7%)
             text-align: center
-            padding: 5px 3px 3px 0
+            padding: 0.25rem 0.25rem 0.25rem 0
             width: 18px
             color: $white-color
             font-size: $small-font-size
@@ -248,7 +248,7 @@
             padding-bottom: 0
     .overlay-tooltip
         .mapboxgl-popup-label
-            margin-right: 8px
+            margin-right: 0.5rem
         .mapboxgl-popup-row-header
             background-color: $mid-gray-color-2
             padding: 0.5rem 0.3rem 0.5rem 0.3rem !important

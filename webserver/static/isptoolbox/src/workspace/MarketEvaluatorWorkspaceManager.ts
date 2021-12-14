@@ -9,12 +9,8 @@ import MarketEvaluatorWS, {
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
-import {
-    AccessPoint,
-    AccessPointSector,
-    ASRTowerCoverageArea,
-    CoverageArea
-} from './WorkspaceFeatures';
+import { AccessPoint, ASRTowerCoverageArea, CoverageArea } from './WorkspaceFeatures';
+import { AccessPointSector } from './WorkspaceSectorFeature';
 
 const SUPPORTED_FEATURE_TYPES = [
     WorkspaceFeatureTypes.COVERAGE_AREA,

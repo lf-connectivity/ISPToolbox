@@ -7,17 +7,10 @@ import { SessionModal } from '../organisms/SessionModal';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
-import {
-    AccessPoint,
-    CPE,
-    APToCPELink,
-    CoverageArea,
-    PointToPointLink,
-    AccessPointSector
-} from './WorkspaceFeatures';
+import { AccessPoint, CPE, APToCPELink, CoverageArea, PointToPointLink } from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
-import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
+import { AccessPointSector } from './WorkspaceSectorFeature';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void | boolean;
 

@@ -2,19 +2,14 @@ import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import * as _ from 'lodash';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
-import {
-    AccessPoint,
-    AccessPointSector,
-    APToCPELink,
-    CPE,
-    PointToPointLink
-} from './WorkspaceFeatures';
+import { AccessPoint, APToCPELink, CPE, PointToPointLink } from './WorkspaceFeatures';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { BuildingCoverageStatus } from './BuildingCoverage';
 import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 import { getStreetAndAddressInfo } from '../LinkCheckUtils';
 
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
+import { AccessPointSector } from './WorkspaceSectorFeature';
 
 const SUPPORTED_FEATURE_TYPES = [
     WorkspaceFeatureTypes.AP_CPE_LINK,

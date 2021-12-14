@@ -24,7 +24,7 @@
                 </a>
                 {% else %}
                 <a type="submit" class="btn">
-                    {% include 'workspace/atoms/icons/loading_circle_spinner.html'%} {{job.task_result.status | title}} &nbsp;
+                    {% include 'workspace/atoms/icons/loading_circle_spinner.html'%}{% if job.task_result.status == "STARTED" %} {% translate "Loading" %}{% else %}{{job.task_result.status | title}} {% endif %}&nbsp;
                 </a>
                 {% endif %}
                 <div class="ml-5 my-auto">
@@ -41,7 +41,7 @@
                     value="{%translate 'Request Data'%}">
             </form>
             {% else %}
-            <a href="{% url 'workspace:access_your_information' %}" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0">{% translate "Refresh"%}</a>
+            <a href="{% url 'workspace:access_your_information' %}" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0">{% translate "Refresh to download"%}</a>
             {% endif %}
         </div>
     </div>

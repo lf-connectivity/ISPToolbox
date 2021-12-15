@@ -14,7 +14,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.http import Http404, JsonResponse
 from workspace import models as workspace_models
-from workspace.mixnins import SuperuserRequiredMixin
+from workspace.mixins import SuperuserRequiredMixin
 import json
 
 

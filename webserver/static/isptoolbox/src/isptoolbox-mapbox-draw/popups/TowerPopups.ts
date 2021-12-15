@@ -320,7 +320,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                             </div>
                         </li>
                         <li>
-                            <p class="label">Customer Antenna<span>Height Above Surfaces</span></p>
+                            <p class="label">Customer Antenna<span>Height Above Rooftop</span></p>
                             <div class="data-with-unit">
                                 <input type='number'
                                        value='${Math.round(

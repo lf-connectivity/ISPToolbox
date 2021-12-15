@@ -38,6 +38,12 @@ import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import { ViewshedTool } from './ViewshedTool';
 import { miles2km } from '../LinkCalcUtils';
 import { isBeta } from '../LinkCheckUtils';
+import { AjaxTowerPopup } from '../isptoolbox-mapbox-draw/popups/AjaxTowerPopup';
+import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
+import {
+    LinkCheckSectorPopup,
+    MarketEvaluatorSectorPopup
+} from '../isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -63,6 +69,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
     draw: MapboxDraw;
     workspaceManager: any;
     apPopup: any;
+    sectorPopup: any;
     renderCloudRF: boolean;
     last_selection: string = '';
 
@@ -71,13 +78,16 @@ abstract class RadiusAndBuildingCoverageRenderer {
         draw: MapboxDraw,
         workspaceManagerClass: any,
         apPopupClass: any,
+        sectorPopupClass: any,
         options?: {
+            // TODO: remove renderCloudRF from renderer
             renderCloudRF?: boolean;
         }
     ) {
         this.map = map;
         this.draw = draw;
-        this.apPopup = apPopupClass.getInstance();
+        this.apPopup = isBeta() ? AjaxTowerPopup.getInstance() : apPopupClass.getInstance();
+        this.sectorPopup = sectorPopupClass.getInstance();
         this.workspaceManager = BaseWorkspaceManager.getInstance();
 
         this.renderCloudRF = options?.renderCloudRF || false;
@@ -177,19 +187,52 @@ abstract class RadiusAndBuildingCoverageRenderer {
             }
         };
 
+        const onClickPolygon = (e: any) => {
+            // Show tooltip if only one AP is selected.
+            const selectedSectors = this.workspaceManager.filterByType(
+                this.draw.getSelected().features,
+                WorkspaceFeatureTypes.SECTOR
+            );
+            if (selectedSectors.length === 1) {
+                let sector = BaseWorkspaceManager.getFeatureByUuid(
+                    selectedSectors[0].properties.uuid
+                ) as AccessPointSector;
+                // Setting this timeout so the natural mouseclick close popup trigger resolves
+                // before this one
+                setTimeout(() => {
+                    this.sectorPopup.hide();
+                    this.sectorPopup.setSector(sector);
+                    this.sectorPopup.show();
+                }, 1);
+            } else if (selectedSectors.length > 1) {
+                this.apPopup.hide();
+            }
+        };
+
         // Keep trying to load the AP onClick event handler until we can find layers
         // to do this, then stop.
-        const loadOnClick = () => {
+        const loadAPOnClick = () => {
             this.map.getStyle().layers?.forEach((layer: any) => {
                 if (layer.id.includes('gl-draw-point-ap')) {
                     this.map.on('click', layer.id, onClickAP);
                     this.renderBuildings();
                     this.renderAPRadius();
-                    this.map.off('idle', loadOnClick);
+                    this.map.off('idle', loadAPOnClick);
                 }
             });
         };
-        this.map.on('idle', loadOnClick);
+
+        const loadSectorOnClick = () => {
+            this.map.getStyle().layers?.forEach((layer: any) => {
+                if (layer.id.includes('gl-draw-polygon-fill')) {
+                    this.map.on('click', layer.id, onClickPolygon);
+                    this.map.off('idle', loadSectorOnClick);
+                }
+            });
+        };
+
+        this.map.on('idle', loadAPOnClick);
+        this.map.on('idle', loadSectorOnClick);
     }
 
     /**
@@ -282,7 +325,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
             let aps = this.draw
                 .getAll()
                 .features.filter((f) => f.properties?.feature_type === WorkspaceFeatureTypes.AP);
-    
+
             // Render all APs.
             aps.forEach((feat: any) => {
                 if (feat && (feat.properties.radius || feat.properties.radius_miles)) {
@@ -303,21 +346,23 @@ abstract class RadiusAndBuildingCoverageRenderer {
                                 feat.properties.radius || miles2km(feat.properties.radius_miles);
                             new_feat = createGeoJSONCircle(feat.geometry, radius, feat.id);
                         }
-    
+
                         // @ts-ignore
                         new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
                             ? ACTIVE_AP
                             : INACTIVE_AP;
-    
+
                         if (
-                            !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(feat.id)
+                            !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(
+                                feat.id
+                            )
                         ) {
                             circle_feats[feat.id] = new_feat;
                         }
                     }
                 }
             });
-    
+
             // Replace radius features with selected
             const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
             if (radiusSource.type === 'geojson') {
@@ -380,7 +425,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
     ws: LOSCheckWS;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw, ws: LOSCheckWS) {
-        super(map, draw, LOSCheckWorkspaceManager, LinkCheckTowerPopup);
+        super(map, draw, LOSCheckWorkspaceManager, LinkCheckTowerPopup, LinkCheckSectorPopup);
         this.ws = ws;
 
         // Building Layer click callback
@@ -398,9 +443,9 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                         layers: [BUILDING_LAYER]
                     })[0];
                     let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
-                    if(building.properties?.cpe_location){
+                    if (building.properties?.cpe_location) {
                         const parsed_location = JSON.parse(building.properties.cpe_location);
-                        if(parsed_location !== null){
+                        if (parsed_location !== null) {
                             lngLat = parsed_location.coordinates;
                         }
                     }
@@ -582,9 +627,16 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     buildingOverlays: GeometryCollection;
     buildingFilterSize: [number, number];
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
-        super(map, draw, MarketEvaluatorWorkspaceManager, MarketEvaluatorTowerPopup, {
-            renderCloudRF: true
-        });
+        super(
+            map,
+            draw,
+            MarketEvaluatorWorkspaceManager,
+            MarketEvaluatorTowerPopup,
+            MarketEvaluatorSectorPopup,
+            {
+                renderCloudRF: true
+            }
+        );
 
         this.buildingOverlays = {
             type: 'GeometryCollection',

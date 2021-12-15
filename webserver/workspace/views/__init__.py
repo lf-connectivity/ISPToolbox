@@ -46,7 +46,12 @@ from .visualization_views import PotreeVisualizationMetaView
 from .import_views import SessionFileImportView
 from .dyi_views import DeleteYourInformationView
 from .ayi_views import AccessYourInformationView
-from .tower_form_views import AccessPointLocationFormView
+from .tower_form_views import (
+    AccessPointLocationFormView,
+    TowerLocationFormView,
+    SectorFormViewMarketEvaluator,
+    SectorFormViewLOSCheck,
+)
 from .www_views import AnalyticsView, NetworkToolInterventionsView
 
 import workspace.utils.import_utils

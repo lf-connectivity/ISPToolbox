@@ -16,6 +16,8 @@ import { MarketEvaluatorTowerPopup } from './isptoolbox-mapbox-draw/popups/Tower
 import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
 import { MultiThumbSlider } from './atoms/MultiThumbSlider';
 import MarketEvaluatorMapLayerSidebarManager from './MarketEvaluatorMapLayerSidebarManager';
+import { AjaxTowerPopup } from './isptoolbox-mapbox-draw/popups/AjaxTowerPopup';
+import { MarketEvaluatorSectorPopup } from './isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
 
 export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     map: MapboxGL.Map;
@@ -72,6 +74,8 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
         new MarketEvaluatorWorkspaceManager(this.map, this.draw);
 
         // Tooltips
+        new AjaxTowerPopup(this.map, this.draw);
+        new MarketEvaluatorSectorPopup(this.map, this.draw);
         new MarketEvaluatorTowerPopup(this.map, this.draw);
         const radius_building_render = new MarketEvaluatorRadiusAndBuildingCoverageRenderer(
             this.map,

@@ -47,7 +47,9 @@ import { LiDAR3DView } from './organisms/LiDAR3DView';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 
 import { WorkspacePointFeature } from './workspace/WorkspacePointFeature';
-import { LinkCheckPTPOverlay, HOVER_POINT_SOURCE} from './LinkCheckPTPOverlay';
+import { LinkCheckPTPOverlay, HOVER_POINT_SOURCE } from './LinkCheckPTPOverlay';
+import { AjaxTowerPopup } from './isptoolbox-mapbox-draw/popups/AjaxTowerPopup';
+import { LinkCheckSectorPopup } from './isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
 var _ = require('lodash');
 
 type HighChartsExtremesEvent = {
@@ -60,7 +62,6 @@ const THREE = window.THREE;
 const SMALLEST_UPDATE = 1e-5;
 const LEFT_NAVIGATION_KEYS = ['ArrowLeft', 'Left', 'A', 'a'];
 const RIGHT_NAVIGATION_KEYS = ['ArrowRight', 'Right', 'D', 'd'];
-
 
 const center_freq_values: { [key: string]: number } = {
     '2.4 GHz': 2.437,
@@ -315,7 +316,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new LinkCheckCustomerConnectPopup(this.map, this.draw);
         new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw);
         new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw);
+        new AjaxTowerPopup(this.map, this.draw);
         new LinkCheckTowerPopup(this.map, this.draw);
+        new LinkCheckSectorPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
 
         // Set relationships amongst collapsible components
@@ -423,9 +426,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 }
             });
             this.selectedFeatureID = features.length ? features[0] : null;
-
         }
-        
 
         this.updateLinkProfile();
         this.link_chart.redraw();
@@ -503,7 +504,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                                     //@ts-ignore
                                     feat.geometry.coordinates[coord1] = coords;
                                     this.draw.add(feat);
-                                    this.map.fire('draw.create', {features: [feat]});
+                                    this.map.fire('draw.create', { features: [feat] });
                                 }
                                 this.updateLinkProfile();
                                 this.map.setCenter(coords);
@@ -542,7 +543,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 update.features.length === 1
         );
     }
-
 
     setInputs(
         msg: string,

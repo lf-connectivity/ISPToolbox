@@ -104,6 +104,12 @@ urlpatterns = [
     # Forms
     path('workspace/form/ap-loc-form-<uuid:uuid>/',
          views.AccessPointLocationFormView.as_view(), name="ap-loc-form"),
+    path('workspace/form/tower-form/<uuid:uuid>/',
+         views.TowerLocationFormView.as_view(), name="tower-form"),
+    path('workspace/form/sector-form/market/<uuid:uuid>/',
+         views.SectorFormViewMarketEvaluator.as_view(), name="sector-form-market-eval"),
+    path('workspace/form/sector-form/network/<uuid:uuid>/',
+         views.SectorFormViewLOSCheck.as_view(), name="sector-form-network-edit"),
     # Ajax
     path('workspace/ajax/ap-los/coverage/<uuid:uuid>/',
          views.AccessPointCoverageResults.as_view(), name="viewshed_coverage"),

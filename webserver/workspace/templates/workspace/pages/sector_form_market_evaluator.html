@@ -1,0 +1,7 @@
+{% extends "workspace/organisms/sector_form_base.html" %}
+{% load i18n isp_toolbox_sources %}
+
+{% block buttontext %}
+{% load_sources_from "workspace/pages/market_evaluator.html" sources with tool="market_evaluator" as sources %}
+{% translate "Plot Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
+{% endblock %}

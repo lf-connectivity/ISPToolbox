@@ -1,24 +1,22 @@
-import { LinkCheckBasePopup } from './LinkCheckBasePopup';
+import { djangoUrl } from '../../utils/djangoUrl';
+import { LinkCheckBasePopup, LOADING_SVG } from './LinkCheckBasePopup';
 
-export abstract class LinkCheckBaseAjaxPopup extends LinkCheckBasePopup {
-    protected endpointUrl: string;
+export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
+    protected endpoint: string;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, endpointUrl: string) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, endpoint: string) {
         super(map, draw);
-        this.endpointUrl = endpointUrl;
+        this.endpoint = endpoint;
     }
 
     protected showComponent() {
         this.popup.setLngLat(this.lnglat);
         if (!this.popup.isOpen()) {
-            let data = this.getData();
-            if (!this.getData()) {
-                data = '';
-            }
-
+            this.popup.setHTML(LOADING_SVG);
+            this.popup.addTo(this.map);
             $.get(
-                this.endpointUrl,
-                data,
+                this.getEndpoint(),
+                '',
                 (result) => {
                     this.popup.setHTML(result);
                 },
@@ -32,10 +30,20 @@ export abstract class LinkCheckBaseAjaxPopup extends LinkCheckBasePopup {
         }
     }
 
-    // for getting rid of abstract class clause
+    // for getting rid of abstract function definition
     protected getHTML() {
         return '';
     }
 
-    protected abstract getData(): any;
+    protected getEndpoint(): string {
+        if (!this.getEndpointParams()) {
+            return djangoUrl(this.endpoint);
+        } else {
+            return djangoUrl(this.endpoint, ...this.getEndpointParams());
+        }
+    }
+
+    protected getEndpointParams(): any[] {
+        return [];
+    }
 }

@@ -338,6 +338,7 @@ def existing_citation(sources, id, href=None, footnote_id=None):
     index = list(sources).index(id) + 1
     return _create_citation_html(index, href, footnote_id)
 
+
 @register.simple_tag
 def source_link(country, source_id):
     """

@@ -53,6 +53,7 @@ from .tower_form_views import (
     SectorFormViewLOSCheck,
 )
 from .www_views import AnalyticsView, NetworkToolInterventionsView
+from .admin import WorkspaceEngagementView
 
 import workspace.utils.import_utils
 

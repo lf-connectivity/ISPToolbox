@@ -26,7 +26,7 @@ from mmwave.views import (
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView
 from Overlay.views import OverlaySource
 from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView
-from workspace.views import AdminGeneric403View
+from workspace.views import AdminGeneric403View, WorkspaceEngagementView
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
@@ -107,6 +107,9 @@ urlpatterns = [
 
     # Accounts / All Auth
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="account_logout"),
+
+    # Dashboard Paths
+    path('admin/dashboard/', WorkspaceEngagementView.as_view(), name="admin-dashboard"),
 
     # 403 Any request starting with admin
     re_path(r'admin/.*', AdminGeneric403View),

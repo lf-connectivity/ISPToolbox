@@ -1,6 +1,7 @@
 # from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import indexes
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import BaseUserManager
@@ -135,3 +136,22 @@ class NewUserExperience(models.Model):
     @property
     def num_anonymous_users_seen(self):
         return self.anonymous_sessions.count()
+
+
+class PageVisit(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, blank=True, null=True
+    )
+    session = models.ForeignKey(
+        Session, on_delete=models.SET_NULL, blank=True, null=True
+    )
+    request = models.CharField(
+        max_length=255, blank=True, null=True, db_index=True
+    )
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    response_code = models.IntegerField(
+        blank=True, null=True
+    )
+    ip = models.GenericIPAddressField(
+        blank=True, null=True, db_index=True
+    )

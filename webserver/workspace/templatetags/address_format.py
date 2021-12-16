@@ -29,12 +29,16 @@ _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS = {
 def _process_component(response_component):
     address_components = {}
     if 'id' in response_component:
-        component_type = _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS[response_component['id'].split('.')[0]]
-        address_components[component_type] = response_component['text']
+        mapbox_component_type = response_component['id'].split('.')[0]
 
-        # Addresses might have house number
-        if component_type == 'road' and 'address' in response_component:
-            address_components['house_number'] = response_component['address']
+        # ignore neighborhood data type because it lacks official status
+        if mapbox_component_type in _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS:
+            component_type = _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS[mapbox_component_type]
+            address_components[component_type] = response_component['text']
+
+            # Addresses might have house number
+            if component_type == 'road' and 'address' in response_component:
+                address_components['house_number'] = response_component['address']
 
     return address_components
 

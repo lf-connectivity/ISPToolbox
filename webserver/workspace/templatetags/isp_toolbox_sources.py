@@ -30,6 +30,19 @@ _INT_LITERAL_REGEX = re.compile('^(\d+)$')                  # noqa: W605
 _KWARG_REGEX = re.compile('^(\w+)=(.+)$')                   # noqa: W605
 
 
+def _create_citation_html(index, href, footnote_id):
+    # href being empty string = same page.
+    if href is not None:
+        # Open page in new tab unless it's the same page.
+        target = '_self' if href == '' else '_blank'
+        if footnote_id:
+            href += f'#{footnote_id}-{index}'
+
+        return format_html(_CITATION_HTML_FORMAT_STRING_LINK, href, target, index)
+    else:
+        return format_html(_CITATION_HTML_FORMAT_STRING, index)
+
+
 class _TokenParserBlockState(enum.Enum):
     NEUTRAL = ''
     AS_BLOCK = 'as'
@@ -59,16 +72,7 @@ class _CitationNode(template.Node):
         if not do_render:
             return ''
         else:
-            # href being empty string = same page.
-            if href is not None:
-                # Open page in new tab unless it's the same page.
-                target = '_self' if href == '' else '_blank'
-                if footnote_id:
-                    href += f'#{footnote_id}-{index}'
-
-                return format_html(_CITATION_HTML_FORMAT_STRING_LINK, href, target, index)
-            else:
-                return format_html(_CITATION_HTML_FORMAT_STRING, index)
+            return _create_citation_html(index, href, footnote_id)
 
 
 class _NewSourcesListNode(template.Node):
@@ -324,7 +328,7 @@ def citation(parser, token):
 
 
 @register.simple_tag
-def existing_citation(sources, id, href=None):
+def existing_citation(sources, id, href=None, footnote_id=None):
     """
     Template tag for citing an already cited source.
     """
@@ -332,8 +336,7 @@ def existing_citation(sources, id, href=None):
         raise template.TemplateSyntaxError(f'{id} not in sources.')
 
     index = list(sources).index(id) + 1
-    return format_html(_CITATION_HTML_FORMAT_STRING, index)
-
+    return _create_citation_html(index, href, footnote_id)
 
 @register.simple_tag
 def source_link(country, source_id):

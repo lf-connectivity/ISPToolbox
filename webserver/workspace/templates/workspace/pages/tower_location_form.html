@@ -1,7 +1,13 @@
 {% extends "workspace/molecules/tower_tooltip_form_base.html" %}
-{% load i18n %}
+{% load i18n address_format %}
 
 {% block content %}
+{% reverse_geocoded_address_lines lat lng as address_lines %}
+<div class="description">
+    {% for line in address_lines %}
+        <p>{{ line }}</p>
+    {% endfor %}
+</div>
 <button class='btn btn-primary isptoolbox-btn' id='place-sector-btn-tower-popup'>
     {% translate "Place Random Sector"%}
 </button>

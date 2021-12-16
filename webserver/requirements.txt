@@ -55,11 +55,13 @@ httptools==0.1.1
 humanize==3.11.0
 idna==2.10
 importlib-metadata==4.8.1
+international-address-formatter==1.0.2
 jmespath==0.10.0
 joblib==0.16.0
 kombu==5.1.0
 l18n==2018.5
 lxml==4.6.3
+mapbox==0.18.0
 markdown==3.2.2
 msgpack==1.0.0
 numpy==1.19.0

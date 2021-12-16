@@ -259,7 +259,6 @@ USERNAME_ES = ELASTICSEARCH_SECRETS['ADMIN_ELASTICSEARCH']
 PASSWORD_ES = ELASTICSEARCH_SECRETS['PASSWORD_ELASTICSEARCH']
 
 MIDDLEWARE = [
-    'IspToolboxApp.middleware.HealthCheckMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -269,6 +268,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'IspToolboxAccounts.middleware.logpagevisit',
     'djangosaml2.middleware.SamlSessionMiddleware',
 ]
 

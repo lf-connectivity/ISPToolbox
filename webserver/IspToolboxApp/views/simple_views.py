@@ -10,7 +10,7 @@ class SocialLoginView(View):
 
 class HealthCheckView(View):
     def get(self, request):
-        return HttpResponse()
+        return HttpResponse('ok')
 
 
 class MarketEvaluatorTest(View):

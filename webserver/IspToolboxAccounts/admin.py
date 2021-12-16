@@ -6,7 +6,9 @@ from django.core.exceptions import PermissionDenied
 from django.urls.base import reverse_lazy
 from IspToolboxAccounts import models
 
+
 admin.site.register(models.PageVisit)
+
 
 @admin.register(models.User)
 class IspToolboxUserAdmin(admin.ModelAdmin):

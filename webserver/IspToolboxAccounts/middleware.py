@@ -20,7 +20,7 @@ def logpagevisit(get_response):
         pv = PageVisit(
             user=request.user if not request.user.is_anonymous else None,
             session_id=request.session.session_key,
-            request=request.path,
+            request=(request.path[:253] + '..') if len(request.path) > 255 else request.path,
             ip=get_client_ip(request)
         )
         response = get_response(request)

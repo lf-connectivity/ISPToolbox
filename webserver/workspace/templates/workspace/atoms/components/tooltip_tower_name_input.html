@@ -1,4 +1,3 @@
 {% spaceless %}
-{% load isp_toolbox_units %}
-<input class="input--tower-name" id="name-input-tower-popup" value="{{ name }}" placeholder="Tower Name" type="text" name="name" maxlength="{% field_limit "NAME" "max" %}" required>
+<input class="input--tower-name" id="name-input-tower-popup" value="{{ tower_input_name }}" placeholder="Tower Name" type="text">
 {% endspaceless %}

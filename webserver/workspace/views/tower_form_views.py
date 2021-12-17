@@ -2,6 +2,7 @@ from rest_framework import generics
 from django.shortcuts import render
 from rest_framework.mixins import DestroyModelMixin
 from workspace.models import (
+    AccessPointLocation,
     AccessPointSerializer,
     AccessPointCoverageBuildings,
     AccessPointSectorSerializer,
@@ -16,13 +17,18 @@ class TooltipFormView(generics.GenericAPIView):
         model = self.serializer_class.Meta.model
         return model.get_rest_queryset(self.request)
 
-    def get(self, request, *args, **kwargs):
+    def get_context(self, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         context = serializer.data.copy()
         context.update({"units": instance.map_session.units})
         context.update({"session": instance.map_session})
         context.update(dict((k, str(kwargs[k])) for k in kwargs))
+        return context
+
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(**kwargs)
         return render(request, self.template_name, context)
 
 
@@ -84,3 +90,10 @@ class TowerLocationFormView(TooltipFormView):
 class SectorFormView(TooltipFormView):
     template_name = "workspace/pages/sector_form.html"
     serializer_class = AccessPointSectorSerializer
+
+    def get_context(self, *args, **kwargs):
+        context = super().get_context(**kwargs)
+        ap = AccessPointLocation.objects.get(uuid=context['ap'], map_session=context['map_session'])
+        serialized_ap = AccessPointSerializer(ap)
+        context.update({"ap": serialized_ap.data})
+        return context

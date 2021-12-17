@@ -1,11 +1,83 @@
 {% extends "workspace/molecules/tower_tooltip_form_base.html" %}
-{% load i18n isp_toolbox_sources isp_toolbox_tool_info %}
+{% load i18n address_format isp_toolbox_units isp_toolbox_sources isp_toolbox_tool_info %}
 
-{% block content %}
-    {% load_tool_info tool as tool_info %}
-    {% if tool == "market_evaluator" %}
-        {% load_sources_from tool_info.app_page_template sources with tool=tool as sources %}
-    {% endif %}
+{% block title %}
+    <a id="back-to-tower-sector-popup" data-target="{{ ap.uuid }}">{% translate "Edit Tower" %}</a> /
+    {% translate "Edit Access Point" %}
+{% endblock %}
+
+{% block content_ul %}
+{% reverse_geocoded_address_lines ap.lat ap.lng as address_lines %}
+{% load_tool_info tool as tool_info %}
+{% load_sources_from tool_info.app_page_template sources with tool=tool as sources %}
+
+<li>
+    <div class="description">
+        <p><b>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</b></p>
+        <p>{{ ap.lat|floatformat:5 }}, {{ ap.lng|floatformat:5 }}</p>
+    </div>
+</li>
+<li class="name-row">
+    {% include "workspace/atoms/components/tooltip_tower_name_input.html" with tower_input_name=name %}
+</li>
+<li>
+    <p class="label">{% translate "Heading" %}</p>
+    <div class="data-with-unit">
+        <input type="number"
+               value="{{ heading|floatformat:2 }}"
+               id="heading-input-sector-popup"
+               min="0" max="360" step="0.01"
+               class="input--value"
+        >
+        <span>&#176;</span>
+    </div>
+</li>
+<li>
+    <p class="label">{% translate "Beamwidth Azimuth" %}</p>
+    <div class="data-with-unit">
+        <input type="number"
+               value="{{ azimuth|floatformat:2 }}"
+               id="azimuth-input-sector-popup"
+               min="0.01" max="360" step="0.01"
+               class="input--value"
+        >
+        <span>&#176;</span>
+    </div>
+</li>
+<li>
+    <p class="label">{% translate "Access Point Height" %}<span>{% translate "Height Above Ground" %}</span></p>
+    <div class="data-with-unit">
+        <input type="number"
+               value="{% unit_preference_value units height_ft|floatformat:"0" height|floatformat:"0" %}"
+               id="height-input-sector-popup"
+               class="input--value"
+        >
+        <span>{% unit_preference_value units "ft" "m" %}</span>
+    </div>
+</li>
+<li>
+    <p class="label">{% translate "Customer Antenna Height" %}<span>{% translate "Height Above Rooftop" %}</span></p>
+    <div class="data-with-unit">
+        <input type="number"
+               value="{% unit_preference_value units default_cpe_height_ft|floatformat:"0" default_cpe_height|floatformat:"0" %}"
+               id="cpe-hgt-sector-popup"
+               class="input--value"
+        >
+        <span>{% unit_preference_value units "ft" "m" %}</span>
+    </div>
+</li>
+<li>
+    <p class="label">{% translate "Distance" %}</p>
+    <div class="data-with-unit">
+        <input type="number"
+               value="{% unit_preference_value units radius_miles|floatformat:2 radius|floatformat:2 %}"
+               id="radius-input-sector-popup"
+               class="input--value"
+        >
+        <span>{% unit_preference_value units "mi" "km" %}</span>
+    </div>
+</li>
+<li class="stat-row">
     <button class='btn btn-primary isptoolbox-btn' id='coverage-viewshed-btn-sector-popup'>
         {% if tool == "market_evaluator" %}
             {% translate "Plot Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
@@ -13,4 +85,7 @@
             {% translate "Calculate Coverage" %}
         {% endif %}
     </button>
+</li>
+{% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-sector-row-sector-popup" delete_row_a_id="sector-delete-btn" delete_row_object_name="Access Point" delete_row_last_updated=last_updated %}
+
 {% endblock %}

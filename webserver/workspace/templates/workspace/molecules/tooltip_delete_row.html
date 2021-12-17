@@ -1,0 +1,6 @@
+{% load i18n %}
+
+<div class="node-edits" id="{{ delete_row_div_id }}">
+    <a id="{{ delete_row_a_id }}" data-toggle="modal" data-target="#apDeleteModal">{% translate "Delete" %} {% translate delete_row_object_name %}</a>
+    <p>{% translate "Last Edited" %} {{ delete_row_last_updated }}</p>
+</div>

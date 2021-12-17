@@ -1,4 +1,5 @@
 from django import template
+from django.utils.translation import gettext as _
 from rest_framework.status import HTTP_200_OK
 
 from mapbox import Geocoder
@@ -92,7 +93,9 @@ def _process_component(response_component):
 
 
 def _reverse_geocode(lat, long):
-    address_components = {}
+    address_components = {
+        "road": _("Undetected Street Address")
+    }
     response = _geocoder.reverse(lon=long, lat=lat)
     if response.status_code == HTTP_200_OK:
         best_fit = response.geojson()["features"][0]

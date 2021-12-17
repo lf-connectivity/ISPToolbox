@@ -1,21 +1,27 @@
 import { roundToDecimalPlaces } from '../../LinkCalcUtils';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
-import { WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
+import { ISPToolboxTool, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
 import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
 const CALCULATE_COVERAGE_BUTTON_ID = 'coverage-viewshed-btn-sector-popup';
 
+/**
+ * Doing base classes for this to account for differences in button logic
+ * as opposed to just templating
+ */
 export abstract class BaseAjaxSectorPopup
     extends LinkCheckBaseAjaxFormPopup
     implements IMapboxDrawPlugin
 {
     protected sector?: AccessPointSector;
+    protected readonly tool: ISPToolboxTool
     protected static _instance: BaseAjaxSectorPopup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw, endpoint: string) {
-        super(map, draw, endpoint);
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, tool: ISPToolboxTool) {
+        super(map, draw, 'workspace:sector-form');
         initializeMapboxDrawInterface(this, this.map);
+        this.tool = tool
     }
 
     getSector(): AccessPointSector | undefined {
@@ -34,7 +40,7 @@ export abstract class BaseAjaxSectorPopup
     protected cleanup() {}
 
     protected getEndpointParams() {
-        return [this.sector?.workspaceId];
+        return [this.tool, this.sector?.workspaceId];
     }
 
     static getInstance() {
@@ -65,7 +71,7 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
         if (BaseAjaxSectorPopup._instance) {
             return BaseAjaxSectorPopup._instance as MarketEvaluatorSectorPopup;
         }
-        super(map, draw, 'workspace:sector-form-market-eval');
+        super(map, draw, ISPToolboxTool.MARKET_EVAL);
         BaseAjaxSectorPopup._instance = this;
     }
 
@@ -87,7 +93,7 @@ export class LinkCheckSectorPopup extends BaseAjaxSectorPopup {
         if (BaseAjaxSectorPopup._instance) {
             return BaseAjaxSectorPopup._instance as LinkCheckSectorPopup;
         }
-        super(map, draw, 'workspace:sector-form-network-edit');
+        super(map, draw, ISPToolboxTool.LOS_CHECK);
         BaseAjaxSectorPopup._instance = this;
     }
 

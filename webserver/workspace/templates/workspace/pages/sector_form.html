@@ -1,0 +1,16 @@
+{% extends "workspace/molecules/tower_tooltip_form_base.html" %}
+{% load i18n isp_toolbox_sources isp_toolbox_tool_info %}
+
+{% block content %}
+    {% load_tool_info tool as tool_info %}
+    {% if tool == "market_evaluator" %}
+        {% load_sources_from tool_info.app_page_template sources with tool=tool as sources %}
+    {% endif %}
+    <button class='btn btn-primary isptoolbox-btn' id='coverage-viewshed-btn-sector-popup'>
+        {% if tool == "market_evaluator" %}
+            {% translate "Plot Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
+        {% elif tool == "los_check" %}
+            {% translate "Calculate Coverage" %}
+        {% endif %}
+    </button>
+{% endblock %}

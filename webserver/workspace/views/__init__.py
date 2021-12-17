@@ -49,8 +49,7 @@ from .ayi_views import AccessYourInformationView
 from .tower_form_views import (
     AccessPointLocationFormView,
     TowerLocationFormView,
-    SectorFormViewMarketEvaluator,
-    SectorFormViewLOSCheck,
+    SectorFormView
 )
 from .www_views import AnalyticsView, NetworkToolInterventionsView
 from .admin import WorkspaceEngagementView

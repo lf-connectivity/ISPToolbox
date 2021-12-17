@@ -12,7 +12,7 @@ import {
     CPEDrawMode,
     APDrawMode
 } from './isptoolbox-mapbox-draw/index';
-import { LinkCheckEvents } from './workspace/WorkspaceConstants';
+import { ISPToolboxTool, LinkCheckEvents } from './workspace/WorkspaceConstants';
 import LidarAvailabilityLayer from './availabilityOverlay';
 import {
     LOSWSEvents,
@@ -316,7 +316,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new LinkCheckCustomerConnectPopup(this.map, this.draw);
         new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw);
         new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw);
-        new AjaxTowerPopup(this.map, this.draw);
+        new AjaxTowerPopup(this.map, this.draw, ISPToolboxTool.LOS_CHECK);
         new LinkCheckTowerPopup(this.map, this.draw);
         new LinkCheckSectorPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);

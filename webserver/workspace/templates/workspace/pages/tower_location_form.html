@@ -1,14 +1,51 @@
 {% extends "workspace/molecules/tower_tooltip_form_base.html" %}
-{% load i18n address_format %}
+{% load i18n address_format isp_toolbox_sources isp_toolbox_tool_info %}
 
 {% block content %}
 {% reverse_geocoded_address_lines lat lng as address_lines %}
-<div class="description">
-    {% for line in address_lines %}
-        <p>{{ line }}</p>
-    {% endfor %}
+{% load_tool_info tool as tool_info %}
+{% load_sources_from tool_info.app_page_template sources with tool=tool as sources %}
+
+<div>
+    <ul>
+        <li class="name-row">
+            <input
+                class="input--tower-name" 
+                id="name-input-tower-popup" 
+                value="{{ name }}" 
+                placeholder="Tower Name"
+                type="text">
+            <div class="coordinates">
+                <div class="data-with-unit">
+                    <input type="text"
+                            value="{{ lat|floatformat:5 }}, {{ lng|floatformat:5 }}"
+                            id="lat-lng-input-tower-popup"
+                            placeholder="latitude, longitude"
+                            class="input--value"
+                    >
+                </div>
+            </div>
+        </li>
+        <li>
+            <div class="description">
+                <p>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</p>
+                {% for line in address_lines|slice:"1:" %}
+                    <p>{{ line }}</p>
+                {% endfor %}
+            </div>
+        </li>
+        <li class="stat-row">
+            <button class='btn btn-primary isptoolbox-btn' id='place-sector-btn-tower-popup'>
+                {% translate "Add Access Point"%}
+            </button>
+        </li>
+        <div class="node-edits" id="${DELETE_ROW_DIV_ID}">
+            <a id="tower-delete-btn" data-toggle="modal" data-target="#apDeleteModal">{% translate "Delete Tower" %}</a>
+            <p>{% translate "Last Edited" %} {{ last_updated }}</p>
+        </div>
+
+    </ul>
+
+    
 </div>
-<button class='btn btn-primary isptoolbox-btn' id='place-sector-btn-tower-popup'>
-    {% translate "Place Random Sector"%}
-</button>
 {% endblock %}

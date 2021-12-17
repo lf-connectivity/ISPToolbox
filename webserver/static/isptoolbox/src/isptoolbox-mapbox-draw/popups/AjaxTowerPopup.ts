@@ -1,6 +1,6 @@
 import { roundToDecimalPlaces } from '../../LinkCalcUtils';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
-import { WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
+import { ISPToolboxTool, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
 import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
@@ -8,14 +8,16 @@ const PLACE_SECTOR_BUTTON_ID = 'place-sector-btn-tower-popup';
 
 export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapboxDrawPlugin {
     protected accessPoint?: AccessPoint;
+    protected readonly tool: ISPToolboxTool;
     protected static _instance: AjaxTowerPopup;
 
-    constructor(map: mapboxgl.Map, draw: MapboxDraw) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, tool: ISPToolboxTool) {
         if (AjaxTowerPopup._instance) {
             return AjaxTowerPopup._instance;
         }
         super(map, draw, 'workspace:tower-form');
         initializeMapboxDrawInterface(this, this.map);
+        this.tool = tool
         AjaxTowerPopup._instance = this;
     }
 
@@ -69,7 +71,7 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
     protected cleanup() {}
 
     protected getEndpointParams() {
-        return [this.accessPoint?.workspaceId];
+        return [this.tool, this.accessPoint?.workspaceId];
     }
 
     static getInstance() {

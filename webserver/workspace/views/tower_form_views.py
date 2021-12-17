@@ -22,6 +22,7 @@ class TooltipFormView(generics.GenericAPIView):
         context = serializer.data.copy()
         context.update({"units": instance.map_session.units})
         context.update({"session": instance.map_session})
+        context.update(dict((k, str(kwargs[k])) for k in kwargs))
         return render(request, self.template_name, context)
 
 
@@ -80,11 +81,6 @@ class TowerLocationFormView(TooltipFormView):
     serializer_class = AccessPointSerializer
 
 
-class SectorFormViewMarketEvaluator(TooltipFormView):
-    template_name = "workspace/pages/sector_form_market_evaluator.html"
-    serializer_class = AccessPointSectorSerializer
-
-
-class SectorFormViewLOSCheck(TooltipFormView):
-    template_name = "workspace/pages/sector_form_network_edit.html"
+class SectorFormView(TooltipFormView):
+    template_name = "workspace/pages/sector_form.html"
     serializer_class = AccessPointSectorSerializer

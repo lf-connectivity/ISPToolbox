@@ -13,7 +13,6 @@ import os
 
 
 register = template.Library()
-_geocoder = Geocoder(access_token=settings.MAPBOX_ACCESS_TOKEN_PUBLIC)
 
 
 _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS = {
@@ -26,35 +25,6 @@ _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS = {
     "neighborhood": "neighbourhood",
     "address": "road",
 }
-
-
-def _process_component(response_component):
-    address_components = {}
-    if "id" in response_component:
-        mapbox_component_type = response_component["id"].split(".")[0]
-        component_type = _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS[mapbox_component_type]
-        address_components[component_type] = response_component["text"]
-
-        # Addresses might have house number
-        if component_type == "road" and "address" in response_component:
-            address_components["house_number"] = response_component["address"]
-
-    return address_components
-
-
-def _reverse_geocode(lat, long):
-    address_components = {}
-    response = _geocoder.reverse(lon=long, lat=lat)
-    if response.status_code == HTTP_200_OK:
-        best_fit = response.geojson()["features"][0]
-        address_components.update(_process_component(best_fit))
-
-        # Process response into address components
-        if "context" in best_fit:
-            for item in best_fit["context"]:
-                address_components.update(_process_component(item))
-
-        return address_components
 
 
 # AddressFormatter is bugged, but nobody is accepting any PRs :(
@@ -107,6 +77,39 @@ class _UTF8AddressFormatter(international_address_formatter.AddressFormatter):
         return pystache.render(fmt["address_template"], cleaned_address).strip()
 
 
+def _process_component(response_component):
+    address_components = {}
+    if "id" in response_component:
+        mapbox_component_type = response_component["id"].split(".")[0]
+        component_type = _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS[mapbox_component_type]
+        address_components[component_type] = response_component["text"]
+
+        # Addresses might have house number
+        if component_type == "road" and "address" in response_component:
+            address_components["house_number"] = response_component["address"]
+
+    return address_components
+
+
+def _reverse_geocode(lat, long):
+    address_components = {}
+    response = _geocoder.reverse(lon=long, lat=lat)
+    if response.status_code == HTTP_200_OK:
+        best_fit = response.geojson()["features"][0]
+        address_components.update(_process_component(best_fit))
+
+        # Process response into address components
+        if "context" in best_fit:
+            for item in best_fit["context"]:
+                address_components.update(_process_component(item))
+
+        return address_components
+
+
+_geocoder = Geocoder(access_token=settings.MAPBOX_ACCESS_TOKEN_PUBLIC)
+_address_formatter = _UTF8AddressFormatter()
+
+
 @register.simple_tag
 def reverse_geocoded_address_lines(lat, long, include_country=False):
     """
@@ -114,8 +117,7 @@ def reverse_geocoded_address_lines(lat, long, include_country=False):
     """
     address_components = _reverse_geocode(lat, long)
     country_code = pycountry.countries.get(name=address_components["country"]).alpha_2
-    address_formatter = _UTF8AddressFormatter()
-    lines = address_formatter.format(address_components, country_code=country_code).split("\n")
+    lines = _address_formatter.format(address_components, country_code=country_code).split("\n")
     if not include_country:
         lines = lines[:-1]
     return lines

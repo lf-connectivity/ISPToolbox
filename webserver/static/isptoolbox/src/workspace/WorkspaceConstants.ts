@@ -1,3 +1,8 @@
+export enum ISPToolboxTool {
+    MARKET_EVAL = "market_evaluator",
+    LOS_CHECK = "los_check"
+}
+
 export enum WorkspaceEvents {
     AP_UPDATE = 'ap.update',
     AP_RENDER_GIVEN = 'ap.render_given',

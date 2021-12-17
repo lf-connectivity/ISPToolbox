@@ -46,7 +46,6 @@ urlpatterns = [
     # Admin SSO
     path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2')),
     # Health Check Endpoint
-    path('elb-status/', views.HealthCheckView.as_view()),
     path('gis/osmBuildings/', views.BuildingsView.as_view(), name='osmBuildings'),
     # Market Evaluator
     # Pipeline Functions for MarketEvaluator
@@ -121,11 +120,11 @@ urlpatterns = [
 if not settings.ENABLE_ACCOUNT_CREATION:
     social_login = [
         path('fb-sdk/facebook/login/token/',
-             views.HealthCheckView.as_view(), name="facebook_login_by_token"),
+             views.RespondOkView.as_view(), name="facebook_login_by_token"),
         path('fb-sdk/facebook/login/',
-             views.HealthCheckView.as_view(), name="facebook_login"),
+             views.RespondOkView.as_view(), name="facebook_login"),
         path('fb-sdk/facebook/login/callback/',
-             views.HealthCheckView.as_view(), name="facebook_callback"),
+             views.RespondOkView.as_view(), name="facebook_callback"),
         path('fb-sdk/social/', include('allauth.socialaccount.urls')),
     ]
 else:

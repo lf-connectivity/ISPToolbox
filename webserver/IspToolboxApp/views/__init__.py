@@ -20,8 +20,7 @@ from .RetargetingPixelView import (
     MarketingAudienceGeoPixelCheck
 )
 from .simple_views import (
-    SocialLoginView,
-    HealthCheckView,
+    RespondOkView,
     MarketEvaluatorTest
 )
 from .market_evaluator_views.MarketEvaluator import (

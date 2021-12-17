@@ -3,12 +3,7 @@ from django.views import View
 from django.http import HttpResponse
 
 
-class SocialLoginView(View):
-    def get(self, request):
-        return render(request, 'index.html')
-
-
-class HealthCheckView(View):
+class RespondOkView(View):
     def get(self, request):
         return HttpResponse('ok')
 

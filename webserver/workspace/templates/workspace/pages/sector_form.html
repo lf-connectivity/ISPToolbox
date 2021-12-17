@@ -77,6 +77,12 @@
         <span>{% unit_preference_value units "mi" "km" %}</span>
     </div>
 </li>
+
+<li>
+    <p class="label">{% translate "Frequency" %}</p>
+    {% include "mmwave/molecules/frequency_toggle.html" %}
+</li>
+
 <li class="stat-row">
     <button class='btn btn-primary isptoolbox-btn' id='coverage-viewshed-btn-sector-popup'>
         {% if tool == "market_evaluator" %}

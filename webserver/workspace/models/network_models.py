@@ -240,6 +240,10 @@ class AccessPointLocation(WorkspaceFeature):
         self.max_radius = val / KM_2_MI
 
     @property
+    def observer(self):
+        return self.geojson
+
+    @property
     def height_ft(self):
         return self.height * M_2_FT
 
@@ -546,6 +550,18 @@ class AccessPointSector(WorkspaceFeature):
     @radius_miles.setter
     def radius_miles(self, val):
         self.radius = val / KM_2_MI
+
+    @property
+    def max_radius(self):
+        return self.radius
+    
+    @max_radius.setter
+    def max_radius(self, val):
+        self.radius = val
+
+    @property
+    def observer(self):
+        return self.ap.geojson
 
     @property
     def default_cpe_height_ft(self):

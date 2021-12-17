@@ -75,3 +75,7 @@ run_test:
 	@echo ----------------------------------------------Start Integration Test Server------------------------------------------
 	mkdir -p coverage
 	docker-compose -f docker-compose.yml -f docker-compose.test.yml up
+
+debug_test:
+	# Run Local Test - Attach Debugger to Continue
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --service-ports -e TEST_DEBUG=TRUE django-app ./wait-for-postgres.sh python3 manage.py test --noinput $(TESTCASE)

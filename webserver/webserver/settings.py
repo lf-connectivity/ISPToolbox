@@ -578,3 +578,11 @@ SAML_CONFIG = {
         'url': [('https://isptoolbox.io', 'en')],
     },
 }
+
+
+if os.environ.get('TEST_DEBUG', 'false').lower() == 'true':
+    port = 3000
+    print(f'Waiting to attach debugger at port: {port}....')
+    import ptvsd
+    ptvsd.enable_attach(address=('0.0.0.0', port))
+    ptvsd.wait_for_attach()

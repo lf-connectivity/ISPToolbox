@@ -6,7 +6,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from IspToolboxApp.util.s3 import S3PublicExportMixin, writeMultipleS3Objects
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from workspace.models.network_models import AccessPointLocation
+from workspace.models.network_models import AccessPointLocation, AccessPointSector
 from workspace.utils.geojson_circle import destination
 from mmwave.models import EPTLidarPointCloud, TileModel
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
@@ -32,6 +32,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from workspace.utils.process_utils import celery_task_subprocess_check_output_wrapper
 
 
+CURRENT_VIEWSHED_VERSION = 1
 DEFAULT_PROJECTION = 3857
 DEFAULT_OBSTRUCTED_COLOR = [0, 0, 0, 128]
 PIL.Image.MAX_IMAGE_PIXELS = 20_000 * 20_000
@@ -42,7 +43,16 @@ class Viewshed(models.Model, S3PublicExportMixin):
     """
     Viewshed computation result
     """
-    ap = models.OneToOneField(AccessPointLocation, on_delete=models.CASCADE)
+    ap = models.OneToOneField(
+        AccessPointLocation,
+        on_delete=models.CASCADE,
+        null=True, blank=True, default=None
+    )
+    sector = models.ForeignKey(
+        AccessPointSector,
+        on_delete=models.CASCADE,
+        null=True, blank=True, default=None
+    )
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True)
     hash = models.CharField(
         max_length=255,
@@ -50,11 +60,24 @@ class Viewshed(models.Model, S3PublicExportMixin):
             This hash helps determine if the AP has already been computed.
         """
     )
+    version = models.IntegerField(
+        default=0,
+        db_index=True
+    )
     created = models.DateTimeField(auto_now_add=True)
     max_zoom = models.IntegerField(
         default=17, validators=[MinValueValidator(0), MaxValueValidator(20)])
     min_zoom = models.IntegerField(
         default=12, validators=[MinValueValidator(0), MaxValueValidator(20)])
+
+    @property
+    def radio(self):
+        if self.ap:
+            return self.ap
+        elif self.sector:
+            return self.sector
+        else:
+            return None
 
     class CoverageStatus(models.TextChoices):
         VISIBLE = "VISIBLE"

@@ -22,10 +22,13 @@ import rasterio
 import PIL
 from PIL import Image
 import numpy as np
+import json
+from rasterio import mask
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 import time
 import os
 import re
+import shutil
 from numpy import polyfit, polyval
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -120,14 +123,14 @@ class Viewshed(models.Model, S3PublicExportMixin):
             'base_url': self.getBaseTileSetUrl(),
             'maxzoom': self.max_zoom,
             'minzoom': self.min_zoom,
-            'uuid': self.ap.uuid,
+            'uuid': self.radio.uuid,
         }
 
     def calculate_hash(self):
         """
         This function generates a hash to help cache viewshed results
         """
-        return f'{self.ap.height},{self.ap.max_radius},{self.ap.geojson.x},{self.ap.geojson.y},{self.ap.default_cpe_height}'
+        return f'{self.radio.height},{self.radio.max_radius},{self.radio.observer.x},{self.radio.observer.y},{self.radio.default_cpe_height}'
 
     def result_cached(self) -> bool:
         return self.hash == self.calculate_hash()
@@ -139,26 +142,26 @@ class Viewshed(models.Model, S3PublicExportMixin):
     def get_s3_key(self, **kwargs) -> str:
         if settings.PROD:
             key = 'viewshed/viewshed-tower-' + \
-                str(self.ap.uuid) + ('.tif' if kwargs.get('tif') else '.png')
+                str(self.radio.uuid) + ('.tif' if kwargs.get('tif') else '.png')
         else:
             key = 'viewshed/test-viewshed-tower-' + \
-                str(self.ap.uuid) + ('.tif' if kwargs.get('tif') else '.png')
+                str(self.radio.uuid) + ('.tif' if kwargs.get('tif') else '.png')
         return key
 
     def translate_dtm_height_to_dsm_height(self) -> float:
-        point = self.ap.geojson
+        point = self.radio.observer
         dtm = getDTMPoint(point)
         tile_engine = DSMTileEngine(
             point, EPTLidarPointCloud.query_intersect_aoi(point))
         dsm = tile_engine.getSurfaceHeight(point)
-        return self.ap.height + dtm - dsm
+        return self.radio.height + dtm - dsm
 
     def calculateViewshed(self, status_callback=None) -> None:
         """
         Compute Viewshed of Access Point
         """
         # Delete all tiles from previous calculations
-        aoi = self.ap.getDSMExtentRequired()
+        aoi = self.radio.getDSMExtentRequired()
         dsm_engine = DSMTileEngine(
             aoi, EPTLidarPointCloud.query_intersect_aoi(aoi))
         with tempfile.NamedTemporaryFile(mode='w+b', suffix=".tif") as dsm_file:
@@ -197,7 +200,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
         time_remaining = 0
         for i in range(step, len(polynomials)):
             time_remaining = time_remaining + \
-                polyval(polynomials[i], self.ap.radius_miles)
+                polyval(polynomials[i], self.radio.radius_miles)
         return time_remaining
 
     def __createRawGDALViewshedCommand(self, dsm_filepath, output_filepath, dsm_projection):
@@ -206,14 +209,14 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
         documentation: https://gdal.org/programs/gdal_viewshed.html
         """
-        transformed_observer = self.ap.geojson.transform(
+        transformed_observer = self.radio.observer.transform(
             dsm_projection, clone=True)
         transformed_height = self.translate_dtm_height_to_dsm_height()
         output_value = 1
         if self.mode != Viewshed.CoverageStatus.NORMAL:
             output_value = -1
         return f"""gdal_viewshed -b 1 -ov {output_value}
-            -oz {transformed_height} -tz {self.ap.default_cpe_height} -md {self.__calculateRadiusViewshed()}
+            -oz {transformed_height} -tz {self.radio.default_cpe_height} -md {self.__calculateRadiusViewshed()}
             -ox {transformed_observer.x} -oy {transformed_observer.y} -om {self.mode}
             {dsm_filepath} {output_filepath}
         """
@@ -225,8 +228,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
     def __calculateRadiusViewshed(self) -> float:
         # Calculate how far viewshed should extend
-        pt_radius = destination(self.ap.geojson, self.ap.max_radius, 90)
-        src = self.ap.geojson.transform(DEFAULT_PROJECTION, clone=True)
+        pt_radius = destination(self.radio.observer, self.radio.max_radius, 90)
+        src = self.radio.observer.transform(DEFAULT_PROJECTION, clone=True)
         res = Point(pt_radius[0], pt_radius[1])
         res.srid = 4326
         res = res.transform(DEFAULT_PROJECTION, clone=True)
@@ -247,8 +250,11 @@ class Viewshed(models.Model, S3PublicExportMixin):
                 status_callback("Colorizing and Reprojecting",
                                 self.__timeRemainingViewshed(2))
 
+            self.__cropSector(output_temp)
+
             with tempfile.NamedTemporaryFile(suffix=".tif") as colorized_temp:
                 self.__colorizeOutputViewshed(output_temp, colorized_temp)
+                shutil.copy(colorized_temp.name, '/usr/src/app/output.tif')
                 TASK_LOGGER.info(f'colorizing: {time.time() - start_tiling}')
                 start = time.time()
                 self.__reprojectViewshed(output_temp)
@@ -318,8 +324,32 @@ class Viewshed(models.Model, S3PublicExportMixin):
                     for i in range(1, 5):
                         new_layer = np.zeros(layer.shape, dtype=np.uint8)
                         if i == 4:
-                            new_layer[layer >= self.ap.default_cpe_height] = 128
+                            new_layer[layer >= self.radio.default_cpe_height] = 128
                         dst.write(new_layer, indexes=i)
+
+    def __cropSector(self, viewshed_image):
+        if self.ap is None and self.sector is not None:
+            with rasterio.open(viewshed_image.name) as ds:
+                # Set output and crop variables
+                nodata = None
+                output_type = rasterio.uint8
+                if self.mode == Viewshed.CoverageStatus.GROUND:
+                    nodata = np.Inf
+                    output_type = rasterio.float64
+                # Reproject Sector Onto Tif
+                sector = self.radio.geojson
+                if sector.srid is None:
+                    sector.srid = 4326
+                # Perform Crop Operation
+                sector = sector.transform(ds.crs.wkt, clone=True)
+                out_image, out_transform = mask.mask(
+                    ds, [json.loads(sector.json)], nodata=nodata, crop=True
+                )
+                # Write to File
+                profile = ds.profile
+                profile.data.update({'height': out_image.shape[1], 'width': out_image.shape[2]})
+                with rasterio.open(viewshed_image.name, 'w', **profile) as dst:
+                    dst.write(out_image.astype(output_type))
 
     def __reprojectViewshed(self, output_temp):
         # Load Output Viewshed TIF File

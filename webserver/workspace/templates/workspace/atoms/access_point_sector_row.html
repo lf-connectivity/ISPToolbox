@@ -3,7 +3,6 @@
 <tr class="tower-row">
     <td class="align-middle" scope="row">{{ forloop.counter0|add:offset }}</td>
     <td><input name="name" type="text" value="{{ ap.name }}" ap-uuid-target="{{ap.uuid}}" disabled></td>
-    
     <td>
         <div class="input-group metric-input">
             <div class="input-group-prepend">
@@ -16,7 +15,6 @@
             </div>
         </div>
     </td>
-
     <td>
         <div class="input-group metric-input">
         <div class="input-group-prepend">
@@ -25,7 +23,6 @@
         </div>
         </div>
     </td>
-
     <td>
         <div class="input-group metric-input">
         <div class="input-group-prepend">
@@ -36,7 +33,6 @@
         </div>
         </div>
     </td>
-
     <td>
         <div class="input-group metric-input">
             <div class="input-group-prepend">
@@ -47,7 +43,6 @@
             </div>
             </div>    
     </td>
-
     <td><input name="frequency" type="text" value="{{ ap.frequency }}" ap-uuid-target="{{ap.uuid}}" disabled>
         <div class="input-group metric-input">
             <div class="input-group-prepend">
@@ -60,9 +55,7 @@
             </div>
         </div>
     </td>
-
     <td class="align-middle">{{ap.last_updated|lower}}</td>
-
     <td>
         <div class="btn-group" role="group" aria-label="edit-btn-group">
         <button type="button" class="btn d-none ap-save-edit-btn" title="Save tower" id="ap-save-edit-{{ap.uuid}}"  data-target="{{ap.uuid}}">

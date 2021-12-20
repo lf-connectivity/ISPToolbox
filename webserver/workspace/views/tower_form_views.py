@@ -26,7 +26,6 @@ class TooltipFormView(generics.GenericAPIView):
         context.update(dict((k, str(kwargs[k])) for k in kwargs))
         return context
 
-
     def get(self, request, *args, **kwargs):
         context = self.get_context(**kwargs)
         return render(request, self.template_name, context)

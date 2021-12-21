@@ -2,7 +2,6 @@ from django import template
 from django.utils.html import format_html
 
 import math
-from workspace.models.model_constants import ModelLimits
 
 register = template.Library()
 
@@ -25,9 +24,8 @@ def unit_preference_value(unit, imperial_value, metric_value):
 
 
 @register.simple_tag
-def field_limit(limit_name, limit_type, truncate=None):
-    limit = getattr(getattr(ModelLimits, limit_name.upper()), limit_type.lower())
-    if truncate is not None:
-        multiplier = 10 ** truncate
-        limit = math.floor(limit * multiplier) / multiplier
-    return limit
+def frequency_dropdown_option(frequency, option_value, option_text):
+    if math.isclose(frequency, option_value):
+        return format_html(_HTML_OPTION_SELECTED, option_value, option_text)
+    else:
+        return format_html(_HTML_OPTION, option_value, option_text)

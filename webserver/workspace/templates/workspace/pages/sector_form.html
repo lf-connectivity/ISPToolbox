@@ -17,8 +17,8 @@
 <ul>
     <form method="POST" action="." data-url="{% url 'workspace:sector-form' tool uuid %}" id="sector-update-form">
         {% csrf_token %}
-        <li>
-            <div class="description">
+        <li class="pb-n3"> 
+            <div class="description mb-0">
                 <p><b>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</b></p>
                 <p>{{ ap.lat|floatformat:5 }}, {{ ap.lng|floatformat:5 }}</p>
             </div>
@@ -26,91 +26,99 @@
         <li class="name-row">
             {% include "workspace/atoms/components/tooltip_tower_name_input.html" %}
         </li>
-        <li>
-            <p class="label">{% translate "Heading" %}</p>
-            <div class="data-with-unit">
-                <input type="number"
-                    name="heading"
-                    value="{{ heading|floatformat:2 }}"
-                    id="heading-input-sector-popup"
-                    min="{% field_limit "HEADING" "min" 2 %}"
-                    max="{% field_limit "HEADING" "max" 2 %}"
-                    step="any"
-                    class="input--value"
-                    required
-                >
-                <span>&#176;</span>
-            </div>
-        </li>
-        <li>
-            <p class="label">{% translate "Beamwidth Azimuth" %}</p>
-            <div class="data-with-unit">
-                <input type="number"
-                    name="azimuth"
-                    value="{{ azimuth|floatformat:2 }}"
-                    id="azimuth-input-sector-popup"
-                    min="{% field_limit "AZIMUTH" "min" 2 %}"
-                    max="{% field_limit "AZIMUTH" "max" 2 %}"
-                    step="any"
-                    class="input--value"
-                    required
-                >
-                <span>&#176;</span>
-            </div>
-        </li>
-        <li>
-            <p class="label">{% translate "Access Point Height" %}<span>{% translate "Height Above Ground" %}</span></p>
-            <div class="data-with-unit">
-                <input type="number"
-                    name="{% unit_preference_value units "height_ft" "height" %}"
-                    value="{% unit_preference_value units height_ft|floatformat:"0" height|floatformat:"0" %}"
-                    id="height-input-sector-popup"
-                    min="{% field_limit height_limit "min" 2 %}"
-                    max="{% field_limit height_limit "max" 2 %}"
-                    step="any"
-                    class="input--value"
-                    required
-                >
-                <span>{% unit_preference_value units "ft" "m" %}</span>
-            </div>
-        </li>
-        <li>
-            <p class="label">{% translate "Customer Antenna Height" %}<span>{% translate "Height Above Rooftop" %}</span></p>
-            <div class="data-with-unit">
-                <input type="number"
-                    name="{% unit_preference_value units "default_cpe_height_ft" "default_cpe_height" %}"
-                    value="{% unit_preference_value units default_cpe_height_ft|floatformat:"0" default_cpe_height|floatformat:"0" %}"
-                    id="cpe-hgt-sector-popup"
-                    min="{% field_limit height_limit "min" 2 %}"
-                    max="{% field_limit height_limit "max" 2 %}"
-                    step="any"
-                    class="input--value"
-                    required
-                >
-                <span>{% unit_preference_value units "ft" "m" %}</span>
-            </div>
-        </li>
-        <li>
-            <p class="label">{% translate "Distance" %}</p>
-            <div class="data-with-unit">
-                <input type="number"
-                    name="{% unit_preference_value units "radius_miles" "radius" %}"
-                    value="{% unit_preference_value units radius_miles|floatformat:2 radius|floatformat:2 %}"
-                    id="radius-input-sector-popup"
-                    min="{% field_limit radius_limit "min" 2 %}"
-                    max="{% field_limit radius_limit "max" 2 %}"
-                    step="any"
-                    class="input--value"
-                    required
-                >
-                <span>{% unit_preference_value units "mi" "km" %}</span>
-            </div>
-        </li>
+        <div class="d-flex p-1 justify-content-between">
+            <div>
+                <li class="ap-li">
+                    <p class="label">{% translate "Heading" %}</p>
+                    <div class="data-with-unit">
+                        <input type="number"
+                            name="heading"
+                            value="{{ heading|floatformat:2 }}"
+                            id="heading-input-sector-popup"
+                            min="{% field_limit "HEADING" "min" 2 %}"
+                            max="{% field_limit "HEADING" "max" 2 %}"
+                            step="any"
+                            class="input--value"
+                            required
+                        >
+                        <span>&#176;</span>
+                    </div>
+                </li>
+    
+                <li class="ap-li">
+                    <p class="label">{% translate "Beamwidth Azimuth" %}</p>
+                    <div class="data-with-unit">
+                        <input type="number"
+                            name="azimuth"
+                            value="{{ azimuth|floatformat:2 }}"
+                            id="azimuth-input-sector-popup"
+                            min="{% field_limit "AZIMUTH" "min" 2 %}"
+                            max="{% field_limit "AZIMUTH" "max" 2 %}"
+                            step="any"
+                            class="input--value"
+                            required
+                        >
+                        <span>&#176;</span>
+                    </div>
+                </li>
 
-        <li>
-            <p class="label">{% translate "Frequency" %}</p>
-            {% include "workspace/molecules/frequency_dropdown.html" with dropdown_freq_user_value=frequency dropdown_freq_name="frequency" dropdown_freq_id="freq-select-sector-popup" %}
-        </li>
+                <li class="ap-li">
+                    <p class="label">{% translate "Access Point Height" %}</p>
+                    <div class="data-with-unit">
+                        <input type="number"
+                            name="{% unit_preference_value units "height_ft" "height" %}"
+                            value="{% unit_preference_value units height_ft|floatformat:"0" height|floatformat:"0" %}"
+                            id="height-input-sector-popup"
+                            min="{% field_limit height_limit "min" 2 %}"
+                            max="{% field_limit height_limit "max" 2 %}"
+                            step="any"
+                            class="input--value"
+                            required
+                        >
+                        <span>{% unit_preference_value units "ft" "m" %}</span>
+                    </div>
+                </li>
+
+                <li class="ap-li">
+                    <p class="label">{% translate "Install Height" %}</p>
+                    <div class="data-with-unit">
+                        <input type="number"
+                            name="{% unit_preference_value units "default_cpe_height_ft" "default_cpe_height" %}"
+                            value="{% unit_preference_value units default_cpe_height_ft|floatformat:"0" default_cpe_height|floatformat:"0" %}"
+                            id="cpe-hgt-sector-popup"
+                            min="{% field_limit height_limit "min" 2 %}"
+                            max="{% field_limit height_limit "max" 2 %}"
+                            step="any"
+                            class="input--value"
+                            required
+                        >
+                        <span>{% unit_preference_value units "ft" "m" %}</span>
+                    </div>
+                </li>
+
+                <li class="ap-li">
+                    <p class="label">{% translate "Distance" %}</p>
+                    <div class="data-with-unit">
+                        <input type="number"
+                            name="{% unit_preference_value units "radius_miles" "radius" %}"
+                            value="{% unit_preference_value units radius_miles|floatformat:2 radius|floatformat:2 %}"
+                            id="radius-input-sector-popup"
+                            min="{% field_limit radius_limit "min" 2 %}"
+                            max="{% field_limit radius_limit "max" 2 %}"
+                            step="any"
+                            class="input--value"
+                            required
+                        >
+                        <span>{% unit_preference_value units "mi" "km" %}</span>
+                    </div>
+                </li>
+
+                <li class="ap-li">
+                    <p class="label">{% translate "Frequency" %}</p>
+                    {% include "workspace/molecules/frequency_dropdown.html" with dropdown_freq_user_value=frequency dropdown_freq_name="frequency" dropdown_freq_id="freq-select-sector-popup" %}
+                </li>
+            </div>
+        </div>
 
         <li class="stat-row">
             <button class='btn btn-primary isptoolbox-btn' id='coverage-viewshed-btn-sector-popup' type="submit" name="submit">

@@ -3,7 +3,7 @@
 .mapboxgl-popup.map-tooltip
     color: $white-color
     font-family: $brand-font-family-sans-serif
-    min-width: 285px
+    min-width: 320px
     .title
         margin-bottom: 10px
         h6
@@ -228,6 +228,29 @@
             border-bottom: solid 2px transparent
     .loader-logo, .loader-error
         margin: 8px 0
+
+.mapboxgl-popup.map-tooltip
+    .overlay-tooltip, .tooltip--sector-summary
+        li
+            align-items: center
+            display: block
+            flex-flow: row
+            justify-content: space-between
+            padding: .5rem 0
+        select
+            border: 0px
+            background: darken($brand-dark-gray-color, 7%)
+            font-size: $small-font-size
+            color: $white-color
+            padding: .5rem 0
+            width: 120px
+            padding-left: 0.6rem
+        .ap-input--value
+            margin-left: 0px
+            width: 100px
+            padding-left: 0.6rem
+        .label
+            width: 150px
 
 .mapboxgl-popup.map-tooltip
     .overlay-tooltip, .tooltip--tower-summary

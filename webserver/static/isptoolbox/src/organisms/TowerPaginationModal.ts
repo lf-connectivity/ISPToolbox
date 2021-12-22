@@ -81,7 +81,6 @@ export class TowerPaginationModal {
             '/pro/workspace/api/ap-sector/',
             data ? data : '',
             (result) => {
-                console.log(result)
                 $('#ap-list-modal-body-loading').addClass('d-none');
                 $('#ap-list-modal-body').html(result).removeClass('d-none');
                 $('#accessPointModalLabel').html('Access Points');

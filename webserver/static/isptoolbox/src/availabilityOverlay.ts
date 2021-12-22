@@ -136,7 +136,6 @@ export class AdminLidarAvailabilityLayer extends LidarAvailabilityLayer {
                 'X-CSRFToken': getCookie('csrftoken')
             }
         }).done((resp) => {
-            console.log(resp);
             let cloudsMsg = resp.clouds
                 .map((cloud: any) => {
                     return `${cloud.name}: ${cloud.exists ? 'has tile ✅' : 'no tile ❌'}`;

@@ -291,7 +291,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
         features: Array<GeoJSON.Feature>;
         action: 'move' | 'change_coordinates';
     }) {
-        console.log(event);
         // We don't need to do updates by type in a certain order, so a switch
         // statement will do.
         event.features.forEach((feature: any) => {
@@ -370,15 +369,12 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     }
 
     acceptNewState() {
-        console.log("accept new state");
         this.previousState = this.draw.getAll();
     }
 
     revertOperation(features: Array<GeoJSON.Feature>, operation: CRUDOperation){
-        console.log("reverting operation");
         features.forEach((revert_f) => {
             const feat = this.previousState.features.find(f => f.id === revert_f.id);
-            console.log(feat);
             switch(operation){
                 case CRUDOperation.CREATE:
                     if(revert_f?.id)

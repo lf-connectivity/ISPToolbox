@@ -111,7 +111,6 @@ export class SessionModal {
             $('.sort-ap').on('click', (e: any) => {
                 const ordering = e.currentTarget.getAttribute('ordering-target');
                 const page = this.getCurrentPage();
-                console.log({ ordering, page });
                 this.showModalCallback(undefined, page, ordering);
             });
 

@@ -19,6 +19,10 @@
         </div>
     </li>
     <li class="name-row">
+        <div class="d-flex">
+        <p class="label">{% translate "Access Point Name" %}</p>
+        <a class="label text-right">{% translate "+ Add Access Point" %}</a>
+        </div>
         {% include "workspace/atoms/components/tooltip_tower_name_input.html" with tower_input_name=name %}
     </li>
 <div class="d-flex p-1 justify-content-between">

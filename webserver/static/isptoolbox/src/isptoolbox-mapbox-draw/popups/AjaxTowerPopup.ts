@@ -1,18 +1,13 @@
-import { roundToDecimalPlaces } from '../../LinkCalcUtils';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
 import { parseLatitudeLongitude } from '../../utils/LatLngInputUtils';
-import {
-    ISPToolboxTool,
-    WorkspaceEvents,
-    WorkspaceFeatureTypes
-} from '../../workspace/WorkspaceConstants';
+import { ISPToolboxTool, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
 import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
 import { BaseAjaxSectorPopup } from './AjaxSectorPopups';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
-const PLACE_SECTOR_BUTTON_ID = 'place-sector-btn-tower-popup';
 const TOWER_UPDATE_FORM_ID = 'tower-update-form';
+const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
 
 // @ts-ignore
 $.validator.addMethod('latlng', (value, element) => {
@@ -30,7 +25,6 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
         }
         super(map, draw, 'workspace:tower-form');
         initializeMapboxDrawInterface(this, this.map);
-        PubSub.subscribe(WorkspaceEvents.SECTOR_CREATED, this.sectorCreateCallback.bind(this));
         this.tool = tool;
         AjaxTowerPopup._instance = this;
     }
@@ -68,6 +62,18 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
                 });
             }
         });
+
+        $(`#${TOWER_DELETE_BUTTON_ID}`)
+            .off()
+            .on('click', () => {
+                $(`#ap-delete-confirm-btn`)
+                    .off()
+                    .on('click', () => {
+                        this.map.fire('draw.delete', {
+                            features: [this.accessPoint?.getFeatureData()]
+                        });
+                    });
+            });
     }
 
     protected cleanup() {}
@@ -96,30 +102,5 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
                 this.hide();
             }
         });
-    }
-
-    // Show edit sector tooltip after object gets persisted. Move to sector if
-    // it is out of the map
-    protected sectorCreateCallback(
-        event: string,
-        data: { ap: AccessPoint; sector: AccessPointSector }
-    ) {
-        if (data.ap === this.accessPoint) {
-            let popup = BaseAjaxSectorPopup.getInstance();
-            popup.setSector(data.sector);
-            popup.show();
-
-            let coords = this.accessPoint.getFeatureGeometryCoordinates() as [number, number];
-
-            // Fly to AP if AP isn't on map. We center the AP horizontally, but place it
-            // 65% of the way down on the screen so the tooltip fits.
-            if (!this.map.getBounds().contains(coords)) {
-                let south = this.map.getBounds().getSouth();
-                let north = this.map.getBounds().getNorth();
-                this.map.flyTo({
-                    center: [coords[0], coords[1] + +0.15 * (north - south)]
-                });
-            }
-        }
     }
 }

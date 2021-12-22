@@ -327,6 +327,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             LinkCheckCustomerConnectPopup,
             LinkCheckVertexClickCustomerConnectPopup,
             LinkCheckCPEClickCustomerConnectPopup,
+            AjaxTowerPopup,
+            LinkCheckSectorPopup,
             MapLayerSidebarManager
         ]);
         const prioritizeDirectSelect = function ({ features }: any) {

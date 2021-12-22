@@ -73,6 +73,8 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
         };
 
         this.saveFeatureDrawModeHandlers.simple_select = saveCoverageArea;
+
+        this.saveFeatureDrawModeHandlers.direct_select = saveCoverageArea;
     }
 
     initUpdateFeatureHandlers() {

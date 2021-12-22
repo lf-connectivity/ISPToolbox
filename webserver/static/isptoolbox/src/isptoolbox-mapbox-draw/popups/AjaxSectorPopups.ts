@@ -1,12 +1,18 @@
-import { roundToDecimalPlaces } from '../../LinkCalcUtils';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
-import { ISPToolboxTool, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
+import {
+    ISPToolboxTool,
+    WorkspaceEvents,
+    WorkspaceFeatureTypes
+} from '../../workspace/WorkspaceConstants';
+import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
 import { AjaxTowerPopup } from './AjaxTowerPopup';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
 const SECTOR_UPDATE_FORM_ID = 'sector-update-form';
 const BACK_TO_TOWER_LINK_ID = 'back-to-tower-sector-popup';
+const SECTOR_DELETE_BUTTON_ID = 'sector-delete-btn';
+const ADD_SECTOR_BUTTON_ID = 'add-access-point-sector-popup';
 
 /**
  * Doing base classes for this to account for differences in button logic
@@ -23,6 +29,8 @@ export abstract class BaseAjaxSectorPopup
     constructor(map: mapboxgl.Map, draw: MapboxDraw, tool: ISPToolboxTool) {
         super(map, draw, 'workspace:sector-form');
         initializeMapboxDrawInterface(this, this.map);
+        PubSub.subscribe(WorkspaceEvents.SECTOR_CREATED, this.sectorCreateCallback.bind(this));
+
         this.tool = tool;
     }
 
@@ -61,6 +69,38 @@ export abstract class BaseAjaxSectorPopup
                     towerPopup.show();
                 }
             });
+
+        $(`#${SECTOR_DELETE_BUTTON_ID}`)
+            .off()
+            .on('click', () => {
+                $(`#ap-delete-confirm-btn`)
+                    .off()
+                    .on('click', () => {
+                        this.map.fire('draw.delete', {
+                            features: [this.sector?.getFeatureData()]
+                        });
+                    });
+            });
+
+        $(`#${ADD_SECTOR_BUTTON_ID}`)
+            .off()
+            .on('click', () => {
+                if (this.sector) {
+                    let newSector = {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: this.lnglat
+                        },
+                        properties: {
+                            feature_type: WorkspaceFeatureTypes.SECTOR,
+                            ap: this.sector.ap?.workspaceId,
+                            uneditable: true
+                        }
+                    };
+                    this.map.fire('draw.create', { features: [newSector] });
+                }
+            });
     }
 
     static getInstance() {
@@ -86,6 +126,29 @@ export abstract class BaseAjaxSectorPopup
     }
 
     protected onFormSubmitSuccess() {}
+
+    // Show edit sector tooltip after object gets persisted. Move to sector if
+    // it is out of the map
+    protected sectorCreateCallback(
+        event: string,
+        data: { ap: AccessPoint; sector: AccessPointSector }
+    ) {
+        this.setSector(data.sector);
+        if (this.sector) {
+            let coords = this.sector.ap.getFeatureGeometryCoordinates() as [number, number];
+
+            // Fly to AP if AP isn't on map. We center the AP horizontally, but place it
+            // 65% of the way down on the screen so the tooltip fits.
+            if (!this.map.getBounds().contains(coords)) {
+                let south = this.map.getBounds().getSouth();
+                let north = this.map.getBounds().getNorth();
+                this.map.flyTo({
+                    center: [coords[0], coords[1] + +0.15 * (north - south)]
+                });
+            }
+            this.show();
+        }
+    }
 }
 
 export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {

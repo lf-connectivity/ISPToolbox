@@ -54,6 +54,8 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
         this.saveFeatureDrawModeHandlers.direct_select = (feature: any) => {
             if (feature.properties.radius) {
                 this.createApFeature(feature);
+            } else if (feature.properties.feature_type === WorkspaceFeatureTypes.SECTOR) {
+                this.saveWorkspaceFeature(new AccessPointSector(this.map, this.draw, feature));
             }
         };
 

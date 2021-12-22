@@ -85,7 +85,7 @@ class SessionFilter(filters.BaseFilterBackend):
         else:
             return queryset
 
-class AccessPointFilter(filters.BaseFilterBackend):
+    class AccessPointFilter(filters.BaseFilterBackend):
     """
     This filter allows LIST endpoints to filter based on ap uuid
     """
@@ -97,13 +97,13 @@ class AccessPointFilter(filters.BaseFilterBackend):
         else:
             return queryset
 
-class AccessPointLocationListCreate(
+    class AccessPointLocationListCreate(
     WorkspaceFeatureGetQuerySetMixin,
     WorkspacePerformCreateMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     generics.GenericAPIView,
-):
+    ):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
 
@@ -131,13 +131,13 @@ class AccessPointLocationListCreate(
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-class AccessPointLocationGet(
+    class AccessPointLocationGet(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
     WorkspaceFeatureGetQuerySetMixin,
     generics.GenericAPIView,
-):
+    ):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
     lookup_field = "uuid"
@@ -325,13 +325,13 @@ class AccessPointSectorCreate(
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-class AccessPointSectorGet(
+    class AccessPointSectorGet(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
     WorkspaceFeatureGetQuerySetMixin,
     generics.GenericAPIView,
-):
+    ):
     serializer_class = AccessPointSectorSerializer
     permission_classes = [AllowAny]
     lookup_field = "uuid"

@@ -2,7 +2,6 @@ from django.http.response import HttpResponseBadRequest
 from rest_framework import generics
 from django.shortcuts import render
 from rest_framework.mixins import DestroyModelMixin
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from workspace.models import (
     AccessPointLocation,
     AccessPointSerializer,

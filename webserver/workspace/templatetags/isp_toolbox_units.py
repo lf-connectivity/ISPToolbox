@@ -2,16 +2,9 @@ from django import template
 from django.utils.html import format_html
 
 import math
+from workspace.models.model_constants import ModelLimits
 
 register = template.Library()
-
-_HTML_OPTION = """
-    <option value="{}">{} GHz</option>
-"""
-
-_HTML_OPTION_SELECTED = """
-    <option value="{}" selected>{} GHz</option>
-"""
 
 
 # Done here so we don't have to do this in templates 100000 times

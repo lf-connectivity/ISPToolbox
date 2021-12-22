@@ -1,5 +1,4 @@
 from django import template
-from django.utils.html import format_html
 
 import math
 from workspace.models.model_constants import ModelLimits

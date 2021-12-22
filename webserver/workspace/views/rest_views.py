@@ -86,9 +86,9 @@ class SessionFilter(filters.BaseFilterBackend):
             return queryset
 
     class AccessPointFilter(filters.BaseFilterBackend):
-    """
-    This filter allows LIST endpoints to filter based on ap uuid
-    """
+        """
+        This filter allows LIST endpoints to filter based on ap uuid
+        """
 
     def filter_queryset(self, request, queryset, view):
         ap = request.GET.get("ap", None)

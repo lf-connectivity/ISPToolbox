@@ -1,10 +1,11 @@
+from django.http.response import Http404
 from django.views import View
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.core.exceptions import PermissionDenied
 from dataUpdate.models import Source
 from django.core.cache import cache
 from dataUpdate.scripts.load_asn_elasticsearch import queryASNElasticCache
+from dataUpdate.scripts.rdap_utils import RDAP_ASNs, RDAPRequest
 from workspace.utils.api_validate_request import validate_auth_header
 
 
@@ -56,4 +57,18 @@ class ASNElasticSearchView(View):
                 return JsonResponse(context)
             return render(request, 'asn/asn-check.html', context)
         else:
-            raise PermissionDenied
+            raise Http404
+
+
+class RDAPQueryView(View):
+    def get(self, request):
+        if request.user.is_superuser or validate_auth_header(request):
+            ip = request.GET.get('ip', None)
+            if ip is not None:
+                rdap_resp = RDAPRequest(ip)
+                asns = RDAP_ASNs(rdap_resp)
+                return JsonResponse({'asn': asns})
+            else:
+                return JsonResponse({})
+        else:
+            raise Http404

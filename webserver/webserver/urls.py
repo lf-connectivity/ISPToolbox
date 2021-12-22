@@ -23,7 +23,7 @@ from solar_sizing_tool.views import SolarSizingToolView
 from mmwave.views import (
     LOSCheckDemo, DSMExportView, LatestLidarView, NetworkDemoView
 )
-from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView
+from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView, RDAPQueryView
 from Overlay.views import OverlaySource
 from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView
 from workspace.views import AdminGeneric403View, WorkspaceEngagementView
@@ -74,6 +74,7 @@ urlpatterns = [
     # Path Overlay
     path('overlay/', OverlaySource.as_view(), name='overlay_source'),
     path('asn/', ASNElasticSearchView.as_view(), name="asn-search"),
+    path('rdap/', RDAPQueryView.as_view(), name="rdap_query"),
     # Sources Last Updated Dates
     path('sources/last-update/', CountrySourceUpdatedView.as_view(),
          name='source_updated_dates'),

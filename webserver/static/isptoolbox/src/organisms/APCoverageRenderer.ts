@@ -441,7 +441,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     !features.some((feat) => {
                         if(feat.properties)
                         {
-                            const type = feat.properties['meta'+":"+'type'];
+                            const type = feat.properties['meta:type'];
                             return feat.source.includes('mapbox-gl-draw') && type === "Point";
                         }
                         return feat.source.includes('mapbox-gl-draw');

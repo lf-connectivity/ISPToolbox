@@ -85,10 +85,11 @@ class SessionFilter(filters.BaseFilterBackend):
         else:
             return queryset
 
-    class AccessPointFilter(filters.BaseFilterBackend):
-        """
-        This filter allows LIST endpoints to filter based on ap uuid
-        """
+
+class AccessPointFilter(filters.BaseFilterBackend):
+    """
+    This filter allows LIST endpoints to filter based on ap uuid
+    """
 
     def filter_queryset(self, request, queryset, view):
         ap = request.GET.get("ap", None)
@@ -97,13 +98,14 @@ class SessionFilter(filters.BaseFilterBackend):
         else:
             return queryset
 
-    class AccessPointLocationListCreate(
+
+class AccessPointLocationListCreate(
     WorkspaceFeatureGetQuerySetMixin,
     WorkspacePerformCreateMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     generics.GenericAPIView,
-    ):
+):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
 
@@ -122,7 +124,8 @@ class SessionFilter(filters.BaseFilterBackend):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({"ordering": self.request.GET.get("ordering", self.ordering[0])})
+        context.update(
+            {"ordering": self.request.GET.get("ordering", self.ordering[0])})
         return context
 
     def get(self, request, *args, **kwargs):
@@ -131,13 +134,14 @@ class SessionFilter(filters.BaseFilterBackend):
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-    class AccessPointLocationGet(
+
+class AccessPointLocationGet(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
     WorkspaceFeatureGetQuerySetMixin,
     generics.GenericAPIView,
-    ):
+):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
     lookup_field = "uuid"
@@ -310,13 +314,15 @@ class AccessPointSectorCreate(
 
     pagination_class = pagination.IspToolboxCustomAjaxPagination
 
-    filter_backends = [filters.OrderingFilter, SessionFilter, AccessPointFilter]
+    filter_backends = [filters.OrderingFilter,
+                       SessionFilter, AccessPointFilter]
     ordering_fields = ["name", "last_updated", "height", "radius"]
     ordering = ["-last_updated"]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({"ordering": self.request.GET.get("ordering", self.ordering[0])})
+        context.update(
+            {"ordering": self.request.GET.get("ordering", self.ordering[0])})
         return context
 
     def get(self, request, *args, **kwargs):
@@ -325,13 +331,14 @@ class AccessPointSectorCreate(
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
-    class AccessPointSectorGet(
+
+class AccessPointSectorGet(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.UpdateModelMixin,
     WorkspaceFeatureGetQuerySetMixin,
     generics.GenericAPIView,
-    ):
+):
     serializer_class = AccessPointSectorSerializer
     permission_classes = [AllowAny]
     lookup_field = "uuid"
@@ -359,7 +366,8 @@ class AccessPointCoverageResults(View):
         features = []
         nearby = coverage.nearby_buildings.all()
         nearby_ids = [b.msftid for b in nearby]
-        buildings = MsftBuildingOutlines.objects.filter(id__in=nearby_ids).all()
+        buildings = MsftBuildingOutlines.objects.filter(
+            id__in=nearby_ids).all()
         buildings = {b.id: b.geog for b in buildings}
         features = [
             {

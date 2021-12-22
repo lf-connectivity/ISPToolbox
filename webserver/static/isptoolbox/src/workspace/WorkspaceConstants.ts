@@ -1,13 +1,14 @@
 export enum ISPToolboxTool {
-    MARKET_EVAL = "market_evaluator",
-    LOS_CHECK = "los_check"
+    MARKET_EVAL = 'market_evaluator',
+    LOS_CHECK = 'los_check'
 }
 
 export enum WorkspaceEvents {
     AP_UPDATE = 'ap.update',
     AP_RENDER_GIVEN = 'ap.render_given',
     AP_COVERAGE_UPDATED = 'ap.coverage_updated',
-    NO_ITEMS = 'workspace.no_items'
+    NO_ITEMS = 'workspace.no_items',
+    SECTOR_CREATED = 'sector.created'
 }
 
 export enum ASREvents {

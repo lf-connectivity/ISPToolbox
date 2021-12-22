@@ -4,6 +4,12 @@ import typing
 from dataclasses import dataclass, field
 
 
+# Number of feet in a meter
+M_2_FT = 3.28084
+
+KM_2_MI = 0.621371
+
+
 class FeatureType(enum.Enum):
     AP = "access_point"
     CPE = "cpe"
@@ -17,7 +23,7 @@ class FeatureType(enum.Enum):
 class _Limits(object):
     min: float
     max: float
-    default: float
+    default: float = 0
 
     # There might be other defaults defined. Use this to make it easier to look
     # them up
@@ -32,13 +38,27 @@ class _Limits(object):
                 f"type object {repr(self.__class__.__name__)} has no attribute {repr(attr)}"
             )
 
+    # Return a version of this object with scaled factors
+    def get_scaled_limits(self, scale_factor):
+        return _Limits(
+            scale_factor * self.min,
+            scale_factor * self.max,
+            scale_factor * self.default,
+        )
+
 
 class ModelLimits(object):
     # Height in meters
     HEIGHT = _Limits(0.1, 1000, 30, {"cpe_default": 1, "ptp_default": 18.29})
 
+    # Height in ft
+    HEIGHT_FT = HEIGHT.get_scaled_limits(M_2_FT)
+
     # Radius in km
     RADIUS = _Limits(0.1, 16, 2, {"no_check_radius_default": 0.01})
+
+    # Radius in mi
+    RADIUS_MILES = RADIUS.get_scaled_limits(KM_2_MI)
 
     # Frequency in GHz
     FREQUENCY = _Limits(0, 100, 2.437)
@@ -47,10 +67,7 @@ class ModelLimits(object):
     HEADING = _Limits(0, 360, 0)
 
     # Azimuth in degrees
-    AZIMUTH = _Limits(0.1, 360, 120)
+    AZIMUTH = _Limits(0.01, 360, 120)
 
-
-# Number of feet in a meter
-M_2_FT = 3.28084
-
-KM_2_MI = 0.621371
+    # Name length
+    NAME = _Limits(1, 50)

@@ -10,8 +10,8 @@ export function parseLatitudeLongitude(val: string): [number, number] | null {
             return null;
         }
 
-        const lat = parseFloat($.trim(coords[0]));
-        const lng = parseFloat($.trim(coords[1]));
+        const lat = getFloatFromString($.trim(coords[0]));
+        const lng = getFloatFromString($.trim(coords[1]));
         if (!validateCoordinates(lat, lng)) {
             return null;
         }
@@ -50,4 +50,14 @@ function validateCoordinates(lat: number, lng: number) {
 
 function setInvalidValue(id: string, valid: boolean) {
     valid ? $(id).removeClass('is-invalid') : $(id).addClass('is-invalid');
+}
+
+function getFloatFromString(val: string) {
+    // Validate no characters that shouldn't be there. Can't use parseFloat
+    // for this, as parsing 123abc still works
+    if (val.match(/^[-]?([0-9]*[.])?[0-9]+$/) == null) {
+        return NaN;
+    } else {
+        return parseFloat(val);
+    }
 }

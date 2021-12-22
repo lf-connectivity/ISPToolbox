@@ -76,10 +76,7 @@ export abstract class BaseWorkspaceFeature {
      * @param errorFollowup Function to execute on failure of ajax request
      * object.
      */
-    create(
-        successFollowup?: (resp: any) => void,
-        errorFollowup?: () => void
-    ) {
+    create(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         $.ajax({
             url: `${this.apiEndpoint}`,
             method: 'POST',
@@ -106,15 +103,43 @@ export abstract class BaseWorkspaceFeature {
     }
 
     /**
+     * Sends an AJAX request to read an object then update the state of the
+     * object in the frontend. This should be called after updating the data in
+     * a form. Calls successFollowup, if defined.
+     *
+     * @param successFollowup Function to execute on successfully retrieving object.
+     * @param errorFollowup Function to execute on failure of ajax request.
+     */
+    read(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
+        $.ajax({
+            url: `${this.apiEndpoint}${this.workspaceId}/`,
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                Accept: 'application/json'
+            }
+        })
+            .done((resp) => {
+                this.updateFeatureProperties(resp);
+                if (successFollowup) {
+                    successFollowup(resp);
+                }
+            })
+            .fail((error) => {
+                renderAjaxOperationFailed();
+                if (errorFollowup) {
+                    errorFollowup();
+                }
+            });
+    }
+
+    /**
      * Updates the object in the backend with new information. Calls successFollowup if defined.
      *
      * @param successFollowup Function to execute on successfully updating object
      * @param errorFollowup Function to execute on failure of ajax request
      */
-    update(
-        successFollowup?: (resp: any) => void,
-        errorFollowup?: () => void
-    ) {
+    update(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'PATCH',
@@ -144,10 +169,7 @@ export abstract class BaseWorkspaceFeature {
      * @param successFollowup Function to execute on successfully deleting object
      * @param errorFollowup Function to execute on failure of ajax request
      */
-    delete(
-        successFollowup?: (resp: any) => void,
-        errorFollowup?: () => void
-    ) {
+    delete(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'DELETE',

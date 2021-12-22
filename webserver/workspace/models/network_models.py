@@ -8,7 +8,12 @@ from django.conf import settings
 from django.contrib.gis.db import models as geo_models
 from django.contrib.gis.geos import GEOSGeometry, LineString, Polygon
 from django.contrib.sessions.models import Session
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MaxValueValidator,
+    MinLengthValidator,
+    MinValueValidator,
+)
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_save
@@ -133,7 +138,24 @@ class AccessPointSectorSerializerValidatorMixin(serializers.Serializer):
 
 
 class AccessPointLocation(WorkspaceFeature):
-    name = models.CharField(max_length=50, default="Unnamed AP")
+    name = models.CharField(
+        max_length=ModelLimits.NAME.max,
+        default="Unnamed AP",
+        validators=[
+            MinLengthValidator(
+                int(ModelLimits.NAME.min),
+                message=_(
+                    "Ensure this value has length of at least %(limit_value)s characters."
+                ),
+            ),
+            MaxLengthValidator(
+                int(ModelLimits.NAME.max),
+                message=_(
+                    "Ensure this value has length at most %(limit_value)s characters."
+                ),
+            ),
+        ],
+    )
 
     # TODO: deprecate height, radius, no_check_radius, default_cpe_height, and
     # cloudrf_coverage_geojson after AP sector launch
@@ -302,13 +324,13 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
         required=False,
         validators=[
             MinValueValidator(
-                ModelLimits.HEIGHT.min * M_2_FT,
+                ModelLimits.HEIGHT_FT.min,
                 message=_(
                     "Ensure this value is greater than or equal to %(limit_value)s ft."
                 ),
             ),
             MaxValueValidator(
-                ModelLimits.HEIGHT.max * M_2_FT,
+                ModelLimits.HEIGHT_FT.max,
                 message=_(
                     "Ensure this value is less than or equal to %(limit_value)s ft."
                 ),
@@ -319,13 +341,13 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
         required=False,
         validators=[
             MinValueValidator(
-                ModelLimits.RADIUS.min * KM_2_MI,
+                ModelLimits.RADIUS_MILES.min,
                 message=_(
                     "Ensure this value is greater than or equal to %(limit_value)s mi."
                 ),
             ),
             MaxValueValidator(
-                ModelLimits.RADIUS.max * KM_2_MI,
+                ModelLimits.RADIUS_MILES.max,
                 message=_(
                     "Ensure this value is less than or equal to %(limit_value)s mi."
                 ),
@@ -340,13 +362,13 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
         required=False,
         validators=[
             MinValueValidator(
-                ModelLimits.HEIGHT.min * M_2_FT,
+                ModelLimits.HEIGHT_FT.min,
                 message=_(
                     "Ensure this value is greater than or equal to %(limit_value)s ft."
                 ),
             ),
             MaxValueValidator(
-                ModelLimits.HEIGHT.max * M_2_FT,
+                ModelLimits.HEIGHT_FT.max,
                 message=_(
                     "Ensure this value is less than or equal to %(limit_value)s ft."
                 ),
@@ -588,13 +610,13 @@ class AccessPointSectorSerializer(
         required=False,
         validators=[
             MinValueValidator(
-                ModelLimits.HEIGHT.min * M_2_FT,
+                ModelLimits.HEIGHT_FT.min,
                 message=_(
                     "Ensure this value is greater than or equal to %(limit_value)s ft."
                 ),
             ),
             MaxValueValidator(
-                ModelLimits.HEIGHT.max * M_2_FT,
+                ModelLimits.HEIGHT_FT.max,
                 message=_(
                     "Ensure this value is less than or equal to %(limit_value)s ft."
                 ),
@@ -606,13 +628,13 @@ class AccessPointSectorSerializer(
         required=False,
         validators=[
             MinValueValidator(
-                ModelLimits.RADIUS.min * KM_2_MI,
+                ModelLimits.RADIUS_MILES.min,
                 message=_(
                     "Ensure this value is greater than or equal to %(limit_value)s mi."
                 ),
             ),
             MaxValueValidator(
-                ModelLimits.RADIUS.max * KM_2_MI,
+                ModelLimits.RADIUS_MILES.max,
                 message=_(
                     "Ensure this value is less than or equal to %(limit_value)s mi."
                 ),
@@ -625,13 +647,13 @@ class AccessPointSectorSerializer(
         required=False,
         validators=[
             MinValueValidator(
-                ModelLimits.HEIGHT.min * M_2_FT,
+                ModelLimits.HEIGHT_FT.min,
                 message=_(
                     "Ensure this value is greater than or equal to %(limit_value)s ft."
                 ),
             ),
             MaxValueValidator(
-                ModelLimits.HEIGHT.max * M_2_FT,
+                ModelLimits.HEIGHT_FT.max,
                 message=_(
                     "Ensure this value is less than or equal to %(limit_value)s ft."
                 ),

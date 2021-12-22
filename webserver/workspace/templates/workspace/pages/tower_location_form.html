@@ -7,34 +7,39 @@
 {% load_sources_from tool_info.app_page_template sources with tool=tool as sources %}
 
 <ul>
-    <li class="name-row">
-        {% include "workspace/atoms/components/tooltip_tower_name_input.html" with tower_input_name=name %}
-        <div class="coordinates">
-            <div class="data-with-unit">
+    <form method="POST" action="." data-url="{% url 'workspace:tower-form' tool uuid %}" id="tower-update-form">
+        {% csrf_token %}
+        <li class="name-row">
+            {% include "workspace/atoms/components/tooltip_tower_name_input.html" %}
+            <div class="coordinates">
                 <input type="text"
                         value="{{ lat|floatformat:5 }}, {{ lng|floatformat:5 }}"
                         id="lat-lng-input-tower-popup"
                         placeholder="latitude, longitude"
                         class="input--value"
+                        name="coordinates"
+                        data-rule-latlng="true"
+                        data-msg-latlng="{% translate "Please enter a valid &quot;latitude, longitude&quot; pair"%}"
+                        required
                         {% if uneditable %} readonly="true" {% endif %}
                 >
             </div>
-        </div>
-    </li>
-    <li>
-        <div class="description">
-            <p>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</p>
-            {% for line in address_lines|slice:"1:" %}
-                <p>{{ line }}</p>
-            {% endfor %}
-        </div>
-    </li>
-    <li class="stat-row">
-        <button class='btn btn-primary isptoolbox-btn' id='place-sector-btn-tower-popup'>
-            {% translate "Add Access Point"%}
-        </button>
-    </li>
-    {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-tower-row-tower-popup" delete_row_a_id="tower-delete-btn" delete_row_object_name="Tower" delete_row_last_updated=last_updated %}
+        </li>
+        <li>
+            <div class="description">
+                <p>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</p>
+                {% for line in address_lines|slice:"1:" %}
+                    <p>{{ line }}</p>
+                {% endfor %}
+            </div>
+        </li>
+        <li class="stat-row">
+            <button class='btn btn-primary isptoolbox-btn' id='place-sector-btn-tower-popup' type='submit' name='submit'>
+                {% translate "Add Access Point"%}
+            </button>
+        </li>
+        {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-tower-row-tower-popup" delete_row_a_id="tower-delete-btn" delete_row_object_name="Tower" delete_row_last_updated=last_updated %}
+    </form>
 </ul>
 
 {% endblock %}

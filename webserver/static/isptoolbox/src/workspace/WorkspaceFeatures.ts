@@ -1,5 +1,5 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
-import { Feature, Geometry, LineString } from 'geojson';
+import { Feature, Geometry, LineString, Point } from 'geojson';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { isUnitsUS } from '../utils/MapPreferences';
 import { LinkCheckEvents } from './WorkspaceConstants';
@@ -21,7 +21,9 @@ const AP_RESPONSE_FIELDS = [
     'radius_miles',
     'height_ft',
     'default_cpe_height_ft',
-    'cloudrf_coverage_geojson_json'
+    'cloudrf_coverage_geojson_json',
+    'lng',
+    'lat'
 ];
 const AP_SERIALIZER_FIELDS = [
     'name',
@@ -69,6 +71,17 @@ export class AccessPoint extends WorkspacePointFeature {
 
     create(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         super.create((resp) => {
+            PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
+
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        }, errorFollowup);
+    }
+
+    read(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
+        super.read((resp) => {
+            this.setCoordinates();
             PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
 
             if (successFollowup) {
@@ -177,6 +190,19 @@ export class AccessPoint extends WorkspacePointFeature {
         this.sectors.forEach((sector) => {
             sector.update();
         });
+    }
+
+    private setCoordinates() {
+        if (
+            this.getFeatureProperty('lng') &&
+            this.getFeatureProperty('lng') !== null &&
+            this.getFeatureProperty('lat') &&
+            this.getFeatureProperty('lat') !== null
+        ) {
+            let lng = this.getFeatureProperty('lng');
+            let lat = this.getFeatureProperty('lat');
+            this.move([lng, lat]);
+        }
     }
 }
 

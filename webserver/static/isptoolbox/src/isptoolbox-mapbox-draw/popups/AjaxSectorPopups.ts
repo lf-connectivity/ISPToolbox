@@ -2,9 +2,11 @@ import { roundToDecimalPlaces } from '../../LinkCalcUtils';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
 import { ISPToolboxTool, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
 import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
+import { AjaxTowerPopup } from './AjaxTowerPopup';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
-const CALCULATE_COVERAGE_BUTTON_ID = 'coverage-viewshed-btn-sector-popup';
+const SECTOR_UPDATE_FORM_ID = 'sector-update-form';
+const BACK_TO_TOWER_LINK_ID = 'back-to-tower-sector-popup';
 
 /**
  * Doing base classes for this to account for differences in button logic
@@ -15,13 +17,13 @@ export abstract class BaseAjaxSectorPopup
     implements IMapboxDrawPlugin
 {
     protected sector?: AccessPointSector;
-    protected readonly tool: ISPToolboxTool
+    protected readonly tool: ISPToolboxTool;
     protected static _instance: BaseAjaxSectorPopup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw, tool: ISPToolboxTool) {
         super(map, draw, 'workspace:sector-form');
         initializeMapboxDrawInterface(this, this.map);
-        this.tool = tool
+        this.tool = tool;
     }
 
     getSector(): AccessPointSector | undefined {
@@ -41,6 +43,24 @@ export abstract class BaseAjaxSectorPopup
 
     protected getEndpointParams() {
         return [this.tool, this.sector?.workspaceId];
+    }
+
+    protected setEventHandlers() {
+        this.createSubmitFormCallback(SECTOR_UPDATE_FORM_ID, () => {
+            if (this.sector) {
+                this.sector.read(this.onFormSubmitSuccess.bind(this));
+            }
+        });
+
+        $(`#${BACK_TO_TOWER_LINK_ID}`)
+            .off()
+            .on('click', () => {
+                if (this.sector) {
+                    let towerPopup = AjaxTowerPopup.getInstance();
+                    towerPopup.setAccessPoint(this.sector.ap);
+                    towerPopup.show();
+                }
+            });
     }
 
     static getInstance() {
@@ -64,6 +84,8 @@ export abstract class BaseAjaxSectorPopup
             }
         });
     }
+
+    protected onFormSubmitSuccess() {}
 }
 
 export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
@@ -75,16 +97,14 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
         BaseAjaxSectorPopup._instance = this;
     }
 
-    protected setEventHandlers() {
-        $(`#${CALCULATE_COVERAGE_BUTTON_ID}`)
-            .off()
-            .on('click', () => {
-                console.log(`Calculating viewshed coverage for sector ${this.sector?.workspaceId}`);
-            });
-    }
-
     static getInstance() {
         return BaseAjaxSectorPopup.getInstance() as MarketEvaluatorSectorPopup;
+    }
+
+    protected onFormSubmitSuccess() {
+        console.log(
+            `Calculating CloudRF coverage for sector ${this.sector?.workspaceId} coming soon`
+        );
     }
 }
 
@@ -97,12 +117,10 @@ export class LinkCheckSectorPopup extends BaseAjaxSectorPopup {
         BaseAjaxSectorPopup._instance = this;
     }
 
-    protected setEventHandlers() {
-        $(`#${CALCULATE_COVERAGE_BUTTON_ID}`)
-            .off()
-            .on('click', () => {
-                console.log(`Calculating viewshed for sector ${this.sector?.workspaceId}`);
-            });
+    protected onFormSubmitSuccess() {
+        console.log(
+            `Calculating building/viewshed coverage for sector ${this.sector?.workspaceId} coming soon`
+        );
     }
 
     static getInstance() {

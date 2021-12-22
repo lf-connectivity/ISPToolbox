@@ -1,12 +1,15 @@
+from django.http.response import HttpResponseBadRequest
 from rest_framework import generics
 from django.shortcuts import render
 from rest_framework.mixins import DestroyModelMixin
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from workspace.models import (
     AccessPointLocation,
     AccessPointSerializer,
     AccessPointCoverageBuildings,
     AccessPointSectorSerializer,
 )
+
 import logging
 
 
@@ -17,9 +20,10 @@ class TooltipFormView(generics.GenericAPIView):
         model = self.serializer_class.Meta.model
         return model.get_rest_queryset(self.request)
 
-    def get_context(self, *args, **kwargs):
+    def get_context(self, *args, serializer=None, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        if not serializer:
+            serializer = self.get_serializer(instance)
         context = serializer.data.copy()
         context.update({"units": instance.map_session.units})
         context.update({"session": instance.map_session})
@@ -29,6 +33,19 @@ class TooltipFormView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         context = self.get_context(**kwargs)
         return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=False)
+        try:
+            serializer.save()
+            context = self.get_context(serializer=serializer, **kwargs)
+            return render(request, self.template_name, context)
+        except Exception:
+            # On 400, don't return anything. This is done as a catch all, as
+            # client-side validation should be working
+            raise HttpResponseBadRequest()
 
 
 class AccessPointLocationFormView(DestroyModelMixin, generics.GenericAPIView):
@@ -92,7 +109,9 @@ class SectorFormView(TooltipFormView):
 
     def get_context(self, *args, **kwargs):
         context = super().get_context(**kwargs)
-        ap = AccessPointLocation.objects.get(uuid=context['ap'], map_session=context['map_session'])
+        ap = AccessPointLocation.objects.get(
+            uuid=context["ap"], map_session=context["map_session"]
+        )
         serialized_ap = AccessPointSerializer(ap)
         context.update({"ap": serialized_ap.data})
         return context

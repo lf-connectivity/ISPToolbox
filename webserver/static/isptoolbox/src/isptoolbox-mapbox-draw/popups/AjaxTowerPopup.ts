@@ -1,10 +1,23 @@
 import { roundToDecimalPlaces } from '../../LinkCalcUtils';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
-import { ISPToolboxTool, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
+import { parseLatitudeLongitude } from '../../utils/LatLngInputUtils';
+import {
+    ISPToolboxTool,
+    WorkspaceEvents,
+    WorkspaceFeatureTypes
+} from '../../workspace/WorkspaceConstants';
 import { AccessPoint } from '../../workspace/WorkspaceFeatures';
+import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
+import { BaseAjaxSectorPopup } from './AjaxSectorPopups';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
 const PLACE_SECTOR_BUTTON_ID = 'place-sector-btn-tower-popup';
+const TOWER_UPDATE_FORM_ID = 'tower-update-form';
+
+// @ts-ignore
+$.validator.addMethod('latlng', (value, element) => {
+    return parseLatitudeLongitude(value) !== null;
+});
 
 export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapboxDrawPlugin {
     protected accessPoint?: AccessPoint;
@@ -17,7 +30,8 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
         }
         super(map, draw, 'workspace:tower-form');
         initializeMapboxDrawInterface(this, this.map);
-        this.tool = tool
+        PubSub.subscribe(WorkspaceEvents.SECTOR_CREATED, this.sectorCreateCallback.bind(this));
+        this.tool = tool;
         AjaxTowerPopup._instance = this;
     }
 
@@ -35,37 +49,25 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
     }
 
     protected setEventHandlers() {
-        $(`#${PLACE_SECTOR_BUTTON_ID}`)
-            .off()
-            .on('click', () => {
-                // Create two random sectors if there aren't any
-                if (this.accessPoint && !this.accessPoint.sectors.size) {
-                    for (let i = 0; i < 2; i++) {
-                        let heading = roundToDecimalPlaces(Math.random() * 360.0, 1);
-                        let azimuth = roundToDecimalPlaces((Math.random() * 360 + 0.1) % 360, 1);
-                        let newSector = {
-                            type: 'Feature',
-                            geometry: {
-                                type: 'Point',
-                                coordinates: this.lnglat
-                            },
-                            properties: {
-                                feature_type: WorkspaceFeatureTypes.SECTOR,
-                                ap: this.accessPoint.workspaceId,
-                                heading: heading,
-                                azimuth: azimuth,
-                                radius: 1,
-                                height: 100,
-                                default_cpe_height: 3,
-                                frequency: 2.437,
-                                name: 'Random Sector',
-                                uneditable: true
-                            }
-                        };
-                        this.map.fire('draw.create', { features: [newSector] });
-                    }
-                }
-            });
+        this.createSubmitFormCallback(TOWER_UPDATE_FORM_ID, () => {
+            if (this.accessPoint) {
+                this.accessPoint.read(() => {
+                    let newSector = {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: this.lnglat
+                        },
+                        properties: {
+                            feature_type: WorkspaceFeatureTypes.SECTOR,
+                            ap: this.accessPoint?.workspaceId,
+                            uneditable: true
+                        }
+                    };
+                    this.map.fire('draw.create', { features: [newSector] });
+                });
+            }
+        });
     }
 
     protected cleanup() {}
@@ -94,5 +96,30 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
                 this.hide();
             }
         });
+    }
+
+    // Show edit sector tooltip after object gets persisted. Move to sector if
+    // it is out of the map
+    protected sectorCreateCallback(
+        event: string,
+        data: { ap: AccessPoint; sector: AccessPointSector }
+    ) {
+        if (data.ap === this.accessPoint) {
+            let popup = BaseAjaxSectorPopup.getInstance();
+            popup.setSector(data.sector);
+            popup.show();
+
+            let coords = this.accessPoint.getFeatureGeometryCoordinates() as [number, number];
+
+            // Fly to AP if AP isn't on map. We center the AP horizontally, but place it
+            // 65% of the way down on the screen so the tooltip fits.
+            if (!this.map.getBounds().contains(coords)) {
+                let south = this.map.getBounds().getSouth();
+                let north = this.map.getBounds().getNorth();
+                this.map.flyTo({
+                    center: [coords[0], coords[1] + +0.15 * (north - south)]
+                });
+            }
+        }
     }
 }

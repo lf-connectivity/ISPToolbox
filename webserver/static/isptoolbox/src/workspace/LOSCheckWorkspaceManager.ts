@@ -32,22 +32,22 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
             // It is possible to add either an AP or CPE while in simple_select so determine based on feature properties
             // Adding CPE also adds link from CPE to specified AP (see customer popup)
             if (feature.geometry.type == 'Point' && !feature.properties.radius) {
-                let workspaceFeature = new CPE(this.map, this.draw, feature);
-                this.saveWorkspaceFeature(workspaceFeature, (resp) => {
-                    let cpe = workspaceFeature as CPE;
-                    let apUUID = feature.properties.ap;
-                    let ap = this.features.get(apUUID) as AccessPoint;
-                    let link = cpe.linkAP(ap);
-                    this.saveWorkspaceFeature(link, (resp) => {
-                        this.map.fire('draw.create', { features: [link.getFeatureData()] });
-                    });
-                });
-            } else if (feature.properties.radius) {
                 if (feature.properties.feature_type === WorkspaceFeatureTypes.SECTOR) {
                     this.saveWorkspaceFeature(new AccessPointSector(this.map, this.draw, feature));
                 } else {
-                    this.createApFeature(feature);
+                    let workspaceFeature = new CPE(this.map, this.draw, feature);
+                    this.saveWorkspaceFeature(workspaceFeature, (resp) => {
+                        let cpe = workspaceFeature as CPE;
+                        let apUUID = feature.properties.ap;
+                        let ap = this.features.get(apUUID) as AccessPoint;
+                        let link = cpe.linkAP(ap);
+                        this.saveWorkspaceFeature(link, (resp) => {
+                            this.map.fire('draw.create', { features: [link.getFeatureData()] });
+                        });
+                    });
                 }
+            } else if (feature.properties.radius) {
+                this.createApFeature(feature);
             }
         };
 

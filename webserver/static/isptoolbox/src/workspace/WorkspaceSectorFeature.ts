@@ -3,7 +3,7 @@ import { Feature, Geometry, MultiPolygon, GeoJsonProperties } from 'geojson';
 import { djangoUrl } from '../utils/djangoUrl';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';
-import { WorkspaceFeatureTypes } from './WorkspaceConstants';
+import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, APToCPELink, CPE, LINK_AP_INDEX } from './WorkspaceFeatures';
 import { WorkspacePolygonFeature } from './WorkspacePolygonFeature';
 
@@ -76,19 +76,22 @@ export class AccessPointSector extends WorkspacePolygonFeature {
             // Case where AP sector is created in session
             this.setAP();
             this.setGeojson();
+            PubSub.publish(WorkspaceEvents.SECTOR_CREATED, { ap: this.ap, sector: this });
             if (successFollowup) {
                 successFollowup(resp);
             }
         });
     }
 
+    read(successFollowup?: (resp: any) => void) {
+        super.read((resp: any) => {
+            this.onUpdate(resp, successFollowup);
+        });
+    }
+
     update(successFollowup?: (resp: any) => void) {
         super.update((resp: any) => {
-            this.setGeojson();
-            this.moveLinks(this.ap.getFeatureGeometryCoordinates() as [number, number]);
-            if (successFollowup) {
-                successFollowup(resp);
-            }
+            this.onUpdate(resp, successFollowup);
         });
     }
 
@@ -166,5 +169,13 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         this.links.forEach((link) => {
             link.moveVertex(LINK_AP_INDEX, newCoords);
         });
+    }
+
+    private onUpdate(resp: any, successFollowup?: (resp: any) => void) {
+        this.setGeojson();
+        this.moveLinks(this.ap.getFeatureGeometryCoordinates() as [number, number]);
+        if (successFollowup) {
+            successFollowup(resp);
+        }
     }
 }

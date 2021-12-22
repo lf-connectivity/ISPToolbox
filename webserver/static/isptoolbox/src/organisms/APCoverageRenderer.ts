@@ -187,7 +187,10 @@ abstract class RadiusAndBuildingCoverageRenderer {
             }
         };
 
-        const onClickPolygon = (e: any) => {
+        const onClickPolygon = (e: mapboxgl.MapLayerMouseEvent) => {
+            if(this.map.queryRenderedFeatures(e.point, {layers: [BUILDING_LAYER]}).length > 0){
+                return;
+            }
             // Show tooltip if only one AP is selected.
             const selectedSectors = this.workspaceManager.filterByType(
                 this.draw.getSelected().features,
@@ -222,7 +225,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
             });
         };
 
-        const loadSectorOnClick = () => {
+        const loadSectorOnClick = (e: any) => {
             this.map.getStyle().layers?.forEach((layer: any) => {
                 if (layer.id.includes('gl-draw-polygon-fill')) {
                     this.map.on('click', layer.id, onClickPolygon);
@@ -436,6 +439,11 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                 const features = this.map.queryRenderedFeatures(e.point);
                 if (
                     !features.some((feat) => {
+                        if(feat.properties)
+                        {
+                            const type = feat.properties['meta'+":"+'type'];
+                            return feat.source.includes('mapbox-gl-draw') && type === "Point";
+                        }
                         return feat.source.includes('mapbox-gl-draw');
                     })
                 ) {

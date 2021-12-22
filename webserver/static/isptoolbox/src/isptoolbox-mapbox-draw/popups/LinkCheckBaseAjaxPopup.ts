@@ -37,18 +37,7 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
     ) {
         // @ts-ignore
         $(`#${formId}`).validate({
-            errorPlacement: (label: any, element: any) => {
-                // For inputs in a data with unit div, insert label after the unit span.
-                let dataWithUnit = element.parent('div.data-with-unit');
-                if (dataWithUnit.length && dataWithUnit.children('span').length) {
-                    label.insertAfter(dataWithUnit.children('span')[0]);
-                } else {
-                    label.insertAfter(element);
-                }
-            },
             onkeyup: false,
-            onclick: false,
-            onfocusout: false,
             submitHandler: () => {
                 $.post(
                     this.getEndpoint(),

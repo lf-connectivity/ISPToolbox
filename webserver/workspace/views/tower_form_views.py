@@ -20,7 +20,7 @@ class TooltipFormView(generics.GenericAPIView):
         model = self.serializer_class.Meta.model
         return model.get_rest_queryset(self.request)
 
-    def get_context(self, *args, **kwargs):
+    def get_context(self, *args, serializer=None, **kwargs):
         instance = self.get_object()
         if not serializer:
             serializer = self.get_serializer(instance)
@@ -109,7 +109,9 @@ class SectorFormView(TooltipFormView):
 
     def get_context(self, *args, **kwargs):
         context = super().get_context(**kwargs)
-        ap = AccessPointLocation.objects.get(uuid=context['ap'], map_session=context['map_session'])
+        ap = AccessPointLocation.objects.get(
+            uuid=context["ap"], map_session=context["map_session"]
+        )
         serialized_ap = AccessPointSerializer(ap)
         context.update({"ap": serialized_ap.data})
         return context

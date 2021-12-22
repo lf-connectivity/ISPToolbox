@@ -37,11 +37,24 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
     ) {
         // @ts-ignore
         $(`#${formId}`).validate({
+            // For inputs in a data with unit div, append param name to error message
+            invalidHandler: (event: any, validator: any) => {
+                let errorList = validator.errorList;
+                errorList.forEach((err: any) => {
+                    let element = $(err.element);
+                    if (element.attr('data-param-label')) {
+                        err.message = `${element.attr('data-param-label')}: ${err.message}`;
+                    }
+                });
+            },
+            // No error class in input
+            highlight: (element: any, errorClass: any) => {
+                $(element).removeClass(errorClass);
+            },
+            // For inputs in a data with unit div, display at bottom
             errorPlacement: (label: any, element: any) => {
-                // For inputs in a data with unit div, insert label after the unit span.
-                let dataWithUnit = element.parent('div.data-with-unit');
-                if (dataWithUnit.length && dataWithUnit.children('span').length) {
-                    label.insertAfter(dataWithUnit.children('span')[0]);
+                if (element.attr('data-param-label')) {
+                    label.insertBefore($('li.stat-row'));
                 } else {
                     label.insertAfter(element);
                 }

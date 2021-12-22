@@ -143,7 +143,7 @@
                 border-bottom-color: $error-color
         &:focus + span
             border-bottom: 2px solid $brand-primary-color
-        
+
     /* Chrome, Safari, Edge, Opera */
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button
@@ -231,6 +231,9 @@
 
 .mapboxgl-popup.map-tooltip
     .overlay-tooltip, .tooltip--sector-summary
+        ul
+            margin: 0
+            padding: 0
         li
             align-items: center
             display: block
@@ -251,6 +254,24 @@
             padding-left: 0.6rem
         .label
             width: 150px
+        .coordinates
+            display: block
+            margin-top: 10px
+            align-items: baseline
+            justify-content: space-between
+            input
+                width: 100%
+                margin: 0
+                text-align: left
+                padding-left: 0.5rem
+            .data-with-unit
+                flex-grow: 1
+            .comma
+                margin: 0 5px
+                color: $white-color
+        .error
+            color: $error-color !important
+            margin-top: 0.25rem !important
 
 .mapboxgl-popup.map-tooltip
     .overlay-tooltip, .tooltip--tower-summary

@@ -109,15 +109,7 @@
 
         <li>
             <p class="label">{% translate "Frequency" %}</p>
-            <select name="frequency" id="freq-select-sector-popup">
-                {% frequency_dropdown_option frequency 2.437 2.4 %}
-                {% frequency_dropdown_option frequency 3.6 3.65 %}
-                {% frequency_dropdown_option frequency 5.4925 5 %}
-                {% frequency_dropdown_option frequency 11.2 11 %}
-                {% frequency_dropdown_option frequency 18.7 18 %}
-                {% frequency_dropdown_option frequency 24.35 24 %}
-                {% frequency_dropdown_option frequency 64.79 60 %}
-            </select>
+            {% include "workspace/molecules/frequency_dropdown.html" with dropdown_freq_user_value=frequency dropdown_freq_name="frequency" dropdown_freq_id="freq-select-sector-popup" %}
         </li>
 
         <li class="stat-row">

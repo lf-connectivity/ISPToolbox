@@ -554,7 +554,7 @@ class AccessPointSector(WorkspaceFeature):
     @property
     def max_radius(self):
         return self.radius
-    
+
     @max_radius.setter
     def max_radius(self, val):
         self.radius = val

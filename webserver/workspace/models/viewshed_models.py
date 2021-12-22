@@ -130,7 +130,9 @@ class Viewshed(models.Model, S3PublicExportMixin):
         """
         This function generates a hash to help cache viewshed results
         """
-        return f'{self.radio.height},{self.radio.max_radius},{self.radio.observer.x},{self.radio.observer.y},{self.radio.default_cpe_height}'
+        return f'{self.radio.height},{self.radio.max_radius},' +\
+            f'{self.radio.observer.x},{self.radio.observer.y},' +\
+            f'{self.radio.default_cpe_height}'
 
     def result_cached(self) -> bool:
         return self.hash == self.calculate_hash()

@@ -28,7 +28,6 @@ from rasterio.warp import calculate_default_transform, reproject, Resampling
 import time
 import os
 import re
-import shutil
 from numpy import polyfit, polyval
 from django.core.validators import MaxValueValidator, MinValueValidator
 
@@ -256,7 +255,6 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
             with tempfile.NamedTemporaryFile(suffix=".tif") as colorized_temp:
                 self.__colorizeOutputViewshed(output_temp, colorized_temp)
-                shutil.copy(colorized_temp.name, '/usr/src/app/output.tif')
                 TASK_LOGGER.info(f'colorizing: {time.time() - start_tiling}')
                 start = time.time()
                 self.__reprojectViewshed(output_temp)

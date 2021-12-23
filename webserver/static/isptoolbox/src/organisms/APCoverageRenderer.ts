@@ -433,44 +433,41 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
 
         // Building Layer click callback
         this.map.on('click', BUILDING_LAYER, (e: any) => {
-            // Only activate if in simple select mode
-            if (this.draw.getMode() == 'simple_select') {
-                // Check if we clicked on a CPE
-                const features = this.map.queryRenderedFeatures(e.point);
-                if (
-                    !features.some((feat) => {
-                        if(feat.properties)
-                        {
-                            const type = feat.properties['meta:type'];
-                            return feat.source.includes('mapbox-gl-draw') && type === "Point";
-                        }
-                        return feat.source.includes('mapbox-gl-draw');
-                    })
-                ) {
-                    let building = this.map.queryRenderedFeatures(e.point, {
-                        layers: [BUILDING_LAYER]
-                    })[0];
-                    let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
-                    if (building.properties?.cpe_location) {
-                        const parsed_location = JSON.parse(building.properties.cpe_location);
-                        if (parsed_location !== null) {
-                            lngLat = parsed_location.coordinates;
-                        }
+            // Check if we clicked on a CPE
+            const features = this.map.queryRenderedFeatures(e.point);
+            if (
+                !features.some((feat) => {
+                    if(feat.properties)
+                    {
+                        const type = feat.properties['meta:type'];
+                        return feat.source.includes('mapbox-gl-draw') && type === "Point";
                     }
-                    let buildingId = building.properties?.msftid;
-                    let mapboxClient = MapboxSDKClient.getInstance();
-                    mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                            LinkCheckCustomerConnectPopup,
-                            lngLat,
-                            response
-                        );
-                        popup.setBuildingId(buildingId);
-
-                        // Render all APs
-                        popup.show();
-                    });
+                    return feat.source.includes('mapbox-gl-draw');
+                })
+            ) {
+                let building = this.map.queryRenderedFeatures(e.point, {
+                    layers: [BUILDING_LAYER]
+                })[0];
+                let lngLat: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+                if (building.properties?.cpe_location) {
+                    const parsed_location = JSON.parse(building.properties.cpe_location);
+                    if (parsed_location !== null) {
+                        lngLat = parsed_location.coordinates;
+                    }
                 }
+                let buildingId = building.properties?.msftid;
+                let mapboxClient = MapboxSDKClient.getInstance();
+                mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                    let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                        LinkCheckCustomerConnectPopup,
+                        lngLat,
+                        response
+                    );
+                    popup.setBuildingId(buildingId);
+
+                    // Render all APs
+                    popup.show();
+                });
             }
         });
 

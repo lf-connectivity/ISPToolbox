@@ -269,6 +269,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         if (this.link_chart) {
             this.link_chart.redraw();
         }
+
+        $('#link_view_bar').css('padding-bottom', `${$('#disclaimer').outerHeight()}px`)
     }
 
     initMapCenterAndZoom() {

@@ -1,4 +1,15 @@
 {% spaceless %}
 {% load isp_toolbox_units %}
-<input class="input--tower-name" id="name-input-tower-popup" value="{{ name }}" placeholder="Tower Name" type="text" name="name" maxlength="{% field_limit "NAME" "max" %}" required>
+<input class="input--tower-name {{ name_input_additional_classes }}"
+    id="{{ name_input_id|default:"name-input-tower-popup" }}"
+    value="{{ name }}"
+    placeholder="{{ name_input_placeholder|default:"Tower Name" }}"
+    type="text"
+    name="name"
+    maxlength="{% field_limit "NAME" "max" %}"
+    {% if name_input_data_param_put_after_id %} 
+        data-param-error-put-after-id="{{ name_input_data_param_put_after_id }}"
+    {% endif%}
+    required
+>
 {% endspaceless %}

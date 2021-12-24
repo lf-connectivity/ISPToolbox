@@ -42,8 +42,8 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
                 let errorList = validator.errorList;
                 errorList.forEach((err: any) => {
                     let element = $(err.element);
-                    if (element.attr('data-param-label')) {
-                        err.message = `${element.attr('data-param-label')}: ${err.message}`;
+                    if (element.data('paramLabel')) {
+                        err.message = `${element.data('paramLabel')}: ${err.message}`;
                     }
                 });
             },
@@ -53,8 +53,8 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
             },
             // For inputs in a data with unit div, display at bottom
             errorPlacement: (label: any, element: any) => {
-                if (element.attr('data-param-label')) {
-                    label.insertBefore($('li.stat-row'));
+                if (element.data('paramErrorPutAfterId')) {
+                    label.insertAfter($(`#${element.data('paramErrorPutAfterId')}`));
                 } else {
                     label.insertAfter(element);
                 }
@@ -68,16 +68,13 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
                     $(`#${formId}`).serialize(),
                     (result) => {
                         this.popup.setHTML(result);
+                        this.setEventHandlers();
                         if (successFollowup) {
                             successFollowup(result);
                         }
                     },
                     'html'
-                )
-                    .fail(() => {})
-                    .done(() => {
-                        this.setEventHandlers();
-                    });
+                ).fail(() => {});
             }
         });
     }

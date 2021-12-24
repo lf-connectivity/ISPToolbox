@@ -1,3 +1,4 @@
+import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
 import {
     ISPToolboxTool,
@@ -9,10 +10,17 @@ import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
 import { AjaxTowerPopup } from './AjaxTowerPopup';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
+const SECTOR_NAME_UPDATE_FORM_ID = 'sector-name-update-form';
 const SECTOR_UPDATE_FORM_ID = 'sector-update-form';
 const BACK_TO_TOWER_LINK_ID = 'back-to-tower-sector-popup';
 const SECTOR_DELETE_BUTTON_ID = 'sector-delete-btn';
 const ADD_SECTOR_BUTTON_ID = 'add-access-point-sector-popup';
+
+const NAME_INPUT_ID = 'name-input-sector-popup';
+const NAME_P_ID = 'name-p-sector-popup';
+const EDIT_NAME_BTN_ID = 'edit-sector-name-sector-popup';
+const SAVE_NAME_BTN_ID = 'save-sector-name-sector-popup';
+const SECTOR_SELECT_ID = 'select-sector-sector-popup';
 
 /**
  * Doing base classes for this to account for differences in button logic
@@ -60,6 +68,12 @@ export abstract class BaseAjaxSectorPopup
             }
         });
 
+        this.createSubmitFormCallback(SECTOR_NAME_UPDATE_FORM_ID, () => {
+            if (this.sector) {
+                this.sector.read();
+            }
+        });
+
         $(`#${BACK_TO_TOWER_LINK_ID}`)
             .off()
             .on('click', () => {
@@ -82,6 +96,25 @@ export abstract class BaseAjaxSectorPopup
                     });
             });
 
+        // Set selected sector to the current one
+        $(`#${SECTOR_SELECT_ID}`).prop('selectedIndex', 1);
+
+        $(`#${SECTOR_SELECT_ID}`)
+            .off()
+            .on('change', () => {
+                // Check if a different sector was selected
+                if ($(`#${SECTOR_SELECT_ID}`).prop('selectedIndex') !== 1 && this.sector) {
+                    let sectorUuid = $(`#${SECTOR_SELECT_ID}`).val() as string;
+                    let sector = this.sector.ap.sectors.get(sectorUuid);
+                    if (sector) {
+                        this.draw.changeMode('simple_select', { featureIds: [sector.mapboxId] });
+                        this.hide();
+                        this.setSector(sector);
+                        this.show();
+                    }
+                }
+            });
+
         $(`#${ADD_SECTOR_BUTTON_ID}`)
             .off()
             .on('click', () => {
@@ -101,6 +134,29 @@ export abstract class BaseAjaxSectorPopup
                     this.map.fire('draw.create', { features: [newSector] });
                 }
             });
+
+        $(`#${EDIT_NAME_BTN_ID}`)
+            .off()
+            .on('click', () => {
+                hideHoverTooltip(`#${EDIT_NAME_BTN_ID}`);
+
+                // Hide non-edit mode components
+                $(`#${EDIT_NAME_BTN_ID}`).addClass('d-none');
+                $(`#${NAME_P_ID}`).addClass('d-none');
+
+                // Show edit mode components
+                $(`#${NAME_INPUT_ID}`).removeClass('d-none');
+                $(`#${SAVE_NAME_BTN_ID}`).removeClass('d-none');
+            });
+
+        // hack to remove tooltip, otherwise it stays on page until refresh
+        $(`#${SAVE_NAME_BTN_ID}`)
+            .off()
+            .on('click', () => {
+                hideHoverTooltip(`#${SAVE_NAME_BTN_ID}`);
+            });
+
+        addHoverTooltip('.tooltip-input-btn', 'bottom');
     }
 
     static getInstance() {

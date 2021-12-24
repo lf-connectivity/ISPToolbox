@@ -272,6 +272,26 @@
         .error
             color: $error-color !important
             margin-top: 0.25rem !important
+        .tooltip-input-btn
+            background: darken($brand-dark-gray-color, 7%)
+            color: $white-color
+            border-radius: 0px
+            -webkit-border-radius: 0px
+            -moz-border-radius: 0px
+            border-bottom: solid 2px transparent
+            &:disabled
+                svg
+                    stroke: $mid-gray-color-2
+        .name-input
+            background: darken($brand-dark-gray-color, 7%)
+            display: flex
+            p
+                width: 100%
+                padding: 0.6rem 0.25rem 0.25rem 0.35rem
+                white-space: nowrap
+            select
+                margin-right: 0.5rem
+                width: 1.25rem
 
 .mapboxgl-popup.map-tooltip
     .overlay-tooltip, .tooltip--tower-summary

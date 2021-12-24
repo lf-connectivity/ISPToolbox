@@ -5,3 +5,8 @@ export function addHoverTooltip(selector: string, placement: string = 'top') {
         placement: placement
     });
 }
+
+export function hideHoverTooltip(selector: string) {
+    // @ts-ignore
+    $(selector).tooltip('hide');
+}

@@ -11,6 +11,8 @@ from workspace.models import (
 
 import logging
 
+from workspace.models.network_models import AccessPointSector
+
 
 class TooltipFormView(generics.GenericAPIView):
     lookup_field = "uuid"
@@ -108,9 +110,18 @@ class SectorFormView(TooltipFormView):
 
     def get_context(self, *args, **kwargs):
         context = super().get_context(**kwargs)
+
+        # Get AP information
         ap = AccessPointLocation.objects.get(
             uuid=context["ap"], map_session=context["map_session"]
         )
         serialized_ap = AccessPointSerializer(ap)
         context.update({"ap": serialized_ap.data})
+
+        # Get sector information
+        other_sectors = AccessPointSector.objects.filter(
+            ap=ap, map_session=context["map_session"]
+        ).exclude(uuid=context["uuid"])
+        serialized_sectors = AccessPointSectorSerializer(other_sectors, many=True)
+        context.update({"other_sectors": serialized_sectors.data})
         return context

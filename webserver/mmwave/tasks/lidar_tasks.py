@@ -4,7 +4,6 @@ from mmwave.scripts.update_lidar_metadata import (
 from webserver.celery import celery_app as app
 from django.conf import settings
 from mmwave.models import EPTLidarPointCloud
-from django.conf import settings
 import redis
 import time
 from celery.utils.log import get_task_logger

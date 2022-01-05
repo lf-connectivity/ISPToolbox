@@ -5,7 +5,7 @@ from .link_tasks import (
     getDTMPoint,
 )
 from .dsm_tasks import exportDSMData
-from .lidar_tasks import updateLidarMetaData, pull_latest_pointcloud_metadata
+from .lidar_tasks import updateLidarMetaData, pull_latest_pointcloud_metadata, tile_untiled_datasets
 from mmwave.scripts.create_dsm_for_ept import createTileDSM, convertPtCloudToDSMTiled
 from mmwave.scripts.smap import create_los_engagemnet_csv
 
@@ -14,5 +14,5 @@ __all__ = [
     'updateLidarMetaData', 'createTileDSM', 'convertPtCloudToDSMTiled', 'getDTMPoint',
     'pullLatestPointCloudsEntwine', 'addHighResolutionBoundaries',
     'uploadBoundaryTilesetMapbox', 'createNewlyAddedCloudOverlay',
-    'pull_latest_pointcloud_metadata', 'create_los_engagement_csv'
+    'pull_latest_pointcloud_metadata', 'create_los_engagement_csv', 'tile_untiled_datasets'
 ]

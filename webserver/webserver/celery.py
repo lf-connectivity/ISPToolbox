@@ -63,6 +63,11 @@ def setup_periodic(sender, **kwargs):
             dataUpdate_tasks.updateElasticSearchIndex.s(),
             name="update_elastic_search_asn"
         )
+        sender.add_periodic_task(
+            crontab(minute=0, hour=2),
+            mmwave_tasks.tile_untiled_datasets.s(),
+            name="tile_untiled_datasets"
+        )
         # Execute once at midnight on
         # the first day of every month servertime - settings.py default timezone
         sender.add_periodic_task(

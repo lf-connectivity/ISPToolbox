@@ -25,8 +25,8 @@ import {
 import { isUnitsUS } from './utils/MapPreferences';
 import PubSub from 'pubsub-js';
 import { LOSCheckWorkspaceManager } from './workspace/LOSCheckWorkspaceManager';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
-import { isBeta, validateHeight, getUnits, UnitSystems } from './LinkCheckUtils';
+import { WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
+import { validateHeight, getUnits, UnitSystems, isBeta } from './LinkCheckUtils';
 import {
     LinkCheckCPEClickCustomerConnectPopup,
     LinkCheckCustomerConnectPopup,
@@ -38,7 +38,7 @@ import { LinkCheckLocationSearchTool } from './organisms/LinkCheckLocationSearch
 import { LinkCheckBasePopup } from './isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
 import { parseFormLatitudeLongitude } from './utils/LatLngInputUtils';
 import { ISPToolboxAbstractAppPage } from './ISPToolboxAbstractAppPage';
-import { LinkCheckRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
+import { LinkCheckRadiusAndBuildingCoverageRenderer } from './organisms/LinkCheckRadiusAndBuildingCoverageRenderer';
 import { ViewshedTool } from './organisms/ViewshedTool';
 import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
 import LOSCheckLinkProfileView from './organisms/LOSCheckLinkProfileView';

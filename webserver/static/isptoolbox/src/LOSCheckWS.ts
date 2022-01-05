@@ -116,10 +116,9 @@ class LOSCheckWS {
         }
     }
 
-    sendAPRequest(uuid: string, height: number) {
+    sendAPRequest(uuid: string) {
         const request = JSON.stringify({
             msg: 'ap',
-            ap_hgt: height,
             uuid: uuid
         });
         if (this.ws.readyState !== WebSocket.OPEN) {

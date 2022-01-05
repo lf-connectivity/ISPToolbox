@@ -13,7 +13,7 @@ import {
 import { ISPToolboxAbstractAppPage } from './ISPToolboxAbstractAppPage';
 import { MarketEvaluatorWorkspaceManager } from './workspace/MarketEvaluatorWorkspaceManager';
 import { MarketEvaluatorTowerPopup } from './isptoolbox-mapbox-draw/popups/TowerPopups';
-import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from './organisms/APCoverageRenderer';
+import { MarketEvaluatorRadiusAndBuildingCoverageRenderer } from './organisms/MarketEvaluatorRadiusAndBuildingCoverageRenderer';
 import { MultiThumbSlider } from './atoms/MultiThumbSlider';
 import MarketEvaluatorMapLayerSidebarManager from './MarketEvaluatorMapLayerSidebarManager';
 import { AjaxTowerPopup } from './isptoolbox-mapbox-draw/popups/AjaxTowerPopup';

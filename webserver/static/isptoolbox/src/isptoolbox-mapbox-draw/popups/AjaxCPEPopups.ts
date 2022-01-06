@@ -4,19 +4,19 @@ import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
 export abstract class BaseAjaxCPEPopup extends LinkCheckBaseAjaxFormPopup {}
 
-export class LinkCheckLocationPopup extends BaseAjaxCPEPopup {
-    private static _instance: LinkCheckLocationPopup;
+export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
+    private static _instance: AjaxLinkCheckLocationPopup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
-        if (LinkCheckLocationPopup._instance) {
-            return LinkCheckLocationPopup._instance;
+        if (AjaxLinkCheckLocationPopup._instance) {
+            return AjaxLinkCheckLocationPopup._instance;
         }
         super(map, draw, 'workspace:los-location-form');
-        LinkCheckLocationPopup._instance = this;
+        AjaxLinkCheckLocationPopup._instance = this;
     }
 
     static getInstance() {
-        return LinkCheckLocationPopup._instance;
+        return AjaxLinkCheckLocationPopup._instance;
     }
 
     protected cleanup() {
@@ -30,16 +30,16 @@ export class LinkCheckLocationPopup extends BaseAjaxCPEPopup {
     }
 }
 
-export class LinkCheckCPEPopup extends BaseAjaxCPEPopup {
+export class AjaxLinkCheckCPEPopup extends BaseAjaxCPEPopup {
     private cpe: CPE;
-    private static _instance: LinkCheckCPEPopup;
+    private static _instance: AjaxLinkCheckCPEPopup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
-        if (LinkCheckCPEPopup._instance) {
-            return LinkCheckCPEPopup._instance;
+        if (AjaxLinkCheckCPEPopup._instance) {
+            return AjaxLinkCheckCPEPopup._instance;
         }
         super(map, draw, 'workspace:cpe-form');
-        LinkCheckCPEPopup._instance = this;
+        AjaxLinkCheckCPEPopup._instance = this;
     }
 
     setCPE(cpe: CPE) {
@@ -48,7 +48,7 @@ export class LinkCheckCPEPopup extends BaseAjaxCPEPopup {
     }
 
     static getInstance() {
-        return LinkCheckCPEPopup._instance;
+        return AjaxLinkCheckCPEPopup._instance;
     }
 
     protected cleanup() {}

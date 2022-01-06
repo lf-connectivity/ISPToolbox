@@ -6,7 +6,7 @@ import { ClickableMarker } from '../molecules/ClickableMarker';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 import { isBeta } from '../LinkCheckUtils';
-import { LinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
+import { AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
 
 export class LinkCheckLocationSearchTool {
     private map: mapboxgl.Map;
@@ -104,7 +104,7 @@ export class LinkCheckLocationSearchTool {
     private showPopup() {
         let lngLat: [number, number] = [this.marker.getLngLat().lng, this.marker.getLngLat().lat];
         if (isBeta()) {
-            let popup = LinkCheckLocationPopup.getInstance();
+            let popup = AjaxLinkCheckLocationPopup.getInstance();
             console.log(lngLat);
             popup.setLngLat(lngLat);
             popup.show();

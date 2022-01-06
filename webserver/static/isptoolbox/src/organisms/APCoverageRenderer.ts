@@ -45,8 +45,8 @@ import {
     MarketEvaluatorSectorPopup
 } from '../isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
 import {
-    LinkCheckCPEPopup,
-    LinkCheckLocationPopup
+    AjaxLinkCheckCPEPopup,
+    AjaxLinkCheckLocationPopup
 } from '../isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
@@ -463,7 +463,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                 }
 
                 if (isBeta()) {
-                    let popup = LinkCheckLocationPopup.getInstance();
+                    let popup = AjaxLinkCheckLocationPopup.getInstance();
                     popup.setLngLat(lngLat);
                     popup.show();
                 } else {
@@ -509,7 +509,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                 ) as CPE;
 
                 if (isBeta()) {
-                    let popup = LinkCheckCPEPopup.getInstance();
+                    let popup = AjaxLinkCheckCPEPopup.getInstance();
                     popup.hide();
                     popup.setCPE(cpe);
                     popup.show();

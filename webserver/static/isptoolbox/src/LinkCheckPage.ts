@@ -51,8 +51,8 @@ import { LinkCheckPTPOverlay, HOVER_POINT_SOURCE } from './LinkCheckPTPOverlay';
 import { AjaxTowerPopup } from './isptoolbox-mapbox-draw/popups/AjaxTowerPopup';
 import { LinkCheckSectorPopup } from './isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
 import {
-    LinkCheckCPEPopup,
-    LinkCheckLocationPopup
+    AjaxLinkCheckCPEPopup as AjaxLinkCheckCPEPopup,
+    AjaxLinkCheckLocationPopup as AjaxLinkCheckLocationPopup
 } from './isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
 var _ = require('lodash');
 
@@ -152,7 +152,11 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                             if (this.showVertexDebounce) {
                                 this.showVertexDebounce.cancel();
                             }
-                            LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
+                            if (isBeta()) {
+                                AjaxLinkCheckLocationPopup.getInstance().hide();
+                            } else {
+                                LinkCheckVertexClickCustomerConnectPopup.getInstance().hide();
+                            }
                         }
                     }
                 }),
@@ -325,8 +329,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new AjaxTowerPopup(this.map, this.draw, ISPToolboxTool.LOS_CHECK);
         new LinkCheckTowerPopup(this.map, this.draw);
         new LinkCheckSectorPopup(this.map, this.draw);
-        new LinkCheckLocationPopup(this.map, this.draw);
-        new LinkCheckCPEPopup(this.map, this.draw);
+        new AjaxLinkCheckLocationPopup(this.map, this.draw);
+        new AjaxLinkCheckCPEPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
 
         // Set relationships amongst collapsible components
@@ -337,7 +341,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             LinkCheckCPEClickCustomerConnectPopup,
             AjaxTowerPopup,
             LinkCheckSectorPopup,
-            MapLayerSidebarManager
+            MapLayerSidebarManager,
+            AjaxLinkCheckCPEPopup,
+            AjaxLinkCheckLocationPopup
         ]);
         const prioritizeDirectSelect = function ({ features }: any) {
             if (features.length == 1 && features[0].geometry.type !== 'Point') {
@@ -359,18 +365,25 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     ? 0
                     : 1;
 
-            let mapboxClient = MapboxSDKClient.getInstance();
             let vertexLngLat = e.features[0].geometry.coordinates[selectedVertex];
-            mapboxClient.reverseGeocode(vertexLngLat, (response: any) => {
-                let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                    LinkCheckVertexClickCustomerConnectPopup,
-                    vertexLngLat,
-                    response
-                );
-                popup.setSelectedFeatureId(e.features[0].id);
-                popup.setSelectedVertex(selectedVertex);
+            if (isBeta()) {
+                let popup = AjaxLinkCheckLocationPopup.getInstance();
+                popup.hide();
+                popup.setLngLat(vertexLngLat);
                 popup.show();
-            });
+            } else {
+                let mapboxClient = MapboxSDKClient.getInstance();
+                mapboxClient.reverseGeocode(vertexLngLat, (response: any) => {
+                    let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                        LinkCheckVertexClickCustomerConnectPopup,
+                        vertexLngLat,
+                        response
+                    );
+                    popup.setSelectedFeatureId(e.features[0].id);
+                    popup.setSelectedVertex(selectedVertex);
+                    popup.show();
+                });
+            }
         }, 175);
 
         this.map.on('draw.selectionchange', (e: any) => {

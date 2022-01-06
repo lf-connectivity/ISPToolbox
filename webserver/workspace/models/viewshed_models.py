@@ -50,7 +50,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
         on_delete=models.CASCADE,
         null=True, blank=True, default=None
     )
-    sector = models.ForeignKey(
+    sector = models.OneToOneField(
         AccessPointSector,
         on_delete=models.CASCADE,
         null=True, blank=True, default=None
@@ -129,7 +129,11 @@ class Viewshed(models.Model, S3PublicExportMixin):
         """
         This function generates a hash to help cache viewshed results
         """
+        sector_props = ""
+        if self.sector is not None:
+            sector_props = f'sector:{self.sector.heading},{self.sector.azimuth},'
         return f'{self.radio.height},{self.radio.max_radius},' +\
+            sector_props +\
             f'{self.radio.observer.x},{self.radio.observer.y},' +\
             f'{self.radio.default_cpe_height}'
 
@@ -310,6 +314,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                     layer = src.read(1)
                     for i in range(1, 5):
                         new_layer = np.zeros(layer.shape, dtype=np.uint8)
+                        # Set alpha layer to transparent
                         if i == 4:
                             new_layer[layer == 0] = 128
                         dst.write(new_layer, indexes=i)
@@ -323,6 +328,7 @@ class Viewshed(models.Model, S3PublicExportMixin):
                     layer = src.read(1)
                     for i in range(1, 5):
                         new_layer = np.zeros(layer.shape, dtype=np.uint8)
+                        # Set Alpha Layer to Transparent
                         if i == 4:
                             new_layer[layer >= self.radio.default_cpe_height] = 128
                         dst.write(new_layer, indexes=i)
@@ -331,11 +337,14 @@ class Viewshed(models.Model, S3PublicExportMixin):
         if self.ap is None and self.sector is not None:
             with rasterio.open(viewshed_image.name) as ds:
                 # Set output and crop variables
-                nodata = None
+                nodata = -1
                 output_type = rasterio.uint8
                 if self.mode == Viewshed.CoverageStatus.GROUND:
-                    nodata = np.Inf
+                    nodata = -np.Inf
                     output_type = rasterio.float64
+                if self.mode == Viewshed.CoverageStatus.NORMAL:
+                    nodata = 1
+                    output_type = rasterio.uint8
                 # Reproject Sector Onto Tif
                 sector = self.radio.geojson
                 if sector.srid is None:
@@ -347,7 +356,11 @@ class Viewshed(models.Model, S3PublicExportMixin):
                 )
                 # Write to File
                 profile = ds.profile
-                profile.data.update({'height': out_image.shape[1], 'width': out_image.shape[2]})
+                profile.data.update({
+                    'height': out_image.shape[1],
+                    'width': out_image.shape[2],
+                    'transform': out_transform
+                })
                 with rasterio.open(viewshed_image.name, 'w', **profile) as dst:
                     dst.write(out_image.astype(output_type))
 

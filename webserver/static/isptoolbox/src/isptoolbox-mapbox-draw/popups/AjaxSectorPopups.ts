@@ -1,4 +1,5 @@
 import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
+import { renderAjaxOperationFailed } from '../../utils/ConnectionIssues';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
 import {
     ISPToolboxTool,
@@ -66,13 +67,13 @@ export abstract class BaseAjaxSectorPopup
             if (this.sector) {
                 this.sector.read(this.onFormSubmitSuccess.bind(this));
             }
-        });
+        }, this.onFormSubmitFailure);
 
         this.createSubmitFormCallback(SECTOR_NAME_UPDATE_FORM_ID, () => {
             if (this.sector) {
                 this.sector.read();
             }
-        });
+        }, this.onFormSubmitFailure);
 
         $(`#${BACK_TO_TOWER_LINK_ID}`)
             .off()
@@ -182,6 +183,10 @@ export abstract class BaseAjaxSectorPopup
     }
 
     protected onFormSubmitSuccess() {}
+
+    protected onFormSubmitFailure() {
+        renderAjaxOperationFailed();
+    }
 
     // Show edit sector tooltip after object gets persisted. Move to sector if
     // it is out of the map

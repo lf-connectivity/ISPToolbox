@@ -1,6 +1,9 @@
 from django.http.response import Http404
 from django.views import View
-from workspace.models import AccessPointLocation, AccessPointCoverageBuildings
+from workspace.models import (
+    AccessPointLocation, AccessPointCoverageBuildings,
+    AccessPointSector
+)
 from workspace import pagination
 from gis_data.models import MsftBuildingOutlines
 from workspace.models import (
@@ -17,6 +20,7 @@ from workspace.models import (
 from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
+import logging
 import json
 
 
@@ -403,12 +407,25 @@ class AccessPointCoverageStatsView(View):
 class AccessPointCoverageViewshedOverlayView(View):
     def get(self, request, **kwargs):
         try:
+            uuid = kwargs.get("uuid", None)
             ap = AccessPointLocation.get_rest_queryset(request).get(
-                uuid=kwargs.get("uuid")
+                uuid=uuid
             )
             viewshed = Viewshed.objects.get(ap=ap)
             if not viewshed.result_cached():
+                logging.info('Viewshed overlay not calculated')
                 raise Http404("Overlay not cached")
+            return JsonResponse(viewshed.getTilesetInfo())
+        except Exception:
+            logging.info('Failed to find Accesspoint matching UUID')
+        try:
+            sector = AccessPointSector.get_rest_queryset(request).get(
+                uuid=uuid
+            )
+            viewshed = Viewshed.objects.get(sector=sector)
+            if not viewshed.result_cached():
+                logging.info('Viewshed overlay not calculated')
+                raise Http404("Overlay not cached")
+            return JsonResponse(viewshed.getTilesetInfo())
         except Exception:
             raise Http404
-        return JsonResponse(viewshed.getTilesetInfo())

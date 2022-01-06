@@ -10,6 +10,7 @@ import { EMPTY_LAYER_AFTER_BUILDING } from './APCoverageRenderer';
 import { getCookie } from '../utils/Cookie';
 import { djangoUrl } from '../utils/djangoUrl';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
+import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 
 export enum ViewshedEvents {
     VS_REQUEST = 'vs.request',
@@ -20,6 +21,7 @@ export enum ViewshedEvents {
 
 const VIEWSHED_TILE_OVERLAY_SOURCE = 'isptoolbox.viewshedoverlay-tile-source';
 const VIEWSHED_TILE_OVERLAY_LAYER = 'isptoolbox.viewshedoverlay-tile-layer';
+
 export class ViewshedTool implements IMapboxDrawPlugin {
     map: mapboxgl.Map;
     draw: MapboxDraw;
@@ -55,6 +57,10 @@ export class ViewshedTool implements IMapboxDrawPlugin {
             throw new Error('No Instance of ViewshedTool instantiated.');
         }
     }
+    static checkValidFeatureType(feat: GeoJSON.Feature) : boolean{
+        return feat.properties?.feature_type === WorkspaceFeatureTypes.AP
+        || feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR;
+    }
 
     drawUpdateCallback(event: { features: Array<GeoJSON.Feature>; action: string }) {
         const features = event.features;
@@ -64,15 +70,15 @@ export class ViewshedTool implements IMapboxDrawPlugin {
                 return this.viewshed_feature_id === f?.id;
             }) &&
             features.some((f) => {
-                return f.properties?.feature_type === WorkspaceFeatureTypes.AP;
+                return ViewshedTool.checkValidFeatureType(f);
             })
         ) {
             this.setVisibleLayer(false);
         }
         if (features.length === 1) {
             const feat = features[0];
-            if (feat.properties?.feature_type === WorkspaceFeatureTypes.AP) {
-                this.requestViewshedOverlay(feat.properties.uuid);
+            if (ViewshedTool.checkValidFeatureType(feat)) {
+                this.requestViewshedOverlay(feat.properties?.uuid);
             }
         }
     }
@@ -96,7 +102,7 @@ export class ViewshedTool implements IMapboxDrawPlugin {
                 return this.viewshed_feature_id === f?.id;
             }) &&
             features.some((f) => {
-                return f.properties?.feature_type === WorkspaceFeatureTypes.AP;
+                return ViewshedTool.checkValidFeatureType(f);
             })
         ) {
             this.setVisibleLayer(false);
@@ -107,8 +113,8 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         } else {
             if (features.length === 1) {
                 const feat = features[0];
-                if (feat.properties?.feature_type === WorkspaceFeatureTypes.AP) {
-                    this.requestViewshedOverlay(feat.properties.uuid);
+                if (ViewshedTool.checkValidFeatureType(feat)) {
+                    this.requestViewshedOverlay(feat.properties?.uuid);
                 }
             }
         }
@@ -125,6 +131,22 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         }
     }
 
+    requestViewshedOverlay(uuid: string) {
+        $.ajax({
+            url: djangoUrl('workspace:viewshed_overlay', uuid),
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .done((resp) => {
+            this.updateViewshedImage('', resp);
+        })
+        .fail(() => {
+            renderAjaxOperationFailed();
+        });
+    }
+
     setVisibleLayer(setVisible: boolean) {
         const layer = this.map.getLayer(VIEWSHED_TILE_OVERLAY_LAYER);
         if (layer) {
@@ -134,19 +156,6 @@ export class ViewshedTool implements IMapboxDrawPlugin {
                 setVisible ? 'visible' : 'none'
             );
         }
-    }
-
-    requestViewshedOverlay(uuid: string) {
-        $.ajax({
-            url: djangoUrl('workspace:viewshed_overlay', uuid),
-            success: (resp) => {
-                this.updateViewshedImage('', resp);
-            },
-            method: 'GET',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken')
-            }
-        });
     }
 
     updateViewshedImage(msg: string, data: ViewShedResponse) {

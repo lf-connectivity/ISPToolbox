@@ -16,7 +16,7 @@ from django.core.validators import (
 )
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import pre_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from rest_framework import serializers
@@ -33,6 +33,7 @@ from .model_constants import KM_2_MI, FeatureType, M_2_FT, ModelLimits
 from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
+from webserver.celery import celery_app as app
 
 
 BUFFER_DSM_EXPORT_KM = 0.5
@@ -613,6 +614,14 @@ class AccessPointSector(WorkspaceFeature):
         geo_sector = self.get_sector_geojson_json(buffer_radius=BUFFER_DSM_EXPORT_KM)
         aoi = GEOSGeometry(json.dumps(geo_sector))
         return aoi.envelope
+
+
+@receiver(post_save, sender=AccessPointSector)
+def _calculate_coverage(sender, instance, created, raw, using, update_fields, **kwargs):
+    """
+    Calculate coverage for sector after saving
+    """
+    app.send_task('workspace.tasks.viewshed_tasks.calculateSectorViewshed', (instance.uuid,))
 
 
 class AccessPointSectorSerializer(

@@ -49,8 +49,9 @@ from .ayi_views import AccessYourInformationView
 from .tower_form_views import (
     AccessPointLocationFormView,
     TowerLocationFormView,
-    SectorFormView
+    SectorFormView,
 )
+from .cpe_form_views import LocationTooltipView, CPETooltipView
 from .www_views import AnalyticsView, NetworkToolInterventionsView
 from .admin import WorkspaceEngagementView
 

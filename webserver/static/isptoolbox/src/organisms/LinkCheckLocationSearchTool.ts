@@ -5,6 +5,8 @@ import { MapboxSDKClient } from '../MapboxSDKClient';
 import { ClickableMarker } from '../molecules/ClickableMarker';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
+import { isBeta } from '../LinkCheckUtils';
+import { LinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
 
 export class LinkCheckLocationSearchTool {
     private map: mapboxgl.Map;
@@ -101,12 +103,20 @@ export class LinkCheckLocationSearchTool {
 
     private showPopup() {
         let lngLat: [number, number] = [this.marker.getLngLat().lng, this.marker.getLngLat().lat];
-        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-            LinkCheckCustomerConnectPopup,
-            lngLat,
-            this.reverseGeocodeResponse
-        ) as LinkCheckCustomerConnectPopup;
-        popup.show();
+        if (isBeta()) {
+            let popup = LinkCheckLocationPopup.getInstance();
+            console.log(lngLat);
+            popup.setLngLat(lngLat);
+            popup.show();
+        } else {
+            let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                LinkCheckCustomerConnectPopup,
+                lngLat,
+                this.reverseGeocodeResponse
+            ) as LinkCheckCustomerConnectPopup;
+            popup.show();
+        }
+
         this.isPopupOpen = true;
     }
 

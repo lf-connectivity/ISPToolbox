@@ -50,6 +50,10 @@ import { WorkspacePointFeature } from './workspace/WorkspacePointFeature';
 import { LinkCheckPTPOverlay, HOVER_POINT_SOURCE } from './LinkCheckPTPOverlay';
 import { AjaxTowerPopup } from './isptoolbox-mapbox-draw/popups/AjaxTowerPopup';
 import { LinkCheckSectorPopup } from './isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
+import {
+    LinkCheckCPEPopup,
+    LinkCheckLocationPopup
+} from './isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
 var _ = require('lodash');
 
 type HighChartsExtremesEvent = {
@@ -270,7 +274,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             this.link_chart.redraw();
         }
 
-        $('#link_view_bar').css('padding-bottom', `${$('#disclaimer').outerHeight()}px`)
+        $('#link_view_bar').css('padding-bottom', `${$('#disclaimer').outerHeight()}px`);
     }
 
     initMapCenterAndZoom() {
@@ -321,6 +325,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new AjaxTowerPopup(this.map, this.draw, ISPToolboxTool.LOS_CHECK);
         new LinkCheckTowerPopup(this.map, this.draw);
         new LinkCheckSectorPopup(this.map, this.draw);
+        new LinkCheckLocationPopup(this.map, this.draw);
+        new LinkCheckCPEPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
 
         // Set relationships amongst collapsible components
@@ -378,13 +384,22 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
         this.map.on('draw.selectionchange', this.showInputs.bind(this));
         this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
-        this.map.on('draw.update', ({features, action} : {features : Array<GeoJSON.Feature>, action: 'move' | 'change_coordinates'}) => {
-            if(features.length === 1 ){
-                if(features[0].properties?.feature_type === WorkspaceFeatureTypes.AP) {
-                    LOSCheckLinkProfileView.getInstance().show();
+        this.map.on(
+            'draw.update',
+            ({
+                features,
+                action
+            }: {
+                features: Array<GeoJSON.Feature>;
+                action: 'move' | 'change_coordinates';
+            }) => {
+                if (features.length === 1) {
+                    if (features[0].properties?.feature_type === WorkspaceFeatureTypes.AP) {
+                        LOSCheckLinkProfileView.getInstance().show();
+                    }
                 }
             }
-        })
+        );
         PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));

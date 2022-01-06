@@ -44,6 +44,10 @@ import {
     LinkCheckSectorPopup,
     MarketEvaluatorSectorPopup
 } from '../isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
+import {
+    LinkCheckCPEPopup,
+    LinkCheckLocationPopup
+} from '../isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -188,7 +192,7 @@ abstract class RadiusAndBuildingCoverageRenderer {
         };
 
         const onClickPolygon = (e: mapboxgl.MapLayerMouseEvent) => {
-            if(this.map.queryRenderedFeatures(e.point, {layers: [BUILDING_LAYER]}).length > 0){
+            if (this.map.queryRenderedFeatures(e.point, { layers: [BUILDING_LAYER] }).length > 0) {
                 return;
             }
             // Show tooltip if only one AP is selected.
@@ -437,10 +441,12 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             const features = this.map.queryRenderedFeatures(e.point);
             if (
                 !features.some((feat) => {
-                    if(feat.properties)
-                    {
+                    if (feat.properties) {
                         const type = feat.geometry.type;
-                        return feat.source.includes('mapbox-gl-draw') && (type === "Point" || type === "LineString");
+                        return (
+                            feat.source.includes('mapbox-gl-draw') &&
+                            (type === 'Point' || type === 'LineString')
+                        );
                     }
                     return feat.source.includes('mapbox-gl-draw');
                 })
@@ -455,19 +461,26 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                         lngLat = parsed_location.coordinates;
                     }
                 }
-                let buildingId = building.properties?.msftid;
-                let mapboxClient = MapboxSDKClient.getInstance();
-                mapboxClient.reverseGeocode(lngLat, (response: any) => {
-                    let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                        LinkCheckCustomerConnectPopup,
-                        lngLat,
-                        response
-                    );
-                    popup.setBuildingId(buildingId);
 
-                    // Render all APs
+                if (isBeta()) {
+                    let popup = LinkCheckLocationPopup.getInstance();
+                    popup.setLngLat(lngLat);
                     popup.show();
-                });
+                } else {
+                    let buildingId = building.properties?.msftid;
+                    let mapboxClient = MapboxSDKClient.getInstance();
+                    mapboxClient.reverseGeocode(lngLat, (response: any) => {
+                        let popup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                            LinkCheckCustomerConnectPopup,
+                            lngLat,
+                            response
+                        );
+                        popup.setBuildingId(buildingId);
+
+                        // Render all APs
+                        popup.show();
+                    });
+                }
             }
         });
 
@@ -494,18 +507,26 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                 let cpe = BaseWorkspaceManager.getFeatureByUuid(
                     selectedCPEs[0].properties.uuid
                 ) as CPE;
-                let mapboxClient = MapboxSDKClient.getInstance();
-                let lngLat = cpe.getFeatureGeometry()?.coordinates as [number, number];
-                mapboxClient.reverseGeocode(lngLat, (resp: any) => {
-                    cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
-                        LinkCheckCPEClickCustomerConnectPopup,
-                        lngLat,
-                        resp
-                    );
-                    cpePopup.hide();
-                    cpePopup.setCPE(cpe);
-                    cpePopup.show();
-                });
+
+                if (isBeta()) {
+                    let popup = LinkCheckCPEPopup.getInstance();
+                    popup.hide();
+                    popup.setCPE(cpe);
+                    popup.show();
+                } else {
+                    let mapboxClient = MapboxSDKClient.getInstance();
+                    let lngLat = cpe.getFeatureGeometry()?.coordinates as [number, number];
+                    mapboxClient.reverseGeocode(lngLat, (resp: any) => {
+                        cpePopup = LinkCheckBasePopup.createPopupFromReverseGeocodeResponse(
+                            LinkCheckCPEClickCustomerConnectPopup,
+                            lngLat,
+                            resp
+                        );
+                        cpePopup.hide();
+                        cpePopup.setCPE(cpe);
+                        cpePopup.show();
+                    });
+                }
             } else if (selectedCPEs.length > 1) {
                 cpePopup.hide();
             }

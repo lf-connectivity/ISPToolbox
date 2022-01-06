@@ -7,6 +7,8 @@ from IspToolboxAccounts import forms
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 
+from workspace.views.cpe_form_views import CPETooltipView
+
 
 app_name = 'workspace'
 urlpatterns = [
@@ -108,6 +110,10 @@ urlpatterns = [
          views.TowerLocationFormView.as_view(), name="tower-form"),
     path('workspace/form/sector-form/<str:tool>/<uuid:uuid>/',
          views.SectorFormView.as_view(), name="sector-form"),
+    path('workspace/form/los-location-form/<str:lng>/<str:lat>/',
+         views.LocationTooltipView.as_view(), name="los-location-form"),
+    path('workspace/form/los-cpe-form/<uuid:uuid>/',
+         views.CPETooltipView.as_view(), name="cpe-form"),
     # Ajax
     path('workspace/ajax/ap-los/coverage/<uuid:uuid>/',
          views.AccessPointCoverageResults.as_view(), name="viewshed_coverage"),

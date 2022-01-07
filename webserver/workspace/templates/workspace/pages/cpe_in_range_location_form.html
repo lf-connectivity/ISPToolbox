@@ -15,10 +15,12 @@
         {% endif %}">
         <h6>
             {% if status == "serviceable" %}
-                {% translate "Clear line of sight" %}
+                {% translate "Clear line of sight " %}
+                &thinsp;
                 {% include "workspace/atoms/icons/cpe_pass_icon.html" %}
             {% elif status == "unserviceable" %}
                 {% translate "No clear line of sight" %}
+                &thinsp;
                 {% include "workspace/atoms/icons/cpe_fail_icon.html" %}
             {% else %}
                 {% translate "Check line of sight" %}

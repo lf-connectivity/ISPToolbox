@@ -1,4 +1,5 @@
 import { LinkCheckLocationSearchTool } from '../../organisms/LinkCheckLocationSearchTool';
+import { getSessionID } from '../../utils/MapPreferences';
 import { CPE } from '../../workspace/WorkspaceFeatures';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
@@ -26,7 +27,7 @@ export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
     protected setEventHandlers(): void {}
 
     protected getEndpointParams(): any[] {
-        return [this.lnglat[0], this.lnglat[1]];
+        return [getSessionID(), this.lnglat[0], this.lnglat[1]];
     }
 }
 

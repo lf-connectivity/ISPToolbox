@@ -1,0 +1,61 @@
+{% spaceless %}
+{% load i18n address_format isp_toolbox_units isp_toolbox_sources isp_toolbox_tool_info %}
+
+{% reverse_geocoded_address_lines lat lng as address_lines %}
+{% load_tool_info "los_check" as tool_info %}
+{% load_sources_from tool_info.app_page_template sources with tool="los_check" as sources %}
+
+{{ address_lines|first|json_script:"cpe-name-customer-popup" }}
+<div class="tooltip--cpe">
+    <div class="title
+        {% if status == "serviceable" %}
+            success
+        {% elif status == "unserviceable" %}
+            fail
+        {% endif %}">
+        <h6>
+            {% if status == "serviceable" %}
+                {% translate "Clear line of sight" %}
+                {% include "workspace/atoms/icons/cpe_pass_icon.html" %}
+            {% elif status == "unserviceable" %}
+                {% translate "No clear line of sight" %}
+                {% include "workspace/atoms/icons/cpe_fail_icon.html" %}
+            {% else %}
+                {% translate "Check line of sight" %}
+            {% endif %}
+        </h6>
+    </div>
+
+    <div class="description">
+        <p class="bold">{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</p>
+        {% for line in address_lines|slice:"1:" %}
+            <p class="small">{{ line }}</p>
+        {% endfor %}
+        <p class="small">{{ lat|floatformat:5 }}&deg;, {{ lng|floatformat:5 }}&deg;</p>
+    </div>
+
+    <div class="description section">
+        <div class="draw-ptp-row">
+            {% comment %}
+            TODO: Customize ptp prompt for CPE vs location
+            {% endcomment %}
+            <p class="small">Draw PtP to:</p>
+            {% if sectors|length > 1 %}
+                <a id="cpe-switch-tower-link-customer-popup" class="link">Switch</a>
+            {% endif %}
+        </div>
+        <div>
+            <p>
+                <span class="bold">{{ highlighted_sector.name }}</span> - {{ highlighted_sector.distance|floatformat:"2" }} {% unit_preference_value units "mi" "km" %}
+            </p>
+        </div>
+    </div>
+    {% comment %}
+    TODO: Customize button row for CPE vs location
+    {% endcomment %}
+    <div class="button-row">
+        <button class='btn btn-primary isptoolbox-btn' id='view-los-btn-customer-popup'>View Line of Sight</button>
+        <a id='place-tower-link-customer-popup' class="link">Place Tower</a>
+    </div>
+</div>
+{% endspaceless %}

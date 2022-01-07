@@ -20,6 +20,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from rest_framework import serializers
+from turfpy import measurement
 
 import logging
 import numpy
@@ -615,13 +616,55 @@ class AccessPointSector(WorkspaceFeature):
         aoi = GEOSGeometry(json.dumps(geo_sector))
         return aoi.envelope
 
+    def intersects(self, lng_lat, units="METRIC"):
+        """
+        Determines if the point specified intersects with this sector. If so,
+        returns the distance
+        """
+
+        def wrap_geojson(geojson):
+            """Wrap geojson for turfpy functions"""
+            if isinstance(geojson, str):
+                geometry = json.loads(geojson)
+            else:
+                geometry = geojson
+            return {"geometry": geometry}
+
+        start = wrap_geojson(self.ap.geojson.json)
+        end = wrap_geojson(lng_lat)
+        start_bearing = (self.heading - self.azimuth / 2) % 360
+        end_bearing = (self.heading + self.azimuth / 2) % 360
+        bearing = measurement.bearing(start, end) % 360
+
+        # If end_bearing is less than or equal to start_bearing, that means we go through 0.
+        # Check if the angle is between end and start bearing for exclusion
+        if end_bearing <= start_bearing:
+            if bearing >= end_bearing and bearing <= start_bearing:
+                return False
+        elif not (bearing >= start_bearing and bearing <= end_bearing):
+            return False
+
+        if units == "METRIC":
+            distance = measurement.distance(start, end)
+            max_distance = self.radius
+        else:
+            distance = measurement.distance(start, end, units="mi")
+            max_distance = self.radius_miles
+
+        if distance > max_distance:
+            return False
+        else:
+            return distance
+
 
 @receiver(post_save, sender=AccessPointSector)
 def _calculate_coverage(sender, instance, created, raw, using, update_fields, **kwargs):
     """
     Calculate coverage for sector after saving
     """
-    app.send_task('workspace.tasks.viewshed_tasks.calculateSectorViewshed', (instance.uuid,))
+    app.send_task(
+        "workspace.tasks.viewshed_tasks.calculateSectorViewshed", (instance.uuid,)
+    )
 
 
 class AccessPointSectorSerializer(

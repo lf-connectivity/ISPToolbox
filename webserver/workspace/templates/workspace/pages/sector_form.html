@@ -20,7 +20,7 @@
         <li class="pb-n3"> 
             <div class="description mb-0">
                 <p><b>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</b></p>
-                <p>{{ ap.lat|floatformat:5 }}, {{ ap.lng|floatformat:5 }}</p>
+                <p>{{ ap.lat|floatformat:5 }}&deg;, {{ ap.lng|floatformat:5 }}&deg;</p>
             </div>
         </li>
         <li class="name-row">

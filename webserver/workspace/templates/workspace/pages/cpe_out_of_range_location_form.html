@@ -1,0 +1,24 @@
+{% spaceless %}
+{% load i18n address_format isp_toolbox_sources isp_toolbox_tool_info %}
+
+{% reverse_geocoded_address_lines lat lng as address_lines %}
+{% load_tool_info "los_check" as tool_info %}
+{% load_sources_from tool_info.app_page_template sources with tool="los_check" as sources %}
+
+{{ address_lines|first|json_script:"cpe-name-customer-popup" }}
+<div class="tooltip--location">
+    <div class="title">
+        <h6>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</h6>
+    </div>
+    <div class="description">
+        {% for line in address_lines|slice:"1:" %}
+            <p>{{ line }}</p>
+        {% endfor %}
+        <p>{{ lat|floatformat:5 }}&deg;, {{ lng|floatformat:5 }}&deg;</p>
+    </div>
+    <div class="button-row">
+        <button class='btn btn-primary isptoolbox-btn' id='draw-ptp-btn-customer-popup'>Draw PtP</button>
+        <a id='place-tower-link-customer-popup' class="link">Place Tower</a>
+    </div>
+</div>
+{% endspaceless %}

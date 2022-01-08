@@ -45,6 +45,7 @@ fastkml==0.11
 fiona==1.8.17
 flower==1.0.0
 future==0.18.2
+GDAL==3.4.0
 geographiclib==1.50
 geojson==2.5.0
 geopy==2.0.0
@@ -65,9 +66,10 @@ lxml==4.6.5
 mapbox==0.18.0
 markdown==3.2.2
 msgpack==1.0.0
-numpy==1.19.0
+numpy==1.22.0
 pandas==1.2.1
 pathtools==0.1.2
+PDAL==3.0.2
 prometheus-client==0.11.0
 prompt-toolkit==3.0.20
 psycopg2-binary==2.8.5
@@ -82,7 +84,6 @@ rasterio==1.1.5
 redis==3.5.3
 requests==2.24.0
 s3transfer==0.3.3
-scikit-learn==0.23.1
 scipy==1.5.1
 Shapely==1.7.0
 six==1.15.0

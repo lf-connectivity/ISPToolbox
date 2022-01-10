@@ -48,6 +48,9 @@ resource "aws_launch_configuration" "ecs-async" {
   key_name                    = aws_key_pair.production.key_name
   associate_public_ip_address = true
   user_data                   = "#!/bin/bash\necho ECS_CLUSTER='${aws_ecs_cluster.async-production.name}' > /etc/ecs/ecs.config\n${file("scripts/cw_agent_init.sh")}"
+  root_block_device {
+    volume_size = 100
+  }
   lifecycle {
     create_before_destroy = true
   }

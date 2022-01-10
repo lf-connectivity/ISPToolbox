@@ -1,3 +1,4 @@
+import { LinkCheckLocationSearchTool } from '../../../organisms/LinkCheckLocationSearchTool';
 import { BaseWorkspaceFeature } from '../../../workspace/BaseWorkspaceFeature';
 import { BaseWorkspaceManager } from '../../../workspace/BaseWorkspaceManager';
 import { LinkCheckBaseAjaxFormPopup } from '../LinkCheckBaseAjaxPopup';
@@ -7,15 +8,28 @@ var _ = require('lodash');
 const CPE_NAME_JSON_ID = 'cpe-name-cpe-flow';
 const SECTOR_IDS_JSON_ID = 'sector-ids-cpe-flow';
 
+const DRAW_PTP_BUTTON = 'draw-ptp-btn-customer-popup';
 const SWITCH_SECTOR_LINK = 'cpe-switch-sector-link-customer-popup';
 
 const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-switch-sector-popup';
 const CONNECT_SECTOR_LI_CLASS = 'connect-sector-li-switch-sector-popup';
 const CONNECT_SECTOR_LINK_CLASS = 'connect-sector-link-switch-sector-popup';
 
+// Five decimal places of precision for lat longs,
+export const EPSILON = 0.000001;
+
 abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
+    protected tooltipAction: boolean;
+
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, endpoint: string) {
+        super(map, draw, endpoint);
+        this.tooltipAction = false;
+    }
+
     protected cleanup() {
-        this.changeSelection([]);
+        if (!this.tooltipAction) {
+            this.changeSelection([]);
+        }
     }
 
     protected getCPEName(): string {
@@ -34,6 +48,13 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
         this.changeSelection(this.getSectorIds());
     }
 
+    protected createTooltipAction(f: (event: any | void) => void): (event: any | void) => void {
+        return (event: any) => {
+            this.tooltipAction = true;
+            f(event);
+        };
+    }
+
     private changeSelection(sectorIds: Array<any>) {
         let features = sectorIds.map((id: string) => BaseWorkspaceManager.getFeatureByUuid(id));
 
@@ -48,6 +69,16 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
 export abstract class BaseAjaxCPEPopup extends BaseAjaxCPEFlowPopup {
     protected setEventHandlers() {
         $(`#${SWITCH_SECTOR_LINK}`).off().on('click', this.onSwitchSector.bind(this));
+        $(`#${DRAW_PTP_BUTTON}`)
+            .off()
+            .on('click', this.createTooltipAction(this.onDrawPtP.bind(this)));
+    }
+
+    protected onDrawPtP() {
+        //@ts-ignore
+        this.draw.changeMode('draw_link', { start: this.lnglat });
+        this.map.fire('draw.modechange', { mode: 'draw_link' });
+        this.hide();
     }
 
     protected abstract onSwitchSector(): void;

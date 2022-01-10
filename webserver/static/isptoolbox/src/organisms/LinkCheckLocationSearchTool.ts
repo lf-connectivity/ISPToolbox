@@ -82,6 +82,10 @@ export class LinkCheckLocationSearchTool {
         }
     }
 
+    getLngLat() {
+        return this.marker.getLngLat();
+    }
+
     setLngLat(lngLatInput: any) {
         this.marker.setLngLat(lngLatInput);
         this.onLocationChange();
@@ -105,7 +109,6 @@ export class LinkCheckLocationSearchTool {
         let lngLat: [number, number] = [this.marker.getLngLat().lng, this.marker.getLngLat().lat];
         if (isBeta()) {
             let popup = AjaxLinkCheckLocationPopup.getInstance();
-            console.log(lngLat);
             popup.setLngLat(lngLat);
             popup.show();
         } else {

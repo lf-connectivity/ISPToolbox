@@ -1,6 +1,10 @@
 import { LinkCheckLocationSearchTool } from '../../../organisms/LinkCheckLocationSearchTool';
 import { getSessionID } from '../../../utils/MapPreferences';
-import { BaseAjaxCPEPopup, BaseAjaxLinkCheckSwitchSectorPopup } from './BaseAjaxCPEFlowPopups';
+import {
+    BaseAjaxCPEPopup,
+    BaseAjaxLinkCheckSwitchSectorPopup,
+    EPSILON
+} from './BaseAjaxCPEFlowPopups';
 
 export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
     private static _instance: AjaxLinkCheckLocationPopup;
@@ -19,6 +23,14 @@ export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
 
     protected cleanup() {
         super.cleanup();
+        let geocoderLngLat = LinkCheckLocationSearchTool.getInstance().getLngLat();
+        if (
+            geocoderLngLat &&
+            Math.abs(geocoderLngLat.lng - this.lnglat[0]) < EPSILON &&
+            Math.abs(geocoderLngLat.lat - this.lnglat[1]) < EPSILON
+        ) {
+            LinkCheckLocationSearchTool.getInstance().hide();
+        }
         LinkCheckLocationSearchTool.getInstance().onPopupClose();
     }
 

@@ -12,6 +12,7 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
     protected showComponent() {
         this.popup.setLngLat(this.lnglat);
         if (!this.popup.isOpen()) {
+            this.popup.off('close', this.cleanupCall);
             this.popup.setHTML(LOADING_SVG);
             this.popup.addTo(this.map);
             $.get(
@@ -25,6 +26,7 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
                 .fail(() => {})
                 .done(() => {
                     this.popup.addTo(this.map);
+                    this.popup.on('close', this.cleanupCall);
                     this.setEventHandlers();
                 });
         }
@@ -64,23 +66,22 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
             onfocusout: false,
             submitHandler: () => {
                 $.post({
-                    url:this.getEndpoint(),
+                    url: this.getEndpoint(),
                     data: $(`#${formId}`).serialize(),
                     dataType: 'html'
                 })
-                .done((result) => {
-                    this.popup.setHTML(result);
+                    .done((result) => {
+                        this.popup.setHTML(result);
                         this.setEventHandlers();
                         if (successFollowup) {
                             successFollowup(result);
                         }
-                    }
-                )
-                .fail((error) => {
-                    if(errorFollowup){
-                        errorFollowup();
-                    }
-                });
+                    })
+                    .fail((error) => {
+                        if (errorFollowup) {
+                            errorFollowup();
+                        }
+                    });
             }
         });
     }

@@ -40,6 +40,8 @@ export abstract class LinkCheckBasePopup extends CollapsibleComponent {
     protected lnglat: [number, number];
     protected popup: mapboxgl.Popup;
 
+    protected cleanupCall: any;
+
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         super();
         this.map = map;
@@ -50,9 +52,8 @@ export abstract class LinkCheckBasePopup extends CollapsibleComponent {
         this.popup = new window.mapboxgl.Popup({
             className: 'map-tooltip'
         });
-        this.popup.on('close', () => {
-            this.cleanup();
-        });
+        this.cleanupCall = this.cleanup.bind(this);
+        this.popup.on('close', this.cleanupCall);
     }
 
     setAddress(address: string) {

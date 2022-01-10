@@ -75,6 +75,8 @@ export abstract class BaseAjaxSectorPopup
             }
         }, this.onFormSubmitFailure);
 
+        this.createInputSubmitButtonListener(SECTOR_UPDATE_FORM_ID);
+
         $(`#${BACK_TO_TOWER_LINK_ID}`)
             .off()
             .on('click', () => {

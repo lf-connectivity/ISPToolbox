@@ -6,7 +6,7 @@ import { ClickableMarker } from '../molecules/ClickableMarker';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 import { isBeta } from '../LinkCheckUtils';
-import { AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
+import { AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckLocationFlowPopups';
 
 export class LinkCheckLocationSearchTool {
     private map: mapboxgl.Map;

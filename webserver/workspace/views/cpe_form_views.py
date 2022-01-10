@@ -44,6 +44,7 @@ class CPETooltipMixin:
         else:
             return {
                 "name": sector.name,
+                "uuid": sector.uuid,
                 "distance": distance,
                 # TODO: add status check by querying for building
                 "status": _CoverageStatus.UNKNOWN.value,
@@ -69,6 +70,9 @@ class CPETooltipMixin:
                 in_range.append(sector_context)
 
         self.context["sectors"] = sorted(in_range, key=lambda s: s["distance"])
+        self.context["sector_ids"] = [
+            sector["uuid"] for sector in self.context["sectors"]
+        ]
 
         # Get overall coverage status
         status = _CoverageStatus.UNKNOWN
@@ -109,9 +113,15 @@ class LocationTooltipView(View, CPETooltipMixin):
             return render(request, self.out_of_range_template, self.context)
 
 
+# TODO: test this after coding LocationTooltip
 class CPETooltipView(generics.GenericAPIView, CPETooltipMixin):
     serializer_class = CPESerializer
     lookup_field = "uuid"
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template)
+
+
+class SwitchSectorTooltipView(LocationTooltipView):
+    in_range_template = "workspace/pages/cpe_switch_sectors_form.html"
+    out_of_range_template = "workspace/pages/cpe_switch_sectors_form.html"

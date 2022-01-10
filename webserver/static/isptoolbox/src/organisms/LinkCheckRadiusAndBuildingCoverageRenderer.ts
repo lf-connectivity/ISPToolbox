@@ -1,17 +1,12 @@
 import mapboxgl from 'mapbox-gl';
 import * as _ from 'lodash';
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
-import {
-    WorkspaceEvents,
-    WorkspaceFeatureTypes
-} from '../workspace/WorkspaceConstants';
+import { WorkspaceEvents, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { AccessPoint, CPE } from '../workspace/WorkspaceFeatures';
 import LOSCheckWS from '../LOSCheckWS';
 import { AccessPointCoverageResponse, LOSWSEvents } from '../workspace/WorkspaceConstants';
 import { LOSCheckWorkspaceManager } from '../workspace/LOSCheckWorkspaceManager';
-import {
-    LinkCheckTowerPopup,
-} from '../isptoolbox-mapbox-draw/popups/TowerPopups';
+import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { LinkCheckBasePopup } from '../isptoolbox-mapbox-draw/popups/LinkCheckBasePopup';
 import {
@@ -21,13 +16,16 @@ import {
 import { getCookie } from '../utils/Cookie';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import { ViewshedTool } from './ViewshedTool';
+import { LinkCheckSectorPopup } from '../isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
 import {
-    LinkCheckSectorPopup,
-} from '../isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
-import { BUILDING_DATA_SOURCE, BUILDING_LAYER, BUILDING_OUTLINE_LAYER, RadiusAndBuildingCoverageRenderer } from './APCoverageRenderer';
-import { AjaxLinkCheckCPEPopup, AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
+    BUILDING_DATA_SOURCE,
+    BUILDING_LAYER,
+    BUILDING_OUTLINE_LAYER,
+    RadiusAndBuildingCoverageRenderer
+} from './APCoverageRenderer';
 import { isBeta } from '../LinkCheckUtils';
-
+import { AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckLocationFlowPopups';
+import { AjaxLinkCheckCPEPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckCPEFlowPopups';
 
 export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     ws: LOSCheckWS;

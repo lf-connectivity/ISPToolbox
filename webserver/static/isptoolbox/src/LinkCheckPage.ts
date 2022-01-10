@@ -51,9 +51,10 @@ import { LinkCheckPTPOverlay, HOVER_POINT_SOURCE } from './LinkCheckPTPOverlay';
 import { AjaxTowerPopup } from './isptoolbox-mapbox-draw/popups/AjaxTowerPopup';
 import { LinkCheckSectorPopup } from './isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
 import {
-    AjaxLinkCheckCPEPopup as AjaxLinkCheckCPEPopup,
-    AjaxLinkCheckLocationPopup as AjaxLinkCheckLocationPopup
-} from './isptoolbox-mapbox-draw/popups/AjaxCPEPopups';
+    AjaxLinkCheckLocationPopup,
+    AjaxLinkCheckLocationSwitchSectorPopup
+} from './isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckLocationFlowPopups';
+import { AjaxLinkCheckCPEPopup } from './isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckCPEFlowPopups';
 var _ = require('lodash');
 
 type HighChartsExtremesEvent = {
@@ -331,6 +332,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new LinkCheckSectorPopup(this.map, this.draw);
         new AjaxLinkCheckLocationPopup(this.map, this.draw);
         new AjaxLinkCheckCPEPopup(this.map, this.draw);
+        new AjaxLinkCheckLocationSwitchSectorPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
 
         // Set relationships amongst collapsible components
@@ -343,7 +345,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             LinkCheckSectorPopup,
             MapLayerSidebarManager,
             AjaxLinkCheckCPEPopup,
-            AjaxLinkCheckLocationPopup
+            AjaxLinkCheckLocationPopup,
+            AjaxLinkCheckLocationSwitchSectorPopup
         ]);
         const prioritizeDirectSelect = function ({ features }: any) {
             if (features.length == 1 && features[0].geometry.type !== 'Point') {

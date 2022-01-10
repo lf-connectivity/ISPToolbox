@@ -1,0 +1,38 @@
+{% spaceless %}
+{% load i18n isp_toolbox_units %}
+
+{{ address_lines|first|json_script:"cpe-name-cpe-flow" }}
+{{ sector_ids|json_script:"sector-ids-cpe-flow" }}
+<div class="tooltip--switch-towers">
+    <div class="title">
+        <h6>
+            <a id="back-to-main-link-switch-sector-popup"> 
+                {% include "workspace/atoms/icons/back_button_icon.html" %}
+            </a> 
+            Towers within Coverage
+            </h6>
+    </div>
+    <div>
+        <ul id="connect-sector-ul-switch-sector-popup">
+            {% for sector in sectors %}
+                <li class="connect-sector-li-switch-sector-popup" data-sector-id="{{ sector.uuid }}">
+                    <div>
+                        <p>
+                            {{ sector.name }} - {{ sector.distance|floatformat:"2" }} {% unit_preference_value units "mi" "km" %}</p>
+                        <a class="link connect-sector-link-switch-sector-popup">
+                            View LOS
+                        </a>
+                    </div>
+                    <div>
+                        {% if sector.status == "serviceable" %}
+                            {% include "workspace/atoms/icons/cpe_pass_icon.html" %}
+                        {% elif status == "unserviceable" %}
+                            {% include "workspace/atoms/icons/cpe_fail_icon.html" %}
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endspaceless %}

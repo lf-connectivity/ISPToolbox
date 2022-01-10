@@ -51,7 +51,7 @@ from .tower_form_views import (
     TowerLocationFormView,
     SectorFormView,
 )
-from .cpe_form_views import LocationTooltipView, CPETooltipView
+from .cpe_form_views import LocationTooltipView, CPETooltipView, SwitchSectorTooltipView
 from .www_views import AnalyticsView, NetworkToolInterventionsView
 from .admin import WorkspaceEngagementView
 

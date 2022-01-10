@@ -5,7 +5,8 @@
 {% load_tool_info "los_check" as tool_info %}
 {% load_sources_from tool_info.app_page_template sources with tool="los_check" as sources %}
 
-{{ address_lines|first|json_script:"cpe-name-customer-popup" }}
+{{ address_lines|first|json_script:"cpe-name-cpe-flow" }}
+{{ sector_ids|json_script:"sector-ids-cpe-flow" }}
 <div class="tooltip--location">
     <div class="title">
         <h6>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</h6>

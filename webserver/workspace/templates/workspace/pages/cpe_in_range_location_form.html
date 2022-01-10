@@ -5,7 +5,8 @@
 {% load_tool_info "los_check" as tool_info %}
 {% load_sources_from tool_info.app_page_template sources with tool="los_check" as sources %}
 
-{{ address_lines|first|json_script:"cpe-name-customer-popup" }}
+{{ address_lines|first|json_script:"cpe-name-cpe-flow" }}
+{{ sector_ids|json_script:"sector-ids-cpe-flow" }}
 <div class="tooltip--cpe">
     <div class="title
         {% if status == "serviceable" %}
@@ -43,7 +44,7 @@
             {% endcomment %}
             <p class="small">Draw PtP to:</p>
             {% if sectors|length > 1 %}
-                <a id="cpe-switch-tower-link-customer-popup" class="link">Switch</a>
+                <a id="cpe-switch-sector-link-customer-popup" class="link">Switch</a>
             {% endif %}
         </div>
         <div>

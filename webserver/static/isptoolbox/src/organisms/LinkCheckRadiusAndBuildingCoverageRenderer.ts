@@ -229,9 +229,12 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     }
                     this.draw.setFeatureProperty(feat.id as string, 'last_updated', now);
                 });
-                this.apPopup.onAPUpdate(
-                    BaseWorkspaceManager.getFeatureByUuid(message.uuid) as AccessPoint
-                );
+                if(this.apPopup && this.apPopup.onAPUpdate)
+                {
+                    this.apPopup.onAPUpdate(
+                        BaseWorkspaceManager.getFeatureByUuid(message.uuid) as AccessPoint
+                    );
+                }
             },
             method: 'GET',
             headers: {

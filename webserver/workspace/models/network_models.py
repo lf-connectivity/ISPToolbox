@@ -663,7 +663,7 @@ def _calculate_coverage(sender, instance, created, raw, using, update_fields, **
     Calculate coverage for sector after saving
     """
     app.send_task(
-        "workspace.tasks.viewshed_tasks.calculateSectorViewshed", (instance.uuid,)
+        "workspace.tasks.sector_tasks.calculateSectorViewshed", (instance.uuid,)
     )
 
 

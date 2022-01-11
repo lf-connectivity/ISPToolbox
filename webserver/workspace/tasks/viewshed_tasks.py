@@ -4,7 +4,7 @@ from workspace.models.viewshed_models import DSMAvailabilityException, Viewshed
 import json
 import subprocess
 from webserver.celery import celery_app as app
-from workspace.models import AccessPointLocation, AccessPointSector
+from workspace.models import AccessPointLocation
 from workspace.tasks.coverage_tasks import calculateCoverage
 from workspace.tasks.websocket_utils import updateClientAPStatus, sendMessageToChannel
 
@@ -56,22 +56,6 @@ def computeViewshedCoverage(network_id, data, user_id):
         }
         sendMessageToChannel(network_id, resp)
         raise e
-
-
-@app.task
-def calculateSectorViewshed(sector_id: str):
-    sector = AccessPointSector.objects.get(uuid=sector_id)
-    try:
-        assert(sector.viewshed is not None)
-    except Viewshed.DoesNotExist:
-        Viewshed(sector=sector).save()
-        TASK_LOGGER.info('created new viewshed object')
-    if not sector.viewshed.result_cached():
-        sector.viewshed.delete()
-        Viewshed(sector=sector).save()
-        sector.viewshed.calculateViewshed(lambda msg, time: TASK_LOGGER.info(f"{msg}, {time}"))
-    else:
-        TASK_LOGGER.info("cache hit on viewshed result")
 
 
 def create_progress_status_callback(network_id: str, ap_uuid: str):

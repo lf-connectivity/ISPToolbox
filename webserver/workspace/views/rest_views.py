@@ -1,7 +1,8 @@
 from django.http.response import Http404
 from django.views import View
 from workspace.models import (
-    AccessPointLocation, AccessPointCoverageBuildings,
+    AccessPointLocation,
+    AccessPointCoverageBuildings,
     AccessPointSector
 )
 from workspace import pagination
@@ -364,9 +365,7 @@ class AccessPointCoverageResults(View):
     class EMPTY_BUILDING:
         json = {"type": "Polygon", "coordinates": []}
 
-    def get(self, request, uuid):
-        ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
-        coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
+    def create_building_response(self, coverage):
         features = []
         nearby = coverage.nearby_buildings.all()
         nearby_ids = [b.msftid for b in nearby]
@@ -396,12 +395,35 @@ class AccessPointCoverageResults(View):
         fc = {"type": "FeatureCollection", "features": features}
         return JsonResponse(fc)
 
+    def get(self, request, uuid):
+        try:
+            ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
+            coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
+            return self.create_building_response(coverage)
+        except AccessPointLocation.DoesNotExist:
+            logging.info("Failed to find AP matching UUID")
+        try:
+            sector = AccessPointSector.get_rest_queryset(request).get(uuid=uuid)
+            coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
+            return self.create_building_response(coverage)
+        except AccessPointCoverageBuildings.DoesNotExist:
+            raise Http404
+
 
 class AccessPointCoverageStatsView(View):
     def get(self, request, uuid):
-        ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
-        coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
-        return JsonResponse(coverage.coverageStatistics())
+        try:
+            ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
+            coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
+            return JsonResponse(coverage.coverageStatistics())
+        except AccessPointLocation.DoesNotExist:
+            logging.info("Failed to find AP matching UUID")
+        try:
+            sector = AccessPointSector.get_rest_queryset(request).get(uuid=uuid)
+            coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
+            return JsonResponse(coverage.coverageStatistics())
+        except AccessPointCoverageBuildings.DoesNotExist:
+            raise Http404
 
 
 class AccessPointCoverageViewshedOverlayView(View):

@@ -1124,8 +1124,12 @@ class AccessPointCoverageBuildings(models.Model):
         FAIL = "Failed"
         COMPLETE = "Complete"
 
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ap = models.OneToOneField(
-        AccessPointLocation, on_delete=models.CASCADE, primary_key=True
+        AccessPointLocation, on_delete=models.CASCADE, db_index=True, null=True, blank=True, default=None,
+    )
+    sector = models.OneToOneField(
+        AccessPointSector, on_delete=models.CASCADE, db_index=True, null=True, blank=True, default=None,
     )
     status = models.CharField(
         default=CoverageCalculationStatus.START,
@@ -1145,7 +1149,10 @@ class AccessPointCoverageBuildings(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def calculate_hash(self):
-        return f"{self.ap.geojson.x},{self.ap.geojson.y},{self.ap.max_radius},{self.ap.height},{self.ap.default_cpe_height}"
+        if self.ap is not None:
+            return f"{self.ap.geojson.x},{self.ap.geojson.y},{self.ap.max_radius},{self.ap.height},{self.ap.default_cpe_height}"
+        else:
+            return f"{self.sector.ap.geojson.x},{self.sector.ap.geojson.y},{self.sector.max_radius},{self.sector.height},{self.sector.default_cpe_height}"
 
     def result_cached(self):
         return self.hash == self.calculate_hash()

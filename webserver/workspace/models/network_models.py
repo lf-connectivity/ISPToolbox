@@ -1150,9 +1150,11 @@ class AccessPointCoverageBuildings(models.Model):
 
     def calculate_hash(self):
         if self.ap is not None:
-            return f"{self.ap.geojson.x},{self.ap.geojson.y},{self.ap.max_radius},{self.ap.height},{self.ap.default_cpe_height}"
+            return f"{self.ap.geojson.x},{self.ap.geojson.y}," + \
+                f"{self.ap.max_radius},{self.ap.height},{self.ap.default_cpe_height}"
         else:
-            return f"{self.sector.ap.geojson.x},{self.sector.ap.geojson.y},{self.sector.max_radius},{self.sector.height},{self.sector.default_cpe_height}"
+            return f"{self.sector.ap.geojson.x},{self.sector.ap.geojson.y}," + \
+                f"{self.sector.max_radius},{self.sector.height},{self.sector.default_cpe_height}"
 
     def result_cached(self):
         return self.hash == self.calculate_hash()

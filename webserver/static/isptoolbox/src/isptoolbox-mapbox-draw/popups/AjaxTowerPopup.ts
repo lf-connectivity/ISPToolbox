@@ -62,7 +62,6 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
                 });
             }
         });
-        this.createInputSubmitButtonListener(TOWER_UPDATE_FORM_ID);
 
         $(`#${TOWER_DELETE_BUTTON_ID}`)
             .off()

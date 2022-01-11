@@ -188,7 +188,7 @@ class LidarEngine:
                 except Exception as e:
                     logging.error(
                         f'failed to get profile for link {geometry.json}')
-                    logging.error(str(e))
+                    logging.error(e, exc_info=True)
                     profile = [float('nan')] * num_samples
                     profiles.append((geometry, profile))
 
@@ -203,7 +203,7 @@ class LidarEngine:
                     except Exception as e:
                         logging.error(
                             f'failed to get profile for link {geometry.json}')
-                        logging.error(str(e))
+                        logging.error(e, exc_info=True)
                         profile = [float('nan')] * num_samples
                         profiles.append((line, profile))
 
@@ -228,6 +228,8 @@ class LidarEngine:
     def __getProfileForLinkCloud(self, link, cloud, num_samples=None):
         if num_samples is None:
             num_samples = self.num_samples
+        if link.empty:
+            return []
         lidar_profile, _, _, _ = getLidarPointsAroundLink(
             cloud.url, link, cloud.srs,
             resolution=self.resolution,

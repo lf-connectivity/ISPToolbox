@@ -60,6 +60,11 @@ static_test:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run static ./build_static_prod.sh
 
+prod_check_migrations:
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build django-app
+	@echo $$(tput setaf 3)Checking for migrations before deploying - if an error occurs, make sure migrations are applied - $$(tput setab 7)$$(tput setaf 0)make prod_migrate$$(tput sgr 0)$$(tput el)
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run django-app python3 manage.py migrate --check
+
 static_prod:
 	@echo ----------------------------------------------BUIDLING STATIC FILES \& PUSHING TO PROD \(S3\)----------------------------------------
 	docker-compose -f docker-compose.yml -f webserver/static/docker-compose.static-prod.yml build

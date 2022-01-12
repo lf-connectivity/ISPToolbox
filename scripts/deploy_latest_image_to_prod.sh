@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e 
+echo "Checking for any outstanding migrations"
+make prod_check_migrations
 # DEPLOY LATEST ECR DOCKER IMAGES TO ECS, PRODUCTION
 echo "Pushing Latest image to Async Scheduler"
 aws ecs update-service --cluster isptoolbox-production-async-cluster \

@@ -18,6 +18,8 @@ import { miles2km } from '../LinkCalcUtils';
 import { isBeta } from '../LinkCheckUtils';
 import { AjaxTowerPopup } from '../isptoolbox-mapbox-draw/popups/AjaxTowerPopup';
 import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
+import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
+import { BaseTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -37,11 +39,11 @@ const INACTIVE_AP = 'false';
 
 
 // TODO: Remove RenderCloudRF option from here, it will go into WorkspaceManager
-export abstract class RadiusAndBuildingCoverageRenderer {
+export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPlugin {
     map: mapboxgl.Map;
     draw: MapboxDraw;
     workspaceManager: any;
-    apPopup: any;
+    apPopup: BaseTowerPopup;
     sectorPopup: any;
     renderCloudRF: boolean;
     last_selection: string = '';
@@ -57,6 +59,7 @@ export abstract class RadiusAndBuildingCoverageRenderer {
             renderCloudRF?: boolean;
         }
     ) {
+        initializeMapboxDrawInterface(this, map);
         this.map = map;
         this.draw = draw;
         this.apPopup = isBeta() ? AjaxTowerPopup.getInstance() : apPopupClass.getInstance();
@@ -134,8 +137,6 @@ export abstract class RadiusAndBuildingCoverageRenderer {
             BUILDING_LAYER
         );
 
-        this.map.on('draw.delete', this.drawDeleteCallback.bind(this));
-        this.map.on('draw.selectionchange', this.drawSelectionChangeCallback.bind(this));
         PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.AP_updateCallback.bind(this));
 
         const onClickAP = (e: any) => {
@@ -368,7 +369,7 @@ export abstract class RadiusAndBuildingCoverageRenderer {
                 renderFeatures.map((feat) => {
                     let coverage_object = BaseWorkspaceManager.getFeatureByUuid(
                         feat.properties?.uuid
-                    ) as AccessPoint;
+                    ) as AccessPoint | AccessPointSector;
                     return coverage_object?.coverage || EMPTY_BUILDING_COVERAGE;
                 })
             );
@@ -386,13 +387,16 @@ export abstract class RadiusAndBuildingCoverageRenderer {
         );
     }
 
-    protected shouldRenderFeature(f: any) {
-        if (f.properties?.feature_type === WorkspaceFeatureTypes.AP) {
-            return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(f.id);
-        } else if (f.properties?.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA) {
-            return !(f.id in MapLayerSidebarManager.getInstance().hiddenCoverageAreas);
-        } else {
-            return false;
+    protected shouldRenderFeature(f: GeoJSON.Feature) {
+        switch(f.properties?.feature_type) {
+            case WorkspaceFeatureTypes.AP:
+                return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(f.id as string);
+            case WorkspaceFeatureTypes.SECTOR:
+                return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(f.id as string);
+            case WorkspaceFeatureTypes.COVERAGE_AREA:
+                return !(f.id as string in MapLayerSidebarManager.getInstance().hiddenCoverageAreas);
+            default:
+                return false;
         }
     }
 }

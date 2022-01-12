@@ -11,6 +11,7 @@ import { getCookie } from '../utils/Cookie';
 import { djangoUrl } from '../utils/djangoUrl';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
+import { isBeta } from '../LinkCheckUtils';
 
 export enum ViewshedEvents {
     VS_REQUEST = 'vs.request',
@@ -58,8 +59,11 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         }
     }
     static checkValidFeatureType(feat: GeoJSON.Feature) : boolean{
-        return feat.properties?.feature_type === WorkspaceFeatureTypes.AP
-        || feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR;
+        if(isBeta()){
+            return feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR;
+        } else {
+            return feat.properties?.feature_type === WorkspaceFeatureTypes.AP;
+        }
     }
 
     drawUpdateCallback(event: { features: Array<GeoJSON.Feature>; action: string }) {
@@ -78,6 +82,7 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         if (features.length === 1) {
             const feat = features[0];
             if (ViewshedTool.checkValidFeatureType(feat)) {
+                this.setVisibleLayer(false);
                 this.requestViewshedOverlay(feat.properties?.uuid);
             }
         }
@@ -162,7 +167,7 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         // Only Act on the websocket response if the user still has the AP selected
         const selected_features = this.draw.getSelected();
         const show_viewshed = selected_features.features.some((f) => {
-            return f.properties?.uuid === data.uuid;
+            return f.properties?.uuid === data.uuid && ViewshedTool.checkValidFeatureType(f);
         });
         if (show_viewshed) {
             const matched_features = this.draw.getSelected().features.filter((f) => {

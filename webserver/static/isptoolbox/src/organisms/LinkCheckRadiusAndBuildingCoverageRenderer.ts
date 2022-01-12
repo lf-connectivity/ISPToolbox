@@ -1,7 +1,7 @@
 import mapboxgl from 'mapbox-gl';
 import * as _ from 'lodash';
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import { WorkspaceEvents, WorkspaceFeatureTypes, WS_AP_Events } from '../workspace/WorkspaceConstants';
 import { AccessPoint, CPE } from '../workspace/WorkspaceFeatures';
 import LOSCheckWS from '../LOSCheckWS';
 import { AccessPointCoverageResponse, LOSWSEvents } from '../workspace/WorkspaceConstants';
@@ -26,6 +26,7 @@ import {
 import { isBeta } from '../LinkCheckUtils';
 import { AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckLocationFlowPopups';
 import { AjaxLinkCheckCPEPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckCPEFlowPopups';
+import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 
 export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     ws: LOSCheckWS;
@@ -177,6 +178,29 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             },
             BUILDING_OUTLINE_LAYER
         );
+        
+        // Wait for mapbox draw to finish loading - once complete place buildings above mapbox draw layers
+        // If you can think of a better way to do this - feel free to replace
+        const addBuildingLayerHelper = (r: mapboxgl.MapDataEvent) => {
+            const draw_layers_loaded =
+                r.target.getStyle().layers?.some(l => l.type === 'line' && (l.source as string).includes('mapbox-gl-draw'));
+            if (draw_layers_loaded){ 
+                this.map.moveLayer(BUILDING_LAYER);
+                this.map.moveLayer(BUILDING_OUTLINE_LAYER);
+                this.map.off('styledata', addBuildingLayerHelper);
+            }
+        };
+        this.map.on('styledata', addBuildingLayerHelper)
+    }
+
+    drawSelectionChangeCallback({ features }: { features: Array<GeoJSON.Feature>; }): void {
+        RadiusAndBuildingCoverageRenderer.prototype.drawSelectionChangeCallback.call(this, {features});
+        features.forEach((f) => {
+            if(f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR)
+            {
+                this.accessPointStatusCallback('', {type: WS_AP_Events.AP_STATUS, uuid: f.properties?.uuid});
+            }
+        })
     }
 
     sendCoverageRequest({ features }: { features: Array<any> }) {
@@ -244,8 +268,8 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
     }
 
     updateCoverageFromAjaxResponse(resp: any, uuid: string) {
-        const ap = BaseWorkspaceManager.getFeatureByUuid(uuid) as AccessPoint;
-        ap.setCoverage(resp.features);
+        const feat = BaseWorkspaceManager.getFeatureByUuid(uuid) as AccessPoint | AccessPointSector;
+        feat.setCoverage(resp.features);
         this.renderBuildings();
         PubSub.publish(WorkspaceEvents.AP_COVERAGE_UPDATED, { uuid: uuid });
     }

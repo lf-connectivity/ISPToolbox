@@ -93,11 +93,11 @@ def readMultipleS3Objects(keys, filenames, bucket_name=bucket_name):
             executor.submit(readMultipleHelper, s3_client, key, filename, bucket_name): key
             for key, filename in zip(keys, filenames)
         }
-    for future in concurrent.futures.as_completed(future_to_url):
-        try:
-            future.result()
-        except Exception:
-            pass
+        for future in concurrent.futures.as_completed(future_to_url):
+            try:
+                future.result()
+            except Exception:
+                pass
 
 
 def writeMultipleS3Objects(keys, filenames, bucket_name=bucket_name):
@@ -106,11 +106,11 @@ def writeMultipleS3Objects(keys, filenames, bucket_name=bucket_name):
             executor.submit(writeMultipleHelper, s3_client, key, filename, bucket_name): key
             for key, filename in zip(keys, filenames)
         }
-    for future in concurrent.futures.as_completed(future_to_url):
-        try:
-            future.result()
-        except Exception:
-            pass
+        for future in concurrent.futures.as_completed(future_to_url):
+            try:
+                future.result()
+            except Exception:
+                pass
 
 
 def readS3Object(object_name, fp, bucket_name=bucket_name):

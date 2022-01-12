@@ -5,6 +5,7 @@ from django.contrib.gis.geos import GEOSGeometry, Point
 from mmwave.lidar_utils import SlippyTiles
 import tempfile
 import shlex
+import os
 import time
 from IspToolboxApp.util.s3 import readMultipleS3Objects
 import rasterio
@@ -35,11 +36,11 @@ class DSMTileEngine:
                 for cloud in self.clouds:
                     # Check for overlapping tiles
                     if cloud.existsTile(x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM):
-                        with tempfile.NamedTemporaryFile(suffix='.tif', delete=False, dir=tmp_dir) as tmp_tif:
-                            jobs.append(cloud.get_s3_key_tile(
-                                x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES))
-                            tifs.append(tmp_tif.name)
-                            break
+                        tmp_tif_name = os.path.join(tmp_dir, f"{cloud.pk},{x},{y},{SlippyTiles.DEFAULT_OUTPUT_ZOOM}.tif")
+                        jobs.append(cloud.get_s3_key_tile(
+                            x, y, SlippyTiles.DEFAULT_OUTPUT_ZOOM, old_path=USE_OLD_TILES))
+                        tifs.append(tmp_tif_name)
+                        break
             TASK_LOGGER.info(
                 f'Time to generate jobs: {time.time() - start} jobs:{ len(jobs)}')
             readMultipleS3Objects(jobs, tifs)

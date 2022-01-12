@@ -412,12 +412,14 @@ class AccessPointCoverageResults(View):
 
 class AccessPointCoverageStatsView(View):
     def get(self, request, uuid):
+        # TODO: deprecate
         try:
             ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
             coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
             return JsonResponse(coverage.coverageStatistics())
         except AccessPointLocation.DoesNotExist:
             logging.info("Failed to find AP matching UUID")
+        # ENDTODO: deprecate
         try:
             sector = AccessPointSector.get_rest_queryset(request).get(uuid=uuid)
             coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
@@ -428,8 +430,9 @@ class AccessPointCoverageStatsView(View):
 
 class AccessPointCoverageViewshedOverlayView(View):
     def get(self, request, **kwargs):
+        uuid = kwargs.get("uuid", None)
+        # TODO: deprecate
         try:
-            uuid = kwargs.get("uuid", None)
             ap = AccessPointLocation.get_rest_queryset(request).get(
                 uuid=uuid
             )
@@ -440,6 +443,7 @@ class AccessPointCoverageViewshedOverlayView(View):
             return JsonResponse(viewshed.getTilesetInfo())
         except Exception:
             logging.info('Failed to find Accesspoint matching UUID')
+        # ENDTODO: deprecate
         try:
             sector = AccessPointSector.get_rest_queryset(request).get(
                 uuid=uuid

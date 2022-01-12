@@ -1125,6 +1125,7 @@ class AccessPointCoverageBuildings(models.Model):
         COMPLETE = "Complete"
 
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # TODO: deprecate
     ap = models.OneToOneField(
         AccessPointLocation, on_delete=models.CASCADE, db_index=True, null=True, blank=True, default=None,
     )

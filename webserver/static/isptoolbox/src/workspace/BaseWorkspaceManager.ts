@@ -7,7 +7,14 @@ import { SessionModal } from '../organisms/SessionModal';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
-import { AccessPoint, CPE, APToCPELink, CoverageArea, PointToPointLink } from './WorkspaceFeatures';
+import {
+    AccessPoint,
+    CPE,
+    APToCPELink,
+    CoverageArea,
+    PointToPointLink,
+    isAP
+} from './WorkspaceFeatures';
 import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { AccessPointSector } from './WorkspaceSectorFeature';
@@ -22,13 +29,13 @@ enum CRUDOperation {
     CREATE = 1,
     READ,
     UPDATE,
-    DELETE,
-  }
+    DELETE
+}
 
 export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     map: MapboxGL.Map;
     draw: MapboxDraw;
-    previousState: GeoJSON.FeatureCollection = {type: "FeatureCollection", features: []};
+    previousState: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
     readonly features: Map<string, BaseWorkspaceFeature>; // Map from workspace UUID to feature
     renderCloudRf: boolean;
@@ -50,7 +57,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
     private towerModal: TowerPaginationModal;
     private sessionModal: SessionModal;
-    
 
     /**
      * Initializes a WorkspaceManager base object
@@ -140,9 +146,11 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
             if (supportedFeatureTypes.includes(WorkspaceFeatureTypes.AP_CPE_LINK)) {
                 this.filterByType(initialFeatures, WorkspaceFeatureTypes.AP_CPE_LINK).forEach(
                     (feature: any) => {
-                        let apWorkspaceId = feature.properties.ap;
+                        let apWorkspaceId = feature.properties.ap || feature.properties.sector;
                         let cpeWorkspaceId = feature.properties.cpe;
-                        let ap = this.features.get(apWorkspaceId) as AccessPoint;
+                        let ap = this.features.get(apWorkspaceId) as
+                            | AccessPoint
+                            | AccessPointSector;
                         let cpe = this.features.get(cpeWorkspaceId) as CPE;
                         let workspaceFeature = new APToCPELink(
                             this.map,
@@ -152,7 +160,11 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                             cpe
                         );
                         ap.links.set(cpe, workspaceFeature);
-                        cpe.ap = ap;
+                        if (isAP(ap)) {
+                            cpe.ap = ap;
+                        } else {
+                            cpe.sector = ap;
+                        }
                         this.features.set(workspaceFeature.workspaceId, workspaceFeature);
                     }
                 );
@@ -266,14 +278,17 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                     // Delete pre-ajax call stuff
                     let retval = this.deleteFeaturePreAjaxHandlers[featureType](workspaceFeature);
                     if (retval !== false) {
-                        workspaceFeature.delete((resp) => {
-                            this.features.delete(feature.properties.uuid);
-                            // Should probably be replaced with a pubsub event signal
-                            MapLayerSidebarManager.getInstance().setUserMapLayers();
-                            this.acceptNewState();
-                        }, () => {
-                            this.revertOperation(event.features, CRUDOperation.DELETE);
-                        });
+                        workspaceFeature.delete(
+                            (resp) => {
+                                this.features.delete(feature.properties.uuid);
+                                // Should probably be replaced with a pubsub event signal
+                                MapLayerSidebarManager.getInstance().setUserMapLayers();
+                                this.acceptNewState();
+                            },
+                            () => {
+                                this.revertOperation(event.features, CRUDOperation.DELETE);
+                            }
+                        );
                     }
                 });
             }
@@ -322,16 +337,25 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                                         ].pre_update(workspaceFeature);
 
                                     if (retval !== false) {
-                                        cpe.update(() => {
-                                            // Should probably be replaced with a pubsub event signal
-                                            MapLayerSidebarManager.getInstance().setUserMapLayers();
-                                            this.acceptNewState();
-                                            this.updateFeatureAjaxHandlers[
-                                                WorkspaceFeatureTypes.CPE
-                                            ].post_update(workspaceFeature);
-                                        }, () => {this.revertOperation(event.features, CRUDOperation.UPDATE)});
+                                        cpe.update(
+                                            () => {
+                                                // Should probably be replaced with a pubsub event signal
+                                                MapLayerSidebarManager.getInstance().setUserMapLayers();
+                                                this.acceptNewState();
+                                                this.updateFeatureAjaxHandlers[
+                                                    WorkspaceFeatureTypes.CPE
+                                                ].post_update(workspaceFeature);
+                                            },
+                                            () => {
+                                                this.revertOperation(
+                                                    event.features,
+                                                    CRUDOperation.UPDATE
+                                                );
+                                            }
+                                        );
                                     }
-                                }, (error: any) => {
+                                },
+                                (error: any) => {
                                     renderAjaxOperationFailed();
                                     this.revertOperation(event.features, CRUDOperation.UPDATE);
                                 }
@@ -348,18 +372,21 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                                 ].pre_update(workspaceFeature);
 
                             if (retval !== false) {
-                                workspaceFeature.update(() => {
-                                    // Should probably be replaced with a pubsub event signal
-                                    MapLayerSidebarManager.getInstance().setUserMapLayers();
+                                workspaceFeature.update(
+                                    () => {
+                                        // Should probably be replaced with a pubsub event signal
+                                        MapLayerSidebarManager.getInstance().setUserMapLayers();
 
-                                    // @ts-ignore
-                                    this.updateFeatureAjaxHandlers[
-                                        feature.properties.feature_type
-                                    ].post_update(workspaceFeature);
-                                    this.acceptNewState();
-                                }, ()=>{
-                                    this.revertOperation(event.features, CRUDOperation.UPDATE);
-                                });
+                                        // @ts-ignore
+                                        this.updateFeatureAjaxHandlers[
+                                            feature.properties.feature_type
+                                        ].post_update(workspaceFeature);
+                                        this.acceptNewState();
+                                    },
+                                    () => {
+                                        this.revertOperation(event.features, CRUDOperation.UPDATE);
+                                    }
+                                );
                             }
                         }
                         break;
@@ -372,26 +399,23 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
         this.previousState = this.draw.getAll();
     }
 
-    revertOperation(features: Array<GeoJSON.Feature>, operation: CRUDOperation){
+    revertOperation(features: Array<GeoJSON.Feature>, operation: CRUDOperation) {
         features.forEach((revert_f) => {
-            const feat = this.previousState.features.find(f => f.id === revert_f.id);
-            switch(operation){
+            const feat = this.previousState.features.find((f) => f.id === revert_f.id);
+            switch (operation) {
                 case CRUDOperation.CREATE:
-                    if(revert_f?.id)
-                        this.draw.delete(String(revert_f?.id));
+                    if (revert_f?.id) this.draw.delete(String(revert_f?.id));
                     break;
                 case CRUDOperation.READ:
                     break;
                 case CRUDOperation.UPDATE:
-                    if(feat)
-                        this.draw.add(feat);
+                    if (feat) this.draw.add(feat);
                     break;
                 case CRUDOperation.DELETE:
-                    if(feat)
-                        this.draw.add(feat);
+                    if (feat) this.draw.add(feat);
                     break;
             }
-        })
+        });
     }
 
     static getInstance(): BaseWorkspaceManager {

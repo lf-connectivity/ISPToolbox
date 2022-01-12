@@ -54,7 +54,12 @@ import {
     AjaxLinkCheckLocationPopup,
     AjaxLinkCheckLocationSwitchSectorPopup
 } from './isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckLocationFlowPopups';
-import { AjaxLinkCheckCPEPopup } from './isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckCPEFlowPopups';
+import {
+    AjaxLinkCheckCPEPopup,
+    AjaxLinkCheckCPESwitchSectorPopup
+} from './isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckCPEFlowPopups';
+import { AccessPoint, isAP } from './workspace/WorkspaceFeatures';
+import { AccessPointSector } from './workspace/WorkspaceSectorFeature';
 var _ = require('lodash');
 
 type HighChartsExtremesEvent = {
@@ -333,6 +338,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new AjaxLinkCheckLocationPopup(this.map, this.draw);
         new AjaxLinkCheckCPEPopup(this.map, this.draw);
         new AjaxLinkCheckLocationSwitchSectorPopup(this.map, this.draw);
+        new AjaxLinkCheckCPESwitchSectorPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
 
         // Set relationships amongst collapsible components
@@ -474,7 +480,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
                     if (this.workspaceLinkSelected()) {
                         let link = this.draw.get(this.selectedFeatureID);
-                        let ap = LOSCheckWorkspaceManager.getFeatureByUuid(link?.properties?.ap);
+                        let ap = LOSCheckWorkspaceManager.getFeatureByUuid(
+                            link?.properties?.ap || link?.properties?.sector
+                        );
                         ap.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
                         this.map.fire('draw.update', { features: [ap.getFeatureData()] });
                     } else {
@@ -581,13 +589,24 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     setInputs(
         msg: string,
-        data: { radio: number; latitude: number; longitude: number; name: string; height: number }
+        data: {
+            radio: number;
+            latitude: number;
+            longitude: number;
+            name: string;
+            height: number;
+            frequency?: number;
+        }
     ) {
         $(`#lat-lng-${data.radio}`).val(
             `${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`
         );
         $(`#hgt-${data.radio}`).val(data.height.toFixed(0));
         $(`#radio_name-${data.radio}`).text(data.name);
+
+        if (data.frequency) {
+            $('#freq-dropdown').text(center_freq_values_reverse.get(data.frequency) as string);
+        }
     }
 
     showLinkCheckProfile() {
@@ -631,6 +650,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
                 $('#lat-lng-0').prop('readonly', false);
                 $('#lat-lng-1').prop('readonly', false);
+                $('#freq-dropdown').removeClass('disabled');
             }
 
             // Workspace AP-CPE link frequency, heights, and name
@@ -638,14 +658,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 feat.properties?.feature_type &&
                 feat.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
             ) {
+                let ap = LOSCheckWorkspaceManager.getFeatureByUuid(
+                    feat.properties.ap || feat.properties.sector
+                ) as AccessPoint | AccessPointSector;
+                let cpe = LOSCheckWorkspaceManager.getFeatureByUuid(feat.properties.cpe);
+
                 if (center_freq_values_reverse.has(feat.properties.frequency)) {
                     $('#freq-dropdown').text(
                         center_freq_values_reverse.get(feat.properties.frequency) as string
                     );
                 }
-
-                let ap = LOSCheckWorkspaceManager.getFeatureByUuid(feat.properties.ap);
-                let cpe = LOSCheckWorkspaceManager.getFeatureByUuid(feat.properties.cpe);
 
                 $('#hgt-0').val(
                     Math.round(
@@ -664,6 +686,21 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
                 if (ap.getFeatureProperty('uneditable')) {
                     $('#lat-lng-0').prop('readonly', true);
+                }
+
+                // Sectors: frequency and latlng editing disabled, frequency on sector
+                if (!isAP(ap)) {
+                    $('#lat-lng-0').prop('readonly', true);
+                    $('#freq-dropdown').addClass('disabled');
+
+                    if (center_freq_values_reverse.has(ap.getFeatureProperty('frequency'))) {
+                        $('#freq-dropdown').text(
+                            center_freq_values_reverse.get(
+                                ap.getFeatureProperty('frequency')
+                            ) as string
+                        );
+                        this.centerFreq = ap.getFeatureProperty('frequency');
+                    }
                 }
 
                 $('#radio_name-0').text(ap.getFeatureProperty('name'));

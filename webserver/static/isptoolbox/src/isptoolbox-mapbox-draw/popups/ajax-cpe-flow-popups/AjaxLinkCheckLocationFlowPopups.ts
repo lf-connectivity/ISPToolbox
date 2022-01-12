@@ -1,10 +1,7 @@
-import { LinkCheckLocationSearchTool } from '../../../organisms/LinkCheckLocationSearchTool';
 import { getSessionID } from '../../../utils/MapPreferences';
-import {
-    BaseAjaxCPEPopup,
-    BaseAjaxLinkCheckSwitchSectorPopup,
-    EPSILON
-} from './BaseAjaxCPEFlowPopups';
+import { BaseAjaxCPEPopup, BaseAjaxLinkCheckSwitchSectorPopup } from './BaseAjaxCPEFlowPopups';
+
+const VIEW_LOS_BUTTON = 'view-los-btn-customer-popup';
 
 export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
     private static _instance: AjaxLinkCheckLocationPopup;
@@ -23,20 +20,22 @@ export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
 
     protected cleanup() {
         super.cleanup();
-        let geocoderLngLat = LinkCheckLocationSearchTool.getInstance().getLngLat();
-        if (
-            geocoderLngLat &&
-            Math.abs(geocoderLngLat.lng - this.lnglat[0]) < EPSILON &&
-            Math.abs(geocoderLngLat.lat - this.lnglat[1]) < EPSILON
-        ) {
-            LinkCheckLocationSearchTool.getInstance().hide();
-        }
-        LinkCheckLocationSearchTool.getInstance().onPopupClose();
+        this.geocoderMarkerCleanup();
     }
 
     protected setEventHandlers(): void {
         super.setEventHandlers();
         this.highlightAll();
+
+        $(`#${VIEW_LOS_BUTTON}`)
+            .off()
+            .on(
+                'click',
+                this.createTooltipAction(() => {
+                    this.createCPE($(`#${VIEW_LOS_BUTTON}`).data('sectorId'));
+                    this.hide();
+                })
+            );
     }
 
     protected getEndpointParams(): any[] {
@@ -67,8 +66,9 @@ export class AjaxLinkCheckLocationSwitchSectorPopup extends BaseAjaxLinkCheckSwi
         return AjaxLinkCheckLocationSwitchSectorPopup._instance;
     }
 
-    protected getEndpointParams(): any[] {
-        return [getSessionID(), this.lnglat[0], this.lnglat[1]];
+    protected cleanup() {
+        super.cleanup();
+        this.geocoderMarkerCleanup();
     }
 
     protected onBackButton(): void {
@@ -80,6 +80,7 @@ export class AjaxLinkCheckLocationSwitchSectorPopup extends BaseAjaxLinkCheckSwi
     }
 
     protected onSelectSector(sectorId: string): void {
-        console.log(`Selected ${sectorId}`);
+        this.createCPE(sectorId);
+        this.hide();
     }
 }

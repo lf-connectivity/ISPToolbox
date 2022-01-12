@@ -1,5 +1,5 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
-import { Feature, Geometry, MultiPolygon, GeoJsonProperties } from 'geojson';
+import { Feature, Geometry, MultiPolygon, GeoJsonProperties, LineString } from 'geojson';
 import { djangoUrl } from '../utils/djangoUrl';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';
@@ -155,6 +155,7 @@ export class AccessPointSector extends WorkspacePolygonFeature {
             } as Feature<MultiPolygon, GeoJsonProperties>;
 
             this.draw.add(new_feat);
+            this.setFeatureProperty('uneditable', true);
         }
     }
 
@@ -165,9 +166,38 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         }
     }
 
+    /**
+     * Links the AP with the given CPE and creates an APToCPELink object to represent the link.
+     * @param cpe CPE to link to this AP.
+     * @returns The AP to CPE link object created, or undefined if link already exists.
+     */
+    linkCPE(cpe: CPE): APToCPELink {
+        if (this.links.has(cpe)) {
+            // @ts-ignore
+            return this.links.get(cpe);
+        }
+        const newLinkFeature: Feature<LineString, any> = {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates: [
+                    this.ap.getFeatureGeometryCoordinates(),
+                    cpe.getFeatureGeometryCoordinates()
+                ]
+            },
+            properties: {}
+        };
+
+        cpe.sector = this;
+        const newLink = new APToCPELink(this.map, this.draw, newLinkFeature, this, cpe);
+        this.links.set(cpe, newLink);
+        return newLink;
+    }
+
     private moveLinks(newCoords: [number, number]) {
         this.links.forEach((link) => {
             link.moveVertex(LINK_AP_INDEX, newCoords);
+            link.setFeatureProperty('frequency', this.getFeatureProperty('frequency'));
         });
     }
 

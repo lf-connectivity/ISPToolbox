@@ -1,7 +1,11 @@
 import { LinkCheckLocationSearchTool } from '../../../organisms/LinkCheckLocationSearchTool';
-import { BaseWorkspaceFeature } from '../../../workspace/BaseWorkspaceFeature';
 import { BaseWorkspaceManager } from '../../../workspace/BaseWorkspaceManager';
+import { WorkspaceFeatureTypes } from '../../../workspace/WorkspaceConstants';
 import { LinkCheckBaseAjaxFormPopup } from '../LinkCheckBaseAjaxPopup';
+import { Feature, Point } from 'geojson';
+import { getSessionID } from '../../../utils/MapPreferences';
+import { CPE } from '../../../workspace/WorkspaceFeatures';
+import { AccessPointSector } from '../../../workspace/WorkspaceSectorFeature';
 
 var _ = require('lodash');
 
@@ -30,6 +34,7 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
         if (!this.tooltipAction) {
             this.changeSelection([]);
         }
+        this.tooltipAction = false;
     }
 
     protected getCPEName(): string {
@@ -53,6 +58,43 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
             this.tooltipAction = true;
             f(event);
         };
+    }
+
+    protected geocoderMarkerCleanup() {
+        let geocoderLngLat = LinkCheckLocationSearchTool.getInstance().getLngLat();
+        if (
+            geocoderLngLat &&
+            this.tooltipAction &&
+            Math.abs(geocoderLngLat[0] - this.lnglat[0]) < EPSILON &&
+            Math.abs(geocoderLngLat[1] - this.lnglat[1]) < EPSILON
+        ) {
+            LinkCheckLocationSearchTool.getInstance().hide();
+        }
+        LinkCheckLocationSearchTool.getInstance().onPopupClose();
+    }
+
+    protected createCPE(sectorId: string) {
+        let newCPE = {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: this.lnglat
+            },
+            properties: {
+                name: this.getCPEName(),
+                sector: sectorId,
+                feature_type: WorkspaceFeatureTypes.CPE
+            }
+        } as Feature<Point, any>;
+        this.map.fire('draw.create', { features: [newCPE] });
+    }
+
+    protected cpeSwitchSector(cpe: CPE, sectorId: string) {
+        let sector = BaseWorkspaceManager.getFeatureByUuid(sectorId) as AccessPointSector;
+        if (cpe.sector?.workspaceId && cpe.sector.workspaceId !== sectorId) {
+            let link = cpe.sector?.links.get(cpe);
+            link?.switchAP(sector);
+        }
     }
 
     private changeSelection(sectorIds: Array<any>) {
@@ -106,6 +148,10 @@ export abstract class BaseAjaxLinkCheckSwitchSectorPopup extends BaseAjaxCPEFlow
         }, 150);
     }
 
+    protected getEndpointParams(): any[] {
+        return [getSessionID(), this.lnglat[0], this.lnglat[1]];
+    }
+
     protected setEventHandlers(): void {
         $(`#${BACK_TO_MAIN_LINK_ID}`).off().on('click', this.onBackButton.bind(this));
 
@@ -115,6 +161,7 @@ export abstract class BaseAjaxLinkCheckSwitchSectorPopup extends BaseAjaxCPEFlow
                 // find closest li with data attribute.
                 let sectorId = $(event.target).closest('li[data-sector-id]').data('sectorId');
                 if (sectorId) {
+                    this.tooltipAction = true;
                     this.onSelectSector(sectorId);
                 }
             });

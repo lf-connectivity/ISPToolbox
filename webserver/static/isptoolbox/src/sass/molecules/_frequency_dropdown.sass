@@ -2,7 +2,7 @@
 
 .freq-toggle
     margin-left: 5px
-    .btn   
+    .btn
         border-radius: 0 !important
         padding: 0.25rem 0.75rem
     .active
@@ -28,6 +28,9 @@
         font-family: $brand-font-family-mono
         font-size: $small-font-size
         padding: 0.25rem
+        &.disabled
+            background-color: $light-gray-color
+            color: $disabled-gray
     .dropdown-toggle::after
         display: inline-block
         width: .5em

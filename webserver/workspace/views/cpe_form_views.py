@@ -113,13 +113,31 @@ class LocationTooltipView(View, CPETooltipMixin):
             return render(request, self.out_of_range_template, self.context)
 
 
-# TODO: test this after coding LocationTooltip
 class CPETooltipView(generics.GenericAPIView, CPETooltipMixin):
     serializer_class = CPESerializer
     lookup_field = "uuid"
 
+    def get_queryset(self):
+        model = self.serializer_class.Meta.model
+        return model.get_rest_queryset(self.request)
+
+    def init_context(self, map_session, lng_lat):
+        super().init_context(map_session, lng_lat)
+        serializer = self.get_serializer(self.cpe)
+        self.context["cpe"] = serializer.data.copy()
+        self.context["highlighted_sector"] = self.get_context_for_sector(
+            self.cpe.sector
+        )
+
     def get(self, request, *args, **kwargs):
-        return render(request, self.template)
+        self.cpe = self.get_object()
+        self.init_context(self.cpe.map_session, self.cpe.geojson.json)
+
+        # Only show in range tooltip if CPE is in sector it's connected to.
+        if self.cpe.sector.intersects(self.lng_lat, units=self.units):
+            return render(request, self.in_range_template, self.context)
+        else:
+            return render(request, self.out_of_range_template, self.context)
 
 
 class SwitchSectorTooltipView(LocationTooltipView):

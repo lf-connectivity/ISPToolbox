@@ -1,5 +1,6 @@
 {% spaceless %}
-{% load i18n isp_toolbox_units %}
+{% load i18n address_format isp_toolbox_units  %}
+{% reverse_geocoded_address_lines lat lng as address_lines %}
 
 {{ address_lines|first|json_script:"cpe-name-cpe-flow" }}
 {{ sector_ids|json_script:"sector-ids-cpe-flow" }}

@@ -38,8 +38,9 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
                     let workspaceFeature = new CPE(this.map, this.draw, feature);
                     this.saveWorkspaceFeature(workspaceFeature, (resp) => {
                         let cpe = workspaceFeature as CPE;
-                        let apUUID = feature.properties.ap;
-                        let ap = this.features.get(apUUID) as AccessPoint;
+
+                        let apUUID = feature.properties.ap || feature.properties.sector;
+                        let ap = this.features.get(apUUID) as AccessPoint | AccessPointSector;
                         let link = cpe.linkAP(ap);
                         this.saveWorkspaceFeature(link, (resp) => {
                             this.map.fire('draw.create', { features: [link.getFeatureData()] });
@@ -56,6 +57,17 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
                 this.createApFeature(feature);
             } else if (feature.properties.feature_type === WorkspaceFeatureTypes.SECTOR) {
                 this.saveWorkspaceFeature(new AccessPointSector(this.map, this.draw, feature));
+            } else if (feature.properties.feature_type === WorkspaceFeatureTypes.CPE) {
+                let workspaceFeature = new CPE(this.map, this.draw, feature);
+                this.saveWorkspaceFeature(workspaceFeature, (resp) => {
+                    let cpe = workspaceFeature as CPE;
+                    let apUUID = feature.properties.ap || feature.properties.sector;
+                    let ap = this.features.get(apUUID) as AccessPoint | AccessPointSector;
+                    let link = cpe.linkAP(ap);
+                    this.saveWorkspaceFeature(link, (resp) => {
+                        this.map.fire('draw.create', { features: [link.getFeatureData()] });
+                    });
+                });
             }
         };
 
@@ -86,7 +98,7 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
             workspaceFeature: BaseWorkspaceFeature
         ) => {
             let link = workspaceFeature as APToCPELink;
-            if (!this.draw.get(link.ap.mapboxId) || !this.draw.get(link.cpe.mapboxId)) {
+            if (!this.draw.get(link.tower.mapboxId) || !this.draw.get(link.cpe.mapboxId)) {
                 this.features.delete(workspaceFeature.workspaceId);
                 return false;
             } else {

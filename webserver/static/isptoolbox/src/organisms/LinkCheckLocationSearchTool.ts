@@ -83,7 +83,12 @@ export class LinkCheckLocationSearchTool {
     }
 
     getLngLat() {
-        return this.marker.getLngLat();
+        let lngLat = this.marker.getLngLat();
+        if (lngLat) {
+            return [this.marker.getLngLat().lng, this.marker.getLngLat().lat];
+        } else {
+            return undefined;
+        }
     }
 
     setLngLat(lngLatInput: any) {

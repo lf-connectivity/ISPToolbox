@@ -797,6 +797,23 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(link.cpe, self.test_cpe)
         self.assertEqual(link.uneditable, DEFAULT_AP_CPE_LINK_UNEDITABLE)
 
+    def test_create_ap_cpe_link_frequency(self):
+        new_link = {
+            "frequency": UPDATED_FREQUENCY,
+            "geojson": DEFAULT_TEST_LINESTRING,
+            "sector": self.test_sector.uuid,
+            "cpe": self.test_cpe.uuid,
+            "uneditable": DEFAULT_AP_CPE_LINK_UNEDITABLE,
+        }
+        link = self.create_geojson_model(APToCPELink, AP_CPE_LINK_ENDPOINT, new_link)
+        self.assertEqual(link.owner, self.testuser)
+        self.assertEqual(link.frequency, DEFAULT_FREQUENCY)
+        self.assertJSONEqual(link.geojson.json, DEFAULT_TEST_LINESTRING)
+        self.assertEqual(link.ap, None)
+        self.assertEqual(link.sector, self.test_sector)
+        self.assertEqual(link.cpe, self.test_cpe)
+        self.assertEqual(link.uneditable, DEFAULT_AP_CPE_LINK_UNEDITABLE)
+
     def test_create_ap_cpe_link_deprecated(self):
         new_link = {
             "frequency": DEFAULT_FREQUENCY,
@@ -912,6 +929,9 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         sector = self.update_geojson_model(
             AccessPointSector, SECTOR_ENDPOINT, sector_id, updated_sector
         )
+
+        self.test_ap_cpe_link.refresh_from_db()
+
         self.assertJSONEqual(sector.geojson.json, UPDATED_TEST_SECTOR)
         self.assertEqual(sector.owner, self.testuser)
         self.assertEqual(sector.name, UPDATED_NAME)
@@ -920,6 +940,7 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertEqual(sector.heading, UPDATED_HEADING)
         self.assertEqual(sector.azimuth, UPDATED_AZIMUTH)
         self.assertEqual(sector.frequency, UPDATED_FREQUENCY)
+        self.assertEqual(self.test_ap_cpe_link.frequency, UPDATED_FREQUENCY)
 
     def test_update_items_not_exist(self):
         id = str(uuid4())
@@ -958,8 +979,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertJSONEqual(cpe.geojson.json, UPDATED_TEST_POINT)
         self.assertEqual(cpe.height, UPDATED_HEIGHT)
 
-    def test_update_ap_cpe_link(self):
-        link_id = self.test_ap_cpe_link.uuid
+    def test_update_ap_cpe_link_deprecated(self):
+        link_id = self.test_ap_cpe_link_deprecated.uuid
         updated_link = {
             "frequency": UPDATED_FREQUENCY,
         }
@@ -968,9 +989,9 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         )
         self.assertEqual(link.owner, self.testuser)
         self.assertEqual(link.frequency, UPDATED_FREQUENCY)
-        self.assertEqual(link.ap, None)
-        self.assertEqual(link.sector, self.test_sector)
-        self.assertEqual(link.cpe, self.test_cpe)
+        self.assertEqual(link.ap, self.test_ap)
+        self.assertEqual(link.sector, None)
+        self.assertEqual(link.cpe, self.test_cpe_deprecated)
 
     def test_update_polygon_coverage_area(self):
         area_id = self.test_polygon_coverage_area.uuid

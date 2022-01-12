@@ -33,10 +33,10 @@ const AP_SERIALIZER_FIELDS = [
     'default_cpe_height'
 ];
 
-const CPE_RESPONSE_FIELDS = ['name', 'height', 'height_ft', 'ap'];
-const CPE_SERIALIZER_FIELDS = ['name', 'height', 'ap'];
+const CPE_RESPONSE_FIELDS = ['name', 'height', 'height_ft', 'ap', 'sector'];
+const CPE_SERIALIZER_FIELDS = ['name', 'height', 'ap', 'sector'];
 
-const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe'];
+const AP_CPE_LINK_FIELDS = ['frequency', 'ap', 'cpe', 'sector'];
 
 const PTP_LINK_FIELDS = ['frequency', 'radio0hgt', 'radio1hgt'];
 
@@ -227,9 +227,14 @@ export class CPE extends WorkspacePointFeature {
      * @param cpe AP to link to this CPE.
      * @returns The AP to CPE link object created, or undefined if link already exists.
      */
-    linkAP(ap: AccessPoint): APToCPELink {
-        this.setFeatureProperty('ap', ap.workspaceId);
+    linkAP(ap: AccessPoint | AccessPointSector): APToCPELink {
+        if (isAP(ap)) {
+            this.setFeatureProperty('ap', ap.workspaceId);
+        } else {
+            this.setFeatureProperty('sector', ap.workspaceId);
+        }
         let retval = ap.linkCPE(this);
+
         this.map.fire('draw.update', { features: [this.getFeatureData()] });
         return retval;
     }
@@ -251,14 +256,12 @@ export class CPE extends WorkspacePointFeature {
     delete(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         super.delete((resp) => {
             if (this.ap) {
-                let link = this.ap.links.get(this) as APToCPELink;
-                this.ap.links.delete(this);
-                let removedLink = link.getFeatureData();
-                this.removeFeatureFromMap(link.mapboxId);
-                if (removedLink) {
-                    this.map.fire('draw.delete', { features: [removedLink] });
-                }
+                this.deleteLinkFromTower(this.ap);
                 this.ap = undefined;
+            }
+            if (this.sector) {
+                this.deleteLinkFromTower(this.sector);
+                this.sector = undefined;
             }
             if (successFollowup) {
                 successFollowup(resp);
@@ -271,18 +274,33 @@ export class CPE extends WorkspacePointFeature {
             let link = this.ap.links.get(this);
             link?.moveVertex(LINK_CPE_INDEX, newCoords);
         }
+
+        if (this.sector) {
+            let link = this.sector.links.get(this);
+            link?.moveVertex(LINK_CPE_INDEX, newCoords);
+        }
+    }
+
+    private deleteLinkFromTower(ap: AccessPoint | AccessPointSector) {
+        let link = ap.links.get(this) as APToCPELink;
+        ap.links.delete(this);
+        let removedLink = link.getFeatureData();
+        this.removeFeatureFromMap(link.mapboxId);
+        if (removedLink) {
+            this.map.fire('draw.delete', { features: [removedLink] });
+        }
     }
 }
 
 export class APToCPELink extends WorkspaceLineStringFeature {
-    ap: AccessPoint;
+    tower: AccessPoint | AccessPointSector;
     cpe: CPE;
 
     constructor(
         map: MapboxGL.Map,
         draw: MapboxDraw,
         featureData: Feature<LineString, any> | string,
-        ap: AccessPoint,
+        towerThing: AccessPoint | AccessPointSector,
         cpe: CPE
     ) {
         super(
@@ -294,26 +312,39 @@ export class APToCPELink extends WorkspaceLineStringFeature {
             AP_CPE_LINK_FIELDS,
             WorkspaceFeatureTypes.AP_CPE_LINK
         );
-        this.ap = ap;
+
+        this.tower = towerThing;
         this.cpe = cpe;
-        this.setFeatureProperty('ap', this.ap.workspaceId);
         this.setFeatureProperty('cpe', this.cpe.workspaceId);
         this.setFeatureProperty('uneditable', true);
+
+        if (isAP(this.tower)) {
+            this.setFeatureProperty('ap', this.tower.workspaceId);
+        } else {
+            this.setFeatureProperty('sector', this.tower.workspaceId);
+        }
     }
 
     create(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         super.create((resp) => {
             // Set inputs for AP and CPE
-            const apData = {
+            const towerData = {
                 radio: 0,
-                latitude: this.ap.getFeatureGeometryCoordinates()[1],
-                longitude: this.ap.getFeatureGeometryCoordinates()[0],
+                latitude: isAP(this.tower)
+                    ? this.tower.getFeatureGeometryCoordinates()[1]
+                    : this.tower.ap.getFeatureGeometryCoordinates()[1],
+                longitude: isAP(this.tower)
+                    ? this.tower.getFeatureGeometryCoordinates()[0]
+                    : this.tower.ap.getFeatureGeometryCoordinates()[0],
                 height: isUnitsUS()
-                    ? this.ap.getFeatureProperty('height_ft')
-                    : this.ap.getFeatureProperty('height'),
-                name: this.ap.getFeatureProperty('name')
-            };
-            PubSub.publish(LinkCheckEvents.SET_INPUTS, apData);
+                    ? this.tower.getFeatureProperty('height_ft')
+                    : this.tower.getFeatureProperty('height'),
+                name: this.tower.getFeatureProperty('name')
+            } as { [key: string]: any };
+            if (!isAP(this.tower)) {
+                towerData.frequency = this.tower.getFeatureProperty('frequency');
+            }
+            PubSub.publish(LinkCheckEvents.SET_INPUTS, towerData);
 
             const cpeData = {
                 radio: 1,
@@ -336,7 +367,7 @@ export class APToCPELink extends WorkspaceLineStringFeature {
     delete(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         super.delete(() => {
             this.cpe.ap = undefined;
-            this.ap.links.delete(this.cpe);
+            this.tower.links.delete(this.cpe);
             let cpeData = this.cpe.getFeatureData();
             this.removeFeatureFromMap(this.cpe.mapboxId);
             this.map.fire('draw.delete', { features: [cpeData] });
@@ -347,21 +378,30 @@ export class APToCPELink extends WorkspaceLineStringFeature {
         }, errorFollowup);
     }
 
-    switchAP(newAP: AccessPoint) {
-        if (newAP !== this.ap) {
+    switchAP(newTowerThing: AccessPoint | AccessPointSector) {
+        if (newTowerThing !== this.tower) {
             // Delete old AP data
-            this.ap.links.delete(this.cpe);
+            this.tower.links.delete(this.cpe);
 
             // Set new AP
-            this.ap = newAP;
-            this.ap.links.set(this.cpe, this);
-            this.cpe.ap = newAP;
-            this.cpe.setFeatureProperty('ap', newAP.workspaceId);
-            this.setFeatureProperty('ap', newAP.workspaceId);
+            this.tower = newTowerThing;
+            this.tower.links.set(this.cpe, this);
+            if (isAP(newTowerThing)) {
+                this.cpe.ap = newTowerThing;
+                this.cpe.setFeatureProperty('ap', newTowerThing.workspaceId);
+                this.setFeatureProperty('ap', newTowerThing.workspaceId);
+            } else {
+                this.cpe.sector = newTowerThing;
+                this.cpe.setFeatureProperty('sector', newTowerThing.workspaceId);
+                this.setFeatureProperty('sector', newTowerThing.workspaceId);
+            }
+
             this.map.fire('draw.update', { features: [this.getFeatureData()], action: 'move' });
             this.moveVertex(
                 LINK_AP_INDEX,
-                newAP.getFeatureGeometryCoordinates() as [number, number]
+                isAP(newTowerThing)
+                    ? (newTowerThing.getFeatureGeometryCoordinates() as [number, number])
+                    : (newTowerThing.ap.getFeatureGeometryCoordinates() as [number, number])
             );
         }
     }
@@ -450,4 +490,8 @@ export class ASRTowerCoverageArea extends CoverageArea {
             successFollowup(undefined);
         }
     }
+}
+
+export function isAP(ap: AccessPoint | AccessPointSector): ap is AccessPoint {
+    return ap.getFeatureType() === WorkspaceFeatureTypes.AP;
 }

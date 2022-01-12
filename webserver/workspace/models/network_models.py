@@ -763,6 +763,13 @@ class AccessPointSectorSerializer(
             )
 
         validated_data["cloudrf_coverage_geojson"] = new_cloudrf
+
+        # Update frequencies here so that we don't do this update every time the sector
+        # is updated.
+        new_frequency = validated_data.get("frequency", instance.frequency)
+        if not math.isclose(new_frequency, instance.frequency):
+            APToCPELink.objects.filter(sector=instance).update(frequency=new_frequency)
+
         return super(AccessPointSectorSerializer, self).update(instance, validated_data)
 
     def get_cloudrf_coverage_geojson_json(self, obj):
@@ -832,9 +839,10 @@ def _modify_height(sender, instance, **kwargs):
     """
     Modify the height when initially created to be relative to terrain.
     """
+    default_reference = instance.ap if instance.ap else instance.sector
     if instance.created is None:
         if instance.height is None:
-            instance.height = instance.ap.default_cpe_height_ft
+            instance.height = default_reference.default_cpe_height_ft
 
         try:
             instance.height = (
@@ -842,7 +850,7 @@ def _modify_height(sender, instance, **kwargs):
             )
         except Exception as e:
             logging.error(f"Exception when modifying height: {e}")
-            instance.height = instance.ap.default_cpe_height_ft
+            instance.height = default_reference.default_cpe_height_ft
 
 
 class CPESerializer(
@@ -913,6 +921,15 @@ class APToCPELink(WorkspaceFeature):
     @property
     def feature_type(self):
         return FeatureType.AP_CPE_LINK.value
+
+
+@receiver(pre_save, sender=APToCPELink)
+def _modify_frequency(sender, instance, **kwargs):
+    """
+    Modify the frequency to be equal to sector frequency.
+    """
+    if instance.sector:
+        instance.frequency = instance.sector.frequency
 
 
 class APToCPELinkSerializer(

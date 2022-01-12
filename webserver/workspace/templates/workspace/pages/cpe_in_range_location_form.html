@@ -39,10 +39,13 @@
 
     <div class="description section">
         <div class="draw-ptp-row">
-            {% comment %}
-            TODO: Customize ptp prompt for CPE vs location
-            {% endcomment %}
-            <p class="small">Draw PtP to:</p>
+            <p class="small">
+                {% if cpe %}
+                    PtP Drawn to:
+                {% else %}
+                    Draw PtP to:
+                {% endif %}
+            </p>
             {% if sectors|length > 1 %}
                 <a id="cpe-switch-sector-link-customer-popup" class="link">Switch</a>
             {% endif %}
@@ -53,12 +56,20 @@
             </p>
         </div>
     </div>
-    {% comment %}
-    TODO: Customize button row for CPE vs location
-    {% endcomment %}
-    <div class="button-row">
-        <button class='btn btn-primary isptoolbox-btn' id='view-los-btn-customer-popup'>View Line of Sight</button>
-        <a id='place-tower-link-customer-popup' class="link">Place Tower</a>
-    </div>
+    {% if cpe %}
+        <div class="node-edits">
+            <a id="cpe-delete-btn-customer-popup" data-toggle="modal" data-target="#apDeleteModal">
+                Delete Radio
+            </a>
+        </div>
+    {% else %}
+        <div class="button-row">
+            <button class='btn btn-primary isptoolbox-btn'
+                    id='view-los-btn-customer-popup'
+                    data-sector-id="{{ highlighted_sector.uuid }}"
+            >View Line of Sight</button>
+            <a id='place-tower-link-customer-popup' class="link">Place Tower</a>
+        </div>
+    {% endif %}
 </div>
 {% endspaceless %}

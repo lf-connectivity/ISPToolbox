@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.gis.geos import Point
 from django.http.response import Http404
 from django.shortcuts import render
@@ -5,7 +6,13 @@ from django.views import View
 from enum import Enum
 from rest_framework import generics
 
-from workspace.models import AccessPointSector, CPESerializer, WorkspaceMapSession
+from gis_data.models import MsftBuildingOutlines
+from workspace.models import (
+    AccessPointSector,
+    CPESerializer,
+    WorkspaceMapSession,
+    AccessPointCoverageBuildings,
+)
 
 import json
 
@@ -42,12 +49,21 @@ class CPETooltipMixin:
         if distance is False:
             return None
         else:
+            try:
+                coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
+                status = _CoverageStatus(
+                    coverage.nearby_buildings.get(
+                        msftid=self.context["building_id"]
+                    ).status
+                )
+            except ObjectDoesNotExist:
+                status = _CoverageStatus.UNKNOWN
+
             return {
                 "name": sector.name,
                 "uuid": sector.uuid,
                 "distance": distance,
-                # TODO: add status check by querying for building
-                "status": _CoverageStatus.UNKNOWN.value,
+                "status": status.value,
             }
 
     def init_context(self, map_session, lng_lat):
@@ -60,6 +76,15 @@ class CPETooltipMixin:
         self.context["lat"] = coordinates[1]
         self.context["session"] = map_session
         self.context["units"] = self.units
+
+        # Check to see if there's a building intersecting the point
+        location = Point(self.context["lng"], self.context["lat"])
+        try:
+            self.context["building_id"] = MsftBuildingOutlines.objects.get(
+                geog__intersects=location
+            ).id
+        except ObjectDoesNotExist:
+            self.context["building_id"] = -1
 
         # Calculate sectors intersecting point
         sectors = AccessPointSector.objects.filter(map_session=map_session)
@@ -75,9 +100,11 @@ class CPETooltipMixin:
         ]
 
         # Get overall coverage status
-        status = _CoverageStatus.UNKNOWN
+        status = _CoverageStatus.UNSERVICEABLE
         for sector in in_range:
-            status = _CoverageStatus.update_overall_status(status, sector["status"])
+            status = _CoverageStatus.update_overall_status(
+                status, _CoverageStatus(sector["status"])
+            )
         self.context["status"] = status.value
 
         # Get best sector to connect to - first serviceable in range sector, or
@@ -85,11 +112,11 @@ class CPETooltipMixin:
         if in_range:
             if status == _CoverageStatus.SERVICEABLE:
                 highlighted_sector = min(
-                    (
+                    [
                         sect
                         for sect in in_range
                         if sect["status"] == _CoverageStatus.SERVICEABLE.value
-                    ),
+                    ],
                     key=lambda s: s["distance"],
                 )
             else:
@@ -125,9 +152,13 @@ class CPETooltipView(generics.GenericAPIView, CPETooltipMixin):
         super().init_context(map_session, lng_lat)
         serializer = self.get_serializer(self.cpe)
         self.context["cpe"] = serializer.data.copy()
+
+        # Highlighted sector and status should match status of CPE rooftop
+        # only
         self.context["highlighted_sector"] = self.get_context_for_sector(
             self.cpe.sector
         )
+        self.context["status"] = self.context["highlighted_sector"]["status"]
 
     def get(self, request, *args, **kwargs):
         self.cpe = self.get_object()

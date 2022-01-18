@@ -27,7 +27,7 @@
                     <div>
                         {% if sector.status == "serviceable" %}
                             {% include "workspace/atoms/icons/cpe_pass_icon.html" %}
-                        {% elif status == "unserviceable" %}
+                        {% elif sector.status == "unserviceable" %}
                             {% include "workspace/atoms/icons/cpe_fail_icon.html" %}
                         {% endif %}
                     </div>

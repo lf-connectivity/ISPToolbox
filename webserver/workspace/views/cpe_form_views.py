@@ -45,26 +45,20 @@ class CPETooltipMixin:
     out_of_range_template = "workspace/pages/cpe_out_of_range_location_form.html"
 
     def get_context_for_sector(self, sector):
-        distance = sector.intersects(self.lng_lat, units=self.units)
-        if distance is False:
-            return None
-        else:
-            try:
-                coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
-                status = _CoverageStatus(
-                    coverage.nearby_buildings.get(
-                        msftid=self.context["building_id"]
-                    ).status
-                )
-            except ObjectDoesNotExist:
-                status = _CoverageStatus.UNKNOWN
+        try:
+            coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
+            status = _CoverageStatus(
+                coverage.nearby_buildings.get(msftid=self.context["building_id"]).status
+            )
+        except ObjectDoesNotExist:
+            status = _CoverageStatus.UNKNOWN
 
-            return {
-                "name": sector.name,
-                "uuid": sector.uuid,
-                "distance": distance,
-                "status": status.value,
-            }
+        return {
+            "name": sector.name,
+            "uuid": sector.uuid,
+            "distance": sector.distance(self.lng_lat, units=self.units),
+            "status": status.value,
+        }
 
     def init_context(self, map_session, lng_lat):
         self.units = map_session.units
@@ -90,9 +84,8 @@ class CPETooltipMixin:
         sectors = AccessPointSector.objects.filter(map_session=map_session)
         in_range = []
         for sector in sectors:
-            sector_context = self.get_context_for_sector(sector)
-            if self.get_context_for_sector(sector):
-                in_range.append(sector_context)
+            if sector.intersects(self.lng_lat, units=self.units):
+                in_range.append(self.get_context_for_sector(sector))
 
         self.context["sectors"] = sorted(in_range, key=lambda s: s["distance"])
         self.context["sector_ids"] = [
@@ -163,12 +156,7 @@ class CPETooltipView(generics.GenericAPIView, CPETooltipMixin):
     def get(self, request, *args, **kwargs):
         self.cpe = self.get_object()
         self.init_context(self.cpe.map_session, self.cpe.geojson.json)
-
-        # Only show in range tooltip if CPE is in sector it's connected to.
-        if self.cpe.sector.intersects(self.lng_lat, units=self.units):
-            return render(request, self.in_range_template, self.context)
-        else:
-            return render(request, self.out_of_range_template, self.context)
+        return render(request, self.in_range_template, self.context)
 
 
 class SwitchSectorTooltipView(LocationTooltipView):

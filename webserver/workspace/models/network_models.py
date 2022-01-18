@@ -616,22 +616,21 @@ class AccessPointSector(WorkspaceFeature):
         aoi = GEOSGeometry(json.dumps(geo_sector))
         return aoi.envelope
 
+    @staticmethod
+    def _wrap_geojson(geojson):
+        """Wrap geojson for turfpy functions"""
+        if isinstance(geojson, str):
+            geometry = json.loads(geojson)
+        else:
+            geometry = geojson
+        return {"geometry": geometry}
+
     def intersects(self, lng_lat, units="METRIC"):
         """
-        Determines if the point specified intersects with this sector. If so,
-        returns the distance
+        Determines if the point specified intersects with this sector.
         """
-
-        def wrap_geojson(geojson):
-            """Wrap geojson for turfpy functions"""
-            if isinstance(geojson, str):
-                geometry = json.loads(geojson)
-            else:
-                geometry = geojson
-            return {"geometry": geometry}
-
-        start = wrap_geojson(self.ap.geojson.json)
-        end = wrap_geojson(lng_lat)
+        start = AccessPointSector._wrap_geojson(self.ap.geojson.json)
+        end = AccessPointSector._wrap_geojson(lng_lat)
         start_bearing = (self.heading - self.azimuth / 2) % 360
         end_bearing = (self.heading + self.azimuth / 2) % 360
         bearing = measurement.bearing(start, end) % 360
@@ -644,17 +643,21 @@ class AccessPointSector(WorkspaceFeature):
         elif not (bearing >= start_bearing and bearing <= end_bearing):
             return False
 
+        distance = self.distance(lng_lat, units)
         if units == "METRIC":
-            distance = measurement.distance(start, end)
             max_distance = self.radius
         else:
-            distance = measurement.distance(start, end, units="mi")
             max_distance = self.radius_miles
 
-        if distance > max_distance:
-            return False
+        return distance <= max_distance
+
+    def distance(self, lng_lat, units="METRIC"):
+        start = AccessPointSector._wrap_geojson(self.ap.geojson.json)
+        end = AccessPointSector._wrap_geojson(lng_lat)
+        if units == "METRIC":
+            return measurement.distance(start, end)
         else:
-            return distance
+            return measurement.distance(start, end, units="mi")
 
 
 @receiver(post_save, sender=AccessPointSector)

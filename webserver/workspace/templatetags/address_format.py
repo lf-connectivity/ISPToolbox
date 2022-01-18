@@ -32,7 +32,9 @@ _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS = {
 # See PR: https://github.com/dunkelstern/international_address_formatter/pull/3
 class _UTF8AddressFormatter(international_address_formatter.AddressFormatter):
     def __init__(self):
-        file_dir = os.path.dirname(os.path.abspath(international_address_formatter.__file__))
+        file_dir = os.path.dirname(
+            os.path.abspath(international_address_formatter.__file__)
+        )
         config = os.path.abspath(os.path.join(file_dir, "data/worldwide.yml"))
 
         with open(config, "r", encoding="latin-1") as f:
@@ -82,20 +84,21 @@ def _process_component(response_component):
     address_components = {}
     if "id" in response_component:
         mapbox_component_type = response_component["id"].split(".")[0]
-        component_type = _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS[mapbox_component_type]
-        address_components[component_type] = response_component["text"]
+        if mapbox_component_type in _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS:
+            component_type = _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS[
+                mapbox_component_type
+            ]
+            address_components[component_type] = response_component["text"]
 
-        # Addresses might have house number
-        if component_type == "road" and "address" in response_component:
-            address_components["house_number"] = response_component["address"]
+            # Addresses might have house number
+            if component_type == "road" and "address" in response_component:
+                address_components["house_number"] = response_component["address"]
 
     return address_components
 
 
 def _reverse_geocode(lat, long):
-    address_components = {
-        "road": _("Undetected Street Address")
-    }
+    address_components = {"road": _("Undetected Street Address")}
     response = _geocoder.reverse(lon=long, lat=lat)
     if response.status_code == HTTP_200_OK:
         best_fit = response.geojson()["features"][0]
@@ -120,7 +123,9 @@ def reverse_geocoded_address_lines(lat, long, include_country=False):
     """
     address_components = _reverse_geocode(lat, long)
     country_code = pycountry.countries.get(name=address_components["country"]).alpha_2
-    lines = _address_formatter.format(address_components, country_code=country_code).split("\n")
+    lines = _address_formatter.format(
+        address_components, country_code=country_code
+    ).split("\n")
     if not include_country:
         lines = lines[:-1]
     return lines

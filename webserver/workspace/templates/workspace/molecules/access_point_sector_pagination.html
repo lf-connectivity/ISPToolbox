@@ -10,13 +10,13 @@
         <th scope="col">{% translate 'Name' %}
           {% if ordering == "name"%}
           <a name="" class="sort-ap" ordering-target="-name">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
           <a name="" class="sort-ap" ordering-target="name">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
           </a>
@@ -25,13 +25,13 @@
         <th scope="col">{% translate "Heading"%}
           {% if ordering == "heading"%}
           <a class="sort-ap" ordering-target="-heading">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
           <a class="sort-ap" ordering-target="heading">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html'  with flip=True %}
             </button>
           </a>
@@ -40,13 +40,13 @@
         <th scope="col">{% translate "Beamwidth Azimuth"%}
           {% if ordering == "azimuth"%}
           <a class="sort-ap" ordering-target="-azimuth">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
           <a class="sort-ap" ordering-target="azimuth">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
             </button>
           </a>
@@ -61,7 +61,7 @@
           </a>
           {% else %}
           <a name="" class="sort-ap" ordering-target="height">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
           </a>
@@ -76,7 +76,7 @@
           </a>
           {% else %}
           <a name="" class="sort-ap" ordering-target="radius">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
           </a>
@@ -91,7 +91,7 @@
           </a>
           {% else %}
           <a name="" class="sort-ap" ordering-target="frequency">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
           </a>
@@ -106,7 +106,7 @@
           </a>
           {% else %}
           <a class="sort-ap" ordering-target="last_updated" class="last-updated">
-            <button class="btn arrow">
+            <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
             </button>
           </a>

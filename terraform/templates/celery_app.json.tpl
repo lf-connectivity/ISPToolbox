@@ -3,8 +3,15 @@
     "name": "celery-app",
     "image": "${docker_image_url_celery}",
     "essential": true,
-    "cpu": 2048,
-    "memory": 6144,
+    "cpu": 4096,
+    "memory": 16384,
+    "ulimits": [
+      {
+        "name": "core",
+        "softLimit": 0,
+        "hardLimit": 0
+      }
+    ],
     "command": ["celery","--app","webserver","worker","-l","info"],
     "environment": [
       {

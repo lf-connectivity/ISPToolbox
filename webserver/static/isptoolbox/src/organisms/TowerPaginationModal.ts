@@ -144,6 +144,10 @@ export class TowerPaginationModal {
                 this.draw.delete(feat_ids);
                 this.map.fire('draw.delete', { features: feats });
             }
+            const ordering = $('#ap-modal-ordering').val() as string;
+            const ap = $('#ap-sector-uuid').val() as string
+            const page = event.currentTarget.getAttribute('page-target') as string;
+            this.getAccessPointSectors({ ordering, page, session: undefined, ap});
         });
         $('.ap-edit-btn').on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');

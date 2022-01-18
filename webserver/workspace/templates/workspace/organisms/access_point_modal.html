@@ -4,6 +4,7 @@
   <div class="modal-dialog modal-xl modal-fullscreen-lg-down" role="document">
     <div class="modal-content">
       <div class="modal-header">
+        <h3 class="modal-title d-none" id="accessPointSectorModalLabel">{% translate "Access Points"%}</h3>
         <h3 class="modal-title" id="accessPointModalLabel">{% translate "Tower Locations"%}</h3>
         <div class="d-flex">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -13,7 +14,7 @@
       </div>
       <nav id="tower-breadcrumb" class="d-none" aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="#" data-target="#apSectorModal">Tower Name</a></li>
+          <li class="breadcrumb-item"><a href="#" id="breadcrumb-tower-modal">Towers</a></li>
           <li class="breadcrumb-item active" aria-current="page" data-target="{{ap.uuid}}">Access Points</li>
         </ol>
       </nav>

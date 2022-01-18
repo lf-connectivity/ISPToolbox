@@ -110,8 +110,8 @@
       {% endfor %}
     </tbody>
   </table>
-  <input class="d-none" id="ap-modal-ordering" value="{{ordering}}">
-  <input class="d-none" id="ap-modal-page-num" value="{{current}}">
+  <input hidden id="ap-modal-ordering" value="{{ordering}}">
+  <input hidden id="ap-modal-page-num" value="{{current}}">
 </div>
 {% include 'workspace/atoms/pagination_page_nav.html' with pagination_class_css="ap-modal-page-change" %}
 {% endwith %}

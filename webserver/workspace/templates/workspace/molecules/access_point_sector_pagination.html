@@ -1,3 +1,4 @@
+{% spaceless %}
 {% load rest_framework i18n %}
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
@@ -5,6 +6,7 @@
   <table class="table table-sm table-hover" style="overflow-x: scroll">
     <thead class="thead-modal">
       <tr>
+        <th scope="col">#</th>
         <th scope="col">{% translate 'Name' %}
           {% if ordering == "name"%}
           <a name="" class="sort-ap" ordering-target="-name">
@@ -119,10 +121,11 @@
       {% endfor %}
     </tbody>
   </table>
-  <input class="d-none" id="ap-modal-ordering" value="{{ordering}}">
-  <input class="d-none" id="ap-modal-page-num" value="{{current}}">
+  <input hidden id="ap-sector-modal-ordering" value="{{ordering}}">
+  <input hidden id="ap-sector-uuid" value="{{request.GET.ap}}">
+  <input hidden id="ap-modal-page-num" value="{{current}}">
 </div>
-{% include 'workspace/atoms/pagination_page_nav.html' with pagination_class_css="ap-modal-page-change" %}
+{% include 'workspace/atoms/pagination_page_nav.html' with pagination_class_css="ap-sector-page-change" %}
 {% endwith %}
 {%else %}
 <div class="modal-body">
@@ -133,3 +136,4 @@
   </div>
 </div>
 {% endif %}
+{% endspaceless %}

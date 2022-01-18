@@ -3,10 +3,7 @@ import * as _ from 'lodash';
 import { createGeoJSONCircle } from '../isptoolbox-mapbox-draw/DrawModeUtils';
 import { Geometry, GeoJsonProperties, FeatureCollection, Feature } from 'geojson';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from '../workspace/BuildingCoverage';
-import {
-    WorkspaceEvents,
-    WorkspaceFeatureTypes
-} from '../workspace/WorkspaceConstants';
+import { WorkspaceEvents, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { AccessPoint } from '../workspace/WorkspaceFeatures';
 
 import { GeometryCollection } from '@turf/helpers';
@@ -20,6 +17,7 @@ import { AjaxTowerPopup } from '../isptoolbox-mapbox-draw/popups/AjaxTowerPopup'
 import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { BaseTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
+import { clickedOnMapCanvas } from '../utils/MapboxEvents';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -29,14 +27,12 @@ export const BUILDING_DATA_SOURCE = 'building_data_source';
 export const BUILDING_LAYER = 'building_layer';
 export const BUILDING_OUTLINE_LAYER = 'building_outline_layer';
 
-
 const EMPTY_SOURCE_AFTER_BUILDING = 'empty_building_source';
 export const EMPTY_LAYER_AFTER_BUILDING = 'empty_building_layer';
 
 const IS_ACTIVE_AP = 'active_ap';
 const ACTIVE_AP = 'true';
 const INACTIVE_AP = 'false';
-
 
 // TODO: Remove RenderCloudRF option from here, it will go into WorkspaceManager
 export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPlugin {
@@ -176,11 +172,15 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
                 ) as AccessPointSector;
                 // Setting this timeout so the natural mouseclick close popup trigger resolves
                 // before this one
-                setTimeout(() => {
-                    this.sectorPopup.hide();
-                    this.sectorPopup.setSector(sector);
-                    this.sectorPopup.show();
-                }, 1);
+
+                // Only clicking on the mapboxgl canvas triggers the event. (no marker trigger)
+                if (clickedOnMapCanvas(e)) {
+                    setTimeout(() => {
+                        this.sectorPopup.hide();
+                        this.sectorPopup.setSector(sector);
+                        this.sectorPopup.show();
+                    }, 1);
+                }
             } else if (selectedSectors.length > 1) {
                 this.apPopup.hide();
             }
@@ -388,13 +388,19 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
     }
 
     protected shouldRenderFeature(f: GeoJSON.Feature) {
-        switch(f.properties?.feature_type) {
+        switch (f.properties?.feature_type) {
             case WorkspaceFeatureTypes.AP:
-                return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(f.id as string);
+                return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(
+                    f.id as string
+                );
             case WorkspaceFeatureTypes.SECTOR:
-                return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(f.id as string);
+                return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(
+                    f.id as string
+                );
             case WorkspaceFeatureTypes.COVERAGE_AREA:
-                return !(f.id as string in MapLayerSidebarManager.getInstance().hiddenCoverageAreas);
+                return !(
+                    (f.id as string) in MapLayerSidebarManager.getInstance().hiddenCoverageAreas
+                );
             default:
                 return false;
         }

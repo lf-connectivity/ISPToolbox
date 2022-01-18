@@ -3,7 +3,7 @@
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
 <div class="modal-body isptoolbox-form">
-  <table class="table table-sm table-hover" style="overflow-x: scroll">
+  <table class="table table-sm table-hover table-modal" style="overflow-x: scroll">
     <thead class="thead-modal">
       <tr>
         <th scope="col" class="pl-2">#</th>

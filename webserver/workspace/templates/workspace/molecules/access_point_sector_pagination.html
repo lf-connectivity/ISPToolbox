@@ -3,7 +3,7 @@
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
 <div class="modal-body isptoolbox-form">
-  <table class="table table-sm table-hover" style="overflow-x: scroll">
+  <table class="table table-sm table-hover table-modal" style="overflow-x: scroll">
     <thead class="thead-modal">
       <tr>
         <th scope="col">#</th>
@@ -23,14 +23,14 @@
           {% endif %}
         </th>
         <th scope="col">{% translate "Heading"%}
-          {% if ordering == "max_radius"%}
-          <a class="sort-ap" ordering-target="-max_radius">
+          {% if ordering == "heading"%}
+          <a class="sort-ap" ordering-target="-heading">
             <button class="btn arrow">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a class="sort-ap" ordering-target="max_radius">
+          <a class="sort-ap" ordering-target="heading">
             <button class="btn arrow">
               {% include 'workspace/atoms/arrow_icon.html'  with flip=True %}
             </button>
@@ -38,14 +38,14 @@
           {% endif %}
         </th>
         <th scope="col">{% translate "Beamwidth Azimuth"%}
-          {% if ordering == "height"%}
-          <a class="sort-ap" ordering-target="-height">
+          {% if ordering == "azimuth"%}
+          <a class="sort-ap" ordering-target="-azimuth">
             <button class="btn arrow">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a class="sort-ap" ordering-target="height">
+          <a class="sort-ap" ordering-target="azimuth">
             <button class="btn arrow">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
             </button>
@@ -53,14 +53,14 @@
           {% endif %}
         </th>
         <th scope="col">{% translate 'Height' %}
-          {% if ordering == "lat"%}
-          <a name="" class="sort-ap" ordering-target="-lat">
+          {% if ordering == "height"%}
+          <a name="" class="sort-ap" ordering-target="-height">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a name="" class="sort-ap" ordering-target="lat">
+          <a name="" class="sort-ap" ordering-target="height">
             <button class="btn arrow">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
@@ -68,14 +68,14 @@
           {% endif %}
         </th>
         <th scope="col">{% translate 'Radius' %}
-          {% if ordering == "lng"%}
-          <a name="" class="sort-ap" ordering-target="-lng">
+          {% if ordering == "radius"%}
+          <a name="" class="sort-ap" ordering-target="-radius">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a name="" class="sort-ap" ordering-target="lng">
+          <a name="" class="sort-ap" ordering-target="radius">
             <button class="btn arrow">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
@@ -83,14 +83,14 @@
           {% endif %}
         </th>
         <th scope="col">{% translate 'Frequency' %}
-          {% if ordering == "lng"%}
-          <a name="" class="sort-ap" ordering-target="-lng">
+          {% if ordering == "frequency"%}
+          <a name="" class="sort-ap" ordering-target="-frequency">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a name="" class="sort-ap" ordering-target="lng">
+          <a name="" class="sort-ap" ordering-target="frequency">
             <button class="btn arrow">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>

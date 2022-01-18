@@ -321,7 +321,9 @@ class AccessPointSectorCreate(
 
     filter_backends = [filters.OrderingFilter,
                        SessionFilter, AccessPointFilter]
-    ordering_fields = ["name", "last_updated", "height", "radius"]
+    ordering_fields = [
+        "name", "last_updated", "height", "radius", "azimuth", "heading", "frequency"
+    ]
     ordering = ["-last_updated"]
 
     def get_serializer_context(self):

@@ -188,14 +188,15 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         // Wait for mapbox draw to finish loading - once complete place buildings above mapbox draw layers
         // If you can think of a better way to do this - feel free to replace
         const addBuildingLayerHelper = (r: mapboxgl.MapDataEvent) => {
-            const draw_layers_loaded = r.target
-                .getStyle()
+            const style = r.target.getStyle();
+            const draw_layers_loaded = style
                 .layers?.some(
-                    (l) => l.type === 'line' && (l.source as string).includes('mapbox-gl-draw')
+                    (l) => l.type === 'line' && (l.source as string).includes('mapbox-gl-draw') && l.id === 'gl-draw-line-static.cold'
                 );
+
             if (draw_layers_loaded) {
-                this.map.moveLayer(BUILDING_LAYER);
-                this.map.moveLayer(BUILDING_OUTLINE_LAYER);
+                this.map.moveLayer(BUILDING_LAYER, 'gl-draw-line-static.cold');
+                this.map.moveLayer(BUILDING_OUTLINE_LAYER, BUILDING_LAYER);
                 this.map.off('styledata', addBuildingLayerHelper);
             }
         };

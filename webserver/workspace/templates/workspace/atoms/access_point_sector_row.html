@@ -51,14 +51,12 @@
         </div>
     </td>
     <td>
-        <div class="input-group metric-input">
-            <div class="input-group-prepend">
-            <input name="frequency" type="text" value="{{ ap.frequency }}" ap-uuid-target="{{ap.uuid}}" disabled>
-                <span class="input-group-text">
-                    GHz
-                </span>
-            </div>
-        </div>
+        <select class="input-group my-auto" name="frequency" ap-uuid-target="{{ap.uuid}}" disabled>
+            <option value="{{ ap.frequency }}">{{ ap.frequency }} GHz</option>
+            {% for option, value in results.serializer.context.freq_options.items %}
+                <option value="{{value}}">{{option}}</option>
+            {% endfor %}
+        </select>
     </td>
     <td class="align-middle">{{ap.last_updated|lower}}</td>
     <td>

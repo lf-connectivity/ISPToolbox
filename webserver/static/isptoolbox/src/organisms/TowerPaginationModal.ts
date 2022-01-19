@@ -153,7 +153,7 @@ export class TowerPaginationModal {
             const uuid = event.currentTarget.getAttribute('data-target');
             event.currentTarget.classList.add('d-none');
             if (typeof uuid === 'string') {
-                $(`input[ap-uuid-target='${uuid}']`).removeAttr('disabled');
+                $(`input[ap-uuid-target='${uuid}'], select[ap-uuid-target='${uuid}']`).removeAttr('disabled');
                 $(`#ap-save-edit-${uuid}`).removeClass('d-none');
             }
         });
@@ -161,7 +161,7 @@ export class TowerPaginationModal {
             const uuid = event.currentTarget.getAttribute('data-target');
             const drawn_features = this.draw.getAll();
             const ap = drawn_features.features.filter((feat: any) => feat.properties.uuid === uuid);
-            $(`input[ap-uuid-target=${uuid}]`).each((idx, elem) => {
+            $(`input[ap-uuid-target=${uuid}], select[ap-uuid-target='${uuid}']`).each((idx, elem) => {
                 ap.forEach((feat: any) => {
                     let attr_name = elem.getAttribute('name');
                     let val = $(elem).val();

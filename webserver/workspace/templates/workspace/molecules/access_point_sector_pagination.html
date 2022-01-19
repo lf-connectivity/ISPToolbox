@@ -7,111 +7,111 @@
     <thead class="thead-modal">
       <tr>
         <th scope="col">#</th>
-        <th scope="col">{% translate 'Name' %}
+        <th scope="col"><div class="d-flex">{% translate 'Name' %}
           {% if ordering == "name"%}
-          <a name="" class="sort-ap" ordering-target="-name">
+          <a name="" class="sort-ap my-auto" ordering-target="-name">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a name="" class="sort-ap" ordering-target="name">
+          <a name="" class="sort-ap my-auto" ordering-target="name">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
           </a>
           {% endif %}
-        </th>
-        <th scope="col">{% translate "Heading"%}
+        </div></th>
+        <th scope="col"><div class="d-flex">{% translate "Heading"%}
           {% if ordering == "heading"%}
-          <a class="sort-ap" ordering-target="-heading">
+          <a class="sort-ap my-auto" ordering-target="-heading">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a class="sort-ap" ordering-target="heading">
+          <a class="sort-ap my-auto" ordering-target="heading">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html'  with flip=True %}
             </button>
           </a>
           {% endif %}
-        </th>
-        <th scope="col">{% translate "Beamwidth Azimuth"%}
+        </div></th>
+        <th scope="col"><div class="d-flex">{% translate "Beamwidth Azimuth"%}
           {% if ordering == "azimuth"%}
-          <a class="sort-ap" ordering-target="-azimuth">
+          <a class="sort-ap my-auto" ordering-target="-azimuth">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a class="sort-ap" ordering-target="azimuth">
+          <a class="sort-ap my-auto" ordering-target="azimuth">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
             </button>
           </a>
           {% endif %}
-        </th>
-        <th scope="col">{% translate 'Height' %}
+        </div></th>
+        <th scope="col"><div class="d-flex">{% translate 'Height' %}
           {% if ordering == "height"%}
-          <a name="" class="sort-ap" ordering-target="-height">
+          <a name="" class="sort-ap my-auto" ordering-target="-height">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a name="" class="sort-ap" ordering-target="height">
+          <a name="" class="sort-ap my-auto" ordering-target="height">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
           </a>
           {% endif %}
-        </th>
-        <th scope="col">{% translate 'Radius' %}
+        </div></th>
+        <th scope="col"><div class="d-flex">{% translate 'Radius' %}
           {% if ordering == "radius"%}
-          <a name="" class="sort-ap" ordering-target="-radius">
+          <a name="" class="sort-ap my-auto" ordering-target="-radius">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a name="" class="sort-ap" ordering-target="radius">
+          <a name="" class="sort-ap my-auto" ordering-target="radius">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
           </a>
           {% endif %}
-        </th>
-        <th scope="col">{% translate 'Frequency' %}
+        </div></th>
+        <th scope="col"><div class="d-flex">{% translate 'Frequency' %}
           {% if ordering == "frequency"%}
-          <a name="" class="sort-ap" ordering-target="-frequency">
+          <a name="" class="sort-ap my-auto" ordering-target="-frequency">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a name="" class="sort-ap" ordering-target="frequency">
+          <a name="" class="sort-ap my-auto" ordering-target="frequency">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
             </button>
           </a>
           {% endif %}
-        </th>
-        <th scope="col" style="width: 160px;">{%translate "Last Modified"%}
+        </div></th>
+        <th scope="col"><div class="d-flex">{% translate "Last Modified"%}
           {% if ordering == "last_updated"%}
-          <a class="sort-ap" ordering-target="-last_updated">
+          <a class="sort-ap my-auto" ordering-target="-last_updated">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
           {% else %}
-          <a class="sort-ap" ordering-target="last_updated" class="last-updated">
+          <a class="sort-ap my-auto" ordering-target="last_updated" class="last-updated">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
             </button>
           </a>
           {% endif %}
-        </th>
+        </div></th>
         <th scope="col"></th>
       </tr>
     </thead>

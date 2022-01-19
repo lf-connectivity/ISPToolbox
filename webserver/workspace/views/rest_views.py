@@ -330,6 +330,17 @@ class AccessPointSectorCreate(
         context = super().get_serializer_context()
         context.update(
             {"ordering": self.request.GET.get("ordering", self.ordering[0])})
+        context.update({
+            'freq_options': {
+                '2.4 GHz': 2.437,
+                '3.65 GHz': 3.6,
+                '5 GHz': 5.4925,
+                '11 GHz': 11.2,
+                '18 GHz': 18.7,
+                '24 GHz': 24.35,
+                '60 GHz': 64.79
+            }
+        })
         return context
 
     def get(self, request, *args, **kwargs):
@@ -405,7 +416,8 @@ class AccessPointCoverageResults(View):
         except AccessPointLocation.DoesNotExist:
             logging.info("Failed to find AP matching UUID")
         try:
-            sector = AccessPointSector.get_rest_queryset(request).get(uuid=uuid)
+            sector = AccessPointSector.get_rest_queryset(
+                request).get(uuid=uuid)
             coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
             return self.create_building_response(coverage)
         except AccessPointCoverageBuildings.DoesNotExist:
@@ -423,7 +435,8 @@ class AccessPointCoverageStatsView(View):
             logging.info("Failed to find AP matching UUID")
         # ENDTODO: deprecate
         try:
-            sector = AccessPointSector.get_rest_queryset(request).get(uuid=uuid)
+            sector = AccessPointSector.get_rest_queryset(
+                request).get(uuid=uuid)
             coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
             return JsonResponse(coverage.coverageStatistics())
         except AccessPointCoverageBuildings.DoesNotExist:

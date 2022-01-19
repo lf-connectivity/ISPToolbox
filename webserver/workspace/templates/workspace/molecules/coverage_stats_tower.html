@@ -1,0 +1,51 @@
+{% load i18n %}
+{% if coverage_stats.serviceable or coverage_stats.unserviceable %}
+<div>
+    <div class="d-flex justify-content-between">
+        <div>
+            <p class="ap-stats--label mb-0">
+                {% translate "Est Clear LOS"%}
+            </p>
+            <p class="ap-stats--label" style="font-size: 0.6rem;">
+                {% translate "at least 1 point on rooftop"%}
+            </p>
+        </div>
+        <div class="ap-stats--summary d-flex flew-row">
+            <div class="mr-2">
+                {% include "workspace/atoms/icons/unobstructed_icon.html" %}
+            </div>
+            <p style="color: #34eb46;">{{coverage_stats.serviceable}}</p>
+        </div>
+    </div>
+</div>
+<div>
+    <div class="d-flex justify-content-between">
+        <p class="ap-stats--label">
+            {% translate "Est Obstructed LOS"%}
+        </p>
+        <div class="ap-stats--summary d-flex flew-row">
+            <div class="mr-2">
+                {% include "workspace/atoms/icons/obstructed_icon.html" %}
+            </div>
+            <p style="color: #ff2f00;"> {{coverage_stats.unserviceable}}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if coverage_stats.unknown %}
+<div>
+    <div class="d-flex justify-content-between">
+        <p class="ap-stats--label">
+            {% translate "Loading LOS"%}
+        </p>
+        <div class="ap-stats--summary d-flex flew-row">
+            <div class="mr-2">
+                {% include "workspace/atoms/icons/loading_spinner.html" %}
+            </div>
+            <p style="color: #ccc;">
+                {{coverage_stats.unknown}}
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}

@@ -11,7 +11,9 @@ from workspace.models import (
 
 import logging
 
-from workspace.models.network_models import AccessPointSector
+from workspace.models.network_models import (
+    AccessPointSector,
+)
 
 
 class TooltipFormView(generics.GenericAPIView):
@@ -122,6 +124,15 @@ class SectorFormView(TooltipFormView):
         other_sectors = AccessPointSector.objects.filter(
             ap=ap, map_session=context["map_session"]
         ).exclude(uuid=context["uuid"])
+        try:
+            coverage = AccessPointCoverageBuildings.objects.filter(
+                sector=context["uuid"],
+            ).get()
+            context.update({
+                'coverage_stats': coverage.coverageStatistics()
+            })
+        except Exception:
+            logging.info("Could not find associated coverage")
         serialized_sectors = AccessPointSectorSerializer(other_sectors, many=True)
         context.update({"other_sectors": serialized_sectors.data})
         return context

@@ -12,7 +12,7 @@
         </div>
         <div class="ap-stats--summary d-flex flew-row">
             <div class="mr-2">
-                {% include "workspace/atoms/icons/unobstructed_icon.html" %}
+                {% include "workspace/atoms/icons/cpe_pass_icon.html" %}
             </div>
             <p style="color: #34eb46;">{{coverage_stats.serviceable}}</p>
         </div>
@@ -25,7 +25,7 @@
         </p>
         <div class="ap-stats--summary d-flex flew-row">
             <div class="mr-2">
-                {% include "workspace/atoms/icons/obstructed_icon.html" %}
+                {% include "workspace/atoms/icons/cpe_fail_icon.html" %}
             </div>
             <p style="color: #ff2f00;"> {{coverage_stats.unserviceable}}</p>
         </div>

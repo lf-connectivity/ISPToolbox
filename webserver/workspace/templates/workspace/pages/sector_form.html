@@ -189,7 +189,9 @@
                 {% endif %}
             </button>
         </li>
+        {% if tool == "los_check" %}
         {% include "workspace/molecules/coverage_stats_tower.html" %}
+        {% endif %}
         {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-sector-row-sector-popup" delete_row_a_id="sector-delete-btn" delete_row_object_name="Access Point" delete_row_last_updated=last_updated %}
     </form>
 </ul>

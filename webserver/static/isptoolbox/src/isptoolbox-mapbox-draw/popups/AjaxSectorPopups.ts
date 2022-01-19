@@ -18,7 +18,6 @@ const SECTOR_DELETE_BUTTON_ID = 'sector-delete-btn';
 const ADD_SECTOR_BUTTON_ID = 'add-access-point-sector-popup';
 
 const NAME_INPUT_ID = 'name-input-sector-popup';
-const NAME_P_ID = 'name-p-sector-popup';
 const EDIT_NAME_BTN_ID = 'edit-sector-name-sector-popup';
 const SAVE_NAME_BTN_ID = 'save-sector-name-sector-popup';
 const SECTOR_SELECT_ID = 'select-sector-sector-popup';
@@ -145,10 +144,9 @@ export abstract class BaseAjaxSectorPopup
 
                 // Hide non-edit mode components
                 $(`#${EDIT_NAME_BTN_ID}`).addClass('d-none');
-                $(`#${NAME_P_ID}`).addClass('d-none');
 
                 // Show edit mode components
-                $(`#${NAME_INPUT_ID}`).removeClass('d-none');
+                $(`#${NAME_INPUT_ID}`).prop('disabled', false);;
                 $(`#${SAVE_NAME_BTN_ID}`).removeClass('d-none');
             });
 

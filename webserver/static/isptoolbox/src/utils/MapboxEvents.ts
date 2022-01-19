@@ -1,10 +1,10 @@
 export function clickedOnMapCanvas(e: any) {
-    const target = e.originalEvent.target;
     return (
-        target !== null &&
+        e.originalEvent &&
+        e.originalEvent.target != null &&
         // @ts-ignore
-        $(target).prop('tagName').toLowerCase() == 'canvas' &&
+        $(e.originalEvent.target).prop('tagName').toLowerCase() == 'canvas' &&
         // @ts-ignore
-        $(target).hasClass('mapboxgl-canvas')
+        $(e.originalEvent.target).hasClass('mapboxgl-canvas')
     );
 }

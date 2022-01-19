@@ -14,10 +14,16 @@
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
-          {% else %}
+          {% elif ordering == "name" %}
           <a name="" class="sort-ap my-auto" ordering-target="name">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap my-auto" ordering-target="name">
+            <button class="sort-btn">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
             </button>
           </a>
           {% endif %}
@@ -29,10 +35,16 @@
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
-          {% else %}
+          {% elif ordering == "-heading" %}
           <a class="sort-ap my-auto" ordering-target="heading">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html'  with flip=True %}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap my-auto" ordering-target="heading">
+            <button class="sort-btn">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
             </button>
           </a>
           {% endif %}
@@ -44,10 +56,16 @@
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
-          {% else %}
+          {% elif ordering == "-azimuth" %}
           <a class="sort-ap my-auto" ordering-target="azimuth">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap my-auto" ordering-target="azimuth">
+            <button class="sort-btn">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
             </button>
           </a>
           {% endif %}
@@ -59,10 +77,16 @@
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
-          {% else %}
+          {% elif ordering == "-height" %}
           <a name="" class="sort-ap my-auto" ordering-target="height">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap my-auto" ordering-target="height">
+            <button class="sort-btn">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
             </button>
           </a>
           {% endif %}
@@ -74,10 +98,16 @@
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
-          {% else %}
+          {% elif ordering == "-radius" %}
           <a name="" class="sort-ap my-auto" ordering-target="radius">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap my-auto" ordering-target="radius">
+            <button class="sort-btn">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
             </button>
           </a>
           {% endif %}
@@ -89,10 +119,16 @@
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
-          {% else %}
+          {% elif ordering == "-frequency" %}
           <a name="" class="sort-ap my-auto" ordering-target="frequency">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap my-auto" ordering-target="frequency">
+            <button class="sort-btn">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
             </button>
           </a>
           {% endif %}
@@ -104,10 +140,16 @@
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
           </a>
-          {% else %}
+          {% elif ordering == "-last_updated" %}
           <a class="sort-ap my-auto" ordering-target="last_updated" class="last-updated">
             <button class="sort-btn">
               {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
+            </button>
+          </a>
+          {% else %}
+          <a name="" class="sort-ap my-auto" ordering-target="last_updated">
+            <button class="sort-btn">
+              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
             </button>
           </a>
           {% endif %}

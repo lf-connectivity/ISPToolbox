@@ -3,6 +3,18 @@
 transform="scale(1,-1)"
 {% endif %}
 >
-    <path d="M9 5.5L5 9.5L1 5.5" stroke="#111111" stroke-linecap="round" stroke-linejoin="round" />
-    <path d="M5 9.5V0.5" stroke="#111111" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9 5.5L5 9.5L1 5.5" 
+    {% if light %}
+    stroke="#D0D0D0"
+    {% else %}
+    stroke="#111111"
+    {% endif %}
+    stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M5 9.5V0.5" 
+    {% if light %}
+    stroke="#D0D0D0"
+    {% else %}
+    stroke="#111111"
+    {% endif %}
+    stroke-linecap="round" stroke-linejoin="round" />
 </svg>

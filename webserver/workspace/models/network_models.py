@@ -432,7 +432,10 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
 
 
 class AccessPointSector(WorkspaceFeature):
-    name = models.CharField(max_length=50, default="Unnamed AP Sector")
+    name = models.CharField(
+        max_length=50,
+        default="Unnamed AP"
+    )
     heading = models.FloatField(
         default=ModelLimits.HEADING.default,
         validators=[

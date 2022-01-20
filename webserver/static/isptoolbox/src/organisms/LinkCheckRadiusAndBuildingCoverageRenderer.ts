@@ -207,14 +207,15 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         RadiusAndBuildingCoverageRenderer.prototype.drawSelectionChangeCallback.call(this, {
             features
         });
-        features.forEach((f) => {
-            if (f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR) {
+        if(features.length === 1){
+            const feat = features[0];
+            if( feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR){
                 this.accessPointStatusCallback('', {
                     type: WS_AP_Events.AP_STATUS,
-                    uuid: f.properties?.uuid
+                    uuid: feat.properties?.uuid
                 });
             }
-        });
+        }
     }
 
     sendCoverageRequest({ features }: { features: Array<any> }) {

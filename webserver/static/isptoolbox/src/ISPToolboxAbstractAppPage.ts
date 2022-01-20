@@ -57,7 +57,7 @@ export abstract class ISPToolboxAbstractAppPage {
             // @ts-ignore
             initial_zoom = window.ISPTOOLBOX_SESSION_INFO.initialMapZoom;
             // @ts-ignore
-        } catch (err) {}
+        } catch (err) { }
 
         this.map = new mapboxgl.Map({
             container: 'map',
@@ -66,12 +66,6 @@ export abstract class ISPToolboxAbstractAppPage {
             zoom: initial_zoom, // starting zoom
             attributionControl: false
         });
-
-        this.map.addControl(
-            new mapboxgl.AttributionControl({
-                customAttribution: `<a href="${SOURCES_PAGE_BASE_URL}/${sources_page}/" target="_blank">Sources</a>`
-            })
-        );
 
         this.map.on('load', () => {
             // When map movement ends save where the user is looking

@@ -64,7 +64,7 @@ export abstract class ISPToolboxAbstractAppPage {
             style: 'mapbox://styles/mapbox/satellite-streets-v11', // stylesheet location
             center: initial_map_center, // starting position [lng, lat]
             zoom: initial_zoom, // starting zoom
-            attributionControl: false
+            attributionControl: true
         });
 
         this.map.on('load', () => {

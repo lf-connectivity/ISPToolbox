@@ -21,6 +21,8 @@ import { calculateMaximumFresnelRadius } from '../LinkCalcUtils';
 import { LinkCheckPage } from '../LinkCheckPage';
 import { calculateLookVector } from '../HoverMoveLocation3DView';
 import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
+import { djangoUrl } from '../utils/djangoUrl';
+import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
 let potree = (window as any).Potree as null | typeof Potree;
 if (!(window as any).webgl2support) {
@@ -207,8 +209,10 @@ export class LiDAR3DView implements IMapboxDrawPlugin {
             const feat = event.features[0];
             if (
                 (feat.geometry.type === 'Point' && !dragging) ||
-                feat.geometry.type === 'LineString'
+                feat.geometry.type === 'LineString' ||
+                feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR
             ) {
+                
                 this.highlightFeature(feat);
             }
         }
@@ -230,7 +234,7 @@ export class LiDAR3DView implements IMapboxDrawPlugin {
         // Load the meta data for feature
         const uuid = feat.properties?.uuid;
         if (typeof uuid === 'string') {
-            $.get(`/pro/workspace/api/visualization/${uuid}/`)
+            $.get(djangoUrl('workspace:potree_viz', uuid))
                 .done((resp) => {
                     const selected = this.draw.getSelected();
                     // Verify that the feature we selected is still the one we want to render

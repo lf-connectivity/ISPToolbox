@@ -3,6 +3,8 @@ from mmwave import models as mmwave_models
 import json
 from django.contrib.gis.geos import LineString, Point
 
+from workspace.models.network_models import AccessPointSector
+
 BUFFER_POINT_M = 50
 
 
@@ -10,8 +12,11 @@ def get_workspace_potree_visualization_metadata(feature: models.WorkspaceFeature
     """
     Calculate metadata to visualize potree
     """
+    geojson = feature.geojson
+    if isinstance(feature, models.AccessPointSector):
+        geojson = feature.observer
     clouds = mmwave_models.EPTLidarPointCloud.query_intersect_aoi(
-        feature.geojson)
+        geojson)
     if len(clouds) == 0:
         raise Exception
     clouds = list(clouds)
@@ -19,9 +24,9 @@ def get_workspace_potree_visualization_metadata(feature: models.WorkspaceFeature
     metadata = {
         'clouds': [{'name': cld.name, 'url': cld.url} for cld in clouds],
     }
-    if isinstance(feature.geojson, LineString):
+    if isinstance(geojson, LineString):
         metadata.update(PotreeMetaLine(feature, clouds[0].srs))
-    elif isinstance(feature.geojson, Point):
+    elif isinstance(geojson, Point):
         metadata.update(PotreeMetaPoint(feature, clouds[0].srs))
     return metadata
 
@@ -65,9 +70,12 @@ def PotreeMetaPoint(feature, srs):
     """
     Get metadata necessary to render point in potree
     """
+    geojson = feature.geojson
+    if isinstance(feature, AccessPointSector):
+        geojson = feature.observer
     metadata = {
         'type': 'Point',
-        'center': json.loads(feature.geojson.transform(srs, clone=True).json),
+        'center': json.loads(geojson.transform(srs, clone=True).json),
         'height': feature.height,
         'dtm': feature.get_dtm_height(),
         'name': feature.name

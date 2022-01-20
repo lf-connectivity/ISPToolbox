@@ -52,7 +52,8 @@ export enum LOSWSEvents {
     AP_MSG = 'ws.ap_msg',
     VIEWSHED_PROGRESS_MSG = 'ws.viewshed_progress_msg',
     VIEWSHED_UNEXPECTED_ERROR_MSG = 'ws.viewshed_unexpected_err_msg',
-    STD_MSG = 'ws.std_msg'
+    STD_MSG = 'ws.std_msg',
+    CPE_SECTOR_CREATED_MSG = 'ws.cpe_sector_created_msg'
 }
 
 export enum WS_AP_Events {
@@ -61,7 +62,8 @@ export enum WS_AP_Events {
     AP_STATUS = 'ap.status',
     AP_UNEXPECTED_ERROR = 'ap.unexpected_error',
     AP_ERROR = 'ap.error',
-    AP_VIEWSHED_PROGRESS = 'ap.viewshed_progress'
+    AP_VIEWSHED_PROGRESS = 'ap.viewshed_progress',
+    CPE_SECTOR_CREATED = 'cpe.sector_created'
 }
 
 export enum LOSWSHandlers {
@@ -132,15 +134,23 @@ export type LidarResponse = {
     tx: [number, number];
     still_loading: boolean;
 };
+
 export type AccessPointCoverageResponse = {
     type: WS_AP_Events.AP_STATUS;
     uuid: string;
+};
+
+export type CPESectorCreatedResponse = {
+    type: WS_AP_Events.CPE_SECTOR_CREATED;
+    added_features: Array<any>;
+    deleted_features: Array<any>;
 };
 
 export type LOSCheckResponse = LinkResponse | TerrainResponse | LidarResponse;
 export type WSResponse =
     | LOSCheckResponse
     | AccessPointCoverageResponse
+    | CPESectorCreatedResponse
     | ViewShedResponse
     | ViewshedProgressResponse
     | ViewshedUnexpectedError;

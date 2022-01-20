@@ -5,11 +5,10 @@ from .ayi_dyi_tasks import createUserDataDownload
 from .sector_tasks import (
     calculateSectorCoverage,
     calculateSectorNearby,
-    calculateSectorViewshed
+    calculateSectorViewshed,
 )
+from .cpe_tasks import createSectorCPEFromLngLat
 
-__all__ = [
-    'generateAccessPointCoverage', 'calculateCoverage', 'computeViewshedCoverage',
-    'createUserDataDownload', 'calculateSectorCoverage', 'calculateSectorNearby',
-    'calculateSectorViewshed'
-]
+import workspace.utils.import_utils
+
+__all__ = workspace.utils.import_utils.get_imported_classnames(__name__)

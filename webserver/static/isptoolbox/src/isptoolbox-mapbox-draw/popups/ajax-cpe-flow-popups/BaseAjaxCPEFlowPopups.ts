@@ -12,7 +12,6 @@ var _ = require('lodash');
 const CPE_NAME_JSON_ID = 'cpe-name-cpe-flow';
 const SECTOR_IDS_JSON_ID = 'sector-ids-cpe-flow';
 
-const DRAW_PTP_BUTTON = 'draw-ptp-btn-customer-popup';
 const SWITCH_SECTOR_LINK = 'cpe-switch-sector-link-customer-popup';
 
 const BACK_TO_MAIN_LINK_ID = 'back-to-main-link-switch-sector-popup';
@@ -73,7 +72,7 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
         LinkCheckLocationSearchTool.getInstance().onPopupClose();
     }
 
-    protected createCPE(sectorId: string) {
+    protected createCPE(id: string, idType: 'ap' | 'sector' = 'sector') {
         let newCPE = {
             type: 'Feature',
             geometry: {
@@ -82,10 +81,10 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
             },
             properties: {
                 name: this.getCPEName(),
-                sector: sectorId,
                 feature_type: WorkspaceFeatureTypes.CPE
             }
         } as Feature<Point, any>;
+        newCPE.properties[idType] = id;
         this.map.fire('draw.create', { features: [newCPE] });
     }
 
@@ -111,16 +110,6 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
 export abstract class BaseAjaxCPEPopup extends BaseAjaxCPEFlowPopup {
     protected setEventHandlers() {
         $(`#${SWITCH_SECTOR_LINK}`).off().on('click', this.onSwitchSector.bind(this));
-        $(`#${DRAW_PTP_BUTTON}`)
-            .off()
-            .on('click', this.createTooltipAction(this.onDrawPtP.bind(this)));
-    }
-
-    protected onDrawPtP() {
-        //@ts-ignore
-        this.draw.changeMode('draw_link', { start: this.lnglat });
-        this.map.fire('draw.modechange', { mode: 'draw_link' });
-        this.hide();
     }
 
     protected abstract onSwitchSector(): void;

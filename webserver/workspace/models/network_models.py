@@ -81,31 +81,37 @@ class WorkspaceFeature(models.Model):
 
 class SessionWorkspaceModelMixin:
     @classmethod
-    def get_features_for_session(serializer, session):
-        objects = serializer.Meta.model.objects.filter(map_session=session).all()
+    def get_features_for_session(serializer, session, objects=None):
+        if not objects:
+            objects = serializer.Meta.model.objects.filter(map_session=session).all()
 
         # Filter out all geometryfield model properties from properties.
         features = []
         for obj in objects:
-            properties = {}
-            for k, v in serializer(obj).data.items():
+            if obj.map_session == session:
+                properties = {}
+                for k, v in serializer(obj).data.items():
 
-                # Some keys might be properties, not fields
-                try:
-                    model_field_type = obj._meta.get_field(k)
-                except FieldDoesNotExist:
-                    model_field_type = None
+                    # Some keys might be properties, not fields
+                    try:
+                        model_field_type = obj._meta.get_field(k)
+                    except FieldDoesNotExist:
+                        model_field_type = None
 
-                if not isinstance(model_field_type, GeometryField):
-                    properties[k] = v
+                    if not isinstance(model_field_type, GeometryField):
+                        # UUIDs not being serializable are annoying
+                        if isinstance(v, uuid.UUID):
+                            properties[k] = str(v)
+                        else:
+                            properties[k] = v
 
-            features.append(
-                {
-                    "type": "Feature",
-                    "geometry": json.loads(obj.geojson.json),
-                    "properties": properties,
-                }
-            )
+                features.append(
+                    {
+                        "type": "Feature",
+                        "geometry": json.loads(obj.geojson.json),
+                        "properties": properties,
+                    }
+                )
 
         return {"type": "FeatureCollection", "features": features}
 
@@ -1133,10 +1139,20 @@ class AccessPointCoverageBuildings(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # TODO: deprecate
     ap = models.OneToOneField(
-        AccessPointLocation, on_delete=models.CASCADE, db_index=True, null=True, blank=True, default=None,
+        AccessPointLocation,
+        on_delete=models.CASCADE,
+        db_index=True,
+        null=True,
+        blank=True,
+        default=None,
     )
     sector = models.OneToOneField(
-        AccessPointSector, on_delete=models.CASCADE, db_index=True, null=True, blank=True, default=None,
+        AccessPointSector,
+        on_delete=models.CASCADE,
+        db_index=True,
+        null=True,
+        blank=True,
+        default=None,
     )
     status = models.CharField(
         default=CoverageCalculationStatus.START,
@@ -1157,11 +1173,15 @@ class AccessPointCoverageBuildings(models.Model):
 
     def calculate_hash(self):
         if self.ap is not None:
-            return f"{self.ap.geojson.x},{self.ap.geojson.y}," + \
-                f"{self.ap.max_radius},{self.ap.height},{self.ap.default_cpe_height}"
+            return (
+                f"{self.ap.geojson.x},{self.ap.geojson.y},"
+                + f"{self.ap.max_radius},{self.ap.height},{self.ap.default_cpe_height}"
+            )
         else:
-            return f"{self.sector.ap.geojson.x},{self.sector.ap.geojson.y}," + \
-                f"{self.sector.max_radius},{self.sector.height},{self.sector.default_cpe_height}"
+            return (
+                f"{self.sector.ap.geojson.x},{self.sector.ap.geojson.y},"
+                + f"{self.sector.max_radius},{self.sector.height},{self.sector.default_cpe_height}"
+            )
 
     def result_cached(self):
         return self.hash == self.calculate_hash()

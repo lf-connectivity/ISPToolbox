@@ -111,67 +111,10 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
         let initialFeatures =
             getInitialFeatures() !== null ? getInitialFeatures().features : undefined;
-        const addType = (
-            featureType: WorkspaceFeatureTypes,
-            featureClass: new (
-                map: MapboxGL.Map,
-                draw: MapboxDraw,
-                feature: any
-            ) => BaseWorkspaceFeature,
-            preprocessFeature?: (feature: any) => void
-        ) => {
-            if (this.isSupportedFeatureType(featureType)) {
-                this.filterByType(initialFeatures, featureType).forEach((feature: any) => {
-                    if (preprocessFeature) {
-                        preprocessFeature(feature);
-                    }
-                    let workspaceFeature = new featureClass(this.map, this.draw, feature);
-                    this.features.set(workspaceFeature.workspaceId, workspaceFeature);
-                });
-            }
-        };
 
         // Add initial features
         if (initialFeatures) {
-            // APs, CPEs, and Coverage areas before PtP links and coverage areas
-            addType(WorkspaceFeatureTypes.AP, AccessPoint, (feature: any) => {
-                feature.properties.radius = feature.properties.max_radius;
-                feature.properties.center = feature.geometry.coordinates;
-            });
-            addType(WorkspaceFeatureTypes.PTP_LINK, PointToPointLink);
-            addType(WorkspaceFeatureTypes.CPE, CPE);
-            addType(WorkspaceFeatureTypes.COVERAGE_AREA, CoverageArea);
-            addType(WorkspaceFeatureTypes.SECTOR, AccessPointSector);
-
-            if (supportedFeatureTypes.includes(WorkspaceFeatureTypes.AP_CPE_LINK)) {
-                this.filterByType(initialFeatures, WorkspaceFeatureTypes.AP_CPE_LINK).forEach(
-                    (feature: any) => {
-                        let apWorkspaceId = feature.properties.ap || feature.properties.sector;
-                        let cpeWorkspaceId = feature.properties.cpe;
-                        let ap = this.features.get(apWorkspaceId) as
-                            | AccessPoint
-                            | AccessPointSector;
-                        let cpe = this.features.get(cpeWorkspaceId) as CPE;
-                        let workspaceFeature = new APToCPELink(
-                            this.map,
-                            this.draw,
-                            feature,
-                            ap,
-                            cpe
-                        );
-                        ap.links.set(cpe, workspaceFeature);
-                        if (isAP(ap)) {
-                            cpe.ap = ap;
-                        } else {
-                            cpe.sector = ap;
-                        }
-                        this.features.set(workspaceFeature.workspaceId, workspaceFeature);
-                    }
-                );
-            }
-
-            // Should probably be replaced with a pubsub event signal
-            MapLayerSidebarManager.getInstance().setUserMapLayers();
+            this.addFeatures(initialFeatures);
         }
         this.previousState = this.draw.getAll();
     }
@@ -416,6 +359,60 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                     break;
             }
         });
+    }
+
+    protected addFeatures(features: any) {
+        const addType = (
+            featureType: WorkspaceFeatureTypes,
+            featureClass: new (
+                map: MapboxGL.Map,
+                draw: MapboxDraw,
+                feature: any
+            ) => BaseWorkspaceFeature,
+            preprocessFeature?: (feature: any) => void
+        ) => {
+            if (this.isSupportedFeatureType(featureType)) {
+                this.filterByType(features, featureType).forEach((feature: any) => {
+                    if (preprocessFeature) {
+                        preprocessFeature(feature);
+                    }
+                    let workspaceFeature = new featureClass(this.map, this.draw, feature);
+                    this.features.set(workspaceFeature.workspaceId, workspaceFeature);
+                });
+            }
+        };
+
+        // APs, CPEs, and Coverage areas before PtP links and coverage areas
+        addType(WorkspaceFeatureTypes.AP, AccessPoint, (feature: any) => {
+            feature.properties.radius = feature.properties.max_radius;
+            feature.properties.center = feature.geometry.coordinates;
+        });
+        addType(WorkspaceFeatureTypes.PTP_LINK, PointToPointLink);
+        addType(WorkspaceFeatureTypes.CPE, CPE);
+        addType(WorkspaceFeatureTypes.COVERAGE_AREA, CoverageArea);
+        addType(WorkspaceFeatureTypes.SECTOR, AccessPointSector);
+
+        if (this.supportedFeatureTypes.includes(WorkspaceFeatureTypes.AP_CPE_LINK)) {
+            this.filterByType(features, WorkspaceFeatureTypes.AP_CPE_LINK).forEach(
+                (feature: any) => {
+                    let apWorkspaceId = feature.properties.ap || feature.properties.sector;
+                    let cpeWorkspaceId = feature.properties.cpe;
+                    let ap = this.features.get(apWorkspaceId) as AccessPoint | AccessPointSector;
+                    let cpe = this.features.get(cpeWorkspaceId) as CPE;
+                    let workspaceFeature = new APToCPELink(this.map, this.draw, feature, ap, cpe);
+                    ap.links.set(cpe, workspaceFeature);
+                    if (isAP(ap)) {
+                        cpe.ap = ap;
+                    } else {
+                        cpe.sector = ap;
+                    }
+                    this.features.set(workspaceFeature.workspaceId, workspaceFeature);
+                }
+            );
+        }
+
+        // Should probably be replaced with a pubsub event signal
+        MapLayerSidebarManager.getInstance().setUserMapLayers();
     }
 
     static getInstance(): BaseWorkspaceManager {

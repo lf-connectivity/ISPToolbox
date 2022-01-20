@@ -1,6 +1,6 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import * as _ from 'lodash';
-import { WorkspaceFeatureTypes } from './WorkspaceConstants';
+import { LOSWSEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { AccessPoint, APToCPELink, CPE, PointToPointLink } from './WorkspaceFeatures';
 import { MapboxSDKClient } from '../MapboxSDKClient';
@@ -22,6 +22,7 @@ const SUPPORTED_FEATURE_TYPES = [
 export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super(map, draw, SUPPORTED_FEATURE_TYPES);
+        PubSub.subscribe(LOSWSEvents.CPE_SECTOR_CREATED_MSG, this.sectorCreateCallback.bind(this));
         BaseWorkspaceManager._instance = this;
     }
 
@@ -126,6 +127,22 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
             let cpe = workspaceFeature as CPE;
             $(`#radio_name-1`).text(cpe.getFeatureProperty('name'));
         };
+    }
+
+    private sectorCreateCallback(
+        event: string,
+        data: { added_features: Array<any>; deleted_features: Array<any> }
+    ) {
+        // removed the deleted features
+        data.deleted_features.forEach((feature: any) => {
+            let workspaceFeature = this.features.get(feature.properties.uuid);
+            if (workspaceFeature != null) {
+                this.draw.delete(workspaceFeature.mapboxId);
+                this.features.delete(feature.properties.uuid);
+            }
+        });
+
+        this.addFeatures(data.added_features);
     }
 
     private createApFeature(feature: any) {

@@ -27,7 +27,6 @@ export class AjaxLinkCheckCPEPopup extends BaseAjaxCPEPopup {
                         'click',
                         this.createTooltipAction(() => {
                             this.hide();
-                            console.log('deleting CPE');
                             this.cpe.delete();
                         })
                     );

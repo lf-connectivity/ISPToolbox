@@ -1,7 +1,13 @@
+import { Feature, Point } from 'geojson';
+import LOSCheckWS from '../../../LOSCheckWS';
+import { getCookie } from '../../../utils/Cookie';
+import { djangoUrl } from '../../../utils/djangoUrl';
 import { getSessionID } from '../../../utils/MapPreferences';
 import { BaseAjaxCPEPopup, BaseAjaxLinkCheckSwitchSectorPopup } from './BaseAjaxCPEFlowPopups';
 
 const VIEW_LOS_BUTTON = 'view-los-btn-customer-popup';
+const DRAW_PTP_BUTTON = 'draw-ptp-btn-customer-popup';
+const PLACE_TOWER_BUTTON = 'place-tower-link-customer-popup';
 
 export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
     private static _instance: AjaxLinkCheckLocationPopup;
@@ -19,13 +25,12 @@ export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
     }
 
     protected cleanup() {
-        super.cleanup();
         this.geocoderMarkerCleanup();
+        super.cleanup();
     }
 
     protected setEventHandlers(): void {
         super.setEventHandlers();
-        this.highlightAll();
 
         $(`#${VIEW_LOS_BUTTON}`)
             .off()
@@ -36,10 +41,30 @@ export class AjaxLinkCheckLocationPopup extends BaseAjaxCPEPopup {
                     this.hide();
                 })
             );
+
+        $(`#${DRAW_PTP_BUTTON}`)
+            .off()
+            .on('click', this.createTooltipAction(this.onDrawPtP.bind(this)));
+
+        $(`#${PLACE_TOWER_BUTTON}`)
+            .off()
+            .on('click', this.createTooltipAction(this.onPlaceTower.bind(this)));
     }
 
     protected getEndpointParams(): any[] {
         return [getSessionID(), this.lnglat[0], this.lnglat[1]];
+    }
+
+    protected onDrawPtP() {
+        //@ts-ignore
+        this.draw.changeMode('draw_link', { start: this.lnglat });
+        this.map.fire('draw.modechange', { mode: 'draw_link' });
+        this.hide();
+    }
+
+    protected onPlaceTower() {
+        LOSCheckWS.sendCPELocationRequest(this.lnglat[0], this.lnglat[1]);
+        this.hide();
     }
 
     protected onSwitchSector(): void {
@@ -67,8 +92,8 @@ export class AjaxLinkCheckLocationSwitchSectorPopup extends BaseAjaxLinkCheckSwi
     }
 
     protected cleanup() {
-        super.cleanup();
         this.geocoderMarkerCleanup();
+        super.cleanup();
     }
 
     protected onBackButton(): void {

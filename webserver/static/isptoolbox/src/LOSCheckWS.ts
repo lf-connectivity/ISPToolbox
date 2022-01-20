@@ -5,6 +5,7 @@
  **/
 import PubSub from 'pubsub-js';
 import { ViewshedTool } from './organisms/ViewshedTool';
+import { getSessionID } from './utils/MapPreferences';
 import {
     AccessPointCoverageResponse,
     LOSCheckResponse,
@@ -26,9 +27,16 @@ class LOSCheckWS {
     pendingRequests: Array<string> = [];
     ap_callback: AccesPointWSCallback;
     hash: string = '';
+
+    private static _instance: LOSCheckWS;
+
     constructor(networkName: string) {
+        if (LOSCheckWS._instance) {
+            return LOSCheckWS._instance;
+        }
         this.networkName = networkName;
         this.connect();
+        LOSCheckWS._instance = this;
     }
 
     setConnectionStatus(connected: boolean) {
@@ -85,6 +93,10 @@ class LOSCheckWS {
                     break;
                 case WS_AP_Events.AP_UNEXPECTED_ERROR:
                     PubSub.publish(LOSWSEvents.VIEWSHED_UNEXPECTED_ERROR_MSG, resp);
+                    break;
+                case WS_AP_Events.CPE_SECTOR_CREATED:
+                    PubSub.publish(LOSWSEvents.CPE_SECTOR_CREATED_MSG, resp);
+                    break;
                 default:
                     break;
             }
@@ -127,6 +139,21 @@ class LOSCheckWS {
             this.ws.send(request);
         }
         ViewshedTool.getInstance().setVisibleLayer(false);
+    }
+
+    static sendCPELocationRequest(lng: number, lat: number) {
+        const request = JSON.stringify({
+            msg: 'cpe_location',
+            session_id: getSessionID(),
+            lng: lng,
+            lat: lat
+        });
+        const ws = LOSCheckWS._instance.ws;
+        if (ws.readyState !== WebSocket.OPEN) {
+            LOSCheckWS._instance.pendingRequests.push(request);
+        } else {
+            ws.send(request);
+        }
     }
 }
 

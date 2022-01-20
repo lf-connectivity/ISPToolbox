@@ -72,7 +72,6 @@ export class AccessPoint extends WorkspacePointFeature {
     create(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         super.create((resp) => {
             PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
-
             if (successFollowup) {
                 successFollowup(resp);
             }
@@ -378,30 +377,31 @@ export class APToCPELink extends WorkspaceLineStringFeature {
         }, errorFollowup);
     }
 
-    switchAP(newTowerThing: AccessPoint | AccessPointSector) {
-        if (newTowerThing !== this.tower) {
+    switchAP(newTower: AccessPoint | AccessPointSector) {
+        if (newTower !== this.tower) {
             // Delete old AP data
             this.tower.links.delete(this.cpe);
 
             // Set new AP
-            this.tower = newTowerThing;
+            this.tower = newTower;
             this.tower.links.set(this.cpe, this);
-            if (isAP(newTowerThing)) {
-                this.cpe.ap = newTowerThing;
-                this.cpe.setFeatureProperty('ap', newTowerThing.workspaceId);
-                this.setFeatureProperty('ap', newTowerThing.workspaceId);
+            if (isAP(newTower)) {
+                this.cpe.ap = newTower;
+                this.cpe.setFeatureProperty('ap', newTower.workspaceId);
+                this.setFeatureProperty('ap', newTower.workspaceId);
             } else {
-                this.cpe.sector = newTowerThing;
-                this.cpe.setFeatureProperty('sector', newTowerThing.workspaceId);
-                this.setFeatureProperty('sector', newTowerThing.workspaceId);
+                this.cpe.sector = newTower;
+                this.cpe.setFeatureProperty('sector', newTower.workspaceId);
+                this.setFeatureProperty('sector', newTower.workspaceId);
+                this.setFeatureProperty('frequency', newTower.getFeatureProperty('frequency'));
             }
 
             this.map.fire('draw.update', { features: [this.getFeatureData()], action: 'move' });
             this.moveVertex(
                 LINK_AP_INDEX,
-                isAP(newTowerThing)
-                    ? (newTowerThing.getFeatureGeometryCoordinates() as [number, number])
-                    : (newTowerThing.ap.getFeatureGeometryCoordinates() as [number, number])
+                isAP(newTower)
+                    ? (newTower.getFeatureGeometryCoordinates() as [number, number])
+                    : (newTower.ap.getFeatureGeometryCoordinates() as [number, number])
             );
         }
     }

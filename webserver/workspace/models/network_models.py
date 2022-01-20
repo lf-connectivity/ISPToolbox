@@ -142,7 +142,7 @@ class AccessPointSectorSerializerValidatorMixin(serializers.Serializer):
 class AccessPointLocation(WorkspaceFeature):
     name = models.CharField(
         max_length=ModelLimits.NAME.max,
-        default="Unnamed AP",
+        default="Unnamed Tower",
         validators=[
             MinLengthValidator(
                 int(ModelLimits.NAME.min),

@@ -1205,7 +1205,7 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
             default_cpe_height=DEFAULT_CPE_HEIGHT,
             radius=DEFAULT_MAX_RADIUS,
             frequency=DEFAULT_FREQUENCY,
-            cloudrf_coverage_geojson=DEFAULT_TEST_GEO_COLLECTION,
+            cloudrf_coverage_geojson=DEFAULT_TEST_MULTIPOLYGON,
         )
         self.test_sector_with_cloudrf.save()
 
@@ -1255,7 +1255,7 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
         self.assertEqual(sector.cloudrf_coverage_geojson, None)
 
     def update_sector_test_no_delete_cloudrf_flow(
-        self, updated_sector={}, expected_cloudrf=DEFAULT_TEST_GEO_COLLECTION
+        self, updated_sector={}, expected_cloudrf=DEFAULT_TEST_MULTIPOLYGON
     ):
         sector_id = self.test_sector_with_cloudrf.uuid
         new_sector = {
@@ -1356,8 +1356,8 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
         )
 
         sector = AccessPointSector.objects.get(uuid=self.test_sector.uuid)
-        sector.cloudrf_coverage_geojson = DEFAULT_TEST_GEO_COLLECTION
+        sector.cloudrf_coverage_geojson = DEFAULT_TEST_MULTIPOLYGON
         sector.save()
         self.assertJSONEqual(
-            DEFAULT_TEST_GEO_COLLECTION, sector.cloudrf_coverage_geojson_json
+            DEFAULT_TEST_MULTIPOLYGON, sector.cloudrf_coverage_geojson_json
         )

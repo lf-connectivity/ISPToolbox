@@ -9,6 +9,7 @@ from workspace.models import (
     PointToPointLink,
     PointToPointLinkSerializer,
     AccessPointSector,
+    AccessPointSectorSerializer,
     AccessPointLocation,
     AccessPointSerializer,
     CPELocation,
@@ -17,10 +18,6 @@ from workspace.models import (
     APToCPELinkSerializer,
 )
 from workspace.models.model_constants import ModelLimits
-from workspace.models.network_models import (
-    AccessPointLocation,
-    AccessPointSectorSerializer,
-)
 from workspace.tasks.websocket_utils import sendMessageToChannel
 from workspace.templatetags.address_format import reverse_geocoded_address_lines
 

@@ -28,7 +28,6 @@ _DISTANCE_BUFFER = 0.5
 
 
 @app.task
-@transaction.atomic
 def createSectorCPEFromLngLat(channel_id, request, user_id):
     session_id = request["session_id"]
     lng = request["lng"]
@@ -46,7 +45,6 @@ def createSectorCPEFromLngLat(channel_id, request, user_id):
     cpe_points = []
     heights = []
     for ptp in ptps:
-        print(ptp)
         if Point(ptp.geojson.coords[0]).intersects(location):
             cpe_points.append(Point(ptp.geojson.coords[1]))
             heights.append(ptp.radio0hgt)
@@ -90,71 +88,72 @@ def createSectorCPEFromLngLat(channel_id, request, user_id):
     # Height = max of heights
     height = max(heights, default=ModelLimits.HEIGHT.default)
 
-    # Create the objects
-    tower = AccessPointLocation(
-        owner=session.owner, map_session=session, geojson=location
-    )
-    tower.save()
-
-    sector = AccessPointSector(
-        owner=session.owner,
-        map_session=session,
-        ap=tower,
-        heading=heading,
-        azimuth=azimuth,
-        radius=radius,
-        height=height,
-        uneditable=True,
-    )
-    sector.save()
-
-    cpes = []
-    links = []
-    for cpe_point in cpe_points:
-        lat = cpe_point.coords[1]
-        lng = cpe_point.coords[0]
-        name = reverse_geocoded_address_lines(lat, lng)[0]
-        cpe = CPELocation(
-            owner=session.owner,
-            name=name,
-            map_session=session,
-            geojson=cpe_point,
-            sector=sector,
+    # Create/delete the objects
+    with transaction.atomic():
+        tower = AccessPointLocation(
+            owner=session.owner, map_session=session, geojson=location
         )
-        cpe.save()
+        tower.save()
 
-        link = APToCPELink(
+        sector = AccessPointSector(
             owner=session.owner,
             map_session=session,
-            sector=sector,
-            cpe=cpe,
+            ap=tower,
+            heading=heading,
+            azimuth=azimuth,
+            radius=radius,
+            height=height,
             uneditable=True,
         )
-        link.save()
+        sector.save()
 
-        cpes.append(cpe)
-        links.append(link)
+        cpes = []
+        links = []
+        for cpe_point in cpe_points:
+            lat = cpe_point.coords[1]
+            lng = cpe_point.coords[0]
+            name = reverse_geocoded_address_lines(lat, lng)[0]
+            cpe = CPELocation(
+                owner=session.owner,
+                name=name,
+                map_session=session,
+                geojson=cpe_point,
+                sector=sector,
+            )
+            cpe.save()
 
-    new_features = geojson_utils.merge_feature_collections(
-        AccessPointSerializer.get_features_for_session(session, [tower]),
-        AccessPointSectorSerializer.get_features_for_session(session, [sector]),
-        CPESerializer.get_features_for_session(session, cpes),
-        APToCPELinkSerializer.get_features_for_session(session, links),
-    )
+            link = APToCPELink(
+                owner=session.owner,
+                map_session=session,
+                sector=sector,
+                cpe=cpe,
+                uneditable=True,
+            )
+            link.save()
 
-    deleted_features = PointToPointLinkSerializer.get_features_for_session(
-        session, deleted_ptps
-    )
+            cpes.append(cpe)
+            links.append(link)
 
-    # Delete them last to preserve UUID return to user.
-    for ptp in deleted_ptps:
-        ptp.delete()
+        new_features = geojson_utils.merge_feature_collections(
+            AccessPointSerializer.get_features_for_session(session, [tower]),
+            AccessPointSectorSerializer.get_features_for_session(session, [sector]),
+            CPESerializer.get_features_for_session(session, cpes),
+            APToCPELinkSerializer.get_features_for_session(session, links),
+        )
 
-    sendMessageToChannel(
-        channel_id,
-        {
-            "type": "cpe.sector_created",
-            "deleted_features": deleted_features["features"],
-            "added_features": new_features["features"],
-        },
-    )
+        deleted_features = PointToPointLinkSerializer.get_features_for_session(
+            session, deleted_ptps
+        )
+
+        # Delete them last to preserve UUID return to user.
+        for ptp in deleted_ptps:
+            ptp.delete()
+
+        sendMessageToChannel(
+            channel_id,
+            {
+                "type": "cpe.sector_created",
+                "deleted_features": deleted_features["features"],
+                "added_features": new_features["features"],
+            },
+        )

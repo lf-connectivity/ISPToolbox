@@ -72,7 +72,7 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
         LinkCheckLocationSearchTool.getInstance().onPopupClose();
     }
 
-    protected createCPE(id: string, idType: 'ap' | 'sector' = 'sector') {
+    protected createCPE(sectorId: string) {
         let newCPE = {
             type: 'Feature',
             geometry: {
@@ -81,10 +81,10 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
             },
             properties: {
                 name: this.getCPEName(),
+                sector: sectorId,
                 feature_type: WorkspaceFeatureTypes.CPE
             }
         } as Feature<Point, any>;
-        newCPE.properties[idType] = id;
         this.map.fire('draw.create', { features: [newCPE] });
     }
 

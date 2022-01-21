@@ -59,16 +59,3 @@ export function getInitialLockDragging(): boolean {
     }
     return false;
 }
-
-export function getLimit(name: string, type: 'min' | 'max') {
-    if (
-        // @ts-ignore
-        window.ISPTOOLBOX_LIMITS !== undefined &&
-        // @ts-ignore
-        window.ISPTOOLBOX_LIMITS[name] !== undefined
-    ) {
-        //@ts-ignore
-        return window.ISPTOOLBOX_LIMITS[name][type];
-    }
-    return null;
-}

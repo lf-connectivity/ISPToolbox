@@ -1,3 +1,4 @@
+import MarketEvaluatorWS from '../../MarketEvaluatorWS';
 import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
 import { renderAjaxOperationFailed } from '../../utils/ConnectionIssues';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
@@ -62,17 +63,25 @@ export abstract class BaseAjaxSectorPopup
     }
 
     protected setEventHandlers() {
-        this.createSubmitFormCallback(SECTOR_UPDATE_FORM_ID, () => {
-            if (this.sector) {
-                this.sector.read(this.onFormSubmitSuccess.bind(this));
-            }
-        }, this.onFormSubmitFailure);
+        this.createSubmitFormCallback(
+            SECTOR_UPDATE_FORM_ID,
+            () => {
+                if (this.sector) {
+                    this.sector.read(this.onFormSubmitSuccess.bind(this));
+                }
+            },
+            this.onFormSubmitFailure
+        );
 
-        this.createSubmitFormCallback(SECTOR_NAME_UPDATE_FORM_ID, () => {
-            if (this.sector) {
-                this.sector.read();
-            }
-        }, this.onFormSubmitFailure);
+        this.createSubmitFormCallback(
+            SECTOR_NAME_UPDATE_FORM_ID,
+            () => {
+                if (this.sector) {
+                    this.sector.read();
+                }
+            },
+            this.onFormSubmitFailure
+        );
 
         this.createInputSubmitButtonListener(SECTOR_UPDATE_FORM_ID);
 
@@ -146,7 +155,7 @@ export abstract class BaseAjaxSectorPopup
                 $(`#${EDIT_NAME_BTN_ID}`).addClass('d-none');
 
                 // Show edit mode components
-                $(`#${NAME_INPUT_ID}`).prop('disabled', false);;
+                $(`#${NAME_INPUT_ID}`).prop('disabled', false);
                 $(`#${SAVE_NAME_BTN_ID}`).removeClass('d-none');
             });
 
@@ -225,10 +234,25 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
         return BaseAjaxSectorPopup.getInstance() as MarketEvaluatorSectorPopup;
     }
 
+    protected setEventHandlers(): void {
+        super.setEventHandlers();
+
+        // Enable viewshed submit if no cloudrf coverage
+        if (
+            this.sector &&
+            this.sector.getFeatureProperty('cloudrf_coverage_geojson_json') === null
+        ) {
+            $(`#${SECTOR_UPDATE_FORM_ID}`)
+                .find('input:submit, button:submit')
+                .prop('disabled', false)
+                .removeClass('d-none');
+        }
+    }
+
     protected onFormSubmitSuccess() {
-        console.log(
-            `Calculating CloudRF coverage for sector ${this.sector?.workspaceId} coming soon`
-        );
+        if (this.sector) {
+            MarketEvaluatorWS.getInstance().sendViewshedRequest(this.sector.workspaceId);
+        }
     }
 }
 

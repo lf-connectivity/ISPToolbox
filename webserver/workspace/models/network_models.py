@@ -438,10 +438,7 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
 
 
 class AccessPointSector(WorkspaceFeature):
-    name = models.CharField(
-        max_length=50,
-        default="Unnamed AP"
-    )
+    name = models.CharField(max_length=50, default="Unnamed AP")
     heading = models.FloatField(
         default=ModelLimits.HEADING.default,
         validators=[
@@ -544,7 +541,7 @@ class AccessPointSector(WorkspaceFeature):
         AccessPointLocation, on_delete=models.CASCADE, editable=False
     )
 
-    cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)
+    cloudrf_coverage_geojson = geo_models.MultiPolygonField(null=True)
 
     @property
     def cloudrf_coverage_geojson_json(self):

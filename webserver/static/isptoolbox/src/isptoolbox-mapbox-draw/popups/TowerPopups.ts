@@ -591,14 +591,7 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
             let properties = this.accessPoint?.getFeatureData()?.properties;
             let point = this.accessPoint?.getFeatureData().geometry.coordinates;
             if (this.accessPoint && properties && point) {
-                MarketEvaluatorWS.getInstance().sendViewshedRequest(
-                    properties.default_cpe_height,
-                    properties.height,
-                    point[1],
-                    point[0],
-                    properties.max_radius,
-                    this.accessPoint.workspaceId
-                );
+                MarketEvaluatorWS.getInstance().sendViewshedRequest(this.accessPoint.workspaceId);
             }
         });
     }

@@ -6,6 +6,7 @@ import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, APToCPELink, CPE, LINK_AP_INDEX } from './WorkspaceFeatures';
 import { WorkspacePolygonFeature } from './WorkspacePolygonFeature';
+import { getRenderCloudRF } from '../utils/MapPreferences';
 
 const SECTOR_RESPONSE_FIELDS = [
     'name',
@@ -40,14 +41,8 @@ export class AccessPointSector extends WorkspacePolygonFeature {
     ap: AccessPoint;
     coverage: BuildingCoverage;
     awaitingCoverage: boolean;
-    renderCloudRf: boolean;
 
-    constructor(
-        map: MapboxGL.Map,
-        draw: MapboxDraw,
-        featureData: Feature<Geometry, any>,
-        renderCloudRf: boolean = false
-    ) {
+    constructor(map: MapboxGL.Map, draw: MapboxDraw, featureData: Feature<Geometry, any>) {
         super(
             map,
             draw,
@@ -64,7 +59,6 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         let apUUID = this.getFeatureProperty('ap');
         let ap = BaseWorkspaceManager.getFeatureByUuid(apUUID) as AccessPoint;
         this.ap = ap;
-        this.renderCloudRf = renderCloudRf;
 
         // Case where AP sector is preloaded
         this.setAP();
@@ -134,7 +128,7 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         let geometry: any;
         let new_feat: any;
         if (
-            this.renderCloudRf &&
+            getRenderCloudRF() &&
             this.getFeatureProperty('cloudrf_coverage_geojson_json') &&
             this.getFeatureProperty('cloudrf_coverage_geojson_json') !== null
         ) {

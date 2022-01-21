@@ -8,5 +8,6 @@
       {% endif %}
         units: "{{units}}",
         networkID: "{{session.uuid}}",
+        renderCloudRf: {% if tool == "market_evaluator" %} {{ 'true'|safe }} {% else %} {{ 'false'|safe }} {% endif %}
     };
   </script>

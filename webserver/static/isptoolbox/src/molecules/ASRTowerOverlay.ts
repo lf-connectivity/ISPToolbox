@@ -223,21 +223,11 @@ export class ASRTowerOverlay implements MapboxOverlay {
                     ? 'good'
                     : 'bad';
 
-                // disregard the non-polygons in the response coverage
-                let multipolygonCoords: Array<[number, number]> = [];
                 let coverage = JSON.parse(response.coverage);
-                coverage.geometries.forEach((geom: any) => {
-                    if (geom.type === 'Polygon') {
-                        multipolygonCoords.push(geom.coordinates);
-                    }
-                });
 
                 const newFeature = {
                     type: 'Feature',
-                    geometry: {
-                        type: 'MultiPolygon',
-                        coordinates: multipolygonCoords
-                    },
+                    geometry: coverage,
                     properties: {
                         uneditable: true,
                         name: 'ASR Tower Coverage',

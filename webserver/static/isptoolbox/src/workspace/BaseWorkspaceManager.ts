@@ -38,7 +38,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     previousState: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
     supportedFeatureTypes: Array<WorkspaceFeatureTypes>;
     readonly features: Map<string, BaseWorkspaceFeature>; // Map from workspace UUID to feature
-    renderCloudRf: boolean;
     protected static _instance: BaseWorkspaceManager;
 
     // Event handlers for specific workspace feature types
@@ -68,8 +67,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     constructor(
         map: MapboxGL.Map,
         draw: MapboxDraw,
-        supportedFeatureTypes: Array<WorkspaceFeatureTypes>,
-        renderCloudRf: boolean = false
+        supportedFeatureTypes: Array<WorkspaceFeatureTypes>
     ) {
         if (BaseWorkspaceManager._instance) {
             throw Error('BaseWorkspaceManager initialized twice.');
@@ -85,7 +83,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
         this.features = new Map();
         this.supportedFeatureTypes = supportedFeatureTypes;
-        this.renderCloudRf = renderCloudRf;
 
         this.saveFeatureDrawModeHandlers = {};
         this.initSaveFeatureHandlers();

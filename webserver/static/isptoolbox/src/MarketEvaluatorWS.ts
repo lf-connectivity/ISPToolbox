@@ -462,29 +462,18 @@ class MarketEvaluatorWS {
 
     /**
      * Requests CloudRF viewshed associated with given parameters.
-     * @param customerHeight CPE height in meters
-     * @param height Height in meters
-     * @param lat latitude as float
-     * @param lon longitude as float
-     * @param radius Radius in km
-     * @param apUuid AP UUID
+     * @param apUuid sector UUID
      * @returns The request-identifying UUID
      */
-    sendViewshedRequest(
-        customerHeight: number,
-        height: number,
-        lat: number,
-        lon: number,
-        radius: number,
-        apUuid: string
-    ): UUID {
+    sendViewshedRequest(apUuid: string): UUID {
+        // TODO: Only the sector UUID is needed. Deprecate the other params.
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.VIEWSHED,
-            customerHeight,
-            height,
-            lat,
-            lon,
-            radius,
+            customerHeight: 0,
+            height: 0,
+            lat: 0,
+            lon: 0,
+            radius: 0,
             apUuid
         });
     }

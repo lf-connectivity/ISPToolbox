@@ -120,6 +120,8 @@ urlpatterns = [
          views.AccessPointCoverageStatsView.as_view(), name="viewshed_stats"),
     path('workspace/ajax/ap-los/coverage/overlay/<uuid:uuid>/',
          views.AccessPointCoverageViewshedOverlayView.as_view(), name="viewshed_overlay"),
+    path('workspace/ajax/session/sidebar/<uuid:uuid>/',
+         views.ToolSidebarView.as_view(), name="sidebar_view"),
     # Analytics
     path('workspace/api/analytics/events/',
          views.AnalyticsView.as_view(), name='analytics'),

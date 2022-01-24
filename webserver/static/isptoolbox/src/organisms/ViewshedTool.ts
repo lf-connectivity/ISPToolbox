@@ -147,8 +147,11 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         .done((resp) => {
             this.updateViewshedImage('', resp);
         })
-        .fail(() => {
-            renderAjaxOperationFailed();
+        .fail((error) => {
+            if(error.status === 404) {
+            } else {
+                renderAjaxOperationFailed();
+            }
         });
     }
 

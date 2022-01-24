@@ -32,6 +32,7 @@ import { AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/aja
 import { AjaxLinkCheckCPEPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckCPEFlowPopups';
 import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 import { clickedOnMapCanvas } from '../utils/MapboxEvents';
+import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 
 export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     ws: LOSCheckWS;
@@ -238,46 +239,45 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
     accessPointStatusCallback(msg: string, message: AccessPointCoverageResponse) {
         $.ajax({
             url: `/pro/workspace/api/ap-los/coverage/${message.uuid}/`,
-            success: (resp) => {
-                this.updateCoverageFromAjaxResponse(resp, message.uuid);
-            },
             method: 'GET',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
             }
-        });
+        }).done((resp) => {
+            this.updateCoverageFromAjaxResponse(resp, message.uuid);
+        }).fail((error) => {
+            if(error.status !== 404)
+            {
+                renderAjaxOperationFailed();
+            }
+        })
         $.ajax({
             url: `/pro/workspace/api/ap-los/coverage/stats/${message.uuid}/`,
-            success: (resp) => {
-                const features = this.draw.getAll().features.filter((f: GeoJSON.Feature) => {
-                    return f.properties?.uuid === message.uuid;
-                });
-
-                // Set last updated time
-                // TODO: non-US formats when we expand internationally with isUnitsUS false
-                const now = Intl.DateTimeFormat('en-US', {
-                    year: '2-digit',
-                    month: '2-digit',
-                    day: '2-digit'
-                }).format(Date.now());
-
-                // Set serviceable, unserviceable, and unknown
-                features.forEach((feat: GeoJSON.Feature) => {
-                    for (const [key, value] of Object.entries(resp)) {
-                        this.draw.setFeatureProperty(feat.id as string, key, value);
-                    }
-                    this.draw.setFeatureProperty(feat.id as string, 'last_updated', now);
-                });
-                // TODO: deprecate
-                if (this.apPopup && this.apPopup.onAPUpdate) {
-                    this.apPopup.onAPUpdate(
-                        BaseWorkspaceManager.getFeatureByUuid(message.uuid) as AccessPoint
-                    );
-                }
-            },
             method: 'GET',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
+            }
+        }).done((resp) => {
+            const features = this.draw.getAll().features.filter((f: GeoJSON.Feature) => {
+                return f.properties?.uuid === message.uuid;
+            });
+
+            // Set serviceable, unserviceable, and unknown
+            features.forEach((feat: GeoJSON.Feature) => {
+                for (const [key, value] of Object.entries(resp)) {
+                    this.draw.setFeatureProperty(feat.id as string, key, value);
+                }
+            });
+            // TODO: deprecate
+            if (this.apPopup && this.apPopup.onAPUpdate) {
+                this.apPopup.onAPUpdate(
+                    BaseWorkspaceManager.getFeatureByUuid(message.uuid) as AccessPoint
+                );
+            }
+        }).fail((error) => {
+            if(error.status !== 404)
+            {
+                renderAjaxOperationFailed();
             }
         });
     }

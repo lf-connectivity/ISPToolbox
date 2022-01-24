@@ -1,12 +1,12 @@
 @import ../theme
 
-#map-layer-sidebar
+.market_overlay--column
   min-height: 100%
   overflow-y: scroll
-  max-height: calc(100vh - 50px)
+  max-height: calc(100vh - 100px)
   min-width: 300px
 
-#map-objects-section
+.market_overlay--section
   .object-toggle-row
     display: flex
     justify-content: flex-start
@@ -22,6 +22,8 @@
     span.label
       cursor: pointer
       margin: 0 1rem
+      max-width: 8rem
+      word-break: break-all
       &:hover
         color: $brand-secondary-color
 

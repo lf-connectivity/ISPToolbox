@@ -98,10 +98,6 @@ export class ASRTowerOverlay implements MapboxOverlay {
         e.preventDefault();
         if (e.features && e.features.length) {
             let feature = e.features[0];
-            MapLayerSidebarManager.getInstance().setFeatureVisibility(
-                ASR_TOWER_COVERAGE_WORKSPACE_ID,
-                true
-            );
             this.showPopup(feature);
         }
     }
@@ -139,16 +135,6 @@ export class ASRTowerOverlay implements MapboxOverlay {
             if (feat.properties && 'asr_status' in feat.properties) {
                 this.selectedTowerMapboxId = undefined;
                 this.popup.hide();
-
-                // need to distinguish between deletion and hiding in map layer
-                if (
-                    !(
-                        feat.properties.uuid in
-                        MapLayerSidebarManager.getInstance().hiddenCoverageAreas
-                    )
-                ) {
-                    this.setSelected(undefined);
-                }
             }
         });
     }

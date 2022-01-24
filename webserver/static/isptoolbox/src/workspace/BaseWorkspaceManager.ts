@@ -172,9 +172,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
     ) {
         workspaceFeature.create((resp: any) => {
             this.features.set(workspaceFeature.workspaceId, workspaceFeature);
-
-            // Should probably be replaced with a pubsub event signal
-            MapLayerSidebarManager.getInstance().setUserMapLayers();
+            
             this.acceptNewState();
             if (successFollowup) {
                 successFollowup(resp);
@@ -221,8 +219,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                         workspaceFeature.delete(
                             (resp) => {
                                 this.features.delete(feature.properties.uuid);
-                                // Should probably be replaced with a pubsub event signal
-                                MapLayerSidebarManager.getInstance().setUserMapLayers();
                                 this.acceptNewState();
                             },
                             () => {
@@ -279,8 +275,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                                     if (retval !== false) {
                                         cpe.update(
                                             () => {
-                                                // Should probably be replaced with a pubsub event signal
-                                                MapLayerSidebarManager.getInstance().setUserMapLayers();
                                                 this.acceptNewState();
                                                 this.updateFeatureAjaxHandlers[
                                                     WorkspaceFeatureTypes.CPE
@@ -314,9 +308,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                             if (retval !== false) {
                                 workspaceFeature.update(
                                     () => {
-                                        // Should probably be replaced with a pubsub event signal
-                                        MapLayerSidebarManager.getInstance().setUserMapLayers();
-
                                         // @ts-ignore
                                         this.updateFeatureAjaxHandlers[
                                             feature.properties.feature_type
@@ -407,9 +398,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                 }
             );
         }
-
-        // Should probably be replaced with a pubsub event signal
-        MapLayerSidebarManager.getInstance().setUserMapLayers();
     }
 
     static getInstance(): BaseWorkspaceManager {

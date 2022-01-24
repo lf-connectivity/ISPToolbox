@@ -242,15 +242,6 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
         if (dragging) {
             this.apPopup.hide();
         } else {
-            // Unhide hidden APs
-            features.forEach((f: any) => {
-                if (f.properties.feature_type === WorkspaceFeatureTypes.AP) {
-                    MapLayerSidebarManager.getInstance().setFeatureVisibility(
-                        f.properties.uuid,
-                        true
-                    );
-                }
-            });
             this.sendCoverageRequest({ features });
 
             // TODO: Unbeta this!!!
@@ -328,14 +319,6 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
                         new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
                             ? ACTIVE_AP
                             : INACTIVE_AP;
-
-                        if (
-                            !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(
-                                feat.id
-                            )
-                        ) {
-                            circle_feats[feat.id] = new_feat;
-                        }
                     }
                 }
             });
@@ -387,22 +370,7 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
         );
     }
 
-    protected shouldRenderFeature(f: GeoJSON.Feature) {
-        switch (f.properties?.feature_type) {
-            case WorkspaceFeatureTypes.AP:
-                return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(
-                    f.id as string
-                );
-            case WorkspaceFeatureTypes.SECTOR:
-                return !MapLayerSidebarManager.getInstance().hiddenAccessPointIds.includes(
-                    f.id as string
-                );
-            case WorkspaceFeatureTypes.COVERAGE_AREA:
-                return !(
-                    (f.id as string) in MapLayerSidebarManager.getInstance().hiddenCoverageAreas
-                );
-            default:
-                return false;
-        }
+    protected shouldRenderFeature(f: GeoJSON.Feature): boolean {
+        return f.properties?.hidden;
     }
 }

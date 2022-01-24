@@ -116,15 +116,6 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
                 ws.cancelCurrentRequest(MarketEvalWSRequestType.VIEWSHED);
             }
         };
-
-        this.deleteFeaturePreAjaxHandlers[WorkspaceFeatureTypes.COVERAGE_AREA] = (
-            feat: BaseWorkspaceFeature
-        ) => {
-            return !(
-                feat.workspaceId in
-                MarketEvaluatorMapLayerSidebarManager.getInstance().hiddenCoverageAreas
-            );
-        };
     }
 
     onViewshedMsg(msg: string, response: ViewshedGeojsonResponse) {

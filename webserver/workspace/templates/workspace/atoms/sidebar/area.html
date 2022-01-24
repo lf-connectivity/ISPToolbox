@@ -1,0 +1,13 @@
+<div class="object-toggle-row" data-target="{{area.uuid}}">
+    <span>
+        <svg width="14" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" cy-id="coverage-area-icon">
+            <path d="M11.644 0.96875L1.16968 5.08165L7.35908 7.98491L6.40688 14.0333L12.8344 9.43652L11.644 0.96875Z" fill="#5692D1" fill-opacity="0.3" stroke="#5692D1"/>
+        </svg>
+    </span>
+    <span class="label" data-target="{{ area.uuid }}">{{ area.name }}</span>
+    <label class="toggle-switch">
+        <input type="checkbox"
+            data-target="{{ area.uuid }}" checked="">
+        <div class="slider"></div>
+    </label>
+</div>

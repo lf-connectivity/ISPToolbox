@@ -1,0 +1,26 @@
+<div class="object-toggle-row" data-target="{{access_point.uuid}}">
+    <span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+            xmlns="http://www.w3.org/2000/svg" cy-id="tower-icon">
+            <g clip-path="url(#clip0)">
+                <path
+                    d="M7.00008 13.7096C10.705 13.7096 13.7084 10.7062 13.7084 7.0013C13.7084 3.29639 10.705 0.292969 7.00008 0.292969C3.29517 0.292969 0.291748 3.29639 0.291748 7.0013C0.291748 10.7062 3.29517 13.7096 7.00008 13.7096Z"
+                    fill="#C2D8EC" stroke="#5692D1" stroke-width="0.958333"></path>
+                <path
+                    d="M6.99992 8.16536C7.64425 8.16536 8.16658 7.64303 8.16658 6.9987C8.16658 6.35437 7.64425 5.83203 6.99992 5.83203C6.35559 5.83203 5.83325 6.35437 5.83325 6.9987C5.83325 7.64303 6.35559 8.16536 6.99992 8.16536Z"
+                    fill="#5692D1"></path>
+            </g>
+            <defs>
+                <clipPath id="clip0">
+                    <rect width="14" height="14" fill="white"></rect>
+                </clipPath>
+            </defs>
+        </svg>
+    </span>
+    <span class="label" data-target="{{access_point.uuid}}">{{ access_point.name }}</span>
+    <label class="toggle-switch">
+        <input type="checkbox"
+            data-target="{{ access_point.uuid}}" checked="">
+        <div class="slider"></div>
+    </label>
+</div>

@@ -1,0 +1,17 @@
+<div class="market_overlay--section mt-n4" id='map-objects-section'>
+    {% for ap in sidebar.aps %}
+        {% with ap.ap as access_point %}
+            {% include "workspace/atoms/sidebar/ap.html" %}
+        {% endwith %}
+        {% for sector in ap.sectors%}
+            {% include "workspace/atoms/sidebar/sector.html" %}
+        {% endfor %}
+    {% endfor %}
+    {% if tool == "market_evaluator" %}
+    {% for area in sidebar.areas %}
+        {% include "workspace/atoms/sidebar/area.html" %}
+    {% endfor %}
+    {% endif %}
+</div>
+
+

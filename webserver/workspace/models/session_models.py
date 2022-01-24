@@ -19,12 +19,13 @@ from .network_models import (
     AccessPointSerializer,
     CPESerializer,
     APToCPELinkSerializer,
+    CoverageArea,
     CoverageAreaSerializer,
     PointToPointLinkSerializer,
     AccessPointSectorSerializer,
 )
 from workspace import geojson_utils
-from .network_models import AccessPointLocation, APToCPELink
+from .network_models import AccessPointLocation, APToCPELink, AccessPointSector
 from rest_framework.validators import UniqueTogetherValidator
 from django.utils.translation import gettext as _
 from django.contrib.sessions.models import Session
@@ -108,6 +109,26 @@ class WorkspaceMapSession(models.Model):
         return cls.objects.filter(owner=user) | cls.objects.filter(
             session=request.session
         )
+
+    def get_sidebar_info(self):
+        aps = AccessPointLocation.objects.filter(map_session=self).order_by('-created').all()
+        areas = CoverageArea.objects.filter(map_session=self).order_by('-created').all()
+        sidebar_layers = {
+            'aps': [],
+            'areas': [
+                CoverageAreaSerializer(area).data for area in areas
+            ],
+        }
+        for ap in aps:
+            sectors = AccessPointSector.objects.filter(ap=ap).all()
+            sidebar_layers['aps'].append({
+                'ap': AccessPointSerializer(ap).data,
+                'sectors': [AccessPointSectorSerializer(sector).data for sector in sectors],
+            })
+        sidebar_layers.update({
+            'empty': len(sidebar_layers['aps']) == 0 and len(sidebar_layers['areas']) == 0
+        })
+        return sidebar_layers
 
     def get_session_geojson(self):
         fcs = [

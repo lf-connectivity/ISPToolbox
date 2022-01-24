@@ -1,34 +1,28 @@
 import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
-import { WorkspaceFeatureTypes, WorkspaceEvents, WorkspaceTools } from './WorkspaceConstants';
+import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import centroid from '@turf/centroid';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
 import CollapsibleComponent from '../atoms/CollapsibleComponent';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { BaseTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
+import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
+import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
 
-export class MapLayerSidebarManager extends CollapsibleComponent {
-    hiddenAccessPointIds: Array<string>;
-    hiddenCoverageAreas: { [workspaceId: string]: any };
-    polygonCounter: { [name: string]: number };
-    workspaceIdToPolygonCounter: { [workspaceId: string]: number };
+export class MapLayerSidebarManager extends CollapsibleComponent implements IMapboxDrawPlugin {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     protected static _instance: MapLayerSidebarManager;
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super();
+        initializeMapboxDrawInterface(this, map);
         if (MapLayerSidebarManager._instance) {
             throw Error('Already defined');
         }
 
         MapLayerSidebarManager._instance = this;
-        this.polygonCounter = {};
-        this.hiddenAccessPointIds = [];
-        this.hiddenCoverageAreas = {};
-        this.workspaceIdToPolygonCounter = {};
         this.map = map;
         this.draw = draw;
 
@@ -43,6 +37,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
                             this.show();
                         }
                     });
+                    this.drawReadyCallback();
                     this.map.off('idle', loadMapCallback);
                     return false;
                 }
@@ -52,105 +47,91 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         this.map.on('idle', loadMapCallback);
     }
 
-    setUserMapLayers() {
-        // add building objects to sidebar
-        let mapObjectsSection = document.getElementById('map-objects-section');
-        while (mapObjectsSection?.firstChild) {
-            mapObjectsSection.removeChild(mapObjectsSection.firstChild);
-        }
-
-        // Towers, then coverage areas.
-
-        // Sort towers by name
-        let towers = BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.AP);
-        towers.sort((first: BaseWorkspaceFeature, second: BaseWorkspaceFeature) => {
-            let firstName = first.getFeatureProperty('name');
-            let secondName = second.getFeatureProperty('name');
-
-            if (firstName > secondName) {
-                return 1;
-            } else if (firstName == secondName) {
-                return 0;
-            } else {
-                return -1;
-            }
-        });
-
-        BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.AP).forEach((ap: AccessPoint) => {
-            const elem = generateMapLayerSidebarRow(
-                ap.getFeatureData(),
-                ap.getFeatureProperty('name'),
-                this.clickHandler,
-                this.toggleHandler
-            );
-            mapObjectsSection!.appendChild(elem);
-        });
-
-        BaseWorkspaceManager.getFeatures(WorkspaceFeatureTypes.COVERAGE_AREA).forEach(
-            (coverage: CoverageArea) => {
-                let polygonNumber;
-                let name = coverage.getFeatureProperty('name') || 'Area';
-
-                if (coverage.workspaceId in this.workspaceIdToPolygonCounter) {
-                    polygonNumber = this.workspaceIdToPolygonCounter[coverage.workspaceId];
+    drawCreateCallback(event: { features: Array<GeoJSON.Feature> }) {
+        event.features.forEach(f => {
+            const row = generateMapLayerSidebarRow(f);
+            if (row) {
+                if (f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR) {
+                    $(row).insertAfter($(`.market_overlay--section .object-toggle-row[data-target=${f.properties.ap}]`));
                 } else {
-                    if (!(name in this.polygonCounter)) {
-                        polygonNumber = 1;
-                        this.polygonCounter[name] = 1;
-                    } else {
-                        polygonNumber = this.polygonCounter[name];
-                    }
-                    this.workspaceIdToPolygonCounter[coverage.workspaceId] = polygonNumber;
-                    this.polygonCounter[name]++;
+                    $(`.market_overlay--section`).prepend(row);
                 }
-                const elem = generateMapLayerSidebarRow(
-                    coverage.getFeatureData(),
-                    `${name} ${polygonNumber}`,
-                    this.clickHandler,
-                    this.toggleHandler
-                );
-                mapObjectsSection!.appendChild(elem);
+                // Add Click Callback Handlers
+                $(`.market_overlay--section .object-toggle-row[data-target=${f.properties?.uuid}] .label`).on('click', (e) => {
+                    const uuid = e.currentTarget.getAttribute('data-target');
+                    if (typeof uuid === 'string') {
+                        this.clickHandler(uuid);
+                    }
+                });
+                // Add Toggle Callback Handlers
+                $(`.market_overlay--section .object-toggle-row[data-target=${f.properties?.uuid}] .toggle-switch input`).on('click', (e) => {
+                    const uuid = e.currentTarget.getAttribute('data-target');
+                    if (typeof uuid === 'string') {
+                        this.toggleHandler(uuid);
+                    }
+                })
             }
-        );
-
-        mapObjectsSection = document.getElementById('map-objects-section');
-        $('#zerostate').addClass('invisible'); // on default don't show anyhing
-        $('#zerostate').css('max-height', '0px'); // on default don't show anyhing
-        $('#map-objects-section').addClass('mt-n4');
-        if (mapObjectsSection?.firstChild === null) {
-            $('#zerostate').addClass('visible'); //if no items in layers, show the error message
-            $('#zerostate').removeClass('invisible');
-        }
+        })
+        this.renderInstructions();
     }
 
-    setFeatureVisibility(WSId: string, show: boolean) {
-        const WSFeature = BaseWorkspaceManager.getFeatureByUuid(WSId);
-        if (WSFeature) {
-            const MBFeature = this.draw.get(WSFeature.mapboxId);
-            const MBId = (MBFeature ? MBFeature.id : undefined) as string | undefined;
-
-            switch (WSFeature.featureType) {
-                case WorkspaceFeatureTypes.COVERAGE_AREA:
-                    this.toggleCoverageAreaVisibility(MBId, WSFeature, show);
-                    break;
-                case WorkspaceFeatureTypes.AP:
-                    this.toggleAPVisibility(MBId as string, show);
-                    break;
-                default:
-                    return;
+    drawUpdateCallback(event: {
+        features: Array<GeoJSON.Feature>;
+        action: 'move' | 'change_coordinates' | 'read';
+    }) {
+        event.features.forEach((f)=>{
+            // Check if row exists
+            const create_row = $(`.market_overlay--section .object-toggle-row[data-target=${f.properties?.uuid}]`).length === 0;
+            if(create_row)
+            {
+                this.drawCreateCallback({features: [f]});
+            } else {
+                $(`.market_overlay--section .object-toggle-row[data-target=${f.properties?.uuid}] .label`).text(f.properties?.name);
             }
-            this.setCheckedStatus(WSFeature, show);
+        });
+    }
+
+    drawDeleteCallback(event: { features: Array<GeoJSON.Feature> }) {
+        event.features.forEach(f => {
+            const uuid = f.properties?.uuid;
+            if (uuid) {
+                $(`.market_overlay--section .object-toggle-row[data-target=${uuid}]`).remove();
+            }
+        })
+        this.renderInstructions();
+    }
+
+    drawReadyCallback() {
+        // Add Click Callback Handlers
+        $('.market_overlay--section .object-toggle-row .label').on('click', (e) => {
+            const uuid = e.currentTarget.getAttribute('data-target');
+            if (typeof uuid === 'string') {
+                this.clickHandler(uuid);
+            }
+        });
+        // Add Toggle Callback Handlers
+        $('.market_overlay--section .object-toggle-row .toggle-switch input').on('click', (e) => {
+            const uuid = e.currentTarget.getAttribute('data-target');
+            if (typeof uuid === 'string') {
+                this.toggleHandler(uuid);
+            }
+        })
+    }
+
+    renderInstructions() {
+        if ($('.market_overlay--section .object-toggle-row').length == 0) {
+            $('#zerostate').removeClass('d-none');
+        } else {
+            $('#zerostate').addClass('d-none');
         }
     }
 
     protected showComponent() {
-        //@ts-ignore
         $('#map-layer-sidebar').addClass('show');
         this.map.resize();
     }
 
     protected hideComponent() {
-        //@ts-ignore
         $('#map-layer-sidebar').removeClass('show');
         this.map.resize();
     }
@@ -163,73 +144,20 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         }
     }
 
-    private updateCoverageAreaVisibility = (MBFeature: any, WSFeature: any) => {
-        let id = MBFeature?.id;
-
-        // getCheckedStatus returns the current checked status, not the future state.
-        this.toggleCoverageAreaVisibility(id, WSFeature, !this.getCheckedStatus(WSFeature));
-    };
-
-    private updateAPVisibility = (MBFeature: any, WSFeature: any) => {
-        let id = String(MBFeature?.id);
-
-        let popup = BaseTowerPopup.getInstance();
-        if (popup.getAccessPoint() && popup.getAccessPoint() === WSFeature) {
-            popup.hide();
-        }
-
-        // getCheckedStatus returns the current checked status, not the future state.
-        this.toggleAPVisibility(id, !this.getCheckedStatus(WSFeature));
-        PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [WSFeature] });
-    };
-
-    private toggleCoverageAreaVisibility(
-        MBId: string | undefined,
-        WSFeature: BaseWorkspaceFeature,
-        show: boolean
-    ) {
-        let MBFeature: any | undefined;
-        if (show) {
-            if (!MBId) {
-                MBFeature = this.hiddenCoverageAreas[WSFeature.workspaceId];
-                //@ts-ignore
-                let mapboxId = this.draw.add(MBFeature)[0];
-                WSFeature.mapboxId = mapboxId;
-                this.map.fire('draw.create', { features: [MBFeature] });
-                delete this.hiddenCoverageAreas[WSFeature.workspaceId];
-            }
-        } else {
-            if (MBId) {
-                MBFeature = this.draw.get(MBId);
-                if (MBFeature) {
-                    MBFeature.properties.hidden = true;
-                    this.hiddenCoverageAreas[WSFeature.workspaceId] = MBFeature;
-                    this.draw.delete(MBFeature.id);
-                    this.map.fire('draw.delete', { features: [MBFeature] });
+    private updateFeatureVisibility(uuid: string): void {
+        const feat = this.draw.getAll().features.find(f => f.properties?.uuid === uuid);
+        if (feat) {
+            if (feat.properties?.hidden === undefined) {
+                this.draw.setFeatureProperty(feat?.id as string, 'hidden', 'true');
+                const new_feat = this.draw.get(feat?.id as string);
+                if (new_feat) {
+                    this.draw.add(new_feat);
                 }
-            }
-        }
-    }
-
-    private toggleAPVisibility(MBId: string, show: boolean) {
-        let i = this.hiddenAccessPointIds.indexOf(MBId);
-        if (show) {
-            // Remove from hiddenAccessPointIds if there
-            if (i > -1) {
-                this.hiddenAccessPointIds.splice(i, 1);
-            }
-        } else {
-            // Add to hiddenAccessPointIds if not there
-            if (i == -1) {
-                this.hiddenAccessPointIds = [...this.hiddenAccessPointIds, MBId];
-
-                // Deselect tower if it is selected
-                if (
-                    this.draw.getMode() == 'simple_select' &&
-                    this.draw.getSelectedIds().includes(MBId)
-                ) {
-                    let newSelection = this.draw.getSelectedIds().filter((f: string) => f !== MBId);
-                    this.setSelection(newSelection);
+            } else {
+                this.draw.setFeatureProperty(feat?.id as string, 'hidden', undefined);
+                const new_feat = this.draw.get(feat?.id as string);
+                if (new_feat) {
+                    this.draw.add(new_feat);
                 }
             }
         }
@@ -239,31 +167,8 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
         return $(`#switch-user-layer-${WSFeature.workspaceId}`).prop('checked');
     }
 
-    private setCheckedStatus(WSFeature: BaseWorkspaceFeature, checked: boolean) {
-        $(`#switch-user-layer-${WSFeature.workspaceId}`).prop('checked', checked);
-    }
-
-    private setSelection(MBIds: Array<string>) {
-        if (this.draw.getMode() == 'simple_select') {
-            // @ts-ignore
-            this.draw.changeMode('draw_ap', {}); //this is a hack that works in both ME and LOS
-            this.draw.changeMode('simple_select', { featureIds: MBIds });
-        }
-    }
-
-    private toggleHandler = (e: any, uuid: string) => {
-        const WSFeature = BaseWorkspaceManager.getFeatureByUuid(uuid);
-        if (WSFeature) {
-            let MBFeature = this.draw.get(WSFeature.mapboxId);
-            switch (WSFeature.featureType) {
-                case WorkspaceFeatureTypes.COVERAGE_AREA:
-                    this.updateCoverageAreaVisibility(MBFeature, WSFeature);
-                case WorkspaceFeatureTypes.AP:
-                    this.updateAPVisibility(MBFeature, WSFeature);
-                default:
-                    return;
-            }
-        }
+    private toggleHandler = (uuid: string) => {
+        this.updateFeatureVisibility(uuid);
     };
 
     private clickHandler = (uuid: string) => {
@@ -273,7 +178,8 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
 
         if (feature) {
             let coordinates;
-            if (feature.getFeatureType() == WorkspaceFeatureTypes.COVERAGE_AREA) {
+            if (feature.getFeatureType() === WorkspaceFeatureTypes.COVERAGE_AREA ||
+            feature.getFeatureType() === WorkspaceFeatureTypes.SECTOR) {
                 let coverageArea = feature as CoverageArea;
 
                 // @ts-ignore
@@ -290,12 +196,10 @@ export class MapLayerSidebarManager extends CollapsibleComponent {
                 }
             }
 
-            // Change selection to nothing if hidden, object if shown
-            this.setSelection(this.getCheckedStatus(feature) ? [feature.mapboxId] : []);
-
             this.map.flyTo({
                 center: coordinates
             });
         }
     };
 }
+

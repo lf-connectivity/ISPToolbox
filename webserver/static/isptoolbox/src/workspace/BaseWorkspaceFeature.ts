@@ -89,6 +89,8 @@ export abstract class BaseWorkspaceFeature {
             .done((resp) => {
                 this.workspaceId = resp.uuid;
                 this.updateFeatureProperties(resp);
+                const feat = this.draw.get(this.mapboxId);
+                this.map.fire('draw.update', {features: [feat], action: 'read'});
                 if (successFollowup) {
                     successFollowup(resp);
                 }

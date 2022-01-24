@@ -1,39 +1,43 @@
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
-export const generateMapLayerSidebarRow = (
-    feature: any,
-    objectLabel: string,
-    clickHandler: any,
-    toggleHandler: any
-) => {
-    let elem = document.createElement('div');
-    elem.classList.add('object-toggle-row');
+export function generateMapLayerSidebarRow(
+    feature: GeoJSON.Feature
+): undefined | HTMLDivElement {
 
-    let icon = document.createElement('span');
-    icon.innerHTML = objectImgIcons[feature.properties.feature_type];
-    elem.appendChild(icon);
+    if (
+        [WorkspaceFeatureTypes.COVERAGE_AREA, WorkspaceFeatureTypes.AP, WorkspaceFeatureTypes.SECTOR].includes(feature.properties?.feature_type) &&
+        feature.properties?.uuid !== undefined
+        ) {
+        let elem = document.createElement('div');
+        elem.classList.add('object-toggle-row');
+        elem.setAttribute('data-target', feature.properties?.uuid);
+        if (feature.properties?.feature_type === WorkspaceFeatureTypes.SECTOR) {
+            elem.classList.add('ml-3');
+        }
 
-    let label = document.createElement('span');
-    label.classList.add('label');
-    label.innerHTML = objectLabel;
-    label.addEventListener('click', () => {
-        clickHandler(feature.properties.uuid);
-    });
-    elem.appendChild(label);
+        let icon = document.createElement('span');
+        icon.innerHTML = objectImgIcons[feature.properties?.feature_type];
+        elem.appendChild(icon);
 
-    // create toggle button
-    let toggle = document.createElement('label');
-    toggle.classList.add('toggle-switch');
+        let label = document.createElement('span');
+        label.classList.add('label');
+        label.setAttribute('data-target', feature.properties?.uuid);
+        label.innerText = feature.properties?.name;
+        elem.appendChild(label);
 
-    toggle.innerHTML = `<input type='checkbox' id="switch-user-layer-${feature.properties.uuid}" checked />`;
-    let slider = document.createElement('div');
-    slider.classList.add('slider');
-    slider.addEventListener('click', (e) => toggleHandler(e, feature.properties.uuid));
-    toggle.appendChild(slider);
+        // create toggle button
+        let toggle = document.createElement('label');
+        toggle.classList.add('toggle-switch');
 
-    elem.appendChild(toggle);
+        toggle.innerHTML = `<input type='checkbox' data-target="${feature.properties?.uuid}" checked />`;
+        let slider = document.createElement('div');
+        slider.classList.add('slider');
+        toggle.appendChild(slider);
 
-    return elem;
+        elem.appendChild(toggle);
+
+        return elem;
+    }
 };
 
 const objectImgIcons: any = {
@@ -50,6 +54,8 @@ const objectImgIcons: any = {
                 <rect width="14" height="14" fill="white"/>
                 </clipPath>
                 </defs>
-                </svg>                
-                `
+                </svg>`,
+    [WorkspaceFeatureTypes.SECTOR]: `<svg width="18" height="18" viewBox="0 0 150 152" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M33.5377 57.6687L117.779 56.2238L82.4123 137.374C43.7073 114.167 33.7021 74.5677 33.5377 57.6687Z" fill="#5692D1" fill-opacity="0.3" stroke="#5692D1"stroke-width="2.4"/>
+</svg>`
 };

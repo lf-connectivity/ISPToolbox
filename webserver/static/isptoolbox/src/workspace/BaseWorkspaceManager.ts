@@ -240,8 +240,9 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
     drawUpdateCallback(event: {
         features: Array<GeoJSON.Feature>;
-        action: 'move' | 'change_coordinates';
+        action: 'move' | 'change_coordinates' | 'read';
     }) {
+        if(event.action === 'read'){return;}
         // We don't need to do updates by type in a certain order, so a switch
         // statement will do.
         event.features.forEach((feature: any) => {

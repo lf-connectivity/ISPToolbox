@@ -108,6 +108,7 @@ class MarketEvaluatorView(View):
         context = {
             'session': session,
             'geojson': session.get_session_geojson(),
+            'sidebar': session.get_sidebar_info(),
             'workspace_account': workspace_account,
             'workspace_forms': WorkspaceForms(request, session),
             'units': 'US',

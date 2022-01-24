@@ -64,6 +64,7 @@ class EditNetworkView(View):
             'session': session,
             'workspace_account': workspace_account,
             'geojson': session.get_session_geojson(),
+            'sidebar': session.get_sidebar_info(),
             'workspace_forms': WorkspaceForms(request, session),
             'should_collapse_link_view': True,
             'units': session.units_old,

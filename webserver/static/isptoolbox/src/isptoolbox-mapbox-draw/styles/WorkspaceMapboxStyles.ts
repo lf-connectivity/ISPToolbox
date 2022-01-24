@@ -112,7 +112,8 @@ export const WorkspaceMapboxStyles = [
             'all',
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
-            ['==', 'active', 'false']
+            ['==', 'active', 'false'],
+            ['!has', 'user_hidden']
         ],
         paint: {
             'fill-color': [
@@ -143,7 +144,8 @@ export const WorkspaceMapboxStyles = [
             'all',
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
-            ['==', 'active', 'true']
+            ['==', 'active', 'true'],
+            ['!has', 'user_hidden']
         ],
         paint: {
             'fill-color': [
@@ -178,7 +180,8 @@ export const WorkspaceMapboxStyles = [
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static']
+            ['!=', 'mode', 'static'],
+            ['!has', 'user_hidden']
         ],
         paint: {
             'circle-radius': 11,
@@ -194,7 +197,8 @@ export const WorkspaceMapboxStyles = [
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static']
+            ['!=', 'mode', 'static'],
+            ['!has', 'user_hidden']
         ],
         paint: {
             'circle-radius': 10,
@@ -209,7 +213,8 @@ export const WorkspaceMapboxStyles = [
             ['has', 'user_feature_type'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'false'],
-            ['==', '$type', 'Point']
+            ['==', '$type', 'Point'],
+            ['!has', 'user_hidden']
         ],
         layout: {
             'icon-image': 'ap-inactive-isptoolbox', // reference the image
@@ -226,7 +231,8 @@ export const WorkspaceMapboxStyles = [
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'true'],
             ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static']
+            ['!=', 'mode', 'static'],
+            ['!has', 'user_hidden']
         ],
         paint: {
             'circle-radius': 13,
@@ -242,7 +248,8 @@ export const WorkspaceMapboxStyles = [
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'true'],
             ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static']
+            ['!=', 'mode', 'static'],
+            ['!has', 'user_hidden']
         ],
         paint: {
             'circle-radius': 10,
@@ -257,7 +264,8 @@ export const WorkspaceMapboxStyles = [
             ['has', 'user_feature_type'],
             ['==', 'active', 'true'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
-            ['==', '$type', 'Point']
+            ['==', '$type', 'Point'],
+            ['!has', 'user_hidden']
         ],
         layout: {
             'icon-image': 'ap-active-isptoolbox', // reference the image
@@ -370,7 +378,8 @@ export const WorkspaceMapboxStyles = [
             'all',
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
-            ['==', 'active', 'false']
+            ['==', 'active', 'false'],
+            ['!has', 'user_hidden']
         ],
         layout: {
             'line-cap': 'round',
@@ -396,7 +405,8 @@ export const WorkspaceMapboxStyles = [
             'all',
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
-            ['==', 'active', 'true']
+            ['==', 'active', 'true'],
+            ['!has', 'user_hidden']
         ],
         layout: {
             'line-cap': 'round',

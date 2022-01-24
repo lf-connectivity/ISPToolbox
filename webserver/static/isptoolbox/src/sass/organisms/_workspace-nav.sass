@@ -25,9 +25,9 @@
     color: #2D2D2D
     align-items: center
     background-color: #fff
-    display: flex
-    flex-direction: row
-    justify-content: space-between
+    display: grid
+    grid-auto-flow: column
+    grid-auto-columns: 1fr
     height: 50px
     width: 100%
     font-family: $brand-font-family-sans-serif
@@ -69,7 +69,7 @@
             border-radius: 20px
 
     .subtitle
-        margin: auto 0 auto 1rem
+        margin: auto 0 auto 0.50rem
         color: $mid-gray-color
         font-size: $small-font-size
         letter-spacing: 0.2px
@@ -201,8 +201,6 @@
 
 @media (max-width: $breakpoint-sm)
     .workspace-nav
-        display: flex
-        justify-content: space-between
         .homepage-logo
             margin: 0
             #tool_help_button
@@ -220,3 +218,9 @@
     .homepage-logo
         #tool_help_button
             display: none !important
+
+@media (max-width: $breakpoint-xl)
+    .workspace-nav
+        grid-auto-columns: auto
+        display: flex
+        justify-content: space-between

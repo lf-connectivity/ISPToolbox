@@ -68,11 +68,11 @@
         display: flex
         align-items: center
 
-.market-eval-section--inputtextarea
+input.market-eval-section--inputtextarea
     align-items: center
     -moz-appearance: textfield
     -webkit-appearance: none
-    background: $light-gray-color
+    background: $light-gray-color !important
     border-bottom: 2px solid $brand-primary-color
     border-left: 0
     border-radius: 0
@@ -86,8 +86,10 @@
     line-height: 20px
     margin: 0
     max-width: 45px
-    padding: 0px 0.5re 0 0.25rem
+    padding: 0px 0.5rem 0 0.25rem
     text-align: center
+    &:disabled
+        background: $light-gray-color !important
     &:focus
         outline: none
     &::-webkit-outer-spin-button,

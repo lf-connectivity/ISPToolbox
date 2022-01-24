@@ -2,8 +2,8 @@
 {% load i18n address_format isp_toolbox_units isp_toolbox_sources isp_toolbox_tool_info %}
 
 {% block title %}
-    <a id="back-to-tower-sector-popup" data-target="{{ ap.uuid }}">{% translate "Edit Tower" %}</a> /
-    {% translate "Edit Access Point" %}
+<a id="back-to-tower-sector-popup" data-target="{{ ap.uuid }}">{% translate "Edit Tower" %}</a> /
+{% translate "Edit Access Point" %}
 {% endblock %}
 
 {% block content %}
@@ -17,9 +17,10 @@
 <ul>
     <form method="POST" action="." data-url="{% url 'workspace:sector-form' tool uuid %}" id="sector-name-update-form">
         {% csrf_token %}
-        <li class="pb-n3"> 
+        <li class="pb-n3">
             <div class="description mb-0">
-                <p><b>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url footnote_id="footnotes-section" %}</b></p>
+                <p><b>{{ address_lines | first }}{% existing_citation sources "Mapbox" href=tool_info.sources_page_url
+                        footnote_id="footnotes-section" %}</b></p>
                 <p>{{ ap.lat|floatformat:5 }}&deg;, {{ ap.lng|floatformat:5 }}&deg;</p>
             </div>
         </li>
@@ -32,13 +33,11 @@
                 {% comment %}
                 Begin edit mode
                 {% endcomment %}
-                {% include "workspace/atoms/components/tooltip_tower_name_input.html" with name_input_additional_classes="" name_input_id="name-input-sector-popup" name_input_placeholder="Sector Name" name_input_data_param_put_after_id="name-div-sector-popup" disabled=True%}
-                <button class="btn btn-edit tooltip-input-btn d-none"
-                    title="Save Access Point"
-                    id="save-sector-name-sector-popup"
-                    type="submit"
-                    name="submit"
-                >
+                {% include "workspace/atoms/components/tooltip_tower_name_input.html" with
+                name_input_additional_classes="" name_input_id="name-input-sector-popup" name_input_placeholder="Sector
+                Name" name_input_data_param_put_after_id="name-div-sector-popup" disabled=True%}
+                <button class="btn btn-edit tooltip-input-btn d-none" title="Save Access Point"
+                    id="save-sector-name-sector-popup" type="submit" name="submit">
                     {% include 'workspace/atoms/icons/save_icon.html'%}
                 </button>
                 {% comment %}
@@ -48,11 +47,8 @@
                 {% comment %}
                 Begin non-edit mode
                 {% endcomment %}
-                <button type="button"
-                    class="btn btn-edit tooltip-input-btn"
-                    title="Edit Access Point"
-                    id="edit-sector-name-sector-popup"
-                >
+                <button type="button" class="btn btn-edit tooltip-input-btn" title="Edit Access Point"
+                    id="edit-sector-name-sector-popup">
                     {% include 'workspace/atoms/pen_icon.html'%}
                 </button>
                 {% comment %}
@@ -62,53 +58,39 @@
                     <option disabled>--- Current Access Point ---</option>
                     <option value="{{ uuid }}" selected>{{ name }}</option>
                     {% if other_sectors %}
-                        <option disabled>--- Other Access Points ---</option>
-                        {% for sector in other_sectors %}
-                            <option value="{{ sector.uuid }}">{{ sector.name }}</option>
-                        {% endfor %}
+                    <option disabled>--- Other Access Points ---</option>
+                    {% for sector in other_sectors %}
+                    <option value="{{ sector.uuid }}">{{ sector.name }}</option>
+                    {% endfor %}
                     {% endif %}
                 </select>
             </div>
         </li>
     </form>
-     <form method="POST" action="." data-url="{% url 'workspace:sector-form' tool uuid %}" id="sector-update-form">
-         {% csrf_token %}
-        <div class="d-flex p-1 justify-content-between" id="numbers-div-sector-popup">
+    <form method="POST" action="." data-url="{% url 'workspace:sector-form' tool uuid %}" id="sector-update-form">
+        {% csrf_token %}
+        <div class="d-flex justify-content-between" id="numbers-div-sector-popup">
             <div>
                 <li class="ap-li">
                     <p class="label">{% translate "Heading" %}</p>
                     <div class="data-with-unit">
-                        <input type="number"
-                            name="heading"
-                            value="{{ heading|floatformat:2 }}"
-                            id="heading-input-sector-popup"
-                            min="{% field_limit "HEADING" "min" 2 %}"
-                            max="{% field_limit "HEADING" "max" 2 %}"
-                            step="any"
-                            class="ap-input--value"
-                            data-param-label="{% translate "Heading" %}"
-                            data-param-error-put-after-id="numbers-div-sector-popup"
-                            required
-                        >
+                        <input type="number" name="heading" value="{{ heading|floatformat:2 }}"
+                            id="heading-input-sector-popup" min="{% field_limit " HEADING" "min" 2 %}"
+                            max="{% field_limit " HEADING" "max" 2 %}" step="any" class="ap-input--value"
+                            data-param-label="{% translate " Heading" %}"
+                            data-param-error-put-after-id="numbers-div-sector-popup" required>
                         <span>&#176;</span>
                     </div>
                 </li>
-    
+
                 <li class="ap-li">
                     <p class="label">{% translate "Beamwidth Azimuth" %}</p>
                     <div class="data-with-unit">
-                        <input type="number"
-                            name="azimuth"
-                            value="{{ azimuth|floatformat:2 }}"
-                            id="azimuth-input-sector-popup"
-                            min="{% field_limit "AZIMUTH" "min" 2 %}"
-                            max="{% field_limit "AZIMUTH" "max" 2 %}"
-                            step="any"
-                            class="ap-input--value"
-                            data-param-label="{% translate "Beamwidth Azimuth" %}"
-                            data-param-error-put-after-id="numbers-div-sector-popup"
-                            required
-                        >
+                        <input type="number" name="azimuth" value="{{ azimuth|floatformat:2 }}"
+                            id="azimuth-input-sector-popup" min="{% field_limit " AZIMUTH" "min" 2 %}"
+                            max="{% field_limit " AZIMUTH" "max" 2 %}" step="any" class="ap-input--value"
+                            data-param-label="{% translate " Beamwidth Azimuth" %}"
+                            data-param-error-put-after-id="numbers-div-sector-popup" required>
                         <span>&#176;</span>
                     </div>
                 </li>
@@ -116,18 +98,12 @@
                 <li class="ap-li">
                     <p class="label">{% translate "Height Above Ground" %}</p>
                     <div class="data-with-unit">
-                        <input type="number"
-                            name="{% unit_preference_value units "height_ft" "height" %}"
-                            value="{% unit_preference_value units height_ft|floatformat:"0" height|floatformat:"0" %}"
-                            id="height-input-sector-popup"
-                            min="{% field_limit height_limit "min" 2 %}"
-                            max="{% field_limit height_limit "max" 2 %}"
-                            step="any"
-                            class="ap-input--value"
-                            data-param-label="{% translate "Height Above Ground" %}"
-                            data-param-error-put-after-id="numbers-div-sector-popup"
-                            required
-                        >
+                        <input type="number" name="{% unit_preference_value units " height_ft" "height" %}"
+                            value="{% unit_preference_value units height_ft|floatformat:" 0" height|floatformat:"0" %}"
+                            id="height-input-sector-popup" min="{% field_limit height_limit " min" 2 %}"
+                            max="{% field_limit height_limit " max" 2 %}" step="any" class="ap-input--value"
+                            data-param-label="{% translate " Height Above Ground" %}"
+                            data-param-error-put-after-id="numbers-div-sector-popup" required>
                         <span>{% unit_preference_value units "ft" "m" %}</span>
                     </div>
                 </li>
@@ -137,18 +113,13 @@
                 <li class="ap-li">
                     <p class="label">{% translate "Install Height" %}</p>
                     <div class="data-with-unit">
-                        <input type="number"
-                            name="{% unit_preference_value units "default_cpe_height_ft" "default_cpe_height" %}"
-                            value="{% unit_preference_value units default_cpe_height_ft|floatformat:"0" default_cpe_height|floatformat:"0" %}"
-                            id="cpe-hgt-sector-popup"
-                            min="{% field_limit height_limit "min" 2 %}"
-                            max="{% field_limit height_limit "max" 2 %}"
-                            step="any"
-                            class="ap-input--value"
-                            data-param-label="{% translate "Install Height" %}"
-                            data-param-error-put-after-id="numbers-div-sector-popup"
-                            required
-                        >
+                        <input type="number" name="{% unit_preference_value units "
+                            default_cpe_height_ft" "default_cpe_height" %}"
+                            value="{% unit_preference_value units default_cpe_height_ft|floatformat:" 0"
+                            default_cpe_height|floatformat:"0" %}" id="cpe-hgt-sector-popup"
+                            min="{% field_limit height_limit " min" 2 %}" max="{% field_limit height_limit " max" 2 %}"
+                            step="any" class="ap-input--value" data-param-label="{% translate " Install Height" %}"
+                            data-param-error-put-after-id="numbers-div-sector-popup" required>
                         <span>{% unit_preference_value units "ft" "m" %}</span>
                     </div>
                 </li>
@@ -156,36 +127,32 @@
                 <li class="ap-li">
                     <p class="label">{% translate "Distance" %}</p>
                     <div class="data-with-unit">
-                        <input type="number"
-                            name="{% unit_preference_value units "radius_miles" "radius" %}"
+                        <input type="number" name="{% unit_preference_value units " radius_miles" "radius" %}"
                             value="{% unit_preference_value units radius_miles|floatformat:2 radius|floatformat:2 %}"
-                            id="radius-input-sector-popup"
-                            min="{% field_limit radius_limit "min" 2 %}"
-                            max="{% field_limit radius_limit "max" 2 %}"
-                            step="any"
-                            class="ap-input--value"
-                            data-param-label="{% translate "Distance" %}"
-                            data-param-error-put-after-id="numbers-div-sector-popup"
-                            required
-                        >
+                            id="radius-input-sector-popup" min="{% field_limit radius_limit " min" 2 %}"
+                            max="{% field_limit radius_limit " max" 2 %}" step="any" class="ap-input--value"
+                            data-param-label="{% translate " Distance" %}"
+                            data-param-error-put-after-id="numbers-div-sector-popup" required>
                         <span>{% unit_preference_value units "mi" "km" %}</span>
                     </div>
                 </li>
 
                 <li class="ap-li">
                     <p class="label">{% translate "Frequency" %}</p>
-                    {% include "workspace/molecules/frequency_dropdown.html" with dropdown_freq_user_value=frequency dropdown_freq_name="frequency" dropdown_freq_id="freq-select-sector-popup" %}
+                    {% include "workspace/molecules/frequency_dropdown.html" with dropdown_freq_user_value=frequency
+                    dropdown_freq_name="frequency" dropdown_freq_id="freq-select-sector-popup" %}
                 </li>
             </div>
         </div>
     </li>
 
         <li class="stat-row">
-            <button class='btn btn-primary isptoolbox-btn w-100 d-none' id='coverage-viewshed-btn-sector-popup' type="submit" name="submit" form="sector-update-form">
+            <button class='btn btn-primary isptoolbox-btn w-100 d-none' id='coverage-viewshed-btn-sector-popup'
+                type="submit" name="submit" form="sector-update-form">
                 {% if tool == "market_evaluator" %}
-                    {% translate "Calculate Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
+                {% translate "Plot Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
                 {% elif tool == "los_check" %}
-                    {% translate "Calculate Coverage" %}
+                {% translate "Calculate Coverage" %}
                 {% endif %}
             </button>
 
@@ -206,7 +173,9 @@
         {% if tool == "los_check" %}
         {% include "workspace/molecules/coverage_stats_tower.html" %}
         {% endif %}
-        {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-sector-row-sector-popup" delete_row_a_id="sector-delete-btn" delete_row_object_name="Access Point" delete_row_last_updated=last_updated %}
+        {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-sector-row-sector-popup"
+        delete_row_a_id="sector-delete-btn" delete_row_object_name="Access Point" delete_row_last_updated=last_updated
+        %}
     </form>
 </ul>
 {% endblock %}

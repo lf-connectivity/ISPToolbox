@@ -24,6 +24,8 @@ import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 import { djangoUrl } from '../utils/djangoUrl';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
+const PLAY_ANIMATION_DEFAULT = false;
+
 let potree = (window as any).Potree as null | typeof Potree;
 if (!(window as any).webgl2support) {
     potree = null;
@@ -427,10 +429,13 @@ export class LiDAR3DView implements IMapboxDrawPlugin {
             this.globalLinkAnimation.setDuration(animationDuration);
             this.globalLinkAnimation.setVisible(false);
             this.globalLinkAnimation.setInterpolateControlPoints(true);
+            console.log(`start animation: ${start_animation}`);
             if (start_animation) {
                 this.globalLinkAnimation.play(true);
                 this.setPlayPauseButton(false);
             } else {
+                this.setPlayPauseButton(true);
+                this.globalLinkAnimation.pause();
             }
 
             let animationClickCallback = () => {
@@ -687,7 +692,8 @@ export class LiDAR3DView implements IMapboxDrawPlugin {
             scene.scene.add(this.linkLine);
             this.createAnimationForLink(tx, rx, tx_h, rx_h, start_animation);
         };
-        this.updateLinkHeight(tx_h, rx_h, true);
+        this.updateLinkHeight(tx_h, rx_h, PLAY_ANIMATION_DEFAULT);
+
     }
 
     removeLink() {

@@ -192,7 +192,7 @@
             {% if tool == "market_evaluator" %}
                 {% if cloudrf_status == "IN_PROGRESS" %}
                     <div align="center" class="cloudrf-progress-sector-popup">
-                        {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 25px; width: 100%;' blink=True spinner_classes="mx-auto mb-3" %}
+                        {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
                         <p align="center bold" class="mt-1">Plotting Lidar Coverage</p>
                     </div>
                 {% elif cloudrf_status == "COMPLETED" %}

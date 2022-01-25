@@ -69,7 +69,7 @@ def createCloudRFRequest(lat, lon, txh, rxh, rad):
 
 
 def getViewShed(
-    lat, lon, height, customerHeight, radius, sectorId=None, registrationNumber=None
+    lat, lon, height, customerHeight, radius, sector=None, registrationNumber=None
 ):
     """
     Gets a viewshed (json polygon coverage) from an access point:
@@ -83,17 +83,7 @@ def getViewShed(
 
     Returns geojson for viewshed
     """
-    if sectorId:
-        sector = AccessPointSector.objects.get(uuid=sectorId)
-        request_body = createCloudRFRequest(
-            sector.ap.lat,
-            sector.ap.lng,
-            sector.height,
-            sector.default_cpe_height,
-            sector.radius,
-        )
-    else:
-        request_body = createCloudRFRequest(lat, lon, height, customerHeight, radius)
+    request_body = createCloudRFRequest(lat, lon, height, customerHeight, radius)
 
     resp = {}
     retries = 3
@@ -113,7 +103,7 @@ def getViewShed(
 
         # .io for Market Eval v2: coverage is stringified json
         # Return a multipolygon as well.
-        if sectorId or registrationNumber:
+        if sector or registrationNumber:
             # Convert into multipolygon
             coords = []
             for geometry in coverage["geometries"]:
@@ -125,14 +115,22 @@ def getViewShed(
                 "coordinates": coords,
             }
 
-            if sectorId:
+            if sector:
                 # Coverage returns a type Feature, which is incompatible with DB
                 coverage = intersect([coverage, json.loads(sector.geojson.json)])[
                     "geometry"
                 ]
+
+                # Coverage might be a Polygon
+                if coverage["type"] == "Polygon":
+                    coverage = {
+                        "type": "MultiPolygon",
+                        "coordinates": [coverage["coordinates"]],
+                    }
+
                 sector.cloudrf_coverage_geojson = json.dumps(coverage)
                 sector.save()
-                resp["ap_uuid"] = sectorId
+                resp["ap_uuid"] = str(sector.uuid)
 
             if registrationNumber:
                 resp["registration_number"] = registrationNumber

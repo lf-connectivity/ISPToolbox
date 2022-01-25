@@ -23,6 +23,7 @@ from workspace.models import (
     PointToPointLink,
     AccessPointSector,
 )
+from workspace.models.cloudrf_models import CloudRFAsyncTaskModel
 from workspace.models.model_constants import FeatureType, M_2_FT
 from workspace.models import (
     AccessPointSerializer,
@@ -1209,6 +1210,11 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
         )
         self.test_sector_with_cloudrf.save()
 
+        self.test_sector_with_cloudrf.cloudrf_task.hash = (
+            self.test_sector_with_cloudrf.cloudrf_task.calculate_hash()
+        )
+        self.test_sector_with_cloudrf.cloudrf_task.save()
+
     def update_ap_test_delete_cloudrf_flow(self, updated_ap={}):
         ap_id = self.test_ap_with_cloudrf.uuid
         new_ap = {
@@ -1341,6 +1347,18 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
         self.update_ap_test_no_delete_cloudrf_flow(
             updated_ap, UPDATED_TEST_GEO_COLLECTION
         )
+
+    def test_update_sector_height_ft_delete_cloudrf(self):
+        updated_sector = {"height_ft": UPDATED_HEIGHT}
+        self.update_sector_test_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_default_cpe_height_ft_delete_cloudrf(self):
+        updated_sector = {"default_cpe_height_ft": UPDATED_HEIGHT}
+        self.update_sector_test_delete_cloudrf_flow(updated_sector)
+
+    def test_update_sector_radius_miles_delete_cloudrf(self):
+        updated_sector = {"radius_miles": UPDATED_MAX_RADIUS}
+        self.update_sector_test_delete_cloudrf_flow(updated_sector)
 
     def test_update_sector_uneditable_cloudrf_coverage(self):
         updated_sector = {"uneditable": not self.test_sector_with_cloudrf.uneditable}

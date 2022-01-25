@@ -210,5 +210,8 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
     async def tower_viewshed(self, event):
         await self.send_json(event)
 
+    async def tower_viewshed_progress(self, event):
+        await self.send_json(event)
+
     async def polygon_area(self, event):
         await self.send_json(event)

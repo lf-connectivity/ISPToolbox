@@ -33,6 +33,7 @@ export enum MarketEvalWSEvents {
     CENSUSBLOCK_GEOG_MSG = 'ws.geog_censusblock',
     TRIBAL_GEOG_MSG = 'ws.geog_tribal',
     CLOUDRF_VIEWSHED_MSG = 'ws.viewshed_cloudrf',
+    CLOUDRF_VIEWSHED_PROGRESS = 'ws.viewshed_cloudrf_progress',
     MKT_EVAL_WS_ERR = 'ws.mkt_eval_err',
     SEND_REQUEST = 'ws.send_request',
     REQUEST_CANCELLED = 'ws.request_cancelled'
@@ -75,6 +76,10 @@ export type ViewshedGeojsonResponse = {
     ap_uuid?: string;
     registration_number?: string;
     uuid: string;
+};
+
+export type CloudRFProgressResponse = {
+    sector: string;
 };
 
 export type MedianSpeed = {
@@ -128,6 +133,7 @@ type MarketEvaluatorWSValue =
     | ZipGeojsonResponse
     | CountyGeojsonResponse
     | ViewshedGeojsonResponse
+    | CloudRFProgressResponse
     | string;
 
 type GeoArea = GeoJSON.FeatureCollection | GeoJSON.Feature | GeoJSON.GeometryObject;
@@ -308,6 +314,12 @@ class MarketEvaluatorWS {
                     const viewshed: ViewshedGeojsonResponse =
                         response.value as ViewshedGeojsonResponse;
                     PubSub.publish(MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG, viewshed);
+                    break;
+
+                case 'tower.viewshed_progress':
+                    const result: CloudRFProgressResponse =
+                        response.value as CloudRFProgressResponse;
+                    PubSub.publish(MarketEvalWSEvents.CLOUDRF_VIEWSHED_PROGRESS, result);
                     break;
 
                 case 'error':

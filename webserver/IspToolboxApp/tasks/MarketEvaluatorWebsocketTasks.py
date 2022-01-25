@@ -10,6 +10,9 @@ from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from django.contrib.humanize.templatetags.humanize import intcomma
 import logging
 from webserver.celery import celery_app as app
+from workspace.models import AccessPointSector
+from workspace.models.cloudrf_models import CloudRFAsyncTaskModel
+from celery import current_task
 
 
 def sync_send(channelName, consumer, value, uuid):
@@ -109,10 +112,7 @@ def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
         population = 0
         population += HrslUsa15.get_intersection_population(include, read_only)
         population += HrslBra15.get_intersection_population(include, read_only)
-        returnval = {
-            'population': intcomma(population),
-            'error': 0
-        }
+        returnval = {"population": intcomma(population), "error": 0}
     except Exception:
         returnval = {"population": "error", "error": -1}
     sync_send(channelName, "population", returnval, uuid)
@@ -160,7 +160,24 @@ def getTowerViewShed(
     apUuid=None,
     registration_number=None,
 ):
-    result = getViewShed(
-        lat, lon, height, customerHeight, radius, apUuid, registration_number
-    )
+    if apUuid:
+        sector = AccessPointSector.objects.get(uuid=apUuid)
+        sector_task = CloudRFAsyncTaskModel.objects.get(sector=sector)
+        task_id = current_task.request.id
+        sector_task.on_task_start(task_id)
+        sync_send(channelName, "tower.viewshed_progress", {"sector": apUuid}, uuid)
+
+        result = getViewShed(
+            sector.ap.lat,
+            sector.ap.lng,
+            sector.height,
+            sector.default_cpe_height,
+            sector.radius,
+            sector,
+            registration_number,
+        )
+    else:
+        result = getViewShed(
+            lat, lon, height, customerHeight, radius, None, registration_number
+        )
     sync_send(channelName, "tower.viewshed", result, uuid)

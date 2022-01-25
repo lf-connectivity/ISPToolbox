@@ -128,11 +128,14 @@ class SectorFormView(TooltipFormView):
             coverage = AccessPointCoverageBuildings.objects.filter(
                 sector=context["uuid"],
             ).get()
-            context.update({
-                'coverage_stats': coverage.coverageStatistics()
-            })
+            context.update({"coverage_stats": coverage.coverageStatistics()})
         except Exception:
             logging.info("Could not find associated coverage")
+
+        context["cloudrf_status"] = (
+            self.get_object().cloudrf_task.get_cloudrf_coverage_status().value
+        )
+
         serialized_sectors = AccessPointSectorSerializer(other_sectors, many=True)
         context.update({"other_sectors": serialized_sectors.data})
         return context

@@ -28,6 +28,8 @@ from .session_models import (
 )
 from .ayi_dyi_models import AccessInformationJob, DeleteInformationJob
 
+from .cloudrf_models import CloudRFAsyncTaskModel
+
 import workspace.utils.import_utils
 
 __all__ = workspace.utils.import_utils.get_imported_classnames(__name__)

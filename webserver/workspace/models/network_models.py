@@ -749,20 +749,23 @@ class AccessPointSectorSerializer(
         exclude = ["owner", "session", "created"]
 
     def update(self, instance, validated_data):
-        new_height = validated_data.get("height", instance.height)
-        new_heading = validated_data.get("heading", instance.heading)
-        new_azimuth = validated_data.get("azimuth", instance.azimuth)
-        new_radius = validated_data.get("radius", instance.radius)
-        new_cpe_height = validated_data.get(
-            "default_cpe_height", instance.default_cpe_height
-        )
+        params_to_check = [
+            "height",
+            "heading",
+            "azimuth",
+            "radius",
+            "default_cpe_height",
+            "default_cpe_height_ft",
+            "height_ft",
+            "radius_miles",
+        ]
 
-        if (
-            not math.isclose(new_height, instance.height)
-            or not math.isclose(new_heading, instance.heading)
-            or not math.isclose(new_azimuth, instance.azimuth)
-            or not math.isclose(new_radius, instance.radius)
-            or not math.isclose(new_cpe_height, instance.default_cpe_height)
+        if not all(
+            math.isclose(
+                validated_data.get(param, getattr(instance, param)),
+                getattr(instance, param),
+            )
+            for param in params_to_check
         ):
             new_cloudrf = None
 

@@ -1,4 +1,8 @@
-import MarketEvaluatorWS from '../../MarketEvaluatorWS';
+import MarketEvaluatorWS, {
+    CloudRFProgressResponse,
+    MarketEvalWSEvents,
+    ViewshedGeojsonResponse
+} from '../../MarketEvaluatorWS';
 import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
 import { renderAjaxOperationFailed } from '../../utils/ConnectionIssues';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
@@ -22,6 +26,8 @@ const NAME_INPUT_ID = 'name-input-sector-popup';
 const EDIT_NAME_BTN_ID = 'edit-sector-name-sector-popup';
 const SAVE_NAME_BTN_ID = 'save-sector-name-sector-popup';
 const SECTOR_SELECT_ID = 'select-sector-sector-popup';
+
+const CLOUDRF_PROGRESS_CLASS = 'cloudrf-progress-sector-popup';
 
 /**
  * Doing base classes for this to account for differences in button logic
@@ -227,6 +233,14 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
             return BaseAjaxSectorPopup._instance as MarketEvaluatorSectorPopup;
         }
         super(map, draw, ISPToolboxTool.MARKET_EVAL);
+        PubSub.subscribe(
+            MarketEvalWSEvents.CLOUDRF_VIEWSHED_PROGRESS,
+            this.onCloudRfProgress.bind(this)
+        );
+        PubSub.subscribe(
+            MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG,
+            this.onCloudRfComplete.bind(this)
+        );
         BaseAjaxSectorPopup._instance = this;
     }
 
@@ -237,21 +251,46 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
     protected setEventHandlers(): void {
         super.setEventHandlers();
 
-        // Enable viewshed submit if no cloudrf coverage
-        if (
-            this.sector &&
-            this.sector.getFeatureProperty('cloudrf_coverage_geojson_json') === null
-        ) {
+        // Enable viewshed submit if cloudrf coverage isn't loading or done
+        if (!$(`.${CLOUDRF_PROGRESS_CLASS}`).length) {
             $(`#${SECTOR_UPDATE_FORM_ID}`)
                 .find('input:submit, button:submit')
                 .prop('disabled', false)
                 .removeClass('d-none');
         }
+
+        // Hide CloudRF Progress class if input changes
+        $(`#${SECTOR_UPDATE_FORM_ID}`)
+            .each(function () {
+                $(this).data('serialized', $(this).serialize());
+            })
+            .on('change input', function () {
+                const input_changed = !($(this).serialize() == $(this).data('serialized'));
+                if (input_changed) {
+                    $(`.${CLOUDRF_PROGRESS_CLASS}`).addClass('d-none');
+                } else {
+                    $(`.${CLOUDRF_PROGRESS_CLASS}`).removeClass('d-none');
+                }
+            });
     }
 
     protected onFormSubmitSuccess() {
+        console.log(this.sector?.getFeatureData());
         if (this.sector) {
             MarketEvaluatorWS.getInstance().sendViewshedRequest(this.sector.workspaceId);
+        }
+    }
+
+    protected onCloudRfProgress(event: string, data: CloudRFProgressResponse) {
+        if (data.sector === this.sector?.workspaceId) {
+            console.log('updating progress');
+            this.updateComponent();
+        }
+    }
+
+    protected onCloudRfComplete(event: string, data: ViewshedGeojsonResponse) {
+        if (data.ap_uuid && data.ap_uuid === this.sector?.workspaceId) {
+            this.updateComponent();
         }
     }
 }

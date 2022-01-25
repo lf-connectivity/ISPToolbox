@@ -32,6 +32,24 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
         }
     }
 
+    protected updateComponent() {
+        if (this.popup.isOpen()) {
+            $.get(
+                this.getEndpoint(),
+                '',
+                (result) => {
+                    this.popup.setHTML(result);
+                },
+                'html'
+            )
+                .fail(() => {})
+                .done(() => {
+                    this.popup.addTo(this.map);
+                    this.setEventHandlers();
+                });
+        }
+    }
+
     protected createSubmitFormCallback(
         formId: string,
         successFollowup?: (result: any) => void,
@@ -86,27 +104,24 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
         });
     }
 
-    protected createInputSubmitButtonListener(formId: string){
+    protected createInputSubmitButtonListener(formId: string) {
         // If input changes don't match initial form values, enable submit button
         $(`#${formId}`)
-            .each(function(){
-                $(this).data('serialized', $(this).serialize())
+            .each(function () {
+                $(this).data('serialized', $(this).serialize());
             })
-            .on('change input', function(){
+            .on('change input', function () {
                 const input_changed = !($(this).serialize() == $(this).data('serialized'));
-                const submit_btn = $(this)             
-                    .find('input:submit, button:submit')
-                ;
+                const submit_btn = $(this).find('input:submit, button:submit');
                 submit_btn.prop('disabled', !input_changed);
-                if(input_changed){
+                if (input_changed) {
                     submit_btn.removeClass('d-none');
                 } else {
                     submit_btn.addClass('d-none');
                 }
             })
             .find('input:submit, button:submit')
-                .prop('disabled', true)
-        ;
+            .prop('disabled', true);
     }
 
     // for getting rid of abstract function definition

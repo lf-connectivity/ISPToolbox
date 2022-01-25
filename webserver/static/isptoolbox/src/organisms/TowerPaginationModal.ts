@@ -123,6 +123,14 @@ export class TowerPaginationModal {
     }
 
     addSectorModalCallbacks(){
+        $('.freq-option').on('click', (event) => {
+            const uuid = event.currentTarget.getAttribute('ap-uuid-target');
+            const value = $(event.currentTarget).val();
+            const text = $(event.currentTarget).text();
+            $(`button.dropdown-toggle[ap-uuid-target='${uuid}']`).attr('value', value as string).text(text);
+            $(`input[name='frequency'][ap-uuid-target='${uuid}']`).attr('value', value as string);
+        });
+        
         $('.sort-ap').on('click', (event) => {
             const ordering = event.currentTarget.getAttribute('ordering-target') as string;
             const page = $('#ap-modal-page-num').val() as string;
@@ -154,6 +162,7 @@ export class TowerPaginationModal {
             event.currentTarget.classList.add('d-none');
             if (typeof uuid === 'string') {
                 $(`input[ap-uuid-target='${uuid}'], select[ap-uuid-target='${uuid}']`).removeAttr('disabled');
+                $(`button.dropdown-toggle[ap-uuid-target='${uuid}']`).removeAttr('disabled');
                 $(`#ap-save-edit-${uuid}`).removeClass('d-none');
             }
         });
@@ -188,6 +197,7 @@ export class TowerPaginationModal {
             this.map.fire('draw.update', { features: feats });
             $(`#ap-save-edit-${uuid}`).addClass('d-none');
             $(`input[ap-uuid-target='${uuid}']`).prop('disabled', true);
+            $(`button.dropdown-toggle[ap-uuid-target='${uuid}']`).prop( "disabled", true );
             $(`.ap-edit-btn[data-target='${uuid}']`).removeClass('d-none');
         });
 

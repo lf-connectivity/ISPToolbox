@@ -3,7 +3,8 @@
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
 <div class="modal-body isptoolbox-form">
-  <table class="table table-sm table-hover table-modal" style="overflow-x: scroll">
+  <div style="display: block; overflow-x: auto;">
+  <table class="table table-sm table-hover table-modal">
     <thead class="thead-modal">
       <tr>
         <th scope="col">#</th>
@@ -91,9 +92,9 @@
           </a>
           {% endif %}
         </div></th>
-        <th scope="col"><div class="d-flex">{% translate 'Radius' %}
+        <th scope="col"><div class="d-flex">{% translate 'Distance' %}
           {% if ordering == "radius"%}
-          <a name="" class="sort-ap my-auto" ordering-target="-radius">
+          <a name="" class="sort-ap" ordering-target="-radius">
             <button class="btn">
               {% include 'workspace/atoms/arrow_icon.html' %}
             </button>
@@ -163,6 +164,7 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   <input hidden id="ap-sector-modal-ordering" value="{{ordering}}">
   <input hidden id="ap-sector-uuid" value="{{request.GET.ap}}">
   <input hidden id="ap-modal-page-num" value="{{current}}">

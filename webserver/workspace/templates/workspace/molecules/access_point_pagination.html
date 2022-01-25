@@ -3,7 +3,8 @@
 {% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
 <div class="modal-body isptoolbox-form">
-  <table class="table table-sm table-hover table-modal" style="overflow-x: scroll">
+  <div style="display: block; overflow-x: auto">
+  <table class="table table-sm table-hover table-modal">
     <thead class="thead-modal">
       <tr>
         <th scope="col" class="pl-2">#</th>
@@ -109,6 +110,7 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   <input hidden id="ap-modal-ordering" value="{{ordering}}">
   <input hidden id="ap-modal-page-num" value="{{current}}">
 </div>

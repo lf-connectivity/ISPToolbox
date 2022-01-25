@@ -41,22 +41,18 @@
     <td>
         <div class="input-group metric-input">
             <div class="input-group-prepend">
-                <input name="distance" type="text"
-                    value="{{ ap.radius |floatformat:2 }}"
-                ap-uuid-target="{{ap.uuid}}" disabled>
+                <input name="distance" type="text" value="{{ ap.radius }}" ap-uuid-target="{{ap.uuid}}" disabled>
                 <span class="input-group-text">
                     mi
                 </span>
             </div>
-        </div>
+            </div>    
     </td>
     <td>
-        <select class="input-group my-auto" name="frequency" ap-uuid-target="{{ap.uuid}}" disabled>
-            <option value="{{ ap.frequency }}">{{ ap.frequency }} GHz</option>
-            {% for option, value in results.serializer.context.freq_options.items %}
-                <option value="{{value}}">{{option}}</option>
-            {% endfor %}
-        </select>
+        <div>
+            <input hidden value="{{ ap.frequency }}" type="text" class="input-group" name="frequency" ap-uuid-target="{{ap.uuid}}" disabled>
+            {% include "workspace/molecules/frequency_toggle.html" %}
+        </div>
     </td>
     <td class="align-middle">{{ap.last_updated|lower}}</td>
     <td>

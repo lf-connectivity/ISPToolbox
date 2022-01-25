@@ -23,7 +23,6 @@ from workspace.models import (
     PointToPointLink,
     AccessPointSector,
 )
-from workspace.models.cloudrf_models import CloudRFAsyncTaskModel
 from workspace.models.model_constants import FeatureType, M_2_FT
 from workspace.models import (
     AccessPointSerializer,
@@ -1255,10 +1254,18 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
             "uneditable": DEFAULT_UNEDITABLE,
         }
         new_sector.update(updated_sector)
+
+        # Delete metric updates if imperial updates exist
+        if "height_ft" in new_sector:
+            del new_sector["height"]
+        if "radius_miles" in new_sector:
+            del new_sector["radius"]
+
         sector = self.update_geojson_model(
             AccessPointSector, SECTOR_ENDPOINT, sector_id, new_sector
         )
         self.assertEqual(sector.cloudrf_coverage_geojson, None)
+        self.assertTrue(sector.cloudrf_task.is_obsolete())
 
     def update_sector_test_no_delete_cloudrf_flow(
         self, updated_sector={}, expected_cloudrf=DEFAULT_TEST_MULTIPOLYGON
@@ -1274,10 +1281,19 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
             "uneditable": DEFAULT_UNEDITABLE,
         }
         new_sector.update(updated_sector)
+
+        # Delete metric updates if imperial updates exist
+        if "height_ft" in new_sector:
+            del new_sector["height"]
+        if "radius_miles" in new_sector:
+            del new_sector["radius"]
+
         sector = self.update_geojson_model(
             AccessPointSector, SECTOR_ENDPOINT, sector_id, new_sector
         )
+        sector.cloudrf_task.refresh_from_db()
         self.assertJSONEqual(expected_cloudrf, sector.cloudrf_coverage_geojson_json)
+        self.assertFalse(sector.cloudrf_task.is_obsolete())
 
     def test_update_ap_location_delete_cloudrf(self):
         updated_ap = {"geojson": UPDATED_TEST_POINT}

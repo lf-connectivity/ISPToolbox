@@ -8,8 +8,6 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from turfpy.transformation import intersect
 
-from workspace.models import AccessPointSector
-
 
 cloud_rf_uid = settings.CLOUDRF_UID
 cloud_rf_key = settings.CLOUDRF_KEY

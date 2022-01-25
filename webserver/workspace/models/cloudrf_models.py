@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from workspace.models import AccessPointSector
@@ -32,8 +32,11 @@ class CloudRFAsyncTaskModel(AbstractAsyncTaskAssociatedModel):
         return f"""{self.sector.ap.lat:.5f},
             {self.sector.ap.lng:.5f},
             {self.sector.height:.5f},
+            {self.sector.height_ft:.5f},
             {self.sector.default_cpe_height:.5f},
+            {self.sector.default_cpe_height_ft:.5f},
             {self.sector.radius:.5f},
+            {self.sector.radius_miles:.5f},
             {self.sector.heading:.5f},
             {self.sector.azimuth:.5f}
         """

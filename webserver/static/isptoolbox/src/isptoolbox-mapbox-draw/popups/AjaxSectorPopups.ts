@@ -275,7 +275,6 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
     }
 
     protected onFormSubmitSuccess() {
-        console.log(this.sector?.getFeatureData());
         if (this.sector) {
             MarketEvaluatorWS.getInstance().sendViewshedRequest(this.sector.workspaceId);
         }
@@ -283,7 +282,6 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
 
     protected onCloudRfProgress(event: string, data: CloudRFProgressResponse) {
         if (data.sector === this.sector?.workspaceId) {
-            console.log('updating progress');
             this.updateComponent();
         }
     }

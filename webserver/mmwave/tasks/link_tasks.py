@@ -1,4 +1,6 @@
+from sys import exc_info
 import requests
+import logging
 import json
 import math
 from geopy.distance import distance as geopy_distance
@@ -261,6 +263,8 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
         resp['error'] = str(e)
     except Exception as e:
         TASK_LOGGER.error(f'Error during loading lidar profile: {e}', exc_info=True)
+        TASK_LOGGER.exception("Lidar Profile error")
+        logging.error(f'lidar profile error {e}', exc_info=True)
         resp['error'] = 'An unexpected error occurred'
 
     del resp['resolution']

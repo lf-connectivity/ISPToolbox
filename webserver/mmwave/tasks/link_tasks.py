@@ -1,4 +1,3 @@
-from sys import exc_info
 import requests
 import logging
 import json

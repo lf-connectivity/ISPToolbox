@@ -429,7 +429,6 @@ export class LiDAR3DView implements IMapboxDrawPlugin {
             this.globalLinkAnimation.setDuration(animationDuration);
             this.globalLinkAnimation.setVisible(false);
             this.globalLinkAnimation.setInterpolateControlPoints(true);
-            console.log(`start animation: ${start_animation}`);
             if (start_animation) {
                 this.globalLinkAnimation.play(true);
                 this.setPlayPauseButton(false);

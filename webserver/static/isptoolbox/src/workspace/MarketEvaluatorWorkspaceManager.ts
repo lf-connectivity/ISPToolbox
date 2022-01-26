@@ -130,7 +130,7 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
     onViewshedMsg(msg: string, response: ViewshedGeojsonResponse) {
         if (response.ap_uuid) {
             let sector = this.features.get(response.ap_uuid) as AccessPointSector;
-            sector.read();
+            sector.read(() => PubSub.publish(WorkspaceEvents.CLOUDRF_COVERAGE_UPDATED));
         }
     }
 }

@@ -195,9 +195,12 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         });
     }
 
+    // The better way to do this is to use jquery when so you make one request after
+    // everything finishes but that requires a lot of rework
     private onUpdate(resp: any, successFollowup?: (resp: any) => void) {
         this.setGeojson();
         this.moveLinks(this.ap.getFeatureGeometryCoordinates() as [number, number]);
+        PubSub.publish(WorkspaceEvents.CLOUDRF_COVERAGE_UPDATED);
         if (successFollowup) {
             successFollowup(resp);
         }

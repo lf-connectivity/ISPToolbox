@@ -1,6 +1,5 @@
 import mapboxgl from 'mapbox-gl';
 import * as _ from 'lodash';
-import { createGeoJSONCircle } from '../isptoolbox-mapbox-draw/DrawModeUtils';
 import { Geometry } from 'geojson';
 import {
     SQM_2_SQFT,
@@ -50,6 +49,10 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             MarketEvalWSEvents.BUILDING_OVERLAYS_MSG,
             this.onBuildingOverlayMsg.bind(this)
         );
+        PubSub.subscribe(
+            WorkspaceEvents.CLOUDRF_COVERAGE_UPDATED,
+            this.viewshedLoadedCallback.bind(this)
+        );
     }
 
     updateBuildingFilterSize(range: [number, number]) {
@@ -78,41 +81,36 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     drawSelectionChangeCallback({ features }: { features: Array<any> }) {
         let finalFeatures = features;
         // Add tower sectors to selection if a tower is selected
-        if (this.draw.getMode() === 'simple_select') {
-            let feats = features.filter(this.shouldRenderFeature);
-            let featIds = new Set(feats.map((f) => f.id));
-            let complete: boolean = true;
-            feats.forEach((f: GeoJSON.Feature) => {
-                if (
-                    f.properties &&
-                    f.properties.feature_type === WorkspaceFeatureTypes.AP &&
-                    this.shouldRenderFeature(f)
-                ) {
-                    let ap = BaseWorkspaceManager.getFeatureByUuid(
-                        f.properties.uuid
-                    ) as AccessPoint;
-                    ap.sectors.forEach((sector: AccessPointSector) => {
-                        if (!featIds.has(sector.mapboxId)) {
-                            complete = false;
-                            featIds.add(sector.mapboxId);
-                        }
-                    });
-                }
-            });
+        if (this.draw.getMode() === 'simple_select' && !this.isDragging) {
+            let { sectorsAdded, newFeatures, newIds } = this.addSectorsToSelection(features);
 
-            if (!complete) {
-                // I guess delaying the
+            if (!sectorsAdded) {
+                // I guess delaying the selection change actually makes it work
                 setTimeout(() => {
                     this.draw.changeMode('simple_select', {
-                        featureIds: Array.from(featIds)
+                        featureIds: Array.from(newIds)
                     });
                 }, 10);
 
-                finalFeatures = Array.from(featIds).map((id) => this.draw.get(id));
+                finalFeatures = newFeatures;
             }
         }
 
         super.drawSelectionChangeCallback({ features: finalFeatures });
+    }
+
+    drawUpdateCallback({
+        features,
+        action
+    }: {
+        features: Array<GeoJSON.Feature>;
+        action: undefined | 'move' | 'change_coordinates';
+    }) {
+        if (action === 'move' || action === 'change_coordinates') {
+            this.last_selection = '';
+            this.isDragging = false;
+            this.map.fire('draw.selectionchange', { features: features });
+        }
     }
 
     sendCoverageRequest({ features }: any) {
@@ -186,6 +184,39 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             return geojsonArea.geometry(g);
         });
         return [SQM_2_SQFT * Math.min(...areas), SQM_2_SQFT * Math.max(...areas)];
+    }
+
+    private viewshedLoadedCallback(event: string) {
+        let { newFeatures } = this.addSectorsToSelection(this.draw.getSelected().features);
+        this.sendCoverageRequest({ features: newFeatures });
+        this.renderBuildings();
+    }
+
+    private addSectorsToSelection(features: Array<any>) {
+        let feats = features.filter(this.shouldRenderFeature);
+        let newIds = new Set(feats.map((f) => f.id));
+        let sectorsAdded: boolean = true;
+        feats.forEach((f: GeoJSON.Feature) => {
+            if (
+                f.properties &&
+                f.properties.feature_type === WorkspaceFeatureTypes.AP &&
+                this.shouldRenderFeature(f)
+            ) {
+                let ap = BaseWorkspaceManager.getFeatureByUuid(f.properties.uuid) as AccessPoint;
+                ap.sectors.forEach((sector: AccessPointSector) => {
+                    if (!newIds.has(sector.mapboxId)) {
+                        sectorsAdded = false;
+                        newIds.add(sector.mapboxId);
+                    }
+                });
+            }
+        });
+
+        return {
+            sectorsAdded: sectorsAdded,
+            newIds: Array.from(newIds),
+            newFeatures: Array.from(newIds).map((id) => this.draw.get(id))
+        };
     }
 
     private processSectorFeature(f: GeoJSON.Feature) {

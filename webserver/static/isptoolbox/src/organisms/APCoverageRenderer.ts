@@ -42,6 +42,7 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
     apPopup: BaseTowerPopup;
     sectorPopup: any;
     renderCloudRF: boolean;
+    isDragging: boolean = false;
     last_selection: string = '';
 
     constructor(
@@ -228,18 +229,16 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
     drawSelectionChangeCallback({ features }: { features: Array<any> }) {
         // Mapbox will count dragging a point features as a selection change event
         // Use this to determine if we are dragging or just selected a new feature
-        let dragging = false;
-        if (features.length === 1) {
-            if (features[0].id === this.last_selection) {
-                dragging = true;
-            } else {
-                this.last_selection = features[0].id;
-            }
+        let ids = features.map((feat) => feat.id);
+        ids.sort();
+        let selection = ids.join(',');
+        if (selection === this.last_selection) {
+            this.isDragging = true;
         } else {
-            this.last_selection = '';
+            this.last_selection = selection;
         }
         // Hide AP tooltip if user is dragging AP.
-        if (dragging) {
+        if (this.isDragging) {
             this.apPopup.hide();
         } else {
             // Unhide hidden APs

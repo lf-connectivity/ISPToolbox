@@ -8,7 +8,8 @@ export enum WorkspaceEvents {
     AP_RENDER_GIVEN = 'ap.render_given',
     AP_COVERAGE_UPDATED = 'ap.coverage_updated',
     NO_ITEMS = 'workspace.no_items',
-    SECTOR_CREATED = 'sector.created'
+    SECTOR_CREATED = 'sector.created',
+    CLOUDRF_COVERAGE_UPDATED = 'cloudrf.coverage_updated'
 }
 
 export enum ASREvents {

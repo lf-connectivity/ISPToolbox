@@ -264,7 +264,7 @@ def getLiDARProfile(network_id, data, resolution=LidarResolution.LOW.value):
         logging.exception('lidar prof error')
         logging.error(f'lidar profile error {e}', exc_info=True)
         TASK_LOGGER.exception("Lidar Profile error")
-        TASK_LOGGER.error(f'Error during loading lidar profile: {e}', exc_info=True)
+        TASK_LOGGER.error(f'Error during loading lidar profile: {e} {traceback.format_exc()}', exc_info=True)
         resp['error'] = 'An unexpected error occurred'
 
     del resp['resolution']

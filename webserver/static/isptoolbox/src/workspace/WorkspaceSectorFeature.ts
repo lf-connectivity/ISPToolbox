@@ -108,7 +108,7 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         this.links.clear();
 
         // Remove from AP object
-        this.ap.sectors.delete(this.workspaceId);
+        this.ap.removeSector(this.workspaceId);
         super.delete(successFollowup);
     }
 
@@ -123,8 +123,6 @@ export class AccessPointSector extends WorkspacePolygonFeature {
     }
 
     private setGeojson() {
-        // Set coverage to cloud RF???
-        // TODO: Make CloudRF Coverage a multipolygon
         let geometry: any;
         let new_feat: any;
         if (
@@ -155,9 +153,8 @@ export class AccessPointSector extends WorkspacePolygonFeature {
 
     private setAP() {
         // Case if AP sector is preloaded
-        if (this.workspaceId && !this.ap.sectors.has(this.workspaceId)) {
-            this.ap.sectors.set(this.workspaceId, this);
-        }
+        this.ap.addSector(this);
+        this.setFeatureProperty('apMapboxId', this.ap.mapboxId);
     }
 
     /**

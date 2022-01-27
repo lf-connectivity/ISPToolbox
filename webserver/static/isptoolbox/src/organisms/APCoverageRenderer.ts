@@ -7,8 +7,7 @@ import { WorkspaceEvents, WorkspaceFeatureTypes } from '../workspace/WorkspaceCo
 import { AccessPoint } from '../workspace/WorkspaceFeatures';
 
 import { GeometryCollection } from '@turf/helpers';
-//@ts-ignore
-import geojsonArea from '@mapbox/geojson-area';
+
 import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import { miles2km } from '../LinkCalcUtils';
@@ -237,6 +236,7 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
         } else {
             this.last_selection = selection;
         }
+
         // Hide AP tooltip if user is dragging AP.
         if (this.isDragging) {
             this.apPopup.hide();

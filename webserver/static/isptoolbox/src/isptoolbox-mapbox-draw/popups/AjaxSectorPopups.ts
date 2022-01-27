@@ -3,6 +3,7 @@ import MarketEvaluatorWS, {
     MarketEvalWSEvents,
     ViewshedGeojsonResponse
 } from '../../MarketEvaluatorWS';
+import { DeleteFromPopupConfirmationModal } from './DeleteFromPopupConfirmationModal';
 import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
 import { renderAjaxOperationFailed } from '../../utils/ConnectionIssues';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
@@ -104,13 +105,9 @@ export abstract class BaseAjaxSectorPopup
         $(`#${SECTOR_DELETE_BUTTON_ID}`)
             .off()
             .on('click', () => {
-                $(`#ap-delete-confirm-btn`)
-                    .off()
-                    .on('click', () => {
-                        this.map.fire('draw.delete', {
-                            features: [this.sector?.getFeatureData()]
-                        });
-                    });
+                DeleteFromPopupConfirmationModal.getInstance()
+                    .setPopup(this)
+                    .setFeatureToDelete(this.sector?.getFeatureData());
             });
 
         // Set selected sector to the current one

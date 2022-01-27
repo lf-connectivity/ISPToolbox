@@ -29,7 +29,8 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     constructor() {
         super(
             {
-                simple_select: OverrideSimple(),
+                // @ts-ignore
+                simple_select: OverrideSimple(true),
                 direct_select: OverrideDirect(),
                 draw_ap: APDrawMode(),
                 draw_polygon: OverrideDrawPolygon()

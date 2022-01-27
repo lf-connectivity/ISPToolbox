@@ -6,14 +6,58 @@ import {
 } from './DrawModeUtils.js';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
-export function OverrideSimple() {
+export function OverrideSimple(highlightAssociatedSectors = false) {
     const simple_select = MapboxDraw.modes.simple_select;
     simple_select.toDisplayFeatures = function (state, geojson, display) {
         geojson.properties.active = this.isSelected(geojson.properties.id) ? 'true' : 'false';
         display(geojson);
 
         renderLinkEnds(geojson, display);
+
+        // Highlight associated sectors that aren't selected, if the flag is on
+        if (highlightAssociatedSectors) {
+            const highlightSector = function (sources, id) {
+                let hotIds = sources.hot.map((f) => f.properties.id);
+                let coldIds = sources.cold.map((f) => f.properties.id);
+
+                let hotIdIndex = hotIds.indexOf(id);
+                if (hotIds.indexOf(id) !== -1) {
+                    sources.hot[hotIdIndex].properties.active = 'true';
+                }
+
+                let coldIdIndex = coldIds.indexOf(id);
+                if (coldIds.indexOf(id) !== -1) {
+                    sources.cold[coldIdIndex].properties.active = 'true';
+                }
+            };
+
+            let selectedIds = new Set(this.getSelectedIds());
+
+            // Situation 1: selected tower
+            if (
+                geojson.properties.active === 'true' &&
+                geojson.properties.user_sectors &&
+                geojson.properties.user_feature_type === WorkspaceFeatureTypes.AP
+            ) {
+                geojson.properties.user_sectors.forEach((id) => {
+                    if (!selectedIds.has(id)) {
+                        highlightSector(this._ctx.store.sources, id);
+                    }
+                });
+            }
+
+            // Situation 2: added sector
+            else if (
+                geojson.properties.user_feature_type === WorkspaceFeatureTypes.SECTOR &&
+                geojson.properties.user_apMapboxId
+            ) {
+                if (selectedIds.has(geojson.properties.user_apMapboxId)) {
+                    highlightSector(this._ctx.store.sources, geojson.properties.id);
+                }
+            }
+        }
 
         this.fireActionable();
 
@@ -72,5 +116,30 @@ export function OverrideSimple() {
         // $FlowFixMe[prop-missing]
         state.dragMoveLocation = e.lngLat;
     };
+
+    simple_select.stopExtendedInteractions = function (state) {
+        this.getSelected().forEach((feature) => {
+            if (
+                feature.properties.feature_type === WorkspaceFeatureTypes.AP &&
+                feature.properties.sectors
+            ) {
+                feature.properties.sectors.forEach((id) => this.doRender(id));
+            }
+        });
+
+        if (state.boxSelectElement) {
+            if (state.boxSelectElement.parentNode)
+                state.boxSelectElement.parentNode.removeChild(state.boxSelectElement);
+            state.boxSelectElement = null;
+        }
+
+        this.map.dragPan.enable();
+
+        state.boxSelecting = false;
+        state.canBoxSelect = false;
+        state.dragMoving = false;
+        state.canDragMove = false;
+    };
+
     return simple_select;
 }

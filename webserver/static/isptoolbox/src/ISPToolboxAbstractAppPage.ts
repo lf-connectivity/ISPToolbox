@@ -15,6 +15,7 @@ import { isBeta } from './LinkCheckUtils';
 import MapboxLockDraggingControl from './organisms/controls/MapboxLockDraggingControl';
 import AnalyticsService from './AnalyticsService';
 import { addHoverTooltip } from './organisms/HoverTooltip';
+import { DeleteFromPopupConfirmationModal } from './isptoolbox-mapbox-draw/popups/DeleteFromPopupConfirmationModal';
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -57,7 +58,7 @@ export abstract class ISPToolboxAbstractAppPage {
             // @ts-ignore
             initial_zoom = window.ISPTOOLBOX_SESSION_INFO.initialMapZoom;
             // @ts-ignore
-        } catch (err) { }
+        } catch (err) {}
 
         this.map = new mapboxgl.Map({
             container: 'map',
@@ -156,6 +157,7 @@ export abstract class ISPToolboxAbstractAppPage {
             };
 
             new MapboxSDKClient(mapboxgl.accessToken);
+            new DeleteFromPopupConfirmationModal(this.map, this.draw);
 
             $('#map-layers-btn').prop('disabled', false);
 

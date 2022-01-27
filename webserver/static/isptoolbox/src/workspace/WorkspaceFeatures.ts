@@ -67,6 +67,7 @@ export class AccessPoint extends WorkspacePointFeature {
         this.sectors = new Map();
         this.coverage = EMPTY_BUILDING_COVERAGE;
         this.awaitingCoverage = false;
+        this.updateSectorFeatureProperty();
     }
 
     create(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
@@ -179,6 +180,18 @@ export class AccessPoint extends WorkspacePointFeature {
         return newLink;
     }
 
+    addSector(sector: AccessPointSector) {
+        if (sector.workspaceId && !this.sectors.has(sector.workspaceId)) {
+            this.sectors.set(sector.workspaceId, sector);
+            this.updateSectorFeatureProperty();
+        }
+    }
+
+    removeSector(sectorId: string) {
+        this.sectors.delete(sectorId);
+        this.updateSectorFeatureProperty();
+    }
+
     private moveLinks(newCoords: [number, number]) {
         this.links.forEach((link) => {
             link.moveVertex(LINK_AP_INDEX, newCoords);
@@ -202,6 +215,13 @@ export class AccessPoint extends WorkspacePointFeature {
             let lat = this.getFeatureProperty('lat');
             this.move([lng, lat]);
         }
+    }
+
+    private updateSectorFeatureProperty() {
+        this.setFeatureProperty(
+            'sectors',
+            Array.from(this.sectors.values()).map((sector) => sector.mapboxId)
+        );
     }
 }
 

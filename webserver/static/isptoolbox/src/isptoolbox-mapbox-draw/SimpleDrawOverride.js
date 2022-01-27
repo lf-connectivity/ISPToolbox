@@ -18,33 +18,30 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
 
         // Highlight associated sectors that aren't selected, if the flag is on
         if (highlightAssociatedSectors) {
-            const highlightSector = function (sources, id) {
+            const highlightSector = function (sources, id, active) {
                 let hotIds = sources.hot.map((f) => f.properties.id);
                 let coldIds = sources.cold.map((f) => f.properties.id);
 
                 let hotIdIndex = hotIds.indexOf(id);
                 if (hotIds.indexOf(id) !== -1) {
-                    sources.hot[hotIdIndex].properties.active = 'true';
+                    sources.hot[hotIdIndex].properties.active = active;
                 }
 
                 let coldIdIndex = coldIds.indexOf(id);
                 if (coldIds.indexOf(id) !== -1) {
-                    sources.cold[coldIdIndex].properties.active = 'true';
+                    sources.cold[coldIdIndex].properties.active = active;
                 }
             };
 
             let selectedIds = new Set(this.getSelectedIds());
 
-            // Situation 1: selected tower
+            // Situation 1: selected/deselected tower
             if (
-                geojson.properties.active === 'true' &&
                 geojson.properties.user_sectors &&
                 geojson.properties.user_feature_type === WorkspaceFeatureTypes.AP
             ) {
                 geojson.properties.user_sectors.forEach((id) => {
-                    if (!selectedIds.has(id)) {
-                        highlightSector(this._ctx.store.sources, id);
-                    }
+                    highlightSector(this._ctx.store.sources, id, geojson.properties.active);
                 });
             }
 
@@ -54,7 +51,7 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
                 geojson.properties.user_apMapboxId
             ) {
                 if (selectedIds.has(geojson.properties.user_apMapboxId)) {
-                    highlightSector(this._ctx.store.sources, geojson.properties.id);
+                    highlightSector(this._ctx.store.sources, geojson.properties.id, 'true');
                 }
             }
         }
@@ -115,30 +112,6 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
             });
         // $FlowFixMe[prop-missing]
         state.dragMoveLocation = e.lngLat;
-    };
-
-    simple_select.stopExtendedInteractions = function (state) {
-        this.getSelected().forEach((feature) => {
-            if (
-                feature.properties.feature_type === WorkspaceFeatureTypes.AP &&
-                feature.properties.sectors
-            ) {
-                feature.properties.sectors.forEach((id) => this.doRender(id));
-            }
-        });
-
-        if (state.boxSelectElement) {
-            if (state.boxSelectElement.parentNode)
-                state.boxSelectElement.parentNode.removeChild(state.boxSelectElement);
-            state.boxSelectElement = null;
-        }
-
-        this.map.dragPan.enable();
-
-        state.boxSelecting = false;
-        state.canBoxSelect = false;
-        state.dragMoving = false;
-        state.canDragMove = false;
     };
 
     return simple_select;

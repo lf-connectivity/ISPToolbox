@@ -22,9 +22,6 @@ import {
     BUILDING_LAYER,
     RadiusAndBuildingCoverageRenderer
 } from './APCoverageRenderer';
-import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
-import { AccessPoint } from '../workspace/WorkspaceFeatures';
-import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 
 export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     buildingOverlays: GeometryCollection;
@@ -74,14 +71,8 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     }
 
     drawDeleteCallback({ features }: { features: Array<any> }) {
-        let newFeatures = this.addSectorsToSelection(this.draw.getSelected().features);
-        this.sendCoverageRequest({ features: newFeatures });
+        this.sendCoverageRequest({ features: this.draw.getSelected().features });
         super.drawDeleteCallback({ features });
-    }
-
-    drawSelectionChangeCallback({ features }: { features: Array<any> }) {
-        let newFeatures = this.addSectorsToSelection(features);
-        super.drawSelectionChangeCallback({ features: newFeatures });
     }
 
     drawUpdateCallback({
@@ -101,7 +92,14 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     sendCoverageRequest({ features }: any) {
         let geometries: Geometry[] = [];
 
-        features = features.filter(this.shouldRenderFeature);
+        features = this.addSectorsToSelection(features);
+        features = features.filter(this.shouldRenderFeature).filter((f: GeoJSON.Feature) => {
+            return (
+                f.properties &&
+                (f.properties.feature_type === WorkspaceFeatureTypes.COVERAGE_AREA ||
+                    f.properties.feature_type === WorkspaceFeatureTypes.SECTOR)
+            );
+        });
 
         let featuresToProcess;
         if (features.length === 0) {
@@ -203,8 +201,11 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     private processSectorFeature(f: GeoJSON.Feature) {
         if (this.cloudRFExists(f)) {
             return JSON.parse(f.properties?.cloudrf_coverage_geojson_json);
-        } else {
+        } else if (f.properties?.geojson_json) {
             return JSON.parse(f.properties?.geojson_json);
+        } else {
+            // edge case
+            return f;
         }
     }
 }

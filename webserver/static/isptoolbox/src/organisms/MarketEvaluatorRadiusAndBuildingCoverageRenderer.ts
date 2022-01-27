@@ -68,6 +68,20 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
                 'fill-opacity': 0.8
             }
         });
+        // Wait for mapbox draw to finish loading - once complete place buildings above mapbox draw layers
+        // If you can think of a better way to do this - feel free to replace
+        const addBuildingLayerHelper = (r: mapboxgl.MapDataEvent) => {
+            const draw_layers_loaded = r.target
+                .getStyle()
+                .layers?.some(
+                    (l) => l.type === 'line' && (l.source as string).includes('mapbox-gl-draw')
+                );
+            if (draw_layers_loaded) {
+                this.map.moveLayer(BUILDING_LAYER);
+                this.map.off('styledata', addBuildingLayerHelper);
+            }
+        };
+        this.map.on('styledata', addBuildingLayerHelper);
     }
 
     drawDeleteCallback({ features }: { features: Array<any> }) {

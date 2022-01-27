@@ -12,7 +12,7 @@ resource "aws_autoscaling_group" "ecs-cluster-async" {
   name                 = "${var.ecs_cluster_name}-async_auto_scaling_group"
   min_size             = var.autoscale_min
   max_size             = var.autoscale_max
-  desired_capacity     = var.autoscale_desired
+  desired_capacity     = var.autoscale_desired_async
   health_check_type    = "EC2"
   launch_configuration = aws_launch_configuration.ecs-async.name
   vpc_zone_identifier  = [aws_subnet.public-subnet-1.id, aws_subnet.public-subnet-2.id]

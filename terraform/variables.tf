@@ -88,3 +88,8 @@ variable "autoscale_desired" {
   description = "Desired autoscale (number of EC2)"
   default     = "2"
 }
+variable "autoscale_desired_async" {
+  description = "Desired autoscale (number of EC2)"
+  default     = "3"
+}
+

@@ -25,7 +25,7 @@ from mmwave.views import (
 )
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView, RDAPQueryView
 from Overlay.views import OverlaySource
-from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView
+from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView, CreateNewUserAccount
 from workspace.views import AdminGeneric403View, WorkspaceEngagementView
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
@@ -102,14 +102,16 @@ urlpatterns = [
          name="test-accounts"),
     # Feature Flipper
     url(r'^', include('waffle.urls')),
-    # New User Experiences - Admin Reset
-    path('admin/update-nux/', UpdateNuxSettingView.as_view(), name="update-nux"),
 
     # Accounts / All Auth
     path('accounts/logout/', auth_views.LogoutView.as_view(), name="account_logout"),
 
+    # New User Experiences - Admin Reset
+    path('admin/update-nux/', UpdateNuxSettingView.as_view(), name="update-nux"),
     # Dashboard Paths
     path('admin/dashboard/', WorkspaceEngagementView.as_view(), name="admin-dashboard"),
+    # Admin User Creation
+    path('admin/create-account/', CreateNewUserAccount.as_view(), name="admin-create-user"),
 
     # 403 Any request starting with admin
     re_path(r'admin/.*', AdminGeneric403View),

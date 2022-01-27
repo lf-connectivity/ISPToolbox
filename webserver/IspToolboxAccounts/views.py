@@ -2,7 +2,9 @@ from django.contrib.auth import login, authenticate
 from django.contrib.gis.geos.point import Point
 from django.urls.base import reverse
 from django.views import View
-from IspToolboxAccounts.forms import IspToolboxUserCreationForm
+from IspToolboxAccounts.forms import (
+    IspToolboxUserCreationForm, IspToolboxUserCreationAdminForm
+)
 from IspToolboxAccounts.models import User, NewUserExperience
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect, render
@@ -16,6 +18,10 @@ from django.http import Http404, JsonResponse
 from workspace import models as workspace_models
 from workspace.mixins import SuperuserRequiredMixin
 import json
+import secrets
+
+
+ISPT_REGISTRATION_CODE = 'isptoolbox usability testing'
 
 
 class CreateAccountView(View):
@@ -23,7 +29,7 @@ class CreateAccountView(View):
         form = IspToolboxUserCreationForm(request.POST)
         if form.is_valid() and (settings.ENABLE_ACCOUNT_CREATION or (
                 form.cleaned_data.get(
-                    'registration_code') == 'isptoolbox usability testing'
+                    'registration_code') == ISPT_REGISTRATION_CODE
         )):
             form.save()
             username = form.cleaned_data.get('email')
@@ -147,3 +153,27 @@ class UpdateNuxSettingView(SuperuserRequiredMixin, View):
         else:
             nux.users.remove(request.POST.get('user'))
         return redirect(request.POST.get('next'))
+
+
+class CreateNewUserAccount(SuperuserRequiredMixin, View):
+    """
+    This view is used by Admins to create users for usability testing
+    """
+    def get(self, request):
+        form = IspToolboxUserCreationAdminForm()
+        return render(request, 'admin/pages/create_new_account.html', context={'form': form})
+
+    def post(self, request):
+        post = request.POST.copy()
+        random_password = secrets.token_urlsafe(10)
+        post.update({'password1': random_password, 'password2': random_password, 'registration_code': ISPT_REGISTRATION_CODE})
+        form = IspToolboxUserCreationForm(
+            post
+        )
+        created = False
+        if form.is_valid():
+            form.save()
+            created = True
+        return render(
+            request, 'admin/pages/create_new_account.html',
+            context={'created': created, 'password': random_password, 'form': IspToolboxUserCreationAdminForm(request.POST)})

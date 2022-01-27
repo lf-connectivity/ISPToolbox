@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+{% if created %}
+<h1>Account created! Use the following credentials - copy them down as you won't be able to access them again</h1>
+<label>email:</label>{{ form.email }}<label>password:</label>{{ password }}
+<p>to create another account - use the form below</p>
+{% endif %}
+<p>This will create an account with the follow information + random password</p>
+<form method="POST">
+{% csrf_token %}
+{{form}}
+<input type="submit" value="Create">
+</form>
+{% endblock content%}

@@ -166,5 +166,24 @@ class IspToolboxUserDeleteAccountForm(forms.Form):
         request.user.delete()
 
 
+class IspToolboxUserCreationAdminForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    email = forms.EmailField(
+        label="Email",
+        label_suffix="",
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'name@company.com'}))
+    first_name = forms.CharField(
+        label="First Name",
+        label_suffix="",
+        required=True)
+    last_name = forms.CharField(
+        label="Last Name",
+        label_suffix="",
+        required=True)
+
+
 class IspToolboxAccessDataForm(forms.Form):
     pass

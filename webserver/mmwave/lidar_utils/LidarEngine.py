@@ -41,6 +41,7 @@ LIDAR_RESOLUTION_MAX_LINK_LENGTH = {
 }
 
 DEFAULT_BB_BUFFER = 3
+DEFAULT_SRS_PROJ = 3857
 
 _DOUBLE_YEAR_REGEX = re.compile(r'^(.+)_(\d+)_LAS_(\d+)$')
 _SINGLE_YEAR_REGEX = re.compile(r'^(.+)_(\d+)$')
@@ -72,10 +73,13 @@ class LidarEngine:
         self.lidar_profile = self.__calculateLidarProfileMultiPointCloud()
 
     def getUrls(self):
-        return [cloud.url for gc, cloud in self.segments]
+        return [c.url for c in self.getClouds()]
 
     def getSources(self):
-        return [LidarEngine._renameSource(cloud.name) for gc, cloud in self.segments]
+        return [LidarEngine._renameSource(c.name) for c in self.getClouds()]
+
+    def getClouds(self):
+        return [cld for _, cld in self.segments if cld is not None]
 
     def getProfile(self):
         return self.lidar_profile
@@ -97,14 +101,25 @@ class LidarEngine:
         """
         We can only render one transform in potree - let's pick the longest one
         """
-        self.segments.sort(
-            key=lambda segment: self.__calculateLinkDistance(segment[0]), reverse=True)
-        if len(self.segments) > 0:
-            cld = self.segments[0][1]
-            return cld.srs
-        else:
-            # Default Projection for USGS Lidar Datasets
-            return 3857
+        try:
+            if len(self.segments) > 0:
+                def segmentLength(segment):
+                    geom, cld = segment
+                    if cld is not None:
+                        return self.__calculateLinkDistance(geom)
+                    else:
+                        return 0
+
+                longest = max(self.segments, key=segmentLength)
+                cld = longest[1]
+                return cld.srs
+            else:
+                # Default Projection for USGS Lidar Datasets
+                return DEFAULT_SRS_PROJ
+        except Exception:
+            logging.exception(f'failed to get projection for ptp link f{self.segments}')
+        finally:
+            return DEFAULT_SRS_PROJ
 
     def combineResultingProfiles(self):
         """
@@ -299,7 +314,15 @@ class LidarEngine:
                 boundary = cloud.boundary
             geometry = segment.intersection(boundary)
             if geometry.dims > 0:
-                segments.append((geometry, cloud))
+                if isinstance(geometry, MultiLineString):
+                    for s in geometry:
+                        segments.append((s, cloud))
+                else:
+                    segments.append((geometry, cloud))
             remaining_segments.append(segment.difference(boundary))
+
+        # These segments did not have an associated point cloud:
+        for segment in remaining_segments:
+            segments.append((segment, None))
 
         return segments

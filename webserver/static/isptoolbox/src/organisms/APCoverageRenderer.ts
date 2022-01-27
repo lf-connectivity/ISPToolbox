@@ -41,7 +41,6 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
     apPopup: BaseTowerPopup;
     sectorPopup: any;
     renderCloudRF: boolean;
-    isDragging: boolean = false;
     last_selection: string = '';
 
     constructor(
@@ -231,14 +230,16 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
         let ids = features.map((feat) => feat.id);
         ids.sort();
         let selection = ids.join(',');
+        let dragging = false;
+
         if (selection === this.last_selection) {
-            this.isDragging = true;
+            dragging = true;
         } else {
             this.last_selection = selection;
         }
 
         // Hide AP tooltip if user is dragging AP.
-        if (this.isDragging) {
+        if (dragging) {
             this.apPopup.hide();
         } else {
             // Unhide hidden APs

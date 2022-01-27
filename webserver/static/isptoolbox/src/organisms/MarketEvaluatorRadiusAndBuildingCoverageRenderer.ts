@@ -84,7 +84,6 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     }) {
         if (action === 'move' || action === 'change_coordinates') {
             this.last_selection = '';
-            this.isDragging = false;
             this.map.fire('draw.selectionchange', { features: features });
         }
     }

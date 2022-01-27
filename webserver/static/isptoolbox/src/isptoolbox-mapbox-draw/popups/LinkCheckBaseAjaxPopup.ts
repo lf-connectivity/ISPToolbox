@@ -1,5 +1,5 @@
 import { djangoUrl } from '../../utils/djangoUrl';
-import { LinkCheckBasePopup, LOADING_SVG } from './LinkCheckBasePopup';
+import { LinkCheckBasePopup, createLoadingHTMLContent } from './LinkCheckBasePopup';
 
 export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
     protected endpoint: string;
@@ -13,7 +13,7 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
         this.popup.setLngLat(this.lnglat);
         if (!this.popup.isOpen()) {
             this.popup.off('close', this.cleanupCall);
-            this.popup.setHTML(LOADING_SVG);
+            this.popup.setHTML(createLoadingHTMLContent());
             this.popup.addTo(this.map);
             $.get(
                 this.getEndpoint(),

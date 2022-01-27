@@ -32,6 +32,11 @@ export const LOADING_SVG = `
     </svg>
 `;
 
+export function createLoadingHTMLContent(message: string = "Loading"){
+    return `<div class="mapboxgl-popup--loading-tooltip"><div class="my-auto text-center">
+        ${LOADING_SVG}<p>${message}</p></div></div>`
+}
+
 export abstract class LinkCheckBasePopup extends CollapsibleComponent {
     protected map: mapboxgl.Map;
     protected draw: MapboxDraw;

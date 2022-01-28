@@ -28,7 +28,8 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
                     this.popup.on('close', this.cleanupCall);
                     this.setEventHandlers();
                 }
-            }).fail(() => {
+            })
+            .fail(() => {
                 if(this.responseMatchesCurrent(request_params)){
                     this.popup.setHTML(createErrorHTMLContent());
                 }

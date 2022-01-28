@@ -5,36 +5,28 @@
         <div class="my-auto mx-3">
             {% include "workspace/atoms/icons/alert_icon_warning.html" %}
         </div>
-        <p class="my-auto" style="font-size: 0.75em; line-height: 1em; color: white;">{% translate disclaimer %}</p>
+        <p class="my-auto mr-3" style="font-size: 0.83rem; letter-spacing: 0.2px; line-height: 1.2rem; color: #c2c2c2;">
+            {% translate disclaimer %}
+        </p>
     </div>
-    <div class="my-1 my-auto-md mx-1 d-flex flex-row justify-content-around justify-content-normal-md">
-        <a style="color: white; font-size: 0.75em;
-        " class="mx-1 my-auto" id="disclaimer-link" href="#Disclaimer" >{% trans "Disclaimer"%}</a>
+    <div class="my-1 my-auto-md mr-lg-2 mx-md-1 d-flex flex-row justify-content-around justify-content-normal-md">
+        <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;
+        " class="mx-1 my-auto" id="disclaimer-link" href="#Disclaimer">{% trans "Disclaimer"%}</a>
         {% if tool == 'market_evaluator' %}
-        <a style="color: white; font-size: 0.75em;" class="mx-1 my-auto" href="{% url 'workspace:sources' sources_page='market_eval' %}">{% trans "Sources"%}</a>
-        {% endif %}     
+        <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;" class="mx-1 my-auto"
+            href="{% url 'workspace:sources' sources_page='market_eval' %}">{% trans "Sources"%}</a>
+        {% endif %}
         {% if tool == 'los_check' %}
-        <a style="color: white; font-size: 0.75em;" class="mx-1 my-auto" href="{% url 'workspace:sources' sources_page='edit_network' %}">{% trans "Sources"%}</a>
-        {% endif %}           
-        <a style="color: white; font-size: 0.75em;
+        <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;" class="mx-1 my-auto"
+            href="{% url 'workspace:sources' sources_page='edit_network' %}">{% trans "Sources"%}</a>
+        {% endif %}
+        <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;
         " class="mx-1 my-auto" href="{% url 'workspace:terms' %}" target="_blank">{% trans "Terms"%}</a>
-        <a style="color: white; font-size: 0.75em;
+        <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;
         " class="mx-1 my-auto" href="{% url 'workspace:data_policy' %}" target="_blank">{% trans "Privacy"%}</a>
-        <a style="color: white; font-size: 0.75em;
+        <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;
         " class="arrow-link d-flex flex-row mx-1 my-auto" href='https://www.facebook.com/fbctoolbox' target="_blank">
-            {% trans "Contact"%} 
-            <svg
-                class="arrow-link--icon"
-                width="17"
-                height="17"
-                fill="white"
-                stroke="white"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                d="M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432"
-                strokeWidth="1.5px"
-                />
-            </svg>
+            {% trans "Contact"%}
         </a>
     </div>
 </footer>

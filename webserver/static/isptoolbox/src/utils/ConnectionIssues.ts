@@ -1,5 +1,6 @@
-export function renderFailedConnectionIssues() {
-    $('#connection_issues_alert').removeClass("d-none");
+export function setConnectionStatus(online: boolean) {
+    const elem = $('#connection_issues_alert');
+    online ? elem.addClass("d-none") : elem.removeClass("d-none");
 }
 
 export function renderAjaxOperationFailed() {

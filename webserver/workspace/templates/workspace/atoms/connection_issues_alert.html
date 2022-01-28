@@ -1,18 +1,9 @@
 {% load i18n %}
-<div style="position: absolute; margin-top: 1em; left: 50%; transform: translate(-50%, 0%); z-index: 1080;">
+<div style="position: fixed; z-index: 1080; {% if tool == "los_check" %} margin-top: 1em; {% endif %}">
   <div class="alert alert-warning text-center d-none" role="alert" id="connection_issues_alert">
-    {% include "workspace/atoms/icons/alert_icon_warning.html" %} <strong class="ml-3">{% translate "Offline:"%}</strong> {% translate "ISP Toolbox is not connected"%}
+    {% include "workspace/atoms/icons/alert_icon_error.html" %} <strong class="ml-3">{% translate "Problem Connecting:" %}</strong> {% translate " Check your internet connection and try again." %}
   </div>
   <div class="alert alert-danger text-center d-none" role="alert" id="ajax-failed_alert">
-    {% include "workspace/atoms/icons/alert_icon_error.html" %} <strong class="ml-3">{% translate "Operation Failed:"%}</strong> {% translate "Try again later"%}
+    {% include "workspace/atoms/icons/alert_icon_warning.html" %} <strong class="ml-3">{% translate "Unexpected Error:" %}</strong> {% translate "Try refreshing the page." %}
   </div>
 </div>
-<script>
-const updateNetworkStatus = () => {
-  const el = $('#connection_issues_alert');
-  window.navigator.onLine ? el.addClass('d-none') :  el.removeClass('d-none');
-}
-updateNetworkStatus();
-window.addEventListener('offline', updateNetworkStatus);
-window.addEventListener('online', updateNetworkStatus);
-</script>

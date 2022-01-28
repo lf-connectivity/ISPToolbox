@@ -16,6 +16,7 @@ import MapboxLockDraggingControl from './organisms/controls/MapboxLockDraggingCo
 import AnalyticsService from './AnalyticsService';
 import { addHoverTooltip } from './organisms/HoverTooltip';
 import { DeleteFromPopupConfirmationModal } from './isptoolbox-mapbox-draw/popups/DeleteFromPopupConfirmationModal';
+import { setConnectionStatus } from './utils/ConnectionIssues';
 
 //@ts-ignore
 const mapboxgl = window.mapboxgl;
@@ -188,6 +189,11 @@ export abstract class ISPToolboxAbstractAppPage {
             // Add hover tooltips all static elements
             addHoverTooltip('button[title]', 'left');
         });
+
+        // Set Network Status Callbacks
+        setConnectionStatus(window.navigator.onLine);
+        window.addEventListener('offline', ()=>{setConnectionStatus(false)});
+        window.addEventListener('online', ()=> {setConnectionStatus(true)});
 
         //@ts-ignore
         this.analyticsService = new AnalyticsService(window.ISPTOOLBOX_SESSION_INFO.networkID);

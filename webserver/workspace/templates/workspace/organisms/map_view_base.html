@@ -1,12 +1,4 @@
 <div id='map' class='planner-map px-0' data-workspace-tool='los_check'>
-    <div id='map-controls' class="on-map-controls">
-        <div>
-            {% include "workspace/atoms/components/reconnecting_msg.html" %}
-            <div id="geocoder" class="geocoder-container"></div>
-            {% block draw_controls %}
-            {% endblock %}
-        </div>
-    </div>
     {% if not ptponly %}
         <div class="on-map-controls{% if beta is True %} map-controls-beta{% endif %}" style="right: 0px">
             {% include "workspace/molecules/draw_controls.html"%}
@@ -15,6 +7,16 @@
             </div>
         </div>
     {% endif %}
+    <div id='map-controls' class="on-map-controls">
+        <div>
+            {% if tool == 'market_evaluator' %}
+                {% include "workspace/atoms/connection_issues_alert.html" %}
+            {% endif %}
+            <div id="geocoder" class="geocoder-container"></div>
+            {% block draw_controls %}
+            {% endblock %}
+        </div>
+    </div>
 </div>
 {% if not ptponly %}
     {% include "workspace/molecules/map_layer_sidebar.html" with footnote_id="footnotes-section" %}

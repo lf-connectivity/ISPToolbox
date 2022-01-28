@@ -5,6 +5,7 @@
  **/
 
 import PubSub from 'pubsub-js';
+import { setConnectionStatus } from './utils/ConnectionIssues';
 var _ = require('lodash');
 
 export enum MarketEvalWSRequestType {
@@ -198,16 +199,8 @@ class MarketEvaluatorWS {
         }
     }
 
-    protected setConnectionStatus(connected: boolean) {
-        const element = $('#websocket-connection-status');
-        const geocoder = $('#geocoder');
-        if (connected) {
-            element.addClass('d-none');
-            geocoder.removeClass('d-none');
-        } else {
-            element.removeClass('d-none');
-            geocoder.addClass('d-none');
-        }
+    protected setWSConnectionStatus(connected: boolean) {
+        setConnectionStatus(connected);
     }
 
     protected connect() {
@@ -219,14 +212,14 @@ class MarketEvaluatorWS {
         this.ws = new WebSocket(protocol + domain + '/ws/market-evaluator/');
 
         this.ws.onclose = (e) => {
-            this.setConnectionStatus(false);
+            this.setWSConnectionStatus(false);
             setTimeout(() => {
                 this.connect();
             }, 1000);
         };
 
         this.ws.onopen = (e) => {
-            this.setConnectionStatus(true);
+            this.setWSConnectionStatus(true);
             PubSub.publish(MarketEvalWSEvents.MKT_EVAL_WS_CONNECTED);
         };
 

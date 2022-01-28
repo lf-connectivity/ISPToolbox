@@ -5,6 +5,7 @@
  **/
 import PubSub from 'pubsub-js';
 import { ViewshedTool } from './organisms/ViewshedTool';
+import { setConnectionStatus } from './utils/ConnectionIssues';
 import { getSessionID } from './utils/MapPreferences';
 import {
     AccessPointCoverageResponse,
@@ -21,6 +22,7 @@ interface LOSCheckWSCallbacks {
 interface AccesPointWSCallback {
     (message: AccessPointCoverageResponse): void;
 }
+
 class LOSCheckWS {
     ws: WebSocket;
     networkName: string;
@@ -39,16 +41,8 @@ class LOSCheckWS {
         LOSCheckWS._instance = this;
     }
 
-    setConnectionStatus(connected: boolean) {
-        const element = $('#websocket-connection-status');
-        const geocoder = $('#geocoder');
-        if (connected) {
-            element.addClass('d-none');
-            geocoder.removeClass('d-none');
-        } else {
-            element.removeClass('d-none');
-            geocoder.addClass('d-none');
-        }
+    setWSConnectionStatus(connected: boolean) {
+        setConnectionStatus(connected);
     }
 
     connect() {
@@ -60,14 +54,14 @@ class LOSCheckWS {
         this.ws = new WebSocket(protocol + domain + '/ws/los/' + this.networkName + '/');
 
         this.ws.onclose = (e) => {
-            this.setConnectionStatus(false);
+            this.setWSConnectionStatus(false);
             setTimeout(() => {
                 this.connect();
             }, 1000);
         };
 
         this.ws.onopen = (e) => {
-            this.setConnectionStatus(true);
+            this.setWSConnectionStatus(true);
             while (this.pendingRequests.length > 0) {
                 const msg = this.pendingRequests.pop();
                 if (typeof msg === 'string') {

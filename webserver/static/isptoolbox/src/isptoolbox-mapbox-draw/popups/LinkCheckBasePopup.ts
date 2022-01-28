@@ -32,9 +32,26 @@ export const LOADING_SVG = `
     </svg>
 `;
 
+export const ERROR_SVG = `
+<svg width="22" height="21" viewBox="0 0 22 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10.9996 17.8078C11.8068 17.8078 12.4612 17.1535 12.4612 16.3463C12.4612 15.5391 11.8068 14.8848 10.9996 14.8848C10.1924 14.8848 9.53809 15.5391 9.53809 16.3463C9.53809 17.1535 10.1924 17.8078 10.9996 17.8078Z" fill="#D82020"/>
+    <path d="M11 7.57715V12.6925" stroke="#D82020" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0.769043 20L10.9998 1L21.2306 20H0.769043Z" stroke="#D82020" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg> 
+`;
+
 export function createLoadingHTMLContent(message: string = "Loading"){
     return `<div class="mapboxgl-popup--loading-tooltip"><div class="my-auto text-center">
         ${LOADING_SVG}<p>${message}</p></div></div>`
+}
+
+export function createErrorHTMLContent(title: string = "Unexpected Error", message: string= "Try reopening the tooltip") {
+    return `<div class="mapboxgl-popup--loading-tooltip"><div class="my-auto text-center">
+        ${ERROR_SVG}
+            <h1>${title}</h1>
+            <p>${message}</p>
+        </div>
+    </div>`
 }
 
 export abstract class LinkCheckBasePopup extends CollapsibleComponent {

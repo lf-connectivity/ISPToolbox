@@ -1,5 +1,5 @@
 import { djangoUrl } from '../../utils/djangoUrl';
-import { LinkCheckBasePopup, createLoadingHTMLContent } from './LinkCheckBasePopup';
+import { LinkCheckBasePopup, createLoadingHTMLContent, createErrorHTMLContent } from './LinkCheckBasePopup';
 
 export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
     protected endpoint: string;
@@ -15,20 +15,30 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
             this.popup.off('close', this.cleanupCall);
             this.popup.setHTML(createLoadingHTMLContent());
             this.popup.addTo(this.map);
-            $.get(
-                this.getEndpoint(),
-                '',
-                (result) => {
+            const request_params = this.getEndpointParams();
+            $.get({
+                url: this.getEndpoint(),
+                data: '',
+                dataType: 'html',
+            })
+            .done((result) => {
+                if(this.responseMatchesCurrent(request_params))
+                {
                     this.popup.setHTML(result);
-                },
-                'html'
-            )
-                .fail(() => {})
-                .done(() => {
+                }
+            }).fail(() => {
+                if(this.responseMatchesCurrent(request_params)){
+                    this.popup.setHTML(createErrorHTMLContent());
+                }
+            })
+            .always(() => {
+                if(this.responseMatchesCurrent(request_params))
+                {
                     this.popup.addTo(this.map);
                     this.popup.on('close', this.cleanupCall);
                     this.setEventHandlers();
-                });
+                }
+            });
         }
     }
 
@@ -135,6 +145,12 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
         } else {
             return djangoUrl(this.endpoint, ...this.getEndpointParams());
         }
+    }
+
+    protected responseMatchesCurrent(params: any[]): boolean{
+        const allEqual = (arr: any[]) => arr.every( (params, idx) => params === arr[idx]);
+        const eq = allEqual( this.getEndpointParams() );
+        return eq;
     }
 
     protected getEndpointParams(): any[] {

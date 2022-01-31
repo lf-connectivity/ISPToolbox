@@ -3,16 +3,10 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from workspace.models import AccessPointSector
-from workspace.models.task_models import AbstractAsyncTaskAssociatedModel
-
-import enum
-
-
-class CloudRFAsyncTaskStatus(enum.Enum):
-    NOT_STARTED = "NOT_STARTED"
-    IN_PROGRESS = "IN_PROGRESS"
-    COMPLETED = "COMPLETED"
-    ERROR = "ERROR"
+from workspace.models.task_models import (
+    AbstractAsyncTaskAssociatedModel,
+    AsyncTaskStatus,
+)
 
 
 # TODO: Migrate cloudrf coverage into here???
@@ -51,22 +45,22 @@ class CloudRFAsyncTaskModel(AbstractAsyncTaskAssociatedModel):
 
     def get_cloudrf_coverage_status(self):
         status_map = {
-            "PENDING": CloudRFAsyncTaskStatus.IN_PROGRESS,
-            "STARTED": CloudRFAsyncTaskStatus.IN_PROGRESS,
-            "RETRY": CloudRFAsyncTaskStatus.IN_PROGRESS,
-            "FAILURE": CloudRFAsyncTaskStatus.ERROR,
-            "SUCCESS": CloudRFAsyncTaskStatus.COMPLETED,
+            "PENDING": AsyncTaskStatus.IN_PROGRESS,
+            "STARTED": AsyncTaskStatus.IN_PROGRESS,
+            "RETRY": AsyncTaskStatus.IN_PROGRESS,
+            "FAILURE": AsyncTaskStatus.ERROR,
+            "SUCCESS": AsyncTaskStatus.COMPLETED,
         }
         # Weird timing issue means that we have to check for obsolescence
         # before checking for cloudrf geojson
         if self.sector.cloudrf_coverage_geojson:
-            return CloudRFAsyncTaskStatus.COMPLETED
+            return AsyncTaskStatus.COMPLETED
         elif self.is_obsolete():
-            return CloudRFAsyncTaskStatus.NOT_STARTED
+            return AsyncTaskStatus.NOT_STARTED
         else:
             task_result = self.task_result
             if not task_result:
-                return CloudRFAsyncTaskStatus.NOT_STARTED
+                return AsyncTaskStatus.NOT_STARTED
             else:
                 return status_map[task_result.status]
 

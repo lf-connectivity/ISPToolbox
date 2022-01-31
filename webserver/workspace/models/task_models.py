@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from webserver.celery import celery_app as app
 
+import enum
 
 class AbstractAsyncTaskAssociatedModel(models.Model):
     """
@@ -45,7 +46,13 @@ class AbstractAsyncTaskPrimaryKeyMixin(models.Model):
     Use this mixin to have a random UUID id as a primary key
     """
 
-    id = models.UUIDField(default=uuid4, primary_key=True)
+    uuid = models.UUIDField(default=uuid4, primary_key=True)
 
     class Meta:
         abstract = True
+
+class AsyncTaskStatus(enum.Enum):
+    NOT_STARTED = "NOT_STARTED"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    ERROR = "ERROR"

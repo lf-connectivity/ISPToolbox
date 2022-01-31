@@ -9,6 +9,7 @@ from webserver.celery import celery_app as app
 
 import enum
 
+
 class AbstractAsyncTaskAssociatedModel(models.Model):
     """
     Base class for handling task related models.
@@ -50,6 +51,7 @@ class AbstractAsyncTaskPrimaryKeyMixin(models.Model):
 
     class Meta:
         abstract = True
+
 
 class AsyncTaskStatus(enum.Enum):
     NOT_STARTED = "NOT_STARTED"

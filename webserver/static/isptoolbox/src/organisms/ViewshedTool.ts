@@ -12,6 +12,7 @@ import { djangoUrl } from '../utils/djangoUrl';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 import { isBeta } from '../LinkCheckUtils';
+import { SELECTED_LINK_LAYER } from '../LinkCheckPTPOverlay';
 
 export enum ViewshedEvents {
     VS_REQUEST = 'vs.request',
@@ -203,7 +204,7 @@ export class ViewshedTool implements IMapboxDrawPlugin {
                         'raster-opacity': 1.0
                     }
                 },
-                EMPTY_LAYER_AFTER_BUILDING
+                SELECTED_LINK_LAYER
             );
         }
     }

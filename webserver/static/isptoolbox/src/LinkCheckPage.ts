@@ -406,22 +406,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
         this.map.on('draw.selectionchange', this.showInputs.bind(this));
         this.map.on('draw.delete', this.deleteDrawingCallback.bind(this));
-        this.map.on(
-            'draw.update',
-            ({
-                features,
-                action
-            }: {
-                features: Array<GeoJSON.Feature>;
-                action: 'move' | 'change_coordinates';
-            }) => {
-                if (features.length === 1) {
-                    if (features[0].properties?.feature_type === WorkspaceFeatureTypes.AP) {
-                        LOSCheckLinkProfileView.getInstance().show();
-                    }
-                }
-            }
-        );
         PubSub.subscribe(LinkCheckEvents.SET_INPUTS, this.setInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.CLEAR_INPUTS, this.clearInputs.bind(this));
         PubSub.subscribe(LinkCheckEvents.SHOW_INPUTS, this.showInputs.bind(this));
@@ -629,7 +613,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     update.features[0].properties?.feature_type ===
                         WorkspaceFeatureTypes.AP_CPE_LINK && update.action === 'move'
                 ) &&
-                !this.vertexSelected(update)
+                !this.vertexSelected(update) &&
+                update.features[0].geometry.type === 'LineString'
             ) {
                 LOSCheckLinkProfileView.getInstance().show();
             }

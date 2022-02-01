@@ -8,7 +8,6 @@ from workspace.models import (
     AccessPointCoverageBuildings,
     AccessPointSectorSerializer,
     CloudRFAsyncTaskModel,
-    Viewshed,
 )
 
 import logging

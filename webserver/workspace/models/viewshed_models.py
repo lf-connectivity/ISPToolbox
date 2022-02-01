@@ -17,7 +17,6 @@ from workspace.utils.geojson_circle import destination
 from mmwave.models import EPTLidarPointCloud, TileModel
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from mmwave.tasks.link_tasks import getDTMPoint
-import uuid
 import jwt
 import datetime
 import math

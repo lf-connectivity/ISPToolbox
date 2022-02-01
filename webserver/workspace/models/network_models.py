@@ -26,6 +26,7 @@ import logging
 import numpy
 import math
 import json
+import random
 import uuid
 from workspace.models.validators import validate_ptp_link_geometry
 
@@ -437,10 +438,14 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
             return obj.cloudrf_coverage_geojson.json
 
 
+def random_heading():
+    return random.randint(ModelLimits.HEADING.min, ModelLimits.HEADING.max)
+
+
 class AccessPointSector(WorkspaceFeature):
     name = models.CharField(max_length=50, default="Unnamed AP")
     heading = models.FloatField(
-        default=ModelLimits.HEADING.default,
+        default=random_heading,
         validators=[
             MinValueValidator(
                 ModelLimits.HEADING.min,

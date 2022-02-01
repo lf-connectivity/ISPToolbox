@@ -152,12 +152,14 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
                 const new_feat = this.draw.get(feat?.id as string);
                 if (new_feat) {
                     this.draw.add(new_feat);
+                    this.map.fire('draw.update', {action: 'read', features: [new_feat]})
                 }
             } else {
                 this.draw.setFeatureProperty(feat?.id as string, 'hidden', undefined);
                 const new_feat = this.draw.get(feat?.id as string);
                 if (new_feat) {
                     this.draw.add(new_feat);
+                    this.map.fire('draw.update', {action: 'read', features: [new_feat]})
                 }
             }
         }

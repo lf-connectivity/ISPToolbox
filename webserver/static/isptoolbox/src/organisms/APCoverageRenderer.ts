@@ -371,6 +371,6 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
     }
 
     protected shouldRenderFeature(f: GeoJSON.Feature): boolean {
-        return f.properties?.hidden;
+        return f.properties?.hidden === undefined;
     }
 }

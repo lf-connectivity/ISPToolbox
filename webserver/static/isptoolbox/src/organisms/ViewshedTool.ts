@@ -69,20 +69,12 @@ export class ViewshedTool implements IMapboxDrawPlugin {
 
     drawUpdateCallback(event: { features: Array<GeoJSON.Feature>; action: string }) {
         const features = event.features;
-        if (
-            features.length > 0 &&
-            !features.some((f) => {
-                return this.viewshed_feature_id === f?.id;
-            }) &&
-            features.some((f) => {
-                return ViewshedTool.checkValidFeatureType(f);
-            })
-        ) {
+        if (this.shouldHide(features)) {
             this.setVisibleLayer(false);
         }
         if (features.length === 1) {
             const feat = features[0];
-            if (ViewshedTool.checkValidFeatureType(feat)) {
+            if (ViewshedTool.checkValidFeatureType(feat) && this.shouldRenderFeature(feat)) {
                 this.setVisibleLayer(false);
                 this.requestViewshedOverlay(feat.properties?.uuid);
             }
@@ -102,15 +94,8 @@ export class ViewshedTool implements IMapboxDrawPlugin {
             this.last_selection = '';
         }
 
-        if (
-            features.length > 0 &&
-            !features.some((f) => {
-                return this.viewshed_feature_id === f?.id;
-            }) &&
-            features.some((f) => {
-                return ViewshedTool.checkValidFeatureType(f);
-            })
-        ) {
+        if (this.shouldHide(features))
+        {
             this.setVisibleLayer(false);
         }
 
@@ -119,7 +104,7 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         } else {
             if (features.length === 1) {
                 const feat = features[0];
-                if (ViewshedTool.checkValidFeatureType(feat)) {
+                if (ViewshedTool.checkValidFeatureType(feat) && this.shouldRenderFeature(feat)) {
                     this.requestViewshedOverlay(feat.properties?.uuid);
                 }
             }
@@ -135,6 +120,21 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         ) {
             this.setVisibleLayer(false);
         }
+    }
+
+    shouldHide(features: Array<GeoJSON.Feature>): boolean {
+        if(features.length > 0
+            && features.some((f) => {return this.viewshed_feature_id === f?.id && !this.shouldRenderFeature(f);})
+            && features.some((f) => {return ViewshedTool.checkValidFeatureType(f)})
+        )
+        {
+            return true;
+        }
+        return false;
+    }
+
+    shouldRenderFeature(f: GeoJSON.Feature): boolean {
+        return f.properties?.hidden === undefined;
     }
 
     requestViewshedOverlay(uuid: string) {

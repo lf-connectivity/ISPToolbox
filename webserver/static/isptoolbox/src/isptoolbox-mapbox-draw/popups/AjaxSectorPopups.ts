@@ -219,6 +219,7 @@ export abstract class BaseAjaxSectorPopup
                     center: [coords[0], coords[1] + +0.15 * (north - south)]
                 });
             }
+            this.hide();
             this.show();
         }
     }

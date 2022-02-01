@@ -53,8 +53,46 @@ class AbstractAsyncTaskPrimaryKeyMixin(models.Model):
         abstract = True
 
 
+class AbstractAsyncTaskHashCacheMixin(models.Model):
+    """
+    Use this mixin to associate a hash with the model (for caching purposes)
+    """
+
+    hash = models.CharField(
+        max_length=255,
+        help_text="""
+            This hash helps determine if the AP has already been computed.
+        """,
+    )
+
+    def calculate_hash(self):
+        raise NotImplementedError("Please implement this")
+
+    def result_cached(self) -> bool:
+        return self.hash == self.calculate_hash()
+
+    def on_task_start(self, task_id):
+        self.task_id = task_id
+        self.hash = self.calculate_hash()
+        self.save()
+
+    class Meta:
+        abstract = True
+
+
 class AsyncTaskStatus(enum.Enum):
     NOT_STARTED = "NOT_STARTED"
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
     ERROR = "ERROR"
+
+    @staticmethod
+    def from_celery_task_status(status):
+        status_map = {
+            "PENDING": AsyncTaskStatus.IN_PROGRESS,
+            "STARTED": AsyncTaskStatus.IN_PROGRESS,
+            "RETRY": AsyncTaskStatus.IN_PROGRESS,
+            "FAILURE": AsyncTaskStatus.ERROR,
+            "SUCCESS": AsyncTaskStatus.COMPLETED,
+        }
+        return status_map[status]

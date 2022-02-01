@@ -5,21 +5,17 @@ from django.dispatch import receiver
 from workspace.models import AccessPointSector
 from workspace.models.task_models import (
     AbstractAsyncTaskAssociatedModel,
+    AbstractAsyncTaskHashCacheMixin,
     AsyncTaskStatus,
 )
 
 
 # TODO: Migrate cloudrf coverage into here???
-class CloudRFAsyncTaskModel(AbstractAsyncTaskAssociatedModel):
+class CloudRFAsyncTaskModel(
+    AbstractAsyncTaskAssociatedModel, AbstractAsyncTaskHashCacheMixin
+):
     sector = models.OneToOneField(
         AccessPointSector, on_delete=models.CASCADE, related_name="cloudrf_task"
-    )
-
-    hash = models.CharField(
-        max_length=255,
-        help_text="""
-            This hash helps determine if the AP has already been computed.
-        """,
     )
 
     def calculate_hash(self):
@@ -38,19 +34,7 @@ class CloudRFAsyncTaskModel(AbstractAsyncTaskAssociatedModel):
     def is_obsolete(self):
         return self.hash and self.hash != self.calculate_hash()
 
-    def on_task_start(self, task_id):
-        self.task_id = task_id
-        self.hash = self.calculate_hash()
-        self.save()
-
     def get_cloudrf_coverage_status(self):
-        status_map = {
-            "PENDING": AsyncTaskStatus.IN_PROGRESS,
-            "STARTED": AsyncTaskStatus.IN_PROGRESS,
-            "RETRY": AsyncTaskStatus.IN_PROGRESS,
-            "FAILURE": AsyncTaskStatus.ERROR,
-            "SUCCESS": AsyncTaskStatus.COMPLETED,
-        }
         # Weird timing issue means that we have to check for obsolescence
         # before checking for cloudrf geojson
         if self.sector.cloudrf_coverage_geojson:
@@ -62,7 +46,7 @@ class CloudRFAsyncTaskModel(AbstractAsyncTaskAssociatedModel):
             if not task_result:
                 return AsyncTaskStatus.NOT_STARTED
             else:
-                return status_map[task_result.status]
+                return AsyncTaskStatus.from_celery_task_status(task_result.status)
 
 
 @receiver(post_save, sender=AccessPointSector)

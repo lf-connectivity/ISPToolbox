@@ -7,7 +7,8 @@ from workspace.models import (
     AccessPointSerializer,
     AccessPointCoverageBuildings,
     AccessPointSectorSerializer,
-    CloudRFAsyncTaskModel
+    CloudRFAsyncTaskModel,
+    Viewshed,
 )
 
 import logging
@@ -133,10 +134,21 @@ class SectorFormView(TooltipFormView):
         except Exception:
             logging.info("Could not find associated coverage")
 
-        task, _created = CloudRFAsyncTaskModel.objects.get_or_create(sector=self.get_object())
-        context.update({
-            "cloudrf_status": task.get_cloudrf_coverage_status().value
-        })
+        task, _created = CloudRFAsyncTaskModel.objects.get_or_create(
+            sector=self.get_object()
+        )
+        context.update({"cloudrf_status": task.get_cloudrf_coverage_status().value})
+
+        viewshed = self.get_object().viewshed
+        context.update(
+            {
+                "viewshed_status": {
+                    "status": viewshed.get_viewshed_task_status().value,
+                    "progress_message": viewshed.progress_message,
+                    "time_remaining": viewshed.time_remaining,
+                }
+            }
+        )
 
         serialized_sectors = AccessPointSectorSerializer(other_sectors, many=True)
         context.update({"other_sectors": serialized_sectors.data})

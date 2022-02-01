@@ -4,9 +4,15 @@ from django.contrib.gis.geos import Point
 from django.conf import settings
 from storages.backends.s3boto3 import S3Boto3Storage
 from IspToolboxApp.util.s3 import S3PublicExportMixin, writeMultipleS3Objects
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from workspace.models.network_models import AccessPointLocation, AccessPointSector
+from workspace.models.task_models import (
+    AbstractAsyncTaskAssociatedModel,
+    AbstractAsyncTaskHashCacheMixin,
+    AbstractAsyncTaskPrimaryKeyMixin,
+    AsyncTaskStatus,
+)
 from workspace.utils.geojson_circle import destination
 from mmwave.models import EPTLidarPointCloud, TileModel
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
@@ -41,36 +47,36 @@ PIL.Image.MAX_IMAGE_PIXELS = 20_000 * 20_000
 TASK_LOGGER = get_task_logger(__name__)
 
 
-class Viewshed(models.Model, S3PublicExportMixin):
+class Viewshed(
+    AbstractAsyncTaskAssociatedModel,
+    AbstractAsyncTaskPrimaryKeyMixin,
+    AbstractAsyncTaskHashCacheMixin,
+    S3PublicExportMixin,
+):
     """
     Viewshed computation result
     """
+
     ap = models.OneToOneField(
         AccessPointLocation,
         on_delete=models.CASCADE,
-        null=True, blank=True, default=None
+        null=True,
+        blank=True,
+        default=None,
     )
     sector = models.OneToOneField(
-        AccessPointSector,
-        on_delete=models.CASCADE,
-        null=True, blank=True, default=None
+        AccessPointSector, on_delete=models.CASCADE, null=True, blank=True, default=None
     )
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True)
-    hash = models.CharField(
-        max_length=255,
-        help_text="""
-            This hash helps determine if the AP has already been computed.
-        """
-    )
-    version = models.IntegerField(
-        default=0,
-        db_index=True
-    )
+    version = models.IntegerField(default=0, db_index=True)
     created = models.DateTimeField(auto_now_add=True)
     max_zoom = models.IntegerField(
-        default=17, validators=[MinValueValidator(0), MaxValueValidator(20)])
+        default=17, validators=[MinValueValidator(0), MaxValueValidator(20)]
+    )
     min_zoom = models.IntegerField(
-        default=12, validators=[MinValueValidator(0), MaxValueValidator(20)])
+        default=12, validators=[MinValueValidator(0), MaxValueValidator(20)]
+    )
+    progress_message = models.CharField(max_length=255, null=True)
+    time_remaining = models.FloatField(null=True)
 
     @property
     def radio(self):
@@ -88,10 +94,20 @@ class Viewshed(models.Model, S3PublicExportMixin):
         NORMAL = "NORMAL"
 
     mode = models.CharField(
-        default=CoverageStatus.GROUND,
-        max_length=20,
-        choices=CoverageStatus.choices
+        default=CoverageStatus.GROUND, max_length=20, choices=CoverageStatus.choices
     )
+
+    def get_viewshed_task_status(self):
+        task_result = self.task_result
+        if not self.result_cached():
+            if not task_result:
+                return AsyncTaskStatus.NOT_STARTED
+            else:
+                return AsyncTaskStatus.COMPLETED
+        elif task_result:
+            return AsyncTaskStatus.from_celery_task_status(task_result.status)
+        else:
+            return AsyncTaskStatus.COMPLETED
 
     def createJWT(self):
         """
@@ -101,10 +117,10 @@ class Viewshed(models.Model, S3PublicExportMixin):
             {
                 "tileset": str(self.uuid),
                 # token is good for 3 days
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=3)
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=3),
             },
             settings.TILESET_LAMBDA_EDGE_SECRET,
-            algorithm="HS256"
+            algorithm="HS256",
         )
         return encoded_jwt
 
@@ -113,16 +129,16 @@ class Viewshed(models.Model, S3PublicExportMixin):
         Get tileset base url
         """
         prefix = "viewshed/tiles_test"
-        if settings.PROD or kwargs.get('tile_prod', False):
+        if settings.PROD or kwargs.get("tile_prod", False):
             prefix = "viewshed/tiles"
         return f"https://tiles.isptoolbox.io/{prefix}/{self.uuid}/{{z}}/{{y}}/{{x}}.png?access_token={self.createJWT()}"
 
     def getTilesetInfo(self):
         return {
-            'base_url': self.getBaseTileSetUrl(),
-            'maxzoom': self.max_zoom,
-            'minzoom': self.min_zoom,
-            'uuid': self.radio.uuid,
+            "base_url": self.getBaseTileSetUrl(),
+            "maxzoom": self.max_zoom,
+            "minzoom": self.min_zoom,
+            "uuid": self.radio.uuid,
         }
 
     def calculate_hash(self):
@@ -131,14 +147,13 @@ class Viewshed(models.Model, S3PublicExportMixin):
         """
         sector_props = ""
         if self.sector is not None:
-            sector_props = f'sector:{self.sector.heading},{self.sector.azimuth},'
-        return f'{self.radio.height},{self.radio.max_radius},' +\
-            sector_props +\
-            f'{self.radio.observer.x},{self.radio.observer.y},' +\
-            f'{self.radio.default_cpe_height}'
-
-    def result_cached(self) -> bool:
-        return self.hash == self.calculate_hash()
+            sector_props = f"sector:{self.sector.heading},{self.sector.azimuth},"
+        return (
+            f"{self.radio.height},{self.radio.max_radius},"
+            + sector_props
+            + f"{self.radio.observer.x},{self.radio.observer.y},"
+            + f"{self.radio.default_cpe_height}"
+        )
 
     def delete(self):
         self.delete_object()
@@ -146,18 +161,25 @@ class Viewshed(models.Model, S3PublicExportMixin):
 
     def get_s3_key(self, **kwargs) -> str:
         if settings.PROD:
-            key = 'viewshed/viewshed-tower-' + \
-                str(self.radio.uuid) + ('.tif' if kwargs.get('tif') else '.png')
+            key = (
+                "viewshed/viewshed-tower-"
+                + str(self.radio.uuid)
+                + (".tif" if kwargs.get("tif") else ".png")
+            )
         else:
-            key = 'viewshed/test-viewshed-tower-' + \
-                str(self.radio.uuid) + ('.tif' if kwargs.get('tif') else '.png')
+            key = (
+                "viewshed/test-viewshed-tower-"
+                + str(self.radio.uuid)
+                + (".tif" if kwargs.get("tif") else ".png")
+            )
         return key
 
     def translate_dtm_height_to_dsm_height(self) -> float:
         point = self.radio.observer
         dtm = getDTMPoint(point)
         tile_engine = DSMTileEngine(
-            point, EPTLidarPointCloud.query_intersect_aoi(point))
+            point, EPTLidarPointCloud.query_intersect_aoi(point)
+        )
         dsm = tile_engine.getSurfaceHeight(point)
         return self.radio.height + dtm - dsm
 
@@ -167,28 +189,28 @@ class Viewshed(models.Model, S3PublicExportMixin):
         """
         # Delete all tiles from previous calculations
         aoi = self.radio.getDSMExtentRequired()
-        dsm_engine = DSMTileEngine(
-            aoi, EPTLidarPointCloud.query_intersect_aoi(aoi))
-        with tempfile.NamedTemporaryFile(mode='w+b', suffix=".tif") as dsm_file:
+        dsm_engine = DSMTileEngine(aoi, EPTLidarPointCloud.query_intersect_aoi(aoi))
+        with tempfile.NamedTemporaryFile(mode="w+b", suffix=".tif") as dsm_file:
             start = time.time()
             if status_callback is not None:
-                status_callback("Loading coverage data",
-                                self.__timeRemainingViewshed(0))
+                status_callback(
+                    "Loading coverage data...", self.__timeRemainingViewshed(0)
+                )
             try:
                 dsm_engine.getDSM(dsm_file.name)
             except Exception:
                 raise DSMAvailabilityException
 
-            TASK_LOGGER.info(f'dsm download: {time.time() - start}')
+            TASK_LOGGER.info(f"dsm download: {time.time() - start}")
             if status_callback is not None:
-                status_callback("Computing line of sight",
-                                self.__timeRemainingViewshed(1))
-            self.__renderViewshed(
-                dsm_file=dsm_file, status_callback=status_callback)
+                status_callback(
+                    "Computing line of sight...", self.__timeRemainingViewshed(1)
+                )
+            self.__renderViewshed(dsm_file=dsm_file, status_callback=status_callback)
         if status_callback is not None:
-            status_callback(None, None)
+            status_callback("Finalizing results...", None)
         self.hash = self.calculate_hash()
-        self.save(update_fields=['hash'])
+        self.save(update_fields=["hash"])
 
     def __timeRemainingViewshed(self, step: int) -> float:
         # DSM download polyfit 1,2,3 Mile - 3.5, 10, 23 sec
@@ -204,18 +226,20 @@ class Viewshed(models.Model, S3PublicExportMixin):
         ]
         time_remaining = 0
         for i in range(step, len(polynomials)):
-            time_remaining = time_remaining + \
-                polyval(polynomials[i], self.radio.radius_miles)
+            time_remaining = time_remaining + polyval(
+                polynomials[i], self.radio.radius_miles
+            )
         return time_remaining
 
-    def __createRawGDALViewshedCommand(self, dsm_filepath, output_filepath, dsm_projection):
+    def __createRawGDALViewshedCommand(
+        self, dsm_filepath, output_filepath, dsm_projection
+    ):
         """
         Generate shell commmand to run gdal_viewshed: requires gdal-bin > 3.1.0
 
         documentation: https://gdal.org/programs/gdal_viewshed.html
         """
-        transformed_observer = self.radio.observer.transform(
-            dsm_projection, clone=True)
+        transformed_observer = self.radio.observer.transform(dsm_projection, clone=True)
         transformed_height = self.translate_dtm_height_to_dsm_height()
         output_value = 1
         if self.mode != Viewshed.CoverageStatus.NORMAL:
@@ -226,7 +250,9 @@ class Viewshed(models.Model, S3PublicExportMixin):
             {dsm_filepath} {output_filepath}
         """
 
-    def __createGdal2TileCommand(self, viewshed_filepath, output_folderpath, processes=8, tilesize=512):
+    def __createGdal2TileCommand(
+        self, viewshed_filepath, output_folderpath, processes=8, tilesize=512
+    ):
         return f"""gdal2tiles.py --zoom={self.min_zoom}-{self.max_zoom} --tilesize={tilesize}
             --webviewer=none --no-kml --resampling=near --exclude --processes={processes}
             {viewshed_filepath} {output_folderpath}"""
@@ -238,79 +264,81 @@ class Viewshed(models.Model, S3PublicExportMixin):
         res = Point(pt_radius[0], pt_radius[1])
         res.srid = 4326
         res = res.transform(DEFAULT_PROJECTION, clone=True)
-        return math.sqrt((src.x - res.x) * (src.x - res.x) + (src.y - res.y) * (src.y - res.y))
+        return math.sqrt(
+            (src.x - res.x) * (src.x - res.x) + (src.y - res.y) * (src.y - res.y)
+        )
 
     def __renderViewshed(self, dsm_file, status_callback=None):
         with tempfile.NamedTemporaryFile(suffix=".tif") as output_temp:
             start = time.time()
             raw_command = self.__createRawGDALViewshedCommand(
-                dsm_file.name, output_temp.name, DEFAULT_PROJECTION)
+                dsm_file.name, output_temp.name, DEFAULT_PROJECTION
+            )
             filtered_command = shlex.split(raw_command)
             celery_task_subprocess_check_output_wrapper(filtered_command)
 
-            TASK_LOGGER.info(f'compute viewshed: {time.time() - start}')
+            TASK_LOGGER.info(f"compute viewshed: {time.time() - start}")
             start_tiling = time.time()
 
             if status_callback is not None:
-                status_callback("Colorizing and Reprojecting",
-                                self.__timeRemainingViewshed(2))
+                status_callback(
+                    "Colorizing and Reprojecting...", self.__timeRemainingViewshed(2)
+                )
 
             self.__cropSector(output_temp)
 
             with tempfile.NamedTemporaryFile(suffix=".tif") as colorized_temp:
                 self.__colorizeOutputViewshed(output_temp, colorized_temp)
-                TASK_LOGGER.info(f'colorizing: {time.time() - start_tiling}')
+                TASK_LOGGER.info(f"colorizing: {time.time() - start_tiling}")
                 start = time.time()
                 self.__reprojectViewshed(output_temp)
-                TASK_LOGGER.info(f'reproject: {time.time() - start}')
+                TASK_LOGGER.info(f"reproject: {time.time() - start}")
                 start = time.time()
-                self.__createTileset(
-                    colorized_temp, status_callback=status_callback)
-                TASK_LOGGER.info(f'tileset: {time.time() - start}')
-            TASK_LOGGER.info(f'tiling: {time.time() - start_tiling}')
+                self.__createTileset(colorized_temp, status_callback=status_callback)
+                TASK_LOGGER.info(f"tileset: {time.time() - start}")
+            TASK_LOGGER.info(f"tiling: {time.time() - start_tiling}")
 
     def __createTileset(self, tif_tempfile, status_callback=None):
         with tempfile.TemporaryDirectory() as tmp_dir:
             if status_callback is not None:
-                status_callback("Tiling",
-                                self.__timeRemainingViewshed(3))
-            TASK_LOGGER.info(f'tiling started')
+                status_callback("Tiling...", self.__timeRemainingViewshed(3))
+            TASK_LOGGER.info(f"tiling started")
             start = time.time()
             self.__convert2Tiles(tif_tempfile.name, tmp_dir)
-            TASK_LOGGER.info(f'finished tiling: {time.time() - start}')
+            TASK_LOGGER.info(f"finished tiling: {time.time() - start}")
             size = 0
             if status_callback is not None:
-                status_callback("Loading results",
-                                self.__timeRemainingViewshed(4))
+                status_callback("Loading results...", self.__timeRemainingViewshed(4))
             start = time.time()
             paths = []
             keys = []
             # Find all Tile Images
             for subdir, _, files in os.walk(tmp_dir):
                 for file in files:
-                    if file.endswith('.png'):
+                    if file.endswith(".png"):
                         path = os.path.join(subdir, file)
                         regexpath = path.replace(tmp_dir, "")
-                        z, y, x = re.findall('[0-9]+', regexpath)
+                        z, y, x = re.findall("[0-9]+", regexpath)
                         tile = ViewshedTile(viewshed=self, zoom=z, y=y, x=x)
                         size += os.path.getsize(path)
                         tile.save()
                         paths.append(path)
-                        keys.append(tile.upload_to_path(''))
+                        keys.append(tile.upload_to_path(""))
             TASK_LOGGER.info(
-                f'number of tiles: {len(paths)} tiles | size of tiles: {size}B')
+                f"number of tiles: {len(paths)} tiles | size of tiles: {size}B"
+            )
             # Perform Bulk Upload of Tiles to S3 - performed in parallel is much faster
             writeMultipleS3Objects(keys, paths, ViewshedTile.bucket_name)
-            TASK_LOGGER.info(f'finished uploading: {time.time() - start}')
+            TASK_LOGGER.info(f"finished uploading: {time.time() - start}")
 
-    def __colorizeOutputViewshed(self, tif_viewshed_tempfile, output_colorized_tempfile):
+    def __colorizeOutputViewshed(
+        self, tif_viewshed_tempfile, output_colorized_tempfile
+    ):
         with rasterio.open(tif_viewshed_tempfile.name) as src:
             if self.mode == Viewshed.CoverageStatus.NORMAL:
                 meta = src.meta.copy()
-                meta.update({
-                    'count': 4
-                })
-                with rasterio.open(output_colorized_tempfile.name, 'w', **meta) as dst:
+                meta.update({"count": 4})
+                with rasterio.open(output_colorized_tempfile.name, "w", **meta) as dst:
                     layer = src.read(1)
                     for i in range(1, 5):
                         new_layer = np.zeros(layer.shape, dtype=np.uint8)
@@ -320,11 +348,8 @@ class Viewshed(models.Model, S3PublicExportMixin):
                         dst.write(new_layer, indexes=i)
             if self.mode == Viewshed.CoverageStatus.GROUND:
                 meta = src.meta.copy()
-                meta.update({
-                    'count': 4,
-                    'dtype': rasterio.uint8
-                })
-                with rasterio.open(output_colorized_tempfile.name, 'w', **meta) as dst:
+                meta.update({"count": 4, "dtype": rasterio.uint8})
+                with rasterio.open(output_colorized_tempfile.name, "w", **meta) as dst:
                     layer = src.read(1)
                     for i in range(1, 5):
                         new_layer = np.zeros(layer.shape, dtype=np.uint8)
@@ -356,33 +381,38 @@ class Viewshed(models.Model, S3PublicExportMixin):
                 )
                 # Write to File
                 profile = ds.profile
-                profile.data.update({
-                    'height': out_image.shape[1],
-                    'width': out_image.shape[2],
-                    'transform': out_transform
-                })
-                with rasterio.open(viewshed_image.name, 'w', **profile) as dst:
+                profile.data.update(
+                    {
+                        "height": out_image.shape[1],
+                        "width": out_image.shape[2],
+                        "transform": out_transform,
+                    }
+                )
+                with rasterio.open(viewshed_image.name, "w", **profile) as dst:
                     dst.write(out_image.astype(output_type))
 
     def __reprojectViewshed(self, output_temp):
         # Load Output Viewshed TIF File
-        dst_crs = 'EPSG:4326'
+        dst_crs = "EPSG:4326"
         start = time.time()
         with rasterio.open(output_temp.name) as src:
             transform, width, height = calculate_default_transform(
-                src.crs, dst_crs, src.width, src.height, *src.bounds)
+                src.crs, dst_crs, src.width, src.height, *src.bounds
+            )
             kwargs = src.meta.copy()
-            kwargs.update({
-                'crs': dst_crs,
-                'transform': transform,
-                'width': width,
-                'height': height
-            })
-            TASK_LOGGER.info(f'open: {time.time() - start}')
+            kwargs.update(
+                {
+                    "crs": dst_crs,
+                    "transform": transform,
+                    "width": width,
+                    "height": height,
+                }
+            )
+            TASK_LOGGER.info(f"open: {time.time() - start}")
 
             # Create a transformed reprojection
             with tempfile.NamedTemporaryFile(suffix=".tif") as temp_transform:
-                with rasterio.open(temp_transform.name, 'w', **kwargs) as dst:
+                with rasterio.open(temp_transform.name, "w", **kwargs) as dst:
                     for i in range(1, src.count + 1):
                         reproject(
                             source=rasterio.band(src, i),
@@ -391,15 +421,27 @@ class Viewshed(models.Model, S3PublicExportMixin):
                             src_crs=src.crs,
                             dst_transform=transform,
                             dst_crs=dst_crs,
-                            resampling=Resampling.nearest)
+                            resampling=Resampling.nearest,
+                        )
                 temp_transform.seek(0)
                 self.write_object(temp_transform, tif=True)
-                TASK_LOGGER.info(f'reprojected: {time.time() - start}')
+                TASK_LOGGER.info(f"reprojected: {time.time() - start}")
 
     def __convert2Tiles(self, tif_filepath, outputfolder):
         raw_command = self.__createGdal2TileCommand(tif_filepath, outputfolder)
         filtered_command = shlex.split(raw_command)
         subprocess.check_output(filtered_command, encoding="UTF-8")
+
+
+@receiver(post_save, sender=AccessPointSector)
+def _create_viewshed_task(
+    sender, instance, created, raw, using, update_fields, **kwargs
+):
+    """
+    Create CloudRF coverage task for new sectors
+    """
+    if created:
+        Viewshed.objects.create(sector=instance)
 
 
 class DSMAvailabilityException(Exception):
@@ -410,11 +452,12 @@ class ViewshedTile(TileModel):
     """
     Slippy Tile that is associated with Lidar point cloud
     """
+
     viewshed = models.ForeignKey(Viewshed, on_delete=models.CASCADE)
-    bucket_name = 'isptoolbox-tilesets'
+    bucket_name = "isptoolbox-tilesets"
 
     class Meta:
-        unique_together = [['x', 'y', 'zoom', 'viewshed']]
+        unique_together = [["x", "y", "zoom", "viewshed"]]
 
     def upload_to_path(instance, filename):
         prefix = "viewshed/tiles_test"
@@ -424,7 +467,7 @@ class ViewshedTile(TileModel):
 
     tile = models.FileField(
         upload_to=upload_to_path,
-        storage=S3Boto3Storage(bucket_name=bucket_name, location=''),
+        storage=S3Boto3Storage(bucket_name=bucket_name, location=""),
     )
 
 
@@ -439,5 +482,5 @@ def convertViewshedRGBA(viewshed):
     numpy_image = np.zeros((im.size[1], im.size[0], 4), np.uint8)
     numpy_image[img == 0] = DEFAULT_OBSTRUCTED_COLOR
 
-    rgbaimg = Image.fromarray(numpy_image.astype('uint8'), 'RGBA')
+    rgbaimg = Image.fromarray(numpy_image.astype("uint8"), "RGBA")
     rgbaimg.save(viewshed)

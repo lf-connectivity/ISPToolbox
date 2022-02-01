@@ -163,10 +163,21 @@
                     </div>
                 {% endif %}
             {% endif %}
+
+            {% if tool == "los_check" %}
+                {{ viewshed_status.time_remaining|json_script:"time-remaining-viewshed-progress" }}
+                {% if viewshed_status.status == "COMPLETED" %}
+                    {% include "workspace/molecules/coverage_stats_tower.html" %}
+                {% elif viewshed_status.status == "IN_PROGRESS"%}
+                    <div align="center" class="viewshed-progress-sector-popup">
+                        {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
+                        <p align="center bold" class="mt-1">{{ viewshed_status.progress_message }}</p>
+                        <p align="center bold" class="mt-1" id="time-remaining-p-sector-popup"></p>
+                    </div>
+                {% endif %}
+            {% endif %}
         </li>
-        {% if tool == "los_check" %}
-        {% include "workspace/molecules/coverage_stats_tower.html" %}
-        {% endif %}
+
         {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-sector-row-sector-popup" delete_row_a_id="sector-delete-btn" delete_row_object_name="Access Point" delete_row_last_updated=last_updated %}
     </form>
 </ul>

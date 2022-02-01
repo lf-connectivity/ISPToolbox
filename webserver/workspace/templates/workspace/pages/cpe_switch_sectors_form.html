@@ -21,7 +21,11 @@
                         <p>
                             {{ sector.name }} - {{ sector.distance|floatformat:"2" }} {% unit_preference_value units "mi" "km" %}</p>
                         <a class="link connect-sector-link-switch-sector-popup">
-                            View LOS
+                            {% if sector.status == "unknown" %}
+                                Check LOS Status
+                            {% else %}
+                                View LOS
+                            {% endif %}
                         </a>
                     </div>
                     <div>

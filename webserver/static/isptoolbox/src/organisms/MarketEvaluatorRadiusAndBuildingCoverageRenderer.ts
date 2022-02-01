@@ -64,8 +64,8 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             source: BUILDING_DATA_SOURCE,
             layout: {},
             paint: {
-                'fill-color': '#42B72A',
-                'fill-opacity': 0.8
+                'fill-color': '#FAFF00',
+                'fill-opacity': 0.7
             }
         });
         // Wait for mapbox draw to finish loading - once complete place buildings above mapbox draw layers

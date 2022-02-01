@@ -107,6 +107,8 @@ urlpatterns = [
          views.TowerLocationFormView.as_view(), name="tower-form"),
     path('workspace/form/sector-form/<str:tool>/<uuid:uuid>/',
          views.SectorFormView.as_view(), name="sector-form"),
+    path('workspace/form/sector-stats/<str:tool>/<uuid:uuid>/',
+         views.SectorStatsView.as_view(), name="sector-stats"),
     path('workspace/form/cpe-forms/location/<uuid:session_id>/<str:lng>/<str:lat>/',
          views.LocationTooltipView.as_view(), name="los-location-form"),
     path('workspace/form/cpe-forms/cpe/<uuid:uuid>/',

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from workspace.models import AccessPointSector
@@ -58,3 +58,14 @@ def _create_cloudrf_coverage_task(
     """
     if created:
         CloudRFAsyncTaskModel.objects.create(sector=instance)
+
+
+@receiver(pre_delete, sender=AccessPointSector)
+def _cancel_cloudrf_coverage_task(sender, instance, using, **kwargs):
+    """
+    Cancel CloudRF coverage task for deleted sectors
+    """
+    try:
+        CloudRFAsyncTaskModel.objects.get(sector=instance).cancel_task()
+    except CloudRFAsyncTaskModel.DoesNotExist:
+        pass

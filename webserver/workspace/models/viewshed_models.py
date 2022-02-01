@@ -4,14 +4,13 @@ from django.contrib.gis.geos import Point
 from django.conf import settings
 from storages.backends.s3boto3 import S3Boto3Storage
 from IspToolboxApp.util.s3 import S3PublicExportMixin, writeMultipleS3Objects
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch import receiver
 from workspace.models.network_models import AccessPointLocation, AccessPointSector
 from workspace.models.task_models import (
     AbstractAsyncTaskAssociatedModel,
     AbstractAsyncTaskHashCacheMixin,
     AbstractAsyncTaskPrimaryKeyMixin,
-    AsyncTaskStatus,
 )
 from workspace.utils.geojson_circle import destination
 from mmwave.models import EPTLidarPointCloud, TileModel
@@ -95,18 +94,6 @@ class Viewshed(
     mode = models.CharField(
         default=CoverageStatus.GROUND, max_length=20, choices=CoverageStatus.choices
     )
-
-    def get_viewshed_task_status(self):
-        task_result = self.task_result
-        if not self.result_cached():
-            if not task_result:
-                return AsyncTaskStatus.NOT_STARTED
-            else:
-                return AsyncTaskStatus.COMPLETED
-        elif task_result:
-            return AsyncTaskStatus.from_celery_task_status(task_result.status)
-        else:
-            return AsyncTaskStatus.COMPLETED
 
     def createJWT(self):
         """
@@ -440,10 +427,21 @@ def _create_viewshed_task(
     sender, instance, created, raw, using, update_fields, **kwargs
 ):
     """
-    Create CloudRF coverage task for new sectors
+    Create Viewshed task for new sectors
     """
     if created:
         Viewshed.objects.create(sector=instance)
+
+
+@receiver(pre_delete, sender=AccessPointSector)
+def _cancel_viewshed_task(sender, instance, using, **kwargs):
+    """
+    Cancel viewshed task for deleted sectors
+    """
+    try:
+        Viewshed.objects.get(sector=instance).cancel_task()
+    except Viewshed.DoesNotExist:
+        pass
 
 
 class DSMAvailabilityException(Exception):

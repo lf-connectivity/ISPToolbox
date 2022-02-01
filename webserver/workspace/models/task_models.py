@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from webserver.celery import celery_app as app
 
+import celery.states
 import enum
 
 
@@ -36,7 +37,8 @@ class AbstractAsyncTaskAssociatedModel(models.Model):
                 return None
 
     def cancel_task(self):
-        app.control.revoke(self.task_id, terminate=True)
+        if self.task_id:
+            app.control.revoke(self.task_id, terminate=True)
 
     class Meta:
         abstract = True
@@ -72,9 +74,22 @@ class AbstractAsyncTaskHashCacheMixin(models.Model):
         return self.hash == self.calculate_hash()
 
     def on_task_start(self, task_id):
+        self.cancel_task()
         self.task_id = task_id
         self.hash = self.calculate_hash()
         self.save()
+
+    def get_task_status(self):
+        task_result = self.task_result
+        if not self.result_cached():
+            if not task_result:
+                return AsyncTaskStatus.NOT_STARTED
+            else:
+                return AsyncTaskStatus.COMPLETED
+        elif task_result:
+            return AsyncTaskStatus.from_celery_task_status(task_result.status)
+        else:
+            return AsyncTaskStatus.COMPLETED
 
     class Meta:
         abstract = True
@@ -85,14 +100,15 @@ class AsyncTaskStatus(enum.Enum):
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
     ERROR = "ERROR"
+    UNKNOWN = "UNKNOWN"
 
     @staticmethod
     def from_celery_task_status(status):
         status_map = {
-            "PENDING": AsyncTaskStatus.IN_PROGRESS,
-            "STARTED": AsyncTaskStatus.IN_PROGRESS,
-            "RETRY": AsyncTaskStatus.IN_PROGRESS,
-            "FAILURE": AsyncTaskStatus.ERROR,
-            "SUCCESS": AsyncTaskStatus.COMPLETED,
+            celery.states.PENDING: AsyncTaskStatus.IN_PROGRESS,
+            celery.states.STARTED: AsyncTaskStatus.IN_PROGRESS,
+            celery.states.RETRY: AsyncTaskStatus.IN_PROGRESS,
+            celery.states.FAILURE: AsyncTaskStatus.ERROR,
+            celery.states.SUCCESS: AsyncTaskStatus.COMPLETED,
         }
-        return status_map[status]
+        return status_map.get(status, AsyncTaskStatus.UNKNOWN)

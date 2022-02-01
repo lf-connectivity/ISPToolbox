@@ -9,6 +9,7 @@ import { renderAjaxOperationFailed } from '../../utils/ConnectionIssues';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
 import {
     ISPToolboxTool,
+    LOSWSEvents,
     WorkspaceEvents,
     WorkspaceFeatureTypes
 } from '../../workspace/WorkspaceConstants';
@@ -16,19 +17,23 @@ import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
 import { AjaxTowerPopup } from './AjaxTowerPopup';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
+import { djangoUrl } from '../../utils/djangoUrl';
 
 const SECTOR_NAME_UPDATE_FORM_ID = 'sector-name-update-form';
 const SECTOR_UPDATE_FORM_ID = 'sector-update-form';
 const BACK_TO_TOWER_LINK_ID = 'back-to-tower-sector-popup';
 const SECTOR_DELETE_BUTTON_ID = 'sector-delete-btn';
 const ADD_SECTOR_BUTTON_ID = 'add-access-point-sector-popup';
+const TIME_REMAINING_P_ID = 'time-remaining-p-sector-popup';
 
 const NAME_INPUT_ID = 'name-input-sector-popup';
 const EDIT_NAME_BTN_ID = 'edit-sector-name-sector-popup';
 const SAVE_NAME_BTN_ID = 'save-sector-name-sector-popup';
 const SECTOR_SELECT_ID = 'select-sector-sector-popup';
+const STAT_ROW_ID = 'stat-row-sector-popup';
+const TIME_REMAINING_JSON_ID = 'time-remaining-viewshed-progress';
 
-const CLOUDRF_PROGRESS_CLASS = 'cloudrf-progress-sector-popup';
+const TASK_PROGRESS_CLASS = 'task-progress-sector-popup';
 
 /**
  * Doing base classes for this to account for differences in button logic
@@ -170,6 +175,28 @@ export abstract class BaseAjaxSectorPopup
             });
 
         addHoverTooltip('.tooltip-input-btn', 'bottom');
+
+        // Enable viewshed submit if task coverage isn't loading or done
+        if (!$(`.${TASK_PROGRESS_CLASS}`).length) {
+            $(`#${SECTOR_UPDATE_FORM_ID}`)
+                .find('input:submit, button:submit')
+                .prop('disabled', false)
+                .removeClass('d-none');
+        }
+
+        // Hide task Progress class if input changes
+        $(`#${SECTOR_UPDATE_FORM_ID}`)
+            .each(function () {
+                $(this).data('serialized', $(this).serialize());
+            })
+            .on('change input', function () {
+                const input_changed = !($(this).serialize() == $(this).data('serialized'));
+                if (input_changed) {
+                    $(`.${TASK_PROGRESS_CLASS}`).addClass('d-none');
+                } else {
+                    $(`.${TASK_PROGRESS_CLASS}`).removeClass('d-none');
+                }
+            });
     }
 
     static getInstance() {
@@ -192,6 +219,23 @@ export abstract class BaseAjaxSectorPopup
                 this.hide();
             }
         });
+    }
+
+    protected updateSectorStats() {
+        if (this.popup.isOpen()) {
+            $.get(
+                djangoUrl('workspace:sector-stats', ...this.getEndpointParams()),
+                '',
+                (result) => {
+                    $(`#${STAT_ROW_ID}`).html(result);
+                },
+                'html'
+            )
+                .fail(() => {})
+                .done(() => {
+                    this.setEventHandlers();
+                });
+        }
     }
 
     protected onFormSubmitSuccess() {}
@@ -248,28 +292,6 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
 
     protected setEventHandlers(): void {
         super.setEventHandlers();
-
-        // Enable viewshed submit if cloudrf coverage isn't loading or done
-        if (!$(`.${CLOUDRF_PROGRESS_CLASS}`).length) {
-            $(`#${SECTOR_UPDATE_FORM_ID}`)
-                .find('input:submit, button:submit')
-                .prop('disabled', false)
-                .removeClass('d-none');
-        }
-
-        // Hide CloudRF Progress class if input changes
-        $(`#${SECTOR_UPDATE_FORM_ID}`)
-            .each(function () {
-                $(this).data('serialized', $(this).serialize());
-            })
-            .on('change input', function () {
-                const input_changed = !($(this).serialize() == $(this).data('serialized'));
-                if (input_changed) {
-                    $(`.${CLOUDRF_PROGRESS_CLASS}`).addClass('d-none');
-                } else {
-                    $(`.${CLOUDRF_PROGRESS_CLASS}`).removeClass('d-none');
-                }
-            });
     }
 
     protected onFormSubmitSuccess() {
@@ -280,30 +302,83 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
 
     protected onCloudRfProgress(event: string, data: CloudRFProgressResponse) {
         if (data.sector === this.sector?.workspaceId) {
-            this.updateComponent();
+            this.updateSectorStats();
         }
     }
 
     protected onCloudRfComplete(event: string, data: ViewshedGeojsonResponse) {
         if (data.ap_uuid && data.ap_uuid === this.sector?.workspaceId) {
-            this.updateComponent();
+            this.updateSectorStats();
         }
     }
 }
 
 export class LinkCheckSectorPopup extends BaseAjaxSectorPopup {
+    timeRemaining: null | number;
+    intervalId: any;
+    setTimeRemainingFunc: () => void;
+
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         if (BaseAjaxSectorPopup._instance) {
             return BaseAjaxSectorPopup._instance as LinkCheckSectorPopup;
         }
         super(map, draw, ISPToolboxTool.LOS_CHECK);
+        PubSub.subscribe(LOSWSEvents.VIEWSHED_PROGRESS_MSG, this.onTaskUpdate.bind(this));
+        PubSub.subscribe(LOSWSEvents.VIEWSHED_MSG, this.onTaskUpdate.bind(this));
+        PubSub.subscribe(LOSWSEvents.AP_MSG, this.onTaskUpdate.bind(this));
+
+        this.timeRemaining = null;
         BaseAjaxSectorPopup._instance = this;
     }
 
-    protected onFormSubmitSuccess() {
-        console.log(
-            `Calculating building/viewshed coverage for sector ${this.sector?.workspaceId} coming soon`
+    protected setEventHandlers(): void {
+        super.setEventHandlers();
+
+        this.timeRemaining = Math.round(
+            JSON.parse(document.getElementById(TIME_REMAINING_JSON_ID)?.textContent || '0')
         );
+
+        this.stopTimer();
+        this.formatTimeRemaining();
+        this.intervalId = setInterval(() => {
+            if (this.timeRemaining != null) {
+                this.timeRemaining -= 1;
+                this.timeRemaining = Math.max(this.timeRemaining, 0);
+            }
+            this.formatTimeRemaining();
+        }, 1000);
+    }
+
+    protected formatTimeRemaining() {
+        let message;
+        if (this.timeRemaining != null) {
+            if (this.timeRemaining === 0) {
+                this.stopTimer();
+                message = 'Hold tight, almost there!';
+            } else {
+                let date = new Date(0);
+                date.setSeconds(this.timeRemaining);
+                message = 'Time Remaining: ' + date.toISOString().substr(14, 5);
+            }
+        } else {
+            this.stopTimer();
+            message = 'This may take several minutes';
+        }
+
+        $(`#${TIME_REMAINING_P_ID}`).text(message);
+    }
+
+    protected stopTimer() {
+        if (this.intervalId != null) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+    }
+
+    protected onTaskUpdate(event: string, data: any) {
+        if (data.uuid === this.sector?.workspaceId) {
+            this.updateSectorStats();
+        }
     }
 
     static getInstance() {

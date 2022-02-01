@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.http.response import HttpResponseBadRequest
 from rest_framework import generics
 from django.shortcuts import render
@@ -5,16 +6,13 @@ from rest_framework.mixins import DestroyModelMixin
 from workspace.models import (
     AccessPointLocation,
     AccessPointSerializer,
+    AccessPointSector,
     AccessPointCoverageBuildings,
     AccessPointSectorSerializer,
     CloudRFAsyncTaskModel,
 )
 
 import logging
-
-from workspace.models.network_models import (
-    AccessPointSector,
-)
 
 
 class TooltipFormView(generics.GenericAPIView):
@@ -125,6 +123,7 @@ class SectorFormView(TooltipFormView):
         other_sectors = AccessPointSector.objects.filter(
             ap=ap, map_session=context["map_session"]
         ).exclude(uuid=context["uuid"])
+
         try:
             coverage = AccessPointCoverageBuildings.objects.filter(
                 sector=context["uuid"],
@@ -139,16 +138,28 @@ class SectorFormView(TooltipFormView):
         context.update({"cloudrf_status": task.get_cloudrf_coverage_status().value})
 
         viewshed = self.get_object().viewshed
+        building_coverage = self.get_object().building_coverage
         context.update(
             {
                 "viewshed_status": {
-                    "status": viewshed.get_viewshed_task_status().value,
+                    "status": viewshed.get_task_status().value,
                     "progress_message": viewshed.progress_message,
                     "time_remaining": viewshed.time_remaining,
-                }
+                },
+                "building_coverage": {
+                    "status": building_coverage.get_task_status().value,
+                },
             }
         )
 
         serialized_sectors = AccessPointSectorSerializer(other_sectors, many=True)
         context.update({"other_sectors": serialized_sectors.data})
         return context
+
+
+class SectorStatsView(SectorFormView):
+    template_name = "workspace/organisms/sector_tooltip_stat_row.html"
+    serializer_class = AccessPointSectorSerializer
+
+    def post(self, request, *args, **kwargs):
+        raise Http404()

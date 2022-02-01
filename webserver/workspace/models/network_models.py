@@ -16,7 +16,7 @@ from django.core.validators import (
 )
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, pre_delete
 from django.dispatch import receiver
 
 from rest_framework import serializers
@@ -28,6 +28,12 @@ import math
 import json
 import random
 import uuid
+from workspace.models.task_models import (
+    AbstractAsyncTaskAssociatedModel,
+    AbstractAsyncTaskHashCacheMixin,
+    AbstractAsyncTaskPrimaryKeyMixin,
+    AsyncTaskStatus,
+)
 from workspace.models.validators import validate_ptp_link_geometry
 
 from workspace.utils.geojson_circle import createGeoJSONCircle, createGeoJSONSector
@@ -1137,13 +1143,16 @@ class BuildingCoverage(models.Model):
     cpe_location = geo_models.PointField(null=True, blank=True)
 
 
-class AccessPointCoverageBuildings(models.Model):
+class AccessPointCoverageBuildings(
+    AbstractAsyncTaskAssociatedModel,
+    AbstractAsyncTaskPrimaryKeyMixin,
+    AbstractAsyncTaskHashCacheMixin,
+):
     class CoverageCalculationStatus(models.TextChoices):
         START = "Started"
         FAIL = "Failed"
         COMPLETE = "Complete"
 
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # TODO: deprecate
     ap = models.OneToOneField(
         AccessPointLocation,
@@ -1160,6 +1169,7 @@ class AccessPointCoverageBuildings(models.Model):
         null=True,
         blank=True,
         default=None,
+        related_name="building_coverage",
     )
     status = models.CharField(
         default=CoverageCalculationStatus.START,
@@ -1168,13 +1178,6 @@ class AccessPointCoverageBuildings(models.Model):
     )
     nearby_buildings = models.ManyToManyField(
         BuildingCoverage, related_name="nearby_buildings"
-    )
-    hash = models.CharField(
-        max_length=255,
-        help_text="""
-            Hashvalue to determine if result has already been calculated
-        """,
-        default="",
     )
     created = models.DateTimeField(auto_now_add=True)
 
@@ -1190,8 +1193,16 @@ class AccessPointCoverageBuildings(models.Model):
                 + f"{self.sector.max_radius},{self.sector.height},{self.sector.default_cpe_height}"
             )
 
-    def result_cached(self):
-        return self.hash == self.calculate_hash()
+    def get_task_status(self):
+        # We need to look at the results for viewshed first.
+        if self.sector:
+            viewshed_status = self.sector.viewshed.get_task_status()
+            if viewshed_status != AsyncTaskStatus.COMPLETED:
+                return AsyncTaskStatus.NOT_STARTED
+            else:
+                return super().get_task_status()
+        else:
+            return None
 
     def coverageStatistics(self) -> dict:
         serviceable = self.nearby_buildings.filter(
@@ -1208,6 +1219,28 @@ class AccessPointCoverageBuildings(models.Model):
             "unserviceable": unserviceable,
             "unknown": unknown,
         }
+
+
+@receiver(post_save, sender=AccessPointSector)
+def _create_building_coverage_task(
+    sender, instance, created, raw, using, update_fields, **kwargs
+):
+    """
+    Create building coverage task for new sectors
+    """
+    if created:
+        AccessPointCoverageBuildings.objects.create(sector=instance)
+
+
+@receiver(pre_delete, sender=AccessPointSector)
+def _cancel_building_coverage_task(sender, instance, using, **kwargs):
+    """
+    Cancel coverage task for deleted sectors
+    """
+    try:
+        AccessPointCoverageBuildings.objects.get(sector=instance).cancel_task()
+    except AccessPointCoverageBuildings.DoesNotExist:
+        pass
 
 
 class Radio(models.Model):

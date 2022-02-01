@@ -39,8 +39,8 @@ def _update_status(sector_id, msg, time_remaining):
 def calculateSectorViewshed(sector_id: str):
     sector, created = workspace_models.AccessPointSector.objects.get_or_create(uuid=sector_id)
     cached = sector.viewshed.result_cached()
-    sector.viewshed.cancel_task()
     sector.viewshed.on_task_start(current_task.request.id)
+
     try:
         assert sector.viewshed is not None
     except workspace_models.Viewshed.DoesNotExist:
@@ -62,6 +62,10 @@ def calculateSectorViewshed(sector_id: str):
     else:
         TASK_LOGGER.info("cache hit on viewshed result")
 
+    sector.viewshed.progress_message = None
+    sector.viewshed.time_remaining = None
+    sector.viewshed.save()
+
     app.send_task("workspace.tasks.sector_tasks.calculateSectorNearby", (sector.uuid,))
 
 
@@ -70,13 +74,14 @@ def calculateSectorNearby(sector_id: str):
     sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
     (
         building_coverage,
-        created,
+        _,
     ) = workspace_models.AccessPointCoverageBuildings.objects.get_or_create(
         sector=sector
     )
-    if created:
-        building_coverage.save()
-    if not building_coverage.result_cached():
+
+    cached = building_coverage.result_cached()
+    building_coverage.on_task_start(current_task.request.id)
+    if not cached:
         building_coverage.nearby_buildings.clear()
         # Find all buildings that intersect
         offset = 0
@@ -84,7 +89,7 @@ def calculateSectorNearby(sector_id: str):
         while remaining_buildings:
             buildings = gis_data_models.MsftBuildingOutlines.objects.filter(
                 geog__intersects=sector.geojson
-            ).all()[offset: BUILDING_PAGINATION + offset]
+            ).all()[offset : BUILDING_PAGINATION + offset]
             nearby_buildings = []
             for building in buildings:
                 b = workspace_models.BuildingCoverage(msftid=building.id)
@@ -115,27 +120,18 @@ def calculateSectorNearby(sector_id: str):
     sendMessageToChannel(str(sector.map_session.pk), update)
 
     # Start caculating coverage
-    app.send_task(
-        "workspace.tasks.sector_tasks.calculateSectorCoverage", (sector.uuid,)
-    )
+    calculateSectorCoverage(sector, building_coverage)
 
 
-@app.task
-def calculateSectorCoverage(sector_id: str):
-    sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
+def calculateSectorCoverage(
+    sector: workspace_models.AccessPointSector,
+    coverage: workspace_models.AccessPointCoverageBuildings,
+):
     viewshed = sector.viewshed
     # Load Up Coverage
     with tempfile.NamedTemporaryFile(suffix=".tif") as fp:
         viewshed.read_object(fp, tif=True)
         with rasterio.open(fp.name) as ds:
-            # Get Building Coverage
-            coverage = (
-                workspace_models.AccessPointCoverageBuildings.objects.filter(
-                    sector=sector
-                )
-                .order_by("created")
-                .first()
-            )
             # Check Building Coverage
             for idx, building in enumerate(coverage.nearby_buildings.all()):
                 # Determine if Any areas are not obstructed
@@ -195,7 +191,3 @@ def calculateSectorCoverage(sector_id: str):
                     sendMessageToChannel(str(sector.map_session.pk), update)
     update = {"type": "ap.status", "status": coverage.status, "uuid": str(sector.uuid)}
     sendMessageToChannel(str(sector.map_session.pk), update)
-
-    sector.viewshed.progress_message = None
-    sector.viewshed.time_remaining = None
-    sector.viewshed.save()

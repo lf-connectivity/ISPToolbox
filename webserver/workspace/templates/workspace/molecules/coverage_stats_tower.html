@@ -1,6 +1,6 @@
 {% load i18n %}
 {% if coverage_stats.serviceable or coverage_stats.unserviceable %}
-<div class="viewshed-progress-sector-popup">
+<div class="task-progress-sector-popup">
     <div class="d-flex justify-content-between">
         <div>
             <p class="ap-stats--label mb-0">
@@ -18,7 +18,7 @@
         </div>
     </div>
 </div>
-<div>
+<div class="task-progress-sector-popup">
     <div class="d-flex justify-content-between">
         <p class="ap-stats--label">
             {% translate "Est Obstructed LOS"%}
@@ -33,7 +33,7 @@
 </div>
 {% endif %}
 {% if coverage_stats.unknown %}
-<div>
+<div class="task-progress-sector-popup">
     <div class="d-flex justify-content-between">
         <p class="ap-stats--label">
             {% translate "Loading LOS"%}

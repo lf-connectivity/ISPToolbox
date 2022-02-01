@@ -1,0 +1,55 @@
+{% load i18n isp_toolbox_sources isp_toolbox_tool_info %}
+
+{% if not sources and not tool_info %}
+    {% load_tool_info tool as tool_info %}
+    {% load_sources_from tool_info.app_page_template sources with tool=tool as sources %}
+{% endif %}
+
+<button class='btn btn-primary isptoolbox-btn w-100 d-none' id='coverage-viewshed-btn-sector-popup'
+        type="submit" name="submit" form="sector-update-form">
+{% if tool == "market_evaluator" %}
+    {% translate "Calculate Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
+{% elif tool == "los_check" %}
+    {% translate "Calculate Coverage" %}
+{% endif %}
+</button>
+
+{% if tool == "market_evaluator" %}
+    {% if cloudrf_status == "IN_PROGRESS" %}
+        <div align="center" class="task-progress-sector-popup">
+            {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
+            <p align="center bold" class="mt-1">Plotting Lidar Coverage</p>
+        </div>
+    {% elif cloudrf_status == "COMPLETED" %}
+        <div align="center" class="task-progress-sector-popup">
+            {% include "workspace/atoms/icons/cpe_pass_icon.html" with cpe_pass_icon_style="width: 20px; height: 25px;"%}
+            <p align="center bold" class="mt-1">Tower Coverage Plotted</p>
+        </div>
+    {% endif %}
+{% endif %}
+
+{% if tool == "los_check" %}
+    {{ viewshed_status.time_remaining|json_script:"time-remaining-viewshed-progress" }}
+    {% comment %}
+    Uncomment to debug
+    <p> {{ viewshed_status.status}} </p>
+    <p> {{ building_coverage.status }} </p>
+    {% endcomment %}
+    {% if viewshed_status.status == "COMPLETED" %}
+        {% if building_coverage.status == "NOT_STARTED" %}
+            <div align="center" class="task-progress-sector-popup">
+            {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
+            <p align="center bold" class="mt-1">Calculating building coverage...</p>
+            <p align="center bold" class="mt-1" id="time-remaining-p-sector-popup"></p>
+        </div>
+        {% else %}
+            {% include "workspace/molecules/coverage_stats_tower.html" %}
+        {% endif %}
+    {% elif viewshed_status.status == "IN_PROGRESS"%}
+        <div align="center" class="task-progress-sector-popup">
+            {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
+            <p align="center bold" class="mt-1">{{ viewshed_status.progress_message }}</p>
+            <p align="center bold" class="mt-1" id="time-remaining-p-sector-popup"></p>
+        </div>
+    {% endif %}
+{% endif %}

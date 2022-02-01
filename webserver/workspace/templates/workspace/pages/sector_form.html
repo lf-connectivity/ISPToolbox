@@ -140,42 +140,8 @@
         </div>
     </li>
 
-        <li class="stat-row">
-            <button class='btn btn-primary isptoolbox-btn w-100 d-none' id='coverage-viewshed-btn-sector-popup'
-                type="submit" name="submit" form="sector-update-form">
-                {% if tool == "market_evaluator" %}
-                {% translate "Plot Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
-                {% elif tool == "los_check" %}
-                {% translate "Calculate Coverage" %}
-                {% endif %}
-            </button>
-
-            {% if tool == "market_evaluator" %}
-                {% if cloudrf_status == "IN_PROGRESS" %}
-                    <div align="center" class="cloudrf-progress-sector-popup">
-                        {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
-                        <p align="center bold" class="mt-1">Plotting Lidar Coverage</p>
-                    </div>
-                {% elif cloudrf_status == "COMPLETED" %}
-                    <div align="center" class="cloudrf-progress-sector-popup">
-                        {% include "workspace/atoms/icons/cpe_pass_icon.html" with cpe_pass_icon_style="width: 20px; height: 25px;"%}
-                        <p align="center bold" class="mt-1">Tower Coverage Plotted</p>
-                    </div>
-                {% endif %}
-            {% endif %}
-
-            {% if tool == "los_check" %}
-                {{ viewshed_status.time_remaining|json_script:"time-remaining-viewshed-progress" }}
-                {% if viewshed_status.status == "COMPLETED" %}
-                    {% include "workspace/molecules/coverage_stats_tower.html" %}
-                {% elif viewshed_status.status == "IN_PROGRESS"%}
-                    <div align="center" class="viewshed-progress-sector-popup">
-                        {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
-                        <p align="center bold" class="mt-1">{{ viewshed_status.progress_message }}</p>
-                        <p align="center bold" class="mt-1" id="time-remaining-p-sector-popup"></p>
-                    </div>
-                {% endif %}
-            {% endif %}
+        <li class="stat-row" id="stat-row-sector-popup">
+           {% include "workspace/organisms/sector_tooltip_stat_row.html" %}
         </li>
 
         {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-sector-row-sector-popup" delete_row_a_id="sector-delete-btn" delete_row_object_name="Access Point" delete_row_last_updated=last_updated %}

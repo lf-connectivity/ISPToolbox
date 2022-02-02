@@ -444,6 +444,8 @@ def random_heading():
 
 class AccessPointSector(WorkspaceFeature):
     name = models.CharField(max_length=50, default="Unnamed AP")
+    
+    # TODO: restore default once we add sector draw mode.
     heading = models.FloatField(
         default=random_heading,
         validators=[

@@ -47,7 +47,8 @@ def calculateSectorViewshed(sector_id: str):
         workspace_models.Viewshed(sector=sector).save()
         TASK_LOGGER.info("created new viewshed object")
     if not cached:
-        sector.viewshed.delete_tiles()
+        if not created:
+            sector.viewshed.delete_tiles()
         sector.viewshed.calculateViewshed(partial(_update_status, sector_id))
         # Notify Websockets listening to session
         resp = {

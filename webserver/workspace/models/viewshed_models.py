@@ -431,6 +431,9 @@ class Viewshed(
         filtered_command = shlex.split(raw_command)
         subprocess.check_output(filtered_command, encoding="UTF-8")
 
+    def delete_tiles(self):
+        ViewshedTile.objects.filter(viewshed=self).delete()
+
 
 @receiver(post_save, sender=AccessPointSector)
 def _create_viewshed_task(

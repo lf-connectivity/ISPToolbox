@@ -37,7 +37,7 @@ def _update_status(sector_id, msg, time_remaining):
 
 @app.task
 def calculateSectorViewshed(sector_id: str):
-    sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
+    sector, created = workspace_models.AccessPointSector.objects.get_or_create(uuid=sector_id)
     cached = sector.viewshed.result_cached()
     sector.viewshed.cancel_task()
     sector.viewshed.on_task_start(current_task.request.id)
@@ -47,6 +47,7 @@ def calculateSectorViewshed(sector_id: str):
         workspace_models.Viewshed(sector=sector).save()
         TASK_LOGGER.info("created new viewshed object")
     if not cached:
+        sector.viewshed.delete_tiles()
         sector.viewshed.calculateViewshed(partial(_update_status, sector_id))
         # Notify Websockets listening to session
         resp = {

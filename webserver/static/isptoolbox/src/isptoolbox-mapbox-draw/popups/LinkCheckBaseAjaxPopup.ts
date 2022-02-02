@@ -26,7 +26,6 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
                 {
                     this.popup.setHTML(result);
                     this.popup.on('close', this.cleanupCall);
-                    this.setEventHandlers();
                 }
             })
             .fail(() => {
@@ -38,6 +37,7 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
                 if(this.responseMatchesCurrent(request_params))
                 {
                     this.popup.addTo(this.map);
+                    this.setEventHandlers();
                 }
             });
         }

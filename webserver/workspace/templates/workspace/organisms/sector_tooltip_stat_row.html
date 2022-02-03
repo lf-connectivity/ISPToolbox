@@ -30,13 +30,11 @@
 
 {% if tool == "los_check" %}
     {{ viewshed_status.time_remaining|json_script:"time-remaining-viewshed-progress" }}
-    {% comment %}
-    Uncomment to debug
-    <p> {{ viewshed_status.status}} </p>
+    {% comment %} <p> {{ viewshed_status.status}} </p>
     <p> {{ building_coverage.status }} </p>
-    {% endcomment %}
+    <p> {{ coverage_stats }} </p> {% endcomment %}
     {% if viewshed_status.status == "COMPLETED" %}
-        {% if building_coverage.status == "NOT_STARTED" %}
+        {% if not coverage_stats.serviceable and not coverage_stats.unknown and not coverage_stats.unserviceable %}
             <div align="center" class="task-progress-sector-popup">
             {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
             <p align="center bold" class="mt-1">Calculating building coverage...</p>

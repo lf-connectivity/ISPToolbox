@@ -223,11 +223,14 @@ export abstract class BaseAjaxSectorPopup
 
     protected updateSectorStats() {
         if (this.popup.isOpen()) {
+            const request_params = this.getEndpointParams();
             $.get(
                 djangoUrl('workspace:sector-stats', ...this.getEndpointParams()),
                 '',
                 (result) => {
-                    $(`#${STAT_ROW_ID}`).html(result);
+                    if(this.responseMatchesCurrent(request_params)) {
+                        $(`#${STAT_ROW_ID}`).html(result);
+                    }  
                 },
                 'html'
             )

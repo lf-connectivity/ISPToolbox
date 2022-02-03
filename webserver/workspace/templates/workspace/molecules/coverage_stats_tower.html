@@ -1,5 +1,5 @@
 {% load i18n %}
-{% if coverage_stats.serviceable or coverage_stats.unserviceable %}
+{% if coverage_stats.serviceable or coverage_stats.unserviceable or building_coverage.status == "COMPLETED" %}
 <div class="task-progress-sector-popup">
     <div class="d-flex justify-content-between">
         <div>

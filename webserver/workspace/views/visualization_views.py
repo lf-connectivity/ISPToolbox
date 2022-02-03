@@ -24,6 +24,7 @@ class PotreeVisualizationMetaView(LoginRequiredMixin, View):
             except model.objects.model.DoesNotExist:
                 pass
             except Exception as e:
+                logging.exception(e)
                 logging.error(e)
                 pass
         raise Http404

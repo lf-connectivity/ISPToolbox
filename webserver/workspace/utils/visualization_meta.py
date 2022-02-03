@@ -38,10 +38,11 @@ def PotreeMetaLine(feature: models.WorkspaceFeature, srs: int):
     geometry_T = feature.geojson.transform(srs, clone=True)
     bb = geometry_T.extent
     if isinstance(feature, models.APToCPELink):
-        heights = [feature.ap.height, feature.cpe.height],
-        dtms = [feature.ap.get_dtm_height(), feature.cpe.get_dtm_height()]
-        names = [feature.ap.name, feature.cpe.name]
-        tx = json.loads(feature.ap.geojson.transform(srs, clone=True).json)
+        start = feature.ap if feature.ap else feature.sector
+        heights = [start.height, feature.cpe.height],
+        dtms = [start.get_dtm_height(), feature.cpe.get_dtm_height()]
+        names = [start.name, feature.cpe.name]
+        tx = json.loads(start.observer.transform(srs, clone=True).json)
         rx = json.loads(feature.cpe.geojson.transform(srs, clone=True).json)
     elif isinstance(feature, models.PointToPointLink):
         heights = [feature.radio0hgt, feature.radio1hgt]

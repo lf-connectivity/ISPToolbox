@@ -137,6 +137,8 @@ INSTALLED_APPS = [
     'django_celery_results',
     # SSO
     'djangosaml2',
+    # Lazy / Guest User
+    'guest_user',
 ]
 
 if DEBUG:
@@ -387,6 +389,7 @@ DATABASES = {
 
 DATABASE_ROUTERS = ['gis_data.models.GISDataRouter']
 AUTH_USER_MODEL = "IspToolboxAccounts.User"
+GUEST_USER_MODEL = 'IspToolboxAccounts.IspToolboxGuestUser'
 
 # Change session cookie samesite attribute to None for iframe functionality
 SESSION_COOKIE_SECURE = True

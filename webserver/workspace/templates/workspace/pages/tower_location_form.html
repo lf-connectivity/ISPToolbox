@@ -32,13 +32,14 @@
                 {% endfor %}
             </div>
         </li>
-        <li class="stat-row">
-            <button class='btn btn-primary isptoolbox-btn w-100' id='place-sector-btn-tower-popup' type='submit' name='submit'>
-                {% translate "Add Access Point"%}
-            </button>
-        </li>
-        {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-tower-row-tower-popup" delete_row_a_id="tower-delete-btn" delete_row_object_name="Tower" delete_row_last_updated=last_updated %}
+        <input type="submit" name="submit" value="{% translate "Update Tower" %}" class='d-none btn btn-primary isptoolbox-btn w-100'>
     </form>
+    <li class="stat-row">
+        <button class='btn btn-primary isptoolbox-btn w-100' id='place-sector-btn-tower-popup' type='submit' name='submit'>
+            {% translate "Add Access Point"%}
+        </button>
+    </li>
+    {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-tower-row-tower-popup" delete_row_a_id="tower-delete-btn" delete_row_object_name="Tower" delete_row_last_updated=last_updated %}
 </ul>
 
 {% endblock %}

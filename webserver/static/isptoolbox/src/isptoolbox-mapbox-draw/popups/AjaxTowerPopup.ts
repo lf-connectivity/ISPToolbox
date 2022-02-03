@@ -8,6 +8,7 @@ import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
 const TOWER_UPDATE_FORM_ID = 'tower-update-form';
 const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
+const SECTOR_CREATE_BUTTON_ID = 'place-sector-btn-tower-popup';
 
 // @ts-ignore
 $.validator.addMethod('latlng', (value, element) => {
@@ -44,6 +45,9 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
 
     protected setEventHandlers() {
         this.createSubmitFormCallback(TOWER_UPDATE_FORM_ID, () => {
+            this.accessPoint?.read(()=> {});
+        });
+        $(`#${SECTOR_CREATE_BUTTON_ID}`).on('click', () => {
             if (this.accessPoint) {
                 this.accessPoint.read(() => {
                     let newSector = {
@@ -62,6 +66,7 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
                 });
             }
         });
+        this.createInputSubmitButtonListener(TOWER_UPDATE_FORM_ID);
 
         $(`#${TOWER_DELETE_BUTTON_ID}`)
             .off()

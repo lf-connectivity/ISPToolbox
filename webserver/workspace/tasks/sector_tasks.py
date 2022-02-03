@@ -38,14 +38,21 @@ def _update_status(sector_id, msg, time_remaining):
 @app.task
 def calculateSectorViewshed(sector_id: str):
     sector, created = workspace_models.AccessPointSector.objects.get_or_create(uuid=sector_id)
-    cached = sector.viewshed.result_cached()
-    sector.viewshed.on_task_start(current_task.request.id)
 
     try:
-        assert sector.viewshed is not None
+        sector.viewshed.cancel_task()
     except workspace_models.Viewshed.DoesNotExist:
         workspace_models.Viewshed(sector=sector).save()
         TASK_LOGGER.info("created new viewshed object")
+
+    try:
+        sector.building_coverage.cancel_task()
+    except workspace_models.AccessPointCoverageBuildings.DoesNotExist:
+        workspace_models.AccessPointCoverageBuildings(sector=sector).save()
+        TASK_LOGGER.info("created new building coverage object")
+
+    cached = sector.viewshed.result_cached()
+    sector.viewshed.on_task_start(current_task.request.id)
     if not cached:
         if not created:
             sector.viewshed.delete_tiles()

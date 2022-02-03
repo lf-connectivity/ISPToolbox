@@ -45,12 +45,12 @@
                 disabled
                 {% if uneditable %} readonly="true" {% endif %}
                 >
-                <button class="btn btn-edit tooltip-input-btn d-none" title="Save Tower Coordinates"
+                <button class="btn btn-edit tooltip-input-btn d-none" title="{% if uneditable %}Tower has editing disabled{% else %}Save Tower Coordinates{% endif %}"
                     id="save-ap-coord-btn" type="submit" name="submit">
                     {% include 'workspace/atoms/icons/save_icon.html'%}
                 </button>
                 <button type="button" class="btn btn-edit tooltip-input-btn" title="Edit Tower Coordinates"
-                    id="edit-ap-coord-btn">
+                    id="edit-ap-coord-btn" {% if uneditable %}disabled{% endif %}>
                     {% include 'workspace/atoms/pen_icon.html'%}
                 </button>
             </div>

@@ -32,7 +32,7 @@
     </div>
 </div>
 {% endif %}
-{% if coverage_stats.unknown %}
+{% if building_coverage.status == "IN_PROGRESS" %}
 <div class="task-progress-sector-popup">
     <div class="d-flex justify-content-between">
         <p class="ap-stats--label">

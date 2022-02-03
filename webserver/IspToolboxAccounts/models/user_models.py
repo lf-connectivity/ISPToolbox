@@ -1,14 +1,17 @@
 # from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
-from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import UserManager
 from django.contrib.sessions.models import Session
 from django.contrib.postgres.fields import ArrayField
 
+from webserver.celery import celery_app as app
 
-class UserManager(BaseUserManager):
+
+class IspToolboxUserManager(UserManager):
     def create_superuser(self, email, first_name, last_name, password=None, **extra_fields):
         if not email:
             raise ValueError("User must have an email")
@@ -62,10 +65,11 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
-    objects = UserManager()
+    objects = IspToolboxUserManager()
 
-    class Meta:
+    class Meta(AbstractUser.Meta):
         db_table = 'auth_user'
+        swappable = 'AUTH_USER_MODEL'
 
 
 class IspToolboxUserSignUpInfo(models.Model):

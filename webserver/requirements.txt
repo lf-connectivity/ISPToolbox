@@ -27,7 +27,9 @@ django-celery-results==2.2.0
 django-cors-headers==3.4.0
 django-csp==3.6
 django-filter==2.4.0
+django-guest-user==0.5.2
 django-hijack==2.3.0
+django-htmx==1.8.0
 django-js-reverse==0.9.1
 django-modelcluster==5.1
 django-redis==5.0.0

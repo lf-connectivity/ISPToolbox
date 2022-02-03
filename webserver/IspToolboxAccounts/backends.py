@@ -5,9 +5,9 @@ from djangosaml2.backends import Saml2Backend
 
 
 class EmailBackend(ModelBackend):
-    def authenticate(self, request, username=None, password=None, **kwargs):
+    def authenticate(self, request, email=None, password=None, **kwargs):
         try:
-            user = UserModel.objects.get(Q(email__iexact=username))
+            user = UserModel.objects.get(Q(email__iexact=email))
         except UserModel.DoesNotExist:
             UserModel().set_password(password)
         else:

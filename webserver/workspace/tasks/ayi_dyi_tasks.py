@@ -26,7 +26,7 @@ def createUserDataDownload(job_id: UUID):
             f'{job.owner.first_name}_{job.owner.last_name}.json', tmp_fp)
 
 
-@ app.task
+@app.task
 def deleteUser(job_id: UUID):
     job = DeleteInformationJob.objects.get(id=job_id)
     # Get User

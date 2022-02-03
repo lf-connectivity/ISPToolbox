@@ -94,16 +94,19 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
             onclick: false,
             onfocusout: false,
             submitHandler: () => {
+                const params = this.getEndpointParams();
                 $.post({
                     url: this.getEndpoint(),
                     data: $(`#${formId}`).serialize(),
                     dataType: 'html'
                 })
                     .done((result) => {
-                        this.popup.setHTML(result);
-                        this.setEventHandlers();
-                        if (successFollowup) {
-                            successFollowup(result);
+                        if(this.responseMatchesCurrent(params)){
+                            this.popup.setHTML(result);
+                            this.setEventHandlers();
+                            if (successFollowup) {
+                                successFollowup(result);
+                            }
                         }
                     })
                     .fail((error) => {

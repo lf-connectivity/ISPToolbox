@@ -1,4 +1,4 @@
-from guest_user.models import Guest, GuestManager
+from guest_user.models import GuestManager
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.conf import settings as django_settings
@@ -7,6 +7,7 @@ from datetime import timedelta
 
 
 MAX_AGE = 60 * 60 * 24 * 90
+
 
 class IspToolboxGuestUserManager(GuestManager):
     def create_guest_user(self, request=None, username=None):
@@ -20,6 +21,7 @@ class IspToolboxGuestUserManager(GuestManager):
         self.create(user=user)
         user.username = email
         return user
+
 
 class IspToolboxGuestUser(models.Model):
     objects = IspToolboxGuestUserManager()

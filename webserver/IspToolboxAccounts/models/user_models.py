@@ -1,14 +1,11 @@
 # from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.hashers import make_password
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.models import UserManager
 from django.contrib.sessions.models import Session
 from django.contrib.postgres.fields import ArrayField
-
-from webserver.celery import celery_app as app
 
 
 class IspToolboxUserManager(UserManager):

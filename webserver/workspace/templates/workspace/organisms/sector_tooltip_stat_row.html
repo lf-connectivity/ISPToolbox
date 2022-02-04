@@ -33,19 +33,25 @@
     {% comment %} <p> {{ viewshed_status.status}} </p>
     <p> {{ building_coverage.status }} </p>
     <p> {{ coverage_stats }} </p> {% endcomment %}
-    {% if viewshed_status.status == "COMPLETED" %}
-        {% if building_coverage.status == "NOT_STARTED" %}
-            <div align="center" class="task-progress-sector-popup">
-            {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
-            <p align="center bold" class="mt-1">Calculating building coverage...</p>
-            <p align="center bold" class="mt-1" id="time-remaining-p-sector-popup"></p>
+    {% if viewshed_status.status == "ERROR" or building_coverage.status == "ERROR" %}
+        <div align="center" class="task-progress-sector-popup mt-1">
+            {% include "workspace/atoms/icons/error_icon_triangle.html" with error_icon_style="width: 20px; height: 25px;"%}
+            <p align="center bold" class="mt-1">Unexpected Error</p>
+            <p align="center bold" class="mt-1">Unable to calculate building coverage. Check back later.</p>
         </div>
+    {% elif viewshed_status.status == "COMPLETED" %}
+        {% if building_coverage.status == "NOT_STARTED" %}
+            <div align="center" class="task-progress-sector-popup mt-1">
+                {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto" %}
+                <p align="center bold" class="mt-1">Calculating building coverage...</p>
+                <p align="center bold" class="mt-1" id="time-remaining-p-sector-popup"></p>
+            </div>
         {% else %}
             {% include "workspace/molecules/coverage_stats_tower.html" %}
         {% endif %}
     {% elif viewshed_status.status == "IN_PROGRESS"%}
-        <div align="center" class="task-progress-sector-popup">
-            {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
+        <div align="center" class="task-progress-sector-popup mt-1">
+            {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto" %}
             <p align="center bold" class="mt-1">{{ viewshed_status.progress_message }}</p>
             <p align="center bold" class="mt-1" id="time-remaining-p-sector-popup"></p>
         </div>

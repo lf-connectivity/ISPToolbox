@@ -266,6 +266,9 @@ export abstract class BaseAjaxSectorPopup
                     center: [coords[0], coords[1] + +0.15 * (north - south)]
                 });
             }
+
+            this.draw.changeMode('simple_select', {featureIds: [this.sector.mapboxId]})
+            this.map.fire('draw.selectionchange', {features: [this.sector.getFeatureData() ]})
             this.hide();
             this.show();
         }

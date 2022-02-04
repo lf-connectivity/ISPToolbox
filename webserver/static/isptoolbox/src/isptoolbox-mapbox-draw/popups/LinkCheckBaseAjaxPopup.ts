@@ -25,7 +25,6 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
                 if(this.responseMatchesCurrent(request_params))
                 {
                     this.popup.setHTML(result);
-                    this.popup.on('close', this.cleanupCall);
                 }
             })
             .fail(() => {
@@ -33,10 +32,13 @@ export abstract class LinkCheckBaseAjaxFormPopup extends LinkCheckBasePopup {
                     this.popup.setHTML(createErrorHTMLContent());
                 }
             })
-            .always(() => {
+            .always((result, successOrError) => {
                 if(this.responseMatchesCurrent(request_params))
                 {
                     this.popup.addTo(this.map);
+                    if (successOrError === 'success') {
+                        this.popup.on('close', this.cleanupCall);
+                    }
                     this.setEventHandlers();
                 }
             });

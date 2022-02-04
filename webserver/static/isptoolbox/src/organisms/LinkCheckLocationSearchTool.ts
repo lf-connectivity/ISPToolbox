@@ -7,9 +7,12 @@ import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import MapboxGeocoder from 'mapbox__mapbox-gl-geocoder';
 import { isBeta } from '../LinkCheckUtils';
 import { AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckLocationFlowPopups';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
 export class LinkCheckLocationSearchTool {
     private map: mapboxgl.Map;
+    private draw: MapboxDraw;
     private marker: ClickableMarker;
     private workspaceManager: BaseWorkspaceManager;
     private geocoder: MapboxGeocoder | null = null;
@@ -17,7 +20,7 @@ export class LinkCheckLocationSearchTool {
     private isPopupOpen: boolean;
     private static _instance: LinkCheckLocationSearchTool;
 
-    constructor(map: mapboxgl.Map, workspaceManager: BaseWorkspaceManager) {
+    constructor(map: mapboxgl.Map, draw: MapboxDraw, workspaceManager: BaseWorkspaceManager) {
         if (!LinkCheckLocationSearchTool._instance) {
             LinkCheckLocationSearchTool._instance = this;
 
@@ -28,10 +31,16 @@ export class LinkCheckLocationSearchTool {
             });
             this.isPopupOpen = false;
             this.map = map;
+            this.draw = draw;
 
             // Clicking on point -> show popup on desktop
             this.marker.onClick((e: any) => {
-                if (e.originalEvent.button == 0) {
+                const noCpeOrTower = this.draw.getFeatureIdsAt(e.point).every((id: string) => {
+                    // @ts-ignore
+                    let featureType = this.draw.get(id)?.properties.feature_type
+                    return featureType && featureType !== WorkspaceFeatureTypes.AP && featureType !== WorkspaceFeatureTypes.CPE
+                })
+                if (e.originalEvent.button == 0 && noCpeOrTower) {
                     this.showPopup();
                 }
             });

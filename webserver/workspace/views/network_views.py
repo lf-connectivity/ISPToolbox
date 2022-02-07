@@ -10,6 +10,8 @@ from workspace.models import AccessPointLocation, WorkspaceMapSession
 from workspace import models as workspace_models
 from workspace.forms import UploadTowerCSVForm, WorkspaceForms
 from workspace.models.model_constants import KM_2_MI, M_2_FT
+from guest_user.mixins import AllowGuestUserMixin
+from guest_user.functions import is_guest_user
 
 
 class BulkUploadTowersView(LoginRequiredMixin, View):
@@ -33,9 +35,9 @@ class BulkUploadTowersView(LoginRequiredMixin, View):
             raise e
 
 
-class EditNetworkView(View):
+class EditNetworkView(AllowGuestUserMixin, View):
     def get(self, request, session_id=None, name=None):
-        if request.user and request.user.is_authenticated:
+        if not is_guest_user(request.user):
             workspace_account = True
             if session_id is None:
                 if workspace_models.WorkspaceMapSession.objects.filter(owner=request.user).exists():

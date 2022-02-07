@@ -1,3 +1,4 @@
+{% load guest_user %}
 {% if nav_is_app_page is True %}
 <nav
   class="workspace-nav navbar navbar-expand-lg navbar-light bg-white pr-3 pl-0 py-0{% if beta is True %} nav-beta{% endif %}"
@@ -6,7 +7,7 @@
   <div class="workspace-nav fixed-top pr-4" id="workspacenavelem">
     {% endif %}
     <div class="d-flex h-100">
-      {% if not nav_app_page_skip_back_button and user.is_authenticated %}
+      {% if not nav_app_page_skip_back_button and not user|is_guest_user %}
       <a href="{% url 'workspace:workspace_dashboard' %}" class="back-icon py-auto px-3 mr-2"
         id="workspacenavelem-backbutton">
         <svg width="19" height="17" viewBox="0 0 19 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +33,7 @@
       </div>
     </div>
 
-    {% if nav_is_app_page is True and user.is_authenticated and not nav_skip_dropdown_workspace %}
+    {% if nav_is_app_page is True and not user|is_guest_user and user.is_authenticated and not nav_skip_dropdown_workspace %}
     {% include 'workspace/molecules/dropdown_workspace.html' %}
     {% endif %}
 

@@ -1,7 +1,7 @@
-{% load i18n %}
+{% load i18n guest_user %}
 
 <div class="account-dropdown" id="account-dropdown">
-  {% if user.is_authenticated %}
+  {% if not user|is_guest_user %}
   <div class="dropdown show">
     <a
       href="#"

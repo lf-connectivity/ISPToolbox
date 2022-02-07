@@ -11,6 +11,10 @@ export function getCookie(name: string) {
             }
         }
     }
+    if(cookieValue === null)
+    {
+        cookieValue = (document.querySelector('[name=csrfmiddlewaretoken]') as HTMLInputElement)?.value;
+    }
     return cookieValue;
 }
 

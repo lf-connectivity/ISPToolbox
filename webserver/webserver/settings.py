@@ -170,8 +170,8 @@ if PROD:
 
 AUTHENTICATION_BACKENDS = (
     'IspToolboxAccounts.backends.EmailBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-    'IspToolboxAccounts.backends.SSOAdminBackend'
+    'IspToolboxAccounts.backends.SSOAdminBackend',
+    'guest_user.backends.GuestBackend',
 )
 
 LOGIN_REDIRECT_URL = "/pro"
@@ -284,6 +284,10 @@ CSP_INCLUDE_NONCE_IN = [
 CORS_ORIGIN_REGEX_WHITELIST = [
     r"^https://(.+\.)?facebook\.com$",
 ]
+
+CSRF_COOKIE_SECURE = True
+X_FRAME_OPTIONS = 'ALLOW-FROM facebook.com'
+CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
 
 ROOT_URLCONF = 'webserver.urls'
 

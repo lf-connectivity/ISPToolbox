@@ -21,6 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from workspace.models import WorkspaceMapSession
 from django.utils.translation import gettext as _
+from guest_user.functions import is_guest_user
 
 
 @method_decorator(xframe_options_exempt, name='dispatch')
@@ -89,7 +90,7 @@ class LOSCheckDemo(View):
         }
 
         # we're in demo view: suggest user sign-in or create an account
-        if request.user.is_anonymous:
+        if request.user.is_anonymous or is_guest_user(request.user):
             context['sign_up_form'] = UserCreationForm
             context['authentication_form'] = AuthenticationForm
 

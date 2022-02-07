@@ -1,5 +1,5 @@
 {% extends "workspace/pages/base.html" %} 
-{% load static i18n %} 
+{% load static i18n guest_user %} 
 
 {% block title %}
 {% with  title="ISP Toolbox"%}
@@ -51,8 +51,7 @@
                 </div>
             </a>
             <a
-                href="{% if user.is_authenticated %}{% url 'workspace:market_eval_entry' %}
-                    {% else %}{% url 'demo-market-app' %}{% endif %}"
+                href="{% url 'workspace:market_eval_entry' %}"
                 class="card-container"
             >
                 <div class="card" >
@@ -70,7 +69,7 @@
                 </div>
             </a>
             <a
-                href="{% if user.is_authenticated %}{% url 'workspace:edit_account_network' %}{% else %}{% url 'demo-los-check' %}{% endif %}"
+                href="{% url 'workspace:edit_account_network' %}"
                 class="card-container"
             >
                 <div class="card">

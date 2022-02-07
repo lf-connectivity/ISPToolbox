@@ -158,10 +158,15 @@ class WorkspaceMapSession(models.Model):
 
     @classmethod
     def get_or_create_demo_view(cls, request):
-        request.session.save()
-        session, created = cls.objects.get_or_create(
-            session=Session.objects.get(pk=request.session.session_key)
-        )
+        if request.user.is_anonymous:
+            request.session.save()
+            session, created = cls.objects.get_or_create(
+                session_id=request.session.session_key
+            )
+        else:
+            session, created = cls.objects.get_or_create(
+                owner=request.user
+            )
 
         if created:
             session.logging_fbid = int(request.GET.get("id", 0))
@@ -172,17 +177,18 @@ class WorkspaceMapSession(models.Model):
                 session.zoom = 14
             session.save()
         else:
-            # Disassociate session with current map session
-            session.session = None
-            session.save()
+            if request.user.is_anonymous:
+                # Disassociate session with current map session
+                session.session = None
+                session.save()
 
-            # Clone current map session
-            session.uuid = None
-            session.save()
+                # Clone current map session
+                session.uuid = None
+                session.save()
 
-            # Associate session key with cloned map session
-            session.session = Session.objects.get(pk=request.session.session_key)
-            session.save()
+                # Associate session key with cloned map session
+                session.session = Session.objects.get(pk=request.session.session_key)
+                session.save()
 
         return session, created
 

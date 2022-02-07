@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from workspace import models as workspace_models
 from workspace.forms import UploadTowerCSVForm, WorkspaceForms, ExportMarketEvaluatorForm
 from IspToolboxApp.views.MarketEvaluatorTooltips import TOOLTIPS
+from guest_user.mixins import AllowGuestUserMixin
 
 import json
 
@@ -79,7 +80,7 @@ class MarketEvaluatorSessionExportView(LoginRequiredMixin, View):
             return JsonResponse({}, status=400)
 
 
-class MarketEvaluatorView(View):
+class MarketEvaluatorView(AllowGuestUserMixin, View):
     def get(self, request, session_id=None, name=None):
         if request.user and request.user.is_authenticated:
             workspace_account = True

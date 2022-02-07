@@ -180,8 +180,7 @@ export const WorkspaceMapboxStyles = [
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static'],
-            ['!has', 'user_hidden']
+            ['!=', 'mode', 'static']
         ],
         paint: {
             'circle-radius': 11,
@@ -197,8 +196,7 @@ export const WorkspaceMapboxStyles = [
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'false'],
             ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static'],
-            ['!has', 'user_hidden']
+            ['!=', 'mode', 'static']
         ],
         paint: {
             'circle-radius': 10,
@@ -213,8 +211,7 @@ export const WorkspaceMapboxStyles = [
             ['has', 'user_feature_type'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'false'],
-            ['==', '$type', 'Point'],
-            ['!has', 'user_hidden']
+            ['==', '$type', 'Point']
         ],
         layout: {
             'icon-image': 'ap-inactive-isptoolbox', // reference the image
@@ -231,8 +228,7 @@ export const WorkspaceMapboxStyles = [
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'true'],
             ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static'],
-            ['!has', 'user_hidden']
+            ['!=', 'mode', 'static']
         ],
         paint: {
             'circle-radius': 13,
@@ -248,8 +244,7 @@ export const WorkspaceMapboxStyles = [
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
             ['==', 'active', 'true'],
             ['==', '$type', 'Point'],
-            ['!=', 'mode', 'static'],
-            ['!has', 'user_hidden']
+            ['!=', 'mode', 'static']
         ],
         paint: {
             'circle-radius': 10,
@@ -264,8 +259,7 @@ export const WorkspaceMapboxStyles = [
             ['has', 'user_feature_type'],
             ['==', 'active', 'true'],
             ['==', 'user_feature_type', WorkspaceFeatureTypes.AP],
-            ['==', '$type', 'Point'],
-            ['!has', 'user_hidden']
+            ['==', '$type', 'Point']
         ],
         layout: {
             'icon-image': 'ap-active-isptoolbox', // reference the image

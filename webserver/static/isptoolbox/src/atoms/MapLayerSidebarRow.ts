@@ -1,13 +1,14 @@
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
-export function generateMapLayerSidebarRow(
-    feature: GeoJSON.Feature
-): undefined | HTMLDivElement {
-
+export function generateMapLayerSidebarRow(feature: GeoJSON.Feature): undefined | HTMLDivElement {
     if (
-        [WorkspaceFeatureTypes.COVERAGE_AREA, WorkspaceFeatureTypes.AP, WorkspaceFeatureTypes.SECTOR].includes(feature.properties?.feature_type) &&
+        [
+            WorkspaceFeatureTypes.COVERAGE_AREA,
+            WorkspaceFeatureTypes.AP,
+            WorkspaceFeatureTypes.SECTOR
+        ].includes(feature.properties?.feature_type) &&
         feature.properties?.uuid !== undefined
-        ) {
+    ) {
         let elem = document.createElement('div');
         elem.classList.add('object-toggle-row');
         elem.setAttribute('data-target', feature.properties?.uuid);
@@ -38,7 +39,7 @@ export function generateMapLayerSidebarRow(
 
         return elem;
     }
-};
+}
 
 const objectImgIcons: any = {
     [WorkspaceFeatureTypes.COVERAGE_AREA]: `<svg width="14" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" cy-id="coverage-area-icon">

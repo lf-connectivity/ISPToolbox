@@ -10,7 +10,6 @@ const TOWER_UPDATE_CORD_FORM_ID = 'tower-update-form-coord';
 const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
 const SECTOR_CREATE_BUTTON_ID = 'place-sector-btn-tower-popup';
 
-
 const TOWER_NAME_EDIT_BTN_ID = 'edit-ap-name-btn';
 const TOWER_NAME_EDIT_INPUT_ID = 'name-input-ap-popup';
 const TOWER_NAME_SAVE_BTN_ID = 'save-ap-name-btn';
@@ -18,8 +17,6 @@ const TOWER_NAME_SAVE_BTN_ID = 'save-ap-name-btn';
 const TOWER_CORD_EDIT_BTN_ID = 'edit-ap-coord-btn';
 const TOWER_CORD_EDIT_INPUT_ID = 'lat-lng-input-tower-popup';
 const TOWER_CORD_SAVE_BTN_ID = 'save-ap-coord-btn';
-
-
 
 // @ts-ignore
 $.validator.addMethod('latlng', (value, element) => {
@@ -57,11 +54,11 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
     protected setEventHandlers() {
         // Tower Parameters Update
         this.createSubmitFormCallback(TOWER_UPDATE_NAME_FORM_ID, () => {
-            this.accessPoint?.read(()=> {});
+            this.accessPoint?.read(() => {});
         });
 
         this.createSubmitFormCallback(TOWER_UPDATE_CORD_FORM_ID, () => {
-            this.accessPoint?.read(()=> {});
+            this.accessPoint?.read(() => {});
         });
 
         // Create Sector Callback
@@ -91,7 +88,7 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
             .on('click', () => {
                 hideHoverTooltip(`#${TOWER_NAME_EDIT_BTN_ID}`);
 
-            // Hide non-edit mode components
+                // Hide non-edit mode components
                 $(`#${TOWER_NAME_EDIT_BTN_ID}`).addClass('d-none');
 
                 // Show edit mode components
@@ -112,7 +109,7 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
             .on('click', () => {
                 hideHoverTooltip(`#${TOWER_CORD_EDIT_BTN_ID}`);
 
-            // Hide non-edit mode components
+                // Hide non-edit mode components
                 $(`#${TOWER_CORD_EDIT_BTN_ID}`).addClass('d-none');
 
                 // Show edit mode components
@@ -169,5 +166,19 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
                 this.hide();
             }
         });
+    }
+
+    // Hide tooltip if designated AP gets hidden
+    drawUpdateCallback(event: { features: Array<GeoJSON.Feature>; action: string }) {
+        if (event.action === 'read' && this.accessPoint && this.accessPoint.workspaceId) {
+            event.features.forEach((feat: any) => {
+                if (
+                    feat.properties.uuid == this.accessPoint?.workspaceId &&
+                    this.accessPoint?.getFeatureProperty('hidden') == 'true'
+                ) {
+                    this.hide();
+                }
+            });
+        }
     }
 }

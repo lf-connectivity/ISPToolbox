@@ -221,6 +221,20 @@ export abstract class BaseAjaxSectorPopup
         });
     }
 
+    // Hide tooltip if designated AP gets hidden
+    drawUpdateCallback(event: { features: Array<GeoJSON.Feature>; action: string }) {
+        if (event.action === 'read' && this.sector && this.sector.workspaceId) {
+            event.features.forEach((feat: any) => {
+                if (
+                    feat.properties.uuid == this.sector?.workspaceId &&
+                    this.sector?.getFeatureProperty('hidden') == 'true'
+                ) {
+                    this.hide();
+                }
+            });
+        }
+    }
+
     protected updateSectorStats() {
         if (this.popup.isOpen()) {
             const request_params = this.getEndpointParams();
@@ -228,9 +242,9 @@ export abstract class BaseAjaxSectorPopup
                 djangoUrl('workspace:sector-stats', ...this.getEndpointParams()),
                 '',
                 (result) => {
-                    if(this.responseMatchesCurrent(request_params)) {
+                    if (this.responseMatchesCurrent(request_params)) {
                         $(`#${STAT_ROW_ID}`).html(result);
-                    }  
+                    }
                 },
                 'html'
             )
@@ -267,8 +281,8 @@ export abstract class BaseAjaxSectorPopup
                 });
             }
 
-            this.draw.changeMode('simple_select', {featureIds: [this.sector.mapboxId]})
-            this.map.fire('draw.selectionchange', {features: [this.sector.getFeatureData() ]})
+            this.draw.changeMode('simple_select', { featureIds: [this.sector.mapboxId] });
+            this.map.fire('draw.selectionchange', { features: [this.sector.getFeatureData()] });
             this.hide();
             this.show();
         }

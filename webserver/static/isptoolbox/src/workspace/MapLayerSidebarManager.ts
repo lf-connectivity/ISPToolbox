@@ -131,6 +131,18 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
         });
     }
 
+    drawSelectionChangeCallback(event: { features: Array<any> }) {
+        event.features.forEach((feat: any) => {
+            if (
+                feat.properties.uuid &&
+                feat.properties?.feature_type === WorkspaceFeatureTypes.AP
+            ) {
+                let tower = BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid);
+                this.setFeatureVisibility(tower, true);
+            }
+        });
+    }
+
     renderInstructions() {
         if ($('.market_overlay--section .object-toggle-row').length == 0) {
             $('#zerostate').removeClass('d-none');
@@ -173,22 +185,6 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
         }
 
         if (!visible) {
-            // Close tooltip if hiding feature
-            switch (feature.getFeatureType()) {
-                case WorkspaceFeatureTypes.AP:
-                    let towerPopup = AjaxTowerPopup.getInstance();
-                    if (towerPopup.getAccessPoint() === (feature as AccessPoint)) {
-                        towerPopup.hide();
-                    }
-                    break;
-                case WorkspaceFeatureTypes.SECTOR:
-                    let sectorPopup = BaseAjaxSectorPopup.getInstance();
-                    if (sectorPopup.getSector() === (feature as AccessPointSector)) {
-                        sectorPopup.hide();
-                    }
-                    break;
-            }
-
             // Deselect if hiding feature
             let selection = new Set(this.draw.getSelectedIds());
             let mode = this.draw.getMode();
@@ -267,10 +263,6 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
 
     private clickHandler = (uuid: string) => {
         const feature = BaseWorkspaceManager.getFeatureByUuid(uuid);
-        const towerPopup = AjaxTowerPopup.getInstance();
-        const sectorPopup = BaseAjaxSectorPopup.getInstance();
-        towerPopup.hide();
-        sectorPopup.hide();
 
         if (feature) {
             let coordinates;
@@ -285,20 +277,10 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
                 case WorkspaceFeatureTypes.SECTOR:
                     let sector = feature as AccessPointSector;
                     coordinates = sector.ap.getFeatureGeometryCoordinates() as [number, number];
-                    if (this.getCheckedStatus(sector)) {
-                        sectorPopup.setSector(sector);
-                        sectorPopup.show();
-                    }
                     break;
                 case WorkspaceFeatureTypes.AP:
                     let ap = feature as AccessPoint;
                     coordinates = ap.getFeatureGeometryCoordinates() as [number, number];
-
-                    // Show tooltip if AP is visible
-                    if (this.getCheckedStatus(ap)) {
-                        towerPopup.setAccessPoint(ap);
-                        towerPopup.show();
-                    }
                     break;
             }
 

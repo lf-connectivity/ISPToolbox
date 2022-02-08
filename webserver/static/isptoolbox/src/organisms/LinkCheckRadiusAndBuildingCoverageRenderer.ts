@@ -237,6 +237,13 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
     }
 
     accessPointStatusCallback(msg: string, message: AccessPointCoverageResponse) {
+        // TODO: deprecate AP
+        const feat = this.draw.getAll().features.find(f => f.properties?.uuid === message.uuid);
+        if(feat?.properties?.feature_type === WorkspaceFeatureTypes.AP && isBeta())
+        {
+            return;
+        }
+
         $.ajax({
             url: `/pro/workspace/api/ap-los/coverage/${message.uuid}/`,
             method: 'GET',

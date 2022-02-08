@@ -4,6 +4,8 @@ import { Feature, Geometry } from 'geojson';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
+import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
+import {CRUDEvent} from '../utils/IIspToolboxAjaxPlugin';
 
 const BASE_WORKSPACE_SERIALIZED_FIELDS = ['uneditable'];
 const BASE_WORKSPACE_RESPONSE_FIELDS = ['uuid', 'feature_type', 'last_updated', 'uneditable'];
@@ -90,6 +92,10 @@ export abstract class BaseWorkspaceFeature {
                 this.workspaceId = resp.uuid;
                 this.updateFeatureProperties(resp);
                 const feat = this.draw.get(this.mapboxId);
+                if(feat)
+                {
+                    BaseWorkspaceFeature.fire(CRUDEvent.CREATE, {features: [feat]})
+                }
                 this.map.fire('draw.update', {features: [feat], action: 'read'});
                 if (successFollowup) {
                     successFollowup(resp);
@@ -123,6 +129,10 @@ export abstract class BaseWorkspaceFeature {
         })
             .done((resp) => {
                 this.updateFeatureProperties(resp);
+                const feat = this.getFeatureData();
+                if(feat) {
+                    BaseWorkspaceFeature.fire(CRUDEvent.READ, {features: [feat]});
+                }
                 if (successFollowup) {
                     successFollowup(resp);
                 }
@@ -153,6 +163,10 @@ export abstract class BaseWorkspaceFeature {
         })
             .done((resp) => {
                 this.updateFeatureProperties(resp);
+                const feat = this.getFeatureData();
+                if(feat) {
+                    BaseWorkspaceFeature.fire(CRUDEvent.UPDATE, {features: [feat]});
+                }
                 if (successFollowup) {
                     successFollowup(resp);
                 }
@@ -181,6 +195,11 @@ export abstract class BaseWorkspaceFeature {
             }
         })
             .done((resp) => {
+                const feat = this.getFeatureData();
+                if(feat)
+                {
+                    BaseWorkspaceFeature.fire(CRUDEvent.DELETE, {features: [feat]});
+                }
                 this.removeFeatureFromMap(this.mapboxId);
                 if (successFollowup) {
                     successFollowup(resp);
@@ -249,5 +268,43 @@ export abstract class BaseWorkspaceFeature {
         serialization.geojson = JSON.stringify(this.featureData.geometry);
         serialization.map_session = getSessionID();
         return serialization;
+    }
+
+
+    /**
+     * Observer Interface for CRUD Completion Events
+     */
+    private static listeners :
+    {
+        [CRUDEvent.CREATE]: Array<(e: {features: Array<GeoJSON.Feature>}) => void>
+        [CRUDEvent.READ]: Array<(e: {features: Array<GeoJSON.Feature>}) => void>
+        [CRUDEvent.UPDATE]: Array<(e: {features: Array<GeoJSON.Feature>}) => void>
+        [CRUDEvent.DELETE]: Array<(e: {features: Array<GeoJSON.Feature>}) => void>
+    } =
+    {
+        [CRUDEvent.CREATE]: [],
+        [CRUDEvent.READ]: [],
+        [CRUDEvent.UPDATE]: [],
+        [CRUDEvent.DELETE] :[]
+    };
+
+    public static subscribe(event: CRUDEvent, fn:  (e: {features: Array<GeoJSON.Feature>}) => void) {
+       this.listeners[event].push(fn as any);
+    }
+
+    public static unsubscribe(event: CRUDEvent, fn: (e: {features: Array<GeoJSON.Feature>}) => void) {
+        this.listeners[event] = (this.listeners[event] as Array<any>).filter(
+            function (item: any) {
+                if (item !== fn) {
+                    return item;
+                }
+            }
+        );
+    }
+    
+    public static fire(event: CRUDEvent, e: {features: Array<GeoJSON.Feature>}) {
+        this.listeners[event].forEach((f) => {
+            f(e as any);
+        })
     }
 }

@@ -1,6 +1,6 @@
 {% load rest_framework %}
 
-<tr class="tower-row">
+<tr class="tower-row" ap-uuid-target="{{ap.uuid}}">
     <td class="align-middle" scope="row">{{ forloop.counter0|add:offset }}</td>
     <td><input name="name" class="name-input" type="text" value="{{ ap.name }}" ap-uuid-target="{{ap.uuid}}" disabled></td>
     <td>
@@ -16,7 +16,7 @@
     <td>
         <div class="input-group metric-input">
             <div class="input-group-prepend">
-                <input name="beamwidth-azimuth" type="text" value="{{ ap.azimuth }}" ap-uuid-target="{{ap.uuid}}"
+                <input name="azimuth" type="text" value="{{ ap.azimuth }}" ap-uuid-target="{{ap.uuid}}"
                     disabled>
                 <span class="input-group-text">°</span>
             </div>
@@ -32,19 +32,37 @@
                     value="{{ap.height_ft|floatformat:0}}"
                 {% endif %}
                 ap-uuid-target="{{ap.uuid}}" disabled>
-                <span class="input-group-text">
-                    ft
-                </span>
+                {% if units == "SI" %}
+                    <span class="input-group-text">
+                        m
+                    </span>
+                {% else %}
+                    <span class="input-group-text">
+                        ft
+                    </span>
+                {% endif %}
             </div>
         </div>
     </td>
     <td>
         <div class="input-group metric-input">
             <div class="input-group-prepend">
-                <input name="distance" type="text" value="{{ ap.radius }}" ap-uuid-target="{{ap.uuid}}" disabled>
-                <span class="input-group-text">
-                    mi
-                </span>
+                <input name="max_radius" type="text"
+                {% if units == "SI" %}
+                    value="{{ap.max_radius|floatformat:2}}"
+                {% else %}
+                    value="{{ap.radius_miles|floatformat:2}}"
+                {% endif %}
+                    ap-uuid-target="{{ap.uuid}}" disabled>
+                {% if units == "SI" %}
+                    <span class="input-group-text">
+                        km
+                    </span>
+                {% else %}
+                    <span class="input-group-text">
+                        mi
+                    </span>
+                {% endif %}
             </div>
             </div>    
     </td>

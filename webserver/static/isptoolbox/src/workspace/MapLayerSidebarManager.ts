@@ -158,6 +158,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
     }
 
     private setMapboxVisibility(feature: BaseWorkspaceFeature, visible: boolean) {
+        // Set visibility flags
         if (!visible) {
             feature.setFeatureProperty('hidden', 'true');
         } else {
@@ -171,8 +172,8 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
             this.map.fire('draw.update', { action: 'read', features: [new_feat] });
         }
 
-        // Close tooltip if hiding feature
         if (!visible) {
+            // Close tooltip if hiding feature
             switch (feature.getFeatureType()) {
                 case WorkspaceFeatureTypes.AP:
                     let towerPopup = AjaxTowerPopup.getInstance();
@@ -186,6 +187,27 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
                         sectorPopup.hide();
                     }
                     break;
+            }
+
+            // Deselect if hiding feature
+            let selection = new Set(this.draw.getSelectedIds());
+            let mode = this.draw.getMode();
+            if (
+                (mode == 'direct_select' || mode == 'simple_select') &&
+                selection.has(feature.mapboxId)
+            ) {
+                selection.delete(feature.mapboxId);
+                let newSelection = Array.from(selection);
+                this.draw.changeMode('simple_select', { featureIds: newSelection });
+                if (mode == 'direct_select') {
+                    this.map.fire('draw.modechange', {
+                        mode: 'simple_select',
+                        featureIds: newSelection
+                    });
+                }
+                this.map.fire('draw.selectionchange', {
+                    features: newSelection.map((id: string) => this.draw.get(id))
+                });
             }
         }
 

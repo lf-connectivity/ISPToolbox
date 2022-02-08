@@ -164,10 +164,29 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
             feature.setFeatureProperty('hidden', undefined);
         }
 
+        // Update mapbox
         const new_feat = this.draw.get(feature.mapboxId);
         if (new_feat) {
             this.draw.add(new_feat);
             this.map.fire('draw.update', { action: 'read', features: [new_feat] });
+        }
+
+        // Close tooltip if hiding feature
+        if (!visible) {
+            switch (feature.getFeatureType()) {
+                case WorkspaceFeatureTypes.AP:
+                    let towerPopup = AjaxTowerPopup.getInstance();
+                    if (towerPopup.getAccessPoint() === (feature as AccessPoint)) {
+                        towerPopup.hide();
+                    }
+                    break;
+                case WorkspaceFeatureTypes.SECTOR:
+                    let sectorPopup = BaseAjaxSectorPopup.getInstance();
+                    if (sectorPopup.getSector() === (feature as AccessPointSector)) {
+                        sectorPopup.hide();
+                    }
+                    break;
+            }
         }
 
         this.setCheckedStatus(feature, visible);

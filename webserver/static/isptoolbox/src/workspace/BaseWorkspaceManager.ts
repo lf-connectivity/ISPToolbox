@@ -15,9 +15,9 @@ import {
     PointToPointLink,
     isAP
 } from './WorkspaceFeatures';
-import { MapLayerSidebarManager } from './MapLayerSidebarManager';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { AccessPointSector } from './WorkspaceSectorFeature';
+import { CRUDEvent } from '../utils/IIspToolboxAjaxPlugin';
 
 type UpdateDeleteFeatureProcessor = (workspaceFeature: BaseWorkspaceFeature) => void | boolean;
 
@@ -212,7 +212,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                     let workspaceFeature = this.features.get(
                         feature.properties.uuid
                     ) as BaseWorkspaceFeature;
-
+                    
                     // Delete pre-ajax call stuff
                     let retval = this.deleteFeaturePreAjaxHandlers[featureType](workspaceFeature);
                     if (retval !== false) {
@@ -220,6 +220,7 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
                             (resp) => {
                                 this.features.delete(feature.properties.uuid);
                                 this.acceptNewState();
+                                BaseWorkspaceFeature.fire(CRUDEvent.DELETE, {features: [feature]})
                             },
                             () => {
                                 this.revertOperation(event.features, CRUDOperation.DELETE);

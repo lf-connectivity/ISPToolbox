@@ -3,12 +3,15 @@ import mapboxgl from 'mapbox-gl';
 import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 import { getCookie } from '../utils/Cookie';
 import { djangoUrl } from '../utils/djangoUrl';
+import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface} from '../utils/IIspToolboxAjaxPlugin';
 import { getSessionID, isUnitsUS } from '../utils/MapPreferences';
+import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { addHoverTooltip } from './HoverTooltip';
 
-export class TowerPaginationModal {
+export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
     selector: string = '#accessPointModal';
     constructor(private map: mapboxgl.Map, private draw: MapboxDraw) {
+        initializeIspToolboxInterface(this);
         $(this.selector).on('shown.bs.modal', () => {
             this.getAccessPoints(undefined);
         });
@@ -18,14 +21,12 @@ export class TowerPaginationModal {
     {
         switch(mode){
             case 'tower':
-                $('#accessPointSectorModalLabel').addClass('d-none');
+                $('#accessPointSectorModalLabel, #tower-breadcrumb').addClass('d-none');
                 $('#accessPointModalLabel').removeClass('d-none');
-                $('#tower-breadcrumb').addClass('d-none');
                 break;
             case 'sector':
-                $('#accessPointSectorModalLabel').removeClass('d-none');
+                $('#accessPointSectorModalLabel, #tower-breadcrumb').removeClass('d-none');
                 $('#accessPointModalLabel').addClass('d-none');
-                $('#tower-breadcrumb').removeClass('d-none');
                 break;
             default:
                 break;
@@ -152,10 +153,6 @@ export class TowerPaginationModal {
                 this.draw.delete(feat_ids);
                 this.map.fire('draw.delete', { features: feats });
             }
-            const ordering = $('#ap-modal-ordering').val() as string;
-            const ap = $('#ap-sector-uuid').val() as string
-            const page = event.currentTarget.getAttribute('page-target') as string;
-            this.getAccessPointSectors({ ordering, page, session: undefined, ap});
         });
         $('.ap-edit-btn').on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');
@@ -202,10 +199,7 @@ export class TowerPaginationModal {
         });
 
         // Hover tooltips for save/edit/delete
-        addHoverTooltip('.ap-save-edit-btn');
-        addHoverTooltip('.ap-edit-btn');
-        addHoverTooltip('.ap-delete-btn');
-        addHoverTooltip('.ap-sector-btn');
+        addHoverTooltip('.ap-save-edit-btn, .ap-edit-btn, .ap-delete-btn, .ap-sector-btn');
     }
 
     addModalCallbacks() {
@@ -283,9 +277,24 @@ export class TowerPaginationModal {
         });
 
         // Hover tooltips for save/edit/delete
-        addHoverTooltip('.ap-save-edit-btn');
-        addHoverTooltip('.ap-edit-btn');
-        addHoverTooltip('.ap-delete-btn');
-        addHoverTooltip('.ap-sector-btn');
+        addHoverTooltip('.ap-save-edit-btn, .ap-edit-btn, .ap-delete-btn, .ap-sector-btn');
+    }
+
+    deleteCallback(event: {features: Array<GeoJSON.Feature>}) {
+        // Only run if modal is open
+        if($(this.selector).is(':visible'))
+        {
+            if(event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR))
+            {
+                const ordering = $('#ap-modal-ordering').val() as string;
+                const ap = $('#ap-sector-uuid').val() as string
+                const page = $('#ap-modal-page-num').val() as string;
+                this.getAccessPointSectors({ordering, page, session: undefined, ap: ap});
+            }
+            if(event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.AP))
+            {
+                this.getAccessPoints(undefined);
+            }
+        }
     }
 }

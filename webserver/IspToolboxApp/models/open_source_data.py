@@ -57,3 +57,25 @@ class Tl2019BlocksCensus(models.Model):
     class Meta:
         managed = False
         db_table = 'tl_2019_blocks_census'
+
+
+class Form477Dec2020(models.Model):
+    logrecno = models.IntegerField(blank=True, null=True)
+    provider_id = models.IntegerField(blank=True, null=True)
+    frn = models.IntegerField(blank=True, null=True)
+    providername = models.CharField(max_length=255, blank=True, null=True)
+    dbaname = models.CharField(max_length=255, blank=True, null=True)
+    holdingcompanyname = models.CharField(max_length=255, blank=True, null=True)
+    hoconum = models.IntegerField(blank=True, null=True)
+    hocofinal = models.CharField(max_length=255, blank=True, null=True)
+    stateabbr = models.CharField(max_length=20, blank=True, null=True)
+    blockcode = models.CharField(max_length=15, blank=True, null=True)
+    techcode = models.IntegerField(blank=True, null=True)
+    consumer = models.IntegerField(blank=True, null=True)
+    maxaddown = models.FloatField(blank=True, null=True)
+    maxadup = models.FloatField(blank=True, null=True)
+    business = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'form477dec2020'

@@ -2,6 +2,7 @@ from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getQueryTemplate, check
     checkIfPrecomputedIncomeAvailable, select_gis_database
 from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty, Tl2020UsCensusBlocks, TribalLands
 from django.db import connections
+from IspToolboxApp.models import Form477Dec2020
 
 
 def serviceProviders(include, read_only):
@@ -187,15 +188,15 @@ WHERE ST_Intersects(cen.geog, ST_GeomFromGeoJSON(%s))
 AND bbn.minprice_broadband_plan_terrestrial IS NOT NULL
 """
 
-provider_skeleton = """
+provider_skeleton = f"""
 SELECT providername,
     Max(maxaddown)               AS maxdown,
     Max(maxadup)                 AS maxadup,
     Array_agg(DISTINCT techcode) AS tech
-FROM   form477jun2020
+FROM   {Form477Dec2020.objects.model._meta.db_table}
     JOIN tl_2019_blocks_census
-      ON tl_2019_blocks_census.geoid10 = form477jun2020.blockcode
-WHERE  {}
+      ON tl_2019_blocks_census.geoid10 = {Form477Dec2020.objects.model._meta.db_table}.blockcode
+WHERE  {{}}
     AND consumer > 0
 GROUP  BY providername
 ORDER  BY maxdown DESC;

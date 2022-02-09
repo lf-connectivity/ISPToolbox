@@ -222,17 +222,16 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
     }
 
     setFeatureVisibility(feature: BaseWorkspaceFeature, visible: boolean) {
+        this.setMapboxVisibility(feature, visible);
         switch (feature.getFeatureType()) {
             case WorkspaceFeatureTypes.AP:
                 let tower = feature as AccessPoint;
-                this.setMapboxVisibility(tower, visible);
                 tower.sectors.forEach((sect: AccessPointSector) => {
                     this.setMapboxVisibility(sect, visible);
                 });
                 break;
             case WorkspaceFeatureTypes.SECTOR:
                 let sector = feature as AccessPointSector;
-                this.setMapboxVisibility(sector, visible);
 
                 // Two cases for setting visible status for parent tower:
                 // 1. All the sectors are hidden but the tower isn't marked as hidden.

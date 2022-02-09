@@ -94,11 +94,16 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         action
     }: {
         features: Array<GeoJSON.Feature>;
-        action: undefined | 'move' | 'change_coordinates';
+        action: undefined | 'read' | 'move' | 'change_coordinates';
     }) {
         if (action === 'move' || action === 'change_coordinates') {
             this.last_selection = '';
             this.map.fire('draw.selectionchange', { features: features });
+        } else if (action === 'read') {
+            if (this.draw.getSelectedIds().length === 0) {
+                this.sendCoverageRequest({ features: this.draw.getSelected().features });
+                this.renderBuildings();
+            }
         }
     }
 

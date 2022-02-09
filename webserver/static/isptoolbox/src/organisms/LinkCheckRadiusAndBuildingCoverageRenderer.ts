@@ -33,6 +33,7 @@ import { AjaxLinkCheckCPEPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe
 import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 import { clickedOnMapCanvas } from '../utils/MapboxEvents';
 import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
+import { djangoUrl } from '../utils/djangoUrl';
 
 export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     ws: LOSCheckWS;
@@ -245,7 +246,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         }
 
         $.ajax({
-            url: `/pro/workspace/api/ap-los/coverage/${message.uuid}/`,
+            url: djangoUrl('workspace:coverage-geojson', message.uuid),
             method: 'GET',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
@@ -259,7 +260,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             }
         })
         $.ajax({
-            url: `/pro/workspace/api/ap-los/coverage/stats/${message.uuid}/`,
+            url: djangoUrl('workspace:coverage-stats', message.uuid),
             method: 'GET',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')

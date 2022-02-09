@@ -51,6 +51,10 @@ export abstract class BaseAjaxSectorPopup
         super(map, draw, 'workspace:sector-form');
         initializeMapboxDrawInterface(this, this.map);
         PubSub.subscribe(WorkspaceEvents.SECTOR_CREATED, this.sectorCreateCallback.bind(this));
+        PubSub.subscribe(
+            WorkspaceEvents.SECTOR_LAYER_CLICKED,
+            this.sectorLayerClickCallback.bind(this)
+        );
 
         this.tool = tool;
     }
@@ -285,6 +289,22 @@ export abstract class BaseAjaxSectorPopup
             this.map.fire('draw.selectionchange', { features: [this.sector.getFeatureData()] });
             this.hide();
             this.show();
+        }
+    }
+
+    // Show tooltip if only one sector is selected.
+    protected sectorLayerClickCallback(
+        event: string,
+        data: { sectors: Array<AccessPointSector>; selectedSectors: Array<AccessPointSector> }
+    ) {
+        if (data.selectedSectors.length === 1) {
+            let sector = data.selectedSectors[0];
+
+            this.hide();
+            this.setSector(sector);
+            this.show();
+        } else if (data.selectedSectors.length > 1) {
+            this.hide();
         }
     }
 }

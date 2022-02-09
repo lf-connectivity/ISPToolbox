@@ -134,63 +134,90 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
 
         PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.AP_updateCallback.bind(this));
 
-        const onClickAP = (e: any) => {
-            // Show tooltip if only one AP is selected.
-            const selectedAPs = this.workspaceManager.filterByType(
-                this.draw.getSelected().features,
-                WorkspaceFeatureTypes.AP
-            );
-            if (selectedAPs.length === 1) {
-                let ap = BaseWorkspaceManager.getFeatureByUuid(
-                    selectedAPs[0].properties.uuid
-                ) as AccessPoint;
-                // Setting this timeout so the natural mouseclick close popup trigger resolves
-                // before this one
-                setTimeout(() => {
+        const onClickAP = _.debounce((e: any) => {
+            const featuresAtPoint = this.draw.getFeatureIdsAt(e.point);
+            const aps = featuresAtPoint
+                .filter(
+                    (id) => this.draw.get(id)?.properties?.feature_type === WorkspaceFeatureTypes.AP
+                )
+                .map(
+                    (id) =>
+                        BaseWorkspaceManager.getFeatureByUuid(
+                            this.draw.get(id)?.properties?.uuid
+                        ) as AccessPoint
+                );
+            const selectedAPs = this.workspaceManager
+                .filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.AP)
+                .map(
+                    (feat: any) =>
+                        BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid) as AccessPoint
+                );
+
+            // TODO: Deprecate non-beta
+            if (isBeta()) {
+                PubSub.publish(WorkspaceEvents.AP_LAYER_CLICKED, {
+                    aps: aps,
+                    selectedAPs: selectedAPs
+                });
+            } else {
+                // Show tooltip if only one AP is selected.
+                if (selectedAPs.length === 1) {
+                    let ap = selectedAPs[0];
+
                     this.apPopup.hide();
                     this.apPopup.setAccessPoint(ap);
                     this.apPopup.show();
-                }, 1);
-            } else if (selectedAPs.length > 1) {
-                this.apPopup.hide();
+                } else if (selectedAPs.length > 1) {
+                    this.apPopup.hide();
+                }
             }
-        };
+        }, 10);
 
-        const onClickPolygon = (e: mapboxgl.MapLayerMouseEvent) => {
+        const onClickPolygon = _.debounce((e: mapboxgl.MapLayerMouseEvent) => {
             if (this.map.queryRenderedFeatures(e.point, { layers: [BUILDING_LAYER] }).length > 0) {
                 return;
             }
-            // Show tooltip if only one AP is selected.
-            const selectedSectors = this.workspaceManager.filterByType(
-                this.draw.getSelected().features,
-                WorkspaceFeatureTypes.SECTOR
-            );
-            if (selectedSectors.length === 1) {
-                let sector = BaseWorkspaceManager.getFeatureByUuid(
-                    selectedSectors[0].properties.uuid
-                ) as AccessPointSector;
-                // Setting this timeout so the natural mouseclick close popup trigger resolves
-                // before this one
 
-                // Only clicking on the mapboxgl canvas triggers the event. (no marker trigger)
-                if (clickedOnMapCanvas(e)) {
-                    setTimeout(() => {
-                        this.sectorPopup.hide();
-                        this.sectorPopup.setSector(sector);
-                        this.sectorPopup.show();
-                    }, 1);
-                }
-            } else if (selectedSectors.length > 1) {
-                this.apPopup.hide();
+            // Only clicking on the mapboxgl canvas triggers the event. (no marker trigger)
+            if (clickedOnMapCanvas(e)) {
+                const sectors = this.draw
+                    .getFeatureIdsAt(e.point)
+                    .filter(
+                        (id) =>
+                            this.draw.get(id)?.properties?.feature_type ===
+                            WorkspaceFeatureTypes.SECTOR
+                    )
+                    .map(
+                        (id) =>
+                            BaseWorkspaceManager.getFeatureByUuid(
+                                this.draw.get(id)?.properties?.uuid
+                            ) as AccessPointSector
+                    );
+                const selectedSectors = this.workspaceManager
+                    .filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.SECTOR)
+                    .map(
+                        (feat: any) =>
+                            BaseWorkspaceManager.getFeatureByUuid(
+                                feat.properties.uuid
+                            ) as AccessPointSector
+                    );
+
+                PubSub.publish(WorkspaceEvents.SECTOR_LAYER_CLICKED, {
+                    sectors: sectors,
+                    selectedSectors: selectedSectors
+                });
             }
-        };
+        }, 10);
 
         // Keep trying to load the AP onClick event handler until we can find layers
         // to do this, then stop.
         const loadAPOnClick = () => {
             this.map.getStyle().layers?.forEach((layer: any) => {
                 if (layer.id.includes('gl-draw-point-ap')) {
-                    this.map.on('click', layer.id, onClickAP);
+                    this.map.on('click', layer.id, (e: any) => {
+                        onClickAP.cancel();
+                        onClickAP(e);
+                    });
                     this.renderBuildings();
                     this.renderAPRadius();
                     this.map.off('idle', loadAPOnClick);
@@ -201,7 +228,10 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
         const loadSectorOnClick = (e: any) => {
             this.map.getStyle().layers?.forEach((layer: any) => {
                 if (layer.id.includes('gl-draw-polygon-fill')) {
-                    this.map.on('click', layer.id, onClickPolygon);
+                    this.map.on('click', layer.id, (e: any) => {
+                        onClickPolygon.cancel();
+                        onClickPolygon(e);
+                    });
                     this.map.off('idle', loadSectorOnClick);
                 }
             });

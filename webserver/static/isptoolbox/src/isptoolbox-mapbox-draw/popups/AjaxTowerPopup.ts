@@ -1,7 +1,12 @@
 import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
 import { parseLatitudeLongitude } from '../../utils/LatLngInputUtils';
-import { ISPToolboxTool, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
+import { BaseWorkspaceManager } from '../../workspace/BaseWorkspaceManager';
+import {
+    ISPToolboxTool,
+    WorkspaceEvents,
+    WorkspaceFeatureTypes
+} from '../../workspace/WorkspaceConstants';
 import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
@@ -35,6 +40,7 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
         super(map, draw, 'workspace:tower-form');
         initializeMapboxDrawInterface(this, this.map);
         this.tool = tool;
+        PubSub.subscribe(WorkspaceEvents.AP_LAYER_CLICKED, this.apLayerClickCallback.bind(this));
         AjaxTowerPopup._instance = this;
     }
 
@@ -179,6 +185,20 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
                     this.hide();
                 }
             });
+        }
+    }
+
+    // Show tooltip on AP layer click.
+    apLayerClickCallback(
+        event: string,
+        data: { aps: Array<AccessPoint>; selectedAPs: Array<AccessPoint> }
+    ) {
+        if (data.selectedAPs.length === 1) {
+            this.hide();
+            this.setAccessPoint(data.selectedAPs[0]);
+            this.show();
+        } else if (data.selectedAPs.length > 1) {
+            this.hide();
         }
     }
 }

@@ -1,6 +1,6 @@
 import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { WorkspaceFeatureTypes } from './WorkspaceConstants';
+import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import centroid from '@turf/centroid';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
@@ -47,6 +47,8 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
             });
         };
         this.map.on('idle', loadMapCallback);
+
+        PubSub.subscribe(WorkspaceEvents.AP_LAYER_CLICKED, this.apLayerClickCallback.bind(this));
     }
 
     drawCreateCallback(event: { features: Array<GeoJSON.Feature> }) {
@@ -131,15 +133,12 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
         });
     }
 
-    drawSelectionChangeCallback(event: { features: Array<any> }) {
-        event.features.forEach((feat: any) => {
-            if (
-                feat.properties.uuid &&
-                feat.properties?.feature_type === WorkspaceFeatureTypes.AP
-            ) {
-                let tower = BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid);
-                this.setFeatureVisibility(tower, true);
-            }
+    apLayerClickCallback(
+        event: string,
+        data: { aps: Array<AccessPoint>; selectedAPs: Array<AccessPoint> }
+    ) {
+        data.aps.forEach((ap: AccessPoint) => {
+            this.setFeatureVisibility(ap, true);
         });
     }
 

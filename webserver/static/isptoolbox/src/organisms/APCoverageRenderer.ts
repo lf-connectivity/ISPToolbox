@@ -8,7 +8,6 @@ import { AccessPoint } from '../workspace/WorkspaceFeatures';
 
 import { GeometryCollection } from '@turf/helpers';
 
-import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import { miles2km } from '../LinkCalcUtils';
 import { isBeta } from '../LinkCheckUtils';

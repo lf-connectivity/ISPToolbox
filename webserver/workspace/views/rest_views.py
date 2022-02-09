@@ -475,4 +475,5 @@ class AccessPointCoverageViewshedOverlayView(View):
         except AccessPointSector.DoesNotExist:
             raise Http404
         except Exception:
-            raise Http404
+            logging.exception("failed to return coverage overlay")
+            raise

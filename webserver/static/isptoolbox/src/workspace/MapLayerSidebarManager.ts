@@ -62,7 +62,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
                         )
                     );
                 } else {
-                    $(`.market_overlay--section`).prepend(row);
+                    $(`#map-objects-section`).prepend(row);
                 }
                 // Add Click Callback Handlers
                 $(

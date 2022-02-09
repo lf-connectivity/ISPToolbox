@@ -100,10 +100,8 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             this.last_selection = '';
             this.map.fire('draw.selectionchange', { features: features });
         } else if (action === 'read') {
-            if (this.draw.getSelectedIds().length === 0) {
-                this.sendCoverageRequest({ features: this.draw.getSelected().features });
-                this.renderBuildings();
-            }
+            this.sendCoverageRequest({ features: this.draw.getSelected().features });
+            this.renderBuildings();
         }
     }
 

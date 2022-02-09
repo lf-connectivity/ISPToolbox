@@ -12,7 +12,8 @@
         color: $brand-dark-gray-color
         margin-bottom: 7px
     input:not(.btn):not([type="file"]), select
-        margin-bottom: 5px
+        margin-bottom: 2px
+        margin-top: 2px
     select
         color: $brand-dark-gray-color
         background-image: url("data:image/svg+xml,%3Csvg width='12' height='6' viewBox='0 0 12 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.3254 0.620372L0.945767 0.294976L0.294976 1.05423L0.674604 1.37963L1.3254 0.620372ZM5.66667 5L5.34127 5.37963L5.66667 5.65854L5.99206 5.37963L5.66667 5ZM10.6587 1.37963L11.0384 1.05423L10.3876 0.294976L10.0079 0.620372L10.6587 1.37963ZM0.674604 1.37963L5.34127 5.37963L5.99206 4.62037L1.3254 0.620372L0.674604 1.37963ZM5.99206 5.37963L10.6587 1.37963L10.0079 0.620372L5.34127 4.62037L5.99206 5.37963Z' fill='%232D2D2D'/%3E%3C/svg%3E%0A")
@@ -49,9 +50,12 @@
         width: 100%
         padding: 9px 10px
         color: $brand-dark-gray-color
+        line-height: 16px
         &:focus
             border-bottom: 2px solid $brand-secondary-color
             outline: 0
+    input:not(.btn):not([type="file"]):not([type="checkbox"]):disabled, select:disabled
+        border-bottom: 2px solid transparent !important
     &.inline-field-group
         display: block
         label
@@ -110,3 +114,19 @@
     font-size: $small-font-size
     margin-bottom: 0
     margin-top: 10px
+
+#ap-list-modal-body 
+    .metric-input 
+        input
+            text-align: right
+        input[type=number]
+            direction: rtl
+    .date
+        text-align: right
+    .date-label
+        margin-right: -5px
+    .input-group-text
+        line-height: 1rem
+        padding: 9px 6px
+        color: $brand-dark-gray-color
+        margin: 2px 0

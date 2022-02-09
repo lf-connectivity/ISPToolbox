@@ -47,9 +47,8 @@
         <input name="latitude" type="text" value="{{ ap.lat|floatformat:5 }}" ap-uuid-target="{{ap.uuid}}" disabled>
         </div>
         </td>
-    <td>
-        <div class="metric-input"><input name="longitude" type="text" value="{{ ap.lng|floatformat:5 }}" ap-uuid-target="{{ap.uuid}}" disabled></div></td>
-    <td class="align-middle">{{ap.last_updated|lower}}</td>
+    <td><div class="metric-input"><input name="longitude" type="text" value="{{ ap.lng|floatformat:5 }}" ap-uuid-target="{{ap.uuid}}" disabled></div></td>
+    <td class="date align-middle">{{ap.last_updated|lower}}</td>
     <td>
         <div class="btn-group" role="group" aria-label="edit-btn-group">
         <button type="button" class="btn btn-edit ap-sector-btn" title="View Access Points" data-target="{{ap.uuid}}">

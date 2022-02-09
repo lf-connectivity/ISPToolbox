@@ -154,7 +154,8 @@ class SectorFormView(TooltipFormView):
                     "status": building_coverage.get_task_status().value,
                 },
             })
-        except:
+        except Exception:
+            logging.exception('could not find corresponding building coverage')
             pass
 
         serialized_sectors = AccessPointSectorSerializer(other_sectors, many=True)

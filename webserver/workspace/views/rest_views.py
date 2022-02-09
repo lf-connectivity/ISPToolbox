@@ -474,5 +474,5 @@ class AccessPointCoverageViewshedOverlayView(View):
             return JsonResponse(viewshed.getTilesetInfo())
         except AccessPointSector.DoesNotExist:
             raise Http404
-        except:
+        except Exception:
             raise Http404

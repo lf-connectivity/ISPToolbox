@@ -9,8 +9,6 @@ import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
 import { AccessPointSector } from './WorkspaceSectorFeature';
-import { AjaxTowerPopup } from '../isptoolbox-mapbox-draw/popups/AjaxTowerPopup';
-import { BaseAjaxSectorPopup } from '../isptoolbox-mapbox-draw/popups/AjaxSectorPopups';
 
 export class MapLayerSidebarManager extends CollapsibleComponent implements IMapboxDrawPlugin {
     map: MapboxGL.Map;
@@ -55,14 +53,20 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
         event.features.forEach((f) => {
             const row = generateMapLayerSidebarRow(f);
             if (row) {
-                if (f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR) {
-                    $(row).insertAfter(
-                        $(
-                            `.market_overlay--section .object-toggle-row[data-target=${f.properties.ap}]`
-                        )
-                    );
-                } else {
-                    $(`#map-objects-section`).prepend(row);
+                switch (f.properties?.feature_type) {
+                    case WorkspaceFeatureTypes.SECTOR:
+                        $(row).insertAfter(
+                            $(
+                                `.market_overlay--section .object-toggle-row[data-target=${f.properties.ap}]`
+                            )
+                        );
+                        break;
+                    case WorkspaceFeatureTypes.AP:
+                        $(`#ap-objects-section`).prepend(row);
+                        break;
+                    case WorkspaceFeatureTypes.COVERAGE_AREA:
+                        $(`#area-objects-section`).prepend(row);
+                        break;
                 }
                 // Add Click Callback Handlers
                 $(

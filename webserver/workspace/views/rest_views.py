@@ -412,6 +412,8 @@ class AccessPointCoverageResults(View):
         try:
             ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
             coverage = AccessPointCoverageBuildings.objects.get(ap=ap)
+            if not coverage.result_cached():
+                raise Http404
             return self.create_building_response(coverage)
         except AccessPointLocation.DoesNotExist:
             logging.info("Failed to find AP matching UUID")
@@ -419,6 +421,8 @@ class AccessPointCoverageResults(View):
             sector = AccessPointSector.get_rest_queryset(
                 request).get(uuid=uuid)
             coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
+            if not coverage.result_cached():
+                raise Http404
             return self.create_building_response(coverage)
         except AccessPointCoverageBuildings.DoesNotExist:
             raise Http404
@@ -456,7 +460,7 @@ class AccessPointCoverageViewshedOverlayView(View):
                 logging.info('Viewshed overlay not calculated')
                 raise Http404("Overlay not cached")
             return JsonResponse(viewshed.getTilesetInfo())
-        except Exception:
+        except AccessPointLocation.DoesNotExist:
             logging.info('Failed to find Accesspoint matching UUID')
         # ENDTODO: deprecate
         try:
@@ -468,5 +472,7 @@ class AccessPointCoverageViewshedOverlayView(View):
                 logging.info('Viewshed overlay not calculated')
                 raise Http404("Overlay not cached")
             return JsonResponse(viewshed.getTilesetInfo())
-        except Exception:
+        except AccessPointSector.DoesNotExist:
+            raise Http404
+        except:
             raise Http404

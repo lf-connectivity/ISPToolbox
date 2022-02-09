@@ -37,25 +37,31 @@ def _update_status(sector_id, msg, time_remaining):
 
 @app.task
 def calculateSectorViewshed(sector_id: str):
-    sector, created = workspace_models.AccessPointSector.objects.get_or_create(uuid=sector_id)
+    sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
 
     try:
+        sector.refresh_from_db()
         sector.viewshed.cancel_task()
+        # Delete old viewshed to avoid get dirty cache keys on old uuid tile keys
+        sector.viewshed.delete()
+        workspace_models.Viewshed(sector=sector).save()
     except workspace_models.Viewshed.DoesNotExist:
         workspace_models.Viewshed(sector=sector).save()
         TASK_LOGGER.info("created new viewshed object")
 
     try:
+        sector.refresh_from_db()
         sector.building_coverage.cancel_task()
+        sector.building_coverage.delete()
+        workspace_models.AccessPointCoverageBuildings(sector=sector).save()
     except workspace_models.AccessPointCoverageBuildings.DoesNotExist:
         workspace_models.AccessPointCoverageBuildings(sector=sector).save()
         TASK_LOGGER.info("created new building coverage object")
 
+    sector.refresh_from_db()
     cached = sector.viewshed.result_cached()
     sector.viewshed.on_task_start(current_task.request.id)
     if not cached:
-        if not created:
-            sector.viewshed.delete_tiles()
         sector.viewshed.calculateViewshed(partial(_update_status, sector_id))
         # Notify Websockets listening to session
         resp = {

@@ -138,7 +138,6 @@ class SectorFormView(TooltipFormView):
         context.update({"cloudrf_status": task.get_cloudrf_coverage_status().value})
 
         viewshed = self.get_object().viewshed
-        building_coverage = self.get_object().building_coverage
         context.update(
             {
                 "viewshed_status": {
@@ -146,11 +145,17 @@ class SectorFormView(TooltipFormView):
                     "progress_message": viewshed.progress_message,
                     "time_remaining": viewshed.time_remaining,
                 },
+            }
+        )
+        try:
+            building_coverage = self.get_object().building_coverage
+            context.update({
                 "building_coverage": {
                     "status": building_coverage.get_task_status().value,
                 },
-            }
-        )
+            })
+        except:
+            pass
 
         serialized_sectors = AccessPointSectorSerializer(other_sectors, many=True)
         context.update({"other_sectors": serialized_sectors.data})

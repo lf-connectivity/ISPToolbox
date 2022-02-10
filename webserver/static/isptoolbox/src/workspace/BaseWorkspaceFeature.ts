@@ -288,23 +288,7 @@ export abstract class BaseWorkspaceFeature {
         [CRUDEvent.DELETE] :[]
     };
 
-    public static subscribe(event: CRUDEvent, fn:  (e: {features: Array<GeoJSON.Feature>}) => void) {
-       this.listeners[event].push(fn as any);
-    }
-
-    public static unsubscribe(event: CRUDEvent, fn: (e: {features: Array<GeoJSON.Feature>}) => void) {
-        this.listeners[event] = (this.listeners[event] as Array<any>).filter(
-            function (item: any) {
-                if (item !== fn) {
-                    return item;
-                }
-            }
-        );
-    }
-    
     public static fire(event: CRUDEvent, e: {features: Array<GeoJSON.Feature>}) {
-        this.listeners[event].forEach((f) => {
-            f(e as any);
-        })
+        PubSub.publishSync(event, e);
     }
 }

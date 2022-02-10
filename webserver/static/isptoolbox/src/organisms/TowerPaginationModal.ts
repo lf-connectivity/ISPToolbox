@@ -10,8 +10,9 @@ import { addHoverTooltip } from './HoverTooltip';
 
 export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
     selector: string = '#accessPointModal';
+    subscriptions: Array<string | null> = [];
     constructor(private map: mapboxgl.Map, private draw: MapboxDraw) {
-        initializeIspToolboxInterface(this);
+        this.subscriptions = initializeIspToolboxInterface(this);
         $(this.selector).on('shown.bs.modal', () => {
             this.getAccessPoints(undefined);
         });

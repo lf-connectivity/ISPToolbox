@@ -270,24 +270,6 @@ export abstract class BaseWorkspaceFeature {
         return serialization;
     }
 
-
-    /**
-     * Observer Interface for CRUD Completion Events
-     */
-    private static listeners :
-    {
-        [CRUDEvent.CREATE]: Array<(e: {features: Array<GeoJSON.Feature>}) => void>
-        [CRUDEvent.READ]: Array<(e: {features: Array<GeoJSON.Feature>}) => void>
-        [CRUDEvent.UPDATE]: Array<(e: {features: Array<GeoJSON.Feature>}) => void>
-        [CRUDEvent.DELETE]: Array<(e: {features: Array<GeoJSON.Feature>}) => void>
-    } =
-    {
-        [CRUDEvent.CREATE]: [],
-        [CRUDEvent.READ]: [],
-        [CRUDEvent.UPDATE]: [],
-        [CRUDEvent.DELETE] :[]
-    };
-
     public static fire(event: CRUDEvent, e: {features: Array<GeoJSON.Feature>}) {
         PubSub.publishSync(event, e);
     }

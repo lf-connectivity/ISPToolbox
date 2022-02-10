@@ -26,7 +26,7 @@ import {
     BUILDING_LAYER,
     BUILDING_OUTLINE_LAYER,
     RadiusAndBuildingCoverageRenderer
-} from './APCoverageRenderer';
+} from './RadiusAndBuildingCoverageRenderer';
 import { isBeta } from '../LinkCheckUtils';
 import { AjaxLinkCheckLocationPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckLocationFlowPopups';
 import { AjaxLinkCheckCPEPopup } from '../isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckCPEFlowPopups';

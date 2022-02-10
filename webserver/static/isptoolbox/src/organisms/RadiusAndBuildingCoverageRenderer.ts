@@ -33,7 +33,6 @@ const ACTIVE_AP = 'true';
 const INACTIVE_AP = 'false';
 
 // TODO: Remove RenderCloudRF option from here, it will go into WorkspaceManager
-export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPlugin {
     map: mapboxgl.Map;
     draw: MapboxDraw;
     workspaceManager: any;
@@ -130,8 +129,6 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
             },
             BUILDING_LAYER
         );
-
-        PubSub.subscribe(WorkspaceEvents.AP_UPDATE, this.AP_updateCallback.bind(this));
 
         const onClickAP = _.debounce((e: any) => {
             const featuresAtPoint = this.draw.getFeatureIdsAt(e.point);
@@ -279,7 +276,6 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
         }
     }
 
-    AP_updateCallback(msg: string, { features }: { features: Array<any> }) {
         this.sendCoverageRequest({ features });
         this.renderAPRadius();
         this.renderBuildings();

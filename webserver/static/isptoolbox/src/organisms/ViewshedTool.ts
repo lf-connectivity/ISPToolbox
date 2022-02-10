@@ -6,7 +6,7 @@ import {
     ViewShedResponse,
     WorkspaceFeatureTypes
 } from '../workspace/WorkspaceConstants';
-import { EMPTY_LAYER_AFTER_BUILDING } from './APCoverageRenderer';
+import { EMPTY_LAYER_AFTER_BUILDING } from './RadiusAndBuildingCoverageRenderer';
 import { getCookie } from '../utils/Cookie';
 import { djangoUrl } from '../utils/djangoUrl';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';

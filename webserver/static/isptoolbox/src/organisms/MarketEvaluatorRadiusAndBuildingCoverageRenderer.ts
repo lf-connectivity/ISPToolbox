@@ -21,7 +21,7 @@ import {
     BUILDING_DATA_SOURCE,
     BUILDING_LAYER,
     RadiusAndBuildingCoverageRenderer
-} from './APCoverageRenderer';
+} from './RadiusAndBuildingCoverageRenderer';
 
 export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     buildingOverlays: GeometryCollection;

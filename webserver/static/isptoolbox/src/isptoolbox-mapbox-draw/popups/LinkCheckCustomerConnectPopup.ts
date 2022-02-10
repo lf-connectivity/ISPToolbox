@@ -16,7 +16,7 @@ import { LinkCheckLocationSearchTool } from '../../organisms/LinkCheckLocationSe
 import { BaseWorkspaceFeature } from '../../workspace/BaseWorkspaceFeature';
 import pass_svg from '../styles/pass-icon.svg';
 import fail_svg from '../styles/fail-icon.svg';
-import { BUILDING_LAYER } from '../../organisms/APCoverageRenderer';
+import { BUILDING_LAYER } from '../../organisms/RadiusAndBuildingCoverageRenderer';
 import { BaseWorkspaceManager } from '../../workspace/BaseWorkspaceManager';
 
 const DRAW_PTP_BUTTON_ID = 'draw-ptp-btn-customer-popup';

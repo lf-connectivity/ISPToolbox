@@ -328,7 +328,11 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         // instantiate singletons
         new LOSCheckLinkProfileView();
-        this.locationMarker = new LinkCheckLocationSearchTool(this.map, this.draw, this.workspaceManager);
+        this.locationMarker = new LinkCheckLocationSearchTool(
+            this.map,
+            this.draw,
+            this.workspaceManager
+        );
         new LinkCheckCustomerConnectPopup(this.map, this.draw);
         new LinkCheckVertexClickCustomerConnectPopup(this.map, this.draw);
         new LinkCheckCPEClickCustomerConnectPopup(this.map, this.draw);
@@ -355,7 +359,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             AjaxLinkCheckLocationSwitchSectorPopup
         ]);
         const prioritizeDirectSelect = function ({ features }: any) {
-            if (features.length == 1 && features[0].geometry.type !== 'Point') {
+            if (features.length == 1 && features[0].geometry.type === 'LineString') {
                 this.draw.changeMode('direct_select', {
                     featureId: features[0].id
                 });

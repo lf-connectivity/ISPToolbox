@@ -70,20 +70,9 @@ export class AccessPoint extends WorkspacePointFeature {
         this.updateSectorFeatureProperty();
     }
 
-    create(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
-        super.create((resp) => {
-            PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        }, errorFollowup);
-    }
-
     read(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
         super.read((resp) => {
             this.setCoordinates();
-            PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
-
             if (successFollowup) {
                 successFollowup(resp);
             }
@@ -97,7 +86,6 @@ export class AccessPoint extends WorkspacePointFeature {
 
             // @ts-ignore
             this.draw.setFeatureProperty(this.mapboxId, 'radius', feature?.properties.max_radius);
-            PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
             this.moveLinks(this.getFeatureGeometryCoordinates() as [number, number]);
             this.updateSectors();
 
@@ -463,16 +451,6 @@ export class CoverageArea extends BaseWorkspaceFeature {
         this.awaitingCoverage = false;
     }
 
-    update(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
-        super.update((resp: any) => {
-            PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
-
-            if (successFollowup) {
-                successFollowup(resp);
-            }
-        }, errorFollowup);
-    }
-
     awaitNewCoverage() {
         this.coverage = EMPTY_BUILDING_COVERAGE;
         this.awaitingCoverage = true;
@@ -491,14 +469,6 @@ export class ASRTowerCoverageArea extends CoverageArea {
 
         this.setFeatureProperty('uuid', ASR_TOWER_COVERAGE_WORKSPACE_ID);
         this.setFeatureProperty('feature_type', WorkspaceFeatureTypes.COVERAGE_AREA);
-
-        if (successFollowup) {
-            successFollowup(undefined);
-        }
-    }
-
-    update(successFollowup?: (resp: any) => void) {
-        PubSub.publish(WorkspaceEvents.AP_UPDATE, { features: [this.getFeatureData()] });
 
         if (successFollowup) {
             successFollowup(undefined);

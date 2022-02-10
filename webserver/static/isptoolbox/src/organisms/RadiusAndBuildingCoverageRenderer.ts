@@ -16,6 +16,7 @@ import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { BaseTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 import { clickedOnMapCanvas } from '../utils/MapboxEvents';
+import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../utils/IIspToolboxAjaxPlugin';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -33,6 +34,7 @@ const ACTIVE_AP = 'true';
 const INACTIVE_AP = 'false';
 
 // TODO: Remove RenderCloudRF option from here, it will go into WorkspaceManager
+export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPlugin, IIspToolboxAjaxPlugin {
     map: mapboxgl.Map;
     draw: MapboxDraw;
     workspaceManager: any;
@@ -40,6 +42,7 @@ const INACTIVE_AP = 'false';
     sectorPopup: any;
     renderCloudRF: boolean;
     last_selection: string = '';
+    subscriptions: Array<string | null> = [];
 
     constructor(
         map: mapboxgl.Map,
@@ -53,6 +56,7 @@ const INACTIVE_AP = 'false';
         }
     ) {
         initializeMapboxDrawInterface(this, map);
+        this.subscriptions = initializeIspToolboxInterface(this);
         this.map = map;
         this.draw = draw;
         this.apPopup = isBeta() ? AjaxTowerPopup.getInstance() : apPopupClass.getInstance();
@@ -276,6 +280,22 @@ const INACTIVE_AP = 'false';
         }
     }
 
+    createCallback(event: {features: Array<GeoJSON.Feature>})
+    {
+        this.CRUDCallback(event);
+    }
+
+    readCallback(event: {features: Array<GeoJSON.Feature>})
+    {
+        this.CRUDCallback(event);
+    }
+
+    updateCallback(event: {features: Array<GeoJSON.Feature>})
+    {
+        this.CRUDCallback(event);
+    }
+
+    CRUDCallback({features}:{ features: Array<any> }) {
         this.sendCoverageRequest({ features });
         this.renderAPRadius();
         this.renderBuildings();

@@ -4,7 +4,6 @@ export enum ISPToolboxTool {
 }
 
 export enum WorkspaceEvents {
-    AP_UPDATE = 'ap.update',
     AP_RENDER_GIVEN = 'ap.render_given',
     AP_COVERAGE_UPDATED = 'ap.coverage_updated',
     NO_ITEMS = 'workspace.no_items',

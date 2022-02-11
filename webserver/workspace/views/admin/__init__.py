@@ -1,3 +1,3 @@
-from .dashboard import WorkspaceEngagementView
+from .dashboard_views import WorkspaceEngagementView
 
 __all__ = ['WorkspaceEngagementView']

@@ -264,16 +264,6 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
     }
 
     protected getHTML() {
-        if (isBeta()) {
-            return `
-                <div class="tooltip--tower-summary">
-                    <button class='btn btn-primary isptoolbox-btn' id='${PLACE_SECTOR_BUTTON_ID}'>
-                        Place Random Sector
-                    </button>
-                </div>
-            `;
-        }
-
         const coords = this.accessPoint?.getFeatureGeometryCoordinates();
         return `
             <div class="tooltip--tower-summary">

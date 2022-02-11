@@ -312,7 +312,8 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
     renderAPRadius() {
         // TODO: DELETE THIS WE DON'T NEED IT AFTER AP SECTOR LAUNCH
         if (!isBeta()) {
-            const circle_feats: { [id: string]: Feature<Geometry, GeoJsonProperties> } = {};
+
+            const circle_feats: Array<GeoJSON.Feature> = [];
             let fc = this.draw.getSelected();
             let selectedAPs = new Set(
                 fc.features
@@ -327,27 +328,30 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
             aps.forEach((feat: any) => {
                 if (feat && (feat.properties.radius || feat.properties.radius_miles)) {
                     if (feat.geometry.type === 'Point') {
-                        let new_feat;
+                        let new_feat: GeoJSON.Feature = {
+                            type: 'Feature',
+                            geometry: {type: 'Point', coordinates: []},
+                            properties: {},
+                        };
                         if (this.renderCloudRF && this.cloudRFExists(feat)) {
                             // CloudRF coverage is a geometrycollection; turn this into a feature.
                             let geometryCollection = JSON.parse(
                                 feat.properties?.cloudrf_coverage_geojson_json
                             );
-                            new_feat = {
-                                type: 'Feature',
-                                geometry: geometryCollection,
-                                properties: {}
-                            } as Feature<GeometryCollection, GeoJsonProperties>;
+                            new_feat.geometry = geometryCollection;
                         } else {
                             let radius =
                                 feat.properties.radius || miles2km(feat.properties.radius_miles);
                             new_feat = createGeoJSONCircle(feat.geometry, radius, feat.id);
                         }
 
-                        // @ts-ignore
-                        new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
-                            ? ACTIVE_AP
-                            : INACTIVE_AP;
+                        if(new_feat.properties)
+                        {
+                            new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
+                                ? ACTIVE_AP
+                                : INACTIVE_AP;
+                        }
+                        circle_feats.push(new_feat);
                     }
                 }
             });
@@ -355,10 +359,11 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
             // Replace radius features with selected
             const radiusSource = this.map.getSource(ACCESS_POINT_RADIUS_VIS_DATA);
             if (radiusSource.type === 'geojson') {
-                radiusSource.setData({
+                const fc: GeoJSON.FeatureCollection = {
                     type: 'FeatureCollection',
-                    features: Object.values(circle_feats)
-                });
+                    features: circle_feats
+                };
+                radiusSource.setData(fc);
             }
         }
     }

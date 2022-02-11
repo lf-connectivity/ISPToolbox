@@ -457,6 +457,7 @@ def _cancel_viewshed_task(sender, instance, using, **kwargs):
 class DSMAvailabilityException(Exception):
     pass
 
+
 class ViewshedCalculationFailedException(Exception):
     pass
 

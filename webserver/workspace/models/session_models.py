@@ -164,9 +164,12 @@ class WorkspaceMapSession(models.Model):
                 session_id=request.session.session_key
             )
         else:
-            session, created = cls.objects.get_or_create(
-                owner=request.user
-            )
+            created = False
+            try:
+                session = cls.objects.filter(owner=request.user).latest('last_updated')
+            except cls.DoesNotExist:
+                created = True
+                session = cls.objects.create(owner=request.user)
 
         if created:
             session.logging_fbid = int(request.GET.get("id", 0))

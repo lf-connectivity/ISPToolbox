@@ -45,8 +45,6 @@ const COVERAGE_LI_ID = 'coverage-li-tower-popup';
 const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
 const DELETE_ROW_DIV_ID = 'delete-tower-row-tower-popup';
 
-const PLACE_SECTOR_BUTTON_ID = 'place-sector-btn-tower-popup';
-
 enum ImperialToMetricConversion {
     FT_TO_M = 'ft2m',
     MI_TO_KM = 'mi2km'
@@ -222,44 +220,6 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
         // For ASR/uneditable towers, no changing location
         if (this.accessPoint?.getFeatureProperty('uneditable')) {
             $(`#${LAT_LNG_INPUT_ID}`).prop('readonly', true);
-        }
-
-        // Beta stuff
-        if (isBeta()) {
-            $(`#${PLACE_SECTOR_BUTTON_ID}`)
-                .off()
-                .on('click', () => {
-                    // Create two random sectors if there aren't any
-                    if (this.accessPoint && !this.accessPoint.sectors.size) {
-                        for (let i = 0; i < 2; i++) {
-                            let heading = roundToDecimalPlaces(Math.random() * 360.0, 1);
-                            let azimuth = roundToDecimalPlaces(
-                                (Math.random() * 360 + 0.1) % 360,
-                                1
-                            );
-                            let newSector = {
-                                type: 'Feature',
-                                geometry: {
-                                    type: 'Point',
-                                    coordinates: this.lnglat
-                                },
-                                properties: {
-                                    feature_type: WorkspaceFeatureTypes.SECTOR,
-                                    ap: this.accessPoint.workspaceId,
-                                    heading: heading,
-                                    azimuth: azimuth,
-                                    radius: 1,
-                                    height: 100,
-                                    default_cpe_height: 3,
-                                    frequency: 2.437,
-                                    name: 'Random Sector',
-                                    uneditable: true
-                                }
-                            };
-                            this.map.fire('draw.create', { features: [newSector] });
-                        }
-                    }
-                });
         }
     }
 

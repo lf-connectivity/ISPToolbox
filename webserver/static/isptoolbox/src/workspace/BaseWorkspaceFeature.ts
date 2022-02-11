@@ -92,13 +92,13 @@ export abstract class BaseWorkspaceFeature {
                 this.workspaceId = resp.uuid;
                 this.updateFeatureProperties(resp);
                 const feat = this.draw.get(this.mapboxId);
-                if(feat)
-                {
-                    BaseWorkspaceFeature.fire(CRUDEvent.CREATE, {features: [feat]})
-                }
                 this.map.fire('draw.update', {features: [feat], action: 'read'});
                 if (successFollowup) {
                     successFollowup(resp);
+                }
+                if(feat)
+                {
+                    BaseWorkspaceFeature.fire(CRUDEvent.CREATE, {features: [feat]})
                 }
             })
             .fail((error) => {

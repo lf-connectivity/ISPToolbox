@@ -70,7 +70,6 @@ export class AccessPointSector extends WorkspacePolygonFeature {
             // Case where AP sector is created in session
             this.setAP();
             this.setGeojson();
-            PubSub.publish(WorkspaceEvents.SECTOR_CREATED, { ap: this.ap, sector: this });
             if (successFollowup) {
                 successFollowup(resp);
             }

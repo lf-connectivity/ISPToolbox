@@ -18,6 +18,8 @@ import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
 import { AjaxTowerPopup } from './AjaxTowerPopup';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 import { djangoUrl } from '../../utils/djangoUrl';
+import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../../utils/IIspToolboxAjaxPlugin';
+import { BaseWorkspaceManager } from '../../workspace/BaseWorkspaceManager';
 
 const SECTOR_NAME_UPDATE_FORM_ID = 'sector-name-update-form';
 const SECTOR_UPDATE_FORM_ID = 'sector-update-form';
@@ -41,8 +43,9 @@ const TASK_PROGRESS_CLASS = 'task-progress-sector-popup';
  */
 export abstract class BaseAjaxSectorPopup
     extends LinkCheckBaseAjaxFormPopup
-    implements IMapboxDrawPlugin
+    implements IMapboxDrawPlugin, IIspToolboxAjaxPlugin
 {
+    subscriptions: Array<string | null> = [];
     protected sector?: AccessPointSector;
     protected readonly tool: ISPToolboxTool;
     protected static _instance: BaseAjaxSectorPopup;
@@ -50,7 +53,7 @@ export abstract class BaseAjaxSectorPopup
     constructor(map: mapboxgl.Map, draw: MapboxDraw, tool: ISPToolboxTool) {
         super(map, draw, 'workspace:sector-form');
         initializeMapboxDrawInterface(this, this.map);
-        PubSub.subscribe(WorkspaceEvents.SECTOR_CREATED, this.sectorCreateCallback.bind(this));
+        this.subscriptions = initializeIspToolboxInterface(this);
         PubSub.subscribe(
             WorkspaceEvents.SECTOR_LAYER_CLICKED,
             this.sectorLayerClickCallback.bind(this)
@@ -267,28 +270,34 @@ export abstract class BaseAjaxSectorPopup
 
     // Show edit sector tooltip after object gets persisted. Move to sector if
     // it is out of the map
-    protected sectorCreateCallback(
-        event: string,
-        data: { ap: AccessPoint; sector: AccessPointSector }
-    ) {
-        this.setSector(data.sector);
-        if (this.sector) {
-            let coords = this.sector.ap.getFeatureGeometryCoordinates() as [number, number];
+    createCallback({features}: {features: Array<GeoJSON.Feature>}){
+        if(features.length === 1){
+            const feat = features[0];
+            if(feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR)
+            {
+                console.log('runing');
+                let sector = BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid) as AccessPointSector;
+                console.dir(sector);
+                this.setSector(sector);
+                if (this.sector) {
+                    let coords = this.sector.ap.getFeatureGeometryCoordinates() as [number, number];
 
-            // Fly to AP if AP isn't on map. We center the AP horizontally, but place it
-            // 65% of the way down on the screen so the tooltip fits.
-            if (!this.map.getBounds().contains(coords)) {
-                let south = this.map.getBounds().getSouth();
-                let north = this.map.getBounds().getNorth();
-                this.map.flyTo({
-                    center: [coords[0], coords[1] + +0.15 * (north - south)]
-                });
+                    // Fly to AP if AP isn't on map. We center the AP horizontally, but place it
+                    // 65% of the way down on the screen so the tooltip fits.
+                    if (!this.map.getBounds().contains(coords)) {
+                        let south = this.map.getBounds().getSouth();
+                        let north = this.map.getBounds().getNorth();
+                        this.map.flyTo({
+                            center: [coords[0], coords[1] + +0.15 * (north - south)]
+                        });
+                    }
+
+                    this.draw.changeMode('simple_select', { featureIds: [this.sector.mapboxId] });
+                    this.map.fire('draw.selectionchange', { features: [this.sector.getFeatureData()] });
+                    this.hide();
+                    this.show();
+                }
             }
-
-            this.draw.changeMode('simple_select', { featureIds: [this.sector.mapboxId] });
-            this.map.fire('draw.selectionchange', { features: [this.sector.getFeatureData()] });
-            this.hide();
-            this.show();
         }
     }
 

@@ -7,7 +7,6 @@ export enum WorkspaceEvents {
     AP_RENDER_GIVEN = 'ap.render_given',
     AP_COVERAGE_UPDATED = 'ap.coverage_updated',
     NO_ITEMS = 'workspace.no_items',
-    SECTOR_CREATED = 'sector.created',
     CLOUDRF_COVERAGE_UPDATED = 'cloudrf.coverage_updated',
     AP_LAYER_CLICKED = 'ap_layer.clicked',
     CPE_LAYER_CLICKED = 'cpe_layer.clicked',

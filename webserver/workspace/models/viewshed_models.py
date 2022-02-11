@@ -175,6 +175,7 @@ class Viewshed(
         """
         # Delete all tiles from previous calculations
         aoi = self.radio.getDSMExtentRequired()
+        TASK_LOGGER.info("starting dsm download")
         dsm_engine = DSMTileEngine(aoi, EPTLidarPointCloud.query_intersect_aoi(aoi))
         with tempfile.NamedTemporaryFile(mode="w+b", suffix=".tif") as dsm_file:
             start = time.time()
@@ -184,7 +185,9 @@ class Viewshed(
                 )
             try:
                 dsm_engine.getDSM(dsm_file.name)
+                TASK_LOGGER.info("dsm download complete")
             except Exception:
+                TASK_LOGGER.info("dsm download failed")
                 raise DSMAvailabilityException
 
             TASK_LOGGER.info(f"dsm download: {time.time() - start}")
@@ -192,7 +195,14 @@ class Viewshed(
                 status_callback(
                     "Computing line of sight...", self.__timeRemainingViewshed(1)
                 )
-            self.__renderViewshed(dsm_file=dsm_file, status_callback=status_callback)
+            try:
+                TASK_LOGGER.info("starting viewshed computation")
+                self.__renderViewshed(dsm_file=dsm_file, status_callback=status_callback)
+                TASK_LOGGER.info("successfully completed viewshed computation")
+            except Exception:
+                TASK_LOGGER.info("failed to complete viewshed computation")
+                raise ViewshedCalculationFailedException
+
         if status_callback is not None:
             status_callback("Finalizing results...", None)
         self.hash = self.calculate_hash()
@@ -445,6 +455,9 @@ def _cancel_viewshed_task(sender, instance, using, **kwargs):
 
 
 class DSMAvailabilityException(Exception):
+    pass
+
+class ViewshedCalculationFailedException(Exception):
     pass
 
 

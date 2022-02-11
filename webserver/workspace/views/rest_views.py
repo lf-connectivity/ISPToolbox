@@ -460,8 +460,9 @@ class AccessPointCoverageViewshedOverlayView(View):
                 logging.info('Viewshed overlay not calculated')
                 raise Http404("Overlay not cached")
             return JsonResponse(viewshed.getTilesetInfo())
-        except AccessPointLocation.DoesNotExist:
-            logging.info('Failed to find Accesspoint matching UUID')
+        except (AccessPointLocation.DoesNotExist, Viewshed.DoesNotExist):
+            logging.info('Failed to find Accesspoint matching UUID or viewshed not calculated yet')
+            pass
         # ENDTODO: deprecate
         try:
             sector = AccessPointSector.get_rest_queryset(request).get(
@@ -472,7 +473,7 @@ class AccessPointCoverageViewshedOverlayView(View):
                 logging.info('Viewshed overlay not calculated')
                 raise Http404("Overlay not cached")
             return JsonResponse(viewshed.getTilesetInfo())
-        except AccessPointSector.DoesNotExist:
+        except (AccessPointSector.DoesNotExist, Viewshed.DoesNotExist):
             raise Http404
         except Exception:
             logging.exception("failed to return coverage overlay")

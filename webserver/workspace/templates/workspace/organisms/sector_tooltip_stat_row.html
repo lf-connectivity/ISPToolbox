@@ -55,5 +55,10 @@
             <p align="center bold" class="mt-1">{{ viewshed_status.progress_message }}</p>
             <p align="center bold" class="mt-1" id="time-remaining-p-sector-popup"></p>
         </div>
+    {% elif viewshed_status.status == "NOT_STARTED" %}
+        <div align="center" class="task-progress-sector-popup mt-1">
+            {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto" %}
+            <p align="center bold" class="mt-1">{% translate "Calculation in Queue"%}</p>
+        </div>
     {% endif %}
 {% endif %}

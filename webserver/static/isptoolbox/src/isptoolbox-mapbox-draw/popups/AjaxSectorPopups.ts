@@ -275,9 +275,7 @@ export abstract class BaseAjaxSectorPopup
             const feat = features[0];
             if(feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR)
             {
-                console.log('runing');
                 let sector = BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid) as AccessPointSector;
-                console.dir(sector);
                 this.setSector(sector);
                 if (this.sector) {
                     let coords = this.sector.ap.getFeatureGeometryCoordinates() as [number, number];

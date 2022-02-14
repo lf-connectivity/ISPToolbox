@@ -75,14 +75,14 @@
     <td class="date align-middle">{{ap.last_updated|lower}}</td>
     <td>
         <div class="btn-group" role="group" aria-label="edit-btn-group">
-            <button type="button" class="btn d-none ap-save-edit-btn" title="Save tower" id="ap-save-edit-{{ap.uuid}}"
+            <button type="button" class="btn d-none ap-save-edit-btn" title="Save AP" id="ap-save-edit-{{ap.uuid}}"
                 data-target="{{ap.uuid}}">
                 {% include 'workspace/atoms/icons/save_icon.html'%}
             </button>
-            <button type="button" class="btn btn-edit ap-edit-btn" title="Edit tower" data-target="{{ap.uuid}}">
+            <button type="button" class="btn btn-edit ap-edit-btn" title="Edit AP" data-target="{{ap.uuid}}">
                 {% include 'workspace/atoms/pen_icon.html'%}
             </button>
-            <button type="button" class="btn btn-edit ap-delete-btn" title="Delete tower" data-target="{{ap.uuid}}">
+            <button type="button" class="btn btn-edit ap-delete-btn" title="Delete AP" data-target="{{ap.uuid}}">
                 {% include 'workspace/atoms/trash_icon.html'%}
             </button>
         </div>

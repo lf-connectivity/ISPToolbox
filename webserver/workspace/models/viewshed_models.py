@@ -187,7 +187,7 @@ class Viewshed(
                 dsm_engine.getDSM(dsm_file.name)
                 TASK_LOGGER.info("dsm download complete")
             except Exception:
-                TASK_LOGGER.info("dsm download failed")
+                TASK_LOGGER.exception("dsm download failed")
                 raise DSMAvailabilityException
 
             TASK_LOGGER.info(f"dsm download: {time.time() - start}")
@@ -200,7 +200,7 @@ class Viewshed(
                 self.__renderViewshed(dsm_file=dsm_file, status_callback=status_callback)
                 TASK_LOGGER.info("successfully completed viewshed computation")
             except Exception:
-                TASK_LOGGER.info("failed to complete viewshed computation")
+                TASK_LOGGER.exception("failed to complete viewshed computation")
                 raise ViewshedCalculationFailedException
 
         if status_callback is not None:

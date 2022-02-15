@@ -11,17 +11,9 @@ import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 
 const TOWER_UPDATE_NAME_FORM_ID = 'tower-update-form-name';
-const TOWER_UPDATE_CORD_FORM_ID = 'tower-update-form-coord';
 const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
 const SECTOR_CREATE_BUTTON_ID = 'place-sector-btn-tower-popup';
 
-const TOWER_NAME_EDIT_BTN_ID = 'edit-ap-name-btn';
-const TOWER_NAME_EDIT_INPUT_ID = 'name-input-ap-popup';
-const TOWER_NAME_SAVE_BTN_ID = 'save-ap-name-btn';
-
-const TOWER_CORD_EDIT_BTN_ID = 'edit-ap-coord-btn';
-const TOWER_CORD_EDIT_INPUT_ID = 'lat-lng-input-tower-popup';
-const TOWER_CORD_SAVE_BTN_ID = 'save-ap-coord-btn';
 
 // @ts-ignore
 $.validator.addMethod('latlng', (value, element) => {
@@ -63,9 +55,7 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
             this.accessPoint?.read(() => {});
         });
 
-        this.createSubmitFormCallback(TOWER_UPDATE_CORD_FORM_ID, () => {
-            this.accessPoint?.read(() => {});
-        });
+        this.createInputSubmitButtonListener(TOWER_UPDATE_NAME_FORM_ID);
 
         // Create Sector Callback
         $(`#${SECTOR_CREATE_BUTTON_ID}`).on('click', () => {
@@ -88,47 +78,8 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
             }
         });
 
-        // Edit field names callback
-        $(`#${TOWER_NAME_EDIT_BTN_ID}`)
-            .off()
-            .on('click', () => {
-                hideHoverTooltip(`#${TOWER_NAME_EDIT_BTN_ID}`);
 
-                // Hide non-edit mode components
-                $(`#${TOWER_NAME_EDIT_BTN_ID}`).addClass('d-none');
 
-                // Show edit mode components
-                $(`#${TOWER_NAME_EDIT_INPUT_ID}`).prop('disabled', false);
-                $(`#${TOWER_NAME_SAVE_BTN_ID}`).removeClass('d-none');
-            });
-
-        // hack to remove tooltip, otherwise it stays on page until refresh
-        $(`#${TOWER_NAME_SAVE_BTN_ID}`)
-            .off()
-            .on('click', () => {
-                hideHoverTooltip(`#${TOWER_NAME_SAVE_BTN_ID}`);
-            });
-
-        // Edit field names callback
-        $(`#${TOWER_CORD_EDIT_BTN_ID}`)
-            .off()
-            .on('click', () => {
-                hideHoverTooltip(`#${TOWER_CORD_EDIT_BTN_ID}`);
-
-                // Hide non-edit mode components
-                $(`#${TOWER_CORD_EDIT_BTN_ID}`).addClass('d-none');
-
-                // Show edit mode components
-                $(`#${TOWER_CORD_EDIT_INPUT_ID}`).prop('disabled', false);
-                $(`#${TOWER_CORD_SAVE_BTN_ID}`).removeClass('d-none');
-            });
-
-        // hack to remove tooltip, otherwise it stays on page until refresh
-        $(`#${TOWER_CORD_SAVE_BTN_ID}`)
-            .off()
-            .on('click', () => {
-                hideHoverTooltip(`#${TOWER_CORD_SAVE_BTN_ID}`);
-            });
 
         addHoverTooltip('.tooltip-input-btn', 'bottom');
 

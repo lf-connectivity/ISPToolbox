@@ -87,7 +87,7 @@ export class AccessPoint extends WorkspacePointFeature {
             // @ts-ignore
             this.draw.setFeatureProperty(this.mapboxId, 'radius', feature?.properties.max_radius);
             this.moveLinks(this.getFeatureGeometryCoordinates() as [number, number]);
-            this.updateSectors();
+            this.readSectors();
 
             if (successFollowup) {
                 successFollowup(resp);
@@ -127,7 +127,7 @@ export class AccessPoint extends WorkspacePointFeature {
     move(newCoords: [number, number]) {
         super.move(newCoords);
         this.moveLinks(newCoords);
-        this.updateSectors();
+        this.readSectors();
     }
 
     awaitNewCoverage() {
@@ -186,9 +186,9 @@ export class AccessPoint extends WorkspacePointFeature {
         });
     }
 
-    private updateSectors() {
+    private readSectors() {
         this.sectors.forEach((sector) => {
-            sector.update();
+            sector.read();
         });
     }
 

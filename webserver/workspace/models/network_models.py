@@ -334,6 +334,16 @@ class AccessPointLocation(WorkspaceFeature):
         return aoi.envelope
 
 
+@receiver(post_save, sender=AccessPointLocation)
+def _calculate_coverage_tower(sender, instance, created, raw, using, update_fields, **kwargs):
+    """
+    Update coverage after modifying AP location 
+    """
+    app.send_task(
+        "workspace.tasks.viewshed_tasks.updateSectors", (instance.uuid,)
+    )
+
+
 class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = "uuid"
     last_updated = serializers.DateTimeField(

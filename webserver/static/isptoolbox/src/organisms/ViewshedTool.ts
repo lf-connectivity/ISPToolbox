@@ -13,6 +13,7 @@ import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapb
 import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 import { isBeta } from '../LinkCheckUtils';
 import { SELECTED_LINK_LAYER } from '../LinkCheckPTPOverlay';
+import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../utils/IIspToolboxAjaxPlugin';
 
 export enum ViewshedEvents {
     VS_REQUEST = 'vs.request',
@@ -24,16 +25,18 @@ export enum ViewshedEvents {
 const VIEWSHED_TILE_OVERLAY_SOURCE = 'isptoolbox.viewshedoverlay-tile-source';
 const VIEWSHED_TILE_OVERLAY_LAYER = 'isptoolbox.viewshedoverlay-tile-layer';
 
-export class ViewshedTool implements IMapboxDrawPlugin {
+export class ViewshedTool implements IMapboxDrawPlugin, IIspToolboxAjaxPlugin {
     map: mapboxgl.Map;
     draw: MapboxDraw;
     viewshed_feature_id: string | number | null = null;
     static _instance: ViewshedTool;
     last_selection: string | number | undefined;
     dragging = false;
+    subscriptions : Array<string | null> = [];
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
         initializeMapboxDrawInterface(this, map);
+        this.subscriptions = initializeIspToolboxInterface(this);
         if (ViewshedTool._instance) {
             throw Error('This singleton has already been instantiated, use getInstance.');
         }
@@ -122,6 +125,17 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         }
     }
 
+    readCallback({features}: { features: Array<GeoJSON.Feature>})
+    {
+        if(features.length === 1)
+        {
+            const feat = features[0];
+            if(ViewshedTool.checkValidFeatureType(feat) && this.shouldRenderFeature(feat)) {
+                this.requestViewshedOverlay(feat.properties?.uuid);
+            }
+        }
+    }
+
     shouldHide(features: Array<GeoJSON.Feature>): boolean {
         if(features.length > 0
             && features.some((f) => {return this.viewshed_feature_id === f?.id && !this.shouldRenderFeature(f);})
@@ -150,6 +164,7 @@ export class ViewshedTool implements IMapboxDrawPlugin {
         })
         .fail((error) => {
             if(error.status === 404) {
+                this.setVisibleLayer(false);
             } else {
                 renderAjaxOperationFailed();
             }

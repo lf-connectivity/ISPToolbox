@@ -16,6 +16,18 @@ TASK_LOGGER = get_task_logger(__name__)
 
 
 @app.task
+def updateSectors(tower_uuid):
+    """
+    Fire update tasks on sectors after updating position of tower
+    """
+    ap = AccessPointLocation.objects.get(pk=tower_uuid)
+    for sector in ap.accesspointsector_set.all():
+        app.send_task(
+            "workspace.tasks.sector_tasks.calculateSectorViewshed", (sector.uuid,)
+        )
+
+
+@app.task
 def computeViewshedCoverage(network_id, data, user_id):
     ap_uuid = data['uuid']
     try:

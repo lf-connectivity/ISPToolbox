@@ -79,9 +79,10 @@ def calculateSectorViewshed(sector_id: str):
     sector.viewshed.time_remaining = None
     sector.viewshed.save()
 
-    calculateSectorNearby(sector_id)
+    app.send_task("workspace.tasks.sector_tasks.calculateSectorNearby", (sector.uuid,))
 
 
+@app.task
 def calculateSectorNearby(sector_id: str):
     sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
     (

@@ -7,7 +7,11 @@
 
 <button class='btn btn-primary isptoolbox-btn w-100 d-none' id='coverage-viewshed-btn-sector-popup'
         type="submit" name="submit" form="sector-update-form">
+{% if tool == "market_evaluator" %}
+    {% translate "Calculate Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
+{% elif tool == "los_check" %}
     {% translate "Update Access Point" %}
+{% endif %}
 </button>
 
 {% comment %} {% if tool == "market_evaluator" %}

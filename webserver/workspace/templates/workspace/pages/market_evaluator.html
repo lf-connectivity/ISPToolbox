@@ -31,10 +31,10 @@
   {{ geojson|json_script:"isp-map-features" }}
   {% include "workspace/organisms/nux_market.html"%}
 
-  {% citation sources id="CloudRF" render=False %}
+  {% comment %} {% citation sources id="CloudRF" render=False %}
     High-level line of sight is obtained via {% source_link "US" "CLOUD_RF" %}.
     (resolution is ~30m x 30m). {% source_last_updated "US" "CLOUD_RF" format="Data as of <last_updated>." last_updated_format="%Y" %}
-  {% endcitation %}
+  {% endcitation %} {% endcomment %}
 
   {% citation sources id="Mapbox" render=False %}
     Address data obtained via {% source_link "US" "MAPBOX" %}'s Geocoding API.

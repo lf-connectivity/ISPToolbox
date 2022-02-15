@@ -18,7 +18,10 @@ import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
 import { AjaxTowerPopup } from './AjaxTowerPopup';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';
 import { djangoUrl } from '../../utils/djangoUrl';
-import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../../utils/IIspToolboxAjaxPlugin';
+import {
+    IIspToolboxAjaxPlugin,
+    initializeIspToolboxInterface
+} from '../../utils/IIspToolboxAjaxPlugin';
 import { BaseWorkspaceManager } from '../../workspace/BaseWorkspaceManager';
 
 const SECTOR_NAME_UPDATE_FORM_ID = 'sector-name-update-form';
@@ -183,13 +186,13 @@ export abstract class BaseAjaxSectorPopup
 
         addHoverTooltip('.tooltip-input-btn', 'bottom');
 
-        // Enable viewshed submit if task coverage isn't loading or done
-        if (!$(`.${TASK_PROGRESS_CLASS}`).length) {
-            $(`#${SECTOR_UPDATE_FORM_ID}`)
-                .find('input:submit, button:submit')
-                .prop('disabled', false)
-                .removeClass('d-none');
-        }
+        // // Enable viewshed submit if task coverage isn't loading or done
+        // if (!$(`.${TASK_PROGRESS_CLASS}`).length) {
+        //     $(`#${SECTOR_UPDATE_FORM_ID}`)
+        //         .find('input:submit, button:submit')
+        //         .prop('disabled', false)
+        //         .removeClass('d-none');
+        // }
 
         // Hide task Progress class if input changes
         $(`#${SECTOR_UPDATE_FORM_ID}`)
@@ -270,12 +273,13 @@ export abstract class BaseAjaxSectorPopup
 
     // Show edit sector tooltip after object gets persisted. Move to sector if
     // it is out of the map
-    createCallback({features}: {features: Array<GeoJSON.Feature>}){
-        if(features.length === 1){
+    createCallback({ features }: { features: Array<GeoJSON.Feature> }) {
+        if (features.length === 1) {
             const feat = features[0];
-            if(feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR)
-            {
-                let sector = BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid) as AccessPointSector;
+            if (feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR) {
+                let sector = BaseWorkspaceManager.getFeatureByUuid(
+                    feat.properties.uuid
+                ) as AccessPointSector;
                 this.setSector(sector);
                 if (this.sector) {
                     let coords = this.sector.ap.getFeatureGeometryCoordinates() as [number, number];
@@ -291,7 +295,9 @@ export abstract class BaseAjaxSectorPopup
                     }
 
                     this.draw.changeMode('simple_select', { featureIds: [this.sector.mapboxId] });
-                    this.map.fire('draw.selectionchange', { features: [this.sector.getFeatureData()] });
+                    this.map.fire('draw.selectionchange', {
+                        features: [this.sector.getFeatureData()]
+                    });
                     this.hide();
                     this.show();
                 }
@@ -337,14 +343,10 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
         return BaseAjaxSectorPopup.getInstance() as MarketEvaluatorSectorPopup;
     }
 
-    protected setEventHandlers(): void {
-        super.setEventHandlers();
-    }
-
     protected onFormSubmitSuccess() {
-        if (this.sector) {
-            MarketEvaluatorWS.getInstance().sendViewshedRequest(this.sector.workspaceId);
-        }
+        // if (this.sector) {
+        //     MarketEvaluatorWS.getInstance().sendViewshedRequest(this.sector.workspaceId);
+        // }
     }
 
     protected onCloudRfProgress(event: string, data: CloudRFProgressResponse) {

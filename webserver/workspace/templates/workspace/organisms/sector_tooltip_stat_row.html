@@ -7,14 +7,10 @@
 
 <button class='btn btn-primary isptoolbox-btn w-100 d-none' id='coverage-viewshed-btn-sector-popup'
         type="submit" name="submit" form="sector-update-form">
-{% if tool == "market_evaluator" %}
-    {% translate "Calculate Estimated Coverage" %}{% existing_citation sources "CloudRF" %}
-{% elif tool == "los_check" %}
-    {% translate "Calculate Coverage" %}
-{% endif %}
+    {% translate "Update Access Point" %}
 </button>
 
-{% if tool == "market_evaluator" %}
+{% comment %} {% if tool == "market_evaluator" %}
     {% if cloudrf_status == "IN_PROGRESS" %}
         <div align="center" class="task-progress-sector-popup">
             {% include 'workspace/atoms/components/loading_spinner.html' with spinner_style='height: 21px; width: 100%;' blink=True spinner_classes="mx-auto mt-1" %}
@@ -26,7 +22,7 @@
             <p align="center bold" class="mt-1">Tower Coverage Plotted</p>
         </div>
     {% endif %}
-{% endif %}
+{% endif %} {% endcomment %}
 
 {% if tool == "los_check" %}
     {{ viewshed_status.time_remaining|json_script:"time-remaining-viewshed-progress" }}

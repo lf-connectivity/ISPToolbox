@@ -80,6 +80,7 @@ def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
 
     if not ap.viewshed.result_cached():
         TASK_LOGGER.info('viewshed result not cached!')
+        ap.viewshed.cancel_task()
         ap.viewshed.delete()
         Viewshed(ap=ap).save()
         callback = create_progress_status_callback(network_id, ap_uuid)

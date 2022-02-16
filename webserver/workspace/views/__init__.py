@@ -54,7 +54,9 @@ from .tower_form_views import (
 )
 from .cpe_form_views import LocationTooltipView, CPETooltipView, SwitchSectorTooltipView
 from .www_views import AnalyticsView, NetworkToolInterventionsView
-from .admin import WorkspaceEngagementView
+from .admin import (
+    WorkspaceEngagementView, CeleryTaskPerformanceView
+)
 from .sidebar_views import ToolSidebarView
 
 import workspace.utils.import_utils

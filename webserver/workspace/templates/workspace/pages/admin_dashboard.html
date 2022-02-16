@@ -14,57 +14,98 @@
  >
   <div class="card" style="">
     <div class="card-body">
-      <h5 class="card-title">{{ stats.user_count }} user{{ stats.user_count|pluralize }}</h5>
-      <h6 class="card-subtitle mb-2 text-muted">Total Users: All-time</h6>
+      <h5 class="card-title">{{ stats.count }} {{stats.object_name}}{{ stats.count|pluralize }}</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Total Count: All-time</h6>
     </div>
   </div>
-  <div class="card" style="">
-    <div class="card-body">
-      <h5 class="card-title">{{ stats.todays_users }} user{{ stats.todays_users|pluralize }}</h5>
-      <h6 class="card-subtitle mb-2 text-muted">Daily Active Users: Today</h6>
+  {% for stat_name, stat in stats.daily_breakdown.items %}
+    <div class="card" style="">
+      <div class="card-body">
+        <h5 class="card-title">{{stat}} {{ stat_name }} {{stats.object_name}}{{ stat|pluralize }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ stat_name }} {{stats.object_name}}: Today</h6>
+      </div>
     </div>
-  </div>
-  <div class="card" style="">
-    <div class="card-body">
-      <h5 class="card-title">{{ stats.todays_sessions }} session{{ stats.todays_sessions|pluralize }}</h5>
-      <h6 class="card-subtitle mb-2 text-muted">Anonymous Sessions: Today</h6>
-    </div>
-  </div>
+  {% endfor %}
   </div>
   <div id="chart" style="width:100%; height:400px;"></div>
-  {{ stats.tool_breakdown|json_script:"tool-breakdown" }}
-  <script>
+  {{ stats.timeseries|json_script:"timeseries" }}
+<script>
   Highcharts.theme = {% include "workspace/atoms/highcharts-style.html" %}
   Highcharts.setOptions(Highcharts.theme);
-  const chart_data = JSON.parse(document.getElementById('tool-breakdown').textContent);
+  const chart_data = JSON.parse(document.getElementById('timeseries').textContent);
   document.addEventListener('DOMContentLoaded', function () {
-    const chart = Highcharts.chart('chart', {
-        chart: {
-            type: 'area'
-        },
+  {% if chart == "percentage" %}
+  var percentages = {};
+  var totals = [];
+  Object.keys(chart_data).forEach(k => {
+    chart_data[k].forEach((v, idx) =>{
+      if(idx >= totals.length){
+        totals.push(0);
+      }
+      totals[idx] += v[1];
+    })
+  });
+
+  Object.keys(chart_data).forEach(k => {
+    percentages[k] = chart_data[k].map((v, idx) => {
+      return [v[0], v[1] / totals[idx] * 100]
+    });
+  });
+  const chart = Highcharts.chart('chart', {
+    chart: {
+        type: 'area'
+    },
+    title: {
+        text: 'ISP Toolbox Workspace Usage - Last 90 Days'
+    },
+    xAxis: {
+        type: 'datetime'
+    },
+    yAxis: {
         title: {
-            text: 'ISP Toolbox Workspace Usage - Last 90 Days'
-        },
-        xAxis: {
-            type: 'datetime'
-        },
-        yAxis: {
-            title: {
-                text: 'Breakdown by Tool'
-            }
-        },
-        plotOptions: {
-            series: {
-                stacking: 'normal'
-            }
-        },
-        series: Object.keys(chart_data).map((k) => {
-    
-            return { type: 'area',name: k,
-            data: chart_data[k]}}
+            text: 'Breakdown by Tool'
+        }
+    },
+    plotOptions: {
+        series: {
+            stacking: 'normal'
+        }
+    },
+    series: Object.keys(percentages).map((k) => {
+
+        return { type: 'area',name: k,
+        data: percentages[k]}}
+    )
+  });
+    {% else %}
+    const chart = Highcharts.chart('chart', {
+      chart: {
+          type: 'area'
+      },
+      title: {
+          text: 'ISP Toolbox Workspace Usage - Last 90 Days'
+      },
+      xAxis: {
+          type: 'datetime'
+      },
+      yAxis: {
+          title: {
+              text: 'Breakdown by Tool'
+          }
+      },
+      plotOptions: {
+          series: {
+              stacking: 'normal'
+          }
+      },
+      series: Object.keys(chart_data).map((k) => {
+  
+          return { type: 'area',name: k,
+          data: chart_data[k]}}
       )
     });
-});
+    {% endif %}
+  });
 </script>
   {{block.super}}
 {% endblock content%}

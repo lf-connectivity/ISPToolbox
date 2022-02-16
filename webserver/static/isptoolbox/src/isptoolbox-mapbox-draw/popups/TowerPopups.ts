@@ -237,7 +237,7 @@ export abstract class BaseTowerPopup extends LinkCheckBasePopup {
                                 class="input--tower-name" 
                                 id='${NAME_INPUT_ID}' 
                                 value='${sanitizeString(
-                                    this.accessPoint?.getFeatureProperty('name')
+                                    this.accessPoint?.getFeatureProperty('name') ?? ''
                                 )}' 
                                 placeholder='Tower Name'>
                             <div class="coordinates">

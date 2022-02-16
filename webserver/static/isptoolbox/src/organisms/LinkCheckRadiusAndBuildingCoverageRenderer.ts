@@ -228,15 +228,6 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         });
     }
 
-    CRUDCallback({ features }: { features: any[]; }): void {
-        let viewshedTool = ViewshedTool.getInstance();
-        let feature = this.draw.get(viewshedTool.viewshed_feature_id as string);
-        if (feature) {
-            viewshedTool.setVisibleLayer(this.shouldRenderFeature(feature));
-        }
-        super.CRUDCallback({ features: features });
-    }
-
     accessPointStatusCallback(msg: string, message: AccessPointCoverageResponse) {
         // TODO: deprecate AP
         const feat = this.draw.getAll().features.find(f => f.properties?.uuid === message.uuid);

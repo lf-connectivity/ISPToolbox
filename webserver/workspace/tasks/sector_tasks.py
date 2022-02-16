@@ -122,11 +122,10 @@ def calculateSectorNearby(sector_id: str):
         # Find all buildings that intersect
         offset = 0
         remaining_buildings = True
-        raise Exception("123")
         while remaining_buildings:
             buildings = gis_data_models.MsftBuildingOutlines.objects.filter(
                 geog__intersects=sector.geojson
-            ).all()[offset : BUILDING_PAGINATION + offset]
+            ).all()[offset: BUILDING_PAGINATION + offset]
             nearby_buildings = []
             for building in buildings:
                 b = workspace_models.BuildingCoverage(msftid=building.id)

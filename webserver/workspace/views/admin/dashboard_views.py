@@ -1,6 +1,5 @@
 from django.views import View
 from django.contrib import admin
-from numpy import argwhere
 from workspace.mixins import SuperuserRequiredMixin
 from django.shortcuts import render
 from IspToolboxAccounts.models import User, PageVisit
@@ -20,8 +19,8 @@ class CeleryTaskPerformanceView(SuperuserRequiredMixin, View):
         yesterday = datetime.date.today() - datetime.timedelta(days=1)
         time_window = datetime.date.today() - datetime.timedelta(days=90)
 
-        aggregation = {str(state) : Count('task_id', filter=Q(status=state)) for state in states.ALL_STATES}
-        
+        aggregation = {str(state): Count('task_id', filter=Q(status=state)) for state in states.ALL_STATES}
+
         daily = TaskResult.objects \
             .filter(date_created__gt=yesterday) \
             .annotate(date_created_day=Trunc('date_created', 'day')) \

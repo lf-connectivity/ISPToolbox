@@ -1,3 +1,4 @@
+from celery import current_task
 from celery.utils.log import get_task_logger
 from traceback import format_exc
 from workspace.models.viewshed_models import DSMAvailabilityException, Viewshed
@@ -74,6 +75,7 @@ def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
     ap = AccessPointLocation.objects.get(uuid=ap_uuid, owner=user_id)
     try:
         assert(ap.viewshed is not None)
+        ap.on_task_start
     except Viewshed.DoesNotExist:
         Viewshed(ap=ap).save()
         TASK_LOGGER.info('created new viewshed object')
@@ -83,6 +85,7 @@ def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
         ap.viewshed.cancel_task()
         ap.viewshed.delete()
         Viewshed(ap=ap).save()
+        ap.viewshed.on_task_start(current_task.request.id)
         callback = create_progress_status_callback(network_id, ap_uuid)
         ap.viewshed.calculateViewshed(callback)
     else:

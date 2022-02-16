@@ -74,15 +74,13 @@ def create_progress_status_callback(network_id: str, ap_uuid: str):
 def computeViewshed(network_id: str, ap_uuid: str, user_id: int) -> None:
     ap = AccessPointLocation.objects.get(uuid=ap_uuid, owner=user_id)
     try:
-        assert(ap.viewshed is not None)
-        ap.on_task_start
+        ap.viewshed.cancel_task()
     except Viewshed.DoesNotExist:
         Viewshed(ap=ap).save()
         TASK_LOGGER.info('created new viewshed object')
 
     if not ap.viewshed.result_cached():
         TASK_LOGGER.info('viewshed result not cached!')
-        ap.viewshed.cancel_task()
         ap.viewshed.delete()
         Viewshed(ap=ap).save()
         ap.viewshed.on_task_start(current_task.request.id)

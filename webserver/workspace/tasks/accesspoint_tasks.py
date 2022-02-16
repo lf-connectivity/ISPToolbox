@@ -1,3 +1,4 @@
+from celery import current_task
 from celery.utils.log import get_task_logger
 from workspace.models import (
     AccessPointLocation, AccessPointCoverageBuildings, BuildingCoverage
@@ -25,10 +26,14 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
     Calculate the coverage area of an access point location
     """
     ap = AccessPointLocation.objects.get(uuid=request['uuid'])
+
     building_coverage, created = AccessPointCoverageBuildings.objects.get_or_create(
         ap=ap)
     if created:
         building_coverage.save()
+    else:
+        building_coverage.on_task_start(current_task.request.id)
+
     # check if the result exists already
     if not building_coverage.result_cached():
         TASK_LOGGER.info('cache miss building coverage')

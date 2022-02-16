@@ -11,7 +11,7 @@ from rasterio import mask
 from shapely import wkt
 import numpy as np
 from django.contrib.gis.geos import Point
-from functools import partial
+from functools import partial, wraps
 
 
 TASK_LOGGER = get_task_logger(__name__)
@@ -35,66 +35,77 @@ def _update_status(sector_id, msg, time_remaining):
     sendMessageToChannel(network_id, resp)
 
 
+def _sector_task(error_log_msg):
+    def decorator(func):
+        @wraps(func)
+        def wrapped(sector_id):
+            try:
+                func(sector_id)
+            except Exception as e:
+                TASK_LOGGER.error(error_log_msg)
+
+                # notify client of failure
+                _update_status(sector_id, "Task Failed", None)
+
+                # raise exception so that job may be marked as failure
+                raise e
+
+        return wrapped
+
+    return decorator
+
+
 @app.task
+@_sector_task("Unexpected sector viewshed calculation failure")
 def calculateSectorViewshed(sector_id: str):
     sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
 
     try:
-        try:
-            sector.refresh_from_db()
-            sector.viewshed.cancel_task()
-            # Delete old viewshed to avoid get dirty cache keys on old uuid tile keys
-            sector.viewshed.delete()
-            workspace_models.Viewshed(sector=sector).save()
-        except workspace_models.Viewshed.DoesNotExist:
-            workspace_models.Viewshed(sector=sector).save()
-            TASK_LOGGER.info("created new viewshed object")
-
-        try:
-            sector.refresh_from_db()
-            sector.building_coverage.cancel_task()
-            sector.building_coverage.delete()
-            workspace_models.AccessPointCoverageBuildings(sector=sector).save()
-        except workspace_models.AccessPointCoverageBuildings.DoesNotExist:
-            workspace_models.AccessPointCoverageBuildings(sector=sector).save()
-            TASK_LOGGER.info("created new building coverage object")
-
         sector.refresh_from_db()
-        cached = sector.viewshed.result_cached()
-        sector.viewshed.on_task_start(current_task.request.id)
-        if not cached:
-            sector.viewshed.calculateViewshed(partial(_update_status, sector_id))
+        sector.viewshed.cancel_task()
+        # Delete old viewshed to avoid get dirty cache keys on old uuid tile keys
+        sector.viewshed.delete()
+        workspace_models.Viewshed(sector=sector).save()
+    except workspace_models.Viewshed.DoesNotExist:
+        workspace_models.Viewshed(sector=sector).save()
+        TASK_LOGGER.info("created new viewshed object")
 
-            # Notify Websockets listening to session
-            resp = {
-                "type": "ap.viewshed",
-                "base_url": sector.viewshed.getBaseTileSetUrl(),
-                "maxzoom": sector.viewshed.max_zoom,
-                "minzoom": sector.viewshed.min_zoom,
-                "uuid": str(sector.pk),
-            }
-            sendMessageToChannel(str(sector.map_session.pk), resp)
-        else:
-            TASK_LOGGER.info("cache hit on viewshed result")
+    try:
+        sector.refresh_from_db()
+        sector.building_coverage.cancel_task()
+        sector.building_coverage.delete()
+        workspace_models.AccessPointCoverageBuildings(sector=sector).save()
+    except workspace_models.AccessPointCoverageBuildings.DoesNotExist:
+        workspace_models.AccessPointCoverageBuildings(sector=sector).save()
+        TASK_LOGGER.info("created new building coverage object")
 
-        sector.viewshed.progress_message = None
-        sector.viewshed.time_remaining = None
-        sector.viewshed.save()
+    sector.refresh_from_db()
+    cached = sector.viewshed.result_cached()
+    sector.viewshed.on_task_start(current_task.request.id)
+    if not cached:
+        sector.viewshed.calculateViewshed(partial(_update_status, sector_id))
 
-        app.send_task(
-            "workspace.tasks.sector_tasks.calculateSectorNearby", (sector.uuid,)
-        )
-    except Exception as e:
-        TASK_LOGGER.error("Viewshed coverage for sector failed")
+        # Notify Websockets listening to session
+        resp = {
+            "type": "ap.viewshed",
+            "base_url": sector.viewshed.getBaseTileSetUrl(),
+            "maxzoom": sector.viewshed.max_zoom,
+            "minzoom": sector.viewshed.min_zoom,
+            "uuid": str(sector.pk),
+        }
+        sendMessageToChannel(str(sector.map_session.pk), resp)
+    else:
+        TASK_LOGGER.info("cache hit on viewshed result")
 
-        # notify client of failure
-        _update_status(sector_id, "Task Failed", None)
+    sector.viewshed.progress_message = None
+    sector.viewshed.time_remaining = None
+    sector.viewshed.save()
 
-        # raise exception so that job may be marked as failure
-        raise e
+    app.send_task("workspace.tasks.sector_tasks.calculateSectorNearby", (sector.uuid,))
 
 
 @app.task
+@_sector_task("Unexpected sector building coverage calculation failure")
 def calculateSectorNearby(sector_id: str):
     sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
     (
@@ -104,57 +115,49 @@ def calculateSectorNearby(sector_id: str):
         sector=sector
     )
 
-    try:
-        cached = building_coverage.result_cached()
-        building_coverage.on_task_start(current_task.request.id)
-        if not cached:
-            building_coverage.nearby_buildings.clear()
-            # Find all buildings that intersect
-            offset = 0
-            remaining_buildings = True
-            while remaining_buildings:
-                buildings = gis_data_models.MsftBuildingOutlines.objects.filter(
-                    geog__intersects=sector.geojson
-                ).all()[offset : BUILDING_PAGINATION + offset]
-                nearby_buildings = []
-                for building in buildings:
-                    b = workspace_models.BuildingCoverage(msftid=building.id)
-                    b.save()
-                    building_coverage.nearby_buildings.add(b)
-                    nearby_buildings.append(b)
-                building_coverage.save()
+    cached = building_coverage.result_cached()
+    building_coverage.on_task_start(current_task.request.id)
+    if not cached:
+        building_coverage.nearby_buildings.clear()
+        # Find all buildings that intersect
+        offset = 0
+        remaining_buildings = True
+        raise Exception("123")
+        while remaining_buildings:
+            buildings = gis_data_models.MsftBuildingOutlines.objects.filter(
+                geog__intersects=sector.geojson
+            ).all()[offset : BUILDING_PAGINATION + offset]
+            nearby_buildings = []
+            for building in buildings:
+                b = workspace_models.BuildingCoverage(msftid=building.id)
+                b.save()
+                building_coverage.nearby_buildings.add(b)
+                nearby_buildings.append(b)
+            building_coverage.save()
 
-                offset = offset + BUILDING_PAGINATION
-                remaining_buildings = len(buildings) > 0
+            offset = offset + BUILDING_PAGINATION
+            remaining_buildings = len(buildings) > 0
 
-                # notify client that we have gathered some of the buildings
-                update = {
-                    "type": "ap.status",
-                    "status": building_coverage.status,
-                    "uuid": str(sector.uuid),
-                }
-                sendMessageToChannel(str(sector.map_session.pk), update)
-        else:
-            TASK_LOGGER.info("cache hit building coverage")
+            # notify client that we have gathered some of the buildings
+            update = {
+                "type": "ap.status",
+                "status": building_coverage.status,
+                "uuid": str(sector.uuid),
+            }
+            sendMessageToChannel(str(sector.map_session.pk), update)
+    else:
+        TASK_LOGGER.info("cache hit building coverage")
 
-        # notify client that we have gathered all the buildings
-        update = {
-            "type": "ap.status",
-            "status": building_coverage.status,
-            "uuid": str(sector.uuid),
-        }
-        sendMessageToChannel(str(sector.map_session.pk), update)
+    # notify client that we have gathered all the buildings
+    update = {
+        "type": "ap.status",
+        "status": building_coverage.status,
+        "uuid": str(sector.uuid),
+    }
+    sendMessageToChannel(str(sector.map_session.pk), update)
 
-        # Start caculating coverage
-        calculateSectorCoverage(sector, building_coverage)
-    except Exception as e:
-        TASK_LOGGER.error("Building coverage for sector failed")
-
-        # notify client of failure
-        _update_status(sector_id, "Task Failed", None)
-
-        # raise exception so that job may be marked as failure
-        raise e
+    # Start caculating coverage
+    calculateSectorCoverage(sector, building_coverage)
 
 
 def calculateSectorCoverage(

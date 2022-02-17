@@ -14,4 +14,4 @@ echo "coverage.process_startup()" >>  /opt/conda/lib/python3.8/site-packages/sit
 # Start server
 echo "Starting server http://0.0.0.0:8000"
 echo "You must connect the VSCode debugger in order to proceed!"
-exec python3 manage.py runserver --noreload 0.0.0.0:8000
+exec python3 manage.py runserver 0.0.0.0:8000

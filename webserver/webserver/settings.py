@@ -397,8 +397,9 @@ AUTH_USER_MODEL = "IspToolboxAccounts.User"
 GUEST_USER_MODEL = 'IspToolboxAccounts.IspToolboxGuestUser'
 
 # Change session cookie samesite attribute to None for iframe functionality
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'None'
+if PROD:
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'None'
 
 
 # Password validation

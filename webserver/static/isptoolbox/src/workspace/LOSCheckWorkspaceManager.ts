@@ -6,7 +6,7 @@ import { AccessPoint, APToCPELink, CPE, PointToPointLink } from './WorkspaceFeat
 import { MapboxSDKClient } from '../MapboxSDKClient';
 import { BuildingCoverageStatus } from './BuildingCoverage';
 import { LinkCheckTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
-import { getStreetAndAddressInfo } from '../LinkCheckUtils';
+import { getStreetAndAddressInfo, isBeta } from '../LinkCheckUtils';
 
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPointSector } from './WorkspaceSectorFeature';
@@ -116,8 +116,11 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
             Object.keys(BuildingCoverageStatus).forEach((status: string) => {
                 ap.setFeatureProperty(status, null);
             });
-            LinkCheckTowerPopup.getInstance().onAPUpdate(ap);
-            LinkCheckTowerPopup.getInstance().show();
+            if(!isBeta())
+            {
+                LinkCheckTowerPopup.getInstance().onAPUpdate(ap);
+                LinkCheckTowerPopup.getInstance().show();
+            }
         };
 
         this.updateFeatureAjaxHandlers[WorkspaceFeatureTypes.CPE].post_update = (

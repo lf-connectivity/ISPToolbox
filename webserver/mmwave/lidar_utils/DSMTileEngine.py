@@ -70,7 +70,7 @@ class DSMTileEngine:
                         py, px = dataset.index(transformed_pt.x, transformed_pt.y)
                         return dataset.read(1)[py, px]
                 except Exception:
-                    TASK_LOGGER.exception(
+                    TASK_LOGGER.error(
                         f"failed to read tif file - id:{cloud.id} " +
                         f"x,y,z:{tile_x},{tile_y},{SlippyTiles.DEFAULT_OUTPUT_ZOOM}"
                     )

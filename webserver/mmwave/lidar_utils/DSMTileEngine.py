@@ -65,9 +65,13 @@ class DSMTileEngine:
                     break
             # get the value at that point using rasterio
             if found_tif:
-                with rasterio.open(tmp_tif.name) as dataset:
-                    py, px = dataset.index(transformed_pt.x, transformed_pt.y)
-                    return dataset.read(1)[py, px]
+                try:
+                    with rasterio.open(tmp_tif.name) as dataset:
+                        py, px = dataset.index(transformed_pt.x, transformed_pt.y)
+                        return dataset.read(1)[py, px]
+                except Exception as e:
+                    TASK_LOGGER.exception(f"failed to read tif file - id:{cloud.id} x,y,z:{tile_x},{tile_y},{SlippyTiles.DEFAULT_OUTPUT_ZOOM}")
+                    return 0
             else:
                 return 0
         return 0

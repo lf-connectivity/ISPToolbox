@@ -74,7 +74,7 @@ class DSMTileEngine:
                         f"failed to read tif file - id:{cloud.id} " +
                         f"x,y,z:{tile_x},{tile_y},{SlippyTiles.DEFAULT_OUTPUT_ZOOM}"
                     )
-                    return 0
+                    raise
             else:
                 return 0
         return 0

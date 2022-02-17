@@ -38,20 +38,18 @@ Cypress.Commands.add("login", () => {
   cy.visit(LOGIN_PAGE);
 
   cy.fixture("login_fixture").then((user) => {
-    // {enter} causes the form to submit
     cy.get("input[name=username]").should("be.visible").type(user.email);
     cy.get("input[name=password]")
       .should("be.visible")
-      .type(`${user.password1}{enter}`);
-
-    cy.wait(3000);
-
-    // Make sure sessionid cookie exists
-    cy.getCookie("sessionid", { timeout: 90000 }).should("exist");
+      .type(`${user.password1}`);
   });
+  cy.get("input[type=submit][value=Login]").click();
+
+  // Make sure sessionid cookie exists
+  cy.getCookie("sessionid").should("exist");
 
   // we should be redirected to homepage
-  cy.url().should("include", "/pro");
+  cy.location('pathname').should('eq', '/pro/')
 });
 
 Cypress.Commands.add("preserve_session_cookie", () => {

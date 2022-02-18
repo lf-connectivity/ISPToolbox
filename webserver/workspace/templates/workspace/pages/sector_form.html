@@ -33,7 +33,7 @@
                 </select>
             </div>
         </li>
-        <div class="justify-content-between" style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 0.5rem;" id="numbers-div-sector-popup">
+        <div class="justify-content-between" style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 1rem;" id="numbers-div-sector-popup">
             <li class="d-flex align-content-between flex-wrap">
                 <p class="label">{% translate "Heading" %}</p>
                 <div class="data-with-unit">
@@ -73,7 +73,7 @@
                 {% include "workspace/molecules/frequency_dropdown.html" with dropdown_freq_user_value=frequency dropdown_freq_name="frequency" dropdown_freq_id="freq-select-sector-popup" %}
             </li>
             <li class="d-flex align-content-between flex-wrap">
-                <p class="label">{% translate "Access Point Height above ground" %}</p>
+                <p class="label">{% translate "Access Point"%}<br>{% translate "Height above ground" %}</p>
                 <div class="data-with-unit">
                     <input type="number" name="{% unit_preference_value units "height_ft" "height" %}"
                         value="{% unit_preference_value units height_ft|floatformat:"0" height|floatformat:"0" %}"
@@ -85,7 +85,7 @@
                 </div>
             </li>
             <li class="d-flex align-content-between flex-wrap">
-                <p class="label">{% translate "Customer Antenna Height above rooftop" %}</p>
+                <p class="label">{% translate "Customer Antenna"%}<br> {% translate "Height above rooftop" %}</p>
                 <div class="data-with-unit">
                     <input type="number" name="{% unit_preference_value units "default_cpe_height_ft" "default_cpe_height" %}"
                         value="{% unit_preference_value units default_cpe_height_ft|floatformat:"0" default_cpe_height|floatformat:"0" %}" id="cpe-hgt-sector-popup"

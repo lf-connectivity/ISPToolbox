@@ -32,3 +32,19 @@ a
 
 :-moz-placeholder
   color: lighten($mid-gray-color, 20%)
+
+// bootstrap highlight tooltips
+.tooltip
+  font-family: $brand-font-family-mono
+  font-size: 12px
+.tooltip-inner
+  background-color: $brand-dark-gray-color
+  border-radius: 0
+.bs-tooltip-auto[x-placement^=top] .arrow::before, .bs-tooltip-top .arrow::before
+    border-top-color: $brand-dark-gray-color
+.bs-tooltip-auto[x-placement^=right] .arrow::before, .bs-tooltip-right .arrow::before
+    border-right-color: $brand-dark-gray-color
+.bs-tooltip-auto[x-placement^=bottom] .arrow::before, .bs-tooltip-bottom .arrow::before
+    border-bottom-color: $brand-dark-gray-color
+.bs-tooltip-auto[x-placement^=left] .arrow::before, .bs-tooltip-left .arrow::before
+    border-left-color: $brand-dark-gray-color

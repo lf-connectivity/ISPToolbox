@@ -12,10 +12,15 @@
     border-bottom-right-radius: 5px
     display: flex
     justify-content: flex-end
+    margin-top: 0.5rem
     padding: 0 2rem 1.5rem
 
     & .shepherd-button:last-child
         margin-right: 0
+    
+    .shepherd-button:not(.isptoolbox-btn):hover
+        background: none
+        border-radius: 0
 
 .shepherd-cancel-icon
     background: transparent
@@ -41,10 +46,10 @@
         color: rgba(0,0,0,.75)
 
 .shepherd-title
-    color: black
+    color: $brand-dark-gray-color
     display: flex
     font-size: 1rem
-    font-weight: 400
+    font-weight: 800
     flex: 1 0 auto
     margin: 0
     padding: 0
@@ -60,10 +65,10 @@
         padding: 1.5em 2em 0
 
 .shepherd-text
-    color: black
+    color: $brand-dark-gray-color
     font-size: 1rem
-    line-height: 1.3em
-    padding: 1.5em 2em
+    line-height: 1.5em
+    padding: 1em 2em
 
     & p
         margin-top: 0

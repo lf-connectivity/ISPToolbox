@@ -12,36 +12,15 @@
 {% unit_preference_value units "RADIUS_MILES" "RADIUS" as radius_limit %}
 
 <ul>
-    <form method="POST" action="." data-url="{% url 'workspace:sector-form' tool uuid %}" id="sector-name-update-form">
+    <form method="POST" action="." data-url="{% url 'workspace:sector-form' tool uuid %}" id="sector-update-form">
         {% csrf_token %}
         <li class="name-row">
             <div class="d-flex">
                 <p class="label">{% translate "Access Point Name" %}</p>
                 <a class="label text-right" id="add-access-point-sector-popup">{% translate "+ Add Access Point" %}</a>
             </div>
-            <div class="name-input" id="name-div-sector-popup">
-                {% comment %}
-                Begin edit mode
-                {% endcomment %}
-                {% include "workspace/atoms/components/tooltip_tower_name_input.html" with name_input_additional_classes="" name_input_id="name-input-sector-popup" name_input_placeholder="Sector Name" name_input_data_param_put_after_id="name-div-sector-popup" disabled=True%}
-                <button class="btn btn-edit tooltip-input-btn d-none" title="Save Access Point"
-                    id="save-sector-name-sector-popup" type="submit" name="submit">
-                    {% include 'workspace/atoms/icons/save_icon.html'%}
-                </button>
-                {% comment %}
-                End edit mode
-                {% endcomment %}
-
-                {% comment %}
-                Begin non-edit mode
-                {% endcomment %}
-                <button type="button" class="btn btn-edit tooltip-input-btn" title="Edit Access Point"
-                    id="edit-sector-name-sector-popup">
-                    {% include 'workspace/atoms/pen_icon.html'%}
-                </button>
-                {% comment %}
-                End non-edit mode
-                {% endcomment %}
+            <div class="name-input">
+                {% include "workspace/atoms/components/tooltip_tower_name_input.html" with name_input_additional_classes="" name_input_id="name-input-sector-popup" name_input_placeholder="Sector Name"  %}
                 <select id="select-sector-sector-popup" data-current-sector="{{ uuid }}">
                     <option disabled>--- Current Access Point ---</option>
                     <option value="{{ uuid }}" selected>{{ name }}</option>
@@ -54,9 +33,6 @@
                 </select>
             </div>
         </li>
-    </form>
-    <form method="POST" action="." data-url="{% url 'workspace:sector-form' tool uuid %}" id="sector-update-form">
-        {% csrf_token %}
         <div class="justify-content-between" style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 0.5rem;" id="numbers-div-sector-popup">
             <li class="d-flex align-content-between flex-wrap">
                 <p class="label">{% translate "Heading" %}</p>

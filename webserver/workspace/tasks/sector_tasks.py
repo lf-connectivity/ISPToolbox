@@ -60,6 +60,18 @@ def _sector_task(error_log_msg):
 def calculateSectorViewshed(sector_id: str):
     sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
 
+    # Check the hash to determine if we need to run
+    try:
+        cached = sector.viewshed.result_cached()
+        if cached:
+            TASK_LOGGER.info("cache hit on viewshed result")
+            return
+        else:
+            raise workspace_models.Viewshed.DoesNotExist
+    except workspace_models.Viewshed.DoesNotExist:
+        TASK_LOGGER.info("cache miss on viewshed result")
+        pass
+
     try:
         sector.refresh_from_db()
         sector.viewshed.cancel_task()
@@ -80,22 +92,18 @@ def calculateSectorViewshed(sector_id: str):
         TASK_LOGGER.info("created new building coverage object")
 
     sector.refresh_from_db()
-    cached = sector.viewshed.result_cached()
     sector.viewshed.on_task_start(current_task.request.id)
-    if not cached:
-        sector.viewshed.calculateViewshed(partial(_update_status, sector_id))
+    sector.viewshed.calculateViewshed(partial(_update_status, sector_id))
 
-        # Notify Websockets listening to session
-        resp = {
-            "type": "ap.viewshed",
-            "base_url": sector.viewshed.getBaseTileSetUrl(),
-            "maxzoom": sector.viewshed.max_zoom,
-            "minzoom": sector.viewshed.min_zoom,
-            "uuid": str(sector.pk),
-        }
-        sendMessageToChannel(str(sector.map_session.pk), resp)
-    else:
-        TASK_LOGGER.info("cache hit on viewshed result")
+    # Notify Websockets listening to session
+    resp = {
+        "type": "ap.viewshed",
+        "base_url": sector.viewshed.getBaseTileSetUrl(),
+        "maxzoom": sector.viewshed.max_zoom,
+        "minzoom": sector.viewshed.min_zoom,
+        "uuid": str(sector.pk),
+    }
+    sendMessageToChannel(str(sector.map_session.pk), resp)
 
     sector.viewshed.progress_message = None
     sector.viewshed.time_remaining = None

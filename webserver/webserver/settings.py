@@ -445,7 +445,6 @@ CELERY_TIMEZONE = 'America/Los_Angeles'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_RESULT_EXPIRES = datetime.timedelta(days=30)
 CELERY_TASK_TRACK_STARTED = True
-CELERY_SEND_EVENTS = True
 
 CACHES = {
     'default': {

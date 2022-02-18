@@ -3,8 +3,6 @@ from celery import Celery
 from celery.schedules import crontab
 from django.conf import settings
 
-from webserver.celery_event_handler import CeleryTaskEventHandler
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'webserver.settings')
 
 # Sometimes autodiscover_tasks doesn't pick up all tasks.
@@ -21,12 +19,7 @@ celery_app.conf.update(
 celery_app.conf.task_routes = {
     'mmwave.scripts.*': {'queue': 'dsm'},
 }
-celery_event_handler = CeleryTaskEventHandler(celery_app)
 
-# Only start the monitor for celery workers.
-@celery_app.on_after_finalize.connect
-def start_monitoring(sender, **kwargs):
-    celery_event_handler.start_monitoring()
 
 # These are all the tasks we want to run periodically
 @celery_app.on_after_finalize.connect

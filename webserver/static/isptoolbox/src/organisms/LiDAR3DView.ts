@@ -121,7 +121,7 @@ export class LiDAR3DView implements IMapboxDrawPlugin {
                     $(event.currentTarget).children('.bi-droplet-fill').addClass('d-none');
                 }
                 $(event.currentTarget).attr('data-material-attribute', material);
-                
+
                 //@ts-ignore
                 const scene = window.viewer.scene;
                 scene.pointclouds.forEach((cld: any) => {
@@ -211,10 +211,9 @@ export class LiDAR3DView implements IMapboxDrawPlugin {
             const feat = event.features[0];
             if (
                 (feat.geometry.type === 'Point' && !dragging) ||
-                feat.geometry.type === 'LineString' ||
+                (feat.geometry.type === 'LineString' && !dragging) ||
                 feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR
             ) {
-                
                 this.highlightFeature(feat);
             }
         }
@@ -692,7 +691,6 @@ export class LiDAR3DView implements IMapboxDrawPlugin {
             this.createAnimationForLink(tx, rx, tx_h, rx_h, start_animation);
         };
         this.updateLinkHeight(tx_h, rx_h, PLAY_ANIMATION_DEFAULT);
-
     }
 
     removeLink() {

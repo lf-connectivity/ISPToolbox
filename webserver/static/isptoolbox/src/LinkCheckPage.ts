@@ -130,6 +130,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
     hover3dDot: any;
     linkProfileHoverPosition: number;
+    prevSelection: string | undefined | null;
     selectedFeatureID: string | undefined | null;
 
     datasets: Map<LOSWSHandlers, Array<string>>;
@@ -177,6 +178,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.centerFreq = DEFAULT_LINK_FREQ;
         this.hover3dDot = null;
         this.fresnel_width = 1;
+        this.prevSelection = null;
         this.selectedFeatureID = null;
 
         this._link_distance = 0;
@@ -305,8 +307,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     }
 
     onMapLoad() {
-        this.map.on('draw.update', this.updateRadioLocation.bind(this));
-        this.map.on('draw.create', this.updateRadioLocation.bind(this));
+        this.map.on('draw.update', this.updateRadioLocation.bind(this, false));
+        this.map.on('draw.create', this.updateRadioLocation.bind(this, false));
 
         this.profileWS = new LOSCheckWS(this.networkID);
 
@@ -404,7 +406,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             if (this.vertexSelected(e)) {
                 this.showVertexDebounce(e);
             }
-            this.updateRadioLocation(e);
+            this.updateRadioLocation(true, e);
         });
         this.map.on('draw.selectionchange', prioritizeDirectSelect.bind(this));
         this.map.on('draw.selectionchange', this.mouseLeave.bind(this));
@@ -602,7 +604,25 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         $('#data-container').collapse('show');
     }
 
-    updateRadioLocation(update: { features: Array<GeoJSON.Feature>; action: undefined | 'move' }) {
+    updateRadioLocation(
+        isSelectionChange: boolean,
+        update: { features: Array<GeoJSON.Feature>; action: undefined | 'move' }
+    ) {
+        // Stupid bugfix will make better later this function already does enough.
+        // Definitely not copypasted from elsewhere
+        let dragging = false;
+        if (isSelectionChange) {
+            let ids = update.features.map((feat) => feat.id);
+            ids.sort();
+            let selection = ids.join(',');
+
+            if (selection === this.prevSelection) {
+                dragging = true;
+            } else {
+                this.prevSelection = selection;
+            }
+        }
+
         // Filter out empty updates or circle feature updates
         // TODO (achongfb): modularize this into a PTPLink Class and APClass
         if (
@@ -753,7 +773,10 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             }
 
             this.updateLinkChart();
-            this.updateLinkProfile();
+
+            if (!dragging) {
+                this.updateLinkProfile();
+            }
         }
     }
 
@@ -826,6 +849,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 this.userRequestIdentity,
                 this.centerFreq
             );
+
             this._elevation = [];
             this._lidar = [];
             this._link_distance = 0;

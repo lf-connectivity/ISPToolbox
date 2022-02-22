@@ -1,48 +1,68 @@
 <form action="{% url 'workspace:session_import_kmz' %}" method="POST" enctype="multipart/form-data">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="importKMZModalLabel">Import a File</h3>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        {% include "workspace/atoms/isptoolbox_close_icon.html" %}
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>
-                        Your files must contain outlines of areas. These files can be exported from other GIS Tools.
-                        <a href="https://isptoolbox-public-hosted-files.s3-us-west-2.amazonaws.com/ISPToolbox-Sample.kml"
-                            style="display: inline-block;">
-                            Download Sample File
-                            <svg width="19" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432" stroke="#5692d1"
-                                    strokeWidth="2px" />
-                            </svg>
-                        </a>
-                    </p>
-                    <div class="isptoolbox-form">
-                        {% csrf_token %}
-                        <ul class="form">
-                            {% for field in workspace_forms.new_session_from_kmz %}
-                            <li class="input-field-group">
-                                {{ field.label_tag }}
-                                {{ field }}
-                                {% if field.help_text %}
-                                    <p class="helptext">{{ field.help_text|safe }}</p>
-                                {% endif %}
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="importKMZModalLabel">Import a File</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Your files must contain outlines of areas. These files can be exported from other GIS Tools.
+                    <a href="https://isptoolbox-public-hosted-files.s3-us-west-2.amazonaws.com/ISPToolbox-Sample.kml"
+                        style="display: inline-block;">
+                        Download Sample File
+                        <svg width="19" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.294 14.763l9.155-9.155m-6.117-.47l6.43.156.158 6.432" stroke="#5692d1"
+                                strokeWidth="2px" />
+                        </svg>
+                    </a>
+                </p>
+                <div class="isptoolbox-form">
+                    {% csrf_token %}
+                    <ul class="form">
+                        {% for field in workspace_forms.new_session_from_kmz %}
+                        <li class="input-field-group">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.help_text %}
+                            <p class="helptext">{{ field.help_text|safe }}</p>
+                            {% endif %}
 
-                                {% if field.errors %}
-                                {% for error in field.errors %}
-                                <p class="error">{{ error|escape }}</p>
-                                {% endfor %}
-                                {% endif %}
-                            </li>
+                            {% if field.errors %}
+                            {% for error in field.errors %}
+                            <p class="error">{{ error|escape }}</p>
                             {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <input type="submit" class="btn btn-primary isptoolbox-btn" value="Start Session">
+                            {% endif %}
+                            {% if field.name == 'file' %}
+                            <script>
+                                var input = document.getElementById('{{field.auto_id}}');
+                                input.addEventListener('change', (event) => {
+                                    const target = event.target
+                                    if (target.files && target.files[0]) {
+                                        console.log(target.files[0].size);
+                                        const maxAllowedSize = 1 * 1024 * 1024;
+                                        if (target.files[0].size > maxAllowedSize) {
+                                            $('#{{field.auto_id}}_size_error').removeClass('d-none')
+                                            target.value = ''
+                                        } else {
+                                            $('#{{field.auto_id}}_size_error').addClass('d-none');
+                                        }
+                                    }
+                                })
+                            </script>
+                            <p class="error d-none" id="{{field.auto_id}}_size_error">Your file is too large. Try
+                                uploading just the KML or simplifying your input.</p>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
+            <div class="modal-footer">
+                <input type="submit" class="btn btn-primary isptoolbox-btn" value="Start Session">
+            </div>
         </div>
-    </form>
+    </div>
+</form>

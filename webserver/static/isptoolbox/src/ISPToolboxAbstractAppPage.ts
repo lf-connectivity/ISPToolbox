@@ -160,10 +160,6 @@ export abstract class ISPToolboxAbstractAppPage {
             new MapboxSDKClient(mapboxgl.accessToken);
             new DeleteFromPopupConfirmationModal(this.map, this.draw);
 
-            $('#map-layers-btn').prop('disabled', false);
-
-            
-
             // Additional loading
             this.onMapLoad();
 

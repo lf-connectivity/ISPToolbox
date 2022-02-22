@@ -10,7 +10,7 @@ import {
 
 context("Sources checks for Market Evaluator", () => {
   before(() => {
-    cy.login();
+    cy.login_fast();
   });
 
   beforeEach(() => {
@@ -22,8 +22,10 @@ context("Sources checks for Market Evaluator", () => {
   it("Clicking Sources in Market Evaluator page brings up sources page", () => {
     // Test that source link opens in new tab, and is in mapbox
     cy.wait_mapbox();
-    cy.get("#map")
-      .contains("a", "Sources")
+    cy.close_disclaimer();
+    cy.close_nux();
+    cy.get("a")
+      .contains("Sources")
       .should("have.attr", "target", "_blank")
       .should("have.attr", "href", MARKET_EVAL_SOURCES_PAGE);
   });
@@ -63,25 +65,22 @@ context("Sources checks for Market Evaluator", () => {
 
 context("Sources checks for LOS", () => {
   before(() => {
-    cy.login();
+    cy.login_fast();
     cy.visit(LOS_CHECK_PAGE);
     cy.wait_mapbox();
     cy.close_disclaimer();
     cy.close_nux();
-    cy.wait(1000);
   });
 
   afterEach(() => {
     cy.preserve_session_cookie();
     cy.visit(LOS_CHECK_PAGE);
-    cy.wait_mapbox();
-    cy.wait(1000);
   });
 
   it("Click Sources in LOS Check page brings up sources page", () => {
     // Test that source link opens in new tab, and is in mapbox
-    cy.get("#map")
-      .contains("a", "Sources")
+    cy.get("a")
+      .contains("Sources")
       .should("have.attr", "target", "_blank")
       .should("have.attr", "href", LOS_CHECK_SOURCES_PAGE);
   });

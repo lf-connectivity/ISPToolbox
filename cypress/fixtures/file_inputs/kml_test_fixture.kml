@@ -11,9 +11,9 @@
 			<Folder>
 				<name>Station</name>
 				<Placemark>
-				<Point>
-				<coordinates>-73.94595818058566,40.75746404569566,15</coordinates>
-				</Point>
+					<Point>
+						<coordinates>-73.94595818058566,40.75746404569566,15</coordinates>
+					</Point>
 				</Placemark>
 			</Folder>
 		</Folder>

@@ -4,7 +4,7 @@ describe("Test Upload KMZ File", () => {
   before(() => { });
 
   beforeEach(() => {
-    cy.login();
+    cy.login_fast();
   });
 
   it("Verify error is shown if session name taken", function () {

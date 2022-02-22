@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
-context('Work', () => {
+context('Workspace Offline Tests', () => {
     beforeEach(() => {
     	cy.goOnline();
-        cy.login();
+        cy.login_fast();
     })
 
     afterEach(()=>{
@@ -19,7 +19,6 @@ context('Work', () => {
         cy.window().then((win) => {
             expect(win.mapbox_handles.draw.getMode()).to.equal('draw_ap');
 		})
-		cy.wait(500);
 
         cy.goOffline();
         cy.get('#connection_issues_alert').should('be.visible'); 
@@ -40,7 +39,6 @@ context('Work', () => {
         cy.window().then((win) => {
             expect(win.mapbox_handles.draw.getMode()).to.equal('draw_ap');
 		})
-		cy.wait(500);
 
         cy.goOffline();
         cy.get('#connection_issues_alert').should('be.visible'); 

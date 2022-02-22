@@ -6,13 +6,13 @@
 Cypress.Commands.add("goOffline", () => {
   cy.log('**go offline**')
   .then(() => {
-    return Cypress.automation('remote:debugger:protocol',
+    Cypress.automation('remote:debugger:protocol',
       {
         command: 'Network.enable',
       })
   })
   .then(() => {
-    return Cypress.automation('remote:debugger:protocol',
+    Cypress.automation('remote:debugger:protocol',
       {
         command: 'Network.emulateNetworkConditions',
         params: {
@@ -32,7 +32,7 @@ Cypress.Commands.add("goOnline", () => {
   cy.log('**go online**')
   .then(() => {
     // https://chromedevtools.github.io/devtools-protocol/1-3/Network/#method-emulateNetworkConditions
-    return Cypress.automation('remote:debugger:protocol',
+    Cypress.automation('remote:debugger:protocol',
       {
         command: 'Network.emulateNetworkConditions',
         params: {
@@ -43,10 +43,4 @@ Cypress.Commands.add("goOnline", () => {
         },
       })
   })
-  .then(() => {
-    return Cypress.automation('remote:debugger:protocol',
-      {
-        command: 'Network.disable',
-      })
-  });
 })

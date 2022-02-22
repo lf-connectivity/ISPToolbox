@@ -2,7 +2,7 @@
 
 describe("Test Delete Your Information Flow", () => {
   beforeEach(() => {
-    cy.login();
+    cy.login_fast();
     cy.fixture("login_fixture").as("user");
   });
 
@@ -11,11 +11,9 @@ describe("Test Delete Your Information Flow", () => {
     cy.get("input[name=confirmation]").type('perm');
     cy.get("input[type=submit]").click();
     cy.contains('incorrect confirmation').should('be.visible');
-  });
-
-  it("Test DYI Flow", function(){
     cy.visit("/pro/account/delete/");
     cy.get("input[name=confirmation]").type('permanently delete');
     cy.get("input[type=submit]").click();  	
-  })
+  });
+  
 });

@@ -1,31 +1,10 @@
 export const TOWER_ICON = "tower-icon";
 export const COVERAGE_AREA_ICON = "coverage-area-icon";
 
-const MAX_RETRIES = 10;
 
 Cypress.Commands.add("toggle_map_layer_sidebar", () => {
-  // Repeatedly click on map layers button until visibility is changed or
-  // it's tried too much.
-  let clickMapLayerSidebar = (body, original_visibility, count = 0) => {
-    cy.get("button#map-layers-btn").click();
-    cy.wait(500).then(() => {
-      let visibility = body.find("div#map-layer-sidebar").is(":visible");
-      if (visibility === original_visibility) {
-        if (count > MAX_RETRIES) {
-          throw new Error("Failed to toggle map layer sidebar visibility");
-        } else {
-          clickMapLayerSidebar(body, original_visibility, count + 1);
-        }
-      }
-    });
-  };
-
-  cy.get("body").then((body) => {
-    const original_visibility = body
-      .find("div#map-layer-sidebar")
-      .is(":visible");
-    clickMapLayerSidebar(body, original_visibility);
-  });
+  cy.get("button#map-layers-btn").click();
+  cy.get("#map-layer-sidebar").should('be.visible');
 });
 
 Cypress.Commands.add("get_map_layer_sidebar", () => {

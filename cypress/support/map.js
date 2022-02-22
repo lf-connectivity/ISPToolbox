@@ -14,7 +14,13 @@ Cypress.Commands.add("set_session_map_preferences", (center, zoom) => {
       zoom: zoom,
     };
     let sessionId = window.ISPTOOLBOX_SESSION_INFO.networkID;
-    cy.request("PATCH", `/pro/workspace/api/session/${sessionId}/`, body);
+    cy.getCookie('csrftoken').then(function(c){
+      cy.request({
+        method: "PATCH", url: `/pro/workspace/api/session/${sessionId}/`, body, headers: {
+          "X-CSRFToken": c.value
+        }});
+    });
+
   });
 });
 

@@ -4,7 +4,7 @@ describe("Test Exporting Workspace Session", () => {
     before(() => { });
 
     beforeEach(() => {
-        cy.login();
+        cy.login_fast();
     });
 
     it("Verify that geojson and kml links are present and work", function () {

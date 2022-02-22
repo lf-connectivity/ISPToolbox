@@ -52,6 +52,16 @@ Cypress.Commands.add("login", () => {
   cy.location('pathname').should('eq', '/pro/')
 });
 
+Cypress.Commands.add("login_fast", () => {
+  cy.visit(LOGIN_PAGE);
+  // reset test accounts
+  cy.request("POST", "/test/accounts/login/").then((response) => {
+    expect(response.body).to.have.property("success", true);
+  });
+  // Make sure sessionid cookie exists
+  cy.getCookie("sessionid").should("exist");
+});
+
 Cypress.Commands.add("preserve_session_cookie", () => {
   Cypress.Cookies.preserveOnce("sessionid");
 });

@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 context("Work", () => {
   beforeEach(() => {
-    cy.login();
+    cy.login_fast();
   });
 
   it("Test create session modal", () => {

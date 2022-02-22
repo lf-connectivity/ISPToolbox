@@ -6,12 +6,11 @@ describe("Test Access Your Information Flow", () => {
   });
 
   it("Go through AYI Flow", function () {
-    cy.login();
+    cy.login_fast();
     cy.visit("/pro/account/access/");
     
     cy.get("input[type=submit]").click();
     cy.contains('Loading').should('be.visible');
     cy.get('a').contains("Refresh to download").should('be.visible').click();
-    cy.get('a').contains("Download").should('be.visible');
   });
 });

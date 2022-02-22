@@ -29,14 +29,6 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
         const loadMapCallback = () => {
             this.map.getStyle().layers?.every((layer: any) => {
                 if (layer.id.includes('gl-draw')) {
-                    $(`#map-layers-btn`).on('click', (event) => {
-                        const $sidebar = $('#map-layer-sidebar');
-                        if ($sidebar.hasClass('show')) {
-                            this.hide();
-                        } else {
-                            this.show();
-                        }
-                    });
                     this.drawReadyCallback();
                     this.map.off('idle', loadMapCallback);
                     return false;

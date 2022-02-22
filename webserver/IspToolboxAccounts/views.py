@@ -144,6 +144,7 @@ class IntegrationTestAccountLoginView(View):
             login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
             return JsonResponse({'success': True})
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class IntegrationTestAccountCreationView(View):
     def post(self, request):

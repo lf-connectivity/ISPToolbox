@@ -61,8 +61,8 @@ class CreateAccountView(View):
         return redirect('workspace:workspace_dashboard')
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class IntegrationTestAccountCreationView(View):
+@method_decorator(csrf_exempt, name="dispatch")
+class IntegrationTestAccountLoginView(View):
     TEST_AP = {
         "coordinates": [
             -86.58242848006918,
@@ -82,9 +82,10 @@ class IntegrationTestAccountCreationView(View):
     TEST_AP = json.dumps(TEST_AP)
     TEST_CPE = json.dumps(TEST_CPE)
 
-    def post(self, request):
+    @classmethod
+    def createAccount(cls, request):
         if settings.PROD:
-            raise Http404
+            return None
         else:
             if User.objects.filter(email="test-isp@fb.com").exists():
                 User.objects.get(email="test-isp@fb.com").delete()
@@ -112,7 +113,7 @@ class IntegrationTestAccountCreationView(View):
                 name='Test AP',
                 owner=login_user,
                 map_session=session,
-                geojson=self.TEST_AP,
+                geojson=cls.TEST_AP,
                 max_radius=0.5
             )
             ap.save()
@@ -121,7 +122,7 @@ class IntegrationTestAccountCreationView(View):
                 name='123 Test Ave',
                 owner=login_user,
                 map_session=session,
-                geojson=self.TEST_CPE,
+                geojson=cls.TEST_CPE,
                 ap=ap
             )
             cpe.save()
@@ -133,7 +134,23 @@ class IntegrationTestAccountCreationView(View):
                 map_session=session
             )
             link.save()
+            return login_user
 
+    def post(self, request):
+        if settings.PROD:
+            raise Http404
+        else:
+            user = IntegrationTestAccountLoginView.createAccount(request)
+            login(request, user, backend=settings.AUTHENTICATION_BACKENDS[0])
+            return JsonResponse({'success': True})
+
+@method_decorator(csrf_exempt, name='dispatch')
+class IntegrationTestAccountCreationView(View):
+    def post(self, request):
+        if settings.PROD:
+            raise Http404
+        else:
+            IntegrationTestAccountLoginView.createAccount(request)
             return JsonResponse({'success': True})
 
     def get(self, request):

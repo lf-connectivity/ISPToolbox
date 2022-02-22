@@ -25,7 +25,10 @@ from mmwave.views import (
 )
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView, RDAPQueryView
 from Overlay.views import OverlaySource
-from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView, CreateNewUserAccount
+from IspToolboxAccounts.views import (
+     IntegrationTestAccountCreationView, UpdateNuxSettingView, CreateNewUserAccount,
+     IntegrationTestAccountLoginView
+)
 from workspace.views import AdminGeneric403View, WorkspaceEngagementView, CeleryTaskPerformanceView
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
@@ -100,6 +103,7 @@ urlpatterns = [
     # Integration Test Endpoints - be sure to 404 in prod
     path('test/accounts/', IntegrationTestAccountCreationView.as_view(),
          name="test-accounts"),
+    path('test/accounts/login/', IntegrationTestAccountLoginView.as_view(), name="test-account-login"),
     # Feature Flipper
     url(r'^', include('waffle.urls')),
 

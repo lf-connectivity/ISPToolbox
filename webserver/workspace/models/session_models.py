@@ -9,6 +9,7 @@ from workspace.models.model_constants import FeatureType
 import uuid
 import json
 import tempfile
+import logging
 from osgeo import gdal
 from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
 from workspace.utils.import_session import (
@@ -334,6 +335,7 @@ class WorkspaceMapSession(models.Model):
                     )
                     ptp.save()
         except Exception as e:
+            logging.exception('failed to import kmz file')
             session.delete()
             raise e
         return session

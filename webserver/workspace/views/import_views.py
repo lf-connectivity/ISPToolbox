@@ -5,6 +5,7 @@ from workspace.forms import NewWorkspaceSessionFromKMZForm
 from workspace.models import WorkspaceMapSession
 from django.urls import reverse
 from django.utils.translation import gettext
+import logging
 
 
 class SessionFileImportView(LoginRequiredMixin, View):
@@ -21,6 +22,7 @@ class SessionFileImportView(LoginRequiredMixin, View):
             session = WorkspaceMapSession.importFile(request)
             return redirect(reverse('workspace:edit_network', args=[session.pk, session.name]))
         except Exception as e:
+            logging.exception('failed to accept upload file')
             # name of session already exists? TODO: duplicate unique constraint error handling
             if 'unique constraint' in repr(e) and '(owner_id, name)' in repr(e):
                 form.add_error('name', gettext(

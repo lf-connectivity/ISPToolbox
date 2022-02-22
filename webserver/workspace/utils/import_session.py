@@ -37,7 +37,7 @@ def _convert_to_geojson(file, file_type):
                 gdal.UseExceptions()
                 src_kml = gdal.OpenEx(tmp_file_kml.name)
                 ds = gdal.VectorTranslate(
-                    output_geojson, src_kml, format='GeoJSON')
+                    output_geojson, src_kml, format='GeoJSON', skipFailures=True)
                 del ds
                 _ = gdal.OpenEx(output_geojson)
                 with open(output_geojson, 'r') as tmp_file_geojson:

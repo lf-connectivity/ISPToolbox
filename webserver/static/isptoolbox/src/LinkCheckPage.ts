@@ -773,10 +773,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             }
 
             this.updateLinkChart();
-
-            if (!dragging) {
-                this.updateLinkProfile();
-            }
+            this.updateLinkProfile(isSelectionChange, dragging);
         }
     }
 
@@ -827,12 +824,12 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
     }
 
     // Overlay
-    updateLinkProfile() {
+    updateLinkProfile(isSelectionChange: boolean = false, dragging: boolean = false) {
         const query_params = this.getRadioLocations();
         if (query_params !== null) {
             // @ts-ignore
             const query = new URLSearchParams(query_params).toString();
-            if (this.selected_feature === query) {
+            if (isSelectionChange && this.selected_feature === query) {
                 return;
             } else {
                 this.selected_feature = query;
@@ -843,16 +840,18 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
             // Create Callback Function for WebSocket
             // Use Websocket for request:
-            this.profileWS.sendRequest(
-                query_params.tx,
-                query_params.rx,
-                this.userRequestIdentity,
-                this.centerFreq
-            );
+            if (!dragging) {
+                this.profileWS.sendRequest(
+                    query_params.tx,
+                    query_params.rx,
+                    this.userRequestIdentity,
+                    this.centerFreq
+                );
 
-            this._elevation = [];
-            this._lidar = [];
-            this._link_distance = 0;
+                this._elevation = [];
+                this._lidar = [];
+                this._link_distance = 0;
+            }
         }
     }
 

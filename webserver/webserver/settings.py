@@ -285,8 +285,6 @@ CORS_ORIGIN_REGEX_WHITELIST = [
     r"^https://(.+\.)?facebook\.com$",
 ]
 
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
 X_FRAME_OPTIONS = 'ALLOW-FROM facebook.com'
 CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
 
@@ -400,6 +398,8 @@ GUEST_USER_MODEL = 'IspToolboxAccounts.IspToolboxGuestUser'
 if PROD:
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'None'
 
 
 # Password validation

@@ -41,7 +41,6 @@
                                 input.addEventListener('change', (event) => {
                                     const target = event.target
                                     if (target.files && target.files[0]) {
-                                        console.log(target.files[0].size);
                                         const maxAllowedSize = 1 * 1024 * 1024;
                                         if (target.files[0].size > maxAllowedSize) {
                                             $('#{{field.auto_id}}_size_error').removeClass('d-none')

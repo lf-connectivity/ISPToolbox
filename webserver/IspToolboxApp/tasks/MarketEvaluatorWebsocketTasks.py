@@ -131,8 +131,8 @@ def getZipGeog(zipcode, channelName, uuid):
 
 
 @app.task
-def getCountyGeog(statecode, countycode, channelName, uuid):
-    result = countyGeog(statecode, countycode)
+def getCountyGeog(statecode, countycode, state, county, channelName, uuid):
+    result = countyGeog(statecode, countycode, state, county)
     sync_send(channelName, "county.geog", result, uuid)
 
 
@@ -143,8 +143,8 @@ def getCensusBlockGeog(blockcode, channelName, uuid):
 
 
 @app.task
-def getTribalGeog(geoid, channelName, uuid):
-    result = tribalGeog(geoid)
+def getTribalGeog(geoid, namelsad, channelName, uuid):
+    result = tribalGeog(geoid, namelsad)
     sync_send(channelName, "tribal.geog", result, uuid)
 
 

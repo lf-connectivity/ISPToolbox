@@ -1,6 +1,16 @@
-from IspToolboxApp.Helpers.MarketEvaluatorHelpers import getQueryTemplate, checkIfPolyInCanada, caTechToTechCode, \
-    checkIfPrecomputedIncomeAvailable, select_gis_database
-from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty, Tl2020UsCensusBlocks, TribalLands
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import (
+    getQueryTemplate,
+    checkIfPolyInCanada,
+    caTechToTechCode,
+    checkIfPrecomputedIncomeAvailable,
+    select_gis_database,
+)
+from gis_data.models import (
+    Tl2019UsZcta510,
+    Tl2019UsCounty,
+    Tl2020UsCensusBlocks,
+    TribalLands,
+)
 from django.db import connections
 from IspToolboxApp.models import Form477Dec2020
 
@@ -12,43 +22,38 @@ def serviceProviders(include, read_only):
 
 
 def genServiceProvidersUS(include, read_only):
-    '''
-        Grabs service provider data for US queries.
-    '''
+    """
+    Grabs service provider data for US queries.
+    """
     query_skeleton = getQueryTemplate(provider_skeleton, None, False)
     with connections[select_gis_database(read_only)].cursor() as cursor:
-        cursor.execute(
-            query_skeleton, [include])
+        cursor.execute(query_skeleton, [include])
         rows = [row for row in cursor.fetchall()]
         competitors = [row[0] for row in rows]
         maxdown = [row[1] for row in rows]
         maxup = [row[2] for row in rows]
         tech = [row[3] for row in rows]
         resp = {
-            'error': 0,
-            'competitors': competitors,
+            "error": 0,
+            "competitors": competitors,
             "down_ad_speed": maxdown,
             "up_ad_speed": maxup,
-            "tech_used": tech}
+            "tech_used": tech,
+        }
         return resp
 
 
 def genServiceProvidersCanada(include, read_only=False):
-    '''
-        Grabs service provider data for Canadian queries.
-    '''
+    """
+    Grabs service provider data for Canadian queries.
+    """
     query_skeleton = getQueryTemplate(provider_skeleton_ca, None, False)
     with connections[select_gis_database(read_only)].cursor() as cursor:
-        cursor.execute(
-            query_skeleton, [include])
+        cursor.execute(query_skeleton, [include])
         rows = [row for row in cursor.fetchall()]
         competitors = [row[0] for row in rows]
         tech = [caTechToTechCode(row[1]) for row in rows]
-        resp = {
-            'error': 0,
-            'competitors': competitors,
-            'tech_used': tech
-        }
+        resp = {"error": 0, "competitors": competitors, "tech_used": tech}
         return resp
 
 
@@ -58,25 +63,28 @@ def medianIncome(include, result={}, read_only=False):
     if precomputedAvailable:
         try:
             with connections[select_gis_database(read_only)].cursor() as cursor:
-                max_gid = result.get('max_gid', 0)
+                max_gid = result.get("max_gid", 0)
                 query_arguments = [include, max_gid]
                 cursor.execute(income_skeleton, query_arguments)
                 row = cursor.fetchone()
                 columns = [col[0] for col in cursor.description]
                 row_dict = dict(zip(columns, row))
-                if row_dict.get('numbuildings', 0) == 0:
+                if row_dict.get("numbuildings", 0) == 0:
                     done = True
 
-                averageMedianIncome = float(
-                    row_dict['avgincome2018']) if row_dict['avgincome2018'] is not None else 0
+                averageMedianIncome = (
+                    float(row_dict["avgincome2018"])
+                    if row_dict["avgincome2018"] is not None
+                    else 0
+                )
                 return {
-                    'averageMedianIncome': averageMedianIncome,
-                    'max_gid': row_dict['max_gid'],
-                    'numbuildings': row_dict['numbuildings'],
-                    'done': done
+                    "averageMedianIncome": averageMedianIncome,
+                    "max_gid": row_dict["max_gid"],
+                    "numbuildings": row_dict["numbuildings"],
+                    "done": done,
                 }
         except BaseException as e:
-            return {'averageMedianIncome': 0, 'error': str(e), 'done': done}
+            return {"averageMedianIncome": 0, "error": str(e), "done": done}
     else:
         done = True
         query_skeleton = income_skeleton_simple
@@ -88,9 +96,9 @@ def medianIncome(include, result={}, read_only=False):
                 cursor.execute(query_skeleton, query_arguments)
                 results = cursor.fetchone()
                 averageMedianIncome = results[0]
-            return {'averageMedianIncome': averageMedianIncome, 'done': done}
+            return {"averageMedianIncome": averageMedianIncome, "done": done}
         except BaseException as e:
-            return {'averageMedianIncome': 0, 'error': str(e), 'done': done}
+            return {"averageMedianIncome": 0, "error": str(e), "done": done}
 
 
 def broadbandNow(include, read_only):
@@ -104,77 +112,75 @@ def broadbandNow(include, read_only):
         else:
             price_range = [str(col) for col in row]
 
-        return {'bbnPriceRange': price_range}
+        return {"bbnPriceRange": price_range}
 
 
 def grantGeog(cbgid):
     try:
-        query_skeleton = \
-            """SELECT cbg_id, St_asgeojson(geog)
+        query_skeleton = """SELECT cbg_id, St_asgeojson(geog)
             FROM auction_904_shp WHERE cbg_id = %s"""
-        with connections['gis_data'].cursor() as cursor:
+        with connections["gis_data"].cursor() as cursor:
             cursor.execute(query_skeleton, [cbgid])
             result = cursor.fetchone()
-            resp = {
-                'error': 0,
-                'cbgid': result[0],
-                'geojson': result[1]
-            }
+            resp = {"error": 0, "cbgid": result[0], "geojson": result[1]}
     except BaseException:
-        resp = {'error': -2}
+        resp = {"error": -2}
     return resp
 
 
 def zipGeog(zipcode):
-    '''
-        Returns geojson for provided zipcode.
-    '''
-    resp = {'error': 0}
+    """
+    Returns geojson for provided zipcode.
+    """
+    resp = {"error": 0}
     try:
-        resp['geojson'] = Tl2019UsZcta510.getZipGeog(zipcode)
-        resp['zip'] = zipcode
+        resp["geojson"] = Tl2019UsZcta510.getZipGeog(zipcode)
+        resp["zip"] = zipcode
     except BaseException:
-        resp = {'error': -2}
+        resp = {"error": -2}
     return resp
 
 
-def countyGeog(statecode, countycode):
-    '''
-        Returns geojson for provided statecode and countycode.
-    '''
-    resp = {'error': 0}
+def countyGeog(statecode, countycode, state, county):
+    """
+    Returns geojson for provided statecode and countycode.
+    """
+    resp = {"error": 0}
     try:
-        resp['geojson'] = Tl2019UsCounty.getCountyGeog(countycode, statecode)
-        resp['statecode'] = statecode
-        resp['countycode'] = countycode
+        resp["geojson"] = Tl2019UsCounty.getCountyGeog(countycode, statecode)
+        resp["statecode"] = statecode
+        resp["countycode"] = countycode
+        resp["county"] = county
+        resp["state"] = state
     except BaseException:
-        resp = {'error': -2}
+        resp = {"error": -2}
     return resp
 
 
 def censusBlockGeog(blockcode):
-    '''
-        Returns census block geojson for provided blockcode.
-    '''
-    resp = {'error': 0}
+    """
+    Returns census block geojson for provided blockcode.
+    """
+    resp = {"error": 0}
     try:
-        resp['geojson'] = Tl2020UsCensusBlocks.getBlockGeog(blockcode)
-        resp['blockcode'] = blockcode
+        resp["geojson"] = Tl2020UsCensusBlocks.getBlockGeog(blockcode)
+        resp["blockcode"] = blockcode
     except BaseException:
-        resp = {'error': -2}
+        resp = {"error": -2}
     return resp
 
 
-def tribalGeog(geoid):
-    '''
-        Returns tribal area geojson for provided geoid.
-    '''
-    resp = {'error': 0}
+def tribalGeog(geoid, namelsad):
+    """
+    Returns tribal area geojson for provided geoid.
+    """
+    resp = {"error": 0}
     try:
-        resp['geojson'] = TribalLands.getTribalGeog(geoid)
-        resp['geoid'] = geoid
+        resp["geojson"] = TribalLands.getTribalGeog(geoid)
+        resp["geoid"] = geoid
+        resp["namelsad"] = namelsad
     except BaseException:
-        resp = {'error': -2}
+        resp = {"error": -2}
     return resp
 
 

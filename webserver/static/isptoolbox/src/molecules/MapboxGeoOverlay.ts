@@ -21,7 +21,6 @@ export type GeoOverlay = {
 };
 
 abstract class MapboxGeoOverlay implements MapboxOverlay {
-    name: string;
     map: mapboxgl.Map;
     draw: MapboxDraw;
     sourceId: string;
@@ -39,7 +38,6 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
     boundMouseClickCallback: (e: any) => void;
 
     constructor(
-        name: string,
         map: mapboxgl.Map,
         draw: MapboxDraw,
         overlay: GeoOverlay,
@@ -48,7 +46,6 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
         popupClass: any,
         wsGeojsonEvent: MarketEvalWSEvents
     ) {
-        this.name = name;
         this.map = map;
         this.draw = draw;
         this.sourceId = overlay.sourceId;
@@ -133,13 +130,15 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
             delete properties.error;
             delete properties.geojson;
 
+            console.log(properties);
+
             const newFeature = {
                 type: 'Feature',
                 geometry: JSON.parse(response.geojson),
                 properties: {
                     ...properties,
                     uneditable: true,
-                    name: this.name,
+                    name: this.getName(properties),
                     feature_type: WorkspaceFeatureTypes.COVERAGE_AREA
                 },
                 id: ''
@@ -216,6 +215,7 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
     }
 
     abstract sendGeojsonRequest(featureProperties: any): void;
+    abstract getName(featureProperties: any): string;
 }
 
 export class RdofGeoOverlay extends MapboxGeoOverlay {
@@ -227,7 +227,6 @@ export class RdofGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            'RDOF Area',
             map,
             draw,
             overlay,
@@ -241,6 +240,10 @@ export class RdofGeoOverlay extends MapboxGeoOverlay {
     sendGeojsonRequest(properties: any) {
         MarketEvaluatorWS.getInstance().sendRDOFRequest(properties.cbg_id);
     }
+
+    getName(properties: any): string {
+        return `RDOF xxxx${properties.cbgid.slice(-5)}`;
+    }
 }
 
 export class CommunityConnectGeoOverlay extends MapboxGeoOverlay {
@@ -252,7 +255,6 @@ export class CommunityConnectGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            'Non-urban Area',
             map,
             draw,
             overlay,
@@ -266,6 +268,10 @@ export class CommunityConnectGeoOverlay extends MapboxGeoOverlay {
     sendGeojsonRequest(properties: any) {
         MarketEvaluatorWS.getInstance().sendZipRequest(properties.zipcode);
     }
+
+    getName(properties: any): string {
+        return `ZIP Code ${properties.zip}`;
+    }
 }
 
 export class CbrsGeoOverlay extends MapboxGeoOverlay {
@@ -277,7 +283,6 @@ export class CbrsGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            'CBRS Area',
             map,
             draw,
             overlay,
@@ -291,8 +296,14 @@ export class CbrsGeoOverlay extends MapboxGeoOverlay {
     sendGeojsonRequest(properties: any) {
         MarketEvaluatorWS.getInstance().sendCountyRequest(
             properties.countycode,
-            properties.statecode
+            properties.statecode,
+            properties.county,
+            properties.state
         );
+    }
+
+    getName(properties: any): string {
+        return `${properties.county} County, ${properties.state}`;
     }
 }
 
@@ -305,7 +316,6 @@ export class CensusBlocksGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            'Census Block',
             map,
             draw,
             overlay,
@@ -319,6 +329,10 @@ export class CensusBlocksGeoOverlay extends MapboxGeoOverlay {
     sendGeojsonRequest(properties: any) {
         MarketEvaluatorWS.getInstance().sendCensusBlockRequest(properties.fullblockcode);
     }
+
+    getName(properties: any): string {
+        return `Census Block xxxx${properties.blockcode.slice(-5)}`;
+    }
 }
 
 export class TribalGeoOverlay extends MapboxGeoOverlay {
@@ -330,7 +344,6 @@ export class TribalGeoOverlay extends MapboxGeoOverlay {
         sourceLayer: string
     ) {
         super(
-            'Tribal Area',
             map,
             draw,
             overlay,
@@ -342,6 +355,10 @@ export class TribalGeoOverlay extends MapboxGeoOverlay {
     }
 
     sendGeojsonRequest(properties: any) {
-        MarketEvaluatorWS.getInstance().sendTribalRequest(properties.GEOID);
+        MarketEvaluatorWS.getInstance().sendTribalRequest(properties.GEOID, properties.NAMELSAD);
+    }
+
+    getName(properties: any): string {
+        return properties.namelsad;
     }
 }

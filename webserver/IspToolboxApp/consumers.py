@@ -128,7 +128,13 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
     async def county_geography_request(self, content, uuid):
         countycode = content["countycode"]
         statecode = content["statecode"]
-        getCountyGeog.delay(statecode, countycode, self.channel_name, uuid)
+
+        # Workspace stuff. TODO: replace with non get method after launch
+        county = content.get("county", None)
+        state = content.get("state", None)
+        getCountyGeog.delay(
+            statecode, countycode, state, county, self.channel_name, uuid
+        )
 
     async def census_block_geography_request(self, content, uuid):
         blockcode = content["blockcode"]
@@ -136,7 +142,10 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
 
     async def tribal_geography_request(self, content, uuid):
         geoid = content["geoid"]
-        getTribalGeog.delay(geoid, self.channel_name, uuid)
+
+        # Workspace stuff. TODO: replace with non get method after launch
+        namelsad = content.get("namelsad", None)
+        getTribalGeog.delay(geoid, namelsad, self.channel_name, uuid)
 
     async def viewshed_request(self, content, uuid):
         lat = content["lat"]

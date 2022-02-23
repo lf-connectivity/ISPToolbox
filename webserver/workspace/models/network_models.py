@@ -16,7 +16,7 @@ from django.core.validators import (
 )
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import post_save, pre_save, pre_delete
+from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver
 
 from rest_framework import serializers
@@ -26,6 +26,7 @@ import logging
 import numpy
 import math
 import json
+import re
 import random
 import uuid
 from workspace.models.task_models import (
@@ -335,13 +336,13 @@ class AccessPointLocation(WorkspaceFeature):
 
 
 @receiver(post_save, sender=AccessPointLocation)
-def _calculate_coverage_tower(sender, instance, created, raw, using, update_fields, **kwargs):
+def _calculate_coverage_tower(
+    sender, instance, created, raw, using, update_fields, **kwargs
+):
     """
     Update coverage after modifying AP location
     """
-    app.send_task(
-        "workspace.tasks.viewshed_tasks.updateSectors", (instance.uuid,)
-    )
+    app.send_task("workspace.tasks.viewshed_tasks.updateSectors", (instance.uuid,))
 
 
 class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
@@ -1126,6 +1127,41 @@ class CoverageArea(WorkspaceFeature):
     @property
     def feature_type(self):
         return FeatureType.COVERAGE_AREA.value
+
+
+@receiver(pre_save, sender=CoverageArea)
+def _set_default_area_name(sender, instance, **kwargs):
+    """
+    Sets the default area # for a regular coverage area, equal to max + 1
+    """
+    if instance.created is None and instance.name == "Area":
+        instance.name = f"Area {instance.map_session.area_number}"
+        instance.map_session.area_number += 1
+        instance.map_session.save()
+
+
+@receiver(post_delete, sender=CoverageArea)
+def _set_area_number_post_delete(sender, instance, using, **kwargs):
+    """
+    Sets the default area # for future coverage areas after deletion.
+    """
+    if re.match(r"^Area \d+$", instance.name):
+        names = CoverageArea.objects.filter(
+            map_session=instance.map_session, name__regex=r"^Area \d+$"
+        ).values("name")
+
+        instance.map_session.area_number = (
+            max(
+                (
+                    int(re.match(r"^Area (\d+)$", area["name"]).group(1))
+                    for area in names
+                ),
+                default=0,
+            )
+            + 1
+        )
+
+        instance.map_session.save()
 
 
 class CoverageAreaSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):

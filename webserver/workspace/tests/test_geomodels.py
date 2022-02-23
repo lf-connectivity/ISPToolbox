@@ -189,7 +189,7 @@ DEFAULT_UNEDITABLE = False
 DEFAULT_AP_SECTOR_UNEDITABLE = True
 DEFAULT_AP_CPE_LINK_UNEDITABLE = True
 DEFAULT_SECTOR_NAME = "Test Sector"
-DEFAULT_COVERAGE_AREA_NAME = "Area"
+DEFAULT_COVERAGE_AREA_NAME = "Test Coverage Area"
 DEFAULT_COVERAGE_AREA_NAME_MULTIPOLYGON = "Census Block"
 
 
@@ -658,9 +658,9 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         )
 
 
-class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
+class WorkspaceRestViewsBaseTestCase(WorkspaceBaseTestCase):
     def setUp(self):
-        super(WorkspaceRestViewsTestCase, self).setUp()
+        super(WorkspaceRestViewsBaseTestCase, self).setUp()
         self.client = APIClient()
         self.client.force_authenticate(user=self.testuser)
 
@@ -706,6 +706,8 @@ class WorkspaceRestViewsTestCase(WorkspaceBaseTestCase):
         self.assertFalse(model_cls.objects.filter(uuid=model_id).exists())
         self.assertEqual(num_user_models - 1, new_num_user_models)
 
+
+class WorkspaceRestViewsTestCase(WorkspaceRestViewsBaseTestCase):
     def test_create_ap(self):
         new_ap = {
             "name": DEFAULT_NAME,
@@ -1168,7 +1170,7 @@ class WorkspaceGeojsonUtilsTestCase(WorkspaceBaseTestCase):
         )
 
 
-class WorkspacePTPLinkTestCase(WorkspaceRestViewsTestCase):
+class WorkspacePTPLinkTestCase(WorkspaceRestViewsBaseTestCase):
     def test_long_linestring_validation(self):
         ptp = PointToPointLink(
             owner=self.testuser,
@@ -1179,7 +1181,8 @@ class WorkspacePTPLinkTestCase(WorkspaceRestViewsTestCase):
 
 
 # TODO: Remove the AP cloudrf TCs once we launch Workspace and AP Sectors
-class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
+# TODO: Remove CloudRF altogether
+class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsBaseTestCase):
     def setUp(self):
         super(WorkspaceCloudRfCoverageTestCase, self).setUp()
         self.test_ap_with_cloudrf = AccessPointLocation(
@@ -1395,3 +1398,54 @@ class WorkspaceCloudRfCoverageTestCase(WorkspaceRestViewsTestCase):
         self.assertJSONEqual(
             DEFAULT_TEST_MULTIPOLYGON, sector.cloudrf_coverage_geojson_json
         )
+
+
+class WorkspaceCoverageAreaNumberingTestCase(WorkspaceBaseTestCase):
+    def create_area(self):
+        area = CoverageArea(
+            owner=self.testuser,
+            map_session=self.test_session,
+            geojson=DEFAULT_TEST_POLYGON,
+            uneditable=DEFAULT_UNEDITABLE,
+        )
+        area.save()
+        return area
+
+    def assertAreaNumberEqual(self, area: CoverageArea, expected_number: int):
+        self.assertEqual(area.name, f"Area {expected_number}")
+
+    def test_simple(self):
+        area = self.create_area()
+        self.assertAreaNumberEqual(area, 1)
+
+    def test_multiple_create(self):
+        for i in range(1, 5):
+            area = self.create_area()
+            self.assertAreaNumberEqual(area, i)
+
+    def test_create_delete_non_max(self):
+        areas = [self.create_area() for i in range(0, 5)]
+        areas[2].delete()
+        new_area = self.create_area()
+        self.assertAreaNumberEqual(new_area, 6)
+
+    def test_create_delete_max(self):
+        areas = [self.create_area() for i in range(0, 5)]
+        areas[4].delete()
+        new_area = self.create_area()
+        self.assertAreaNumberEqual(new_area, 5)
+
+    def test_create_delete_max_multiple(self):
+        areas = [self.create_area() for i in range(0, 5)]
+        areas[4].delete()
+        areas[3].delete()
+        new_area = self.create_area()
+        self.assertAreaNumberEqual(new_area, 4)
+
+    def test_create_delete_max_multiple_reverse(self):
+        areas = [self.create_area() for i in range(0, 5)]
+        areas[2].delete()
+        areas[3].delete()
+        areas[4].delete()
+        new_area = self.create_area()
+        self.assertAreaNumberEqual(new_area, 3)

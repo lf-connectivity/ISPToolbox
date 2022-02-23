@@ -438,11 +438,13 @@ class MarketEvaluatorWS {
      * @param statecode the state code
      * @returns The request-identifying UUID
      */
-    sendCountyRequest(countycode: string, statecode: string): UUID {
+    sendCountyRequest(countycode: string, statecode: string, county: string, state: string): UUID {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.COUNTY,
             countycode,
-            statecode
+            statecode,
+            county,
+            state
         });
     }
 
@@ -458,10 +460,11 @@ class MarketEvaluatorWS {
         });
     }
 
-    sendTribalRequest(geoid: string): UUID {
+    sendTribalRequest(geoid: string, namelsad: string): UUID {
         return this.sendJsonWithUUID({
             request_type: MarketEvalWSRequestType.TRIBAL,
-            geoid
+            geoid,
+            namelsad
         });
     }
 

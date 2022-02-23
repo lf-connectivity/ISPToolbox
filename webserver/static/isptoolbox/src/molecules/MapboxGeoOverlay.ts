@@ -8,6 +8,8 @@ import {
     TribalOverlayPopup
 } from '../isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
 import MarketEvaluatorWS, { MarketEvalWSEvents } from '../MarketEvaluatorWS';
+import { BaseWorkspaceFeature } from '../workspace/BaseWorkspaceFeature';
+import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import MapboxOverlay from './MapboxOverlay';
 
@@ -130,24 +132,32 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
             delete properties.error;
             delete properties.geojson;
 
-            const newFeature = {
-                type: 'Feature',
-                geometry: JSON.parse(response.geojson),
-                properties: {
-                    ...properties,
-                    uneditable: true,
-                    name: this.getName(properties),
-                    feature_type: WorkspaceFeatureTypes.COVERAGE_AREA
-                },
-                id: ''
-            };
+            let areaNames = BaseWorkspaceManager.getFeatures(
+                WorkspaceFeatureTypes.COVERAGE_AREA
+            ).map((area: BaseWorkspaceFeature) => area.getFeatureProperty('name'));
 
-            // @ts-ignore
-            let id = this.draw.add(newFeature)[0];
-            newFeature.id = id;
-            this.map.fire('draw.create', { features: [newFeature] });
-            this.draw.changeMode('simple_select', { featureIds: [id] });
-            this.map.fire('draw.selectionchange', { features: [newFeature] });
+            let name = this.getName(properties);
+
+            if (!areaNames.includes(name)) {
+                const newFeature = {
+                    type: 'Feature',
+                    geometry: JSON.parse(response.geojson),
+                    properties: {
+                        ...properties,
+                        uneditable: true,
+                        name: this.getName(properties),
+                        feature_type: WorkspaceFeatureTypes.COVERAGE_AREA
+                    },
+                    id: ''
+                };
+
+                // @ts-ignore
+                let id = this.draw.add(newFeature)[0];
+                newFeature.id = id;
+                this.map.fire('draw.create', { features: [newFeature] });
+                this.draw.changeMode('simple_select', { featureIds: [id] });
+                this.map.fire('draw.selectionchange', { features: [newFeature] });
+            }
         }
     }
 

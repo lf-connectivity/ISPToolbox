@@ -14,11 +14,11 @@
         " class="mx-1 my-auto" id="disclaimer-link" href="#Disclaimer">{% trans "Disclaimer"%}</a>
         {% if tool == 'market_evaluator' %}
         <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;" class="mx-1 my-auto"
-            href="{% url 'workspace:sources' sources_page='market_eval' %}">{% trans "Sources"%}</a>
+            href="{% url 'workspace:sources' sources_page='market_eval' %}" target="_blank">{% trans "Sources"%}</a>
         {% endif %}
         {% if tool == 'los_check' %}
         <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;" class="mx-1 my-auto"
-            href="{% url 'workspace:sources' sources_page='edit_network' %}">{% trans "Sources"%}</a>
+            href="{% url 'workspace:sources' sources_page='edit_network' %}" target="_blank">{% trans "Sources"%}</a>
         {% endif %}
         <a style="color: #c2c2c2; font-size: 0.83rem; letter-spacing: 0.2px;
         " class="mx-1 my-auto" href="{% url 'workspace:terms' %}" target="_blank">{% trans "Terms"%}</a>

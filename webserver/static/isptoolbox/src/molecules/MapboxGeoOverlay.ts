@@ -130,8 +130,6 @@ abstract class MapboxGeoOverlay implements MapboxOverlay {
             delete properties.error;
             delete properties.geojson;
 
-            console.log(properties);
-
             const newFeature = {
                 type: 'Feature',
                 geometry: JSON.parse(response.geojson),

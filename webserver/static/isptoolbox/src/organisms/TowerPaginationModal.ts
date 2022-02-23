@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 import { getCookie } from '../utils/Cookie';
 import { djangoUrl } from '../utils/djangoUrl';
-import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface} from '../utils/IIspToolboxAjaxPlugin';
+import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../utils/IIspToolboxAjaxPlugin';
 import { getSessionID, isUnitsUS } from '../utils/MapPreferences';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { addHoverTooltip } from './HoverTooltip';
@@ -13,14 +13,23 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
     subscriptions: Array<string | null> = [];
     constructor(private map: mapboxgl.Map, private draw: MapboxDraw) {
         this.subscriptions = initializeIspToolboxInterface(this);
-        $(this.selector).on('shown.bs.modal', () => {
-            this.getAccessPoints(undefined);
+        $(this.selector).on('shown.bs.modal', (e: JQuery.ClickEvent) => {
+            if(e.relatedTarget)
+            {
+                var uuid = $(e.relatedTarget).data('ap') as string;
+                if(uuid) {
+                    this.getAccessPointSectors({ ordering: undefined, page: "1", session: undefined, ap: uuid });
+                } else {
+                    this.getAccessPoints(undefined);
+                }
+            } else {
+                this.getAccessPoints(undefined);
+            }
         });
     }
 
-    setMode(mode: 'tower' | 'sector')
-    {
-        switch(mode){
+    setMode(mode: 'tower' | 'sector') {
+        switch (mode) {
             case 'tower':
                 $('#accessPointSectorModalLabel, #tower-breadcrumb').addClass('d-none');
                 $('#accessPointModalLabel').removeClass('d-none');
@@ -49,17 +58,17 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
                     'X-CSRFToken': getCookie('csrftoken'),
                     Accept: 'application/json'
                 }
-            }).done(() => {});
+            }).done(() => { });
         }
     }
 
     getAccessPoints(
         data:
             | {
-                  ordering: undefined | string;
-                  page: undefined | string;
-                  session: string | null | undefined;
-              }
+                ordering: undefined | string;
+                page: undefined | string;
+                session: string | null | undefined;
+            }
             | undefined
     ) {
         if (data != null) {
@@ -95,7 +104,7 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
                 page: undefined | string;
                 session: string | null | undefined;
                 ap: string;
-              }
+            }
     ) {
         if (data != null) {
             data['session'] = getSessionID();
@@ -124,7 +133,7 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
             });
     }
 
-    addSectorModalCallbacks(){
+    addSectorModalCallbacks() {
         $('.freq-option').on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('ap-uuid-target');
             const value = $(event.currentTarget).val();
@@ -132,18 +141,18 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
             $(`button.dropdown-toggle[ap-uuid-target='${uuid}']`).attr('value', value as string).text(text);
             $(`input[name='frequency'][ap-uuid-target='${uuid}']`).attr('value', value as string);
         });
-        
+
         $('.sort-ap').on('click', (event) => {
             const ordering = event.currentTarget.getAttribute('ordering-target') as string;
             const page = $('#ap-modal-page-num').val() as string;
             const ap = $('#ap-sector-uuid').val() as string
-            this.getAccessPointSectors({ ordering, page, session: undefined, ap});
+            this.getAccessPointSectors({ ordering, page, session: undefined, ap });
         });
         $('.ap-sector-page-change').on('click', (event) => {
             const ordering = $('#ap-modal-ordering').val() as string;
             const ap = $('#ap-sector-uuid').val() as string
             const page = event.currentTarget.getAttribute('page-target') as string;
-            this.getAccessPointSectors({ ordering, page, session: undefined, ap});
+            this.getAccessPointSectors({ ordering, page, session: undefined, ap });
         });
         $(`.ap-delete-btn`).on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');
@@ -195,9 +204,26 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
             this.map.fire('draw.update', { features: feats });
             $(`#ap-save-edit-${uuid}`).addClass('d-none');
             $(`input[ap-uuid-target='${uuid}']`).prop('disabled', true);
-            $(`button.dropdown-toggle[ap-uuid-target='${uuid}']`).prop( "disabled", true );
+            $(`button.dropdown-toggle[ap-uuid-target='${uuid}']`).prop("disabled", true);
             $(`.ap-edit-btn[data-target='${uuid}']`).removeClass('d-none');
         });
+        $('#create_new_sector_from_modal').on('click', (event) => {
+            const uuid = event.currentTarget.getAttribute('data-target');
+            const sector = {
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [0, 0]
+                },
+                properties: {
+                    feature_type: WorkspaceFeatureTypes.SECTOR,
+                    ap: uuid,
+                    uneditable: true
+                }
+            };
+            this.map.fire('draw.create', { features: [sector] });
+        })
+
 
         // Hover tooltips for save/edit/delete
         addHoverTooltip('.ap-save-edit-btn, .ap-edit-btn, .ap-delete-btn, .ap-sector-btn');
@@ -230,7 +256,7 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
         $(`.ap-sector-btn`).on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');
             if (typeof uuid === 'string') {
-               this.getAccessPointSectors({ordering:undefined, page:"1", session: undefined, ap: uuid})
+                this.getAccessPointSectors({ ordering: undefined, page: "1", session: undefined, ap: uuid })
             }
         });
 
@@ -281,19 +307,29 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
         addHoverTooltip('.ap-save-edit-btn, .ap-edit-btn, .ap-delete-btn, .ap-sector-btn');
     }
 
-    deleteCallback(event: {features: Array<GeoJSON.Feature>}) {
+    deleteCallback(event: { features: Array<GeoJSON.Feature> }) {
+        this.crudCallback(event);
+    }
+    createCallback(event: { features: Array<GeoJSON.Feature> }) {
+        this.crudCallback(event);
+    }
+    readCallback(event: { features: Array<GeoJSON.Feature> }) {
+        this.crudCallback(event);
+    }
+    updateCallback(event: { features: Array<GeoJSON.Feature> }) {
+        this.crudCallback(event);
+    }
+
+    crudCallback(event: { features: Array<GeoJSON.Feature> }) {
         // Only run if modal is open
-        if($(this.selector).is(':visible'))
-        {
-            if(event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR))
-            {
+        if ($(this.selector).is(':visible')) {
+            if (event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR)) {
                 const ordering = $('#ap-modal-ordering').val() as string;
                 const ap = $('#ap-sector-uuid').val() as string
                 const page = $('#ap-modal-page-num').val() as string;
-                this.getAccessPointSectors({ordering, page, session: undefined, ap: ap});
+                this.getAccessPointSectors({ ordering, page, session: undefined, ap: ap });
             }
-            if(event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.AP))
-            {
+            if (event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.AP)) {
                 this.getAccessPoints(undefined);
             }
         }

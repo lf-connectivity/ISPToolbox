@@ -42,10 +42,15 @@
         </form>
     </div>
     <div class="stat-section">
-            <button class='btn btn-secondary isptoolbox-btn w-100' style="background-color: rgba(0,0,0,0) !important;"
-                id='place-sector-btn-tower-popup'>
-                {% translate "Add Access Point"%}
+        <button class='btn btn-secondary isptoolbox-btn w-100' style="background-color: rgba(0,0,0,0) !important;"
+            id='place-sector-btn-tower-popup'>
+            {% translate "Add Access Point"%}
+        </button>
+        <a href="#" data-toggle="modal" tabindex="-1" data-target="#accessPointModal" data-ap="{{uuid}}"">
+            <button class='btn btn-secondary isptoolbox-btn w-100' style="border: none; background-color: rgba(0,0,0,0) !important;">
+                {% translate "Add Multiple Access Points"%}
             </button>
+        </a>
         {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-tower-row-tower-popup" delete_row_a_id="tower-delete-btn" delete_row_object_name="Tower" delete_row_last_updated=last_updated %}
     </div>
 </ul>

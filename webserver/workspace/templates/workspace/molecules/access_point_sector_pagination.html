@@ -1,6 +1,5 @@
 {% spaceless %}
 {% load rest_framework i18n %}
-{% if results %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
 <div class="modal-body isptoolbox-form">
   <div style="display: block; overflow-x: auto;">
@@ -164,20 +163,21 @@
       {% endfor %}
     </tbody>
   </table>
-  </div>
+</div>
+{% if not results %}
+<div class="text-center">
+  {% include 'workspace/atoms/missing_icon.html' %}
+  <h3 class="mb-2">{% translate "No access point sectors on this tower yet."%}</h3>
+  <p>{% translate "To get started: Place an access point sector via the tower tooltip."%}</p>
+</div>
+{% endif %}
   <input hidden id="ap-sector-modal-ordering" value="{{ordering}}">
   <input hidden id="ap-sector-uuid" value="{{request.GET.ap}}">
   <input hidden id="ap-modal-page-num" value="{{current}}">
+  <div class="mt-2">
+  {% include 'workspace/molecules/add_sector_row.html' %}
+  </div>
 </div>
 {% include 'workspace/atoms/pagination_page_nav.html' with pagination_class_css="ap-sector-page-change" %}
 {% endwith %}
-{%else %}
-<div class="modal-body">
-  <div class="text-center">
-    {% include 'workspace/atoms/missing_icon.html' %}
-    <h3 class="mb-2">{% translate "No access point sectors on this tower yet."%}</h3>
-    <p>{% translate "To get started: Place an access point sector via the tower tooltip."%}</p>
-  </div>
-</div>
-{% endif %}
 {% endspaceless %}

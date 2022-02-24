@@ -219,7 +219,7 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
 
         for (const lString in this.sources) {
             const layerKey: OverlayString = lString as OverlayString;
-            $(`#switch-${layerKey}`).on('click', () => {
+            $(`#switch-${layerKey}`).prop('disabled', false).on('click', () => {
                 if (this.activeGeoSource === layerKey) {
                     // Toggled off, remove source
                     this.overlays[layerKey].remove();

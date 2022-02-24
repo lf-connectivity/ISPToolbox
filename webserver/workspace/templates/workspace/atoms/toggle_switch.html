@@ -1,6 +1,6 @@
 {% load static %}
 <label class="toggle-switch">
     <input name="{{ widget.name }}" {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"
-        {% endif %}type="checkbox" {% if id %} id="switch-{{id}}" {% endif %}>
+        {% endif %}type="checkbox" {% if id %} id="switch-{{id}}" {% endif %} {% if disabled %} disabled {% endif %}>
     <div class="slider"></div>
 </label>

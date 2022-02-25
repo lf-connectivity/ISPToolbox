@@ -524,6 +524,7 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
                     "cloudrf_coverage_geojson_json": None,
                     "default_cpe_height_ft": expected_default_cpe_height_ft,
                     "radius_miles": expected_max_radius_miles,
+                    "sector_count": 1,
                     "uneditable": DEFAULT_UNEDITABLE,
                 },
             }

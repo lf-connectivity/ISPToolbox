@@ -45,7 +45,7 @@ Cypress.Commands.add("market_eval_toggle_geo_overlay", (overlay) => {
     .parent()
     .within(() => {
       cy.get("div.slider").click();
-      cy.get("input").should('have.attr','data-loaded');
+      cy.get("input", {timeout: 30000}).should('have.attr','data-loaded');
     });
 });
 

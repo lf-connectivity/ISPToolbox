@@ -171,27 +171,17 @@ context("Market Evaluator map layers (also covers LOS map layers)", () => {
   // it("toggling features hidden / unhidden", () => {
 
     // "Hiding a tower should keep the point on the map, while not rendering the radius"
-    cy.draw_get_features().should("have.length", 6);
-
+    // TODO check hidden property of toggled components
     cy.get_user_map_layers_object(
       "Unnamed Tower"
     ).toggle_user_map_layers_feature();
-    cy.draw_get_features().should("have.length", 6);
-
     cy.get_user_map_layers_object(
       "Unnamed Tower"
     ).toggle_user_map_layers_feature();
-    cy.draw_get_features().should("have.length", 6);
 
 //   it("Hiding a coverage area should remove it from the map temporarily", () => {
-
-    cy.draw_get_features().should("have.length", 6);
-
+  // TODO check hidden property of toggled components
     cy.get_user_map_layers_object("Area 1").toggle_user_map_layers_feature();
-    cy.draw_get_features().should("have.length", 6);
-
     cy.get_user_map_layers_object("Area 1").toggle_user_map_layers_feature();
-    cy.draw_get_features().should("have.length", 6);
-    // TODO check hidden property of toggled components
   });
 });

@@ -144,17 +144,6 @@ export abstract class BaseAjaxLinkCheckSwitchSectorPopup extends BaseAjaxCPEFlow
     protected setEventHandlers(): void {
         $(`#${BACK_TO_MAIN_LINK_ID}`).off().on('click', this.onBackButton.bind(this));
 
-        $(`.${CONNECT_SECTOR_LINK_CLASS}`)
-            .off()
-            .on('click', (event: any) => {
-                // find closest li with data attribute.
-                let sectorId = $(event.target).closest('li[data-sector-id]').data('sectorId');
-                if (sectorId) {
-                    this.tooltipAction = true;
-                    this.onSelectSector(sectorId);
-                }
-            });
-
         $(`li.${CONNECT_SECTOR_LI_CLASS}`)
             .off()
             .on('mouseenter', (event: any) => {
@@ -164,6 +153,17 @@ export abstract class BaseAjaxLinkCheckSwitchSectorPopup extends BaseAjaxCPEFlow
             .on('mouseleave', () => {
                 this.debouncedHighlightSector.cancel();
                 this.debouncedHighlightAll();
+            })
+            .on('click', (event: any) => {
+                this.debouncedHighlightAll.cancel();
+                this.debouncedHighlightSector.cancel();
+
+                // find closest li with data attribute.
+                let sectorId = $(event.target).closest('li[data-sector-id]').data('sectorId');
+                if (sectorId) {
+                    this.tooltipAction = true;
+                    this.onSelectSector(sectorId);
+                }
             });
     }
 

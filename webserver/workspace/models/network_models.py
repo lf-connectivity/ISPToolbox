@@ -297,6 +297,10 @@ class AccessPointLocation(WorkspaceFeature):
             else None
         )
 
+    @property
+    def sector_count(self):
+        return self.accesspointsector_set.count()
+
     @classmethod
     def coordinates_validator(cls, value):
         coords = value.split(",")
@@ -408,6 +412,7 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
     lat = serializers.FloatField(read_only=True)
     lng = serializers.FloatField(read_only=True)
+    sector_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = AccessPointLocation

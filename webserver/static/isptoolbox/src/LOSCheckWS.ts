@@ -23,10 +23,31 @@ interface AccesPointWSCallback {
     (message: AccessPointCoverageResponse): void;
 }
 
+class LOSCheckWSPendingRequests {
+    private requests: { [a: string]: string };
+
+    constructor() {
+        this.requests = {};
+    }
+
+    push(request: string) {
+        let requestDict = JSON.parse(request);
+        if ('msg' in requestDict) {
+            this.requests[requestDict.msg] = request;
+        }
+    }
+
+    popAll(): Array<string> {
+        let values = Object.values(this.requests);
+        this.requests = {};
+        return values;
+    }
+}
+
 class LOSCheckWS {
     ws: WebSocket;
     networkName: string;
-    pendingRequests: Array<string> = [];
+    pendingRequests: LOSCheckWSPendingRequests;
     ap_callback: AccesPointWSCallback;
     hash: string = '';
 
@@ -37,6 +58,7 @@ class LOSCheckWS {
             return LOSCheckWS._instance;
         }
         this.networkName = networkName;
+        this.pendingRequests = new LOSCheckWSPendingRequests();
         this.connect();
         LOSCheckWS._instance = this;
     }
@@ -62,12 +84,9 @@ class LOSCheckWS {
 
         this.ws.onopen = (e) => {
             this.setWSConnectionStatus(true);
-            while (this.pendingRequests.length > 0) {
-                const msg = this.pendingRequests.pop();
-                if (typeof msg === 'string') {
-                    this.ws.send(msg);
-                }
-            }
+            this.pendingRequests.popAll().forEach((msg: string) => {
+                this.ws.send(msg);
+            });
         };
 
         this.ws.onmessage = (e) => {

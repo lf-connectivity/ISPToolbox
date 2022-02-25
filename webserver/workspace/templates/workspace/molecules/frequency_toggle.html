@@ -1,5 +1,5 @@
 <div class="dropdown freq-toggle" style="position: static !important;">
-    <button disabled ap-uuid-target="{{ap.uuid}}" class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ ap.frequency}} GHz</button>
+    <button {% if not enabled %}disabled{% endif %} ap-uuid-target="{{ap.uuid}}" class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ ap.frequency}} GHz</button>
     <div class="dropdown-menu" aria-labelledby="freq-dropdown">
       {% for k, v in results.serializer.context.freq_options.items %}
         <button ap-uuid-target="{{ap.uuid}}" value="{{v}}" class="dropdown-item freq-dropdown-item freq-option" type="button">{{k}}</button>

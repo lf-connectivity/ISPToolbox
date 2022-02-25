@@ -22,8 +22,8 @@
             <li class="name-row">
                 <div class="name-input">
                     <input type="text" value="{{ lat|floatformat:5 }}, {{ lng|floatformat:5 }}"
-                        id="lat-lng-input-tower-popup" placeholder="latitude, longitude" class="input--tower-name tall-input"
-                        name="coordinates" data-rule-latlng="true"
+                        id="lat-lng-input-tower-popup" placeholder="latitude, longitude"
+                        class="input--tower-name tall-input" name="coordinates" data-rule-latlng="true"
                         data-msg-latlng="{% translate "Please enter a valid &quot;latitude, longitude&quot; pair."%}"
                         required {% if uneditable %} readonly="true" {% endif %}>
                 </div>
@@ -46,11 +46,21 @@
             id='place-sector-btn-tower-popup'>
             {% translate "Add Access Point"%}
         </button>
-        <a href="#" data-toggle="modal" tabindex="-1" data-target="#accessPointModal" data-ap="{{uuid}}"">
-            <button class='btn btn-secondary isptoolbox-btn w-100' style="border: none; background-color: rgba(0,0,0,0) !important;">
-                {% translate "Add Multiple Access Points"%}
+        {% if sector_count > 0%}
+        <a href="#" data-toggle="modal" tabindex="-1" data-target="#accessPointModal" data-ap="{{uuid}}">
+            <button class='btn btn-secondary isptoolbox-btn w-100' style=" border: none; background-color:
+            rgba(0,0,0,0) !important;">
+            {% translate "Manage" %} {{sector_count}} {% translate "AP" %}{{sector_count|pluralize}}
             </button>
         </a>
+        {% else %}
+        <a href="#" data-toggle="modal" tabindex="-1" data-target="#accessPointModal" data-ap="{{uuid}}" data-new="true">
+                <button class='btn btn-secondary isptoolbox-btn w-100' style=" border: none; background-color:
+            rgba(0,0,0,0) !important;">
+            {% translate "Add Multiple Access Points"%}
+            </button>
+        </a>
+        {% endif %}
         {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-tower-row-tower-popup" delete_row_a_id="tower-delete-btn" delete_row_object_name="Tower" delete_row_last_updated=last_updated %}
     </div>
 </ul>

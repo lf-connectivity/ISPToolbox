@@ -2,11 +2,11 @@
 
 <tr class="tower-row" ap-uuid-target="{{ap.uuid}}">
     <td class="align-middle" scope="row">{{ forloop.counter0|add:offset }}</td>
-    <td><input name="name" class="name-input" type="text" value="{{ ap.name }}" ap-uuid-target="{{ap.uuid}}" disabled></td>
+    <td><input name="name" class="name-input" type="text" value="{{ ap.name }}" ap-uuid-target="{{ap.uuid}}" {%if not enabled %}disabled{%endif%}></td>
     <td>
         <div class="input-group metric-input">
             <div class="input-group-prepend">
-                <input name="heading" type="number" disabled ap-uuid-target="{{ap.uuid}}" value="{{ap.heading}}">
+                <input name="heading" type="number" {%if not enabled %}disabled{%endif%} ap-uuid-target="{{ap.uuid}}" value="{{ap.heading}}">
                 <span class="input-group-text">
                     °
                 </span>
@@ -17,7 +17,7 @@
         <div class="input-group metric-input">
             <div class="input-group-prepend">
                 <input name="azimuth" type="text" value="{{ ap.azimuth }}" ap-uuid-target="{{ap.uuid}}"
-                    disabled>
+                    {%if not enabled %}disabled{%endif%}>
                 <span class="input-group-text">°</span>
             </div>
         </div>
@@ -31,7 +31,29 @@
                 {% else %}
                     value="{{ap.height_ft|floatformat:0}}"
                 {% endif %}
-                ap-uuid-target="{{ap.uuid}}" disabled>
+                ap-uuid-target="{{ap.uuid}}" {%if not enabled %}disabled{%endif%}>
+                {% if units == "SI" %}
+                    <span class="input-group-text">
+                        m
+                    </span>
+                {% else %}
+                    <span class="input-group-text">
+                        ft
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </td>
+    <td>
+        <div class="input-group metric-input">
+            <div class="input-group-prepend">
+                <input name="default_cpe_height" type="text"
+                {% if units == "SI" %}
+                    value="{{ap.default_cpe_height|floatformat:1}}"
+                {% else %}
+                    value="{{ap.default_cpe_height_ft|floatformat:0}}"
+                {% endif %}
+                ap-uuid-target="{{ap.uuid}}" {%if not enabled %}disabled{%endif%}>
                 {% if units == "SI" %}
                     <span class="input-group-text">
                         m
@@ -53,7 +75,7 @@
                 {% else %}
                     value="{{ap.radius_miles|floatformat:2}}"
                 {% endif %}
-                    ap-uuid-target="{{ap.uuid}}" disabled>
+                    ap-uuid-target="{{ap.uuid}}" {%if not enabled %}disabled{%endif%}>
                 {% if units == "SI" %}
                     <span class="input-group-text">
                         km
@@ -68,18 +90,18 @@
     </td>
     <td>
         <div>
-            <input hidden value="{{ ap.frequency }}" type="text" class="input-group" name="frequency" ap-uuid-target="{{ap.uuid}}" disabled>
+            <input hidden value="{{ ap.frequency }}" type="text" class="input-group" name="frequency" ap-uuid-target="{{ap.uuid}}" {%if not enabled %}disabled{%endif%}>
             {% include "workspace/molecules/frequency_toggle.html" %}
         </div>
     </td>
     <td class="date align-middle">{{ap.last_updated|lower}}</td>
     <td>
         <div class="btn-group" role="group" aria-label="edit-btn-group">
-            <button type="button" class="btn d-none ap-save-edit-btn" title="Save AP" id="ap-save-edit-{{ap.uuid}}"
+            <button type="button" class="btn {% if not enabled %}d-none{% endif %} ap-save-edit-btn {% if enabled %}ap-add-new-row-save{% endif %}" title="Save AP" id="ap-save-edit-{{ap.uuid}}"
                 data-target="{{ap.uuid}}">
                 {% include 'workspace/atoms/icons/save_icon.html'%}
             </button>
-            <button type="button" class="btn btn-edit ap-edit-btn" title="Edit AP" data-target="{{ap.uuid}}">
+            <button type="button" class="btn {% if enabled %}d-none{% endif %} btn-edit ap-edit-btn" title="Edit AP" data-target="{{ap.uuid}}">
                 {% include 'workspace/atoms/pen_icon.html'%}
             </button>
             <button type="button" class="btn btn-edit ap-delete-btn" title="Delete AP" data-target="{{ap.uuid}}">

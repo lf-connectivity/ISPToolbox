@@ -2,180 +2,224 @@
 {% load rest_framework i18n %}
 {% with ordering=results.serializer.context.ordering units=request.GET.units %}
 <div class="modal-body isptoolbox-form">
+  {% if not results and not request.GET.new %}
+  <div class="text-center mt-5">
+    {% include 'workspace/atoms/missing_icon.html' %}
+    <h3 class="mb-2">{% translate "No access point sectors on this tower yet."%}</h3>
+    <p>{% translate "To get started: Place an access point sector via the tower tooltip."%}</p>
+  </div>
+  {% endif %}
+  {% if results or request.GET.new %}
   <div style="display: block; overflow-x: auto;">
-  <table class="table table-sm table-hover table-modal">
-    <thead class="thead-modal">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col"><div class="d-flex">{% translate 'Name' %}
-          {% if ordering == "name"%}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="-name">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' %}
-            </button>
-          </a>
-          {% elif ordering == "name" %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="name">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
-            </button>
-          </a>
-          {% else %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="name">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
-            </button>
-          </a>
-          {% endif %}
-        </div></th>
-        <th scope="col"><div class="d-flex justify-content-end">{% translate "Heading"%}
-          {% if ordering == "heading"%}
-          <a class="sort-ap d-flex align-items-center" ordering-target="-heading">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' %}
-            </button>
-          </a>
-          {% elif ordering == "-heading" %}
-          <a class="sort-ap d-flex align-items-center" ordering-target="heading">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html'  with flip=True %}
-            </button>
-          </a>
-          {% else %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="heading">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
-            </button>
-          </a>
-          {% endif %}
-        </div></th>
-        <th scope="col"><div class="d-flex justify-content-end text-right">{% translate "Beamwidth Azimuth"%}
-          {% if ordering == "azimuth"%}
-          <a class="sort-ap d-flex align-items-center" ordering-target="-azimuth">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' %}
-            </button>
-          </a>
-          {% elif ordering == "-azimuth" %}
-          <a class="sort-ap d-flex align-items-center" ordering-target="azimuth">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
-            </button>
-          </a>
-          {% else %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="azimuth">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
-            </button>
-          </a>
-          {% endif %}
-        </div></th>
-        <th scope="col"><div class="d-flex justify-content-end">{% translate 'Height' %}
-          {% if ordering == "height"%}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="-height">
-            <button class="btn">
-              {% include 'workspace/atoms/arrow_icon.html' %}
-            </button>
-          </a>
-          {% elif ordering == "-height" %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="height">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
-            </button>
-          </a>
-          {% else %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="height">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
-            </button>
-          </a>
-          {% endif %}
-        </div></th>
-        <th scope="col"><div class="d-flex justify-content-end">{% translate 'Distance' %}
-          {% if ordering == "radius"%}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="-radius">
-            <button class="btn">
-              {% include 'workspace/atoms/arrow_icon.html' %}
-            </button>
-          </a>
-          {% elif ordering == "-radius" %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="radius">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
-            </button>
-          </a>
-          {% else %}
-          <a name="" class="sort-ap d-flex align-items-center justify-content-end" ordering-target="radius">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
-            </button>
-          </a>
-          {% endif %}
-        </div></th>
-        <th scope="col"><div class="d-flex justify-content-end">{% translate 'Frequency' %}
-          {% if ordering == "frequency"%}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="-frequency">
-            <button class="btn">
-              {% include 'workspace/atoms/arrow_icon.html' %}
-            </button>
-          </a>
-          {% elif ordering == "-frequency" %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="frequency">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
-            </button>
-          </a>
-          {% else %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="frequency">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
-            </button>
-          </a>
-          {% endif %}
-        </div></th>
-        <th scope="col"><div class="d-flex justify-content-end text-right date-label">{% translate "Last Modified"%}
-          {% if ordering == "last_updated"%}
-          <a class="sort-ap d-flex align-items-center" ordering-target="-last_updated">
-            <button class="btn">
-              {% include 'workspace/atoms/arrow_icon.html' %}
-            </button>
-          </a>
-          {% elif ordering == "-last_updated" %}
-          <a class="sort-ap d-flex align-items-center" ordering-target="last_updated" class="last-updated">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
-            </button>
-          </a>
-          {% else %}
-          <a name="" class="sort-ap d-flex align-items-center" ordering-target="last_updated">
-            <button class="sort-btn">
-              {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
-            </button>
-          </a>
-          {% endif %}
-        </div></th>
-        <th scope="col"></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for ap in results %}
-      {% include 'workspace/atoms/access_point_sector_row.html' %}
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% if not results %}
-<div class="text-center">
-  {% include 'workspace/atoms/missing_icon.html' %}
-  <h3 class="mb-2">{% translate "No access point sectors on this tower yet."%}</h3>
-  <p>{% translate "To get started: Place an access point sector via the tower tooltip."%}</p>
-</div>
-{% endif %}
+    <table class="table table-sm table-hover table-modal">
+      <thead class="thead-modal">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">
+            <div class="d-flex">{% translate 'Name' %}
+              {% if ordering == "name"%}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="-name">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' %}
+                </button>
+              </a>
+              {% elif ordering == "name" %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="name">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+                </button>
+              </a>
+              {% else %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="name">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
+                </button>
+              </a>
+              {% endif %}
+            </div>
+          </th>
+          <th scope="col">
+            <div class="d-flex justify-content-end">{% translate "Heading"%}
+              {% if ordering == "heading"%}
+              <a class="sort-ap d-flex align-items-center" ordering-target="-heading">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' %}
+                </button>
+              </a>
+              {% elif ordering == "-heading" %}
+              <a class="sort-ap d-flex align-items-center" ordering-target="heading">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html'  with flip=True %}
+                </button>
+              </a>
+              {% else %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="heading">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
+                </button>
+              </a>
+              {% endif %}
+            </div>
+          </th>
+          <th scope="col">
+            <div class="d-flex justify-content-end text-right">{% translate "Beamwidth Azimuth"%}
+              {% if ordering == "azimuth"%}
+              <a class="sort-ap d-flex align-items-center" ordering-target="-azimuth">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' %}
+                </button>
+              </a>
+              {% elif ordering == "-azimuth" %}
+              <a class="sort-ap d-flex align-items-center" ordering-target="azimuth">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
+                </button>
+              </a>
+              {% else %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="azimuth">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
+                </button>
+              </a>
+              {% endif %}
+            </div>
+          </th>
+          <th scope="col">
+            <div class="d-flex justify-content-end">{% translate 'Access Point Height above ground' %}
+              {% if ordering == "height"%}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="-height">
+                <button class="btn">
+                  {% include 'workspace/atoms/arrow_icon.html' %}
+                </button>
+              </a>
+              {% elif ordering == "-height" %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="height">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+                </button>
+              </a>
+              {% else %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="height">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
+                </button>
+              </a>
+              {% endif %}
+            </div>
+          </th>
+          <th scope="col">
+            <div class="d-flex justify-content-end">{% translate 'Customer Antenna Height above rooftop' %}
+              {% if ordering == "default_cpe_height"%}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="-default_cpe_height">
+                <button class="btn">
+                  {% include 'workspace/atoms/arrow_icon.html' %}
+                </button>
+              </a>
+              {% elif ordering == "-default_cpe_height" %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="default_cpe_height">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+                </button>
+              </a>
+              {% else %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="default_cpe_height">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
+                </button>
+              </a>
+              {% endif %}
+            </div>
+          </th>
+          <th scope="col">
+            <div class="d-flex justify-content-end">{% translate 'Distance' %}
+              {% if ordering == "radius"%}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="-radius">
+                <button class="btn">
+                  {% include 'workspace/atoms/arrow_icon.html' %}
+                </button>
+              </a>
+              {% elif ordering == "-radius" %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="radius">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+                </button>
+              </a>
+              {% else %}
+              <a name="" class="sort-ap d-flex align-items-center justify-content-end" ordering-target="radius">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
+                </button>
+              </a>
+              {% endif %}
+            </div>
+          </th>
+          <th scope="col">
+            <div class="d-flex justify-content-end">{% translate 'Frequency' %}
+              {% if ordering == "frequency"%}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="-frequency">
+                <button class="btn">
+                  {% include 'workspace/atoms/arrow_icon.html' %}
+                </button>
+              </a>
+              {% elif ordering == "-frequency" %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="frequency">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True%}
+                </button>
+              </a>
+              {% else %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="frequency">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
+                </button>
+              </a>
+              {% endif %}
+            </div>
+          </th>
+          <th scope="col">
+            <div class="d-flex justify-content-end text-right date-label">{% translate "Last Modified"%}
+              {% if ordering == "last_updated"%}
+              <a class="sort-ap d-flex align-items-center" ordering-target="-last_updated">
+                <button class="btn">
+                  {% include 'workspace/atoms/arrow_icon.html' %}
+                </button>
+              </a>
+              {% elif ordering == "-last_updated" %}
+              <a class="sort-ap d-flex align-items-center" ordering-target="last_updated" class="last-updated">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True %}
+                </button>
+              </a>
+              {% else %}
+              <a name="" class="sort-ap d-flex align-items-center" ordering-target="last_updated">
+                <button class="sort-btn">
+                  {% include 'workspace/atoms/arrow_icon.html' with flip=True light=True%}
+                </button>
+              </a>
+              {% endif %}
+            </div>
+          </th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ap in results %}
+        {% include 'workspace/atoms/access_point_sector_row.html' %}
+        {% endfor %}
+        {% if request.GET.new %}
+        {% with enabled=True ap=results.serializer.context.default_sector %}
+        {% include 'workspace/atoms/access_point_sector_row.html' %}
+        {% endwith %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
   <input hidden id="ap-sector-modal-ordering" value="{{ordering}}">
   <input hidden id="ap-sector-uuid" value="{{request.GET.ap}}">
   <input hidden id="ap-modal-page-num" value="{{current}}">
   <div class="mt-2">
-  {% include 'workspace/molecules/add_sector_row.html' %}
+    {% include 'workspace/molecules/add_sector_row.html' %}
   </div>
 </div>
 {% include 'workspace/atoms/pagination_page_nav.html' with pagination_class_css="ap-sector-page-change" %}

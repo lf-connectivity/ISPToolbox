@@ -339,7 +339,8 @@ class AccessPointSectorCreate(
                 '18 GHz': 18.7,
                 '24 GHz': 24.35,
                 '60 GHz': 64.79
-            }
+            },
+            'default_sector': AccessPointSector()
         })
         return context
 

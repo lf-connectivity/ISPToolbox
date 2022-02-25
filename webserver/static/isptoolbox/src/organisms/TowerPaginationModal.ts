@@ -14,11 +14,11 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
     constructor(private map: mapboxgl.Map, private draw: MapboxDraw) {
         this.subscriptions = initializeIspToolboxInterface(this);
         $(this.selector).on('shown.bs.modal', (e: JQuery.ClickEvent) => {
-            if(e.relatedTarget)
-            {
+            if (e.relatedTarget) {
                 var uuid = $(e.relatedTarget).data('ap') as string;
-                if(uuid) {
-                    this.getAccessPointSectors({ ordering: undefined, page: "1", session: undefined, ap: uuid });
+                var new_form = $(e.relatedTarget).data('new') as string;
+                if (uuid) {
+                    this.getAccessPointSectors({ ordering: undefined, page: "1", session: undefined, ap: uuid, new: new_form});
                 } else {
                     this.getAccessPoints(undefined);
                 }
@@ -104,6 +104,7 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
                 page: undefined | string;
                 session: string | null | undefined;
                 ap: string;
+                new: string | null | undefined;
             }
     ) {
         if (data != null) {
@@ -146,13 +147,13 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
             const ordering = event.currentTarget.getAttribute('ordering-target') as string;
             const page = $('#ap-modal-page-num').val() as string;
             const ap = $('#ap-sector-uuid').val() as string
-            this.getAccessPointSectors({ ordering, page, session: undefined, ap });
+            this.getAccessPointSectors({ ordering, page, session: undefined, ap, new: undefined });
         });
         $('.ap-sector-page-change').on('click', (event) => {
             const ordering = $('#ap-modal-ordering').val() as string;
             const ap = $('#ap-sector-uuid').val() as string
             const page = event.currentTarget.getAttribute('page-target') as string;
-            this.getAccessPointSectors({ ordering, page, session: undefined, ap });
+            this.getAccessPointSectors({ ordering, page, session: undefined, ap, new: undefined });
         });
         $(`.ap-delete-btn`).on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');
@@ -175,53 +176,85 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
         });
         $('.ap-save-edit-btn').on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');
+            const tower_uuid = $('#ap-sector-uuid').val() as string;
             const drawn_features = this.draw.getAll();
             const ap = drawn_features.features.filter((feat: any) => feat.properties.uuid === uuid);
+            const feat_properties: any = {};
             $(`input[ap-uuid-target=${uuid}], select[ap-uuid-target='${uuid}']`).each((idx, elem) => {
-                ap.forEach((feat: any) => {
-                    let attr_name = elem.getAttribute('name');
-                    let val = $(elem).val();
-                    if (isUnitsUS()) {
-                        switch (attr_name) {
-                            case 'height':
-                                //@ts-ignore
-                                val = parseFloat(val) * 0.3048;
-                                break;
-                            case 'max_radius':
-                                attr_name = 'radius';
-                                //@ts-ignore
-                                val = parseFloat(val) * 1.60934;
-                                break;
-                            default:
-                        }
+                let attr_name = elem.getAttribute('name');
+                let val = $(elem).val();
+                if (isUnitsUS()) {
+                    switch (attr_name) {
+                        case 'height':
+                            //@ts-ignore
+                            val = parseFloat(val) * 0.3048;
+                            break;
+                        case 'default_cpe_height':
+                            //@ts-ignore
+                            val = parseFloat(val) * 0.3048;
+                            break;
+                        case 'max_radius':
+                            attr_name = 'radius';
+                            //@ts-ignore
+                            val = parseFloat(val) * 1.60934;
+                            break;
+                        default:
                     }
-                    if (attr_name) {
-                        this.draw.setFeatureProperty(feat.id, attr_name, val);
-                    }
-                });
+                }
+                if (attr_name) {
+                    feat_properties[attr_name] = val;
+                }
             });
-            const feats = ap.map((feat: any) => this.draw.get(feat.id));
-            this.map.fire('draw.update', { features: feats });
+            if (ap.length === 0) {
+                const feature = {
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [0, 0] },
+                    properties: {
+                        feature_type: WorkspaceFeatureTypes.SECTOR, ap: tower_uuid,
+                        uneditable: true, ...feat_properties
+                    }
+                };
+                this.map.fire('draw.create', {
+                    features: [
+                        feature
+                    ]
+                });
+            } else {
+                ap.forEach((feat: any) => {
+                    Object.entries(feat_properties).forEach(([attr_name, val]) => {
+                        this.draw.setFeatureProperty(feat.id, attr_name, val);
+                    })
+                });
+                const feats = ap.map((feat: any) => this.draw.get(feat.id));
+                this.map.fire('draw.update', { features: feats });
+            }
+
             $(`#ap-save-edit-${uuid}`).addClass('d-none');
             $(`input[ap-uuid-target='${uuid}']`).prop('disabled', true);
             $(`button.dropdown-toggle[ap-uuid-target='${uuid}']`).prop("disabled", true);
             $(`.ap-edit-btn[data-target='${uuid}']`).removeClass('d-none');
         });
         $('#create_new_sector_from_modal').on('click', (event) => {
-            const uuid = event.currentTarget.getAttribute('data-target');
-            const sector = {
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [0, 0]
-                },
-                properties: {
-                    feature_type: WorkspaceFeatureTypes.SECTOR,
-                    ap: uuid,
-                    uneditable: true
-                }
-            };
-            this.map.fire('draw.create', { features: [sector] });
+            // save row if user requested adding new AP
+            if($('.ap-add-new-row-save').length > 0)
+            {
+                $('.ap-add-new-row-save').trigger('click');
+            } else {
+                const uuid = event.currentTarget.getAttribute('data-target');
+                const sector = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [0, 0]
+                    },
+                    properties: {
+                        feature_type: WorkspaceFeatureTypes.SECTOR,
+                        ap: uuid,
+                        uneditable: true
+                    }
+                };
+                this.map.fire('draw.create', { features: [sector] });
+            }
         })
 
 
@@ -256,7 +289,7 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
         $(`.ap-sector-btn`).on('click', (event) => {
             const uuid = event.currentTarget.getAttribute('data-target');
             if (typeof uuid === 'string') {
-                this.getAccessPointSectors({ ordering: undefined, page: "1", session: undefined, ap: uuid })
+                this.getAccessPointSectors({ ordering: undefined, page: "1", session: undefined, ap: uuid, new: undefined})
             }
         });
 
@@ -327,7 +360,7 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
                 const ordering = $('#ap-modal-ordering').val() as string;
                 const ap = $('#ap-sector-uuid').val() as string
                 const page = $('#ap-modal-page-num').val() as string;
-                this.getAccessPointSectors({ ordering, page, session: undefined, ap: ap });
+                this.getAccessPointSectors({ ordering, page, session: undefined, ap: ap, new: undefined });
             }
             if (event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.AP)) {
                 this.getAccessPoints(undefined);

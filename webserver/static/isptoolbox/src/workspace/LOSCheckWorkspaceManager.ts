@@ -48,6 +48,8 @@ export class LOSCheckWorkspaceManager extends BaseWorkspaceManager {
                         });
                     });
                 }
+            } else if (feature.properties?.feature_type === WorkspaceFeatureTypes.SECTOR) {
+                this.saveWorkspaceFeature(new AccessPointSector(this.map, this.draw, feature));
             } else if (feature.properties.radius) {
                 this.createApFeature(feature);
             }

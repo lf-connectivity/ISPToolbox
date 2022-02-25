@@ -40,32 +40,33 @@ jobs:
         with:
           start: make run_test
           wait-on: "http://localhost:8000, http://localhost:8020"
-      - name: Generate E2E test backend coverage
-        run: |
-          docker stop $(docker ps -a -f "name=isptoolbox_" -q)
-          cd webserver
-          python3 ../scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
-          coverage combine
-          coverage report
-          coverage html
-          coverage erase
-          cd ..
-      - name: Upload E2E test backend coverage
-        uses: actions/upload-artifact@v1
-        with:
-          name: coverage-backend
-          path: coverage/htmlcov
-      - name: Upload E2E test frontend coverage
-        uses: actions/upload-artifact@v1
-        with:
-          name: coverage-frontend
-          path: frontend_coverage/reports/lcov-report
-      - name: Post-upload artifact removal for coverage
-        if: always()
-        run: |
-          sudo rm -rf /usr/src/app
-          rm -rf coverage
-          rm -rf frontend_coverage
+    # TODO: fix coverage tests
+      # - name: Generate E2E test backend coverage
+      #   run: |
+      #     docker stop $(docker ps -a -f "name=isptoolbox_" -q)
+      #     cd webserver
+      #     python3 ../scripts/create_coverage_file.py .coveragerc-base .coveragerc-dev .coveragerc
+      #     coverage combine
+      #     coverage report
+      #     coverage html
+      #     coverage erase
+      #     cd ..
+      # - name: Upload E2E test backend coverage
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: coverage-backend
+      #     path: coverage/htmlcov
+      # - name: Upload E2E test frontend coverage
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: coverage-frontend
+      #     path: frontend_coverage/reports/lcov-report
+      # - name: Post-upload artifact removal for coverage
+      #   if: always()
+      #   run: |
+      #     sudo rm -rf /usr/src/app
+      #     rm -rf coverage
+      #     rm -rf frontend_coverage
       - name: Upload Failing Cypress Screenshots
         uses: actions/upload-artifact@v1
         if: failure()

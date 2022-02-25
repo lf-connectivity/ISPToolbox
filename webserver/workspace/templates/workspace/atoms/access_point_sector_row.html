@@ -1,7 +1,7 @@
 {% load rest_framework %}
 
 <tr class="tower-row" ap-uuid-target="{{ap.uuid}}">
-    <td class="align-middle" scope="row">{{ forloop.counter0|add:offset }}</td>
+    <td class="align-middle" scope="row">{% if forloop %}{{ forloop.counter0 | add:offset }}{% else %}{{ results|length | add:offset }}{%endif%}</td>
     <td><input name="name" class="name-input" type="text" value="{{ ap.name }}" ap-uuid-target="{{ap.uuid}}" {%if not enabled %}disabled{%endif%}></td>
     <td>
         <div class="input-group metric-input">
@@ -94,7 +94,7 @@
             {% include "workspace/molecules/frequency_toggle.html" %}
         </div>
     </td>
-    <td class="date align-middle">{{ap.last_updated|lower}}</td>
+    <td class="date align-middle">{% if ap.last_updated %}{{ap.last_updated|lower }}{% endif %}</td>
     <td>
         <div class="btn-group" role="group" aria-label="edit-btn-group">
             <button type="button" class="btn {% if not enabled %}d-none{% endif %} ap-save-edit-btn {% if enabled %}ap-add-new-row-save{% endif %}" title="Save AP" id="ap-save-edit-{{ap.uuid}}"

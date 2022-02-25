@@ -22,7 +22,7 @@ Cypress.Commands.add("get_user_map_layers", () => {
 });
 
 Cypress.Commands.add("get_user_map_layers_object", (text) => {
-  cy.get(`div#map-objects-section div.object-toggle-row:contains(${text})`, {timeout: 10000});
+  cy.get(`div#map-objects-section div.object-toggle-row:contains(${text})`, {timeout: 30000});
 });
 
 Cypress.Commands.add(

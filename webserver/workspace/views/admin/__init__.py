@@ -1,5 +1,5 @@
 from .dashboard_views import (
-    WorkspaceEngagementView, CeleryTaskPerformanceView
+    WorkspaceEngagementView, CeleryTaskPerformanceView, FlowerAsyncDashboardView
 )
 
-__all__ = ['WorkspaceEngagementView', 'CeleryTaskPerformanceView']
+__all__ = ['WorkspaceEngagementView', 'CeleryTaskPerformanceView', 'FlowerAsyncDashboardView']

@@ -10,7 +10,10 @@ from collections import defaultdict
 import datetime
 from django_celery_results.models import TaskResult
 from celery import states
-
+from revproxy.views import ProxyView
+from webserver import settings
+from django.utils.decorators import method_decorator
+from IspToolboxAccounts.admin import admin_required
 
 class CeleryTaskPerformanceView(SuperuserRequiredMixin, View):
     def get(self, request):
@@ -115,3 +118,20 @@ class WorkspaceEngagementView(SuperuserRequiredMixin, View):
             }
         )
         return render(request, "workspace/pages/admin_dashboard.html", context)
+
+
+class FlowerAsyncDashboardView(ProxyView):
+    upstream = 'http://flower:5555'
+
+    def get_request_headers(self):
+        request_headers = super().get_request_headers()
+        request_headers['Host'] = 'isptoolbox.io' if settings.PROD else 'localhost'
+        request_headers['Upgrade'] = 'Upgrade'
+        request_headers['Connection'] = 'Upgrade'
+        return request_headers
+
+    @method_decorator(admin_required)
+    def dispatch(self, request, *args, **kwargs):
+        # Get rid of leading / in path
+        request.path = request.path[1:]
+        return super().dispatch(request, request.path)

@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'IspToolboxAccounts',
     # ISP Toolbox App
     'IspToolboxApp',
+    'revproxy',
     # Django
     'workspace.apps.IspToolboxAdminConfig',
     'django.contrib.auth',

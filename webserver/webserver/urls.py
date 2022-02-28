@@ -25,11 +25,10 @@ from mmwave.views import (
 )
 from dataUpdate.views import CountrySourceUpdatedView, ASNElasticSearchView, RDAPQueryView
 from Overlay.views import OverlaySource
-from IspToolboxAccounts.views import (
-     IntegrationTestAccountCreationView, UpdateNuxSettingView, CreateNewUserAccount,
-     IntegrationTestAccountLoginView
+from IspToolboxAccounts.views import IntegrationTestAccountCreationView, UpdateNuxSettingView, CreateNewUserAccount
+from workspace.views import (
+     AdminGeneric403View, WorkspaceEngagementView, CeleryTaskPerformanceView, FlowerAsyncDashboardView
 )
-from workspace.views import AdminGeneric403View, WorkspaceEngagementView, CeleryTaskPerformanceView
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
@@ -115,6 +114,7 @@ urlpatterns = [
     # Dashboard Paths
     path('admin/dashboard/', WorkspaceEngagementView.as_view(), name="admin-dashboard"),
     path('admin/celery/', CeleryTaskPerformanceView.as_view(), name="celery-summary"),
+    re_path(r'async/.*', FlowerAsyncDashboardView.as_view(), name="async-dashboard"),
     # Admin User Creation
     path('admin/create-account/', CreateNewUserAccount.as_view(), name="admin-create-user"),
 

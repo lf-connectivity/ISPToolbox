@@ -61,4 +61,6 @@ def admin_test(user):
     return False
 
 
-admin.site.login = user_passes_test(admin_test, login_url=reverse_lazy('saml2:saml2_login'))(admin.site.login)
+admin_required = user_passes_test(admin_test, login_url=reverse_lazy('saml2:saml2_login'))
+
+admin.site.login = admin_required(admin.site.login)

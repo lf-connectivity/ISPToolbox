@@ -41,7 +41,7 @@ Cypress.Commands.add("market_eval_click_info_tooltip", (text) => {
 });
 
 Cypress.Commands.add("market_eval_toggle_geo_overlay", (overlay) => {
-  cy.get(`p:contains(${overlay})`, {timeout: 10000})
+  cy.get(`p:contains(${overlay})`)
     .parent()
     .find('div.slider').click();
   cy.get(`p:contains(${overlay})`, {timeout: 10000})

@@ -5,7 +5,7 @@
     "essential": true,
     "cpu": 1536,
     "memory": 4096,
-    "links": [],
+    "links": ["flower"],
     "portMappings": [
       {
         "containerPort": 8000,
@@ -123,7 +123,7 @@
     "essential": true,
     "cpu": 512,
     "memory": 2048,
-    "links": ["django-app", "websocket-app", "node-app" , "flower"],
+    "links": ["django-app", "websocket-app", "node-app"],
     "portMappings": [
       {
         "containerPort": 80,

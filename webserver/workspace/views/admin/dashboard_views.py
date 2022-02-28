@@ -15,6 +15,7 @@ from webserver import settings
 from django.utils.decorators import method_decorator
 from IspToolboxAccounts.admin import admin_required
 
+
 class CeleryTaskPerformanceView(SuperuserRequiredMixin, View):
     def get(self, request):
         context = {**admin.site.each_context(request)}

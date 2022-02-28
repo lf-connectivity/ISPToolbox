@@ -354,16 +354,6 @@ INSERT INTO public."Overlay_overlay"(type, source_url, source_layer, created)
 VALUES ('communityConnect', 'mapbox://alexychong.bp1lmhp5', 'calculated-cc-speeds-shp-casfao', NOW())
 ```
 
-## Async Task Monitoring with Flower (pronounced flow-er)
-
-url: isptoolbox.io/async/
-
-username: isptoolboxadmin
-
-password: wisplover123
-
-![Alt text](images/flower_signin.png "Title")
-
 ### Inspect Running / Queued / Failed Jobs
 
 ![Alt text](images/flower_sample.png "Title")

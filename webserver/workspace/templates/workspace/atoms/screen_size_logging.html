@@ -1,0 +1,27 @@
+{% csrf_token %}
+<script>
+  const screen_size = {};
+  $(() => {
+    const screen_size = [];
+    if (window) {
+      if (window.screen) {
+        screen_size.push(window.screen.width);
+        screen_size.push(window.screen.height);
+        screen_size.push(window.screen.availWidth);
+        screen_size.push(window.screen.availHeight);
+      }
+      screen_size.push(window.innerWidth);
+      screen_size.push(window.innerHeight);
+      screen_size.push(window.devicePixelRatio);
+    }
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    $.post({
+      url: "{% url 'workspace:analytics' %}",
+      data: JSON.stringify({url: window.location.pathname, eventType: 'screen_dim', sessionId: JSON.stringify(screen_size) }),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      }
+    });
+  });
+</script>

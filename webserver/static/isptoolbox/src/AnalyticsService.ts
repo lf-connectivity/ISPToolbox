@@ -1,4 +1,5 @@
 import { getCookie } from './utils/Cookie';
+import { djangoUrl } from './utils/djangoUrl';
 
 interface Event {
     eventType: string;
@@ -27,7 +28,7 @@ class AnalyticsService {
             event.sessionId = this.sessionId;
         }
 
-        const response = await fetch('/pro/workspace/api/analytics/events/', {
+        const response = await fetch(djangoUrl('workspace:analytics'), {
             method: 'POST',
             mode: 'same-origin',
             credentials: 'same-origin',

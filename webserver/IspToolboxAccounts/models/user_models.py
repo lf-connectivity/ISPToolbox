@@ -148,6 +148,9 @@ class PageVisit(models.Model):
     request = models.CharField(
         max_length=255, blank=True, null=True, db_index=True
     )
+    useragent = models.CharField(
+        max_length=255, blank=True, null=True, default=None, db_index=True
+    )
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     response_code = models.IntegerField(
         blank=True, null=True

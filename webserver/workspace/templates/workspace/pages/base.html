@@ -1,6 +1,6 @@
 {% spaceless %}
 <!DOCTYPE html>
-{% load static i18n django_htmx %}
+{% load static i18n %}
 <html lang="en">
 <head>
 {% block title %}<title>{% if title %}{% translate title %}{% else %}{% translate "ISP Toolbox" %}{% endif %}</title>{% endblock title %}
@@ -31,8 +31,6 @@
             {% endblock %}
         </footer>
     </div>
-    <script src="{% static 'workspace/htmx.min.js' %}"></script>
-    {% django_htmx_script %}
 </body>
 </html>
 {% endspaceless %}

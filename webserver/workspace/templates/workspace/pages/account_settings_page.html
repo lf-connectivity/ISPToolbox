@@ -9,6 +9,22 @@
 {% endblock %}
 {% block content %}
 <div class="container" style="margin-top: 100px;">
+    {% if request.POST and form_save_success %}
+    <div class="alert alert-success text-center alert-dismissible fade show" role="alert" id="success-update-profile">
+        {% include "workspace/atoms/icons/toast_icons/success.html" %} <strong
+            class="ml-3">{% translate "Success:" %}</strong> {% translate "Profile information updated." %}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <script>
+        $(()=>{
+            setTimeout(()=>{
+                $('#success-update-profile').slideUp(500).delay(500).alert('close');
+            }, 2000)
+        })
+    </script>
+    {% endif %}
     <div class="d-flex justify-content-between">
         <h1>{% translate "Manage Account"%}</h1>
         <a class="btn btn-primary isptoolbox-btn m-2 p-2"
@@ -35,11 +51,13 @@
                     <div class="card-body py-0">
                         <h1 class="pb-3"></h1>
                         <p><strong>{% translate "Delete ISP Toolbox Account"%}</strong></p>
-                        <p>{% blocktranslate %}If you wish to delete your ISP Toolbox account, you may do so by clicking on the link
+                        <p>{% blocktranslate %}If you wish to delete your ISP Toolbox account, you may do so by clicking
+                            on the link
                             below. Deleting your account is permanent and will remove all content associated with
                             it.{% endblocktranslate%}</p>
                         <div>
-                            <a href="{% url 'workspace:delete_your_information'%}">{% translate "Delete Your Information"%}</a>
+                            <a
+                                href="{% url 'workspace:delete_your_information'%}">{% translate "Delete Your Information"%}</a>
                         </div>
                     </div>
                 </div>

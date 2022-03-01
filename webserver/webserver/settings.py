@@ -140,6 +140,8 @@ INSTALLED_APPS = [
     'djangosaml2',
     # Lazy / Guest User
     'guest_user',
+    # HTMX ajax lib
+    "django_htmx",
 ]
 
 if DEBUG:
@@ -273,6 +275,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'IspToolboxAccounts.middleware.logpagevisit',
+    "django_htmx.middleware.HtmxMiddleware",
     'djangosaml2.middleware.SamlSessionMiddleware',
 ]
 

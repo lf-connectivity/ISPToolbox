@@ -128,6 +128,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
             if context['optional_account_form'].is_valid():
                 context['optional_account_form'].instance.owner = request.user
                 context['optional_account_form'].save()
+                context['form_save_success'] = True
         else:
             context.update({'optional_account_form': IspToolboxUserSignUpInfoForm(
                 instance=IspToolboxUserSignUpInfoForm.Meta.model.objects.get(

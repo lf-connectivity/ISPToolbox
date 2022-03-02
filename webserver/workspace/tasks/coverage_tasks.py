@@ -28,7 +28,7 @@ def calculateCoverage(access_point_id: str, user_id: str) -> None:
                 ap=access_point
             ).order_by('created').first()
             # Check Building Coverage
-            for building in coverage.nearby_buildings.all():
+            for building in coverage.buildingcoverage_set.all():
                 # Determine if Any areas are not obstructed
                 building_polygon = (
                     building.geog if building.geog else

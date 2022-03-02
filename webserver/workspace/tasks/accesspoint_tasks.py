@@ -46,14 +46,12 @@ def generateAccessPointCoverage(channel_id, request, user_id=None):
         # Find all buildings that intersect the access point radius
         buildings = MsftBuildingOutlines.objects.filter(
             geog__intersects=circle).all()[0:LIMIT_BUILDINGS]
-        building_coverage.nearby_buildings.clear()
+        building_coverage.buildingcoverage_set.all().delete()
         nearby_buildings = []
         for building in buildings:
-            b = BuildingCoverage(msftid=building.id)
-            b.save()
-            building_coverage.nearby_buildings.add(b)
+            b = BuildingCoverage(coverage=building_coverage, msftid=building.id)
             nearby_buildings.append(b)
-        building_coverage.save()
+        BuildingCoverage.objects.bulk_create(nearby_buildings)
 
         building_coverage.status = AccessPointCoverageBuildings.CoverageCalculationStatus.COMPLETE.value
         building_coverage.hash = new_hash

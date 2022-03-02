@@ -381,7 +381,7 @@ class AccessPointCoverageResults(View):
 
     def create_building_response(self, coverage):
         features = []
-        nearby = coverage.nearby_buildings.all()
+        nearby = coverage.buildingcoverage_set.all()
         nearby_ids = [b.msftid for b in nearby]
         buildings = MsftBuildingOutlines.objects.filter(
             id__in=nearby_ids).all()

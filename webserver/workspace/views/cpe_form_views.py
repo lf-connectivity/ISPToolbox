@@ -48,7 +48,7 @@ class CPETooltipMixin:
         try:
             coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
             status = _CoverageStatus(
-                coverage.nearby_buildings.get(msftid=self.context["building_id"]).status
+                coverage.buildingcoverage_set.get(msftid=self.context["building_id"]).status
             )
         except ObjectDoesNotExist:
             status = _CoverageStatus.UNKNOWN

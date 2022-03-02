@@ -126,7 +126,7 @@ def calculateSectorNearby(sector_id: str):
     cached = building_coverage.result_cached()
     building_coverage.on_task_start(current_task.request.id)
     if not cached:
-        building_coverage.nearby_buildings.clear()
+        building_coverage.buildingcoverage_set.all().delete()
         # Find all buildings that intersect
         offset = 0
         remaining_buildings = True
@@ -136,11 +136,9 @@ def calculateSectorNearby(sector_id: str):
             ).all()[offset: BUILDING_PAGINATION + offset]
             nearby_buildings = []
             for building in buildings:
-                b = workspace_models.BuildingCoverage(msftid=building.id)
-                b.save()
-                building_coverage.nearby_buildings.add(b)
+                b = workspace_models.BuildingCoverage(coverage=building_coverage, msftid=building.id)
                 nearby_buildings.append(b)
-            building_coverage.save()
+            workspace_models.BuildingCoverage.objects.bulk_create(nearby_buildings)
 
             offset = offset + BUILDING_PAGINATION
             remaining_buildings = len(buildings) > 0
@@ -177,7 +175,7 @@ def calculateSectorCoverage(
         viewshed.read_object(fp, tif=True)
         with rasterio.open(fp.name) as ds:
             # Check Building Coverage
-            for idx, building in enumerate(coverage.nearby_buildings.all()):
+            for idx, building in enumerate(coverage.buildingcoverage_set.all()):
                 # Determine if Any areas are not obstructed
                 building_polygon = (
                     building.geog

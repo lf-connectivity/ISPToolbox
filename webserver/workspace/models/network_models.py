@@ -348,6 +348,20 @@ def _calculate_coverage_tower(
     """
     app.send_task("workspace.tasks.viewshed_tasks.updateSectors", (instance.uuid,))
 
+@receiver(pre_delete, sender=AccessPointLocation)
+def _cancel_building_coverage_task(sender, instance, using, **kwargs):
+    """
+    Cancel coverage task for deleted sectors
+    """
+    try:
+        AccessPointCoverageBuildings.objects.get(ap=instance).cancel_task()
+    except AccessPointCoverageBuildings.DoesNotExist:
+        pass
+
+    # try:
+    #     Viewshed.objects.get(ap=instance).cancel_task()
+    # except Viewshed.DoesNotExist:
+    #     pass
 
 class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = "uuid"
@@ -1184,7 +1198,8 @@ class BuildingCoverage(models.Model):
         SERVICEABLE = "serviceable"
         UNSERVICEABLE = "unserviceable"
         UNKNOWN = "unknown"
-
+    
+    coverage = models.ForeignKey('workspace.AccessPointCoverageBuildings', on_delete=models.CASCADE, db_index=True, null=True)
     msftid = models.IntegerField(null=True, blank=True)
     geog = geo_models.GeometryField(null=True, blank=True)
     status = models.CharField(
@@ -1227,9 +1242,6 @@ class AccessPointCoverageBuildings(
         max_length=20,
         choices=CoverageCalculationStatus.choices,
     )
-    nearby_buildings = models.ManyToManyField(
-        BuildingCoverage, related_name="nearby_buildings"
-    )
     created = models.DateTimeField(auto_now_add=True)
 
     def calculate_hash(self):
@@ -1256,13 +1268,13 @@ class AccessPointCoverageBuildings(
             return None
 
     def coverageStatistics(self) -> dict:
-        serviceable = self.nearby_buildings.filter(
+        serviceable = self.buildingcoverage_set.filter(
             status=BuildingCoverage.CoverageStatus.SERVICEABLE
         ).count()
-        unserviceable = self.nearby_buildings.filter(
+        unserviceable = self.buildingcoverage_set.filter(
             status=BuildingCoverage.CoverageStatus.UNSERVICEABLE
         ).count()
-        unknown = self.nearby_buildings.filter(
+        unknown = self.buildingcoverage_set.filter(
             status=BuildingCoverage.CoverageStatus.UNKNOWN
         ).count()
         return {

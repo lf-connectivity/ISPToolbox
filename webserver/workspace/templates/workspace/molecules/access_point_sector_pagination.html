@@ -209,7 +209,7 @@
         {% include 'workspace/atoms/access_point_sector_row.html' %}
         {% endfor %}
         {% if request.GET.new %}
-        {% with enabled=True ap=results.serializer.context.default_sector %}
+        {% with enabled=True ap=results.serializer.context.default_sector offset=1 %}
         {% include 'workspace/atoms/access_point_sector_row.html' %}
         {% endwith %}
         {% endif %}

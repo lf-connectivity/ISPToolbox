@@ -16,7 +16,7 @@ import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { BaseTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 import { clickedOnMapCanvas } from '../utils/MapboxEvents';
-import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../utils/IIspToolboxAjaxPlugin';
+import { CRUDEvent, IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../utils/IIspToolboxAjaxPlugin';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -282,26 +282,34 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
 
     createCallback(event: {features: Array<GeoJSON.Feature>})
     {
-        this.CRUDCallback(event);
+        this.CRUDCallback(event, CRUDEvent.CREATE);
     }
 
     readCallback(event: {features: Array<GeoJSON.Feature>})
     {
-        this.CRUDCallback(event);
+        this.CRUDCallback(event, CRUDEvent.READ);
     }
 
     updateCallback(event: {features: Array<GeoJSON.Feature>})
     {
-        this.CRUDCallback(event);
+        this.CRUDCallback(event, CRUDEvent.UPDATE);
+    }
+    deleteCallback(event: {features: Array<GeoJSON.Feature>})
+    {
+        this.CRUDCallback(event, CRUDEvent.DELETE);
     }
 
-    CRUDCallback({features}:{ features: Array<any> }) {
-        this.sendCoverageRequest({ features });
+    CRUDCallback({features}:{ features: Array<any> }, event_type : CRUDEvent) {
+        if(event_type !== CRUDEvent.DELETE)
+        {
+            this.sendCoverageRequest({ features });
+        }
         this.renderAPRadius();
         this.renderBuildings();
         if (
             features.length === 1 &&
-            features[0].properties?.feature_type === WorkspaceFeatureTypes.AP
+            features[0].properties?.feature_type === WorkspaceFeatureTypes.AP &&
+            event_type !== CRUDEvent.DELETE
         ) {
             let ap = BaseWorkspaceManager.getFeatureByUuid(
                 features[0].properties.uuid

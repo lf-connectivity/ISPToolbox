@@ -283,7 +283,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
 
     updateCoverageFromAjaxResponse(resp: GeoJSON.FeatureCollection, uuid: string) {
         const feat = BaseWorkspaceManager.getFeatureByUuid(uuid) as AccessPoint | AccessPointSector;
-        feat.setCoverage(resp.features);
+        feat?.setCoverage(resp.features);
         this.renderBuildings();
         PubSub.publish(WorkspaceEvents.AP_COVERAGE_UPDATED, { uuid: uuid });
     }

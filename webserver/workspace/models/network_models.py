@@ -348,8 +348,9 @@ def _calculate_coverage_tower(
     """
     app.send_task("workspace.tasks.viewshed_tasks.updateSectors", (instance.uuid,))
 
+
 @receiver(pre_delete, sender=AccessPointLocation)
-def _cancel_building_coverage_task(sender, instance, using, **kwargs):
+def _cancel_access_point_loc_task(sender, instance, using, **kwargs):
     """
     Cancel coverage task for deleted sectors
     """
@@ -358,10 +359,6 @@ def _cancel_building_coverage_task(sender, instance, using, **kwargs):
     except AccessPointCoverageBuildings.DoesNotExist:
         pass
 
-    # try:
-    #     Viewshed.objects.get(ap=instance).cancel_task()
-    # except Viewshed.DoesNotExist:
-    #     pass
 
 class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMixin):
     lookup_field = "uuid"
@@ -1198,7 +1195,7 @@ class BuildingCoverage(models.Model):
         SERVICEABLE = "serviceable"
         UNSERVICEABLE = "unserviceable"
         UNKNOWN = "unknown"
-    
+
     coverage = models.ForeignKey('workspace.AccessPointCoverageBuildings', on_delete=models.CASCADE, db_index=True, null=True)
     msftid = models.IntegerField(null=True, blank=True)
     geog = geo_models.GeometryField(null=True, blank=True)

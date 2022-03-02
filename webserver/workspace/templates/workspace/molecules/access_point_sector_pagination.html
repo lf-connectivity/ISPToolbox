@@ -11,12 +11,12 @@
   {% endif %}
   {% if results or request.GET.new %}
   <div style="display: block; overflow-x: auto;">
-    <table class="table table-sm table-hover table-modal">
+    <table class="table table-sm table-hover table-modal theme-table">
       <thead class="thead-modal">
         <tr>
           <th scope="col">#</th>
           <th scope="col">
-            <div class="d-flex">{% translate 'Name' %}
+            <div class="d-flex align-items-end">{% translate 'Name' %}
               {% if ordering == "name"%}
               <a name="" class="sort-ap d-flex align-items-center" ordering-target="-name">
                 <button class="sort-btn">
@@ -39,7 +39,7 @@
             </div>
           </th>
           <th scope="col">
-            <div class="d-flex justify-content-end">{% translate "Heading"%}
+            <div class="d-flex align-items-end justify-content-end">{% translate "Heading"%}
               {% if ordering == "heading"%}
               <a class="sort-ap d-flex align-items-center" ordering-target="-heading">
                 <button class="sort-btn">
@@ -62,7 +62,7 @@
             </div>
           </th>
           <th scope="col">
-            <div class="d-flex justify-content-end text-right">{% translate "Beamwidth Azimuth"%}
+            <div class="d-flex align-items-end justify-content-end text-right">{% translate "Beamwidth Azimuth"%}
               {% if ordering == "azimuth"%}
               <a class="sort-ap d-flex align-items-center" ordering-target="-azimuth">
                 <button class="sort-btn">
@@ -85,10 +85,11 @@
             </div>
           </th>
           <th scope="col">
-            <div class="d-flex justify-content-end">{% translate 'Access Point Height above ground' %}
-              {% if ordering == "height"%}
+            <div class="text-right d-flex align-items-end">
+              <span>{% translate 'Access Point' %} <span class="sub-label">{% translate  'Height above ground' %}</span></span>
+              {% if ordering == "height" %}
               <a name="" class="sort-ap d-flex align-items-center" ordering-target="-height">
-                <button class="btn">
+                <button class="sort-btn">
                   {% include 'workspace/atoms/arrow_icon.html' %}
                 </button>
               </a>
@@ -108,10 +109,11 @@
             </div>
           </th>
           <th scope="col">
-            <div class="d-flex justify-content-end">{% translate 'Customer Antenna Height above rooftop' %}
+            <div class="text-right d-flex align-items-end">
+              <span>{% translate 'Customer Antenna' %}<span class="sub-label">{% translate 'Height above rooftop' %}</span></span>
               {% if ordering == "default_cpe_height"%}
               <a name="" class="sort-ap d-flex align-items-center" ordering-target="-default_cpe_height">
-                <button class="btn">
+                <button class="sort-btn">
                   {% include 'workspace/atoms/arrow_icon.html' %}
                 </button>
               </a>
@@ -131,10 +133,10 @@
             </div>
           </th>
           <th scope="col">
-            <div class="d-flex justify-content-end">{% translate 'Distance' %}
+            <div class="d-flex justify-content-end align-items-end">{% translate 'Distance' %}
               {% if ordering == "radius"%}
               <a name="" class="sort-ap d-flex align-items-center" ordering-target="-radius">
-                <button class="btn">
+                <button class="sort-btn">
                   {% include 'workspace/atoms/arrow_icon.html' %}
                 </button>
               </a>
@@ -154,10 +156,10 @@
             </div>
           </th>
           <th scope="col">
-            <div class="d-flex justify-content-end">{% translate 'Frequency' %}
+            <div class="d-flex justify-content-end align-items-end">{% translate 'Frequency' %}
               {% if ordering == "frequency"%}
               <a name="" class="sort-ap d-flex align-items-center" ordering-target="-frequency">
-                <button class="btn">
+                <button class="sort-btn">
                   {% include 'workspace/atoms/arrow_icon.html' %}
                 </button>
               </a>
@@ -177,10 +179,10 @@
             </div>
           </th>
           <th scope="col">
-            <div class="d-flex justify-content-end text-right date-label">{% translate "Last Modified"%}
+            <div class="d-flex justify-content-end text-right date-label align-items-end">{% translate "Modified"%}
               {% if ordering == "last_updated"%}
               <a class="sort-ap d-flex align-items-center" ordering-target="-last_updated">
-                <button class="btn">
+                <button class="sort-btn">
                   {% include 'workspace/atoms/arrow_icon.html' %}
                 </button>
               </a>

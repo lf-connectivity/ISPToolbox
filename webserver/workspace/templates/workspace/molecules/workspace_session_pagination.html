@@ -7,7 +7,7 @@
   <div class="theme-table open-workspace">
     <div class="thead">
       <div class="tr">
-        <p class="th-column workspace-name">{% translate "Session Name"%}
+        <p class="th-column workspace-name d-flex align-items-end">{% translate "Session Name"%}
           {% if ordering == "name"%}
           <a name="" class="sort-ap" ordering-target="-name">
             <button class="sort-btn">{% include 'workspace/atoms/arrow_icon.html' %}</button>
@@ -25,7 +25,7 @@
           {% endcomment %}
         </p>
 
-        <p class="th-column last-edit desktop-only">Last Edited
+        <p class="th-column last-edit desktop-only d-flex align-items-end">Last Edited
           {% if ordering == "last_updated"%}
           <a class="sort-ap" ordering-target="-last_updated">
             <button class="sort-btn">{% include 'workspace/atoms/arrow_icon.html' %}</button>

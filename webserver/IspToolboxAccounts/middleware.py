@@ -22,7 +22,7 @@ def logpagevisit(get_response):
             session_id=request.session.session_key,
             request=(request.path[:253] + '..') if len(request.path) > 255 else request.path,
             ip=get_client_ip(request),
-            useragent=request.META['HTTP_USER_AGENT']
+            useragent=request.META.get('HTTP_USER_AGENT')
         )
         response = get_response(request)
         # Code to be executed for each request/response after

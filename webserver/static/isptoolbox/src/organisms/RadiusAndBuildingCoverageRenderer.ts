@@ -16,7 +16,11 @@ import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { BaseTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 import { clickedOnMapCanvas } from '../utils/MapboxEvents';
-import { CRUDEvent, IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../utils/IIspToolboxAjaxPlugin';
+import {
+    CRUDEvent,
+    IIspToolboxAjaxPlugin,
+    initializeIspToolboxInterface
+} from '../utils/IIspToolboxAjaxPlugin';
 
 const ACCESS_POINT_RADIUS_VIS_DATA = 'ap_vis_data_source';
 const ACCESS_POINT_RADIUS_VIS_LAYER_LINE = 'ap_vis_data_layer-line';
@@ -34,7 +38,9 @@ const ACTIVE_AP = 'true';
 const INACTIVE_AP = 'false';
 
 // TODO: Remove RenderCloudRF option from here, it will go into WorkspaceManager
-export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPlugin, IIspToolboxAjaxPlugin {
+export abstract class RadiusAndBuildingCoverageRenderer
+    implements IMapboxDrawPlugin, IIspToolboxAjaxPlugin
+{
     map: mapboxgl.Map;
     draw: MapboxDraw;
     workspaceManager: any;
@@ -146,12 +152,10 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
                             this.draw.get(id)?.properties?.uuid
                         ) as AccessPoint
                 );
-            const selectedAPs = this.workspaceManager
-                .filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.AP)
-                .map(
-                    (feat: any) =>
-                        BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid) as AccessPoint
-                );
+            const selectedAPs = this.onClickMapLayerGetSelection(
+                e,
+                WorkspaceFeatureTypes.AP
+            ) as Array<AccessPoint>;
 
             // TODO: Deprecate non-beta
             if (isBeta()) {
@@ -193,14 +197,10 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
                                 this.draw.get(id)?.properties?.uuid
                             ) as AccessPointSector
                     );
-                const selectedSectors = this.workspaceManager
-                    .filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.SECTOR)
-                    .map(
-                        (feat: any) =>
-                            BaseWorkspaceManager.getFeatureByUuid(
-                                feat.properties.uuid
-                            ) as AccessPointSector
-                    );
+
+                const selectedSectors = this.onClickSectorLayerGetSelection(
+                    e
+                ) as Array<AccessPointSector>;
 
                 PubSub.publish(WorkspaceEvents.SECTOR_LAYER_CLICKED, {
                     sectors: sectors,
@@ -280,28 +280,23 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
         }
     }
 
-    createCallback(event: {features: Array<GeoJSON.Feature>})
-    {
+    createCallback(event: { features: Array<GeoJSON.Feature> }) {
         this.CRUDCallback(event, CRUDEvent.CREATE);
     }
 
-    readCallback(event: {features: Array<GeoJSON.Feature>})
-    {
+    readCallback(event: { features: Array<GeoJSON.Feature> }) {
         this.CRUDCallback(event, CRUDEvent.READ);
     }
 
-    updateCallback(event: {features: Array<GeoJSON.Feature>})
-    {
+    updateCallback(event: { features: Array<GeoJSON.Feature> }) {
         this.CRUDCallback(event, CRUDEvent.UPDATE);
     }
-    deleteCallback(event: {features: Array<GeoJSON.Feature>})
-    {
+    deleteCallback(event: { features: Array<GeoJSON.Feature> }) {
         this.CRUDCallback(event, CRUDEvent.DELETE);
     }
 
-    CRUDCallback({features}:{ features: Array<any> }, event_type : CRUDEvent) {
-        if(event_type !== CRUDEvent.DELETE)
-        {
+    CRUDCallback({ features }: { features: Array<any> }, event_type: CRUDEvent) {
+        if (event_type !== CRUDEvent.DELETE) {
             this.sendCoverageRequest({ features });
         }
         this.renderAPRadius();
@@ -336,7 +331,6 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
     renderAPRadius() {
         // TODO: DELETE THIS WE DON'T NEED IT AFTER AP SECTOR LAUNCH
         if (!isBeta()) {
-
             const circle_feats: Array<GeoJSON.Feature> = [];
             let fc = this.draw.getSelected();
             let selectedAPs = new Set(
@@ -354,8 +348,8 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
                     if (feat.geometry.type === 'Point') {
                         let new_feat: GeoJSON.Feature = {
                             type: 'Feature',
-                            geometry: {type: 'Point', coordinates: []},
-                            properties: {},
+                            geometry: { type: 'Point', coordinates: [] },
+                            properties: {}
                         };
                         if (this.renderCloudRF && this.cloudRFExists(feat)) {
                             // CloudRF coverage is a geometrycollection; turn this into a feature.
@@ -369,8 +363,7 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
                             new_feat = createGeoJSONCircle(feat.geometry, radius, feat.id);
                         }
 
-                        if(new_feat.properties)
-                        {
+                        if (new_feat.properties) {
                             new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
                                 ? ACTIVE_AP
                                 : INACTIVE_AP;
@@ -430,5 +423,74 @@ export abstract class RadiusAndBuildingCoverageRenderer implements IMapboxDrawPl
 
     protected shouldRenderFeature(f: GeoJSON.Feature): boolean {
         return f.properties?.hidden === undefined;
+    }
+
+    // Fixes a bug where one more click is needed to open tooltip after
+    // direct_select mode (selection is nothing). Select target based on point.
+    protected onClickMapLayerGetSelection(e: any, featureType: WorkspaceFeatureTypes) {
+        let selectedItems = this.workspaceManager
+            .filterByType(this.draw.getSelected().features, featureType)
+            .map((feat: any) => BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid));
+
+        if (!selectedItems.length) {
+            let ids = this.draw
+                .getFeatureIdsAt(e.point)
+                .filter((id) => this.draw.get(id)?.properties?.feature_type === featureType);
+
+            if (ids.length) {
+                this.draw.changeMode('simple_select', { featureIds: [ids[0]] });
+                this.map.fire('draw.modechange', { mode: 'simple_select' });
+                this.map.fire('draw.selectionchange', { features: [this.draw.get(ids[0])] });
+
+                return [
+                    // @ts-ignore
+                    BaseWorkspaceManager.getFeatureByUuid(this.draw.get(ids[0]).properties.uuid)
+                ];
+            } else {
+                return [];
+            }
+        } else {
+            return selectedItems;
+        }
+    }
+
+    // Need to check if we have clicked over a tower for sector layers, otherwise clicking
+    // towers = 10000000000000 sector tooltips.
+    protected onClickSectorLayerGetSelection(e: any) {
+        let selectedItems = this.workspaceManager
+            .filterByType(this.draw.getSelected().features, WorkspaceFeatureTypes.SECTOR)
+            .map((feat: any) => BaseWorkspaceManager.getFeatureByUuid(feat.properties.uuid));
+
+        if (!selectedItems.length) {
+            let sectorIds = this.draw
+                .getFeatureIdsAt(e.point)
+                .filter(
+                    (id) =>
+                        this.draw.get(id)?.properties?.feature_type === WorkspaceFeatureTypes.SECTOR
+                );
+
+            let otherIds = this.draw
+                .getFeatureIdsAt(e.point)
+                .filter(
+                    (id) =>
+                        this.draw.get(id)?.properties?.feature_type !== WorkspaceFeatureTypes.SECTOR
+                );
+            if (sectorIds.length && !otherIds.length) {
+                this.draw.changeMode('simple_select', { featureIds: [sectorIds[0]] });
+                this.map.fire('draw.modechange', { mode: 'simple_select' });
+                this.map.fire('draw.selectionchange', { features: [this.draw.get(sectorIds[0])] });
+
+                return [
+                    BaseWorkspaceManager.getFeatureByUuid(
+                        // @ts-ignore
+                        this.draw.get(sectorIds[0]).properties.uuid
+                    )
+                ];
+            } else {
+                return [];
+            }
+        } else {
+            return selectedItems;
+        }
     }
 }

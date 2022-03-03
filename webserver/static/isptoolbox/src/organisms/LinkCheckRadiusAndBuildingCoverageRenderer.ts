@@ -104,17 +104,16 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             this.map.getCanvas().style.cursor = '';
         });
 
-        const onClickCPE = (e: any) => {
+        const onClickCPE = _.debounce((e: any) => {
             // Show tooltip if only one CPE is selected.
-            const selectedCPEs = this.workspaceManager.filterByType(
-                this.draw.getSelected().features,
+            const selectedCPEs = this.onClickMapLayerGetSelection(
+                e,
                 WorkspaceFeatureTypes.CPE
-            );
+            ) as Array<CPE>;
+
             let cpePopup = LinkCheckCPEClickCustomerConnectPopup.getInstance();
             if (selectedCPEs.length === 1) {
-                let cpe = BaseWorkspaceManager.getFeatureByUuid(
-                    selectedCPEs[0].properties.uuid
-                ) as CPE;
+                let cpe = selectedCPEs[0];
 
                 if (isBeta()) {
                     let popup = AjaxLinkCheckCPEPopup.getInstance();
@@ -138,14 +137,17 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             } else if (selectedCPEs.length > 1) {
                 cpePopup.hide();
             }
-        };
+        }, 10);
 
         // Keep trying to load the AP onClick event handler until we can find layers
         // to do this, then stop.
         const loadCPEOnClick = () => {
             this.map.getStyle().layers?.forEach((layer: any) => {
                 if (layer.id.includes('gl-draw-point-cpe')) {
-                    this.map.on('click', layer.id, onClickCPE);
+                    this.map.on('click', layer.id, (e: any) => {
+                        onClickCPE.cancel();
+                        onClickCPE(e);
+                    });
                     this.map.off('idle', loadCPEOnClick);
                 }
             });
@@ -191,10 +193,12 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         // If you can think of a better way to do this - feel free to replace
         const addBuildingLayerHelper = (r: mapboxgl.MapDataEvent) => {
             const style = r.target.getStyle();
-            const draw_layers_loaded = style
-                .layers?.some(
-                    (l) => l.type === 'line' && (l.source as string).includes('mapbox-gl-draw') && l.id === 'gl-draw-line-static.cold'
-                );
+            const draw_layers_loaded = style.layers?.some(
+                (l) =>
+                    l.type === 'line' &&
+                    (l.source as string).includes('mapbox-gl-draw') &&
+                    l.id === 'gl-draw-line-static.cold'
+            );
 
             if (draw_layers_loaded) {
                 this.map.moveLayer(BUILDING_LAYER, 'gl-draw-line-static.cold');
@@ -209,9 +213,9 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
         RadiusAndBuildingCoverageRenderer.prototype.drawSelectionChangeCallback.call(this, {
             features
         });
-        if(features.length === 1){
+        if (features.length === 1) {
             const feat = features[0];
-            if( feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR){
+            if (feat.properties?.feature_type === WorkspaceFeatureTypes.SECTOR) {
                 this.accessPointStatusCallback('', {
                     type: WS_AP_Events.AP_STATUS,
                     uuid: feat.properties?.uuid
@@ -230,9 +234,8 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
 
     accessPointStatusCallback(msg: string, message: AccessPointCoverageResponse) {
         // TODO: deprecate AP
-        const feat = this.draw.getAll().features.find(f => f.properties?.uuid === message.uuid);
-        if(feat?.properties?.feature_type === WorkspaceFeatureTypes.AP && isBeta())
-        {
+        const feat = this.draw.getAll().features.find((f) => f.properties?.uuid === message.uuid);
+        if (feat?.properties?.feature_type === WorkspaceFeatureTypes.AP && isBeta()) {
             return;
         }
 
@@ -242,43 +245,45 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
             }
-        }).done((resp) => {
-            this.updateCoverageFromAjaxResponse(resp, message.uuid);
-        }).fail((error) => {
-            if(error.status !== 404)
-            {
-                renderAjaxOperationFailed();
-            }
         })
+            .done((resp) => {
+                this.updateCoverageFromAjaxResponse(resp, message.uuid);
+            })
+            .fail((error) => {
+                if (error.status !== 404) {
+                    renderAjaxOperationFailed();
+                }
+            });
         $.ajax({
             url: djangoUrl('workspace:coverage-stats', message.uuid),
             method: 'GET',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
             }
-        }).done((resp) => {
-            const features = this.draw.getAll().features.filter((f: GeoJSON.Feature) => {
-                return f.properties?.uuid === message.uuid;
-            });
+        })
+            .done((resp) => {
+                const features = this.draw.getAll().features.filter((f: GeoJSON.Feature) => {
+                    return f.properties?.uuid === message.uuid;
+                });
 
-            // Set serviceable, unserviceable, and unknown
-            features.forEach((feat: GeoJSON.Feature) => {
-                for (const [key, value] of Object.entries(resp)) {
-                    this.draw.setFeatureProperty(feat.id as string, key, value);
+                // Set serviceable, unserviceable, and unknown
+                features.forEach((feat: GeoJSON.Feature) => {
+                    for (const [key, value] of Object.entries(resp)) {
+                        this.draw.setFeatureProperty(feat.id as string, key, value);
+                    }
+                });
+                // TODO: deprecate
+                if (this.apPopup && this.apPopup.onAPUpdate) {
+                    this.apPopup.onAPUpdate(
+                        BaseWorkspaceManager.getFeatureByUuid(message.uuid) as AccessPoint
+                    );
+                }
+            })
+            .fail((error) => {
+                if (error.status !== 404) {
+                    renderAjaxOperationFailed();
                 }
             });
-            // TODO: deprecate
-            if (this.apPopup && this.apPopup.onAPUpdate) {
-                this.apPopup.onAPUpdate(
-                    BaseWorkspaceManager.getFeatureByUuid(message.uuid) as AccessPoint
-                );
-            }
-        }).fail((error) => {
-            if(error.status !== 404)
-            {
-                renderAjaxOperationFailed();
-            }
-        });
     }
 
     updateCoverageFromAjaxResponse(resp: GeoJSON.FeatureCollection, uuid: string) {

@@ -1,10 +1,18 @@
 @import ../theme
 
+.alert-container
+    position: relative
+
 .alert
     background: $brand-dark-gray-color
     border: none
     border-radius: 0
     color: white
+    position: fixed
+    top: 64px
+    left: 50%
+    transform: translateX(-50%)
+    z-index: 10
 
     .close:hover
         color: white

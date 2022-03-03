@@ -253,9 +253,17 @@
             background: darken($brand-dark-gray-color, 7%)
             font-size: $small-font-size
             color: $white-color
-            padding: 0.5rem 0
+            padding: 0.4rem 0.4rem 0.4rem 0.6rem
             width: 100%
-            padding-left: 0.6rem
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='6' viewBox='0 0 12 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.3254 0.620372L0.945767 0.294976L0.294976 1.05423L0.674604 1.37963L1.3254 0.620372ZM5.66667 5L5.34127 5.37963L5.66667 5.65854L5.99206 5.37963L5.66667 5ZM10.6587 1.37963L11.0384 1.05423L10.3876 0.294976L10.0079 0.620372L10.6587 1.37963ZM0.674604 1.37963L5.34127 5.37963L5.99206 4.62037L1.3254 0.620372L0.674604 1.37963ZM5.99206 5.37963L10.6587 1.37963L10.0079 0.620372L5.34127 4.62037L5.99206 5.37963Z' fill='%23ffffff'/%3E%3C/svg%3E%0A")
+            background-repeat: no-repeat
+            background-position: 97% 50%
+            -moz-appearance: none !important
+            -webkit-appearance: none !important
+            -webkit-border-radius: 0px
+            border-style: none
+            appearance: none !important
+            outline-width: 0
         .ap-input--value
             margin-left: 0px
             width: 100%
@@ -300,9 +308,11 @@
                 white-space: nowrap
             select
                 margin-right: 0.5rem
-                width: 1.25rem
-                text-indent: 0.01px
+                width: 1.8rem
+                text-indent: 17px
                 text-overflow: ''
+                white-space: nowrap
+                overflow: hidden
 
         .stat-section
             padding: 0.6rem 0
@@ -393,7 +403,6 @@
         font-size: $base-font-size
         font-weight: bold
         letter-spacing: 0.02em
-
 
 .map-tooltip .mapboxgl-popup-content
     background-color: $brand-dark-gray-color

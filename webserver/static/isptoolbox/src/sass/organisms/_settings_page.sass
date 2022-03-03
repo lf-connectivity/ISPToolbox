@@ -28,10 +28,37 @@
         margin-left: 1.5rem
     #update-account-button
         margin-top: 1.5rem !important
-@media (min-width: $breakpoint-lg)
+
+.settings-page
+    .card
+        background: $white-color
+        border-radius: 0
+        border: none
+
+    .card-body
+        padding: 1.5rem 2rem
+
+    .delete-account .card
+        background: transparent
+
     .manage-account
-        display: flex !important
-        justify-content: space-between
+        display: grid
+        grid-gap: 2rem
+        grid-template-columns: repeat(2, 1fr)
+
+    #update-account-button, #account_info_form .btn[type="submit"]
+        width: 100%
+
+    li.onboarding_container--question:first-child
+        margin-top: 1rem
+
+    #changeaccountinfoform label+input
+        margin-bottom: 1rem
+
+@media (max-width: $breakpoint-lg)
+    .settings-page .manage-account
+        display: flex
+        flex-flow: column
 
 @media (min-width: $breakpoint-md)
     .account_setting_form_container
@@ -42,13 +69,12 @@
 
     .account_settings
         display: block
-        padding: 0.75rem
-    
+
     .manage-account
         display: block
 
     .delete-account
-        order:3
-    
+        order: 3
+
     .user-details
-        order:2
+        order: 2

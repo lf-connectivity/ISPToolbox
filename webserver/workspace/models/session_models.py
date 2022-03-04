@@ -286,25 +286,29 @@ class WorkspaceMapSession(models.Model):
         Check if CPE or AP based on airlink's syntax
         """
         if airlink:
+            # This is a link.ui.com file:
+            # decode point features based on observed pattern (this is a best effort)
             if feat.get("properties", {}).get("description", None) is not None:
+                # Check if any features after this one
                 if idx + 1 >= len(feats):
-                    # definitely an AP
+                    # There are no terrain profiles after this feature -> this must be an AP
                     return FeatureType.AP
                 else:
-                    # check if next item has name terrain profile
+                    # Airlink CPE's are *usually* followed by a terrain profile
                     next_feat = feats[idx + 1]
                     if "Terrain" in next_feat.get("properties", {}).get("Name", ""):
                         return FeatureType.CPE
                     else:
+                        # Default to adding an AP
                         return FeatureType.AP
         else:
+            # This is not an airlink file -> we can try using ISP toolbox's encoding
             geom = feat.get("geometry", {})
             if geom.get("properties", {}).get("type", None) == FeatureType.CPE:
                 return FeatureType.CPE
-            elif geom.get("properties", {}).get("type", None) == FeatureType.AP:
-                return FeatureType.AP
             else:
-                return None
+                # Default to adding an AP
+                return FeatureType.AP
 
     @classmethod
     def importFile(cls, request):

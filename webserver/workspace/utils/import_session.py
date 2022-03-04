@@ -30,6 +30,13 @@ def flatten_geometry(geom: GEOSGeometry):
 
 
 def _create_ogr2ogr_command(input, output):
+    """
+    ogr2ogr accepts an input GIS file and converts it to a different GIS format
+
+    `man ogr2ogr`
+
+    https://gdal.org/programs/ogr2ogr.html
+    """
     return shlex.split(f'ogr2ogr -skipfailures {output} {input} -lco RFC7946=YES -nln isptoolbox')
 
 

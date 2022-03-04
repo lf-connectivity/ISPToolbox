@@ -79,6 +79,7 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
         supplementaryPoints.forEach(display);
     };
 
+    // Support long pressing to drag tooltipped items.
     simple_select.onMouseDown = function (state, e) {
         if (!state.dragMoving && e.longPress) {
             e.featureTarget.properties.active == 'true';

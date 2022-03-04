@@ -281,16 +281,44 @@ class WorkspaceMapSession(models.Model):
         return f"kml/ISPTOOLBOX_{self.name}_{self.uuid}.kml"
 
     @classmethod
+    def getFeatureType(cls, feat, idx, feats, airlink):
+        """
+        Check if CPE or AP based on airlink's syntax
+        """
+        if airlink:
+            if feat.get("properties", {}).get("description", None) is not None:
+                if idx + 1 >= len(feats):
+                    # definitely an AP
+                    return FeatureType.AP
+                else:
+                    # check if next item has name terrain profile
+                    next_feat = feats[idx + 1]
+                    if "Terrain" in next_feat.get("properties", {}).get("Name", ""):
+                        return FeatureType.CPE
+                    else:
+                        return FeatureType.AP
+        else:
+            geom = feat.get("geometry", {})
+            if geom.get("properties", {}).get("type", None) == FeatureType.CPE:
+                return FeatureType.CPE
+            elif geom.get("properties", {}).get("type", None) == FeatureType.AP:
+                return FeatureType.AP
+            else:
+                return None
+
+    @classmethod
     def importFile(cls, request):
         file = request.FILES.get("file", None)
-        fc = convert_file_to_workspace_session(file)
+        fc, airlink = convert_file_to_workspace_session(file)
         session = WorkspaceMapSession(
             name=request.POST.get("name", None), owner=request.user
         )
         session.save()
         try:
             ap_dict = {}
-            for f in fc.get("features", []):
+            last_ap = None
+            feats = fc.get("features", [])
+            for idx, f in enumerate(feats):
                 geom = f.get("geometry", {})
                 f_str = json.dumps({key: geom[key] for key in ["type", "coordinates"]})
                 geos_geom = GEOSGeometry(f_str)
@@ -302,7 +330,8 @@ class WorkspaceMapSession(models.Model):
                         owner=request.user, map_session=session, geojson=geos_geom
                     ).save()
                 elif geos_geom.geom_type == "Point":
-                    if geom.get("properties", {}).get("type", None) == FeatureType.CPE:
+                    feat_type = cls.getFeatureType(f, idx, feats, airlink)
+                    if feat_type == FeatureType.CPE:
                         cpe = CPESerializer.Meta.model(
                             owner=request.user,
                             map_session=session,
@@ -313,12 +342,12 @@ class WorkspaceMapSession(models.Model):
                         )
                         cpe.save()
                         ap_uuid = ap_dict.get(
-                            geom.get("properties", {}).get("ap", None), None
+                            geom.get("properties", {}).get("ap", None), last_ap
                         )
                         APToCPELinkSerializer.Meta.model(
                             owner=request.user, map_session=session, ap=ap_uuid, cpe=cpe
                         ).save()
-                    else:
+                    elif feat_type == FeatureType.AP:
                         ap = AccessPointSerializer.Meta.model(
                             owner=request.user,
                             map_session=session,
@@ -326,6 +355,7 @@ class WorkspaceMapSession(models.Model):
                             height=geom.get("properties", {}).get("height", 0),
                         )
                         ap.save()
+                        last_ap = ap
                         ap_dict.update({geom.get("properties", {}).get("id", None): ap})
                 elif geos_geom.geom_type == "LineString":
                     ptp = PointToPointLinkSerializer.Meta.model(

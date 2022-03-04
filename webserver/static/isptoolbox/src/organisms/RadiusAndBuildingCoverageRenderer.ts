@@ -209,6 +209,8 @@ export abstract class RadiusAndBuildingCoverageRenderer
             }
         }, 10);
 
+        const onLongPressAP = this.createLongPressDebounce();
+
         // Keep trying to load the AP onClick event handler until we can find layers
         // to do this, then stop.
         const loadAPOnClick = () => {
@@ -217,6 +219,13 @@ export abstract class RadiusAndBuildingCoverageRenderer
                     this.map.on('click', layer.id, (e: any) => {
                         onClickAP.cancel();
                         onClickAP(e);
+                    });
+                    this.map.on('mousedown', layer.id, (e: any) => {
+                        onLongPressAP.cancel();
+                        onLongPressAP(e);
+                    });
+                    this.map.on('mouseup', layer.id, (e: any) => {
+                        onLongPressAP.cancel();
                     });
                     this.renderBuildings();
                     this.renderAPRadius();
@@ -425,6 +434,19 @@ export abstract class RadiusAndBuildingCoverageRenderer
         return f.properties?.hidden === undefined;
     }
 
+    protected createLongPressDebounce() {
+        return _.debounce(this.onLongPressMouseDownMapLayer.bind(this), 150);
+    }
+
+    protected onLongPressMouseDownMapLayer(e: any) {
+        // Change selection to featureTarget, mark event as longPress, then refire.
+        if (!e.longPress) {
+            e.longPress = true;
+            this.changeSelection(e.featureTarget.properties.id);
+            this.map.fire('mousedown', e);
+        }
+    }
+
     // Fixes a bug where one more click is needed to open tooltip after
     // direct_select mode (selection is nothing). Select target based on point.
     protected onClickMapLayerGetSelection(e: any, featureType: WorkspaceFeatureTypes) {
@@ -438,9 +460,7 @@ export abstract class RadiusAndBuildingCoverageRenderer
                 .filter((id) => this.draw.get(id)?.properties?.feature_type === featureType);
 
             if (ids.length) {
-                this.draw.changeMode('simple_select', { featureIds: [ids[0]] });
-                this.map.fire('draw.modechange', { mode: 'simple_select' });
-                this.map.fire('draw.selectionchange', { features: [this.draw.get(ids[0])] });
+                this.changeSelection(ids[0]);
 
                 return [
                     // @ts-ignore
@@ -476,9 +496,7 @@ export abstract class RadiusAndBuildingCoverageRenderer
                         this.draw.get(id)?.properties?.feature_type !== WorkspaceFeatureTypes.SECTOR
                 );
             if (sectorIds.length && !otherIds.length) {
-                this.draw.changeMode('simple_select', { featureIds: [sectorIds[0]] });
-                this.map.fire('draw.modechange', { mode: 'simple_select' });
-                this.map.fire('draw.selectionchange', { features: [this.draw.get(sectorIds[0])] });
+                this.changeSelection(sectorIds[0]);
 
                 return [
                     BaseWorkspaceManager.getFeatureByUuid(
@@ -492,5 +510,15 @@ export abstract class RadiusAndBuildingCoverageRenderer
         } else {
             return selectedItems;
         }
+    }
+
+    private changeSelection(id: string) {
+        this.draw.changeMode('simple_select', {
+            featureIds: [id]
+        });
+        this.map.fire('draw.modechange', { mode: 'simple_select' });
+        this.map.fire('draw.selectionchange', {
+            features: [this.draw.get(id)]
+        });
     }
 }

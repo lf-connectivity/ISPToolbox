@@ -7,6 +7,7 @@ import {
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import * as _ from 'lodash';
 
 export function OverrideSimple(highlightAssociatedSectors = false) {
     const simple_select = MapboxDraw.modes.simple_select;
@@ -78,6 +79,15 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
         supplementaryPoints.forEach(display);
     };
 
+    simple_select.onMouseDown = function (state, e) {
+        if (!state.dragMoving && e.longPress) {
+            e.featureTarget.properties.active == 'true';
+            return this.startOnActiveFeature(state, e);
+        }
+        if (isActiveFeature(e)) return this.startOnActiveFeature(state, e);
+        if (this.drawConfig.boxSelect && isShiftMousedown(e)) return this.startBoxSelect(state, e);
+    };
+
     simple_select.dragMove = function (state, e) {
         // Don't drag if lockDragging is on
         if (this._ctx.options.lockDragging) {
@@ -115,4 +125,19 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
     };
 
     return simple_select;
+}
+
+function isShiftMousedown(e) {
+    if (!e.originalEvent) return false;
+    if (!e.originalEvent.shiftKey) return false;
+    return e.originalEvent.button === 0;
+}
+
+function isActiveFeature(e) {
+    if (!e.featureTarget) return false;
+    if (!e.featureTarget.properties) return false;
+    return (
+        e.featureTarget.properties.active === 'true' &&
+        e.featureTarget.properties.meta === 'feature'
+    );
 }

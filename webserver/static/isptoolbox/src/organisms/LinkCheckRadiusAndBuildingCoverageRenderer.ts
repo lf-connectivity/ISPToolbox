@@ -139,6 +139,8 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             }
         }, 10);
 
+        const onLongPressCPE = this.createLongPressDebounce();
+
         // Keep trying to load the AP onClick event handler until we can find layers
         // to do this, then stop.
         const loadCPEOnClick = () => {
@@ -147,6 +149,13 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     this.map.on('click', layer.id, (e: any) => {
                         onClickCPE.cancel();
                         onClickCPE(e);
+                    });
+                    this.map.on('mousedown', layer.id, (e: any) => {
+                        onLongPressCPE.cancel();
+                        onLongPressCPE(e);
+                    });
+                    this.map.on('mouseup', layer.id, (e: any) => {
+                        onLongPressCPE.cancel();
                     });
                     this.map.off('idle', loadCPEOnClick);
                 }

@@ -184,7 +184,7 @@ DEFAULT_HEADING = 0.0
 DEFAULT_AZIMUTH = 120.0
 DEFAULT_NO_CHECK_RADIUS = 0.01
 DEFAULT_CPE_HEIGHT = 1.0
-DEFAULT_FREQUENCY = 2.4
+DEFAULT_FREQUENCY = 2.437
 DEFAULT_UNEDITABLE = False
 DEFAULT_AP_SECTOR_UNEDITABLE = True
 DEFAULT_AP_CPE_LINK_UNEDITABLE = True
@@ -307,7 +307,7 @@ UPDATED_HEIGHT = 100
 UPDATED_MAX_RADIUS = 2.42
 UPDATED_HEADING = 90.0
 UPDATED_AZIMUTH = 190.0
-UPDATED_FREQUENCY = 5
+UPDATED_FREQUENCY = 5.4925
 UPDATED_COVERAGE_AREA_NAME = "tribal"
 
 
@@ -900,6 +900,33 @@ class WorkspaceRestViewsTestCase(WorkspaceRestViewsBaseTestCase):
         )
         self.create_geojson_model_fail(
             APToCPELink, AP_CPE_LINK_ENDPOINT, new_link_none, HTTP_400_BAD_REQUEST
+        )
+
+    def test_create_sector_link_invalid_frequency(self):
+        new_link = {
+            "frequency": 1.6,
+            "geojson": DEFAULT_TEST_LINESTRING,
+            "sector": self.test_sector.uuid,
+            "cpe": self.test_cpe.uuid,
+            "uneditable": DEFAULT_AP_CPE_LINK_UNEDITABLE,
+        }
+
+        new_sector = {
+            "name": DEFAULT_NAME,
+            "ap": self.test_ap.uuid,
+            "height": DEFAULT_HEIGHT,
+            "heading": DEFAULT_HEADING,
+            "azimuth": DEFAULT_AZIMUTH,
+            "frequency": 1.6,
+            "radius": DEFAULT_MAX_RADIUS,
+        }
+
+        self.create_geojson_model_fail(
+            APToCPELink, AP_CPE_LINK_ENDPOINT, new_link, HTTP_400_BAD_REQUEST
+        )
+
+        self.create_geojson_model_fail(
+            AccessPointSector, SECTOR_ENDPOINT, new_sector, HTTP_400_BAD_REQUEST
         )
 
     def test_update_ap(self):

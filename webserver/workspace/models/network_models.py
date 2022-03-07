@@ -38,7 +38,13 @@ from workspace.models.task_models import (
 from workspace.models.validators import validate_ptp_link_geometry
 
 from workspace.utils.geojson_circle import createGeoJSONCircle, createGeoJSONSector
-from .model_constants import KM_2_MI, FeatureType, M_2_FT, ModelLimits
+from .model_constants import (
+    FREQUENCY_CHOICES,
+    KM_2_MI,
+    FeatureType,
+    M_2_FT,
+    ModelLimits,
+)
 from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
@@ -759,6 +765,7 @@ class AccessPointSectorSerializer(
         ],
     )
 
+    frequency = serializers.ChoiceField(choices=FREQUENCY_CHOICES)
     feature_type = serializers.CharField(read_only=True)
     default_cpe_height_ft = serializers.FloatField(
         required=False,
@@ -1009,6 +1016,7 @@ class APToCPELinkSerializer(
         default=None,
     )
 
+    frequency = serializers.ChoiceField(choices=FREQUENCY_CHOICES)
     cpe = serializers.PrimaryKeyRelatedField(
         queryset=CPELocation.objects.all(), pk_field=serializers.UUIDField()
     )
@@ -1196,7 +1204,12 @@ class BuildingCoverage(models.Model):
         UNSERVICEABLE = "unserviceable"
         UNKNOWN = "unknown"
 
-    coverage = models.ForeignKey('workspace.AccessPointCoverageBuildings', on_delete=models.CASCADE, db_index=True, null=True)
+    coverage = models.ForeignKey(
+        "workspace.AccessPointCoverageBuildings",
+        on_delete=models.CASCADE,
+        db_index=True,
+        null=True,
+    )
     msftid = models.IntegerField(null=True, blank=True)
     geog = geo_models.GeometryField(null=True, blank=True)
     status = models.CharField(

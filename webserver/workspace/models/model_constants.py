@@ -9,6 +9,16 @@ M_2_FT = 3.28084
 
 KM_2_MI = 0.621371
 
+FREQUENCY_CHOICES = [
+    (2.437, "2.4 GHz"),
+    (3.6, "3.65 GHz"),
+    (5.4925, "5 GHz"),
+    (11.2, "11 GHz"),
+    (18.7, "18 GHz"),
+    (24.35, "24 GHz"),
+    (64.79, "60 GHz"),
+]
+
 
 class FeatureType(enum.Enum):
     AP = "access_point"

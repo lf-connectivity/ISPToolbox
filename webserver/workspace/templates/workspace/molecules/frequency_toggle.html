@@ -1,8 +1,11 @@
+{% load isp_toolbox_units %}
+{% frequency_list as frequencies %}
+
 <div class="dropdown freq-toggle" style="position: static !important;">
-    <button {% if not enabled %}disabled{% endif %} ap-uuid-target="{{ap.uuid}}" class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ ap.frequency}} GHz</button>
+    <button {% if not enabled %}disabled{% endif %} ap-uuid-target="{{ap.uuid}}" class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ ap.frequency|to_frequency_label }}</button>
     <div class="dropdown-menu" aria-labelledby="freq-dropdown">
-      {% for k, v in results.serializer.context.freq_options.items %}
-        <button ap-uuid-target="{{ap.uuid}}" value="{{v}}" class="dropdown-item freq-dropdown-item freq-option" type="button">{{k}}</button>
+      {% for label, value in frequencies.items %}
+        <button ap-uuid-target="{{ap.uuid}}" value="{{value}}" class="dropdown-item freq-dropdown-item freq-option" type="button">{{label}}</button>
       {% endfor %}
     </div>
 </div>

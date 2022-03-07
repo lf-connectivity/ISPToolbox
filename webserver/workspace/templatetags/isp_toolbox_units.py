@@ -1,7 +1,7 @@
 from django import template
 
 import math
-from workspace.models.model_constants import ModelLimits
+from workspace.models.model_constants import FREQUENCY_CHOICES, ModelLimits
 
 register = template.Library()
 
@@ -16,8 +16,23 @@ def unit_preference_value(unit, imperial_value, metric_value):
 
 
 @register.simple_tag
-def frequency_dropdown_option(frequency, option_value, option_text):
-    if math.isclose(frequency, option_value):
-        return format_html(_HTML_OPTION_SELECTED, option_value, option_text)
-    else:
-        return format_html(_HTML_OPTION, option_value, option_text)
+def field_limit(limit_name, limit_type, truncate=None):
+    limit = getattr(getattr(ModelLimits, limit_name.upper()), limit_type.lower())
+    if truncate is not None:
+        multiplier = 10 ** truncate
+        limit = math.floor(limit * multiplier) / multiplier
+    return limit
+
+
+@register.simple_tag
+def frequency_list():
+    """
+    Returns a dictionary of frequency shorthands and their actual float values
+    """
+
+    return dict((label, value) for value, label in FREQUENCY_CHOICES)
+
+
+@register.filter
+def to_frequency_label(frequency):
+    return dict(FREQUENCY_CHOICES)[frequency]

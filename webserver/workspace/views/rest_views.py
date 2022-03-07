@@ -3,7 +3,7 @@ from django.views import View
 from workspace.models import (
     AccessPointLocation,
     AccessPointCoverageBuildings,
-    AccessPointSector
+    AccessPointSector,
 )
 from workspace import pagination
 from gis_data.models import MsftBuildingOutlines
@@ -23,6 +23,8 @@ from rest_framework import generics, mixins, renderers, filters
 from django.http import JsonResponse
 import logging
 import json
+
+from workspace.models.model_constants import FREQUENCY_CHOICES
 
 
 class WorkspacePerformCreateMixin:
@@ -129,8 +131,7 @@ class AccessPointLocationListCreate(
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update(
-            {"ordering": self.request.GET.get("ordering", self.ordering[0])})
+        context.update({"ordering": self.request.GET.get("ordering", self.ordering[0])})
         return context
 
     def get(self, request, *args, **kwargs):
@@ -319,30 +320,26 @@ class AccessPointSectorCreate(
 
     pagination_class = pagination.IspToolboxCustomAjaxPagination
 
-    filter_backends = [filters.OrderingFilter,
-                       SessionFilter, AccessPointFilter]
+    filter_backends = [filters.OrderingFilter, SessionFilter, AccessPointFilter]
     ordering_fields = [
-        "name", "last_updated", "height", "radius", "azimuth", "heading", "frequency",
-        "default_cpe_height"
+        "name",
+        "last_updated",
+        "height",
+        "radius",
+        "azimuth",
+        "heading",
+        "frequency",
     ]
     ordering = ["-last_updated"]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
+        context.update({"ordering": self.request.GET.get("ordering", self.ordering[0])})
         context.update(
-            {"ordering": self.request.GET.get("ordering", self.ordering[0])})
-        context.update({
-            'freq_options': {
-                '2.4 GHz': 2.437,
-                '3.65 GHz': 3.6,
-                '5 GHz': 5.4925,
-                '11 GHz': 11.2,
-                '18 GHz': 18.7,
-                '24 GHz': 24.35,
-                '60 GHz': 64.79
-            },
-            'default_sector': AccessPointSector()
-        })
+            {
+                "default_sector": AccessPointSector(),
+            }
+        )
         return context
 
     def get(self, request, *args, **kwargs):
@@ -384,8 +381,7 @@ class AccessPointCoverageResults(View):
         features = []
         nearby = coverage.buildingcoverage_set.all()
         nearby_ids = [b.msftid for b in nearby]
-        buildings = MsftBuildingOutlines.objects.filter(
-            id__in=nearby_ids).all()
+        buildings = MsftBuildingOutlines.objects.filter(id__in=nearby_ids).all()
         buildings = {b.id: b.geog for b in buildings}
         features = [
             {
@@ -420,8 +416,7 @@ class AccessPointCoverageResults(View):
         except AccessPointLocation.DoesNotExist:
             logging.info("Failed to find AP matching UUID")
         try:
-            sector = AccessPointSector.get_rest_queryset(
-                request).get(uuid=uuid)
+            sector = AccessPointSector.get_rest_queryset(request).get(uuid=uuid)
             coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
             if not coverage.result_cached():
                 raise Http404
@@ -441,8 +436,7 @@ class AccessPointCoverageStatsView(View):
             logging.info("Failed to find AP matching UUID")
         # ENDTODO: deprecate
         try:
-            sector = AccessPointSector.get_rest_queryset(
-                request).get(uuid=uuid)
+            sector = AccessPointSector.get_rest_queryset(request).get(uuid=uuid)
             coverage = AccessPointCoverageBuildings.objects.get(sector=sector)
             return JsonResponse(coverage.coverageStatistics())
         except AccessPointCoverageBuildings.DoesNotExist:
@@ -454,25 +448,23 @@ class AccessPointCoverageViewshedOverlayView(View):
         uuid = kwargs.get("uuid", None)
         # TODO: deprecate
         try:
-            ap = AccessPointLocation.get_rest_queryset(request).get(
-                uuid=uuid
-            )
+            ap = AccessPointLocation.get_rest_queryset(request).get(uuid=uuid)
             viewshed = Viewshed.objects.get(ap=ap)
             if not viewshed.result_cached():
-                logging.info('Viewshed overlay not calculated')
+                logging.info("Viewshed overlay not calculated")
                 raise Http404("Overlay not cached")
             return JsonResponse(viewshed.getTilesetInfo())
         except (AccessPointLocation.DoesNotExist, Viewshed.DoesNotExist):
-            logging.info('Failed to find Accesspoint matching UUID or viewshed not calculated yet')
+            logging.info(
+                "Failed to find Accesspoint matching UUID or viewshed not calculated yet"
+            )
             pass
         # ENDTODO: deprecate
         try:
-            sector = AccessPointSector.get_rest_queryset(request).get(
-                uuid=uuid
-            )
+            sector = AccessPointSector.get_rest_queryset(request).get(uuid=uuid)
             viewshed = Viewshed.objects.get(sector=sector)
             if not viewshed.result_cached():
-                logging.info('Viewshed overlay not calculated')
+                logging.info("Viewshed overlay not calculated")
                 raise Http404("Overlay not cached")
             return JsonResponse(viewshed.getTilesetInfo())
         except (AccessPointSector.DoesNotExist, Viewshed.DoesNotExist):

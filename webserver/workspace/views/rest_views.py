@@ -24,8 +24,6 @@ from django.http import JsonResponse
 import logging
 import json
 
-from workspace.models.model_constants import FREQUENCY_CHOICES
-
 
 class WorkspacePerformCreateMixin:
     """

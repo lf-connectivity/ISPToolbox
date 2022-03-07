@@ -322,7 +322,8 @@ class AccessPointSectorCreate(
     filter_backends = [filters.OrderingFilter,
                        SessionFilter, AccessPointFilter]
     ordering_fields = [
-        "name", "last_updated", "height", "radius", "azimuth", "heading", "frequency"
+        "name", "last_updated", "height", "radius", "azimuth", "heading", "frequency",
+        "default_cpe_height"
     ]
     ordering = ["-last_updated"]
 

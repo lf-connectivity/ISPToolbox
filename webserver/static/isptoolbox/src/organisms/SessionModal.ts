@@ -32,7 +32,7 @@ export class SessionModal {
             });
 
             $('.session-name-link').on('click', (event) => {
-                e.preventDefault();
+                event.preventDefault();
                 const uuid = event.currentTarget.getAttribute('data-target');
                 const url = `${getToolURL()}${uuid}/`;
                 window.location.replace(url);

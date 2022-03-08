@@ -110,7 +110,6 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
                 new: string | null | undefined;
             }
     ) {
-        console.log('getting sectors');
         if (data != null) {
             data['session'] = getSessionID();
         }

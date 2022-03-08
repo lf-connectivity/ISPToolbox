@@ -560,7 +560,8 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             let feat = this.draw.get(this.selectedFeatureID);
             return (
                 feat?.properties?.feature_type &&
-                feat?.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
+                (feat?.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK ||
+                    feat?.properties?.feature_type === WorkspaceFeatureTypes.PTP_LINK)
             );
         } else {
             return false;

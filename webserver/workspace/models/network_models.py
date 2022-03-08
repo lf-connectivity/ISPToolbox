@@ -765,7 +765,9 @@ class AccessPointSectorSerializer(
         ],
     )
 
-    frequency = serializers.ChoiceField(choices=FREQUENCY_CHOICES)
+    frequency = serializers.ChoiceField(
+        choices=FREQUENCY_CHOICES, default=FREQUENCY_CHOICES[0][0]
+    )
     feature_type = serializers.CharField(read_only=True)
     default_cpe_height_ft = serializers.FloatField(
         required=False,
@@ -1016,7 +1018,9 @@ class APToCPELinkSerializer(
         default=None,
     )
 
-    frequency = serializers.ChoiceField(choices=FREQUENCY_CHOICES)
+    frequency = serializers.ChoiceField(
+        choices=FREQUENCY_CHOICES, default=FREQUENCY_CHOICES[0][0]
+    )
     cpe = serializers.PrimaryKeyRelatedField(
         queryset=CPELocation.objects.all(), pk_field=serializers.UUIDField()
     )
@@ -1104,7 +1108,9 @@ class PointToPointLinkSerializer(
     lookup_field = "uuid"
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
-    frequency = serializers.ChoiceField(choices=FREQUENCY_CHOICES)
+    frequency = serializers.ChoiceField(
+        choices=FREQUENCY_CHOICES, default=FREQUENCY_CHOICES[0][0]
+    )
     radio0hgt_ft = serializers.FloatField(
         required=False,
         validators=[

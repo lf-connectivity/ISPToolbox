@@ -1,3 +1,6 @@
+{% load isp_toolbox_units %}
+{% frequency_list as frequencies %}
+
 <div>
   <div class="d-flex align-items-baseline">
     <h5 class="mb-0" id="frequency-label">Frequency&nbsp;</h5>
@@ -6,13 +9,9 @@
         5 GHz
       </button>
       <div class="dropdown-menu" aria-labelledby="freq-dropdown">
-        <button id="2.4 GHz" class="dropdown-item freq-dropdown-item" type="button">2.4 GHz</button>
-        <button id="3.65 GHz" class="dropdown-item freq-dropdown-item" type="button">3.65 GHz</button>
-        <button id="5 GHz" class="dropdown-item freq-dropdown-item active" type="button">5 GHz</button>
-        <button id="11 GHz" class="dropdown-item freq-dropdown-item" type="button">11 GHz</button>
-        <button id="18 GHz" class="dropdown-item freq-dropdown-item" type="button">18 GHz</button>
-        <button id="24 GHz" class="dropdown-item freq-dropdown-item" type="button">24 GHz</button>
-        <button id="60 GHz" class="dropdown-item freq-dropdown-item" type="button">60 GHz</button>
+        {% for label, value in frequencies.items %}
+          <button id="{{ label }}" class="dropdown-item freq-dropdown-item {% if label == "5 GHz" %}active{% endif %} type="button">{{label}}</button>
+        {% endfor %}
       </div>
     </div>
   </div>

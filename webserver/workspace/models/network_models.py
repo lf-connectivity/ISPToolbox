@@ -1104,6 +1104,7 @@ class PointToPointLinkSerializer(
     lookup_field = "uuid"
     last_updated = serializers.DateTimeField(format="%m/%d/%Y %-I:%M%p", required=False)
     feature_type = serializers.CharField(read_only=True)
+    frequency = serializers.ChoiceField(choices=FREQUENCY_CHOICES)
     radio0hgt_ft = serializers.FloatField(
         required=False,
         validators=[

@@ -30,7 +30,7 @@ abstract class BaseAjaxCPEFlowPopup extends LinkCheckBaseAjaxFormPopup {
     }
 
     protected cleanup() {
-        if (!this.tooltipAction) {
+        if (!this.tooltipAction && this.draw.getMode() === 'simple_select') {
             this.changeSelection([]);
         }
         this.tooltipAction = false;

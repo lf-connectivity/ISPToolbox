@@ -44,10 +44,9 @@
     </td>
     <td>
         <div class="metric-input">
-        <input name="latitude" type="text" value="{{ ap.lat|floatformat:5 }}" ap-uuid-target="{{ap.uuid}}" disabled>
+            <input form="tower_form_{{ap.uuid}}" name="coordinates" type="text" value="{{ ap.lat|floatformat:5 }}, {{ ap.lng|floatformat:5 }}" ap-uuid-target="{{ap.uuid}}" disabled>
         </div>
-        </td>
-    <td><div class="metric-input"><input name="longitude" type="text" value="{{ ap.lng|floatformat:5 }}" ap-uuid-target="{{ap.uuid}}" disabled></div></td>
+    </td>
     <td class="date align-middle">{{ap.last_updated|lower}}</td>
     <td>
         <div class="btn-group" role="group" aria-label="edit-btn-group">

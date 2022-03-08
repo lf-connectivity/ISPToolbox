@@ -4,6 +4,7 @@ import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
 import { getCookie } from '../utils/Cookie';
 import { djangoUrl } from '../utils/djangoUrl';
 import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../utils/IIspToolboxAjaxPlugin';
+import { parseLatitudeLongitude } from '../utils/LatLngInputUtils';
 import { getSessionID, isUnitsUS } from '../utils/MapPreferences';
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { addHoverTooltip } from './HoverTooltip';
@@ -11,6 +12,7 @@ import { addHoverTooltip } from './HoverTooltip';
 export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
     selector: string = '#accessPointModal';
     subscriptions: Array<string | null> = [];
+    mode: string = 'tower';
     constructor(private map: mapboxgl.Map, private draw: MapboxDraw) {
         this.subscriptions = initializeIspToolboxInterface(this);
         $(this.selector).on('shown.bs.modal', (e: JQuery.ClickEvent) => {
@@ -29,6 +31,7 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
     }
 
     setMode(mode: 'tower' | 'sector') {
+        this.mode = mode;
         switch (mode) {
             case 'tower':
                 $('#accessPointSectorModalLabel, #tower-breadcrumb').addClass('d-none');
@@ -107,6 +110,7 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
                 new: string | null | undefined;
             }
     ) {
+        console.log('getting sectors');
         if (data != null) {
             data['session'] = getSessionID();
         }
@@ -321,6 +325,16 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
                                 //@ts-ignore
                                 val = parseFloat(val) * 1.60934;
                                 break;
+                            case 'coordinates':
+                                const coords = parseLatitudeLongitude(val as string);
+                                if(coords !== null){
+                                    const feature = this.draw.get(feat.id);
+                                    if(feature?.geometry)
+                                    {
+                                        feature.geometry = {...feature?.geometry, type: 'Point', coordinates: [coords[1], coords[0]]};
+                                        this.draw.add(feature);
+                                    }
+                                }
                             default:
                         }
                     }
@@ -356,14 +370,16 @@ export class TowerPaginationModal implements IIspToolboxAjaxPlugin {
     crudCallback(event: { features: Array<GeoJSON.Feature> }) {
         // Only run if modal is open
         if ($(this.selector).is(':visible')) {
-            if (event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR)) {
+            if (event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.SECTOR) && this.mode === 'sector') {
                 const ordering = $('#ap-modal-ordering').val() as string;
                 const ap = $('#ap-sector-uuid').val() as string
                 const page = $('#ap-modal-page-num').val() as string;
                 this.getAccessPointSectors({ ordering, page, session: undefined, ap: ap, new: undefined });
             }
-            if (event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.AP)) {
-                this.getAccessPoints(undefined);
+            if (event.features.some(f => f.properties?.feature_type === WorkspaceFeatureTypes.AP) && this.mode === 'tower') {
+                const ordering = $('#ap-modal-ordering').val() as string;
+                const page = $('#ap-modal-page-num').val() as string;
+                this.getAccessPoints({ ordering, page, session: undefined });
             }
         }
     }

@@ -207,23 +207,15 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             $('.freq-dropdown-item').removeClass('active');
             $(this).addClass('active');
             if (this.selectedFeatureID) {
-                if (this.workspaceLinkSelected()) {
-                    let link = this.draw.get(this.selectedFeatureID);
-                    if (link) {
-                        this.draw.setFeatureProperty(
-                            this.selectedFeatureID,
-                            'frequency',
-                            this.centerFreq
-                        );
-                        link = this.draw.get(this.selectedFeatureID);
-                        this.map.fire('draw.update', { features: [link] });
-                    }
-                } else {
+                let link = this.draw.get(this.selectedFeatureID);
+                if (link) {
                     this.draw.setFeatureProperty(
                         this.selectedFeatureID,
                         'frequency',
                         this.centerFreq
                     );
+                    link = this.draw.get(this.selectedFeatureID);
+                    this.map.fire('draw.update', { features: [link] });
                 }
             }
             this.updateLinkChart(true);
@@ -560,8 +552,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             let feat = this.draw.get(this.selectedFeatureID);
             return (
                 feat?.properties?.feature_type &&
-                (feat?.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK ||
-                    feat?.properties?.feature_type === WorkspaceFeatureTypes.PTP_LINK)
+                feat?.properties?.feature_type === WorkspaceFeatureTypes.AP_CPE_LINK
             );
         } else {
             return false;

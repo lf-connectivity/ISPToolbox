@@ -2,11 +2,12 @@
 
 .table-modal
     thead
+        border-bottom: solid 2px $brand-primary-color
         th
             border-bottom: none
             border-top: none
 
-.theme-table 
+.theme-table
     .thead
         background: $light-gray-color
     .tr
@@ -18,8 +19,8 @@
         align-items: flex-end
         padding: 0.75rem
         align-items: center
-        font-weight:800
-    .thead p, 
+        font-weight: 800
+    .thead p,
     .tbody p
         margin: 0
     th, td
@@ -39,11 +40,11 @@
         display: flex
         align-items: center
 
-.theme-table th 
+.theme-table th
     .sort-ap
         display: inline-flex
         .sort-btn path
-            transition: 0.2s all ease 
+            transition: 0.2s all ease
         &:hover .sort-btn
             background: transparent
             path
@@ -51,7 +52,7 @@
 
 .thead-modal
     background: $light-gray-color
-    
+
 .theme-table.open-workspace
     .th-column
         font-weight: bold

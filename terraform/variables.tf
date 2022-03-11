@@ -85,11 +85,11 @@ variable "autoscale_max" {
   default     = "10"
 }
 variable "autoscale_desired" {
-  description = "Desired autoscale (number of EC2)"
+  description = "Desired autoscale (number of EC2) for webservers"
   default     = "2"
 }
 variable "autoscale_desired_async" {
-  description = "Desired autoscale (number of EC2)"
-  default     = "3"
+  description = "Desired autoscale (number of EC2) for async workers"
+  default     = "4"
 }
 

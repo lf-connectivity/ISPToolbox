@@ -4,6 +4,11 @@ resource "aws_autoscaling_group" "ecs-cluster-webserver" {
   max_size             = var.autoscale_max
   desired_capacity     = var.autoscale_desired
   health_check_type    = "EC2"
+  tag {
+    key                 = "type"
+    value               = "webserver"
+    propagate_at_launch = true
+  }
   launch_configuration = aws_launch_configuration.ecs-webserver.name
   vpc_zone_identifier  = [aws_subnet.public-subnet-1.id, aws_subnet.public-subnet-2.id]
 }
@@ -14,6 +19,11 @@ resource "aws_autoscaling_group" "ecs-cluster-async" {
   max_size             = var.autoscale_max
   desired_capacity     = var.autoscale_desired_async
   health_check_type    = "EC2"
+  tag {
+    key                 = "type"
+    value               = "async"
+    propagate_at_launch = true
+  }
   launch_configuration = aws_launch_configuration.ecs-async.name
   vpc_zone_identifier  = [aws_subnet.public-subnet-1.id, aws_subnet.public-subnet-2.id]
 }

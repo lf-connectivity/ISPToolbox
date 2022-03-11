@@ -13,8 +13,8 @@
     .onboarding_container--intro-copy
         margin-top: 12px
         letter-spacing: 0.01em
-    
-    .fb-login-button 
+
+    .fb-login-button
         text-align: center
         margin: 20px auto
 
@@ -31,9 +31,9 @@
         .onboarding_container--question
             display: block
             width: 100%
-    .survery-form 
+    .survery-form
         input, select, .checklist--items
-            margin-bottom: 10px 
+            margin-bottom: 10px
 
     input[type="text"], input[type="email"], input[type="password"], input[type="number"], select
         border: none
@@ -44,9 +44,9 @@
         color: $brand-dark-gray-color
         &:focus
             outline: 0
-    select 
+    select
         color: $brand-dark-gray-color
-        background-image: url("data:image/svg+xml,%3Csvg width='12' height='6' viewBox='0 0 12 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.3254 0.620372L0.945767 0.294976L0.294976 1.05423L0.674604 1.37963L1.3254 0.620372ZM5.66667 5L5.34127 5.37963L5.66667 5.65854L5.99206 5.37963L5.66667 5ZM10.6587 1.37963L11.0384 1.05423L10.3876 0.294976L10.0079 0.620372L10.6587 1.37963ZM0.674604 1.37963L5.34127 5.37963L5.99206 4.62037L1.3254 0.620372L0.674604 1.37963ZM5.99206 5.37963L10.6587 1.37963L10.0079 0.620372L5.34127 4.62037L5.99206 5.37963Z' fill='%232D2D2D'/%3E%3C/svg%3E%0A")        
+        background-image: url("data:image/svg+xml,%3Csvg width='12' height='6' viewBox='0 0 12 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.3254 0.620372L0.945767 0.294976L0.294976 1.05423L0.674604 1.37963L1.3254 0.620372ZM5.66667 5L5.34127 5.37963L5.66667 5.65854L5.99206 5.37963L5.66667 5ZM10.6587 1.37963L11.0384 1.05423L10.3876 0.294976L10.0079 0.620372L10.6587 1.37963ZM0.674604 1.37963L5.34127 5.37963L5.99206 4.62037L1.3254 0.620372L0.674604 1.37963ZM5.99206 5.37963L10.6587 1.37963L10.0079 0.620372L5.34127 4.62037L5.99206 5.37963Z' fill='%232D2D2D'/%3E%3C/svg%3E%0A")
         background-repeat: no-repeat
         background-position: 97% 50%
         -moz-appearance: none
@@ -85,8 +85,8 @@
         display: flex
     label
         text-align: center
-        background: lighten($brand-theme-color, 5%)
-        border: solid 1px $brand-primary-color
+        background: lighten($brand-theme-color, 6%)
+        border: solid 1px transparent
         padding: 13px 20px
         display: flex
         align-items: center
@@ -99,18 +99,29 @@
         box-sizing: content-box
         width: 100%
         line-height: 120%
-        color: $brand-secondary-color
+        color: $brand-dark-gray-color
     label:hover
-        background: lighten($brand-theme-color, 10%)
+        background: lighten($brand-theme-color, 9%)
     input[type=checkbox]
         position: absolute
         opacity: 0
     input[type=checkbox]:checked + label
-        background: $white-color
+        background: $light-gray-color
         border: solid 2px $brand-primary-color
         margin: 0px
         color: $brand-dark-gray-color
 
+.account_settings .checklist--items ul
+    label
+        background: $light-gray-color
+        border: solid 1px transparent
+        color: $brand-dark-gray-color
+    label:hover
+        background: lighten($brand-theme-color, 5%)
+    input[type=checkbox]:checked + label
+        background: lighten($brand-theme-color, 5%)
+        border: solid 2px $brand-primary-color
+        color: $brand-dark-gray-color
 
 .onboarding_container .content-break
     display: flex

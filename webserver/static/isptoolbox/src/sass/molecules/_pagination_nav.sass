@@ -14,3 +14,37 @@
             border-color: $light-gray-color
         &:disabled
             color: $disabled-gray
+
+.paging_simple
+    margin-top: 1em
+    margin-bottom: 1em
+    display: flex
+    justify-content: flex-end
+    .paginate_button
+        border-radius: 0 !important
+        padding-bottom: 0.75em
+        padding-top: 0.75em
+        padding-left: 2em
+        padding-right: 2em
+        color: $brand-primary-color
+        svg 
+            margin: 4px
+        &:hover
+            background-color: $light-gray-color
+            border-color: $light-gray-color
+            cursor: pointer
+    .page-item
+        .paginate_button
+            border-color: $light-gray-color
+        &:disabled
+            color: $disabled-gray
+
+
+table.dataTable>thead .sorting:before,table.dataTable>thead .sorting_asc:before,table.dataTable>thead .sorting_desc:before,table.dataTable>thead .sorting_asc_disabled:before,table.dataTable>thead .sorting_desc_disabled:before 
+    right: 1em
+    content: "↑"
+
+
+table.dataTable>thead .sorting:after,table.dataTable>thead .sorting_asc:after,table.dataTable>thead .sorting_desc:after,table.dataTable>thead .sorting_asc_disabled:after,table.dataTable>thead .sorting_desc_disabled:after 
+    right: .5em
+    content: "↓"

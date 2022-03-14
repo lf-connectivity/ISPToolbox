@@ -1,0 +1,48 @@
+{% load static %}
+{% include "workspace/molecules/page_header.html" %}
+{% block extrastyle %}
+
+<link href="{% static 'ajax_datatable/css/style.css' %}" rel="stylesheet" />
+<link rel='stylesheet' href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<link rel='stylesheet' href="https://cdn.datatables.net/1.11.5/css/buttons.bootstrap4.min.css">
+
+{% endblock extrastyle %}
+
+{% block extrajs %}
+
+<script type="text/javascript" src="{% static 'ajax_datatable/js/utils.js' %}"></script>
+<script src="//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+
+{% endblock %}
+
+<div class="modal fade theme-modal open-workspace show" id="paginationNetworkModal" tabindex="-1" role="dialog" aria-labelledby="paginationNetworkModalLabel" style="display: block;"><div class="modal-dialog modal-dialog-centered modal-lg" role="document"><div class="modal-content"><div class="modal-header"><h3 class="modal-title" id="paginationNetworkModalLabel">Open a Session</h3><button type="button" class="close" data-dismiss="modal" aria-label="Close"><svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 1L1 14.5467" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M1 1L13 14.5467" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div id="session-list-modal-body">
+    <div class="modal-body isptoolbox-form">
+        <div style="display: block; overflow-x: auto">
+            <div class="table-responsive">
+                <table id="session_table" width="100%"
+                    class="table dt-responsive nowrap table-sm table-hover table-modal theme-table">
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script language="javascript">
+    $(document).ready(function () {
+        AjaxDatatableViewUtils.initialize_table(
+            $('#session_table'),
+            "{% url 'workspace:sessions_table' %}", {
+                // extra_options (example)
+                processing: false,
+                autoWidth: false,
+                scrollX: false,
+                bLengthChange: false,
+                pagingType: "simple"
+            }, {
+                // extra_data
+                // ...
+            },
+        );
+    });
+</script>
+

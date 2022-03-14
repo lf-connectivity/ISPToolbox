@@ -9,7 +9,7 @@ from towerlocator.helpers import getViewShed
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from django.contrib.humanize.templatetags.humanize import intcomma
 import logging
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 from workspace.models import AccessPointSector
 from workspace.models.cloudrf_models import CloudRFAsyncTaskModel
 from celery import current_task

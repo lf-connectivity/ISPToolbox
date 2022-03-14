@@ -1,9 +1,8 @@
 #!/bin/python3
-import pandas as pd
-import argparse
-
 
 def main():
+    import pandas as pd
+    import argparse
 
     # Parse input values
     parser = argparse.ArgumentParser(description='Process some integers.')

@@ -1,6 +1,6 @@
 from dataUpdate.scripts.load_asn_elasticsearch import updateASNElasticSearch
 from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 
 ONCALL_ALERT_EMAIL_TITLE = "ASN Update Failed"
 

@@ -45,8 +45,6 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('admin/doc/', include('django.contrib.admindocs.urls')),
     path('admin/', admin.site.urls),
-    # Admin SSO
-    path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2')),
     # Health Check Endpoint
     path('gis/osmBuildings/', views.BuildingsView.as_view(), name='osmBuildings'),
     # Market Evaluator
@@ -157,8 +155,12 @@ else:
              reverse_views.urls_js, name='js_reverse'),
     ]
 
-
 urlpatterns += reverse_url
+
+
+if settings.PROD:
+     # Admin SSO
+    urlpatterns += [path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2')),]
 
 
 handler500 = 'workspace.views.Error500View'  # noqa

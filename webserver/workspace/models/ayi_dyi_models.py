@@ -6,7 +6,7 @@ from celery.result import AsyncResult
 from django.utils.translation import gettext_lazy as _
 from uuid import uuid4
 
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 
 
 class AccessInformationJob(models.Model):

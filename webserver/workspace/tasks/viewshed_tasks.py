@@ -4,7 +4,7 @@ from traceback import format_exc
 from workspace.models.viewshed_models import DSMAvailabilityException, Viewshed
 import json
 import subprocess
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 from workspace.models import AccessPointLocation
 from workspace.tasks.coverage_tasks import calculateCoverage
 from workspace.tasks.websocket_utils import updateClientAPStatus, sendMessageToChannel

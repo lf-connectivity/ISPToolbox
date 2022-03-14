@@ -27,7 +27,7 @@ services:
   celery:
     image: isptoolbox-celery
     build: ./webserver
-    command: celery --app webserver worker -l info
+    command: celery --app celery_async worker -l info
     depends_on:
       - redis
       - postgres
@@ -59,7 +59,7 @@ services:
   flower:
     image: isptoolbox-flower
     build: ./webserver
-    command: celery --app webserver flower --conf=flower_config.py
+    command: celery --app celery_async flower --conf=flower_config.py
     depends_on:
       - redis
       - celery

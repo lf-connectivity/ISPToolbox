@@ -1,10 +1,7 @@
-import pdal
 import json
 from django.contrib.gis.geos import Point
 from geopy.distance import distance as geopy_distance
 from geopy.distance import lonlat
-from scipy.interpolate import interp1d
-import numpy as np
 
 DEFAULT_INTERPOLATION_STEP = 50. / 100.  # cm
 DEFAULT_FILTERS = {
@@ -29,6 +26,9 @@ def averageHeightAtDistance(distance, heights):
     """
     Remove duplicate distances along profile and replace with average heights
     """
+    # Lazy Import To Improve Start Time
+    import numpy as np
+
     unique_increasing_distances, duplicate_indices, num_duplicates = np.unique(
         distance,
         return_inverse=True,
@@ -46,6 +46,9 @@ def takeMaxHeightAtDistance(distance, heights):
     """
         Remove duplicate distances along profile and replace with max heights
     """
+    # Lazy Import To Improve Start Time
+    import numpy as np
+
     unique_increasing_distances, duplicate_indices, _ = np.unique(
         distance,
         return_inverse=True,
@@ -62,6 +65,11 @@ def getLidarPointsAroundLink(
     num_samples, interpolation_step=DEFAULT_INTERPOLATION_STEP, link_buffer=3,
     use_outlier_filter=True
 ):
+    # Lazy Import To Improve Start Time
+    import pdal
+    from scipy.interpolate import interp1d
+    import numpy as np
+
     link_length = geopy_distance(
         lonlat(link[0][0], link[0][1]), lonlat(link[1][0], link[1][1])).meters
     # TODO achong: - create link buffer based on LIDAR cloud reference frame units

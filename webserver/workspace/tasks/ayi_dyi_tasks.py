@@ -1,5 +1,5 @@
 from uuid import UUID
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 from workspace.models import AccessInformationJob, DeleteInformationJob
 import tempfile
 from django.core import serializers

@@ -1,4 +1,4 @@
-from webserver.celery import celery_app as app
+from celery_async.celery import celery_app as app
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from mmwave.models import DSMConversionJob, EPTLidarPointCloud
 import tempfile

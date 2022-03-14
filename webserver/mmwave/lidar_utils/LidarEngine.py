@@ -8,7 +8,6 @@ from geopy.distance import lonlat
 import mmwave.lidar_utils.lidar_engine_queries as lidar_engine_queries
 
 import logging
-import numpy as np
 import re
 
 
@@ -190,6 +189,9 @@ class LidarEngine:
         """
         Uses all segments that have point clouds and combines the results of these segments into a single profile
         """
+        # Lazy Import To Improve Start Time
+        import numpy as np
+
         total_link_dist = self.__calculateLinkDistance()
         profiles = []
         for geometry, cloud in self.segments:

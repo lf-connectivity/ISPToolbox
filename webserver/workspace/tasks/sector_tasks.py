@@ -1,4 +1,4 @@
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 from workspace import models as workspace_models
 from gis_data import models as gis_data_models
 

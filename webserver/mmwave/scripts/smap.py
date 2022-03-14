@@ -11,7 +11,7 @@ from workspace.utils.geojson_circle import createGeoJSONCircle
 import logging
 import tempfile
 import csv
-from webserver.celery import celery_app as app
+from celery_async.celery import celery_app as app
 
 LIMIT_M = 100_000
 bucket_name = 'isptoolbox-export-file'

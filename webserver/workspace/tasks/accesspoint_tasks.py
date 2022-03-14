@@ -11,7 +11,7 @@ from workspace.tasks.websocket_utils import updateClientAPStatus
 
 import numpy as np
 import json
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 
 
 ARC_SECOND_DEGREES = 1.0 / 60.0 / 60.0

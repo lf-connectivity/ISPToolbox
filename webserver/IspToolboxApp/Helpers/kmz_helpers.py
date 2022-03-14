@@ -10,9 +10,6 @@ import rasterio.features
 import rasterio.warp
 from uuid import uuid4
 
-from fastkml import kml as fastkml, styles
-from fastkml.geometry import Geometry
-
 
 ############################
 # KMZ PROCESSING FUNCTIONS #
@@ -157,6 +154,7 @@ def createGeoJsonsFromCoverageOverlays(overlays, root_directory):
 
 
 def getAllStyles():
+    from fastkml import kml as styles
     tag_styles = []
     for layer in ('shape', 'buildings'):
         s = styles.Style(id=f'{layer}-style-id')
@@ -173,6 +171,9 @@ def getAllStyles():
 
 
 def convertKml(geoList):
+
+    from fastkml import kml as fastkml, styles
+    from fastkml.geometry import Geometry
     tag_kml = fastkml.KML()
     ns = '{http://www.opengis.net/kml/2.2}'
 

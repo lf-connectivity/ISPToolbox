@@ -2,7 +2,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from .tasks import genPolySize, genBuildingCount, genClusteredBuildings, genAnchorInstitutions, genBuildingsMST
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 
 
 class NetworkCompConsumer(AsyncJsonWebsocketConsumer):

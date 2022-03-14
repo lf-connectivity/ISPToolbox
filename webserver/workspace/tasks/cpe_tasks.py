@@ -2,7 +2,7 @@ from django.db import transaction
 from django.contrib.gis.geos import Point
 from turfpy import measurement
 
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 from workspace import geojson_utils
 from workspace.models import (
     WorkspaceMapSession,

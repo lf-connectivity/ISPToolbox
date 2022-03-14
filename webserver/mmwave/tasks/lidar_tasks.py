@@ -1,7 +1,7 @@
 from mmwave.scripts.update_lidar_metadata import (
     update_lidar_metadata, alert_oncall_status
 )
-from webserver.celery import celery_app as app
+from celery_async.celery import celery_app as app
 from django.conf import settings
 from mmwave.models import EPTLidarPointCloud
 import redis

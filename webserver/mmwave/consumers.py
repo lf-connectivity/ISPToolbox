@@ -2,7 +2,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from mmwave import tasks as mmwave_tasks
 from workspace import tasks as workspace_tasks
 from workspace.models import WorkspaceMapSession
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 import enum
 from asgiref.sync import sync_to_async
 

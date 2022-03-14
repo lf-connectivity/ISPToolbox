@@ -48,7 +48,7 @@ from .model_constants import (
 from mmwave.tasks.link_tasks import getDTMPoint
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 
 
 BUFFER_DSM_EXPORT_KM = 0.5

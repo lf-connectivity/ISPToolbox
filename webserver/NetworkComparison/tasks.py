@@ -1,4 +1,4 @@
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 from area import area
 from django.db import connections
 from NetworkComparison.util import squaredMetersToMiles

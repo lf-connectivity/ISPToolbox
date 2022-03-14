@@ -12,7 +12,7 @@
         "hardLimit": 0
       }
     ],
-    "command": ["celery","--app","webserver","worker","-l","info"],
+    "command": ["celery","--app","celery_async","worker","-l","info"],
     "environment": [
       {
         "name": "DEBUG",

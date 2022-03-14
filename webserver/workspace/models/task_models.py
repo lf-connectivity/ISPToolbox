@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django_celery_results.models import TaskResult
 from uuid import uuid4
 
-from webserver.celery import celery_app as app
+from celery_async.celery import celery_app as app
 
 import celery.states
 import enum

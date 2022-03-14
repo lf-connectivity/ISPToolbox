@@ -3,7 +3,7 @@ from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuild
     checkIfIncomeProvidersAvailable, queryBuildingOutlines
 from django.contrib.gis.geos import GEOSGeometry
 import json
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 
 from datetime import datetime
 

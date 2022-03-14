@@ -160,7 +160,7 @@
         "protocol": "tcp"
       }
     ],
-    "command": ["celery","--app","webserver","flower","--conf=flower_config.py"],
+    "command": ["celery","--app","celery_async","flower","--conf=flower_config.py"],
     "environment": [
       {
         "name": "DEBUG",

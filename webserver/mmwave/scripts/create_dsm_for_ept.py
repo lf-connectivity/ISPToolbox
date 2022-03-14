@@ -1,6 +1,6 @@
 from mmwave.lidar_utils.SlippyTiles import getTiles, getBoundaryofTile, DEFAULT_OUTPUT_ZOOM
 from mmwave.lidar_utils.DSMEngine import DSMEngine
-from webserver.celery import celery_app as app
+from celery_async.celery import celery_app as app
 from mmwave.models import EPTLidarPointCloud, LidarDSMTileModel
 import tempfile
 from celery.utils.log import get_task_logger

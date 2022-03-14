@@ -22,7 +22,7 @@ from IspToolboxApp.util.validate_user_input import (
     validateUserInputMarketEvaluator,
     InvalidMarketEvaluatorRequest,
 )
-from webserver.celery import celery_app as app
+from celery_async import celery_app as app
 
 
 class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):

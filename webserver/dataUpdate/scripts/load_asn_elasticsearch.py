@@ -19,7 +19,6 @@ from datetime import datetime, timedelta
 import csv
 import time
 import json
-from elasticsearch import Elasticsearch
 from django.conf import settings
 
 
@@ -66,6 +65,7 @@ def getASNInformation(asn):
 
 def updateASNElasticSearch(
         should_query_callback, result_json_callback, asn_error_callback):
+    from elasticsearch import Elasticsearch
     es = Elasticsearch(
         [settings.ES_ENDPOINT], http_auth=(settings.USERNAME_ES, settings.PASSWORD_ES)
     )
@@ -113,6 +113,8 @@ def queryASNElasticCache(query):
     """
     Returns relevant ASN entries that match query (string)
     """
+    from elasticsearch import Elasticsearch
+
     es = Elasticsearch(
         [settings.ES_ENDPOINT], http_auth=(settings.USERNAME_ES, settings.PASSWORD_ES)
     )

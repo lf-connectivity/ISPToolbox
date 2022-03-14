@@ -1,6 +1,4 @@
 import datetime
-import pandas as pd
-
 
 def get_next_in_date_hierarchy(request, date_hierarchy):
     """
@@ -26,6 +24,8 @@ def daterange(starttime, endtime=None, time='day'):
     """
     Generate an iterator of dates between the two given dates.
     """
+    import pandas as pd
+
     if time == 'hour':
         if endtime is None:
             endtime = datetime.timedelta(days=1) + starttime

@@ -115,6 +115,10 @@ urlpatterns = [
          views.CPETooltipView.as_view(), name="cpe-form"),
     path('workspace/form/cpe-forms/sector-change/<uuid:session_id>/<str:lng>/<str:lat>/',
          views.SwitchSectorTooltipView.as_view(), name="cpe-switch-sector-form"),
+    # Tables
+    path('workspace/table/sessions/', views.SessionTableView.as_view(), name="sessions_table"),
+    # Test
+    path('workspace/test/', views.TableTestView.as_view()),
     # Ajax
     path('workspace/ajax/ap-los/coverage/<uuid:uuid>/',
          views.AccessPointCoverageResults.as_view(), name="viewshed_coverage"),

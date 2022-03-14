@@ -140,6 +140,8 @@ INSTALLED_APPS = [
     'djangosaml2',
     # Lazy / Guest User
     'guest_user',
+    # Tables
+    'ajax_datatable',
 ]
 
 if DEBUG:

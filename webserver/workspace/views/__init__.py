@@ -58,6 +58,7 @@ from .admin import (
     WorkspaceEngagementView, CeleryTaskPerformanceView, FlowerAsyncDashboardView
 )
 from .sidebar_views import ToolSidebarView
+from .table_views import (SessionTableView, TableTestView)
 
 import workspace.utils.import_utils
 

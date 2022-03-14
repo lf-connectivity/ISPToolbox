@@ -20,6 +20,7 @@ click-repl==0.2.0
 coverage==5.5
 daphne==3.0.0
 defusedxml==0.6.0
+django-ajax-datatable==4.4.3
 django-allauth==0.42.0
 django-celery-results==2.2.0
 django-cors-headers==3.4.0

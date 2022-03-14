@@ -5,9 +5,9 @@ import logging
 
 class WorkspaceConfig(AppConfig):
     name = 'workspace'
+
     def ready(self):
-        logging.error("ISP Toolbox Ready")
-        pass
+        logging.error("django apps ready")
 
 
 class IspToolboxAdminConfig(AdminConfig):

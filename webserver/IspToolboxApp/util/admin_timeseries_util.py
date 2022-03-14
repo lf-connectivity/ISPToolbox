@@ -1,5 +1,6 @@
 import datetime
 
+
 def get_next_in_date_hierarchy(request, date_hierarchy):
     """
     Helper function that gets next smallest unit of time from url query string

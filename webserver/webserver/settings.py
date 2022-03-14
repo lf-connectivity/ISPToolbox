@@ -177,9 +177,16 @@ if PROD:
 
 AUTHENTICATION_BACKENDS = (
     'IspToolboxAccounts.backends.EmailBackend',
-    'IspToolboxAccounts.backends.SSOAdminBackend',
     'guest_user.backends.GuestBackend',
 )
+
+if PROD:
+    AUTHENTICATION_BACKENDS = (
+        'IspToolboxAccounts.backends.EmailBackend',
+        'IspToolboxAccounts.backends.SSOAdminBackend',
+        'guest_user.backends.GuestBackend',
+    )
+
 
 LOGIN_REDIRECT_URL = "/pro"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/pro/signin/"
@@ -282,7 +289,7 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
 ]
 if PROD:
-    MIDDLEWARE += ['djangosaml2.middleware.SamlSessionMiddleware',]
+    MIDDLEWARE += ['djangosaml2.middleware.SamlSessionMiddleware']
 
 CSP_INCLUDE_NONCE_IN = [
     'default-src',
@@ -483,9 +490,13 @@ if PROD:
     ACS_DEFAULT_REDIRECT_URL = reverse_lazy('admin:index')
 
     SAML_SECRETS_LOCATION = 'prod/admin-sso' if PROD else 'dev/admin-sso'
-    SAML_SECRETS = json.loads(get_secret(SAML_SECRETS_LOCATION,
-                                        aws_access_key_id=AWS_ACCESS_KEY_ID,
-                                        aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+    SAML_SECRETS = json.loads(
+        get_secret(
+            SAML_SECRETS_LOCATION,
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+        )
+    )
 
     SAML_SIGNING_CERT_FILE = '/opt/admin_sso_signing.cert'
     SAML_SIGNING_KEY_FILE = '/opt/admin_sso_signing.key'
@@ -535,7 +546,7 @@ if PROD:
                     # do not change the binding or service name
                     'assertion_consumer_service': [
                         (f'https://{SAML_HOSTNAME}/saml2/acs/',
-                        saml2.BINDING_HTTP_POST),
+                            saml2.BINDING_HTTP_POST),
                     ],
                     # url and binding to the single logout service view
                     # do not change the binding or service name

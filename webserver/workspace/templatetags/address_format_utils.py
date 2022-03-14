@@ -11,7 +11,6 @@ import yaml
 import os
 
 
-
 _MAPBOX_TO_ADDRESS_FORMATTER_COMPONENTS = {
     "country": "country",
     "region": "state",

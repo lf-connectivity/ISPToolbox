@@ -159,8 +159,8 @@ urlpatterns += reverse_url
 
 
 if settings.PROD:
-     # Admin SSO
-    urlpatterns += [path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2')),]
+    # Admin SSO
+    urlpatterns += [path('saml2/', include(('djangosaml2.urls', 'djangosaml2'), namespace='saml2'))]
 
 
 handler500 = 'workspace.views.Error500View'  # noqa

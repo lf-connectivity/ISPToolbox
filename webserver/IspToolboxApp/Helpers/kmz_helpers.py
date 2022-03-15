@@ -154,7 +154,7 @@ def createGeoJsonsFromCoverageOverlays(overlays, root_directory):
 
 
 def getAllStyles():
-    from fastkml import kml as styles
+    from fastkml import styles
     tag_styles = []
     for layer in ('shape', 'buildings'):
         s = styles.Style(id=f'{layer}-style-id')

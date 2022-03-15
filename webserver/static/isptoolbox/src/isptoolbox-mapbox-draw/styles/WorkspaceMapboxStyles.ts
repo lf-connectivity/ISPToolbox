@@ -1,4 +1,4 @@
-import { WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
+import { SectorMapboxDrawState, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
 
 export const WorkspaceMapboxStyles = [
     // Standard Link Styling - unselected
@@ -113,7 +113,16 @@ export const WorkspaceMapboxStyles = [
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
             ['==', 'active', 'false'],
-            ['!has', 'user_hidden']
+            ['!has', 'user_hidden'],
+            [
+                'any',
+                ['!has', 'user_feature_type'],
+                [
+                    'all',
+                    ['has', 'user_feature_type'],
+                    ['!=', 'user_feature_type', WorkspaceFeatureTypes.SECTOR]
+                ]
+            ]
         ],
         paint: {
             'fill-color': [
@@ -145,7 +154,16 @@ export const WorkspaceMapboxStyles = [
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
             ['==', 'active', 'true'],
-            ['!has', 'user_hidden']
+            ['!has', 'user_hidden'],
+            [
+                'any',
+                ['!has', 'user_feature_type'],
+                [
+                    'all',
+                    ['has', 'user_feature_type'],
+                    ['!=', 'user_feature_type', WorkspaceFeatureTypes.SECTOR]
+                ]
+            ]
         ],
         paint: {
             'fill-color': [
@@ -166,6 +184,43 @@ export const WorkspaceMapboxStyles = [
                 '#e3e3e3',
                 '#5692d1'
             ],
+            'fill-opacity': 0.4
+        }
+    },
+    // AP Sector fill styles
+    {
+        id: 'gl-draw-sector-fill-inactive',
+        type: 'fill',
+        filter: [
+            'all',
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static'],
+            ['==', 'active', 'false'],
+            ['!has', 'user_hidden'],
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.SECTOR]
+        ],
+        paint: {
+            'fill-color': '#1172A9',
+            'fill-outline-color': '#1172A9',
+            'fill-opacity': 0.35
+        }
+    },
+    {
+        id: 'gl-draw-sector-fill-active',
+        type: 'fill',
+        filter: [
+            'all',
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static'],
+            ['==', 'active', 'true'],
+            ['!has', 'user_hidden'],
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.SECTOR]
+        ],
+        paint: {
+            'fill-color': '#5692D1',
+            'fill-outline-color': '#5692D1',
             'fill-opacity': 0.4
         }
     },
@@ -373,7 +428,16 @@ export const WorkspaceMapboxStyles = [
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
             ['==', 'active', 'false'],
-            ['!has', 'user_hidden']
+            ['!has', 'user_hidden'],
+            [
+                'any',
+                ['!has', 'user_feature_type'],
+                [
+                    'all',
+                    ['has', 'user_feature_type'],
+                    ['!=', 'user_feature_type', WorkspaceFeatureTypes.SECTOR]
+                ]
+            ]
         ],
         layout: {
             'line-cap': 'round',
@@ -400,7 +464,16 @@ export const WorkspaceMapboxStyles = [
             ['==', '$type', 'Polygon'],
             ['!=', 'mode', 'static'],
             ['==', 'active', 'true'],
-            ['!has', 'user_hidden']
+            ['!has', 'user_hidden'],
+            [
+                'any',
+                ['!has', 'user_feature_type'],
+                [
+                    'all',
+                    ['has', 'user_feature_type'],
+                    ['!=', 'user_feature_type', WorkspaceFeatureTypes.SECTOR]
+                ]
+            ]
         ],
         layout: {
             'line-cap': 'round',
@@ -415,6 +488,73 @@ export const WorkspaceMapboxStyles = [
                 'bad',
                 '#e3e3e3',
                 '#5692d1'
+            ],
+            'line-width': 4
+        }
+    },
+    // AP Sector line styles
+    {
+        id: 'gl-draw-sector-stroke-inactive',
+        type: 'line',
+        filter: [
+            'all',
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static'],
+            ['==', 'active', 'false'],
+            ['!has', 'user_hidden'],
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.SECTOR]
+        ],
+        layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        paint: {
+            'line-color': [
+                'match',
+                ['get', 'user_sector_mapbox_draw_state'],
+                SectorMapboxDrawState.DEFAULT,
+                '#FFFFFF',
+                SectorMapboxDrawState.MAP_LAYER_CLICKED,
+                '#F5F4F4',
+                '#FFFFFF'
+            ],
+            'line-width': [
+                'match',
+                ['get', 'user_sector_mapbox_draw_state'],
+                SectorMapboxDrawState.DEFAULT,
+                0,
+                SectorMapboxDrawState.MAP_LAYER_CLICKED,
+                4,
+                0
+            ]
+        }
+    },
+    {
+        id: 'gl-draw-sector-stroke-active',
+        type: 'line',
+        filter: [
+            'all',
+            ['==', '$type', 'Polygon'],
+            ['!=', 'mode', 'static'],
+            ['==', 'active', 'true'],
+            ['!has', 'user_hidden'],
+            ['has', 'user_feature_type'],
+            ['==', 'user_feature_type', WorkspaceFeatureTypes.SECTOR]
+        ],
+        layout: {
+            'line-cap': 'round',
+            'line-join': 'round'
+        },
+        paint: {
+            'line-color': [
+                'match',
+                ['get', 'user_sector_mapbox_draw_state'],
+                SectorMapboxDrawState.DEFAULT,
+                '#5692D1',
+                SectorMapboxDrawState.MAP_LAYER_CLICKED,
+                '#F5F4F4',
+                '#5692D1'
             ],
             'line-width': 4
         }

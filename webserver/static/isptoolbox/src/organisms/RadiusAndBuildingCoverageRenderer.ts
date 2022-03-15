@@ -177,7 +177,7 @@ export abstract class RadiusAndBuildingCoverageRenderer
             }
         }, 10);
 
-        const onClickPolygon = _.debounce((e: mapboxgl.MapLayerMouseEvent) => {
+        const onClickSector = _.debounce((e: mapboxgl.MapLayerMouseEvent) => {
             if (this.map.queryRenderedFeatures(e.point, { layers: [BUILDING_LAYER] }).length > 0) {
                 return;
             }
@@ -236,10 +236,10 @@ export abstract class RadiusAndBuildingCoverageRenderer
 
         const loadSectorOnClick = (e: any) => {
             this.map.getStyle().layers?.forEach((layer: any) => {
-                if (layer.id.includes('gl-draw-polygon-fill')) {
+                if (layer.id.includes('gl-draw-sector-fill')) {
                     this.map.on('click', layer.id, (e: any) => {
-                        onClickPolygon.cancel();
-                        onClickPolygon(e);
+                        onClickSector.cancel();
+                        onClickSector(e);
                     });
                     this.map.off('idle', loadSectorOnClick);
                 }

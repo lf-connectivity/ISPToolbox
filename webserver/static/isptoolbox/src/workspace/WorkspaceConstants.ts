@@ -33,6 +33,11 @@ export enum WorkspaceFeatureTypes {
     PTP_LINK = 'ptp_link'
 }
 
+export enum SectorMapboxDrawState {
+    DEFAULT = 'default',
+    MAP_LAYER_CLICKED = 'map_layer_clicked'
+}
+
 export enum WorkspaceTools {
     MARKET_EVALUATOR = 'market_evaluator',
     LOS_CHECK = 'los_check'

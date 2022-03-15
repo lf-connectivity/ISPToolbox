@@ -5,7 +5,7 @@ import { WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { getCookie } from '../utils/Cookie';
 import { getSessionID } from '../utils/MapPreferences';
 import { renderAjaxOperationFailed } from '../utils/ConnectionIssues';
-import {CRUDEvent} from '../utils/IIspToolboxAjaxPlugin';
+import { CRUDEvent } from '../utils/IIspToolboxAjaxPlugin';
 
 const BASE_WORKSPACE_SERIALIZED_FIELDS = ['uneditable'];
 const BASE_WORKSPACE_RESPONSE_FIELDS = ['uuid', 'feature_type', 'last_updated', 'uneditable'];
@@ -92,13 +92,12 @@ export abstract class BaseWorkspaceFeature {
                 this.workspaceId = resp.uuid;
                 this.updateFeatureProperties(resp);
                 const feat = this.draw.get(this.mapboxId);
-                this.map.fire('draw.update', {features: [feat], action: 'read'});
+                this.map.fire('draw.update', { features: [feat], action: 'read' });
                 if (successFollowup) {
                     successFollowup(resp);
                 }
-                if(feat)
-                {
-                    BaseWorkspaceFeature.fire(CRUDEvent.CREATE, {features: [feat]})
+                if (feat) {
+                    BaseWorkspaceFeature.fire(CRUDEvent.CREATE, { features: [feat] });
                 }
             })
             .fail((error) => {
@@ -130,8 +129,8 @@ export abstract class BaseWorkspaceFeature {
             .done((resp) => {
                 this.updateFeatureProperties(resp);
                 const feat = this.getFeatureData();
-                if(feat) {
-                    BaseWorkspaceFeature.fire(CRUDEvent.READ, {features: [feat]});
+                if (feat) {
+                    BaseWorkspaceFeature.fire(CRUDEvent.READ, { features: [feat] });
                 }
                 if (successFollowup) {
                     successFollowup(resp);
@@ -164,8 +163,8 @@ export abstract class BaseWorkspaceFeature {
             .done((resp) => {
                 this.updateFeatureProperties(resp);
                 const feat = this.getFeatureData();
-                if(feat) {
-                    BaseWorkspaceFeature.fire(CRUDEvent.UPDATE, {features: [feat]});
+                if (feat) {
+                    BaseWorkspaceFeature.fire(CRUDEvent.UPDATE, { features: [feat] });
                 }
                 if (successFollowup) {
                     successFollowup(resp);
@@ -196,9 +195,8 @@ export abstract class BaseWorkspaceFeature {
         })
             .done((resp) => {
                 const feat = this.getFeatureData();
-                if(feat)
-                {
-                    BaseWorkspaceFeature.fire(CRUDEvent.DELETE, {features: [feat]});
+                if (feat) {
+                    BaseWorkspaceFeature.fire(CRUDEvent.DELETE, { features: [feat] });
                 }
                 this.removeFeatureFromMap(this.mapboxId);
                 if (successFollowup) {
@@ -243,6 +241,14 @@ export abstract class BaseWorkspaceFeature {
         return this.getFeatureData()?.properties[key];
     }
 
+    refreshMapboxFeature() {
+        const new_feat = this.draw.get(this.mapboxId);
+        if (new_feat) {
+            this.draw.add(new_feat);
+            this.map.fire('draw.update', { action: 'read', features: [new_feat] });
+        }
+    }
+
     protected removeFeatureFromMap(mapboxId: string) {
         this.draw.delete(mapboxId);
     }
@@ -270,7 +276,7 @@ export abstract class BaseWorkspaceFeature {
         return serialization;
     }
 
-    public static fire(event: CRUDEvent, e: {features: Array<GeoJSON.Feature>}) {
+    public static fire(event: CRUDEvent, e: { features: Array<GeoJSON.Feature> }) {
         PubSub.publishSync(event, e);
     }
 }

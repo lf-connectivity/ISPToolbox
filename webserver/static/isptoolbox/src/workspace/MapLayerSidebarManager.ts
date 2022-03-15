@@ -1,6 +1,11 @@
 import * as MapboxGL from 'mapbox-gl';
+import * as _ from 'lodash';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
+import {
+    SectorMapboxDrawState,
+    WorkspaceEvents,
+    WorkspaceFeatureTypes
+} from './WorkspaceConstants';
 import centroid from '@turf/centroid';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { AccessPoint, CoverageArea } from './WorkspaceFeatures';
@@ -173,11 +178,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
         }
 
         // Update mapbox
-        const new_feat = this.draw.get(feature.mapboxId);
-        if (new_feat) {
-            this.draw.add(new_feat);
-            this.map.fire('draw.update', { action: 'read', features: [new_feat] });
-        }
+        feature.refreshMapboxFeature();
 
         if (!visible) {
             // Deselect if hiding feature
@@ -259,7 +260,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
         const feature = BaseWorkspaceManager.getFeatureByUuid(uuid);
 
         if (feature) {
-            let coordinates;
+            let coordinates: [number, number] = [0, 0];
             switch (feature.getFeatureType()) {
                 case WorkspaceFeatureTypes.COVERAGE_AREA:
                     let coverageArea = feature as CoverageArea;
@@ -271,6 +272,23 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
                 case WorkspaceFeatureTypes.SECTOR:
                     let sector = feature as AccessPointSector;
                     coordinates = sector.ap.getFeatureGeometryCoordinates() as [number, number];
+                    this.map.once('movestart', () => {
+                        const checkInBounds = _.debounce(
+                            () => {
+                                if (!this.map.getBounds().contains(coordinates)) {
+                                    checkInBounds();
+                                } else {
+                                    sector.setMapboxDrawState(
+                                        SectorMapboxDrawState.MAP_LAYER_CLICKED,
+                                        800
+                                    );
+                                }
+                            },
+                            50,
+                            { leading: true }
+                        );
+                        checkInBounds();
+                    });
                     break;
                 case WorkspaceFeatureTypes.AP:
                     let ap = feature as AccessPoint;

@@ -137,6 +137,9 @@ export abstract class BaseAjaxSectorPopup
                     let sector = this.sector.ap.sectors.get(sectorUuid);
                     if (sector) {
                         this.draw.changeMode('simple_select', { featureIds: [sector.mapboxId] });
+                        this.map.fire('draw.selectionchange', {
+                            features: [this.draw.get(sector.mapboxId)]
+                        });
                         this.hide();
                         this.setSector(sector);
                         this.show();

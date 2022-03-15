@@ -1,9 +1,14 @@
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
+import * as _ from 'lodash';
 import { Feature, Geometry, MultiPolygon, GeoJsonProperties, LineString } from 'geojson';
 import { djangoUrl } from '../utils/djangoUrl';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';
-import { WorkspaceEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';
+import {
+    SectorMapboxDrawState,
+    WorkspaceEvents,
+    WorkspaceFeatureTypes
+} from './WorkspaceConstants';
 import { AccessPoint, APToCPELink, CPE, LINK_AP_INDEX } from './WorkspaceFeatures';
 import { WorkspacePolygonFeature } from './WorkspacePolygonFeature';
 import { getRenderCloudRF } from '../utils/MapPreferences';
@@ -41,6 +46,7 @@ export class AccessPointSector extends WorkspacePolygonFeature {
     ap: AccessPoint;
     coverage: BuildingCoverage;
     awaitingCoverage: boolean;
+    resetMapboxDrawState: any | undefined;
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw, featureData: Feature<Geometry, any>) {
         super(
@@ -63,6 +69,7 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         // Case where AP sector is preloaded
         this.setAP();
         this.setGeojson();
+        this.setMapboxDrawState();
     }
 
     create(successFollowup?: (resp: any) => void) {
@@ -70,6 +77,7 @@ export class AccessPointSector extends WorkspacePolygonFeature {
             // Case where AP sector is created in session
             this.setAP();
             this.setGeojson();
+            this.setMapboxDrawState();
             if (successFollowup) {
                 successFollowup(resp);
             }
@@ -119,6 +127,30 @@ export class AccessPointSector extends WorkspacePolygonFeature {
     setCoverage(coverage: Array<any>) {
         this.coverage = new BuildingCoverage(coverage);
         this.awaitingCoverage = false;
+    }
+
+    // Sets the mapbox draw state for a given duration
+    setMapboxDrawState(
+        state: SectorMapboxDrawState = SectorMapboxDrawState.DEFAULT,
+        duration: number = 0
+    ) {
+        this.setFeatureProperty('sector_mapbox_draw_state', state);
+        this.refreshMapboxFeature();
+        if (duration > 0) {
+            // Using a debounce like this to prevent repeated calls from making
+            // sector feature blink over and over.
+            if (this.resetMapboxDrawState) {
+                this.resetMapboxDrawState.cancel();
+            }
+            this.resetMapboxDrawState = _.debounce(() => {
+                this.setMapboxDrawState();
+            }, duration);
+            this.resetMapboxDrawState();
+        }
+    }
+
+    getMapboxDrawState() {
+        return this.getFeatureProperty('sector_mapbox_draw_state');
     }
 
     private setGeojson() {

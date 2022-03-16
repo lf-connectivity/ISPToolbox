@@ -1,0 +1,16 @@
+{% load static %}
+{% include "workspace/molecules/page_header.html" %}
+{% block extrastyle %}
+
+<link href="{% static 'ajax_datatable/css/style.css' %}" rel="stylesheet" />
+<link rel='stylesheet' href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<link rel='stylesheet' href="https://cdn.datatables.net/1.11.5/css/buttons.bootstrap4.min.css">
+
+{% endblock extrastyle %}
+
+{% block extrajs %}
+
+<script type="text/javascript" src="{% static 'ajax_datatable/js/utils.js' %}"></script>
+<script src="//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+
+{% endblock %}

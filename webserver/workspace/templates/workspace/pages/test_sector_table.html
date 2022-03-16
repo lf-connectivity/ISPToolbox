@@ -1,0 +1,44 @@
+{% include "workspace/molecules/test_modal_headers.html" %}
+
+<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="paginationNetworkModalLabel">Access Points</h3><button type="button" class="close"
+                data-dismiss="modal" aria-label="Close"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 1L1 14.5467" stroke="black" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                    <path d="M1 1L13 14.5467" stroke="black" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                </svg></button>
+        </div>
+        <div id="session-list-modal-body">
+            <div class="modal-body isptoolbox-form">
+                <div style="display: block; overflow-x: auto">
+                    <div class="table-responsive">
+                        <table id="sector_table" width="100%"
+                            class="table dt-responsive nowrap table-sm table-hover table-modal theme-table">
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script language="javascript">
+    $(document).ready(function () {
+        AjaxDatatableViewUtils.initialize_table(
+            $('#sector_table'),
+            "{% url 'workspace:sector_table' %}", {
+                // extra_options (example)
+                processing: false,
+                autoWidth: false,
+                scrollX: false,
+                bLengthChange: false,
+                pagingType: "simple"
+            }, {
+                tower: "{{url_pattern.uuid}}"
+            },
+        );
+    });
+</script>

@@ -117,8 +117,12 @@ urlpatterns = [
          views.SwitchSectorTooltipView.as_view(), name="cpe-switch-sector-form"),
     # Tables
     path('workspace/table/sessions/', views.SessionTableView.as_view(), name="sessions_table"),
+    path('workspace/table/towers/', views.TowerTableView.as_view(), name="tower_table"),
+    path('workspace/table/sectors/', views.SectorTableView.as_view(), name="sector_table"),
     # Test
-    path('workspace/test/', views.TableTestView.as_view()),
+    path('workspace/test/session/', views.SessionTableTestView.as_view(), name="session_test"),
+    path('workspace/test/tower/<uuid:uuid>/', views.TowerTableTestView.as_view(), name="tower_test"),
+    path('workspace/test/sector/<uuid:uuid>/', views.SectorTableTestView.as_view(), name="sector_test"),
     # Ajax
     path('workspace/ajax/ap-los/coverage/<uuid:uuid>/',
          views.AccessPointCoverageResults.as_view(), name="viewshed_coverage"),

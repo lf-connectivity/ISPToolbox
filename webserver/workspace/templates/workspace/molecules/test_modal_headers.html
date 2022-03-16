@@ -3,8 +3,34 @@
 {% block extrastyle %}
 
 <link href="{% static 'ajax_datatable/css/style.css' %}" rel="stylesheet" />
-<link rel='stylesheet' href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
-<link rel='stylesheet' href="https://cdn.datatables.net/1.11.5/css/buttons.bootstrap4.min.css">
+<style>
+table.dataTable thead .sorting
+{
+    background-image: url({% static "/isptoolbox/images/sort_both.png"%});
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: 10px;
+    padding-right: 2rem;
+}
+
+table.dataTable thead .sorting_asc
+{
+    background-image: url({% static "/isptoolbox/images/sort_asc.png"%});
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: 10px;
+    padding-right: 2rem;
+}
+
+table.dataTable thead .sorting_desc
+{
+    background-image: url({% static "/isptoolbox/images/sort_desc.png"%});
+    background-repeat: no-repeat;
+    background-position: center right;
+    background-size: 10px;
+    padding-right: 2rem;
+ }
+</style>
 
 {% endblock extrastyle %}
 

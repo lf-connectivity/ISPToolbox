@@ -68,6 +68,8 @@ class TowerTableView(AjaxDatatableView):
         return qs
 
     def customize_row(self, row, obj):
+        row['coordinates'] = "{:.6f}, {:.6f}".format(obj.lat, obj.lng)
+        row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")
         row['view'] = f"""
             <a href="{reverse_lazy('workspace:sector_test', kwargs={'uuid': obj.pk})}" class="btn btn-info btn-edit">
                View
@@ -117,6 +119,7 @@ class SectorTableView(AjaxDatatableView):
         return qs
 
     def customize_row(self, row, obj):
+        row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")
         row['edit'] = """
             <a href="#" class="btn btn-info btn-edit">
                Edit

@@ -106,6 +106,30 @@
                     </div>
                 </div>
             </a>
+            {% flag "api" %}
+            <a
+                href="{% url "workspace:swagger-ui" %}"
+                target="_blank"
+                class="card-container"
+            >
+                <div class="card">
+                    <div class="card-body">
+                        <div class='header-row'>
+                            <span class='small subheading'>Automation</span>
+                            {% include 'workspace/atoms/icons/dashboard_saa.html' %}
+                        </div>
+                        <h4 class="card-title">
+                            {% translate "API Integration"%}
+                            {% include 'workspace/atoms/icons/arrow_up_right.html' %}
+                        </h4>
+                        
+                        <p class="card-text">
+                            {% translate "Use ISP Toolbox's APIs to automate parts of your business."%}
+                        </p>
+                    </div>
+                </div>
+            </a>
+            {% endflag %}
             {% flag "marketing" %}
             <a
                 href="{% url 'workspace:serviceablility_export' %}"

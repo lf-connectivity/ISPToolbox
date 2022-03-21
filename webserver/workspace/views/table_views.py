@@ -131,6 +131,7 @@ class SectorTableView(AjaxDatatableView):
             </a>
         """
 
+
 class SectorTableServiceableView(AjaxDatatableView):
     """
     """
@@ -146,8 +147,21 @@ class SectorTableServiceableView(AjaxDatatableView):
         {'name': 'name', 'visible': True},
         {'name': 'map_session', 'title': 'Session', 'foreign_field': 'map_session__name', 'visible': True},
         {'name': 'status', 'title': 'Status', 'foreign_field': 'building_coverage__status', 'visible': True},
-        {'name': 'serviceable', 'title': 'Serviceable Buildings', 'visible': True, 'placeholder': True, 'searchable': False, 'orderable': False,},
-        {'name': 'unserviceable', 'title': 'Unserviceable Buildings', 'visible': True, 'placeholder': True, 'searchable': False, 'orderable': False,},
+        {
+            'name': 'serviceable',
+            'title': 'Serviceable Buildings',
+            'visible': True, 'placeholder': True,
+            'searchable': False,
+            'orderable': False
+        },
+        {
+            'name': 'unserviceable',
+            'title': 'Unserviceable Buildings',
+            'visible': True,
+            'placeholder': True,
+            'searchable': False,
+            'orderable': False
+        },
         {'name': 'last_updated', 'title': 'Modified', 'visible': True},
         {'name': 'export', 'title': '', 'placeholder': True, 'searchable': False, 'orderable': False, },
     ]
@@ -172,6 +186,7 @@ class SectorTableServiceableView(AjaxDatatableView):
                Export
             </a>
         """
+
 
 class SessionTableTestView(View):
     def get(self, request):

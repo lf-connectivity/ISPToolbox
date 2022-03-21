@@ -18,10 +18,12 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver
+from gis_data.models import MsftBuildingOutlines
 
 from rest_framework import serializers
 from turfpy import measurement
 
+import csv
 import logging
 import numpy
 import math
@@ -710,6 +712,24 @@ class AccessPointSector(WorkspaceFeature):
             return measurement.distance(start, end)
         else:
             return measurement.distance(start, end, units="mi")
+
+    def create_serviceable_download(self, fp):
+        writer = csv.writer(fp)
+        buildings = self.building_coverage.buildingcoverage_set.all()
+        nearby_ids = [b.msftid for b in buildings]
+        msft_buildings = MsftBuildingOutlines.objects.filter(id__in=nearby_ids).all()
+        msft_buildings = {b.id: b.geog for b in msft_buildings}
+        writer.writerow(['', 'latitude', 'longitude', 'status'])
+        for idx, b in enumerate(buildings):
+            geog = b.geog
+            if not geog:
+                geog = msft_buildings.get(
+                        b.msftid, Polygon()
+                    )
+            try:
+                writer.writerow([idx, geog.centroid[1], geog.centroid[0], b.status])
+            except Exception:
+                logging.exception(f"failed to export {b.id}")
 
 
 @receiver(post_save, sender=AccessPointSector)

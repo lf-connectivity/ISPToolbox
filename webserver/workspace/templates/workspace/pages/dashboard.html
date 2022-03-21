@@ -1,5 +1,5 @@
 {% extends "workspace/pages/base.html" %} 
-{% load static i18n guest_user %} 
+{% load static i18n guest_user waffle_tags %} 
 
 {% block title %}
 {% with  title="ISP Toolbox"%}
@@ -78,7 +78,6 @@
                             <span class='small subheading'>Network</span>
                             {% include 'workspace/atoms/icons/dashboard_los.html' %}
                         </div>
-                        
                         <h4 class="card-title">{% translate "Line of Sight Check"%}</h4>
                         <p class="card-text">
                             {% translate "Use LiDAR data to determine if a customer is serviceable"%}
@@ -101,13 +100,34 @@
                             {% translate "Service Area Ads"%}
                             {% include 'workspace/atoms/icons/arrow_up_right.html' %}
                         </h4>
-                        
                         <p class="card-text">
                             {% translate "Generate Custom Audiences based on service areas for your Facebook Ads."%}
                         </p>
                     </div>
                 </div>
             </a>
+            {% flag "marketing" %}
+            <a
+                href="{% url 'workspace:serviceablility_export' %}"
+                class="card-container"
+            >
+                <div class="card">
+                    <div class="card-body">
+                        <div class='header-row'>
+                            <span class='small subheading'>Serviceability Export</span>
+                            {% include 'workspace/atoms/icons/dashboard_saa.html' %}
+                        </div>
+                        <h4 class="card-title">
+                            {% translate "Serviceability Export"%}
+                            {% include 'workspace/atoms/icons/arrow_up_right.html' %}
+                        </h4>
+                        <p class="card-text">
+                            {% translate "Export the locations of serviceable buildings to send postcard marketing."%}
+                        </p>
+                    </div>
+                </div>
+            </a>
+            {% endflag %}
         </div>
     </div>
     <div class="container">

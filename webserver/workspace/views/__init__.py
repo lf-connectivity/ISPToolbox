@@ -60,7 +60,10 @@ from .admin import (
 from .sidebar_views import ToolSidebarView
 from .table_views import (
     SessionTableView, TowerTableView, SectorTableView,
-    SessionTableTestView, TowerTableTestView, SectorTableTestView
+    SessionTableTestView, TowerTableTestView, SectorTableTestView, SectorTableServiceableView
+)
+from .marketing_views import (
+    ServiceabilityExportView, ServiceabilityExportCsvView
 )
 
 import workspace.utils.import_utils

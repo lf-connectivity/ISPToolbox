@@ -131,6 +131,47 @@ class SectorTableView(AjaxDatatableView):
             </a>
         """
 
+class SectorTableServiceableView(AjaxDatatableView):
+    """
+    """
+    model = workspace_models.AccessPointSector
+    title = 'Access Points'
+    initial_order = [["last_updated", "desc"], ]
+    length_menu = [[10, 20, 50, 100, -1], [10, 20, 50, 100, 'all']]
+    search_values_separator = '+'
+    show_column_filters = False
+
+    column_defs = [
+        {'name': 'uuid', 'visible': False},
+        {'name': 'name', 'visible': True},
+        {'name': 'map_session', 'title': 'Session', 'foreign_field': 'map_session__name', 'visible': True},
+        {'name': 'status', 'title': 'Status', 'foreign_field': 'building_coverage__status', 'visible': True},
+        {'name': 'serviceable', 'title': 'Serviceable Buildings', 'visible': True, 'placeholder': True, 'searchable': False, 'orderable': False,},
+        {'name': 'unserviceable', 'title': 'Unserviceable Buildings', 'visible': True, 'placeholder': True, 'searchable': False, 'orderable': False,},
+        {'name': 'last_updated', 'title': 'Modified', 'visible': True},
+        {'name': 'export', 'title': '', 'placeholder': True, 'searchable': False, 'orderable': False, },
+    ]
+
+    def get_initial_queryset(self, request=None):
+        qs = self.model.get_rest_queryset(request)
+        if 'tower' in request.REQUEST:
+            qs = qs.filter(ap_id=request.REQUEST.get('tower'))
+        return qs
+
+    def customize_row(self, row, obj):
+        row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")
+        if obj.building_coverage:
+            row['serviceable'] = obj.building_coverage.coverageStatistics()['serviceable']
+            row['unserviceable'] = obj.building_coverage.coverageStatistics()['unserviceable']
+        else:
+            row['serviceable'] = 'N/A'
+            row['unserviceable'] = 'N/A'
+        export_url = reverse_lazy('workspace:serviceability_export_csv', kwargs={'uuid': obj.pk})
+        row['export'] = f"""
+            <a href="{export_url}" download class="btn btn-info btn-edit">
+               Export
+            </a>
+        """
 
 class SessionTableTestView(View):
     def get(self, request):

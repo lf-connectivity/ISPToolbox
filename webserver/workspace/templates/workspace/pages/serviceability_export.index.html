@@ -1,0 +1,40 @@
+{% extends "workspace/pages/base.html" %}
+{% load i18n %}
+{% block additional_headers %}
+{% include "workspace/molecules/datatables_headers.html" %}
+{% endblock additional_headers%}
+
+{% block content %}
+
+{% block sector_table %}
+{% url 'workspace:sector_table_serviceable' as table_ajax_url %}
+{% with header="Export Serviceable Homes" table_id="sector_data_table" modal_id="sector_modal" table_ajax_url=table_ajax_url %}
+<div class="container d-flex wide mb-5" style="margin-top: 50px; flex-flow:column;">
+    <div class="mt-5">
+        <h1>{{header}}</h1>
+        <p>{% translate "Browse list of sectors and select one to export serviceable homes." %}</p>
+    </div>
+    <div class="table-responsive isptoolbox-form">
+        <table id="{{table_id}}" width="100%"
+            class="table dt-responsive nowrap table-sm table-hover table-modal theme-table">
+        </table>
+    </div>
+</div>
+<script language="javascript">
+    $(document).ready(function () {
+        AjaxDatatableViewUtils.initialize_table(
+            $('#{{table_id}}'),
+            "{{ table_ajax_url }}", {
+                // extra_options (example)
+                processing: false,
+                autoWidth: false,
+                scrollX: false,
+                bLengthChange: false,
+                pagingType: "simple"
+            }, {},
+        );
+    });
+</script>
+{% endwith %}
+{% endblock sector_table %}
+{% endblock content %}

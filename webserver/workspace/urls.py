@@ -32,6 +32,9 @@ urlpatterns = [
     # DSM Export
     path('workspace/api/dsm-export/', CreateExportDSM.as_view()),
     path('workspace/api/dsm-export/<uuid:uuid>/', CreateExportDSM.as_view()),
+    # Marketing
+    path('marketing/', views.ServiceabilityExportView.as_view(), name='serviceablility_export'),
+    path('marketing/export/<uuid:uuid>.csv', views.ServiceabilityExportCsvView.as_view(), name="serviceability_export_csv"),
     # Sources
     path('sources/<str:sources_page>/',
          views.WorkspaceSourcesView.as_view(), name="sources"),
@@ -119,6 +122,7 @@ urlpatterns = [
     path('workspace/table/sessions/', views.SessionTableView.as_view(), name="sessions_table"),
     path('workspace/table/towers/', views.TowerTableView.as_view(), name="tower_table"),
     path('workspace/table/sectors/', views.SectorTableView.as_view(), name="sector_table"),
+    path('workspace/table/serviceable/', views.SectorTableServiceableView.as_view(), name="sector_table_serviceable"),
     # Test
     path('workspace/test/session/', views.SessionTableTestView.as_view(), name="session_test"),
     path('workspace/test/tower/<uuid:uuid>/', views.TowerTableTestView.as_view(), name="tower_test"),

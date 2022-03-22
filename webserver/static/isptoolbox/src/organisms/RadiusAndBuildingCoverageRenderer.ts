@@ -50,6 +50,8 @@ export abstract class RadiusAndBuildingCoverageRenderer
     last_selection: string = '';
     subscriptions: Array<string | null> = [];
 
+    onLongPressAP: _.DebouncedFunc<any>;
+
     constructor(
         map: mapboxgl.Map,
         draw: MapboxDraw,
@@ -209,7 +211,7 @@ export abstract class RadiusAndBuildingCoverageRenderer
             }
         }, 10);
 
-        const onLongPressAP = this.createLongPressDebounce();
+        this.onLongPressAP = this.createLongPressDebounce();
 
         // Keep trying to load the AP onClick event handler until we can find layers
         // to do this, then stop.
@@ -221,11 +223,11 @@ export abstract class RadiusAndBuildingCoverageRenderer
                         onClickAP(e);
                     });
                     this.map.on('mousedown', layer.id, (e: any) => {
-                        onLongPressAP.cancel();
-                        onLongPressAP(e);
+                        this.onLongPressAP.cancel();
+                        this.onLongPressAP(e);
                     });
                     this.map.on('mouseup', layer.id, (e: any) => {
-                        onLongPressAP.cancel();
+                        this.onLongPressAP.cancel();
                     });
                     this.renderBuildings();
                     this.renderAPRadius();
@@ -248,6 +250,10 @@ export abstract class RadiusAndBuildingCoverageRenderer
 
         this.map.on('idle', loadAPOnClick);
         this.map.on('idle', loadSectorOnClick);
+        PubSub.subscribe(
+            WorkspaceEvents.DRAGGING_FEATURES,
+            this.draggingFeatureCallback.bind(this)
+        );
     }
 
     /**
@@ -273,14 +279,12 @@ export abstract class RadiusAndBuildingCoverageRenderer
 
         if (selection === this.last_selection) {
             dragging = true;
+            PubSub.publish(WorkspaceEvents.DRAGGING_FEATURES, { featureIds: ids });
         } else {
             this.last_selection = selection;
         }
 
-        // Hide AP tooltip if user is dragging AP.
-        if (dragging) {
-            this.apPopup.hide();
-        } else {
+        if (!dragging) {
             this.sendCoverageRequest({ features });
 
             // TODO: Unbeta this!!!
@@ -421,6 +425,14 @@ export abstract class RadiusAndBuildingCoverageRenderer
                 features: coverage.toFeatureArray()
             });
         }
+    }
+
+    draggingFeatureCallback(event: string, data: { featureIds: Array<string> }) {
+        // Hide AP tooltip if user is dragging AP.
+        this.apPopup.hide();
+
+        // Cancel long press callback
+        this.onLongPressAP.cancel();
     }
 
     protected cloudRFExists(feat: Feature) {

@@ -38,6 +38,8 @@ import { djangoUrl } from '../utils/djangoUrl';
 export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildingCoverageRenderer {
     ws: LOSCheckWS;
 
+    onLongPressCPE: _.DebouncedFunc<any>;
+
     constructor(map: mapboxgl.Map, draw: MapboxDraw, ws: LOSCheckWS) {
         super(map, draw, LOSCheckWorkspaceManager, LinkCheckTowerPopup, LinkCheckSectorPopup);
         this.ws = ws;
@@ -139,7 +141,7 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
             }
         }, 10);
 
-        const onLongPressCPE = this.createLongPressDebounce();
+        this.onLongPressCPE = this.createLongPressDebounce();
 
         // Keep trying to load the AP onClick event handler until we can find layers
         // to do this, then stop.
@@ -151,11 +153,11 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                         onClickCPE(e);
                     });
                     this.map.on('mousedown', layer.id, (e: any) => {
-                        onLongPressCPE.cancel();
-                        onLongPressCPE(e);
+                        this.onLongPressCPE.cancel();
+                        this.onLongPressCPE(e);
                     });
                     this.map.on('mouseup', layer.id, (e: any) => {
-                        onLongPressCPE.cancel();
+                        this.onLongPressCPE.cancel();
                     });
                     this.map.off('idle', loadCPEOnClick);
                 }
@@ -293,6 +295,13 @@ export class LinkCheckRadiusAndBuildingCoverageRenderer extends RadiusAndBuildin
                     renderAjaxOperationFailed();
                 }
             });
+    }
+
+    draggingFeatureCallback(event: string, data: { featureIds: Array<string> }) {
+        super.draggingFeatureCallback(event, data);
+
+        // Cancel long press callback
+        this.onLongPressCPE.cancel();
     }
 
     updateCoverageFromAjaxResponse(resp: GeoJSON.FeatureCollection, uuid: string) {

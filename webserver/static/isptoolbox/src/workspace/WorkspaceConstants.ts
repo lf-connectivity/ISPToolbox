@@ -10,7 +10,8 @@ export enum WorkspaceEvents {
     CLOUDRF_COVERAGE_UPDATED = 'cloudrf.coverage_updated',
     AP_LAYER_CLICKED = 'ap_layer.clicked',
     CPE_LAYER_CLICKED = 'cpe_layer.clicked',
-    SECTOR_LAYER_CLICKED = 'sector_layer.clicked'
+    SECTOR_LAYER_CLICKED = 'sector_layer.clicked',
+    DRAGGING_FEATURES = 'dragging_features'
 }
 
 export enum ASREvents {

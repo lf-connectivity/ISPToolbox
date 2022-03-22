@@ -78,6 +78,13 @@ export abstract class BaseAjaxSectorPopup
         }
     }
 
+    protected showComponent(): void {
+        if (this.sector) {
+            this.flyToPoint(this.sector.ap.getFeatureGeometryCoordinates() as [number, number]);
+        }
+        super.showComponent();
+    }
+
     protected cleanup() {}
 
     protected getEndpointParams() {
@@ -290,11 +297,7 @@ export abstract class BaseAjaxSectorPopup
                     // Fly to AP if AP isn't on map. We center the AP horizontally, but place it
                     // 65% of the way down on the screen so the tooltip fits.
                     if (!this.map.getBounds().contains(coords)) {
-                        let south = this.map.getBounds().getSouth();
-                        let north = this.map.getBounds().getNorth();
-                        this.map.flyTo({
-                            center: [coords[0], coords[1] + +0.15 * (north - south)]
-                        });
+                        this.flyToPoint(coords);
                     }
 
                     this.draw.changeMode('simple_select', { featureIds: [this.sector.mapboxId] });

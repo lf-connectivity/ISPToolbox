@@ -40,18 +40,21 @@ export const ERROR_SVG = `
 </svg> 
 `;
 
-export function createLoadingHTMLContent(message: string = "Loading"){
+export function createLoadingHTMLContent(message: string = 'Loading') {
     return `<div class="mapboxgl-popup--loading-tooltip"><div class="my-auto text-center">
-        ${LOADING_SVG}<p>${message}</p></div></div>`
+        ${LOADING_SVG}<p>${message}</p></div></div>`;
 }
 
-export function createErrorHTMLContent(title: string = "Unexpected Error", message: string= "Try reopening the tooltip") {
+export function createErrorHTMLContent(
+    title: string = 'Unexpected Error',
+    message: string = 'Try reopening the tooltip'
+) {
     return `<div class="mapboxgl-popup--loading-tooltip"><div class="my-auto text-center">
         ${ERROR_SVG}
             <h1>${title}</h1>
             <p>${message}</p>
         </div>
-    </div>`
+    </div>`;
 }
 
 export abstract class LinkCheckBasePopup extends CollapsibleComponent {
@@ -115,6 +118,19 @@ export abstract class LinkCheckBasePopup extends CollapsibleComponent {
             this.hideComponent();
         }
         super.onComponentShown(msg, { component });
+    }
+
+    /**
+     * Flies to selected coordinates. Center at X coordinate, Y coordinate will be
+     * slightly south of center to accomodate tooltip.
+     * @param coords
+     */
+    protected flyToPoint(coords: [number, number]) {
+        let south = this.map.getBounds().getSouth();
+        let north = this.map.getBounds().getNorth();
+        this.map.flyTo({
+            center: [coords[0], coords[1] + 0.15 * (north - south)]
+        });
     }
 
     /**

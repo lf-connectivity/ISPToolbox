@@ -308,6 +308,13 @@ export abstract class BaseAjaxSectorPopup
         }
     }
 
+    // Hide tooltip if tower is being dragged
+    draggingFeatureCallback(event: string, data: { featureIds: Array<string> }) {
+        if (this.sector?.ap?.mapboxId && data.featureIds.includes(this.sector.ap.mapboxId)) {
+            this.hide();
+        }
+    }
+
     // Show tooltip if only one sector is selected.
     protected sectorLayerClickCallback(
         event: string,

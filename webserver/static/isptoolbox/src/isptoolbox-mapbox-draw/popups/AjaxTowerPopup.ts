@@ -14,7 +14,6 @@ const TOWER_UPDATE_NAME_FORM_ID = 'tower-update-form-name';
 const TOWER_DELETE_BUTTON_ID = 'tower-delete-btn';
 const SECTOR_CREATE_BUTTON_ID = 'place-sector-btn-tower-popup';
 
-
 // @ts-ignore
 $.validator.addMethod('latlng', (value, element) => {
     return parseLatitudeLongitude(value) !== null;
@@ -77,9 +76,6 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
                 });
             }
         });
-
-
-
 
         addHoverTooltip('.tooltip-input-btn', 'bottom');
 
@@ -149,6 +145,13 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
             this.setAccessPoint(data.selectedAPs[0]);
             this.show();
         } else if (data.selectedAPs.length > 1) {
+            this.hide();
+        }
+    }
+
+    // Hide tooltip if tower is being dragged
+    draggingFeatureCallback(event: string, data: { featureIds: Array<string> }) {
+        if (this.accessPoint?.mapboxId && data.featureIds.includes(this.accessPoint.mapboxId)) {
             this.hide();
         }
     }

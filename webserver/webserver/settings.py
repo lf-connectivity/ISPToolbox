@@ -143,6 +143,8 @@ INSTALLED_APPS = [
     'guest_user',
     # Tables
     'ajax_datatable',
+    # htmx
+    'django_htmx'
 ]
 if PROD:
     # SSO

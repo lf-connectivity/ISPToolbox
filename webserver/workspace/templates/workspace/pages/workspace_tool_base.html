@@ -1,6 +1,6 @@
 {% spaceless %}
 <!DOCTYPE html>
-{% load static js_reverse %} 
+{% load static js_reverse django_htmx %} 
 
 <html lang="en">
   <head>
@@ -9,7 +9,7 @@
     {% endblock %}
   </head>
 
-  <body>
+  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     {% block nav %}
     {% endblock %}
 
@@ -28,7 +28,9 @@
     {% include "workspace/molecules/workspace_session_info.html" %}
 
     <script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+    {% include 'workspace/atoms/screen_size_logging.html'%}
+    <script src="{% static 'workspace/htmx.min.js' %}"></script>
+    {% django_htmx_script %}
   </body>
-  {% include 'workspace/atoms/screen_size_logging.html'%}
 </html>
 {% endspaceless %}

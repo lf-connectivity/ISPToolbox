@@ -1,6 +1,6 @@
 {% spaceless %}
 <!DOCTYPE html>
-{% load static i18n %}
+{% load static i18n django_htmx %}
 <html lang="en">
 <head>
 {% block title %}<title>{% if title %}{% translate title %}{% else %}{% translate "ISP Toolbox" %}{% endif %}</title>{% endblock title %}
@@ -12,7 +12,7 @@
     {% endblock %}
 </head>
 
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <div class="d-flex flex-column min-vh-100">
         <header>
             {% block beforenav %}
@@ -32,6 +32,8 @@
         </footer>
     </div>
     {% include 'workspace/atoms/screen_size_logging.html'%}
+    <script src="{% static 'workspace/htmx.min.js' %}"></script>
+    {% django_htmx_script %}
 </body>
 </html>
 {% endspaceless %}

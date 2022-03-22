@@ -443,6 +443,22 @@ def _create_viewshed_task(
         Viewshed.objects.create(sector=instance)
 
 
+@receiver(pre_delete, sender=AccessPointLocation)
+def _cancel_access_point_viewshed_task(sender, instance, using, **kwargs):
+    """
+    Cancel viewshed task for deleted sectors
+    """
+    try:
+        Viewshed.objects.get(ap=instance).cancel_task()
+    except Viewshed.DoesNotExist:
+        pass
+    for sector in instance.accesspointsector_set.all():
+        try:
+            Viewshed.objects.get(sector=sector).cancel_task()
+        except Viewshed.DoesNotExist:
+            pass
+
+
 @receiver(pre_delete, sender=AccessPointSector)
 def _cancel_viewshed_task(sender, instance, using, **kwargs):
     """

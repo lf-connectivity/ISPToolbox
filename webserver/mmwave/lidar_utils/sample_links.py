@@ -10,7 +10,7 @@ texas = {
     },
     'rx': {
         'name': 'radio_1',
-        'color': '#42B72A',
+        'color': '#EAD940',
         'lng': -98.57408,
         'lat': 33.87344,
         'id': 1,
@@ -29,7 +29,7 @@ sunflower = {
     },
     'rx': {
         'name': 'radio_1',
-        'color': '#42B72A',
+        'color': '#EAD940',
         'lng': -90.53423166275023,
         'lat': 33.545454397676316,
         'id': 1,
@@ -48,7 +48,7 @@ puerto_rico = {
     },
     'rx': {
         'name': 'radio_1',
-        'color': '#42B72A',
+        'color': '#EAD940',
         'lng': -66.09988844919782,
         'lat':  18.411423676674275,
         'id': 1,
@@ -68,7 +68,7 @@ texas_tall_tower_clouds = {
     },
     'rx': {
         'name': 'radio_1',
-        'color': '#42B72A',
+        'color': '#EAD940',
         'lng': -98.52611,
         'lat':  33.84439,
         'id': 1,

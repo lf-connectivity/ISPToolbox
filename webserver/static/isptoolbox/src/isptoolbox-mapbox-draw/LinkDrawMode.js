@@ -113,7 +113,7 @@ export function renderLinkEnds(geojson, display) {
                     meta: 'radio_point',
                     parent: geojson.properties.id,
                     name: 'radio_1',
-                    color: '#42B72A'
+                    color: '#EAD940'
                 },
                 geometry: {
                     type: 'Point',

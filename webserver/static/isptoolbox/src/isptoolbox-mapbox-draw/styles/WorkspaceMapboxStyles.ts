@@ -453,7 +453,7 @@ export const WorkspaceMapboxStyles = [
                 '#A2A2A2',
                 '#1172A9'
             ],
-            'line-width': 4
+            'line-width': 0
         }
     },
     {

@@ -183,7 +183,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
 
         this._link_distance = 0;
 
-        this.profileView = new LinkProfileView();
+        this.profileView = new LinkProfileView(this.map, this.draw);
 
         this.datasets = new Map();
 

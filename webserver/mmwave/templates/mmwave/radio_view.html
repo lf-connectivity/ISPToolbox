@@ -2,18 +2,18 @@
 <div class="card radio-card">
     <div class="card-body radio-card-body">
         <div class="card-title d-flex" style="align-items: center;">
-            {% if ptponly %}
+            
             <span style="display: block;
             width: 14px;
             height: 7px;
-            background: {% firstof radio.color 'purple' %};"></span>
-            {% else %}
+            background: {% firstof radio.color color 'purple' %};" class="ptp-swatch{% if ptponly %}{% else %} d-none{% endif %}"></span>
+            <div class="ptp-icon {% if ptponly %}d-none{% endif %}">
             {% if radio_id == "0"  %}
             {% include 'mmwave/atoms/ap-icon.svg'%}
             {% else %}
             {% include 'mmwave/atoms/cpe-icon.svg'%}
             {% endif %}
-            {% endif %}
+            </div>
             <h5 style="padding-left: 10px; margin-bottom: 0;" id="radio_name-{% firstof radio.id radio_id %}">
                 {% firstof radio.name radio_name %}</h5>
         </div>

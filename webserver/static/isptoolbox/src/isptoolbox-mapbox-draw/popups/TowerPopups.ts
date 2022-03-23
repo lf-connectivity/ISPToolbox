@@ -524,7 +524,6 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
             MarketEvalWSEvents.REQUEST_CANCELLED,
             this.onWSRequestSendOrCancel.bind(this)
         );
-        PubSub.subscribe(MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG, this.onWSViewshedMsg.bind(this));
     }
 
     static getInstance() {
@@ -607,23 +606,6 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
             request.request_type === MarketEvalWSRequestType.VIEWSHED &&
             request.apUuid === this.accessPoint?.workspaceId
         ) {
-            this.refreshPopup();
-        }
-    }
-
-    protected onWSViewshedMsg(msg: string, response: ViewshedGeojsonResponse) {
-        if (response.ap_uuid && response.ap_uuid === this.accessPoint?.workspaceId) {
-            let coords = this.accessPoint.getFeatureGeometryCoordinates() as [number, number];
-
-            // Fly to AP if AP isn't on map. We center the AP horizontally, but place it
-            // 65% of the way down on the screen so the tooltip fits.
-            if (!this.map.getBounds().contains(coords)) {
-                let south = this.map.getBounds().getSouth();
-                let north = this.map.getBounds().getNorth();
-                this.map.flyTo({
-                    center: [coords[0], coords[1] + +0.15 * (north - south)]
-                });
-            }
             this.refreshPopup();
         }
     }

@@ -59,16 +59,3 @@ export function getInitialLockDragging(): boolean {
     }
     return false;
 }
-
-export function getRenderCloudRF(): boolean {
-    if (
-        // @ts-ignore
-        window.ISPTOOLBOX_SESSION_INFO !== undefined &&
-        // @ts-ignore
-        window.ISPTOOLBOX_SESSION_INFO.networkID !== undefined
-    ) {
-        //@ts-ignore
-        return window.ISPTOOLBOX_SESSION_INFO.renderCloudRf;
-    }
-    return false;
-}

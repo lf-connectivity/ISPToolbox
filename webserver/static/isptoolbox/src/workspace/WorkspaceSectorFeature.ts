@@ -4,14 +4,9 @@ import { Feature, Geometry, MultiPolygon, GeoJsonProperties, LineString } from '
 import { djangoUrl } from '../utils/djangoUrl';
 import { BaseWorkspaceManager } from './BaseWorkspaceManager';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from './BuildingCoverage';
-import {
-    SectorMapboxDrawState,
-    WorkspaceEvents,
-    WorkspaceFeatureTypes
-} from './WorkspaceConstants';
+import { SectorMapboxDrawState, WorkspaceFeatureTypes } from './WorkspaceConstants';
 import { AccessPoint, APToCPELink, CPE, LINK_AP_INDEX } from './WorkspaceFeatures';
 import { WorkspacePolygonFeature } from './WorkspacePolygonFeature';
-import { getRenderCloudRF } from '../utils/MapPreferences';
 
 const SECTOR_RESPONSE_FIELDS = [
     'name',
@@ -25,7 +20,6 @@ const SECTOR_RESPONSE_FIELDS = [
     'default_cpe_height_ft',
     'ap',
     'frequency',
-    'cloudrf_coverage_geojson_json',
     'geojson_json'
 ];
 
@@ -157,19 +151,10 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         let geometry: any;
         let new_feat: any;
         if (
-            getRenderCloudRF() &&
-            this.getFeatureProperty('cloudrf_coverage_geojson_json') &&
-            this.getFeatureProperty('cloudrf_coverage_geojson_json') !== null
-        ) {
-            geometry = JSON.parse(this.getFeatureProperty('cloudrf_coverage_geojson_json'));
-        } else if (
             this.getFeatureProperty('geojson_json') &&
             this.getFeatureProperty('geojson_json') !== null
         ) {
             geometry = JSON.parse(this.getFeatureProperty('geojson_json'));
-        }
-
-        if (geometry) {
             new_feat = {
                 type: 'Feature',
                 geometry: geometry,
@@ -229,7 +214,6 @@ export class AccessPointSector extends WorkspacePolygonFeature {
         this.setGeojson();
         this.awaitNewCoverage();
         this.moveLinks(this.ap.getFeatureGeometryCoordinates() as [number, number]);
-        PubSub.publish(WorkspaceEvents.CLOUDRF_COVERAGE_UPDATED);
         if (successFollowup) {
             successFollowup(resp);
         }

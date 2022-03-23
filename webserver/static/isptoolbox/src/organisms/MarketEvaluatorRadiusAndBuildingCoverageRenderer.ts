@@ -32,10 +32,7 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
             draw,
             MarketEvaluatorWorkspaceManager,
             MarketEvaluatorTowerPopup,
-            MarketEvaluatorSectorPopup,
-            {
-                renderCloudRF: true
-            }
+            MarketEvaluatorSectorPopup
         );
 
         this.buildingOverlays = {
@@ -45,10 +42,6 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         PubSub.subscribe(
             MarketEvalWSEvents.BUILDING_OVERLAYS_MSG,
             this.onBuildingOverlayMsg.bind(this)
-        );
-        PubSub.subscribe(
-            WorkspaceEvents.CLOUDRF_COVERAGE_UPDATED,
-            this.viewshedLoadedCallback.bind(this)
         );
     }
 
@@ -185,12 +178,6 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
         return [SQM_2_SQFT * Math.min(...areas), SQM_2_SQFT * Math.max(...areas)];
     }
 
-    private viewshedLoadedCallback(event: string) {
-        let newFeatures = this.addSectorsToSelection(this.draw.getSelected().features);
-        this.sendCoverageRequest({ features: newFeatures });
-        this.renderBuildings();
-    }
-
     private addSectorsToSelection(features: Array<any>) {
         let feats = features.filter(this.shouldRenderFeature);
         let newIds = new Set(feats.map((f) => f.id));
@@ -215,9 +202,7 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     }
 
     private processSectorFeature(f: GeoJSON.Feature) {
-        if (this.cloudRFExists(f)) {
-            return JSON.parse(f.properties?.cloudrf_coverage_geojson_json);
-        } else if (f.properties?.geojson_json) {
+        if (f.properties?.geojson_json) {
             return JSON.parse(f.properties?.geojson_json);
         } else {
             // edge case

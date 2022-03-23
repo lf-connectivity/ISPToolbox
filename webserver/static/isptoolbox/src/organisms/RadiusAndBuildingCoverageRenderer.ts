@@ -1,12 +1,9 @@
 import mapboxgl from 'mapbox-gl';
 import * as _ from 'lodash';
 import { createGeoJSONCircle } from '../isptoolbox-mapbox-draw/DrawModeUtils';
-import { Geometry, GeoJsonProperties, FeatureCollection, Feature } from 'geojson';
 import { BuildingCoverage, EMPTY_BUILDING_COVERAGE } from '../workspace/BuildingCoverage';
 import { WorkspaceEvents, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import { AccessPoint } from '../workspace/WorkspaceFeatures';
-
-import { GeometryCollection } from '@turf/helpers';
 
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import { miles2km } from '../LinkCalcUtils';
@@ -37,7 +34,6 @@ const IS_ACTIVE_AP = 'active_ap';
 const ACTIVE_AP = 'true';
 const INACTIVE_AP = 'false';
 
-// TODO: Remove RenderCloudRF option from here, it will go into WorkspaceManager
 export abstract class RadiusAndBuildingCoverageRenderer
     implements IMapboxDrawPlugin, IIspToolboxAjaxPlugin
 {
@@ -46,7 +42,6 @@ export abstract class RadiusAndBuildingCoverageRenderer
     workspaceManager: any;
     apPopup: BaseTowerPopup;
     sectorPopup: any;
-    renderCloudRF: boolean;
     last_selection: string = '';
     subscriptions: Array<string | null> = [];
 
@@ -57,11 +52,7 @@ export abstract class RadiusAndBuildingCoverageRenderer
         draw: MapboxDraw,
         workspaceManagerClass: any,
         apPopupClass: any,
-        sectorPopupClass: any,
-        options?: {
-            // TODO: remove renderCloudRF from renderer
-            renderCloudRF?: boolean;
-        }
+        sectorPopupClass: any
     ) {
         initializeMapboxDrawInterface(this, map);
         this.subscriptions = initializeIspToolboxInterface(this);
@@ -70,8 +61,6 @@ export abstract class RadiusAndBuildingCoverageRenderer
         this.apPopup = isBeta() ? AjaxTowerPopup.getInstance() : apPopupClass.getInstance();
         this.sectorPopup = sectorPopupClass.getInstance();
         this.workspaceManager = BaseWorkspaceManager.getInstance();
-
-        this.renderCloudRF = options?.renderCloudRF || false;
 
         this.map.addSource(BUILDING_DATA_SOURCE, {
             type: 'geojson',
@@ -364,17 +353,9 @@ export abstract class RadiusAndBuildingCoverageRenderer
                             geometry: { type: 'Point', coordinates: [] },
                             properties: {}
                         };
-                        if (this.renderCloudRF && this.cloudRFExists(feat)) {
-                            // CloudRF coverage is a geometrycollection; turn this into a feature.
-                            let geometryCollection = JSON.parse(
-                                feat.properties?.cloudrf_coverage_geojson_json
-                            );
-                            new_feat.geometry = geometryCollection;
-                        } else {
-                            let radius =
-                                feat.properties.radius || miles2km(feat.properties.radius_miles);
-                            new_feat = createGeoJSONCircle(feat.geometry, radius, feat.id);
-                        }
+                        let radius =
+                            feat.properties.radius || miles2km(feat.properties.radius_miles);
+                        new_feat = createGeoJSONCircle(feat.geometry, radius, feat.id);
 
                         if (new_feat.properties) {
                             new_feat.properties[IS_ACTIVE_AP] = selectedAPs.has(feat.id)
@@ -433,13 +414,6 @@ export abstract class RadiusAndBuildingCoverageRenderer
 
         // Cancel long press callback
         this.onLongPressAP.cancel();
-    }
-
-    protected cloudRFExists(feat: Feature) {
-        return (
-            feat.properties?.cloudrf_coverage_geojson_json &&
-            feat.properties?.cloudrf_coverage_geojson_json !== null
-        );
     }
 
     protected shouldRenderFeature(f: GeoJSON.Feature): boolean {

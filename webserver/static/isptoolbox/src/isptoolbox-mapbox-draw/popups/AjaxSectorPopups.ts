@@ -341,37 +341,11 @@ export class MarketEvaluatorSectorPopup extends BaseAjaxSectorPopup {
             return BaseAjaxSectorPopup._instance as MarketEvaluatorSectorPopup;
         }
         super(map, draw, ISPToolboxTool.MARKET_EVAL);
-        PubSub.subscribe(
-            MarketEvalWSEvents.CLOUDRF_VIEWSHED_PROGRESS,
-            this.onCloudRfProgress.bind(this)
-        );
-        PubSub.subscribe(
-            MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG,
-            this.onCloudRfComplete.bind(this)
-        );
         BaseAjaxSectorPopup._instance = this;
     }
 
     static getInstance() {
         return BaseAjaxSectorPopup.getInstance() as MarketEvaluatorSectorPopup;
-    }
-
-    protected onFormSubmitSuccess() {
-        // if (this.sector) {
-        //     MarketEvaluatorWS.getInstance().sendViewshedRequest(this.sector.workspaceId);
-        // }
-    }
-
-    protected onCloudRfProgress(event: string, data: CloudRFProgressResponse) {
-        if (data.sector === this.sector?.workspaceId) {
-            this.updateSectorStats();
-        }
-    }
-
-    protected onCloudRfComplete(event: string, data: ViewshedGeojsonResponse) {
-        if (data.ap_uuid && data.ap_uuid === this.sector?.workspaceId) {
-            this.updateSectorStats();
-        }
     }
 }
 

@@ -2,20 +2,16 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl from 'mapbox-gl';
 import { ASROverlayPopup } from '../isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
 import { ft2m, miles2km, roundToDecimalPlaces } from '../LinkCalcUtils';
-import MarketEvaluatorMapLayerSidebarManager from '../MarketEvaluatorMapLayerSidebarManager';
 import MarketEvaluatorWS, {
     ViewshedGeojsonResponse,
-    MarketEvalWSEvents,
     MarketEvalWSRequestType
 } from '../MarketEvaluatorWS';
-import { MapLayerSidebarManager } from '../workspace/MapLayerSidebarManager';
 import {
     ASREvent,
     ASREvents,
     ASRLoadingState,
     WorkspaceFeatureTypes
 } from '../workspace/WorkspaceConstants';
-import { ASR_TOWER_COVERAGE_WORKSPACE_ID } from '../workspace/WorkspaceFeatures';
 import MapboxOverlay from './MapboxOverlay';
 
 const TOWER_ZOOM_THRESHOLD = 12;
@@ -74,10 +70,6 @@ export class ASRTowerOverlay implements MapboxOverlay {
 
         PubSub.subscribe(ASREvents.PLOT_LIDAR_COVERAGE, this.plotLidarCoverageCallback.bind(this));
         PubSub.subscribe(ASREvents.SAVE_ASR_TOWER, this.saveASRTowerCallback.bind(this));
-        PubSub.subscribe(
-            MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG,
-            this.viewshedMessageCallback.bind(this)
-        );
     }
 
     mouseEnterCallback(e: any) {
@@ -198,6 +190,7 @@ export class ASRTowerOverlay implements MapboxOverlay {
         this.map.fire('draw.create', { features: [newAP] });
     }
 
+    // Keeping this here because we might need this in the future (just not for cloudrf)
     viewshedMessageCallback(msg: string, response: ViewshedGeojsonResponse) {
         if (response.registration_number && response.coverage) {
             let towerId = response.registration_number;

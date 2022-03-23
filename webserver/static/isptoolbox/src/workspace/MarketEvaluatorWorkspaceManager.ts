@@ -24,7 +24,6 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
 
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super(map, draw, SUPPORTED_FEATURE_TYPES);
-        PubSub.subscribe(MarketEvalWSEvents.CLOUDRF_VIEWSHED_MSG, this.onViewshedMsg.bind(this));
         BaseWorkspaceManager._instance = this;
     }
 
@@ -116,12 +115,5 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
                 ws.cancelCurrentRequest(MarketEvalWSRequestType.VIEWSHED);
             }
         };
-    }
-
-    onViewshedMsg(msg: string, response: ViewshedGeojsonResponse) {
-        if (response.ap_uuid) {
-            let sector = this.features.get(response.ap_uuid) as AccessPointSector;
-            sector.read(() => PubSub.publish(WorkspaceEvents.CLOUDRF_COVERAGE_UPDATED));
-        }
     }
 }

@@ -18,12 +18,6 @@ export enum ASREvents {
     SAVE_ASR_TOWER = 'asr.save_tower'
 }
 
-export enum ASRLoadingState {
-    STANDBY = 'asr_tooltip.standby',
-    LOADING_COVERAGE = 'asr_tooltip.loading',
-    LOADED_COVERAGE = 'asr_tooltip.loaded'
-}
-
 export enum WorkspaceFeatureTypes {
     AP = 'access_point',
     SECTOR = 'sector',
@@ -81,8 +75,6 @@ export enum LOSWSHandlers {
 
 export type ASREvent = {
     featureProperties: any;
-    height: number;
-    radius: number;
 };
 
 export type LinkResponse = {

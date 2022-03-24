@@ -1,17 +1,8 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import mapboxgl from 'mapbox-gl';
 import { ASROverlayPopup } from '../isptoolbox-mapbox-draw/popups/MarketEvaluatorOverlayPopups';
-import { ft2m, miles2km, roundToDecimalPlaces } from '../LinkCalcUtils';
-import MarketEvaluatorWS, {
-    ViewshedGeojsonResponse,
-    MarketEvalWSRequestType
-} from '../MarketEvaluatorWS';
-import {
-    ASREvent,
-    ASREvents,
-    ASRLoadingState,
-    WorkspaceFeatureTypes
-} from '../workspace/WorkspaceConstants';
+import MarketEvaluatorWS, { MarketEvalWSRequestType } from '../MarketEvaluatorWS';
+import { ASREvent, ASREvents, WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 import MapboxOverlay from './MapboxOverlay';
 
 const TOWER_ZOOM_THRESHOLD = 12;
@@ -68,7 +59,6 @@ export class ASRTowerOverlay implements MapboxOverlay {
         this.boundDrawCreateCallback = this.drawCreateCallback.bind(this);
         this.boundDrawDeleteCallback = this.drawDeleteCallback.bind(this);
 
-        PubSub.subscribe(ASREvents.PLOT_LIDAR_COVERAGE, this.plotLidarCoverageCallback.bind(this));
         PubSub.subscribe(ASREvents.SAVE_ASR_TOWER, this.saveASRTowerCallback.bind(this));
     }
 
@@ -131,45 +121,7 @@ export class ASRTowerOverlay implements MapboxOverlay {
         });
     }
 
-    plotLidarCoverageCallback(msg: string, data: ASREvent) {
-        this.removeExistingCoverageArea();
-
-        // Set selected tower
-        this.setSelected({
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [data.featureProperties.longitude, data.featureProperties.latitude]
-            },
-            properties: {
-                ...data.featureProperties,
-                tower_height_ft: data.height,
-                tower_radius_miles: data.radius,
-                loading_state: ASRLoadingState.LOADING_COVERAGE
-            }
-        });
-
-        // needed to counteract the hidePopup from the draw delete callback
-        this.showPopup(this.selectedTower);
-
-        // Send request to websocket
-        let height = roundToDecimalPlaces(ft2m(data.height), 2);
-        let radius = roundToDecimalPlaces(miles2km(data.radius), 2);
-        let [lat, lng] = [data.featureProperties.latitude, data.featureProperties.longitude];
-        MarketEvaluatorWS.getInstance().sendASRViewshedRequest(
-            height,
-            lat,
-            lng,
-            radius,
-            data.featureProperties.registration_number
-        );
-    }
-
     saveASRTowerCallback(msg: string, data: ASREvent) {
-        // Deselect all towers
-        this.removeExistingCoverageArea();
-        this.setSelected(undefined);
-
         // Create tower
         const newAP = {
             type: 'Feature',
@@ -178,8 +130,6 @@ export class ASRTowerOverlay implements MapboxOverlay {
                 coordinates: [data.featureProperties.longitude, data.featureProperties.latitude]
             },
             properties: {
-                height: roundToDecimalPlaces(ft2m(data.height), 2),
-                max_radius: roundToDecimalPlaces(miles2km(data.radius), 2),
                 name: `ASR #${data.featureProperties.registration_number}`,
                 feature_type: WorkspaceFeatureTypes.AP,
                 center: [data.featureProperties.longitude, data.featureProperties.latitude],
@@ -188,58 +138,6 @@ export class ASRTowerOverlay implements MapboxOverlay {
         };
 
         this.map.fire('draw.create', { features: [newAP] });
-    }
-
-    // Keeping this here because we might need this in the future (just not for cloudrf)
-    viewshedMessageCallback(msg: string, response: ViewshedGeojsonResponse) {
-        if (response.registration_number && response.coverage) {
-            let towerId = response.registration_number;
-            if (
-                response.error === 0 &&
-                towerId === this.selectedTower?.properties.registration_number
-            ) {
-                const asrStatus = ['C', 'G'].includes(this.selectedTower?.properties.status_code)
-                    ? 'good'
-                    : 'bad';
-
-                let coverage = JSON.parse(response.coverage);
-
-                const newFeature = {
-                    type: 'Feature',
-                    geometry: coverage,
-                    properties: {
-                        uneditable: true,
-                        name: 'ASR Tower Coverage',
-                        feature_type: WorkspaceFeatureTypes.COVERAGE_AREA,
-                        asr_status: asrStatus
-                    },
-                    id: ''
-                };
-
-                // @ts-ignore
-                this.selectedTowerMapboxId = this.draw.add(newFeature)[0];
-                newFeature.id = this.selectedTowerMapboxId;
-                this.map.fire('draw.create', { features: [newFeature] });
-                this.draw.changeMode('simple_select', { featureIds: [this.selectedTowerMapboxId] });
-                this.map.fire('draw.selectionchange', { features: [newFeature] });
-
-                this.selectedTower.properties.loading_state = ASRLoadingState.LOADED_COVERAGE;
-                this.setSelected(this.selectedTower);
-
-                // Fly to coverage area if it isn't on map. We center the AP horizontally, but place it
-                // 65% of the way down on the screen so the tooltip fits.
-                let coords = this.selectedTower.geometry.coordinates;
-                if (!this.map.getBounds().contains(coords)) {
-                    let south = this.map.getBounds().getSouth();
-                    let north = this.map.getBounds().getNorth();
-                    this.map.flyTo({
-                        center: [coords[0], coords[1] + +0.15 * (north - south)]
-                    });
-                }
-
-                this.showPopup(this.selectedTower);
-            }
-        }
     }
 
     show(): void {
@@ -388,8 +286,6 @@ export class ASRTowerOverlay implements MapboxOverlay {
         this.map.off('draw.delete', this.boundDrawDeleteCallback);
 
         this.popup.hide();
-        this.setSelected(undefined);
-        this.removeExistingCoverageArea();
         MarketEvaluatorWS.getInstance().cancelCurrentRequest(MarketEvalWSRequestType.ASR_VIEWSHED);
 
         this.map.getLayer(this.towerLayerId) && this.map.removeLayer(this.towerLayerId);
@@ -407,28 +303,5 @@ export class ASRTowerOverlay implements MapboxOverlay {
             this.popup.setLngLat([feature.properties.longitude, feature.properties.latitude]);
             this.popup.show();
         }, 10);
-    }
-
-    private removeExistingCoverageArea() {
-        if (this.selectedTowerMapboxId) {
-            const deletedFeature = this.draw.get(this.selectedTowerMapboxId);
-            if (deletedFeature) {
-                this.draw.delete(this.selectedTowerMapboxId);
-                this.map.fire('draw.delete', { features: [deletedFeature] });
-            }
-            this.selectedTowerMapboxId = undefined;
-        }
-    }
-
-    private setSelected(feature: any) {
-        this.selectedTower = feature;
-        const sourceTower = this.selectedTower || {};
-        const selectedSource = this.map.getSource(this.towerSelectedSourceId);
-        if (selectedSource.type === 'geojson') {
-            selectedSource.setData({
-                type: 'FeatureCollection',
-                features: [sourceTower]
-            });
-        }
     }
 }

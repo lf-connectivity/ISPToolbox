@@ -1,16 +1,11 @@
 import mapboxgl from 'mapbox-gl';
 import { m2ft, roundToDecimalPlaces } from '../../LinkCalcUtils';
-import { MAX_RADIUS, MIN_RADIUS } from '../../LinkCheckUtils';
-import { validateNumber } from '../../molecules/InputValidator';
-import { ASREvents, ASRLoadingState } from '../../workspace/WorkspaceConstants';
-import { LinkCheckBasePopup, LOADING_SVG } from './LinkCheckBasePopup';
+import { ASREvents, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
+import { LinkCheckBasePopup } from './LinkCheckBasePopup';
 import pass_svg from '../styles/pass-icon.svg';
 
-const ASR_HEIGHT_INPUT = 'asr-input-height-asr-popup';
-const ASR_RADIUS_INPUT = 'asr-input-radius-asr-popup';
 const ASR_COVERAGE_BUTTON_LI = 'asr-li-coverage-btn-asr-popup';
 const ASR_COVERAGE_BUTTON = 'asr-btn-coverage-asr-popup';
-const ASR_TOWER_LINK = 'asr-a-tower-asr-popup';
 
 abstract class MarketEvaluatorBaseOverlayPopup extends LinkCheckBasePopup {
     protected featureProperties: any | undefined;
@@ -369,9 +364,6 @@ export class TribalOverlayPopup extends MarketEvaluatorBaseOverlayPopup {
 }
 
 export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
-    protected state: ASRLoadingState;
-    protected towerRadius: number | undefined;
-    protected towerHeight: number | undefined;
     static _instance: ASROverlayPopup;
 
     constructor(map: mapboxgl.Map, draw: MapboxDraw) {
@@ -384,18 +376,10 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
 
     cleanup() {
         super.cleanup();
-        this.towerRadius = undefined;
-        this.towerHeight = undefined;
-        this.state = ASRLoadingState.STANDBY;
     }
 
     setFeature(feature: any) {
         super.setFeature(feature);
-        this.state = this.featureProperties.loading_state || ASRLoadingState.STANDBY;
-        this.towerRadius = this.featureProperties.tower_radius_miles || 3;
-        this.towerHeight =
-            this.featureProperties.tower_height_ft ||
-            roundToDecimalPlaces(m2ft(this.featureProperties.height_without_appurtenaces), 2);
     }
 
     getHTML() {
@@ -454,32 +438,6 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
                     </p>
                 </li>
 
-                <li class="mapboxgl-popup-row">
-                    <p class="mapboxgl-popup-label">Install Height</p>
-                    <div class="data-with-unit">
-                        <input type="number"
-                                value="${this.towerHeight}"
-                                id='${ASR_HEIGHT_INPUT}'
-                                min='0.1' max='${towerHeightMax}'
-                                class="input--value"
-                        >
-                        <span>ft</span>
-                    </div>
-                </li>
-
-                <li class="mapboxgl-popup-row">
-                    <p class="mapboxgl-popup-label">Prop. Radius</p>
-                    <div class="data-with-unit">
-                        <input type="number"
-                                value="${this.towerRadius}"
-                                id="${ASR_RADIUS_INPUT}"
-                                min="${MIN_RADIUS}" max="${MAX_RADIUS}"
-                                class="input--value"
-                        >
-                        <span>mi</span>
-                    </div>
-                </li>
-
                 <li class="mapboxgl-popup-button-row" id="${ASR_COVERAGE_BUTTON_LI}"">
                     ${this.getButtonRowHTML()}
                 </li>
@@ -489,101 +447,42 @@ export class ASROverlayPopup extends MarketEvaluatorBaseOverlayPopup {
     }
 
     setEventHandlers() {
-        const validateHeightAndRadius = () => {
-            let height = parseFloat(String($(`#${ASR_HEIGHT_INPUT}`).val()));
-            let radius = parseFloat(String($(`#${ASR_RADIUS_INPUT}`).val()));
-            let maxHeight = roundToDecimalPlaces(
-                m2ft(this.featureProperties.height_without_appurtenaces),
-                2
-            );
-
-            // input validation on height/radius
-            height = validateNumber(1, maxHeight, height, ASR_HEIGHT_INPUT);
-            radius = validateNumber(1, MAX_RADIUS, radius, ASR_RADIUS_INPUT);
-
-            this.towerHeight = height;
-            this.towerRadius = radius;
-        };
-
         $(`#${ASR_COVERAGE_BUTTON}`).on('click', () => {
-            validateHeightAndRadius();
-
-            PubSub.publish(ASREvents.PLOT_LIDAR_COVERAGE, {
-                featureProperties: this.featureProperties,
-                height: this.towerHeight,
-                radius: this.towerRadius
+            PubSub.publish(ASREvents.SAVE_ASR_TOWER, {
+                featureProperties: this.featureProperties
             });
 
-            this.state = ASRLoadingState.LOADING_COVERAGE;
             this.refreshButtonRow();
         });
-
-        $(`#${ASR_TOWER_LINK}`).on('click', () => {
-            validateHeightAndRadius();
-
-            PubSub.publish(ASREvents.SAVE_ASR_TOWER, {
-                featureProperties: this.featureProperties,
-                height: this.towerHeight,
-                radius: this.towerRadius
-            });
-
-            this.hide();
-        });
-
-        const inputChangeCallback = (id: string) => {
-            return () => {
-                if (this.state !== ASRLoadingState.STANDBY) {
-                    this.state = ASRLoadingState.STANDBY;
-                    this.refreshButtonRow();
-                }
-
-                const val = parseFloat(String($(`#${id}`).val()));
-                if (isNaN(val)) {
-                    $(`#${ASR_COVERAGE_BUTTON}`).prop('disabled', true);
-                } else {
-                    $(`#${ASR_COVERAGE_BUTTON}`).prop('disabled', false);
-                }
-            };
-        };
-
-        $(`#${ASR_HEIGHT_INPUT}`).on('input', inputChangeCallback(ASR_HEIGHT_INPUT));
-        $(`#${ASR_RADIUS_INPUT}`).on('input', inputChangeCallback(ASR_RADIUS_INPUT));
     }
 
     protected getButtonRowHTML() {
-        let html;
-        switch (this.state) {
-            case ASRLoadingState.STANDBY:
-                html = `
-                    <button class='btn btn-primary isptoolbox-btn' id='${ASR_COVERAGE_BUTTON}'>
-                        Plot Estimated Coverage
-                        <sup>
-                            <span class="footnote--bracket">[</span>12<span class="footnote--bracket">]</span>
-                        </sup>
-                    </button>
-                `;
-                break;
-            case ASRLoadingState.LOADING_COVERAGE:
-                html = `
-                    <div align="center">
-                        ${LOADING_SVG}
-                        <p align="center bold" class="mt-1">Plotting Lidar Coverage</p>
-                    </div>
-                `;
-                break;
-            case ASRLoadingState.LOADED_COVERAGE:
-                html = `
-                    <div align="center">
-                        <img src="${pass_svg}" width="20" height="25">
-                        <p align="center bold" class="mt-1">Tower Coverage Plotted</p>
-                    </div>
-                `;
-                break;
+        // Find if there's a tower already plotted
+        let featureIds = this.draw.getFeatureIdsAt(this.map.project(this.lnglat));
+
+        if (
+            featureIds.some((id: string) => {
+                let feat = this.draw.get(id);
+                return (
+                    feat &&
+                    feat.properties &&
+                    feat.properties.feature_type == WorkspaceFeatureTypes.AP
+                );
+            })
+        ) {
+            return `
+                <div align="center">
+                    <img src="${pass_svg}" width="20" height="25">
+                    <p align="center bold" class="mt-1">Tower Coverage Plotted</p>
+                </div>
+            `;
         }
-        html += `
-            <a class="link" id="${ASR_TOWER_LINK}">Save as Tower</a>
+
+        return `
+            <button class='btn btn-primary isptoolbox-btn' id='${ASR_COVERAGE_BUTTON}'>
+                Plot As Tower
+            </button>
         `;
-        return html;
     }
 
     protected refreshButtonRow() {

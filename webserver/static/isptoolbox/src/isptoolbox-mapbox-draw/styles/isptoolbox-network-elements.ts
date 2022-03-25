@@ -3,12 +3,14 @@ import cpe_active_icon from './cpe-active-icon.svg';
 import ap_icon from './ap-icon.svg';
 
 export function load_custom_icons(map: mapboxgl.Map) {
-    let img_cpe_inactive = new Image(50, 40);
+    console.log('loading custom icons');
+    let img_cpe_inactive = new Image(50, 50);
     img_cpe_inactive.crossOrigin = 'Anonymous';
     img_cpe_inactive.onload = () => map.addImage('cpe-inactive-isptoolbox', img_cpe_inactive);
     img_cpe_inactive.src = cpe_icon;
+    console.log(cpe_icon);
 
-    let img_cpe_active = new Image(50, 40);
+    let img_cpe_active = new Image(50, 50);
     img_cpe_active.crossOrigin = 'Anonymous';
     img_cpe_active.onload = () => map.addImage('cpe-active-isptoolbox', img_cpe_active);
     img_cpe_active.src = cpe_active_icon;

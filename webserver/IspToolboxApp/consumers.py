@@ -11,7 +11,6 @@ from IspToolboxApp.tasks.MarketEvaluatorWebsocketTasks import (
     getZipGeog,
     getCountyGeog,
     getCensusBlockGeog,
-    getTowerViewShed,
     getTribalGeog,
     genPopulation,
 )
@@ -35,8 +34,6 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
             "grant": self.grant_geography_request,
             "zip": self.zip_geography_request,
             "county": self.county_geography_request,
-            "viewshed": self.viewshed_request,
-            "asr_viewshed": self.asr_viewshed_request,
             "census_block": self.census_block_geography_request,
             "tribal": self.tribal_geography_request,
         }
@@ -146,42 +143,6 @@ class MarketEvaluatorConsumer(AsyncJsonWebsocketConsumer):
         # Workspace stuff. TODO: replace with non get method after launch
         namelsad = content.get("namelsad", None)
         getTribalGeog.delay(geoid, namelsad, self.channel_name, uuid)
-
-    async def viewshed_request(self, content, uuid):
-        lat = content["lat"]
-        lon = content["lon"]
-        height = content["height"]
-        customerHeight = content["customerHeight"]
-        radius = content["radius"]
-        apUuid = content.get("apUuid", None)
-        getTowerViewShed.delay(
-            lat,
-            lon,
-            height,
-            customerHeight,
-            radius,
-            self.channel_name,
-            uuid,
-            apUuid=apUuid,
-        )
-
-    async def asr_viewshed_request(self, content, uuid):
-        DEFAULT_CUSTOMER_HEIGHT = 10  # looked at the www code
-        lat = content["lat"]
-        lon = content["lon"]
-        height = content["height"]
-        radius = content["radius"]
-        registrationNumber = content["registrationNumber"]
-        getTowerViewShed.delay(
-            lat,
-            lon,
-            height,
-            DEFAULT_CUSTOMER_HEIGHT,
-            radius,
-            self.channel_name,
-            uuid,
-            registration_number=registrationNumber,
-        )
 
     async def building_overlays(self, event):
         await self.send_json(event)

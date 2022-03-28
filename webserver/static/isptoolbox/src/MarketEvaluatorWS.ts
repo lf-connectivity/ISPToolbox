@@ -77,10 +77,6 @@ export type ViewshedGeojsonResponse = {
     uuid: string;
 };
 
-export type CloudRFProgressResponse = {
-    sector: string;
-};
-
 export type MedianSpeed = {
     'Download (Mbit/s)': string;
     'Upload (Mbit/s)': string;
@@ -132,7 +128,6 @@ type MarketEvaluatorWSValue =
     | ZipGeojsonResponse
     | CountyGeojsonResponse
     | ViewshedGeojsonResponse
-    | CloudRFProgressResponse
     | string;
 
 type GeoArea = GeoJSON.FeatureCollection | GeoJSON.Feature | GeoJSON.GeometryObject;
@@ -451,50 +446,6 @@ class MarketEvaluatorWS {
             request_type: MarketEvalWSRequestType.TRIBAL,
             geoid,
             namelsad
-        });
-    }
-
-    /**
-     * Requests CloudRF viewshed associated with given parameters.
-     * @param apUuid sector UUID
-     * @returns The request-identifying UUID
-     */
-    sendViewshedRequest(apUuid: string): UUID {
-        // TODO: Only the sector UUID is needed. Deprecate the other params.
-        return this.sendJsonWithUUID({
-            request_type: MarketEvalWSRequestType.VIEWSHED,
-            customerHeight: 0,
-            height: 0,
-            lat: 0,
-            lon: 0,
-            radius: 0,
-            apUuid
-        });
-    }
-
-    /**
-     * Requests CloudRF viewshed associated with given parameters.
-     * @param height Height in meters
-     * @param lat latitude as float
-     * @param lon longitude as float
-     * @param radius Radius in km
-     * @param registrationNumber ASR registration number
-     * @returns The request-identifying UUID
-     */
-    sendASRViewshedRequest(
-        height: number,
-        lat: number,
-        lon: number,
-        radius: number,
-        registrationNumber: string
-    ): UUID {
-        return this.sendJsonWithUUID({
-            request_type: MarketEvalWSRequestType.ASR_VIEWSHED,
-            height,
-            lat,
-            lon,
-            radius,
-            registrationNumber
         });
     }
 }

@@ -1,8 +1,3 @@
-import MarketEvaluatorWS, {
-    CloudRFProgressResponse,
-    MarketEvalWSEvents,
-    ViewshedGeojsonResponse
-} from '../../MarketEvaluatorWS';
 import { DeleteFromPopupConfirmationModal } from './DeleteFromPopupConfirmationModal';
 import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
 import { renderAjaxOperationFailed } from '../../utils/ConnectionIssues';
@@ -13,7 +8,6 @@ import {
     WorkspaceEvents,
     WorkspaceFeatureTypes
 } from '../../workspace/WorkspaceConstants';
-import { AccessPoint } from '../../workspace/WorkspaceFeatures';
 import { AccessPointSector } from '../../workspace/WorkspaceSectorFeature';
 import { AjaxTowerPopup } from './AjaxTowerPopup';
 import { LinkCheckBaseAjaxFormPopup } from './LinkCheckBaseAjaxPopup';

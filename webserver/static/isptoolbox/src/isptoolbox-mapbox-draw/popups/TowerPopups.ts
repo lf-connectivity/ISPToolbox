@@ -14,21 +14,18 @@ import {
     MIN_HEIGHT,
     validateName,
     validateRadius,
-    validateHeight,
-    isBeta
+    validateHeight
 } from '../../LinkCheckUtils';
 import { sanitizeString } from '../../molecules/InputValidator';
 import { parseFormLatitudeLongitude } from '../../utils/LatLngInputUtils';
 import {
     LOSWSEvents,
     ViewshedProgressResponse,
-    ViewshedUnexpectedError,
-    WorkspaceFeatureTypes
+    ViewshedUnexpectedError
 } from '../../workspace/WorkspaceConstants';
 import MarketEvaluatorWS, {
     MarketEvalWSEvents,
-    MarketEvalWSRequestType,
-    ViewshedGeojsonResponse
+    MarketEvalWSRequestType
 } from '../../MarketEvaluatorWS';
 import { applyChanges } from 'automerge';
 
@@ -532,17 +529,6 @@ export class MarketEvaluatorTowerPopup extends BaseTowerPopup {
         } else {
             throw new Error('No instance of MarketEvaluatorTowerPopup instantiated.');
         }
-    }
-
-    protected setEventHandlers() {
-        super.setEventHandlers();
-        $(`#${PLOT_COVERAGE_BUTTON_ID}`).on('click', () => {
-            let properties = this.accessPoint?.getFeatureData()?.properties;
-            let point = this.accessPoint?.getFeatureData().geometry.coordinates;
-            if (this.accessPoint && properties && point) {
-                MarketEvaluatorWS.getInstance().sendViewshedRequest(this.accessPoint.workspaceId);
-            }
-        });
     }
 
     protected getAdditionalInfo() {

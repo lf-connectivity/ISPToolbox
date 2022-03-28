@@ -115,6 +115,7 @@ class IspToolboxUserSignUpInfo(models.Model):
         max_length=128,
         choices=GOAL_CHOICES,
     ))
+    contact_me = models.BooleanField(default=True, blank=False, null=False)
 
 
 class NewUserExperience(models.Model):

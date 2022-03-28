@@ -7,6 +7,15 @@ from django.conf import settings
 from django.contrib.auth import (
     authenticate
 )
+from django.utils.translation import gettext_lazy as _
+
+class CustomCheckboxInput(forms.CheckboxInput):
+    template_name = 'workspace/atoms/custom_checkbox.html'
+    custom_message = _("It’s okay to contact me via email to participate in interviews.")
+
+    def get_context(self, name, value, attrs):
+        attrs = {**(attrs or {}), 'custom_message': self.custom_message}
+        return super().get_context(name, value, attrs)
 
 
 class IspToolboxUserCreationForm(UserCreationForm):
@@ -112,6 +121,13 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxSelectMultiple,
         choices=IspToolboxUserSignUpInfo.GOAL_CHOICES)
+    contact_me = forms.BooleanField(
+        label="Help us shape the future of ISP Toolbox ",
+        required=True,
+        label_suffix=" ",
+        widget=CustomCheckboxInput,
+        initial=True,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -125,7 +141,8 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
         }
 
     field_order = [
-        'company_website', 'business_type', 'individual_role', 'subscriber_size', 'company_goal'
+        'company_website', 'business_type', 'individual_role', 'subscriber_size', 'company_goal',
+        'contact_me'
     ]
     error_css_class = "error"
     required_css_class = "required"

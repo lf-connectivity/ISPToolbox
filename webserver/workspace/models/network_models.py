@@ -181,8 +181,7 @@ class AccessPointLocation(WorkspaceFeature):
         ],
     )
 
-    # TODO: deprecate height, radius, no_check_radius, default_cpe_height, and
-    # cloudrf_coverage_geojson after AP sector launch
+    # TODO: deprecate height, radius, no_check_radius, default_cpe_height after AP sector launch
     height = models.FloatField(
         default=ModelLimits.HEIGHT.default,
         validators=[
@@ -237,7 +236,6 @@ class AccessPointLocation(WorkspaceFeature):
             ),
         ],
     )
-    cloudrf_coverage_geojson = geo_models.GeometryCollectionField(null=True)
 
     @property
     def lat(self):
@@ -296,14 +294,6 @@ class AccessPointLocation(WorkspaceFeature):
         coords = value.split(",")
         self.geojson.x = float(coords[1])
         self.geojson.y = float(coords[0])
-
-    @property
-    def cloudrf_coverage_geojson_json(self):
-        return (
-            self.cloudrf_coverage_geojson.json
-            if self.cloudrf_coverage_geojson
-            else None
-        )
 
     @property
     def sector_count(self):
@@ -428,7 +418,6 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
             ),
         ],
     )
-    cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
     lat = serializers.FloatField(read_only=True)
     lng = serializers.FloatField(read_only=True)
     sector_count = serializers.IntegerField(read_only=True)
@@ -436,47 +425,6 @@ class AccessPointSerializer(serializers.ModelSerializer, SessionWorkspaceModelMi
     class Meta:
         model = AccessPointLocation
         exclude = ["owner", "session", "created"]
-
-    def update(self, instance, validated_data):
-        new_height = validated_data.get("height", instance.height)
-        new_radius = validated_data.get("max_radius", instance.max_radius)
-        new_cpe_height = validated_data.get(
-            "default_cpe_height", instance.default_cpe_height
-        )
-        new_geojson = json.loads(validated_data.get("geojson", instance.geojson.json))
-        new_point = new_geojson["coordinates"]
-
-        if (
-            not math.isclose(new_height, instance.height)
-            or not math.isclose(new_radius, instance.max_radius)
-            or not math.isclose(new_cpe_height, instance.default_cpe_height)
-            or not numpy.allclose(
-                new_point, json.loads(instance.geojson.json)["coordinates"]
-            )
-        ):
-            new_cloudrf = None
-
-        else:
-            new_cloudrf = validated_data.get(
-                "cloudrf_coverage_geojson", instance.cloudrf_coverage_geojson
-            )
-
-        # On AP move, update all associated sectors' cloudrf coverage
-        if not numpy.allclose(
-            new_point, json.loads(instance.geojson.json)["coordinates"]
-        ):
-            AccessPointSector.objects.filter(ap=instance).update(
-                cloudrf_coverage_geojson=None
-            )
-
-        validated_data["cloudrf_coverage_geojson"] = new_cloudrf
-        return super(AccessPointSerializer, self).update(instance, validated_data)
-
-    def get_cloudrf_coverage_geojson_json(self, obj):
-        if obj.cloudrf_coverage_geojson is None:
-            return None
-        else:
-            return obj.cloudrf_coverage_geojson.json
 
 
 def random_heading():
@@ -588,16 +536,6 @@ class AccessPointSector(WorkspaceFeature):
     ap = models.ForeignKey(
         AccessPointLocation, on_delete=models.CASCADE, editable=False
     )
-
-    cloudrf_coverage_geojson = geo_models.MultiPolygonField(null=True)
-
-    @property
-    def cloudrf_coverage_geojson_json(self):
-        return (
-            self.cloudrf_coverage_geojson.json
-            if self.cloudrf_coverage_geojson
-            else None
-        )
 
     @property
     def radius_miles(self):
@@ -719,13 +657,11 @@ class AccessPointSector(WorkspaceFeature):
         nearby_ids = [b.msftid for b in buildings]
         msft_buildings = MsftBuildingOutlines.objects.filter(id__in=nearby_ids).all()
         msft_buildings = {b.id: b.geog for b in msft_buildings}
-        writer.writerow(['', 'latitude', 'longitude', 'status'])
+        writer.writerow(["", "latitude", "longitude", "status"])
         for idx, b in enumerate(buildings):
             geog = b.geog
             if not geog:
-                geog = msft_buildings.get(
-                        b.msftid, Polygon()
-                    )
+                geog = msft_buildings.get(b.msftid, Polygon())
             try:
                 writer.writerow([idx, geog.centroid[1], geog.centroid[0], b.status])
             except Exception:
@@ -811,40 +747,12 @@ class AccessPointSectorSerializer(
         queryset=AccessPointLocation.objects.all(), pk_field=serializers.UUIDField()
     )
     geojson_json = serializers.SerializerMethodField()
-    cloudrf_coverage_geojson_json = serializers.SerializerMethodField()
 
     class Meta:
         model = AccessPointSector
         exclude = ["owner", "session", "created"]
 
     def update(self, instance, validated_data):
-        params_to_check = [
-            "height",
-            "heading",
-            "azimuth",
-            "radius",
-            "default_cpe_height",
-            "default_cpe_height_ft",
-            "height_ft",
-            "radius_miles",
-        ]
-
-        if not all(
-            math.isclose(
-                validated_data.get(param, getattr(instance, param)),
-                getattr(instance, param),
-            )
-            for param in params_to_check
-        ):
-            new_cloudrf = None
-
-        else:
-            new_cloudrf = validated_data.get(
-                "cloudrf_coverage_geojson", instance.cloudrf_coverage_geojson
-            )
-
-        validated_data["cloudrf_coverage_geojson"] = new_cloudrf
-
         # Update frequencies here so that we don't do this update every time the sector
         # is updated.
         new_frequency = validated_data.get("frequency", instance.frequency)
@@ -852,12 +760,6 @@ class AccessPointSectorSerializer(
             APToCPELink.objects.filter(sector=instance).update(frequency=new_frequency)
 
         return super(AccessPointSectorSerializer, self).update(instance, validated_data)
-
-    def get_cloudrf_coverage_geojson_json(self, obj):
-        if obj.cloudrf_coverage_geojson is None:
-            return None
-        else:
-            return obj.cloudrf_coverage_geojson.json
 
     def get_geojson_json(self, obj):
         return obj.geojson.json

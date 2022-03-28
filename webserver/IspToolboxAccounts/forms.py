@@ -7,14 +7,14 @@ from django.conf import settings
 from django.contrib.auth import (
     authenticate
 )
-from django.utils.translation import gettext_lazy as _
+
 
 class CustomCheckboxInput(forms.CheckboxInput):
     template_name = 'workspace/atoms/custom_checkbox.html'
-    custom_message = _("It’s okay to contact me via email to participate in interviews.")
+    custom_message = "It’s okay to contact me via email to participate in interviews."
 
     def get_context(self, name, value, attrs):
-        attrs = {**(attrs or {}), 'custom_message': self.custom_message}
+        attrs = {**(attrs or {}), 'custom_message': _(self.custom_message)}
         return super().get_context(name, value, attrs)
 
 

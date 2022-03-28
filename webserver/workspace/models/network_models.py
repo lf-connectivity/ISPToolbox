@@ -25,7 +25,6 @@ from turfpy import measurement
 
 import csv
 import logging
-import numpy
 import math
 import json
 import re

@@ -142,14 +142,10 @@ export function OverrideDirect(additionalFunctionality = {}) {
         this.clearSelectedCoordinates();
         selected.forEach((feature) => this.doRender(feature.id));
 
-        if (editableFeatures.length > 0) {
-            editableFeatures.forEach((feature) => this.select(feature.id));
-        } else {
-            this.changeMode('simple_select');
-        }
+        editableFeatures.forEach((feature) => this.select(feature.id));
 
-        moveFeatures(this.getSelected(), delta);
-        this.getSelected()
+        moveFeatures(editableFeatures, delta);
+        editableFeatures
             .filter((feature) => feature.properties.radius)
             .map((circle) => circle.properties.center)
             .forEach((center) => {

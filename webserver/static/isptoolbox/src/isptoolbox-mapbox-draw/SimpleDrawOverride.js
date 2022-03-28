@@ -97,9 +97,7 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
 
         // deselect uneditable features, and only move those that are editable.
         const editableFeatures = this.getSelected().filter((feature) => !isUneditable(feature));
-        this.clearSelectedFeatures();
         this.getSelected().forEach((feature) => this.doRender(feature.id));
-        editableFeatures.forEach((feature) => this.select(feature.id));
 
         // Dragging when drag move is enabled
         // $FlowFixMe[prop-missing]
@@ -112,9 +110,9 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
             // $FlowFixMe[prop-missing]
             lat: e.lngLat.lat - state.dragMoveLocation.lat
         };
-        moveFeatures(this.getSelected(), delta);
+        moveFeatures(editableFeatures, delta);
 
-        this.getSelected()
+        editableFeatures
             .filter((feature) => feature.properties.radius)
             .map((circle) => circle.properties.center)
             .forEach((center) => {

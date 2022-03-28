@@ -130,8 +130,19 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
                     center[1] += delta.lat;
                 });
             // $FlowFixMe[prop-missing]
-            state.dragMoveLocation = e.lngLat;
-        }
+            lat: e.lngLat.lat - state.dragMoveLocation.lat
+        };
+        moveFeatures(editableFeatures, delta);
+
+        editableFeatures
+            .filter((feature) => feature.properties.radius)
+            .map((circle) => circle.properties.center)
+            .forEach((center) => {
+                center[0] += delta.lng;
+                center[1] += delta.lat;
+            });
+        // $FlowFixMe[prop-missing]
+        state.dragMoveLocation = e.lngLat;
     };
 
     return simple_select;

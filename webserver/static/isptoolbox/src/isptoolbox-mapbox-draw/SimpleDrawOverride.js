@@ -95,32 +95,43 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
             return;
         }
 
-        // deselect uneditable features, and only move those that are editable.
+        // only move those that are editable.
         const editableFeatures = this.getSelected().filter((feature) => !isUneditable(feature));
         this.getSelected().forEach((feature) => this.doRender(feature.id));
 
-        // Dragging when drag move is enabled
-        // $FlowFixMe[prop-missing]
-        state.dragMoving = true;
-        e.originalEvent.stopPropagation();
+        // Only move features if we're moused over an editable feature. Sometimes the moused over feature is
+        // flaky because we're mousing over a point.
+        state.mousedOverFeature = this.featuresAt(e).filter((feat) =>
+            this.isSelected(feat.properties.id)
+        ).length
+            ? this.featuresAt(e).filter((feat) => this.isSelected(feat.properties.id))
+            : state.mousedOverFeature || [];
 
-        const delta = {
+        if (state.mousedOverFeature.some((feat) => feat.properties.user_uneditable === false)) {
+            // Dragging when drag move is enabled
             // $FlowFixMe[prop-missing]
-            lng: e.lngLat.lng - state.dragMoveLocation.lng,
-            // $FlowFixMe[prop-missing]
-            lat: e.lngLat.lat - state.dragMoveLocation.lat
-        };
-        moveFeatures(editableFeatures, delta);
+            state.dragMoving = true;
+            e.originalEvent.stopPropagation();
 
-        editableFeatures
-            .filter((feature) => feature.properties.radius)
-            .map((circle) => circle.properties.center)
-            .forEach((center) => {
-                center[0] += delta.lng;
-                center[1] += delta.lat;
-            });
-        // $FlowFixMe[prop-missing]
-        state.dragMoveLocation = e.lngLat;
+            const delta = {
+                // $FlowFixMe[prop-missing]
+                lng: e.lngLat.lng - state.dragMoveLocation.lng,
+                // $FlowFixMe[prop-missing]
+                lat: e.lngLat.lat - state.dragMoveLocation.lat
+            };
+
+            moveFeatures(editableFeatures, delta);
+
+            editableFeatures
+                .filter((feature) => feature.properties.radius)
+                .map((circle) => circle.properties.center)
+                .forEach((center) => {
+                    center[0] += delta.lng;
+                    center[1] += delta.lat;
+                });
+            // $FlowFixMe[prop-missing]
+            state.dragMoveLocation = e.lngLat;
+        }
     };
 
     return simple_select;

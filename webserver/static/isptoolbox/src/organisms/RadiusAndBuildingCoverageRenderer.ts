@@ -428,8 +428,19 @@ export abstract class RadiusAndBuildingCoverageRenderer
         // Change selection to featureTarget, mark event as longPress, then refire.
         if (!e.longPress) {
             e.longPress = true;
-            this.changeSelection(e.featureTarget.properties.id);
-            this.map.fire('mousedown', e);
+
+            // Add to selection if shift key is held down, else change selection to target
+            if (e.originalEvent.shiftKey) {
+                let newSelection = this.draw.getSelectedIds();
+                if (!newSelection.includes(e.featureTarget.properties.id)) {
+                    newSelection.push(e.featureTarget.properties.id);
+                }
+                this.changeSelection(newSelection);
+                this.map.fire('mousedown', e);
+            } else {
+                this.changeSelection(e.featureTarget.properties.id);
+                this.map.fire('mousedown', e);
+            }
         }
     }
 
@@ -498,13 +509,20 @@ export abstract class RadiusAndBuildingCoverageRenderer
         }
     }
 
-    private changeSelection(id: string) {
+    private changeSelection(ids: string | Array<string>) {
+        let newIds;
+        if (typeof ids === 'string') {
+            newIds = [ids];
+        } else {
+            newIds = ids;
+        }
+
         this.draw.changeMode('simple_select', {
-            featureIds: [id]
+            featureIds: newIds
         });
         this.map.fire('draw.modechange', { mode: 'simple_select' });
         this.map.fire('draw.selectionchange', {
-            features: [this.draw.get(id)]
+            features: newIds.map((id) => this.draw.get(id))
         });
     }
 }

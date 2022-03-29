@@ -60,17 +60,15 @@ def _sector_task(error_log_msg):
 def calculateSectorViewshed(sector_id: str):
     sector = workspace_models.AccessPointSector.objects.get(uuid=sector_id)
 
-    # Check the hash to determine if we need to run
-    try:
-        cached = sector.viewshed.result_cached()
-        if cached:
-            TASK_LOGGER.info("cache hit on viewshed result")
-            return
-        else:
-            raise workspace_models.Viewshed.DoesNotExist
-    except workspace_models.Viewshed.DoesNotExist:
+    # Create if not exist
+    viewshed, _ = workspace_models.Viewshed.objects.get_or_create(sector=sector)
+    viewshed.save()
+
+    if sector.viewshed.result_cached():
+        TASK_LOGGER.info("cache hit on viewshed result")
+        return
+    else:
         TASK_LOGGER.info("cache miss on viewshed result")
-        pass
 
     try:
         sector.refresh_from_db()
@@ -93,6 +91,7 @@ def calculateSectorViewshed(sector_id: str):
 
     sector.refresh_from_db()
     sector.viewshed.on_task_start(current_task.request.id)
+    sector.viewshed.cache_result()
     sector.viewshed.calculateViewshed(partial(_update_status, sector_id))
 
     # Notify Websockets listening to session
@@ -123,20 +122,22 @@ def calculateSectorNearby(sector_id: str):
         sector=sector
     )
 
-    cached = building_coverage.result_cached()
     building_coverage.on_task_start(current_task.request.id)
-    if not cached:
+    if not building_coverage.result_cached():
         building_coverage.buildingcoverage_set.all().delete()
+        building_coverage.cache_result()
         # Find all buildings that intersect
         offset = 0
         remaining_buildings = True
         while remaining_buildings:
             buildings = gis_data_models.MsftBuildingOutlines.objects.filter(
                 geog__intersects=sector.geojson
-            ).all()[offset: BUILDING_PAGINATION + offset]
+            ).all()[offset : BUILDING_PAGINATION + offset]
             nearby_buildings = []
             for building in buildings:
-                b = workspace_models.BuildingCoverage(coverage=building_coverage, msftid=building.id)
+                b = workspace_models.BuildingCoverage(
+                    coverage=building_coverage, msftid=building.id
+                )
                 nearby_buildings.append(b)
             workspace_models.BuildingCoverage.objects.bulk_create(nearby_buildings)
 

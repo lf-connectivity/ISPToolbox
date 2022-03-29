@@ -197,7 +197,9 @@ class Viewshed(
                 )
             try:
                 TASK_LOGGER.info("starting viewshed computation")
-                self.__renderViewshed(dsm_file=dsm_file, status_callback=status_callback)
+                self.__renderViewshed(
+                    dsm_file=dsm_file, status_callback=status_callback
+                )
                 TASK_LOGGER.info("successfully completed viewshed computation")
             except Exception:
                 TASK_LOGGER.exception("failed to complete viewshed computation")
@@ -205,8 +207,7 @@ class Viewshed(
 
         if status_callback is not None:
             status_callback("Finalizing results...", None)
-        self.hash = self.calculate_hash()
-        self.save(update_fields=["hash"])
+        self.cache_result()
 
     def __timeRemainingViewshed(self, step: int) -> float:
         # DSM download polyfit 1,2,3 Mile - 3.5, 10, 23 sec

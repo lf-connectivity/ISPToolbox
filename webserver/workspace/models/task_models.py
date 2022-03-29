@@ -76,7 +76,6 @@ class AbstractAsyncTaskHashCacheMixin(models.Model):
     def on_task_start(self, task_id):
         self.cancel_task()
         self.task_id = task_id
-        self.hash = self.calculate_hash()
         self.save()
 
     def get_task_status(self):
@@ -90,6 +89,10 @@ class AbstractAsyncTaskHashCacheMixin(models.Model):
             return AsyncTaskStatus.from_celery_task_status(task_result.status)
         else:
             return AsyncTaskStatus.COMPLETED
+
+    def cache_result(self):
+        self.hash = self.calculate_hash()
+        self.save()
 
     class Meta:
         abstract = True

@@ -11,7 +11,7 @@ import {
     PopulationResponse
 } from '../MarketEvaluatorWS';
 import { getCookie } from '../utils/Cookie';
-import { WorkspaceEvents } from '../workspace/WorkspaceConstants';
+import { SQM_2_SQFT, WorkspaceEvents } from '../workspace/WorkspaceConstants';
 //@ts-ignore
 import geojsonArea from '@mapbox/geojson-area';
 
@@ -206,7 +206,7 @@ export class MarketEvaluatorSidebarManager {
         if (this.buildingOverlays) {
             for (const poly of this.buildingOverlays.geometries) {
                 // Convert sq m to sq ft
-                const area = 10.7639 * geojsonArea.geometry(poly);
+                const area = SQM_2_SQFT * geojsonArea.geometry(poly);
                 if (this.buildingFilter[0] <= area && area <= this.buildingFilter[1]) {
                     polygons.push(poly);
                 }

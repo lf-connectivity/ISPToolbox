@@ -24,6 +24,7 @@ class SessionCreateUpdateView(
     serializer_class = WorkspaceMapSessionSerializer
     lookup_field = 'uuid'
     permission_classes = [AllowAny]
+    schema = None
 
     def post(self, request, *args, **kwargs):
         response = self.create(request, *args, **kwargs)
@@ -54,6 +55,7 @@ class SessionListView(
     renderer_classes = [renderers.TemplateHTMLRenderer, renderers.JSONRenderer]
     pagination_class = pagination.IspToolboxCustomAjaxPagination
     permission_classes = [AllowAny]
+    schema = None
 
     filter_backends = [filters.OrderingFilter]
 
@@ -80,6 +82,7 @@ class SessionDeleteView(
     serializer_class = WorkspaceMapSessionSerializer
     lookup_field = 'uuid'
     permission_classes = [AllowAny]
+    schema = None
 
     def get_queryset(self):
         return WorkspaceMapSession.get_rest_queryset(self.request)

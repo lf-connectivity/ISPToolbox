@@ -136,6 +136,7 @@ class LocationTooltipView(View, CPETooltipMixin):
 class CPETooltipView(generics.GenericAPIView, CPETooltipMixin):
     serializer_class = CPESerializer
     lookup_field = "uuid"
+    schema = None
 
     def get_queryset(self):
         model = self.serializer_class.Meta.model

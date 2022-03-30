@@ -16,6 +16,7 @@ import logging
 
 class TooltipFormView(generics.GenericAPIView):
     lookup_field = "uuid"
+    schema = None
 
     def get_queryset(self):
         model = self.serializer_class.Meta.model
@@ -57,6 +58,7 @@ class AccessPointLocationFormView(DestroyModelMixin, generics.GenericAPIView):
     template_name = "workspace/molecules/access_point_location_form.html"
     serializer_class = AccessPointSerializer
     lookup_field = "uuid"
+    schema = None
 
     def get_coverage_stats(self, instance):
         stats = {}

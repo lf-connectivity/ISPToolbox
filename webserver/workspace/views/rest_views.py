@@ -20,6 +20,7 @@ from workspace.models import (
 )
 from rest_framework.permissions import AllowAny
 from rest_framework import generics, mixins, renderers, filters
+from rest_framework.schemas.openapi import AutoSchema
 from django.http import JsonResponse
 import logging
 import json
@@ -61,6 +62,7 @@ class NetworkDetail(
     generics.RetrieveAPIView,
 ):
     permission_classes = [AllowAny]
+    schema = None
     serializer_class = WorkspaceMapSessionSerializer
 
     def get_queryset(self):
@@ -113,6 +115,7 @@ class AccessPointLocationListCreate(
 ):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
+    schema = None
 
     renderer_classes = [
         renderers.TemplateHTMLRenderer,
@@ -148,6 +151,7 @@ class AccessPointLocationGet(
 ):
     serializer_class = AccessPointSerializer
     permission_classes = [AllowAny]
+    schema = None
     lookup_field = "uuid"
 
     def get(self, request, *args, **kwargs):
@@ -169,6 +173,7 @@ class CPELocationCreate(
 
     serializer_class = CPESerializer
     permission_classes = [AllowAny]
+    schema = None
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -183,6 +188,7 @@ class CPELocationGet(
 ):
     serializer_class = CPESerializer
     permission_classes = [AllowAny]
+    schema = None
     lookup_field = "uuid"
 
     def get(self, request, *args, **kwargs):
@@ -200,6 +206,7 @@ class APToCPELinkCreate(
 ):
     serializer_class = APToCPELinkSerializer
     permission_classes = [AllowAny]
+    schema = None
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -216,6 +223,7 @@ class APToCPELinkGet(
     serializer_class = APToCPELinkSerializer
     lookup_field = "uuid"
     permission_classes = [AllowAny]
+    schema = None
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -235,6 +243,7 @@ class PointToPointLinkCreate(
 ):
     serializer_class = PointToPointLinkSerializer
     permission_classes = [AllowAny]
+    schema = AutoSchema(tags=['Point To Point'])
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -251,6 +260,7 @@ class PointToPointLinkGet(
     serializer_class = PointToPointLinkSerializer
     lookup_field = "uuid"
     permission_classes = [AllowAny]
+    schema = AutoSchema(tags=['Point To Point'])
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -270,6 +280,7 @@ class CoverageAreaCreate(
 ):
     serializer_class = CoverageAreaSerializer
     permission_classes = [AllowAny]
+    schema = None
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -284,6 +295,7 @@ class CoverageAreaGet(
 ):
     serializer_class = CoverageAreaSerializer
     permission_classes = [AllowAny]
+    schema = None
     lookup_field = "uuid"
 
     def get(self, request, *args, **kwargs):
@@ -308,6 +320,7 @@ class AccessPointSectorCreate(
 ):
     serializer_class = AccessPointSectorSerializer
     permission_classes = [AllowAny]
+    schema = None
 
     renderer_classes = [
         renderers.TemplateHTMLRenderer,
@@ -356,6 +369,7 @@ class AccessPointSectorGet(
 ):
     serializer_class = AccessPointSectorSerializer
     permission_classes = [AllowAny]
+    schema = None
     lookup_field = "uuid"
 
     def get(self, request, *args, **kwargs):

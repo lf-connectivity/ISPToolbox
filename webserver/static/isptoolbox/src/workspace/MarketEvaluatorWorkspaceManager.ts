@@ -25,6 +25,8 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super(map, draw, SUPPORTED_FEATURE_TYPES);
         BaseWorkspaceManager._instance = this;
+        const ws = MarketEvaluatorWS.getInstance();
+        ws.sendPolygonRequest(draw.getAll());
     }
 
     initSaveFeatureHandlers() {

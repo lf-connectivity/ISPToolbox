@@ -26,7 +26,7 @@ export class MarketEvaluatorWorkspaceManager extends BaseWorkspaceManager {
         super(map, draw, SUPPORTED_FEATURE_TYPES);
         BaseWorkspaceManager._instance = this;
 
-        // Show all features on load -> this hammers database. Bad idea?
+        // Query Stats for Initial Session Features
         const ws = MarketEvaluatorWS.getInstance();
         ws.sendPolygonRequest(draw.getAll());
     }

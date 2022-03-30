@@ -173,9 +173,9 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
 
     calculateMinMaxBuildingSizes() {
         const areas = this.buildingOverlays.geometries.map((g) => {
-            return geojsonArea.geometry(g);
+            return SQM_2_SQFT * geojsonArea.geometry(g);
         });
-        return [SQM_2_SQFT * Math.min(...areas), SQM_2_SQFT * Math.max(...areas)];
+        return [Math.floor(Math.min(...areas)), Math.ceil(Math.max(...areas))];
     }
 
     private addSectorsToSelection(features: Array<any>) {

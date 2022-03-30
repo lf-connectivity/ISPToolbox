@@ -60,12 +60,13 @@ export class MultiThumbSlider {
         const oldMax = this.domNode.getAttribute('aria-valuemax');
 
         if (this.thumbs.length == 2 && oldMin !== null && oldMax !== null) {
-            this.thumbs[0].valueNow = (this.thumbs[0].valueNow * min) / parseFloat(oldMin);
-            this.thumbs[1].valueNow = (this.thumbs[1].valueNow * max) / parseFloat(oldMax);
+            this.thumbs[0].valueNow = (this.thumbs[0].valueNow * min) / parseInt(oldMin);
+            this.thumbs[1].valueNow = (this.thumbs[1].valueNow * max) / parseInt(oldMax);
         }
 
         this.domNode.setAttribute('aria-valuemin', String(min));
         this.domNode.setAttribute('aria-valuemax', String(max));
+
         this.redraw();
     }
 

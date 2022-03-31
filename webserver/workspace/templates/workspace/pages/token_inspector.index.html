@@ -12,46 +12,74 @@
             <h3 class="modal-title">{% translate "API Token"%}</h3>
             <div class="d-flex flex-row">
                 {% if api_token %}
-                <form method="POSt" action="{{request.path}}">
-                    {% csrf_token %}
-                    <input type="submit" class="btn btn-outline-primary isptoolbox-btn mt-2 mt-lg-0 mx-2" value="{% translate "Generate New Token"%}">
-                </form>
+                <button class="btn btn-outline-primary isptoolbox-btn mt-2 mt-lg-0 mx-2" data-toggle="modal" data-target="#confirmation_modal">{% translate "Generate New Token"%}</button>
                 {% endif %}
-                <a href="{% url 'workspace:swagger-ui' %}" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0 mx-2">{% translate "Open Documentation"%}</a>
+                <a href="{% url 'workspace:swagger-ui' %}"
+                    class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0 mx-2">{% translate "Open Documentation"%}</a>
             </div>
         </div>
         {% if api_token %}
-        <h4 class="modal-title px-3 py-3">{% translate "Copy your API token below and explore the documentation to get started."%}</h4>
+        <h4 class="modal-title px-3 py-3">
+            {% translate "Copy your API token below and explore the documentation to get started."%}</h4>
         <div class="modal-body isptoolbox-form">
             <p>{% blocktranslate %}To use an auth token add the following http header:{% endblocktranslate%}</p>
             <code>Authorization: Token {{ api_token.key }}</code>
-            <div class="w-100" ><input value="{{ api_token.key}}" type="text" name="token" id="api_token_input" ><button class="btn btn-primary isptoolbox-btn" onclick="copy_to_clipboard()">{% translate "Copy" %}</button></div>
+            <div class="w-100"><input value="{{ api_token.key}}" type="text" name="token" id="api_token_input"><button
+                    class="btn btn-primary isptoolbox-btn" onclick="copy_to_clipboard()">{% translate "Copy" %}</button>
+            </div>
         </div>
         {% else %}
         <h4 class="modal-title px-3 py-3">{% translate "To get started request an access token"%}</h4>
         <div class="p-3">
             <form method="POST" action="{{ request.path }}">
                 {% csrf_token %}
-                <input type="submit" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0" value="{% translate "Create Token"%}">
+                <input type="submit" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0"
+                    value="{% translate "Create Token"%}">
             </form>
         </div>
         {% endif %}
+    </div>
+    <div class="modal theme-modal fade" id="confirmation_modal" tabindex="-1" role="dialog"
+        aria-labelledby="confirmation_modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-lg-down" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="accessPointSectorModalLabel">{% translate "Are you sure?"%}</h3>
+                    <div class="d-flex">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <p>Generating a new token will immediately invalidate your previous token and cause all requests using the previous token to fail.</p>
+                </div>
+                <div class="modal-footer">
+                    <form method="POST" action="{{request.path}}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-outline-primary isptoolbox-btn mt-2 mt-lg-0 mx-2"
+                            value="Generate New Token">
+                    </form>
+                    <button class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0 mx-2" data-dismiss="modal">{% translate "Cancel" %}</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <script>
     function copy_to_clipboard() {
         /* Get the text field */
         var copy_api_input = document.getElementById("api_token_input");
-      
+
         /* Select the text field */
         copy_api_input.select();
         copy_api_input.setSelectionRange(0, 99999); /* For mobile devices */
-      
-         /* Copy the text inside the text field */
+
+        /* Copy the text inside the text field */
         navigator.clipboard.writeText(copy_api_input.value).then(() => {
             /* Alert the copied text */
             alert("Copied to clipboard");
-        });      
+        });
     }
 </script>
 {% endblock content %}

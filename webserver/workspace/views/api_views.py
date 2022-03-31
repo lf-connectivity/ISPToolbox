@@ -1,3 +1,4 @@
+from wsgiref.util import request_uri
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,5 +18,8 @@ class TokenInspectorView(mixins.WaffleFlagMixin, LoginRequiredMixin, View):
         return render(request, "workspace/pages/token_inspector.index.html", context)
 
     def post(self, request):
-        _token, _created = Token.objects.get_or_create(user=request.user)
+        token, created = Token.objects.get_or_create(user=request.user)
+        if not created:
+            token.delete()
+            token = Token.objects.get_or_create(user=request.user)
         return redirect(request.path)

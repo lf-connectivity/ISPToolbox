@@ -6,13 +6,19 @@
 {% endwith %}
 {% endblock %}
 {% block content %}
-{% with page_obj=data_requests %}
-
 <div class="modal-dialog modal-xl modal-dialog-centered justify-content-center" role="document">
     <div class="modal-content p-2 w-75">
         <div class="modal-header">
             <h3 class="modal-title">{% translate "API Token"%}</h3>
-            <a href="{% url 'workspace:swagger-ui' %}" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0">{% translate "Open Documentation"%}</a>
+            <div class="d-flex flex-row">
+                {% if api_token %}
+                <form method="POSt" action="{{request.path}}">
+                    {% csrf_token %}
+                    <input type="submit" class="btn btn-outline-primary isptoolbox-btn mt-2 mt-lg-0 mx-2" value="{% translate "Generate New Token"%}">
+                </form>
+                {% endif %}
+                <a href="{% url 'workspace:swagger-ui' %}" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0 mx-2">{% translate "Open Documentation"%}</a>
+            </div>
         </div>
         {% if api_token %}
         <h4 class="modal-title px-3 py-3">{% translate "Copy your API token below and explore the documentation to get started."%}</h4>
@@ -48,5 +54,4 @@
         });      
     }
 </script>
-{% endwith %}
 {% endblock content %}

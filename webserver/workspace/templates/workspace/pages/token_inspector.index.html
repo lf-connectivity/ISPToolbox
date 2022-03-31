@@ -1,0 +1,52 @@
+{% extends 'workspace/pages/base.html' %}
+{% load i18n tz %}
+{% block title %}
+{% with title="API - ISP Toolbox"%}
+{{block.super}}
+{% endwith %}
+{% endblock %}
+{% block content %}
+{% with page_obj=data_requests %}
+
+<div class="modal-dialog modal-xl modal-dialog-centered justify-content-center" role="document">
+    <div class="modal-content p-2 w-75">
+        <div class="modal-header">
+            <h3 class="modal-title">{% translate "API Token"%}</h3>
+            <a href="{% url 'workspace:swagger-ui' %}" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0">{% translate "Open Documentation"%}</a>
+        </div>
+        {% if api_token %}
+        <h4 class="modal-title px-3 py-3">{% translate "Copy your API token below and explore the documentation to get started."%}</h4>
+        <div class="modal-body isptoolbox-form">
+            <p>{% blocktranslate %}To use an auth token add the following http header:{% endblocktranslate%}</p>
+            <code>Authorization: Token {{ api_token.key }}</code>
+            <div class="w-100" ><input value="{{ api_token.key}}" type="text" name="token" id="api_token_input" ><button class="btn btn-primary isptoolbox-btn" onclick="copy_to_clipboard()">{% translate "Copy" %}</button></div>
+        </div>
+        {% else %}
+        <h4 class="modal-title px-3 py-3">{% translate "To get started request an access token"%}</h4>
+        <div class="p-3">
+            <form method="POST" action="{{ request.path }}">
+                {% csrf_token %}
+                <input type="submit" class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0" value="{% translate "Create Token"%}">
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<script>
+    function copy_to_clipboard() {
+        /* Get the text field */
+        var copy_api_input = document.getElementById("api_token_input");
+      
+        /* Select the text field */
+        copy_api_input.select();
+        copy_api_input.setSelectionRange(0, 99999); /* For mobile devices */
+      
+         /* Copy the text inside the text field */
+        navigator.clipboard.writeText(copy_api_input.value).then(() => {
+            /* Alert the copied text */
+            alert("Copied to clipboard");
+        });      
+    }
+</script>
+{% endwith %}
+{% endblock content %}

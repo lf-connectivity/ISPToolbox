@@ -158,6 +158,7 @@ urlpatterns = [
     path('workspace/data-policy/', views.DataPolicy.as_view(), name="data_policy"),
     path('workspace/cookie-policy/', views.Cookies.as_view(), name="cookies"),
     # Browseable API
+    path('api/', views.TokenInspectorView.as_view(), name="api-home"),
     path('api/docs/', TemplateView.as_view(
         template_name='swagger-ui.html',
         extra_context={'schema_url': 'workspace:openapi-schema'}

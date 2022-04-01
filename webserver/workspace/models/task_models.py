@@ -2,7 +2,6 @@ from celery.result import AsyncResult
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from rest_framework import serializers
 from django_celery_results.models import TaskResult
 from uuid import uuid4
 

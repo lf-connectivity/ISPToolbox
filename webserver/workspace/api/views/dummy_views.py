@@ -4,6 +4,7 @@ from rest_framework import serializers
 from webserver import settings
 from workspace.api.views.task_api_views import TaskAPISchema, BaseTaskAPICreateView
 
+
 # Testing code
 class DummyAPITestInputValidator(serializers.Serializer):
     duration = serializers.IntegerField(min_value=1, max_value=10)

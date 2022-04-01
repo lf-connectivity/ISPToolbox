@@ -8,7 +8,6 @@ from workspace.api.models import (
     AsyncTaskAPIModel,
     AsyncTaskAPIModelCreateSuccessSerializer,
     AsyncTaskAPIModelResultsSerializer,
-    AsyncTaskAPIModel,
 )
 
 import json
@@ -55,10 +54,6 @@ class TaskAPIRetrieveView(mixins.RetrieveModelMixin, generics.GenericAPIView):
     schema = AutoSchema(tags=["Task API"])
 
     def get_queryset(self):
-        import logging
-
-        for m in AsyncTaskAPIModel.objects.filter(owner=self.request.user):
-            logging.info(AsyncTaskAPIModelResultsSerializer(instance=m).data)
         return AsyncTaskAPIModel.objects.filter(owner=self.request.user)
 
     def get(self, request, *args, **kwargs):

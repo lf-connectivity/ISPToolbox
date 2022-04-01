@@ -2,6 +2,7 @@ from django import template
 
 import math
 from workspace.models.model_constants import FREQUENCY_CHOICES, ModelLimits
+from workspace import models as workspace_models
 
 register = template.Library()
 
@@ -9,7 +10,7 @@ register = template.Library()
 # Done here so we don't have to do this in templates 100000 times
 @register.simple_tag
 def unit_preference_value(unit, imperial_value, metric_value):
-    if unit == "IMPERIAL":
+    if unit == workspace_models.WorkspaceMapSession.UnitPreferences.IMPERIAL:
         return imperial_value
     else:
         return metric_value

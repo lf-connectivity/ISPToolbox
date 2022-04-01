@@ -2,8 +2,6 @@ import * as MapboxGL from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { getStreetAndAddressInfo } from '../LinkCheckUtils';
 import { MapboxSDKClient } from '../MapboxSDKClient';
-import { TowerPaginationModal } from '../organisms/TowerPaginationModal';
-import { SessionModal } from '../organisms/SessionModal';
 import { getInitialFeatures } from '../utils/MapDefaults';
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { WorkspaceFeatureTypes } from './WorkspaceConstants';
@@ -54,8 +52,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
         [featureType in WorkspaceFeatureTypes]: UpdateDeleteFeatureProcessor;
     };
 
-    private towerModal: TowerPaginationModal;
-    private sessionModal: SessionModal;
 
     /**
      * Initializes a WorkspaceManager base object
@@ -78,8 +74,6 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
         this.map = map;
         this.draw = draw;
 
-        this.towerModal = new TowerPaginationModal(this.map, this.draw);
-        this.sessionModal = new SessionModal();
 
         this.features = new Map();
         this.supportedFeatureTypes = supportedFeatureTypes;
@@ -423,5 +417,17 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
 
     static getFeatureByUuid(uuid: string) {
         return BaseWorkspaceManager.getInstance().features.get(uuid) as BaseWorkspaceFeature;
+    }
+
+    static refresh_by_uuid(uuid: string){
+        const feat = this.getFeatureByUuid(uuid);
+        if(feat)
+            feat.read();
+    }
+
+    static delete_by_uuid(uuid: string){
+        const feat = this.getFeatureByUuid(uuid);
+        if(feat)
+            feat.delete();
     }
 }

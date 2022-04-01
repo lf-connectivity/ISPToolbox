@@ -137,7 +137,13 @@ export abstract class BaseWorkspaceFeature {
                 }
             })
             .fail((error) => {
-                renderAjaxOperationFailed();
+                if(error.status === 404)
+                {
+                    // If we could not find object, remove it
+                    this.delete();
+                } else {
+                    renderAjaxOperationFailed();
+                }
                 if (errorFollowup) {
                     errorFollowup();
                 }
@@ -185,6 +191,18 @@ export abstract class BaseWorkspaceFeature {
      * @param errorFollowup Function to execute on failure of ajax request
      */
     delete(successFollowup?: (resp: any) => void, errorFollowup?: () => void) {
+        // Create callback to use on successful deletion or 404
+        const delete_callback = (resp: any) =>{
+            const feat = this.getFeatureData();
+            if (feat) {
+                BaseWorkspaceFeature.fire(CRUDEvent.DELETE, { features: [feat] });
+            }
+            this.removeFeatureFromMap(this.mapboxId);
+            if (successFollowup) {
+                successFollowup(resp);
+            }
+        }
+        // Send ajax request to delete
         $.ajax({
             url: `${this.apiEndpoint}${this.workspaceId}/`,
             method: 'DELETE',
@@ -194,19 +212,19 @@ export abstract class BaseWorkspaceFeature {
             }
         })
             .done((resp) => {
-                const feat = this.getFeatureData();
-                if (feat) {
-                    BaseWorkspaceFeature.fire(CRUDEvent.DELETE, { features: [feat] });
-                }
-                this.removeFeatureFromMap(this.mapboxId);
-                if (successFollowup) {
-                    successFollowup(resp);
-                }
+                delete_callback(resp);
             })
             .fail((error) => {
-                renderAjaxOperationFailed();
-                if (errorFollowup) {
-                    errorFollowup();
+                // Object didn't exist
+                if(error.status === 404)
+                {
+                    renderAjaxOperationFailed();
+                    if (errorFollowup) {
+                        errorFollowup();
+                    }
+                // If object was deleted
+                } else {
+                    delete_callback(error);
                 }
             });
     }

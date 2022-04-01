@@ -62,7 +62,7 @@ class TaskAPIFrameworkTestCase(WorkspaceBaseAPITestCase):
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
     def test_create_task(self):
-        task_id = self.make_dummy_api_sleep_request({"time": 1})
+        task_id = self.make_dummy_api_sleep_request({"duration": 1})
 
         task_info = self.get_task_info(task_id)
         self.assertEqual(task_info["status"], AsyncTaskStatus.IN_PROGRESS.value)

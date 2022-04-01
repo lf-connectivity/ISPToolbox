@@ -1,4 +1,5 @@
 import { LinkCheckPage } from '../LinkCheckPage';
+import {BaseWorkspaceManager} from '../workspace/BaseWorkspaceManager';
 
 $(() => {
     //@ts-ignore
@@ -9,3 +10,5 @@ $(() => {
     const userRequestIdentity = window.userRequestIdentity;
     new LinkCheckPage(networkID, userRequestIdentity);
 });
+
+export default {BaseWorkspaceManager};

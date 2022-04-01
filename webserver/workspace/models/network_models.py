@@ -131,6 +131,13 @@ class SessionWorkspaceModelMixin:
         return {"type": "FeatureCollection", "features": features}
 
 
+class UnitPreferencesModelMixin:
+    @property
+    def get_units(self):
+        from workspace.models.session_models import WorkspaceMapSession
+        return self.map_session.units if self.map_session else WorkspaceMapSession.UnitPreferences.METRIC
+
+
 # TODO: Remove this after AP sectors launches
 class AccessPointSectorSerializerValidatorMixin(serializers.Serializer):
     """
@@ -160,7 +167,7 @@ class AccessPointSectorSerializerValidatorMixin(serializers.Serializer):
             return data
 
 
-class AccessPointLocation(WorkspaceFeature):
+class AccessPointLocation(UnitPreferencesModelMixin, WorkspaceFeature):
     name = models.CharField(
         max_length=ModelLimits.NAME.max,
         default="Unnamed Tower",
@@ -430,7 +437,7 @@ def random_heading():
     return random.randint(ModelLimits.HEADING.min, ModelLimits.HEADING.max)
 
 
-class AccessPointSector(WorkspaceFeature):
+class AccessPointSector(UnitPreferencesModelMixin, WorkspaceFeature):
     name = models.CharField(max_length=50, default="Unnamed AP")
 
     # TODO: restore default once we add sector draw mode.
@@ -488,24 +495,6 @@ class AccessPointSector(WorkspaceFeature):
         ],
     )
 
-    radius = models.FloatField(
-        default=ModelLimits.RADIUS.default,
-        validators=[
-            MinValueValidator(
-                ModelLimits.RADIUS.min,
-                message=_(
-                    "Ensure this value is greater than or equal to %(limit_value)s km."
-                ),
-            ),
-            MaxValueValidator(
-                ModelLimits.RADIUS.max,
-                message=_(
-                    "Ensure this value is less than or equal to %(limit_value)s. km"
-                ),
-            ),
-        ],
-    )
-
     default_cpe_height = models.FloatField(
         default=ModelLimits.HEIGHT.cpe_default,
         validators=[
@@ -519,6 +508,24 @@ class AccessPointSector(WorkspaceFeature):
                 ModelLimits.HEIGHT.max,
                 message=_(
                     "Ensure this value is less than or equal to %(limit_value)s. m"
+                ),
+            ),
+        ],
+    )
+
+    radius = models.FloatField(
+        default=ModelLimits.RADIUS.default,
+        validators=[
+            MinValueValidator(
+                ModelLimits.RADIUS.min,
+                message=_(
+                    "Ensure this value is greater than or equal to %(limit_value)s km."
+                ),
+            ),
+            MaxValueValidator(
+                ModelLimits.RADIUS.max,
+                message=_(
+                    "Ensure this value is less than or equal to %(limit_value)s. km"
                 ),
             ),
         ],
@@ -764,7 +771,7 @@ class AccessPointSectorSerializer(
         return obj.geojson.json
 
 
-class CPELocation(WorkspaceFeature):
+class CPELocation(UnitPreferencesModelMixin, WorkspaceFeature):
     name = models.CharField(max_length=100)
 
     # TODO: Deprecate this field
@@ -867,7 +874,7 @@ class CPESerializer(
         exclude = ["owner", "session", "created"]
 
 
-class APToCPELink(WorkspaceFeature):
+class APToCPELink(UnitPreferencesModelMixin, WorkspaceFeature):
     frequency = models.FloatField(
         default=ModelLimits.FREQUENCY.default,
         validators=[
@@ -951,7 +958,7 @@ class APToCPELinkSerializer(
         exclude = ["owner", "session", "created"]
 
 
-class PointToPointLink(WorkspaceFeature):
+class PointToPointLink(UnitPreferencesModelMixin, WorkspaceFeature):
     frequency = models.FloatField(
         default=ModelLimits.FREQUENCY.default,
         validators=[
@@ -1072,7 +1079,7 @@ class PointToPointLinkSerializer(
         exclude = ["owner", "session", "created"]
 
 
-class CoverageArea(WorkspaceFeature):
+class CoverageArea(UnitPreferencesModelMixin, WorkspaceFeature):
     name = models.CharField(max_length=50, default="Area")
     geojson = geo_models.GeometryField()
 

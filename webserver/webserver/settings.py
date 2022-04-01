@@ -122,6 +122,7 @@ INSTALLED_APPS = [
     "dataUpdate",
     "isptoolbox_storage",
     "workspace",
+    "workspace.api",
     "solar_sizing_tool",
     "gis_data",
     # S3 Static File Storage

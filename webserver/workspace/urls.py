@@ -4,10 +4,7 @@ from mmwave.views import CreateExportDSM
 from IspToolboxAccounts.views import CreateAccountView
 from django.contrib.auth import views as auth_views
 from IspToolboxAccounts import forms
-from django.views.generic import TemplateView
-from rest_framework.schemas import get_schema_view
 
-from webserver import settings
 
 app_name = 'workspace'
 urlpatterns = [

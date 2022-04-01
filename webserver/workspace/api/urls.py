@@ -4,7 +4,7 @@ from rest_framework.schemas import get_schema_view
 from webserver import settings
 from workspace.api.views import TaskAPIRetrieveView, DummyAPITestCreateView, TokenInspectorView
 
-app_name = "workspace.workspace_api"
+app_name = "workspace.api"
 urlpatterns = [
     path('token/', TokenInspectorView.as_view(), name='api-token'),
     path('docs/', TemplateView.as_view(

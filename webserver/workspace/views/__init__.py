@@ -65,9 +65,6 @@ from .table_views import (
 from .marketing_views import (
     ServiceabilityExportView, ServiceabilityExportCsvView
 )
-from .api_views import (
-    TokenInspectorView
-)
 
 import workspace.utils.import_utils
 

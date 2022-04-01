@@ -2,6 +2,7 @@ from celery.result import AsyncResult
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from rest_framework import serializers
 from django_celery_results.models import TaskResult
 from uuid import uuid4
 
@@ -55,6 +56,19 @@ class AbstractAsyncTaskPrimaryKeyMixin(models.Model):
         abstract = True
 
 
+class AbstractAsyncTaskUserMixin(models.Model):
+    """
+    Use this mixin to associate a task with a user
+    """
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
+    )
+
+    class Meta:
+        abstract = True
+
+
 class AbstractAsyncTaskHashCacheMixin(models.Model):
     """
     Use this mixin to associate a hash with the model (for caching purposes)
@@ -86,7 +100,7 @@ class AbstractAsyncTaskHashCacheMixin(models.Model):
             else:
                 return AsyncTaskStatus.COMPLETED
         elif task_result:
-            return AsyncTaskStatus.from_celery_task_status(task_result.status)
+            return AsyncTaskStatus.from_celery_task_status(task_result.state)
         else:
             return AsyncTaskStatus.COMPLETED
 

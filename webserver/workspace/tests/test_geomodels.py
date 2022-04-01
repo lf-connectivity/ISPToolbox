@@ -473,6 +473,13 @@ class WorkspaceBaseTestCase(TestCase):
         )
 
 
+class WorkspaceBaseAPITestCase(WorkspaceBaseTestCase):
+    def setUp(self):
+        super(WorkspaceBaseAPITestCase, self).setUp()
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.testuser)
+
+
 class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
     def get_feature_collection_flow(self, serializer, expected_features):
         feature_collection = serializer.get_features_for_session(self.test_session)
@@ -657,11 +664,9 @@ class WorkspaceModelsTestCase(WorkspaceBaseTestCase):
         )
 
 
-class WorkspaceRestViewsBaseTestCase(WorkspaceBaseTestCase):
+class WorkspaceRestViewsBaseTestCase(WorkspaceBaseAPITestCase):
     def setUp(self):
         super(WorkspaceRestViewsBaseTestCase, self).setUp()
-        self.client = APIClient()
-        self.client.force_authenticate(user=self.testuser)
 
     def create_geojson_model(self, model_cls, endpoint, data):
         """Uses the POST endpoint for the model class to create a model, then check if it's in db."""

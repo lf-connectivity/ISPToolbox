@@ -14,7 +14,7 @@
                 {% if api_token %}
                 <button class="btn btn-outline-primary isptoolbox-btn mt-2 mt-lg-0 mx-2" data-toggle="modal" data-target="#confirmation_modal">{% translate "Generate New Token"%}</button>
                 {% endif %}
-                <a href="{% url 'workspace:swagger-ui' %}"
+                <a href="{% url 'workspace:api:swagger-ui' %}"
                     class="btn btn-primary isptoolbox-btn mt-2 mt-lg-0 mx-2">{% translate "Open Documentation"%}</a>
             </div>
         </div>

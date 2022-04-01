@@ -1,4 +1,4 @@
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, mixins
 from rest_framework.status import HTTP_201_CREATED
@@ -19,7 +19,7 @@ class TaskAPISchema(AutoSchema):
 
 
 class BaseTaskAPICreateView(generics.GenericAPIView):
-    permission_classes = [AllowAny]  # Change to token only
+    permission_classes = [IsAuthenticated]
     schema = None
 
     task_type = ""  # Please change to nonblank
@@ -49,7 +49,7 @@ class BaseTaskAPICreateView(generics.GenericAPIView):
 
 class TaskAPIRetrieveView(mixins.RetrieveModelMixin, generics.GenericAPIView):
     lookup_field = "uuid"
-    permission_classes = [AllowAny]  # Change to token only
+    permission_classes = [IsAuthenticated]
     serializer_class = AsyncTaskAPIModelResultsSerializer
     schema = AutoSchema(tags=["Task API"])
 

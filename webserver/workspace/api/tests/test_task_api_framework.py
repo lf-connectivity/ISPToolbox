@@ -2,9 +2,11 @@ from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
+    HTTP_401_UNAUTHORIZED,
     HTTP_404_NOT_FOUND,
     HTTP_400_BAD_REQUEST,
 )
+from rest_framework.test import APIClient
 from workspace.api.models import AsyncTaskAPIModel
 from workspace.models.task_models import AsyncTaskStatus
 
@@ -79,3 +81,20 @@ class TaskAPIFrameworkTestCase(WorkspaceBaseAPITestCase):
 
     def test_get_nonexistent_task(self):
         self.assert_task_info_not_exists(str(uuid.uuid4()))
+
+    def test_no_auth(self):
+        client = APIClient()
+        response = client.post(
+            reverse(DUMMY_TASK_API_ENDPOINT),
+            {},
+            format="json",
+            HTTP_ACCEPT=JSON_CONTENT_TYPE,
+        )
+
+        self.assertEqual(response.status_code, HTTP_401_UNAUTHORIZED)
+
+        response = client.get(
+            reverse(TASK_INFO_API_ENDPOINT, kwargs={"uuid": str(uuid.uuid4())})
+        )
+
+        self.assertEqual(response.status_code, HTTP_401_UNAUTHORIZED)

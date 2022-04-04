@@ -9,6 +9,7 @@ from workspace.models import (
     AccessPointSector,
     AccessPointCoverageBuildings,
     AccessPointSectorSerializer,
+    Viewshed
 )
 
 import logging
@@ -131,18 +132,24 @@ class SectorFormView(TooltipFormView):
             ).get()
             context.update({"coverage_stats": coverage.coverageStatistics()})
         except Exception:
-            logging.info("Could not find associated coverage")
+            logging.exception("Could not find associated coverage")
 
-        viewshed = self.get_object().viewshed
-        context.update(
-            {
-                "viewshed_status": {
-                    "status": viewshed.get_task_status().value,
-                    "progress_message": viewshed.progress_message,
-                    "time_remaining": viewshed.time_remaining,
-                },
-            }
-        )
+        try:
+            viewshed = self.get_object().viewshed
+            context.update(
+                {
+                    "viewshed_status": {
+                        "status": viewshed.get_task_status().value,
+                        "progress_message": viewshed.progress_message,
+                        "time_remaining": viewshed.time_remaining,
+                    },
+                }
+            )
+        except Viewshed.DoesNotExist:
+            logging.info("Could not find viewshed")
+        except Exception:
+            logging.exception("Failed to retrieve viewshed stats")
+    
         try:
             building_coverage = self.get_object().building_coverage
             context.update(

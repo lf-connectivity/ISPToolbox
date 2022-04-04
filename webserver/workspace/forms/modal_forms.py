@@ -1,5 +1,6 @@
 from django import forms
 from workspace import models as workspace_models
+from workspace.models.network_models import AccessPointLocation
 
 
 class ModelFormUnitsMixin:
@@ -25,7 +26,7 @@ class ModelFormUnitsMixin:
 
 
 class AccessPointLocationModalForm(ModelFormUnitsMixin, forms.ModelForm):
-    coordinates = forms.CharField(label="Coordinates")
+    coordinates = forms.CharField(label="Coordinates", validators=[AccessPointLocation.coordinates_validator])
     imperial_fields = {
         'height': {'imperial_name': 'height_ft'},
         'max_radius': {'imperial_name': 'radius_miles'},

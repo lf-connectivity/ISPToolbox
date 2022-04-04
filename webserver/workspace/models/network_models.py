@@ -297,9 +297,12 @@ class AccessPointLocation(UnitPreferencesModelMixin, WorkspaceFeature):
 
     @coordinates.setter
     def coordinates(self, value):
-        coords = value.split(",")
-        self.geojson.x = float(coords[1])
-        self.geojson.y = float(coords[0])
+        try:
+            coords = value.split(",")
+            self.geojson.x = float(coords[1])
+            self.geojson.y = float(coords[0])
+        except Exception:
+            logging.exception("failed to parse coordinates")
 
     @property
     def sector_count(self):

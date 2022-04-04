@@ -1,6 +1,7 @@
 from .test_geomodels import WorkspaceBaseTestCase
 from django.urls import reverse_lazy
 
+
 class FormTestCase(WorkspaceBaseTestCase):
     """
     Verify that we can successfully request forms for network elements

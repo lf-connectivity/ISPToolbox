@@ -149,7 +149,7 @@ class SectorFormView(TooltipFormView):
             logging.info("Could not find viewshed")
         except Exception:
             logging.exception("Failed to retrieve viewshed stats")
-    
+
         try:
             building_coverage = self.get_object().building_coverage
             context.update(

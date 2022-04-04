@@ -1,0 +1,20 @@
+{% load i18n %}
+<div class="modal theme-modal fade" id="{{modal_id}}" tabindex="-1" role="dialog" aria-labelledby="{{modal_id}}Title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered {{extra_classes}}" role="document">
+        <div class="modal-content" id="{{modal_id}}_body">
+        </div>
+    </div>
+</div>
+<script language="javascript">
+    $(document).ready(function () {
+        $("#{{modal_id}}").on('show.bs.modal',
+            function(event) {
+                $('.modal').not('#{{modal_id}}').modal("hide");
+            }
+        );
+        $(".modal").not('#{{modal_id}}').on('show.bs.modal', function(event) {
+            $('#{{modal_id}}').modal("hide");
+        });
+    });
+</script>

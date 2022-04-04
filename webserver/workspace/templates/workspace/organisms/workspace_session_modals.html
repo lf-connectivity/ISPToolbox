@@ -3,7 +3,26 @@
 {% else %}
 {% include "workspace/organisms/create_network_modal.html"%}
 {% endif %}
-{% include "workspace/organisms/pagination_network_modal.html"%}
+
+{% block session_table %}
+    {% url 'workspace:session_table' as table_ajax_url %}
+    {% with header="Open a Session" table_id="session_data_table" modal_id="session_modal" table_ajax_url=table_ajax_url %}
+    {% include "workspace/molecules/data_table.html"%}
+    {% endwith %}
+{% endblock %}
+{% block tower_table %}
+    {% url 'workspace:tower_table' as table_ajax_url %}
+    {% with header="Tower Locations" table_id="tower_data_table" modal_id="tower_modal" table_ajax_url=table_ajax_url %}
+    {% include "workspace/molecules/data_table_tower.html"%}
+    {% endwith %}
+{% endblock %}
+{% block sector_table %}
+    {% url 'workspace:sector_table' as table_ajax_url %}
+    {% with header="Access Points" table_id="sector_data_table" modal_id="sector_modal" table_ajax_url=table_ajax_url %}
+    {% include "workspace/molecules/data_table_sector.html"%}
+    {% endwith %}
+{% endblock %}
+
 {% include "workspace/organisms/import_kmz_modal.html" %}
 {% include "workspace/organisms/rename_session_modal.html" %}
 {% include "workspace/organisms/rename_session_modal.html"%}
@@ -12,4 +31,3 @@
 {% include "workspace/organisms/market_eval_export_modal.html"%}
 {% else %}
 {% endif %}
-{% include "workspace/organisms/access_point_modal.html" %}

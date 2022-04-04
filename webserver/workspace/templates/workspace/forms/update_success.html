@@ -1,0 +1,27 @@
+{% load i18n %}
+<div class="modal-header">
+    {% if breadcrumb %}
+    <ol class="breadcrumb my-auto">
+        {% for b in breadcrumb %}
+        {% if b.modal %}
+        <li class="breadcrumb-item"><a href="#" data-toggle="modal" tabindex="-1"
+                data-target="#{{b.modal}}">{{b.name}}</a></li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">{{b.name}}</li>
+        {% endif %}
+        {% endfor %}
+    </ol>
+    {% endif %}
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+    </button>
+</div>
+<div class="modal-body">
+    <h3 class="modal-title">{% translate "Successfully updated "%}"{{object.name}}"</h3>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary isptoolbox-btn" data-dismiss="modal">{% translate "Close"%}</button>
+</div>
+<script>
+    isptoolbox.BaseWorkspaceManager.refresh_by_uuid("{{object.pk}}")
+</script>

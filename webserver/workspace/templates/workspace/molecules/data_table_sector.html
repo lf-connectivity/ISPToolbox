@@ -1,0 +1,49 @@
+{% extends "workspace/molecules/data_table.html" %}
+
+{% block modal_body %}
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="#" data-toggle="modal" tabindex="-1" data-target="#tower_modal">Towers</a></li>
+    <li class="breadcrumb-item active" aria-current="page" data-target="{{ap.uuid}}">Access Points</li>
+</ol>
+{{ block.super}}
+{% endblock %}
+{% block init_table %}
+{{ block.super }}
+{% endblock %}
+{% block extra_js %}
+    $('#{{modal_id}}').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var tower = button.data('tower');
+        if(tower) {
+            var table = $('#{{table_id}}').DataTable({
+                retrieve: true,
+                paging: false
+            });
+            table.destroy()
+            $('#{{table_id}}').html("");
+            $("#tower_modal").modal("hide");
+            AjaxDatatableViewUtils.initialize_table(
+                $('#{{table_id}}'),
+                "{{ table_ajax_url }}", {
+                    // extra_options (example)
+                    processing: false,
+                    autoWidth: false,
+                    scrollX: false,
+                    bLengthChange: false,
+                    pagingType: "simple",
+                    drawCallback: ()=>{
+                        htmx.process('#{{table_id}}');
+                        $('.btn-tooltip').tooltip('hide');
+                        $('.btn-tooltip').tooltip({
+                            delay: { show: 500, hide: 100 },
+                            placement: 'top',
+                            trigger : 'hover'
+                        });
+                    }
+                }, {
+                    tower
+                },
+            );
+        }
+    })
+{% endblock %}

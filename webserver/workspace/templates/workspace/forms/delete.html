@@ -1,0 +1,29 @@
+{% load i18n %}
+<div class="modal-header">
+    {% if breadcrumb %}
+    <ol class="breadcrumb my-auto">
+        {% for b in breadcrumb %}
+        {% if b.modal %}
+        <li class="breadcrumb-item"><a href="#" data-toggle="modal" tabindex="-1" data-target="#{{b.modal}}">{{b.name}}</a></li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">{{b.name}}</li>
+        {% endif %}
+        {% endfor %}
+    </ol>
+    {% endif %}
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+    </button>
+</div>
+<form hx-post="{{ request.path }}" hx-swap="innerHTML" hx-target="#delete_modal_body">
+{% csrf_token %}
+<input type="text" name="pk" value="{{object.pk}}" hidden>
+<div class="modal-body">
+    <h3 class="modal-title" id="apDeleteModalTitle">{% translate "Are you sure you want to delete "%}"{{object.name}}"?
+    </h3>
+    {% translate "Deleting this will remove all associated elements and will not be accessible in other tools."%}
+</div>
+<div class="modal-footer">
+    <button type="submit" class="btn btn-primary isptoolbox-btn negative">{% translate "Delete"%}</button>
+</div>
+</form>

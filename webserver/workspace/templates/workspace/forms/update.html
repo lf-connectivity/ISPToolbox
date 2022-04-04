@@ -1,0 +1,51 @@
+{% load i18n get_item isp_toolbox_units %}
+
+<div class="modal-header">
+    {% if breadcrumb %}
+    <ol class="breadcrumb my-auto">
+        {% for b in breadcrumb %}
+        {% if b.modal %}
+        <li class="breadcrumb-item"><a href="#" data-toggle="modal" tabindex="-1"
+                data-target="#{{b.modal}}">{{b.name}}</a></li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">{{b.name}}</li>
+        {% endif %}
+        {% endfor %}
+    </ol>
+    {% endif %}
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        {% include "workspace/atoms/isptoolbox_close_icon.html" %}
+    </button>
+</div>
+<form hx-post="{{ request.path }}" hx-swap="innerHTML" hx-target="#edit_modal_body">
+    {% csrf_token %}
+    <div class="modal-body">
+        <h3 class="modal-title" id="apDeleteModalTitle">{% translate "Edit"%}
+        </h3>
+        <div class="isptoolbox-form">
+            {{ form.non_field_errors }}
+            <table class="table table-sm table-modal theme-table">
+                <thead class="thead-modal">
+                    <tr>{% for field in form %}<th> {{ field.label | safe }} </th>{% endfor %}</tr>
+                </thead>
+                <tbody>
+                    <tr>{% for field in form %}<td>
+                        <div class="input-group-prepend">
+                        {{field}}
+                        {% if form.units_metric|get_item:field.name %}
+                        <span class="my-auto">
+                        {% unit_preference_value form.instance.get_units form.units_imperial|get_item:field.name form.units_metric|get_item:field.name %}
+                        </span>
+                        {% endif %}
+                        </div>
+                        {{ field.errors }}</td>
+                        {% endfor %}</tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary isptoolbox-btn"
+            id="ap-delete-confirm-btn">{% translate "Update"%}</button>
+    </div>
+</form>

@@ -1,0 +1,65 @@
+<div class="modal theme-modal show" id="{{modal_id}}" tabindex="-1" role="dialog"
+    aria-labelledby="{{modal_id}}Label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="{{ modal_id }}Label">{{ header }}</h3><button type="button" class="close"
+                    data-dismiss="modal" aria-label="Close"><svg width="14" height="16" viewBox="0 0 14 16" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 1L1 14.5467" stroke="black" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round"></path>
+                        <path d="M1 1L13 14.5467" stroke="black" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round"></path>
+                    </svg></button>
+            </div>
+            <div id="session-list-modal-body">
+                <div class="modal-body">
+                    {% block modal_body %}
+                    <div style="display: block; overflow-x: auto">
+                        <div class="table-responsive isptoolbox-form">
+                            <table id="{{table_id}}" width="100%"
+                                class="table dt-responsive nowrap table-sm table-hover table-modal theme-table">
+                            </table>
+                        </div>
+                    </div>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script language="javascript">
+    $(document).ready(function () {
+        {% block init_table %}
+        AjaxDatatableViewUtils.initialize_table(
+            $('#{{table_id}}'),
+            "{{ table_ajax_url }}", {
+                // extra_options (example)
+                processing: false,
+                autoWidth: false,
+                scrollX: false,
+                bLengthChange: false,
+                pagingType: "simple",
+                drawCallback: ()=>{
+                    htmx.process('#{{table_id}}');
+                    $('.btn-tooltip').tooltip('hide');
+                    $('.btn-tooltip').tooltip({
+                        delay: { show: 500, hide: 100 },
+                        placement: 'top',
+                        trigger : 'hover'
+                    });
+                }
+            }, {
+            },
+        );
+        {% endblock %}
+        $(".modal").not('#{{modal_id}}').on('show.bs.modal', function(event) {
+            $('#{{modal_id}}').modal("hide");
+        });
+        $('#{{modal_id}}').on('show.bs.modal', function(event) {
+            $('#{{table_id}}').DataTable().ajax.reload(null, false);
+        });
+        {% block extra_js %}
+        {% endblock %}
+    });
+</script>

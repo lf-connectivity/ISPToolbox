@@ -47,14 +47,14 @@
             {% translate "Add Access Point"%}
         </button>
         {% if sector_count > 0%}
-        <a href="#" data-toggle="modal" tabindex="-1" data-target="#accessPointModal" data-ap="{{uuid}}">
+        <a href="#" data-toggle="modal" tabindex="-1"  data-tower="{{uuid}}" data-target="#sector_modal">
             <button class='btn btn-secondary isptoolbox-btn w-100' style=" border: none; background-color:
             rgba(0,0,0,0) !important;">
             {% translate "Manage" %} {{sector_count}} {% translate "AP" %}{{sector_count|pluralize}}
             </button>
         </a>
         {% else %}
-        <a href="#" data-toggle="modal" tabindex="-1" data-target="#accessPointModal" data-ap="{{uuid}}" data-new="true">
+        <a href="#" data-toggle="modal" tabindex="-1"  data-tower="{{uuid}}" data-target="#sector_modal" data-new="true">
                 <button class='btn btn-secondary isptoolbox-btn w-100' style=" border: none; background-color:
             rgba(0,0,0,0) !important;">
             {% translate "Add Multiple Access Points"%}

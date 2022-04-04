@@ -99,7 +99,7 @@ class AbstractAsyncTaskHashCacheMixin(models.Model):
             else:
                 return AsyncTaskStatus.COMPLETED
         elif task_result:
-            return AsyncTaskStatus.from_celery_task_status(task_result.state)
+            return AsyncTaskStatus.from_celery_task_status(task_result.status)
         else:
             return AsyncTaskStatus.COMPLETED
 

@@ -8,6 +8,7 @@ class ModelFormUnitsMixin:
     This mixin is used for ModelForm's with fields that have units (e.g. km, mi, ft)
     """
     units = True
+
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
         if instance.get_units == workspace_models.WorkspaceMapSession.UnitPreferences.IMPERIAL:

@@ -15,11 +15,12 @@ def unit_preference_value(unit, imperial_value, metric_value):
     else:
         return metric_value
 
+
 @register.simple_tag
 def form_get_units(form, field):
     if form.instance.get_units == workspace_models.WorkspaceMapSession.UnitPreferences.IMPERIAL:
         return form.units_imperial.get(field.name, '')
-    else: 
+    else:
         return form.units_metric.get(field.name, '')
 
 

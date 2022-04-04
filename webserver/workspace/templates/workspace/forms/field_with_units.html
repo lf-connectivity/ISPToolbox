@@ -1,0 +1,7 @@
+{% load isp_toolbox_units %}
+<div class="input-group-prepend">
+    {{field}}
+    <span class="my-auto ml-2">
+    {% form_get_units form field %}
+    </span>
+</div>

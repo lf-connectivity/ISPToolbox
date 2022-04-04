@@ -1,5 +1,5 @@
-{% load i18n get_item isp_toolbox_units %}
-
+{% spaceless %}
+{% load i18n %}
 <div class="modal-header">
     {% if breadcrumb %}
     <ol class="breadcrumb my-auto">
@@ -23,25 +23,7 @@
         <h3 class="modal-title" id="apDeleteModalTitle">{% translate "Edit"%}
         </h3>
         <div class="isptoolbox-form">
-            {{ form.non_field_errors }}
-            <table class="table table-sm table-modal theme-table">
-                <thead class="thead-modal">
-                    <tr>{% for field in form %}<th> {{ field.label | safe }} </th>{% endfor %}</tr>
-                </thead>
-                <tbody>
-                    <tr>{% for field in form %}<td>
-                        <div class="input-group-prepend">
-                        {{field}}
-                        {% if form.units_metric|get_item:field.name %}
-                        <span class="my-auto">
-                        {% unit_preference_value form.instance.get_units form.units_imperial|get_item:field.name form.units_metric|get_item:field.name %}
-                        </span>
-                        {% endif %}
-                        </div>
-                        {{ field.errors }}</td>
-                        {% endfor %}</tr>
-                </tbody>
-            </table>
+            {% include "workspace/forms/form_table_with_units.html" %}
         </div>
     </div>
     <div class="modal-footer">
@@ -49,3 +31,4 @@
             id="ap-delete-confirm-btn">{% translate "Update"%}</button>
     </div>
 </form>
+{% endspaceless %}

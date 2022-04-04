@@ -118,14 +118,17 @@ urlpatterns = [
     path('workspace/form/cpe-forms/sector-change/<uuid:session_id>/<str:lng>/<str:lat>/',
          views.SwitchSectorTooltipView.as_view(), name="cpe-switch-sector-form"),
     # Tables
-    path('workspace/table/sessions/', views.SessionTableView.as_view(), name="sessions_table"),
+    path('workspace/table/sessions/', views.SessionTableView.as_view(), name="session_table"),
     path('workspace/table/towers/', views.TowerTableView.as_view(), name="tower_table"),
     path('workspace/table/sectors/', views.SectorTableView.as_view(), name="sector_table"),
     path('workspace/table/serviceable/', views.SectorTableServiceableView.as_view(), name="sector_table_serviceable"),
-    # Test
-    path('workspace/test/session/', views.SessionTableTestView.as_view(), name="session_test"),
-    path('workspace/test/tower/<uuid:uuid>/', views.TowerTableTestView.as_view(), name="tower_test"),
-    path('workspace/test/sector/<uuid:uuid>/', views.SectorTableTestView.as_view(), name="sector_test"),
+    # Tables Update, Delete
+    path('workspace/ajax/session/update/<uuid:pk>/', views.SessionUpdateView.as_view(), name="ajax_session_update"),
+    path('workspace/ajax/session/delete/<uuid:pk>/', views.SessionDeleteView.as_view(), name="ajax_session_delete"),
+    path('workspace/ajax/tower/update/<uuid:pk>/', views.TowerUpdateView.as_view(), name="ajax_tower_update"),
+    path('workspace/ajax/tower/delete/<uuid:pk>/', views.TowerDeleteView.as_view(), name="ajax_tower_delete"),
+    path('workspace/ajax/sector/update/<uuid:pk>/', views.SectorUpdateView.as_view(), name="ajax_sector_update"),
+    path('workspace/ajax/sector/delete/<uuid:pk>/', views.SectorDeleteView.as_view(), name="ajax_sector_delete"),
     # Ajax
     path('workspace/ajax/ap-los/coverage/<uuid:uuid>/',
          views.AccessPointCoverageResults.as_view(), name="viewshed_coverage"),

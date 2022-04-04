@@ -59,11 +59,14 @@ from .admin import (
 )
 from .sidebar_views import ToolSidebarView
 from .table_views import (
-    SessionTableView, TowerTableView, SectorTableView,
-    SessionTableTestView, TowerTableTestView, SectorTableTestView, SectorTableServiceableView
+    SessionTableView, TowerTableView, SectorTableView, SectorTableServiceableView
 )
 from .marketing_views import (
     ServiceabilityExportView, ServiceabilityExportCsvView
+)
+from .update_delete_views import (
+    TowerDeleteView, TowerUpdateView, SectorDeleteView, SectorUpdateView,
+    SessionDeleteView, SessionUpdateView,
 )
 
 import workspace.utils.import_utils

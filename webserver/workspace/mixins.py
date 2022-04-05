@@ -22,6 +22,15 @@ class WorkspacePerformCreateMixin:
         serializer.save(owner=user, session_id=session)
 
 
+class WorkspaceAPIPerformCreateMixin:
+    """
+    Mixin for REST API Views to create new workspace models with foreign keys to 
+    the request user
+    """
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
 class WorkspaceFeatureGetQuerySetMixin:
     """
     Mixin for REST Views to get the appropriate query set for the model

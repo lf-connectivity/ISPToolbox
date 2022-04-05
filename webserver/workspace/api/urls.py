@@ -2,11 +2,11 @@ from django.urls import path
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 from webserver import settings
-from workspace.api.views import TokenInspectorView
+from workspace.api import views as api_views
 
 app_name = "workspace.api"
 urlpatterns = [
-    path('token/', TokenInspectorView.as_view(), name='api-token'),
+    path('token/', api_views.TokenInspectorView.as_view(), name='api-token'),
     path('docs/', TemplateView.as_view(
         template_name='swagger-ui.html',
         extra_context={'schema_url': 'workspace:api:openapi-schema'}
@@ -18,14 +18,24 @@ urlpatterns = [
     ), name='openapi-schema'),
 
     # V1
+    path(
+        'v1/ptp-serviceability/<uuid:uuid>/',
+        api_views.PointToPointServiceabilityRetrieveView.as_view(),
+        name="ptp-serviceability-get"
+    ),
+    path(
+        'v1/ptp-serviceability/',
+        api_views.PointToPointServiceabilityCreateView.as_view(),
+        name="ptp-serviceability-create"
+    )
 ]
 
 
 if not settings.PROD:
     from workspace.api.views import DummyTaskCreateView, DummyTaskRetrieveDeleteView, DummyTaskStopView
     urlpatterns += [
-        path('v1/dummy-task/', DummyTaskCreateView.as_view(), name="dummy-task-create"),
-        path('v1/dummy-task/<uuid:uuid>/', DummyTaskRetrieveDeleteView.as_view(),
+        path('v1/dummy-task/', api_views.DummyTaskCreateView.as_view(), name="dummy-task-create"),
+        path('v1/dummy-task/<uuid:uuid>/', api_views.DummyTaskRetrieveDeleteView.as_view(),
              name="dummy-task-retrieve-delete"),
-        path('v1/dummy-task/<uuid:uuid>/stop/', DummyTaskStopView.as_view(), name="dummy-task-stop"),
+        path('v1/dummy-task/<uuid:uuid>/stop/', api_views.DummyTaskStopView.as_view(), name="dummy-task-stop"),
     ]

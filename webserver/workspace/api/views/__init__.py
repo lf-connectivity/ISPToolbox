@@ -1,5 +1,9 @@
 from .task_api_views import create_views_for_task_api_serializer
 from .token_views import TokenInspectorView
+from .ptp_views import (
+    PointToPointServiceabilityRetrieveView,
+    PointToPointServiceabilityCreateView
+)
 
 # Put views here
 from webserver.settings import PROD

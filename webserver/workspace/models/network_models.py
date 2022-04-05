@@ -1204,14 +1204,15 @@ class AccessPointCoverageBuildings(
                 + f"{self.sector.max_radius},{self.sector.height},{self.sector.default_cpe_height}"
             )
 
-    def get_task_status(self):
+    @property
+    def task_status(self):
         # We need to look at the results for viewshed first.
         if self.sector:
-            viewshed_status = self.sector.viewshed.get_task_status()
+            viewshed_status = self.sector.viewshed.task_status
             if viewshed_status != AsyncTaskStatus.COMPLETED:
                 return AsyncTaskStatus.NOT_STARTED
             else:
-                return super().get_task_status()
+                return super().task_status
         else:
             return None
 

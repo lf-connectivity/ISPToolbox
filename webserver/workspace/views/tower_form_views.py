@@ -139,7 +139,7 @@ class SectorFormView(TooltipFormView):
             context.update(
                 {
                     "viewshed_status": {
-                        "status": viewshed.get_task_status().value,
+                        "status": viewshed.task_status.value,
                         "progress_message": viewshed.progress_message,
                         "time_remaining": viewshed.time_remaining,
                     },
@@ -155,7 +155,7 @@ class SectorFormView(TooltipFormView):
             context.update(
                 {
                     "building_coverage": {
-                        "status": building_coverage.get_task_status().value,
+                        "status": building_coverage.task_status.value,
                     },
                 }
             )

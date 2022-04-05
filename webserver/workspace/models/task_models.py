@@ -76,7 +76,7 @@ class AbstractAsyncTaskHashCacheMixin(models.Model):
     hash = models.CharField(
         max_length=255,
         help_text="""
-            This hash helps determine if the AP has already been computed.
+            This hash helps determine if the task result has already been computed.
         """,
     )
 
@@ -91,17 +91,18 @@ class AbstractAsyncTaskHashCacheMixin(models.Model):
         self.task_id = task_id
         self.save()
 
-    def get_task_status(self):
+    @property
+    def task_status(self):
         task_result = self.task_result
         if not self.result_cached():
             if not task_result:
-                return AsyncTaskStatus.NOT_STARTED
+                return AsyncTaskStatus.NOT_STARTED.value
             else:
-                return AsyncTaskStatus.COMPLETED
+                return AsyncTaskStatus.COMPLETED.value
         elif task_result:
-            return AsyncTaskStatus.from_celery_task_status(task_result.status)
+            return AsyncTaskStatus.from_celery_task_status(task_result.status).value
         else:
-            return AsyncTaskStatus.COMPLETED
+            return AsyncTaskStatus.COMPLETED.value
 
     def cache_result(self):
         self.hash = self.calculate_hash()

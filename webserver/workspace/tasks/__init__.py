@@ -8,6 +8,7 @@ from .sector_tasks import (
     calculateSectorViewshed,
 )
 from .cpe_tasks import createSectorCPEFromLngLat
+from .ptp_tasks import calculate_serviceability
 
 import workspace.utils.import_utils
 

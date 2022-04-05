@@ -42,7 +42,14 @@ export class MarketEvaluatorMarketCount implements IMapboxDrawPlugin{
                 this.noneSelected();
             }
         } else {
-            this.someSelected(`${event.features.length} / ${this.draw.getAll().features.filter(f => this.filterFeatures(f)).length}`);
+            const number_selected = event.features.length;
+            const total_number = this.draw.getAll().features.filter(f => this.filterFeatures(f)).length;
+            if(number_selected === total_number)
+            {
+                this.allSelected();
+            } else {
+                this.someSelected(`${number_selected} / ${total_number}`);
+            }
         }
     }
 }

@@ -25,22 +25,10 @@ from rest_framework.schemas.openapi import AutoSchema
 from django.http import JsonResponse
 import logging
 import json
-
-
-class WorkspacePerformCreateMixin:
-    """
-    Mixin for REST Views to create new workspace models with foreign keys to the
-    reuqest session or request user
-    """
-
-    def perform_create(self, serializer):
-        session = None
-        if self.request.session and self.request.session.session_key is not None:
-            session = self.request.session.session_key
-        user = self.request.user
-        if self.request.user.is_anonymous:
-            user = None
-        serializer.save(owner=user, session_id=session)
+from workspace.mixins import (
+    WorkspaceFeatureGetQuerySetMixin, 
+    WorkspacePerformCreateMixin
+)
 
 
 # REST Views

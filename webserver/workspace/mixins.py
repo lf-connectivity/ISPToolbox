@@ -6,6 +6,22 @@ class SuperuserRequiredMixin(UserPassesTestMixin):
         return self.request.user.is_superuser
 
 
+class WorkspacePerformCreateMixin:
+    """
+    Mixin for REST Views to create new workspace models with foreign keys to the
+    reuqest session or request user
+    """
+
+    def perform_create(self, serializer):
+        session = None
+        if self.request.session and self.request.session.session_key is not None:
+            session = self.request.session.session_key
+        user = self.request.user
+        if self.request.user.is_anonymous:
+            user = None
+        serializer.save(owner=user, session_id=session)
+
+
 class WorkspaceFeatureGetQuerySetMixin:
     """
     Mixin for REST Views to get the appropriate query set for the model

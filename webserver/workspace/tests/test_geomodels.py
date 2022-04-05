@@ -442,6 +442,16 @@ class WorkspaceBaseTestCase(TestCase):
         )
         self.test_ap_cpe_link.save()
 
+        self.test_ptp_link = PointToPointLink(
+            owner=self.testuser,
+            frequency=DEFAULT_FREQUENCY,
+            map_session=self.test_session,
+            radio0hgt=DEFAULT_HEIGHT,
+            radio1hgt=DEFAULT_HEIGHT,
+            geojson=DEFAULT_TEST_LINESTRING,
+        )
+        self.test_ptp_link.save()
+
         self.test_polygon_coverage_area = CoverageArea(
             owner=self.testuser,
             name=DEFAULT_COVERAGE_AREA_NAME,

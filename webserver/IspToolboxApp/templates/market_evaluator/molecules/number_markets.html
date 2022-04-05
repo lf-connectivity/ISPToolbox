@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="mx-3">
+    <div class="d-none" id="me--num_markets-empty">
+        <p class="mb-0">{% translate "Begin outlining your market by drawing shapes on the map." %}</p>
+    </div>
+    <div class="d-none" id="me--num_markets-all">
+        <p class="mb-0">{% translate "All areas selected" %}</p>
+    </div>
+    <div class="d-none" id="me--num_markets-some">
+        <div class="d-none d-flex flex-row">
+            <p class=" mb-0 mr-1" id="me--num_markets-fraction">3/10</p>
+            <p class="mb-0">{% translate "areas selected "%}</p>
+        </div>
+    </div>
+</div>

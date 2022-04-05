@@ -25,6 +25,7 @@ import {
     TribalGeoOverlay
 } from './molecules/MapboxGeoOverlay';
 import MapboxOverlay from './molecules/MapboxOverlay';
+import { MarketEvaluatorMarketCount } from './organisms/MarketEvaluatorMarketCount';
 import { MapLayerSidebarManager } from './workspace/MapLayerSidebarManager';
 
 type GeoOverlayString = 'rdof' | 'communityConnect' | 'cbrs' | 'censusBlocks' | 'tribal';
@@ -190,6 +191,7 @@ export default class MarketEvaluatorMapLayerSidebarManager extends MapLayerSideb
         new CensusBlocksOverlayPopup(this.map, this.draw);
         new TribalOverlayPopup(this.map, this.draw);
         new ASROverlayPopup(this.map, this.draw);
+        new MarketEvaluatorMarketCount(this.map, this.draw);
 
         this.mapboxLoadTowerIcon('tower-pin-bad');
         this.mapboxLoadTowerIcon('tower-pin-good');

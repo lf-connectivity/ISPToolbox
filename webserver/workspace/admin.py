@@ -19,3 +19,5 @@ admin.site.register(models.PointToPointLink)
 
 admin.site.register(models.AccessInformationJob)
 admin.site.register(models.DeleteInformationJob)
+
+admin.site.register(models.PointToPointServiceability)

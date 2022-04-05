@@ -24,7 +24,7 @@ class WorkspacePerformCreateMixin:
 
 class WorkspaceAPIPerformCreateMixin:
     """
-    Mixin for REST API Views to create new workspace models with foreign keys to 
+    Mixin for REST API Views to create new workspace models with foreign keys to
     the request user
     """
     def perform_create(self, serializer):

@@ -1,5 +1,4 @@
 from workspace import models as workspace_models
-from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import mixins
 from workspace.mixins import (
@@ -12,13 +11,13 @@ from rest_framework.permissions import IsAuthenticated
 class PointToPointServiceabilityRetrieveView(
     WorkspaceFeatureGetQuerySetMixin,
     mixins.RetrieveModelMixin,
-    generics.GenericAPIView):
-
+    generics.GenericAPIView
+):
     lookup_field = "uuid"
     permission_classes = [IsAuthenticated]
     serializer_class = workspace_models.PointToPointLinkServiceableSerializer
     schema = AutoSchema(tags=['Point To Point'])
-    
+
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 

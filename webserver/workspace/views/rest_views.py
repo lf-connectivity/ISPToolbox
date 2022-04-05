@@ -26,7 +26,7 @@ from django.http import JsonResponse
 import logging
 import json
 from workspace.mixins import (
-    WorkspaceFeatureGetQuerySetMixin, 
+    WorkspaceFeatureGetQuerySetMixin,
     WorkspacePerformCreateMixin
 )
 

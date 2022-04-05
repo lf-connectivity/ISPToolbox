@@ -20,7 +20,6 @@ class PointToPointServiceability(
     AbstractAsyncTaskUserMixin,
     AbstractAsyncTaskPrimaryKeyMixin,
     AbstractAsyncTaskHashCacheMixin,
-    
 ):
     EXPIRE_TIME_RESULTS = 3600 * 24 * 7 * 30
 
@@ -38,7 +37,7 @@ class PointToPointServiceability(
         UNKNOWN = "UNKNOWN"
         SERVICEABLE = "SERVICEABLE"
         UNSERVICEABLE = "UNSERVICEABLE"
-    
+
     serviceable = models.CharField(
         default=Serviceability.UNKNOWN,
         max_length=20,
@@ -58,7 +57,7 @@ class PointToPointServiceability(
     def gis_data(self):
         r = redis.Redis.from_url(settings.CELERY_BROKER_URL)
         val = r.get(self.key_elevation_profile())
-        if val != None:
+        if val is not None:
             return json.load(val)
         else:
             return val
@@ -89,7 +88,6 @@ def __gen_serviceability(
 
 class PointToPointLinkServiceableSerializer(serializers.ModelSerializer):
     lookup_field = "uuid"
-    
     number_of_obstructions = serializers.IntegerField(read_only=True)
     serviceable = serializers.CharField(read_only=True)
     gis_data = serializers.CharField(read_only=True)
@@ -97,4 +95,3 @@ class PointToPointLinkServiceableSerializer(serializers.ModelSerializer):
     class Meta:
         model = PointToPointServiceability
         fields = ['number_of_obstructions', 'serviceable', 'gis_data', 'uuid', 'task_status', 'ptp']
-

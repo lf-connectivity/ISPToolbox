@@ -155,7 +155,7 @@ class SectorFormView(TooltipFormView):
             context.update(
                 {
                     "building_coverage": {
-                        "status": building_coverage.task_status.value,
+                        "status": building_coverage.task_status,
                     },
                 }
             )

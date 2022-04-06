@@ -270,7 +270,7 @@ export const WorkspaceMapboxStyles = [
         ],
         layout: {
             'icon-image': 'ap-inactive-isptoolbox', // reference the image
-            'icon-size': 0.25
+            'icon-size': 0.27
         }
     },
     // ACTIVE AP
@@ -318,7 +318,7 @@ export const WorkspaceMapboxStyles = [
         ],
         layout: {
             'icon-image': 'ap-active-isptoolbox', // reference the image
-            'icon-size': 0.25
+            'icon-size': 0.27
         }
     },
     // Default CPE Appearance
@@ -352,7 +352,7 @@ export const WorkspaceMapboxStyles = [
         ],
         paint: {
             'circle-radius': 10,
-            'circle-color': '#5692D1'
+            'circle-color': '#F5F4F4'
         }
     },
     {
@@ -367,7 +367,7 @@ export const WorkspaceMapboxStyles = [
         ],
         layout: {
             'icon-image': 'cpe-inactive-isptoolbox', // reference the image
-            'icon-size': 0.3
+            'icon-size': 0.38
         }
     },
     // ACTIVE CPE
@@ -384,7 +384,7 @@ export const WorkspaceMapboxStyles = [
         ],
         paint: {
             'circle-radius': 12,
-            'circle-color': '#FFFFFF'
+            'circle-color': '#FFF'
         }
     },
     {
@@ -400,7 +400,7 @@ export const WorkspaceMapboxStyles = [
         ],
         paint: {
             'circle-radius': 10,
-            'circle-color': '#5692D1'
+            'circle-color': '#F5F4F4'
         }
     },
     {
@@ -415,7 +415,7 @@ export const WorkspaceMapboxStyles = [
         ],
         layout: {
             'icon-image': 'cpe-inactive-isptoolbox', // reference the image
-            'icon-size': 0.3
+            'icon-size': 0.38
         }
     },
     // polygon outline stroke

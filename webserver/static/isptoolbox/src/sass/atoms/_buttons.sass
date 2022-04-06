@@ -55,7 +55,7 @@ body
         color: $white-color
     .btn-outline-primary
         border-color: $brand-primary-color !important
-        color:  $brand-primary-color
+        color: $brand-primary-color
     .btn-primary:hover
         background: $brand-secondary-color !important
     .btn-edit:hover
@@ -66,8 +66,14 @@ body
     .ap-save-edit-btn:hover
         background-color: $light-gray-color !important
         border-radius: 4px
-    .btn-group button.btn
+    .btn-group button
         border-radius: 0
+        display: flex
+        align-items: center
+        justify-content: center
+        min-height: 40px
+        &:hover
+            border-radius: 0
 
 // @media (max-width: $breakpoint-lg)
 //     .isp-draw-mode-btn

@@ -27,20 +27,8 @@ class ModelFormUnitsMixin:
         return super().save(*args, **kwargs)
 
 
-class AccessPointLocationModalForm(ModelFormUnitsMixin, forms.ModelForm):
+class AccessPointLocationModalForm(forms.ModelForm):
     coordinates = forms.CharField(label="Coordinates", validators=[AccessPointLocation.coordinates_validator])
-    imperial_fields = {
-        'height': {'imperial_name': 'height_ft'},
-        'max_radius': {'imperial_name': 'radius_miles'},
-    }
-    units_metric = {
-        'height': 'm',
-        'max_radius': 'km',
-    }
-    units_imperial = {
-        'height': 'ft',
-        'max_radius': 'mi'
-    }
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
@@ -56,10 +44,10 @@ class AccessPointLocationModalForm(ModelFormUnitsMixin, forms.ModelForm):
     class Meta:
         model = workspace_models.AccessPointLocation
         exclude = [
-            'owner', 'map_session', 'session', 'uneditable', 'geojson', 'no_check_radius', 'default_cpe_height'
+            'owner', 'map_session', 'session', 'uneditable', 'geojson', 'no_check_radius', 'default_cpe_height',
+            'max_radius', 'height'
         ]
         help_texts = {}
-        labels = {'max_radius': 'Radius', 'height': 'Height'}
 
     error_css_class = "error"
     required_css_class = "required"

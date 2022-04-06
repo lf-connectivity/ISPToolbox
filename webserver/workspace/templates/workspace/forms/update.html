@@ -23,7 +23,11 @@
         <h3 class="modal-title" id="apDeleteModalTitle">{% translate "Edit"%}
         </h3>
         <div class="isptoolbox-form">
+            {% if form.units %}
             {% include "workspace/forms/form_table_with_units.html" %}
+            {% else %}
+            {% include "workspace/forms/form_table.html" %}
+            {% endif %}
         </div>
     </div>
     <div class="modal-footer">

@@ -71,8 +71,6 @@ class TowerTableView(AjaxDatatableView):
     column_defs = [
         {'name': 'uuid', 'visible': False},
         {'name': 'name', 'visible': True},
-        {'name': 'max_radius', 'title': 'Radius', 'visible': True},
-        {'name': 'height', 'title': 'Height', 'visible': True},
         {'name': 'coordinates', 'title': 'Coordinates', 'visible': True, 'searchable': False, 'orderable': False},
         {'name': 'sector_count', 'title': 'Sectors', 'visible': True, 'searchable': False, 'orderable': False},
         {'name': 'last_updated', 'title': 'Modified', 'visible': True},
@@ -85,22 +83,12 @@ class TowerTableView(AjaxDatatableView):
         qs = self.model.get_rest_queryset(request)
         if 'map_session' in request.REQUEST:
             qs = qs.filter(map_session_id=request.REQUEST.get('map_session'))
-            self.units = workspace_models.WorkspaceMapSession.get_rest_queryset(request).get(
-                pk=request.REQUEST.get('map_session')
-            ).units
         return qs
 
     def customize_row(self, row, obj):
         img_edit = static('isptoolbox/images/edit.png')
         img_delete = static('isptoolbox/images/delete.png')
         img_view = static('isptoolbox/images/view.png')
-        if hasattr(self, 'units'):
-            if self.units == workspace_models.WorkspaceMapSession.UnitPreferences.METRIC:
-                row['max_radius'] = f"{obj.max_radius} km"
-                row['height'] = f"{obj.height} m"
-            else:
-                row['max_radius'] = f"{obj.radius_miles} mi"
-                row['height'] = f"{obj.height_ft} ft"
 
         row['coordinates'] = "{:.6f}, {:.6f}".format(obj.lat, obj.lng)
         row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")

@@ -6,6 +6,7 @@ from .decorators import async_task_with_model
 
 import time
 
+
 @async_task_with_model(DummyTaskModel)
 def dummyTask(task):
     # Get # of sectors in ap
@@ -13,6 +14,6 @@ def dummyTask(task):
     task.number_of_sectors = len(sectors)
 
     time.sleep(task.sleep_length)
-    task.sleep_response =  f"Slept for {task.sleep_length} seconds"
+    task.sleep_response = f"Slept for {task.sleep_length} seconds"
 
     task.save()

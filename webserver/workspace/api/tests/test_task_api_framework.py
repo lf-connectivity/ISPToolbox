@@ -9,7 +9,6 @@ from rest_framework.status import (
 )
 from rest_framework.test import APIClient
 from workspace.api.models import DummyTaskModel
-from workspace.models.task_models import AsyncTaskStatus
 
 from workspace.tests.test_geomodels import WorkspaceBaseAPITestCase, JSON_CONTENT_TYPE
 

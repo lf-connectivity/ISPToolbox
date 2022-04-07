@@ -24,12 +24,7 @@ urlpatterns = [
 if not settings.PROD:
     urlpatterns += [
         path('v1/dummy-task/', DummyTaskCreateView.as_view(), name="dummy-task-create"),
-        path('v1/dummy-task/<uuid:uuid>',
-            DummyTaskRetrieveDeleteView.as_view(),
-            name="dummy-task-retrieve-delete"
-        ),
-        path('v1/dummy-task/<uuid:uuid>/stop/',
-            DummyTaskStopView.as_view(),
-            name="dummy-task-stop"
-        ),
+        path('v1/dummy-task/<uuid:uuid>/', DummyTaskRetrieveDeleteView.as_view(),
+             name="dummy-task-retrieve-delete"),
+        path('v1/dummy-task/<uuid:uuid>/stop/', DummyTaskStopView.as_view(), name="dummy-task-stop"),
     ]

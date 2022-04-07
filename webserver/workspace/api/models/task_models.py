@@ -1,4 +1,3 @@
-from functools import partial
 from rest_framework import serializers
 
 from celery_async import celery_app as app

@@ -117,7 +117,7 @@ class AsyncTaskStatus(enum.Enum):
     COMPLETED = "COMPLETED"
     ERROR = "ERROR"
     UNKNOWN = "UNKNOWN"
-    STOPPED = "STOPPED"
+    REVOKED = "REVOKED"
 
     @staticmethod
     def from_celery_task_status(status):
@@ -127,6 +127,6 @@ class AsyncTaskStatus(enum.Enum):
             celery.states.RETRY: AsyncTaskStatus.IN_PROGRESS,
             celery.states.FAILURE: AsyncTaskStatus.ERROR,
             celery.states.SUCCESS: AsyncTaskStatus.COMPLETED,
-            celery.states.REVOKED: AsyncTaskStatus.STOPPED,
+            celery.states.REVOKED: AsyncTaskStatus.REVOKED,
         }
         return status_map.get(status, AsyncTaskStatus.UNKNOWN)

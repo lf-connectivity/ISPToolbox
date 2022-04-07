@@ -14,7 +14,7 @@ class AbstractAsyncTaskAPIModel(
     AbstractAsyncTaskUserMixin,
     AbstractAsyncTaskPrimaryKeyMixin,
 ):
-    task_name = None  # Extend it somewhere
+    task_name = None
 
     @classmethod
     def get_rest_queryset(cls, request):
@@ -29,6 +29,9 @@ class AbstractAsyncTaskAPIModel(
             return AsyncTaskStatus.from_celery_task_status(task_result.status).value
 
     def start_task(self):
+        assert (
+            self.task_name is not None
+        ), "Please specify the celery name of the task associated with this model under task_name"
         app.send_task(self.task_name, (self.uuid,))
 
     class Meta:

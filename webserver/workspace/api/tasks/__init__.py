@@ -1,4 +1,4 @@
-from .dummy_tasks import apiSleep
+from .dummy_tasks import dummyTask
 
 import workspace.utils.import_utils
 

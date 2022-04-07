@@ -1,4 +1,4 @@
-from django.db import models
+from functools import partial
 from rest_framework import serializers
 
 from celery_async import celery_app as app
@@ -9,35 +9,17 @@ from workspace.models.task_models import (
     AsyncTaskStatus,
 )
 
-import json
 
-
-class AsyncTaskAPIModel(
+class AbstractAsyncTaskAPIModel(
     AbstractAsyncTaskAssociatedModel,
     AbstractAsyncTaskUserMixin,
     AbstractAsyncTaskPrimaryKeyMixin,
 ):
-    task_type = models.CharField(max_length=512)
+    task_name = None  # Extend it somewhere
 
     @classmethod
-    def create_task(cls, task_user, task_type, task_input):
-        if not task_user or not task_type:
-            raise ValueError("Missing task_user, task_name or task_type")
-
-        task_api_model = cls(owner=task_user, task_type=task_type)
-
-        if task_input:
-            if not isinstance(task_input, str):
-                task = app.send_task(task_type, kwargs=task_input)
-            else:
-                task = app.send_task(task_type, (task_input,))
-        else:
-            task = app.send_task(task_type)
-
-        task_api_model.task_id = task.id
-        task_api_model.save()
-
-        return task_api_model
+    def get_rest_queryset(cls, request):
+        return cls.objects.filter(owner=request.user)
 
     @property
     def status(self):
@@ -47,30 +29,66 @@ class AsyncTaskAPIModel(
         else:
             return AsyncTaskStatus.from_celery_task_status(task_result.status).value
 
-    @property
-    def result(self):
-        status = self.status
-        if status == AsyncTaskStatus.COMPLETED.value:
-            task_result = self.task_result
-            return json.loads(task_result.result)
-        else:
-            return None
+    def start_task(self):
+        app.send_task(self.task_name, (self.uuid,))
 
-
-class AsyncTaskAPIModelCreateSuccessSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AsyncTaskAPIModel
+        abstract = True
+
+
+class UserAllowedToAccessWorkspaceFeature:
+    """
+    Serializer validator for verifying that the user has access to a given Workspace feature
+    """
+
+    requires_context = True
+
+    def __call__(self, workspace_feature, serializer):
+        user = serializer.context["request"].user
+        if workspace_feature.owner != user:
+
+            # Return the exact same message as a does not exist for no-pk
+            raise serializers.ValidationError(
+                f'Invalid pk "{workspace_feature.pk}" - object does not exist.'
+            )
+
+
+class AbstractAsyncTaskAPISerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(read_only=True)
+    status = serializers.CharField(read_only=True)
+    # Sub-serializer creation methods for different views
+
+    @classmethod
+    def get_create_request_serializer_class(cls):
+        class AsyncTaskAPICreateSerializer(cls):
+            class Meta:
+                model = cls.Meta.model
+                fields = cls.Meta.input_fields
+
+        AsyncTaskAPICreateSerializer.__name__ = (
+            cls.__name__.split("Serializer")[0] + "CreateRequestSerializer"
+        )
+        return AsyncTaskAPICreateSerializer
+
+    @classmethod
+    def get_retrieve_delete_request_serializer_class(cls):
+        class AsyncTaskAPIRetrieveDeleteSerializer(cls):
+            class Meta:
+                model = cls.Meta.model
+                fields = cls.Meta.output_fields + ["uuid", "status"]
+
+        AsyncTaskAPIRetrieveDeleteSerializer.__name__ = (
+            cls.__name__.split("Serializer")[0] + "RetrieveDeleteResponseSerializer"
+        )
+        return AsyncTaskAPIRetrieveDeleteSerializer
+
+    class Meta:
+        abstract = True
+        fields = ["uuid", "status"]
+
+
+class AsyncTaskAPIGenericResponseSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField(read_only=True)
+
+    class Meta:
         fields = ["uuid"]
-
-
-class AsyncTaskAPIModelResultsSerializer(serializers.ModelSerializer):
-    status = serializers.ReadOnlyField()
-    result = serializers.ReadOnlyField()
-
-    class Meta:
-        model = AsyncTaskAPIModel
-        fields = [
-            "uuid",
-            "status",
-            "result",
-        ]

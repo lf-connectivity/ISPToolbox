@@ -1,7 +1,6 @@
-from .task_models import (
-    AsyncTaskAPIModel,
-    AsyncTaskAPIModelCreateSuccessSerializer,
-    AsyncTaskAPIModelResultsSerializer,
+from .dummy_models import (
+    DummyTaskModel,
+    DummyTaskSerializer,
 )
 
 import workspace.utils.import_utils

@@ -6,6 +6,7 @@ from workspace.models import (
     AccessPointSector,
 )
 from workspace import pagination
+from workspace.mixins import WorkspaceFeatureGetQuerySetMixin
 from gis_data.models import MsftBuildingOutlines
 from workspace.models import (
     AccessPointSerializer,
@@ -40,17 +41,6 @@ class WorkspacePerformCreateMixin:
         if self.request.user.is_anonymous:
             user = None
         serializer.save(owner=user, session_id=session)
-
-
-class WorkspaceFeatureGetQuerySetMixin:
-    """
-    Mixin for REST Views to get the appropriate query set for the model
-    using the request's user or session
-    """
-
-    def get_queryset(self):
-        model = self.serializer_class.Meta.model
-        return model.get_rest_queryset(self.request)
 
 
 # REST Views
@@ -243,7 +233,7 @@ class PointToPointLinkCreate(
 ):
     serializer_class = PointToPointLinkSerializer
     permission_classes = [AllowAny]
-    schema = AutoSchema(tags=['Point To Point'])
+    schema = AutoSchema(tags=["Point To Point"])
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
@@ -260,7 +250,7 @@ class PointToPointLinkGet(
     serializer_class = PointToPointLinkSerializer
     lookup_field = "uuid"
     permission_classes = [AllowAny]
-    schema = AutoSchema(tags=['Point To Point'])
+    schema = AutoSchema(tags=["Point To Point"])
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)

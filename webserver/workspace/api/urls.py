@@ -2,7 +2,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
 from webserver import settings
-from workspace.api.views import TaskAPIRetrieveView, DummyAPITestCreateView, TokenInspectorView
+from workspace.api.views import DummyTaskCreateView, DummyTaskRetrieveDeleteView, DummyTaskStopView, TokenInspectorView
 
 app_name = "workspace.api"
 urlpatterns = [
@@ -18,11 +18,18 @@ urlpatterns = [
     ), name='openapi-schema'),
 
     # V1
-    path('v1/async-tasks/<uuid:uuid>/', TaskAPIRetrieveView.as_view(), name="task-api-info")
 ]
 
 
 if not settings.PROD:
     urlpatterns += [
-        path('v1/async-tasks/dummy/', DummyAPITestCreateView.as_view(), name="dummy-task")
+        path('v1/dummy-task/', DummyTaskCreateView.as_view(), name="dummy-task-create"),
+        path('v1/dummy-task/<uuid:uuid>',
+            DummyTaskRetrieveDeleteView.as_view(),
+            name="dummy-task-retrieve-delete"
+        ),
+        path('v1/dummy-task/<uuid:uuid>/stop/',
+            DummyTaskStopView.as_view(),
+            name="dummy-task-stop"
+        ),
     ]

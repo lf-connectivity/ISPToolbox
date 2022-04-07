@@ -343,6 +343,16 @@ class WorkspaceBaseTestCase(TestCase):
         )
         self.testuser.save()
 
+        self.other_testuser = get_user_model().objects.create_superuser(
+            username=DEFAULT_USERNAME + "e",
+            password=DEFAULT_PASSWORD,
+            email=DEFAULT_EMAIL + "e",
+            first_name=DEFAULT_FIRST_NAME,
+            last_name=DEFAULT_LAST_NAME,
+            uneditable=DEFAULT_UNEDITABLE,
+        )
+        self.other_testuser.save()
+
         self.test_session = WorkspaceMapSession(
             owner=self.testuser,
         )
@@ -358,6 +368,17 @@ class WorkspaceBaseTestCase(TestCase):
             uneditable=DEFAULT_UNEDITABLE,
         )
         self.test_ap.save()
+
+        self.test_ap_other_user = AccessPointLocation(
+            owner=self.other_testuser,
+            name=DEFAULT_NAME,
+            map_session=self.test_session,
+            geojson=DEFAULT_AP_POINT,
+            height=DEFAULT_HEIGHT,
+            max_radius=DEFAULT_MAX_RADIUS,
+            uneditable=DEFAULT_UNEDITABLE,
+        )
+        self.test_ap_other_user.save()
 
         self.test_sector = AccessPointSector(
             owner=self.testuser,

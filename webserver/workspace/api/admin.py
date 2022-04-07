@@ -1,4 +1,6 @@
 from django.contrib import admin
 from workspace.api import models
+from webserver import settings
 
-admin.site.register(models.AsyncTaskAPIModel)
+if not settings.PROD:
+    admin.site.register(models.DummyTaskModel)

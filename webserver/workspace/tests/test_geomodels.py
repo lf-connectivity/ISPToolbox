@@ -372,7 +372,7 @@ class WorkspaceBaseTestCase(TestCase):
         self.test_ap_other_user = AccessPointLocation(
             owner=self.other_testuser,
             name=DEFAULT_NAME,
-            map_session=self.test_session,
+            map_session=None,
             geojson=DEFAULT_AP_POINT,
             height=DEFAULT_HEIGHT,
             max_radius=DEFAULT_MAX_RADIUS,

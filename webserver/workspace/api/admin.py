@@ -4,3 +4,5 @@ from webserver import settings
 
 if not settings.PROD:
     admin.site.register(models.DummyTaskModel)
+
+admin.site.register(models.PointToPointServiceability)

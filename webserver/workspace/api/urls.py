@@ -20,22 +20,21 @@ urlpatterns = [
     # V1
     path(
         'v1/ptp-serviceability/<uuid:uuid>/',
-        api_views.PointToPointServiceabilityRetrieveView.as_view(),
+        api_views.PointToPointServiceabilityRetrieveDeleteView.as_view(),
         name="ptp-serviceability-get"
     ),
     path(
         'v1/ptp-serviceability/',
         api_views.PointToPointServiceabilityCreateView.as_view(),
         name="ptp-serviceability-create"
-    )
+    ),
+    path(
+        'v1/ptp-serviceability/',
+        api_views.PointToPointServiceabilityStopView.as_view(),
+        name="ptp-serviceability-stop"
+    ),
+    path('v1/dummy-task/', api_views.DummyTaskCreateView.as_view(), name="dummy-task-create"),
+    path('v1/dummy-task/<uuid:uuid>/', api_views.DummyTaskRetrieveDeleteView.as_view(),
+            name="dummy-task-retrieve-delete"),
+    path('v1/dummy-task/<uuid:uuid>/stop/', api_views.DummyTaskStopView.as_view(), name="dummy-task-stop"),
 ]
-
-
-if not settings.PROD:
-    from workspace.api.views import DummyTaskCreateView, DummyTaskRetrieveDeleteView, DummyTaskStopView
-    urlpatterns += [
-        path('v1/dummy-task/', api_views.DummyTaskCreateView.as_view(), name="dummy-task-create"),
-        path('v1/dummy-task/<uuid:uuid>/', api_views.DummyTaskRetrieveDeleteView.as_view(),
-             name="dummy-task-retrieve-delete"),
-        path('v1/dummy-task/<uuid:uuid>/stop/', api_views.DummyTaskStopView.as_view(), name="dummy-task-stop"),
-    ]

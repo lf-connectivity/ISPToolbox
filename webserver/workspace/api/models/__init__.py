@@ -2,6 +2,9 @@ from .dummy_models import (
     DummyTaskModel,
     DummyTaskSerializer,
 )
+from .ptp_results_models import (
+    PointToPointServiceability, PointToPointLinkServiceableSerializer
+)
 
 import workspace.utils.import_utils
 

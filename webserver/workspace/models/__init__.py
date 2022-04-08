@@ -27,9 +27,6 @@ from .session_models import (
     WorkspaceMapSessionSerializer,
 )
 from .ayi_dyi_models import AccessInformationJob, DeleteInformationJob
-from .ptp_results_models import (
-    PointToPointServiceability, PointToPointLinkServiceableSerializer
-)
 
 import workspace.utils.import_utils
 

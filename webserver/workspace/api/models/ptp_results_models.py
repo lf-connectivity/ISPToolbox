@@ -1,9 +1,6 @@
 from django.db import models
-from workspace.models.task_models import (
-    AbstractAsyncTaskAssociatedModel,
-    AbstractAsyncTaskUserMixin,
-    AbstractAsyncTaskPrimaryKeyMixin,
-    AbstractAsyncTaskHashCacheMixin
+from .task_models import (
+    AbstractAsyncTaskAPIModel
 )
 from rest_framework import serializers
 import redis
@@ -16,12 +13,11 @@ from celery_async import celery_app as app
 
 
 class PointToPointServiceability(
-    AbstractAsyncTaskAssociatedModel,
-    AbstractAsyncTaskUserMixin,
-    AbstractAsyncTaskPrimaryKeyMixin,
-    AbstractAsyncTaskHashCacheMixin,
+    AbstractAsyncTaskAPIModel
 ):
     EXPIRE_TIME_RESULTS = 3600 * 24 * 7 * 30
+
+    task_name = "workspace.tasks.ptp_tasks.calculate_serviceability"
 
     @classmethod
     def get_rest_queryset(cls, request):
@@ -76,16 +72,6 @@ class PointToPointServiceability(
         self.save()
 
 
-@receiver(signal=post_save, sender=PointToPointServiceability)
-def __gen_serviceability(
-    sender, instance, created, raw, using, update_fields, **kwargs
-):
-    """
-    Update coverage after modifying AP location
-    """
-    app.send_task("workspace.tasks.ptp_tasks.calculate_serviceability", (instance.uuid,))
-
-
 class PointToPointLinkServiceableSerializer(serializers.ModelSerializer):
     lookup_field = "uuid"
     number_of_obstructions = serializers.IntegerField(read_only=True)
@@ -94,4 +80,4 @@ class PointToPointLinkServiceableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PointToPointServiceability
-        fields = ['number_of_obstructions', 'serviceable', 'gis_data', 'uuid', 'task_status', 'ptp']
+        fields = ['number_of_obstructions', 'serviceable', 'gis_data', 'uuid', 'status', 'ptp']

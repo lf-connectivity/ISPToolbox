@@ -1,36 +1,28 @@
-from workspace import models as workspace_models
-from rest_framework import generics
-from rest_framework import mixins
-from workspace.mixins import (
-    WorkspaceFeatureGetQuerySetMixin, WorkspaceAPIPerformCreateMixin
+from workspace.api import models as workspace_models
+from .task_api_views import (
+    TaskAPICreateView, TaskAPIRetrieveDeleteView, TaskAPIStopView
 )
 from rest_framework.schemas.openapi import AutoSchema
-from rest_framework.permissions import IsAuthenticated
 
-
-class PointToPointServiceabilityRetrieveView(
-    WorkspaceFeatureGetQuerySetMixin,
-    mixins.RetrieveModelMixin,
-    generics.GenericAPIView
+class PointToPointServiceabilityRetrieveDeleteView(
+    TaskAPIRetrieveDeleteView
 ):
-    lookup_field = "uuid"
-    permission_classes = [IsAuthenticated]
     serializer_class = workspace_models.PointToPointLinkServiceableSerializer
-    schema = AutoSchema(tags=['Point To Point'])
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    tags=['Point To Point']
+    schema = AutoSchema(tags=tags)
 
 
 class PointToPointServiceabilityCreateView(
-    WorkspaceAPIPerformCreateMixin,
-    mixins.CreateModelMixin,
-    generics.GenericAPIView
+    TaskAPICreateView
 ):
-    lookup_field = "uuid"
-    permission_classes = [IsAuthenticated]
     serializer_class = workspace_models.PointToPointLinkServiceableSerializer
-    schema = AutoSchema(tags=['Point To Point'])
+    tags=['Point To Point']
+    schema = AutoSchema(tags=tags)
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+
+class PointToPointServiceabilityStopView(
+    TaskAPIStopView
+):
+    serializer_class = workspace_models.PointToPointLinkServiceableSerializer
+    tags=['Point To Point']
+    schema = AutoSchema(tags=tags)

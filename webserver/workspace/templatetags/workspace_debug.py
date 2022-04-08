@@ -35,5 +35,5 @@ def workspace_feature_dump(serializer_class_path, uuid, fields=None):
             _dump_serializer_data(serializer.data, serializer_fields),
         )
 
-    except (ImportError, ObjectDoesNotExist) as e:
+    except (ImportError, ObjectDoesNotExist):
         return ""

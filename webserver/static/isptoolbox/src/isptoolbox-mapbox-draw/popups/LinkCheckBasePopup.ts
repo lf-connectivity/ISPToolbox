@@ -158,6 +158,19 @@ export abstract class LinkCheckBasePopup extends CollapsibleComponent {
         return popup;
     }
 
+    protected createFBOnlyClickListener() {
+        $('a.fbonly')
+            .off()
+            .on('click', (event) => {
+                let elt = $(event.target).parent().find('div:first');
+                if (elt.hasClass('d-none')) {
+                    elt.removeClass('d-none');
+                } else {
+                    elt.addClass('d-none');
+                }
+            });
+    }
+
     protected abstract getHTML(): string;
     protected abstract cleanup(): void;
     protected abstract setEventHandlers(): void;

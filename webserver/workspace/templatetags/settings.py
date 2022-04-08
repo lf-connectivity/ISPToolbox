@@ -17,7 +17,7 @@ class ProdFlag(template.Node):
     def render(self, context):
         if settings.PROD:
             return self.nodelist.render(context)
-        return ''
+        return ""
 
 
 class NotProdFlag(template.Node):
@@ -27,18 +27,35 @@ class NotProdFlag(template.Node):
     def render(self, context):
         if not settings.PROD:
             return self.nodelist.render(context)
-        return ''
+        return ""
+
+
+class FBOnlyFlag(template.Node):
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        if context["request"].user.is_staff:
+            return self.nodelist.render(context)
+        return ""
 
 
 @register.tag(name="onlyprod")
 def onlyprod(parser, token):
-    nodelist = parser.parse(('endonlyprod',))
+    nodelist = parser.parse(("endonlyprod",))
     parser.delete_first_token()
     return ProdFlag(nodelist)
 
 
 @register.tag(name="notprod")
 def notprod(parser, token):
-    nodelist = parser.parse(('endnotprod',))
+    nodelist = parser.parse(("endnotprod",))
     parser.delete_first_token()
     return NotProdFlag(nodelist)
+
+
+@register.tag(name="fbonly")
+def fbonly(parser, token):
+    nodelist = parser.parse(("endfbonly",))
+    parser.delete_first_token()
+    return FBOnlyFlag(nodelist)

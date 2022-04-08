@@ -78,6 +78,7 @@ export class AjaxTowerPopup extends LinkCheckBaseAjaxFormPopup implements IMapbo
         });
 
         addHoverTooltip('.tooltip-input-btn', 'bottom');
+        this.createFBOnlyClickListener();
 
         // Delete Tower Button Callback
         $(`#${TOWER_DELETE_BUTTON_ID}`)

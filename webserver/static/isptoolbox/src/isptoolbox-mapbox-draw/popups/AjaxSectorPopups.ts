@@ -107,6 +107,7 @@ export abstract class BaseAjaxSectorPopup
         );
 
         this.createInputSubmitButtonListener(SECTOR_UPDATE_FORM_ID);
+        this.createFBOnlyClickListener();
 
         $(`#${BACK_TO_TOWER_LINK_ID}`)
             .off()

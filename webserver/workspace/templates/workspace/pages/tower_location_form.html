@@ -1,5 +1,5 @@
 {% extends "workspace/molecules/tower_tooltip_form_base.html" %}
-{% load i18n address_format isp_toolbox_sources isp_toolbox_tool_info %}
+{% load i18n address_format isp_toolbox_sources isp_toolbox_tool_info settings workspace_debug %}
 
 {% block content %}
 {% reverse_geocoded_address_lines lat lng as address_lines %}
@@ -61,6 +61,16 @@
             </button>
         </a>
         {% endif %}
+
+        {% fbonly %}
+            <div>
+                <a class="fbonly">FB-Only: Tower Debug Info</a>
+                <div class="fbonly d-none">
+                    {% workspace_feature_dump "workspace.models.AccessPointSerializer" uuid "uuid" %}
+                </div>
+            </div>
+        {% endfbonly %}
+
         {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-tower-row-tower-popup" delete_row_a_id="tower-delete-btn" delete_row_object_name="Tower" delete_row_last_updated=last_updated %}
     </div>
 </ul>

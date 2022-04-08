@@ -1,5 +1,5 @@
 {% extends "workspace/molecules/tower_tooltip_form_base.html" %}
-{% load i18n isp_toolbox_units %}
+{% load i18n isp_toolbox_units settings workspace_debug %}
 
 {% block title %}
 <a id="back-to-tower-sector-popup" data-target="{{ ap.uuid }}">{% translate "Edit Tower" %}</a> /
@@ -101,6 +101,15 @@
         <li class="stat-row" id="stat-row-sector-popup">
            {% include "workspace/organisms/sector_tooltip_stat_row.html" %}
         </li>
+
+        {% fbonly %}
+            <div>
+                <a class="fbonly">FB-Only: Sector Debug Info</a>
+                <div class="fbonly d-none">
+                    {% workspace_feature_dump "workspace.models.AccessPointSectorSerializer" uuid "uuid,ap" %}
+                </div>
+            </div>
+        {% endfbonly %}
 
         {% include "workspace/molecules/tooltip_delete_row.html" with delete_row_div_id="delete-sector-row-sector-popup" delete_row_a_id="sector-delete-btn" delete_row_object_name="Access Point" delete_row_last_updated=last_updated %}
     </form>

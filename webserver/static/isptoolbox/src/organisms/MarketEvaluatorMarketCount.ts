@@ -52,4 +52,14 @@ export class MarketEvaluatorMarketCount implements IMapboxDrawPlugin{
             }
         }
     }
+
+    drawDeleteCallback(event: {features: Array<GeoJSON.Feature>})
+    {
+        if(this.draw.getAll().features.filter(f => this.filterFeatures(f)).length > 0)
+        {
+            this.allSelected();
+        } else {
+            this.noneSelected();
+        }
+    }
 }

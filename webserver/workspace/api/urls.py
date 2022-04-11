@@ -1,7 +1,6 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from rest_framework.schemas import get_schema_view
-from webserver import settings
 from workspace.api import views as api_views
 
 app_name = "workspace.api"
@@ -34,7 +33,10 @@ urlpatterns = [
         name="ptp-serviceability-stop"
     ),
     path('v1/dummy-task/', api_views.DummyTaskCreateView.as_view(), name="dummy-task-create"),
-    path('v1/dummy-task/<uuid:uuid>/', api_views.DummyTaskRetrieveDeleteView.as_view(),
-            name="dummy-task-retrieve-delete"),
+    path(
+            'v1/dummy-task/<uuid:uuid>/',
+            api_views.DummyTaskRetrieveDeleteView.as_view(),
+            name="dummy-task-retrieve-delete"
+    ),
     path('v1/dummy-task/<uuid:uuid>/stop/', api_views.DummyTaskStopView.as_view(), name="dummy-task-stop"),
 ]

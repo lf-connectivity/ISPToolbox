@@ -7,9 +7,11 @@ class DummyTaskCreateView(TaskAPICreateView):
     tags = ['Dummy Task']
     serializer_class = DummyTaskSerializer.get_create_request_serializer_class()
 
+
 class DummyTaskStopView(TaskAPIStopView):
     tags = ['Dummy Task']
     serializer_class = DummyTaskSerializer
+
 
 class DummyTaskRetrieveDeleteView(TaskAPIRetrieveDeleteView):
     tags = ['Dummy Task']

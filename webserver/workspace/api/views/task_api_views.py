@@ -1,7 +1,5 @@
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework import generics, mixins
-from rest_framework.status import HTTP_201_CREATED
 from rest_framework.schemas.openapi import AutoSchema
 
 from workspace.mixins import WorkspaceFeatureGetQuerySetMixin
@@ -17,9 +15,9 @@ class TaskAPICreateView(mixins.CreateModelMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     tags = None
     serializer_class = None
-    
+
     schema = TaskAPIGenericResponseSchema(tags=tags)
-    
+
     def perform_create(self, serializer):
         task = serializer.save(owner=self.request.user)
         assert hasattr(
@@ -62,7 +60,6 @@ class TaskAPIRetrieveDeleteView(
     tags = None
     serializer_class = None
     schema = TaskAPIGenericResponseSchema(tags=tags)
-
 
     def perform_destroy(self, instance):
         instance.cancel_task()

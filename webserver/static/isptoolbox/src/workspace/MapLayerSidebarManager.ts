@@ -14,8 +14,9 @@ import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { generateMapLayerSidebarRow } from '../atoms/MapLayerSidebarRow';
 import { AccessPointSector } from './WorkspaceSectorFeature';
+import { IIspToolboxAjaxPlugin, initializeIspToolboxInterface } from '../utils/IIspToolboxAjaxPlugin';
 
-export class MapLayerSidebarManager extends CollapsibleComponent implements IMapboxDrawPlugin {
+export class MapLayerSidebarManager extends CollapsibleComponent implements IMapboxDrawPlugin, IIspToolboxAjaxPlugin {
     map: MapboxGL.Map;
     draw: MapboxDraw;
     protected static _instance: MapLayerSidebarManager;
@@ -23,6 +24,7 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
     constructor(map: MapboxGL.Map, draw: MapboxDraw) {
         super();
         initializeMapboxDrawInterface(this, map);
+        initializeIspToolboxInterface(this);
         if (MapLayerSidebarManager._instance) {
             throw Error('Already defined');
         }
@@ -44,6 +46,11 @@ export class MapLayerSidebarManager extends CollapsibleComponent implements IMap
         this.map.on('idle', loadMapCallback);
 
         PubSub.subscribe(WorkspaceEvents.AP_LAYER_CLICKED, this.apLayerClickCallback.bind(this));
+    }
+
+    readCallback(event: {features: Array<GeoJSON.Feature>})
+    {
+        this.drawUpdateCallback({action: 'read', ...event});
     }
 
     drawCreateCallback(event: { features: Array<GeoJSON.Feature> }) {

@@ -206,7 +206,14 @@ class SectorTableServiceableView(AjaxDatatableView):
         {'name': 'uuid', 'visible': False},
         {'name': 'name', 'visible': True},
         {'name': 'map_session', 'title': 'Session', 'foreign_field': 'map_session__name', 'visible': True},
-        {'name': 'status', 'title': 'Status', 'foreign_field': 'building_coverage__status', 'visible': True},
+        {
+            'name': 'status',
+            'title': 'Status',
+            'visible': True, 'placeholder': True,
+            'defaultContent' : 'N/A',
+            'searchable': False,
+            'orderable': False
+        },
         {
             'name': 'serviceable',
             'title': 'Serviceable Buildings',
@@ -234,12 +241,14 @@ class SectorTableServiceableView(AjaxDatatableView):
 
     def customize_row(self, row, obj):
         row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")
-        if obj.building_coverage:
+        try:
             row['serviceable'] = obj.building_coverage.coverageStatistics()['serviceable']
             row['unserviceable'] = obj.building_coverage.coverageStatistics()['unserviceable']
-        else:
+            row['status'] = obj.building_coverage.status
+        except Exception:
             row['serviceable'] = 'N/A'
             row['unserviceable'] = 'N/A'
+            row['status'] = 'N/A'
         export_url = reverse_lazy('workspace:serviceability_export_csv', kwargs={'uuid': obj.pk})
         row['export'] = f"""
             <a href="{export_url}" download class="btn btn-info btn-edit btn-tooltip">

@@ -210,7 +210,7 @@ class SectorTableServiceableView(AjaxDatatableView):
             'name': 'status',
             'title': 'Status',
             'visible': True, 'placeholder': True,
-            'defaultContent' : 'N/A',
+            'defaultContent': 'N/A',
             'searchable': False,
             'orderable': False
         },

@@ -1,5 +1,5 @@
 from celery_async import celery_app as app
-from workspace import models as workspace_models
+from workspace.api import models as workspace_models
 from celery.utils.log import get_task_logger
 
 TASK_LOGGER = get_task_logger(__name__)

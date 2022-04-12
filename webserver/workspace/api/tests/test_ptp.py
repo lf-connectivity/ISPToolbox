@@ -26,7 +26,7 @@ class PointToPointAsyncTestCase(WorkspaceBaseAPITestCase):
             'serviceable': 'UNKNOWN',
             'gis_data': None,
             'uuid': str(ptp_serviceability_pk),
-            'task_status': 'NOT_STARTED',
+            'status': 'UNKNOWN',
             'ptp': str(self.test_ptp_link.pk),
         }
         self.assertJSONEqual(response.content, EXPECTED_CREATE_RESPONSE)

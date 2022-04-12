@@ -3,7 +3,6 @@ from rest_framework import serializers
 from workspace.models import AccessPointLocation
 from workspace.api.models.task_models import (
     AbstractAsyncTaskAPIModel,
-    AbstractAsyncTaskAPISerializer,
     UserAllowedToAccessWorkspaceFeature,
 )
 
@@ -21,7 +20,10 @@ class DummyTaskModel(AbstractAsyncTaskAPIModel):
     )
 
 
-class DummyTaskSerializer(AbstractAsyncTaskAPISerializer):
+class DummyTaskSerializer(serializers.ModelSerializer):
+    lookup_field = "uuid"
+    uuid = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=True)
     ap = serializers.PrimaryKeyRelatedField(
         queryset=AccessPointLocation.objects.all(),
         validators=[UserAllowedToAccessWorkspaceFeature()],
@@ -34,9 +36,8 @@ class DummyTaskSerializer(AbstractAsyncTaskAPISerializer):
             "task_id",
             "status",
             "ap",
+            "uuid",
             "number_of_sectors",
             "sleep_response",
             "sleep_length",
         ]
-        input_fields = ["ap", "sleep_length"]
-        output_fields = ["sleep_response", "number_of_sectors"]

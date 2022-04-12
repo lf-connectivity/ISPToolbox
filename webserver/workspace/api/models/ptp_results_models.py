@@ -20,7 +20,7 @@ class PointToPointServiceability(
     def get_rest_queryset(cls, request):
         return cls.objects.filter(owner=request.user)
 
-    ptp = models.OneToOneField(
+    ptp = models.ForeignKey(
         "workspace.PointToPointLink",
         on_delete=models.CASCADE,
         null=False,

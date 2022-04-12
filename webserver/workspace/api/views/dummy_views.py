@@ -5,7 +5,7 @@ from .task_api_views import TaskAPICreateView, TaskAPIRetrieveDeleteView, TaskAP
 
 class DummyTaskCreateView(TaskAPICreateView):
     tags = ['Dummy Task']
-    serializer_class = DummyTaskSerializer.get_create_request_serializer_class()
+    serializer_class = DummyTaskSerializer
 
 
 class DummyTaskStopView(TaskAPIStopView):
@@ -15,4 +15,4 @@ class DummyTaskStopView(TaskAPIStopView):
 
 class DummyTaskRetrieveDeleteView(TaskAPIRetrieveDeleteView):
     tags = ['Dummy Task']
-    serializer_class = DummyTaskSerializer.get_retrieve_delete_request_serializer_class()
+    serializer_class = DummyTaskSerializer

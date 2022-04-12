@@ -15,7 +15,6 @@ class TaskAPICreateView(mixins.CreateModelMixin, generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     tags = None
     serializer_class = None
-
     schema = TaskAPIGenericResponseSchema(tags=tags)
 
     def perform_create(self, serializer):

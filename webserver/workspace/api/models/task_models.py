@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+import logging
 from celery_async import celery_app as app
 from workspace.models.task_models import (
     AbstractAsyncTaskAssociatedModel,
@@ -24,7 +24,7 @@ class AbstractAsyncTaskAPIModel(
     def status(self):
         task_result = self.task_result
         if not task_result:
-            return AsyncTaskStatus.ERROR.value
+            return AsyncTaskStatus.UNKNOWN.value
         else:
             return AsyncTaskStatus.from_celery_task_status(task_result.status).value
 
@@ -32,6 +32,7 @@ class AbstractAsyncTaskAPIModel(
         assert (
             self.task_name is not None
         ), "Please specify the celery name of the task associated with this model under task_name"
+        logging.info(f"starting task: {self.task_name}")
         app.send_task(self.task_name, (self.uuid,))
 
     class Meta:
@@ -53,40 +54,6 @@ class UserAllowedToAccessWorkspaceFeature:
             raise serializers.ValidationError(
                 f'Invalid pk "{workspace_feature.pk}" - object does not exist.'
             )
-
-
-class AbstractAsyncTaskAPISerializer(serializers.ModelSerializer):
-    uuid = serializers.UUIDField(read_only=True)
-    status = serializers.CharField(read_only=True)
-    # Sub-serializer creation methods for different views
-
-    @classmethod
-    def get_create_request_serializer_class(cls):
-        class AsyncTaskAPICreateSerializer(cls):
-            class Meta:
-                model = cls.Meta.model
-                fields = cls.Meta.input_fields
-
-        AsyncTaskAPICreateSerializer.__name__ = (
-            cls.__name__.split("Serializer")[0] + "CreateRequestSerializer"
-        )
-        return AsyncTaskAPICreateSerializer
-
-    @classmethod
-    def get_retrieve_delete_request_serializer_class(cls):
-        class AsyncTaskAPIRetrieveDeleteSerializer(cls):
-            class Meta:
-                model = cls.Meta.model
-                fields = cls.Meta.output_fields + ["uuid", "status"]
-
-        AsyncTaskAPIRetrieveDeleteSerializer.__name__ = (
-            cls.__name__.split("Serializer")[0] + "RetrieveDeleteResponseSerializer"
-        )
-        return AsyncTaskAPIRetrieveDeleteSerializer
-
-    class Meta:
-        abstract = True
-        fields = ["uuid", "status"]
 
 
 class AsyncTaskAPIGenericResponseSerializer(serializers.Serializer):

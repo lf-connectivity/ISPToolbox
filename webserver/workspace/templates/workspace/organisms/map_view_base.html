@@ -1,13 +1,13 @@
 <div id='map' class='planner-map px-0' data-workspace-tool='los_check'>
     {% if not ptponly %}
-        <div class="on-map-controls{% if beta is True %} map-controls-beta{% endif %}" style="right: 0px">
+        <div class="on-map-controls drawing-map-controls{% if beta is True %} map-controls-beta{% endif %}" style="right: 0px">
             {% include "workspace/molecules/draw_controls.html"%}
             <div class="layer-button-container">
                 {% include "workspace/atoms/buttons/map_layers_button.html" %}
             </div>
         </div>
     {% endif %}
-    <div id='map-controls' class="on-map-controls">
+    <div id='map-controls' class="on-map-controls geocoder-map-controls">
         <div>
             {% if tool == 'market_evaluator' %}
                 {% include "workspace/atoms/connection_issues_alert.html" %}

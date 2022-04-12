@@ -134,8 +134,15 @@ export type LidarResponse = {
     still_loading: boolean;
 };
 
+export enum AccessPointCoverageResponseStatus {
+    STARTED = 'Started',
+    FAILED = 'Failed',
+    COMPLETED = 'Complete'
+}
+
 export type AccessPointCoverageResponse = {
     type: WS_AP_Events.AP_STATUS;
+    status?: AccessPointCoverageResponseStatus;
     uuid: string;
 };
 

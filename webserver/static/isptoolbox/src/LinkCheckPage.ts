@@ -60,6 +60,7 @@ import {
 } from './isptoolbox-mapbox-draw/popups/ajax-cpe-flow-popups/AjaxLinkCheckCPEFlowPopups';
 import { AccessPoint, isAP } from './workspace/WorkspaceFeatures';
 import { AccessPointSector } from './workspace/WorkspaceSectorFeature';
+import { LinkCheckCoverageLoadingLayer } from './organisms/LinkCheckCoverageLoadingLayer';
 var _ = require('lodash');
 
 type HighChartsExtremesEvent = {
@@ -338,6 +339,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         new AjaxLinkCheckLocationSwitchSectorPopup(this.map, this.draw);
         new AjaxLinkCheckCPESwitchSectorPopup(this.map, this.draw);
         new LinkCheckRadiusAndBuildingCoverageRenderer(this.map, this.draw, this.profileWS);
+        new LinkCheckCoverageLoadingLayer(this.map);
 
         // Set relationships amongst collapsible components
         CollapsibleComponent.registerSingletonConflicts(LOSCheckLinkProfileView, [

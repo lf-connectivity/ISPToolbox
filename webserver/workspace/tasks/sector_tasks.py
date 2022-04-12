@@ -132,7 +132,7 @@ def calculateSectorNearby(sector_id: str):
         while remaining_buildings:
             buildings = gis_data_models.MsftBuildingOutlines.objects.filter(
                 geog__intersects=sector.geojson
-            ).all()[offset: BUILDING_PAGINATION + offset]
+            ).all()[offset : BUILDING_PAGINATION + offset]
             nearby_buildings = []
             for building in buildings:
                 b = workspace_models.BuildingCoverage(
@@ -232,5 +232,8 @@ def calculateSectorCoverage(
                         "uuid": str(sector.uuid),
                     }
                     sendMessageToChannel(str(sector.map_session.pk), update)
+
+    coverage.status = "Complete"
+    coverage.save()
     update = {"type": "ap.status", "status": coverage.status, "uuid": str(sector.uuid)}
     sendMessageToChannel(str(sector.map_session.pk), update)

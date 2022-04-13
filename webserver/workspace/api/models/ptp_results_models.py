@@ -6,6 +6,7 @@ from rest_framework import serializers
 import redis
 import json
 import time
+import logging
 from django.conf import settings
 
 
@@ -51,7 +52,7 @@ class PointToPointServiceability(
         r = redis.Redis.from_url(settings.CELERY_BROKER_URL)
         val = r.get(self.key_elevation_profile())
         if val is not None:
-            return json.load(val)
+            return json.loads(val)
         else:
             return val
 
@@ -64,9 +65,20 @@ class PointToPointServiceability(
         r.set(self.key_elevation_profile(), val, ex=int(time.time() + self.EXPIRE_TIME_RESULTS))
 
     def calculate_serviceability(self):
-        self.gis_data = json.dumps({"test": 1234})
-        self.number_of_obstructions = 3
-        self.save()
+        try:
+            # Start By Computing GIS Data
+            gis_data = self.ptp.gis_data()
+            self.gis_data = json.dumps(gis_data.__dict__)
+            # Calculate Obstructions
+            self.number_of_obstructions = self.ptp.calculate_obstructions(gis_data)
+            if self.number_of_obstructions > 0:
+                self.serviceable = PointToPointServiceability.Serviceability.UNSERVICEABLE
+            elif self.number_of_obstructions == 0:
+                self.serviceable = PointToPointServiceability.Serviceability.SERVICEABLE
+            self.save()
+        except Exception:
+            logging.exception("error while calculating serviceability")
+            raise Exception
 
 
 class PointToPointLinkServiceableSerializer(serializers.ModelSerializer):

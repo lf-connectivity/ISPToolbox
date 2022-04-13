@@ -21,7 +21,7 @@ from django.dispatch import receiver
 from gis_data.models import MsftBuildingOutlines
 
 from rest_framework import serializers
-from turfpy import measurement
+
 
 import csv
 import logging
@@ -40,13 +40,17 @@ from workspace.models.validators import validate_ptp_link_geometry
 
 from workspace.utils.geojson_circle import createGeoJSONCircle, createGeoJSONSector
 from .model_constants import (
+    EARTH_RADIUS_M,
     FREQUENCY_CHOICES,
     KM_2_MI,
     FeatureType,
     M_2_FT,
     ModelLimits,
+    SPEED_OF_LIGHT
 )
-from mmwave.tasks.link_tasks import getDTMPoint
+from mmwave.lidar_utils.LidarEngine import LidarEngine, LidarResolution, LIDAR_RESOLUTION_DEFAULTS
+
+from mmwave.tasks.link_tasks import getDTMPoint, getElevationProfile
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.DSMTileEngine import DSMTileEngine
 from celery_async import celery_app as app
@@ -630,6 +634,7 @@ class AccessPointSector(UnitPreferencesModelMixin, WorkspaceFeature):
         """
         Determines if the point specified intersects with this sector.
         """
+        from turfpy import measurement
         start = AccessPointSector._wrap_geojson(self.ap.geojson.json)
         end = AccessPointSector._wrap_geojson(lng_lat)
         start_bearing = (self.heading - self.azimuth / 2) % 360
@@ -653,6 +658,7 @@ class AccessPointSector(UnitPreferencesModelMixin, WorkspaceFeature):
         return distance <= max_distance
 
     def distance(self, lng_lat, units="METRIC"):
+        from turfpy import measurement
         start = AccessPointSector._wrap_geojson(self.ap.geojson.json)
         end = AccessPointSector._wrap_geojson(lng_lat)
         if units == "METRIC":
@@ -962,6 +968,8 @@ class APToCPELinkSerializer(
 
 
 class PointToPointLink(UnitPreferencesModelMixin, WorkspaceFeature):
+    DEFAULT_NUMBER_SAMPLES = 512
+
     frequency = models.FloatField(
         default=ModelLimits.FREQUENCY.default,
         validators=[
@@ -1031,6 +1039,122 @@ class PointToPointLink(UnitPreferencesModelMixin, WorkspaceFeature):
             getDTMPoint(Point(self.geojson[0], srid=self.geojson.srid)),
             getDTMPoint(Point(self.geojson[1], srid=self.geojson.srid)),
         ]
+
+    @property
+    def distance(self):
+        from geopy.distance import distance as geopy_distance
+        from geopy.distance import lonlat
+        return geopy_distance(
+            lonlat(
+                self.geojson[0][0],
+                self.geojson[0][1]
+            ),
+            lonlat(
+                self.geojson[1][0],
+                self.geojson[1][1]
+            )
+        ).meters
+
+    class PointToPointGisData:
+        """
+        Helper class to hold GIS data relevant to link
+        """
+        def __init__(
+            self, lidar: List[float], fresnel: List[float], elevation: List[float],
+            profile: List[float],
+        ):
+            self.lidar = lidar
+            self.fresnel = fresnel
+            self.profile = profile
+            self.elevation = elevation
+
+        def __str__(self):
+            return json.dumps({
+                'lidar': self.lidar,
+                'fresnel': self.fresnel,
+                'profile': self.profile,
+                'elevation': self.elevation
+            })
+
+    def gis_data(self):
+        return PointToPointLink.PointToPointGisData(
+            self.calculate_lidar(),
+            self.calculate_fresnel(),
+            self.calculate_elevation(),
+            self.calculate_profile(),
+        )
+
+    def calculate_elevation(self):
+        return [v['elevation'] for v in getElevationProfile(
+            Point(self.geojson[0]),
+            Point(self.geojson[1]),
+            PointToPointLink.DEFAULT_NUMBER_SAMPLES
+        )]
+
+    def calculate_lidar(self):
+        le = LidarEngine(
+            self.geojson,
+            LIDAR_RESOLUTION_DEFAULTS[LidarResolution.HIGH],
+            PointToPointLink.DEFAULT_NUMBER_SAMPLES
+        )
+        return le.getProfile()
+
+    def calculate_obstructions(self, gis_data: PointToPointGisData):
+        """
+        Determine Locations of Obstructions along link
+        """
+        obstructions = [p - f - l < 0 for p, f, l in zip(gis_data.profile, gis_data.fresnel, gis_data.lidar)]
+        overlaps = 0
+        if len(obstructions) > 0:
+            prev = obstructions[0]
+            for idx, v in enumerate(obstructions):
+                if idx == 0:
+                    continue
+                if prev is True and v is False:
+                    overlaps += 1
+                prev = v
+            if prev is True:
+                overlaps += 1
+        return overlaps
+
+    def calculate_profile(self, num_samples: int = DEFAULT_NUMBER_SAMPLES):
+        """
+        Calculate how the curvature of the earth changes the fresnel zone
+        """
+        resolution = self.distance / num_samples
+        dtm = self.get_dtm_heights()
+        r1 = EARTH_RADIUS_M + self.radio0hgt + dtm[0]
+        r2 = EARTH_RADIUS_M + self.radio1hgt + dtm[1]
+        theta1 = 0
+        theta2 = (num_samples * resolution) / EARTH_RADIUS_M
+        y1 = r1 * math.sin(theta1)
+        x1 = r1 * math.cos(theta1)
+        y2 = r2 * math.sin(theta2)
+        x2 = r2 * math.cos(theta2)
+        m = (y2 - y1) / (x2 - x1)
+        b = y2 - m * x2
+        output = []
+        for i in range(num_samples):
+            theta = i * resolution / EARTH_RADIUS_M
+            h = b / (math.sin(theta) - m * math.cos(theta)) - EARTH_RADIUS_M
+            output.append(h)
+        return output
+
+    def calculate_fresnel(self, num_samples: int = DEFAULT_NUMBER_SAMPLES, fresnel_zone_number: float = 1.0):
+        """
+        Calculate the fresnel zone width across the link
+        """
+        resolution = self.distance / num_samples
+        freq = self.frequency * 10 ** 9  # GHz to Hz
+        wavelength = SPEED_OF_LIGHT / freq  # m
+        d_total = num_samples * resolution
+        output = []
+        for i in range(num_samples):
+            d1 = resolution * i
+            d2 = (num_samples - i) * resolution
+            fresnel = math.sqrt((fresnel_zone_number * d1 * d2 * wavelength) / d_total)
+            output.append(fresnel)
+        return output
 
 
 class PointToPointLinkSerializer(

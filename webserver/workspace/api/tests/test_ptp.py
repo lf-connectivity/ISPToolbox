@@ -1,9 +1,50 @@
 from django.urls import reverse_lazy
 from workspace.tests.test_geomodels import WorkspaceBaseAPITestCase
 from workspace import tasks as workspace_tasks
+from django.contrib.gis.geos import GEOSGeometry
+from mmwave import models as mmwave_models
 
 
 class PointToPointAsyncTestCase(WorkspaceBaseAPITestCase):
+    def setUp(self):
+        super().setUp()
+        polygon = GEOSGeometry("""
+        {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -90.53931713104248,
+              33.547546782478754
+            ],
+            [
+              -90.54167747497559,
+              33.54085812669445
+            ],
+            [
+              -90.53605556488037,
+              33.53824690667674
+            ],
+            [
+              -90.53009033203125,
+              33.54246774356695
+            ],
+            [
+              -90.53931713104248,
+              33.547546782478754
+            ]
+          ]
+        ]
+      }""")
+        self.test_cloud = mmwave_models.EPTLidarPointCloud(
+            name="MS_MSDeltaYazoo-Phase1_2009", count=1,
+            url="https://s3-us-west-2.amazonaws.com/usgs-lidar-public/MS_MSDeltaYazoo-Phase1_2009/ept.json",
+            srs=3857,
+            boundary=polygon
+        )
+        self.test_cloud.save()
+        return
+
     """
     Verify that async task works as expected
     """
@@ -51,6 +92,14 @@ class PointToPointAsyncTestCase(WorkspaceBaseAPITestCase):
                 kwargs={'uuid': ptp_serviceability_pk}
             )
         )
+        EXPECTED_GET_RESPONSE = {
+            'number_of_obstructions': 3,
+            'serviceable': 'UNSERVICEABLE',
+            'gis_data': response.json()['gis_data'],
+            'uuid': str(ptp_serviceability_pk),
+            'status': 'UNKNOWN',
+            'ptp': str(self.test_ptp_link.pk),
+        }
         self.assertTrue(response.status_code, 200)
         # Results should be modified since the async task ran
-        self.assertJSONNotEqual(response.content, EXPECTED_CREATE_RESPONSE)
+        self.assertJSONEqual(response.content, EXPECTED_GET_RESPONSE)

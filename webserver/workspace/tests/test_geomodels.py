@@ -72,7 +72,15 @@ DEFAULT_TEST_LINESTRING = {
         [-121.811111111111111, 38.92222222222222],
     ],
 }
+DEFAULT_TEST_LINESTRING_PTP = {
+    "type": "LineString",
+    "coordinates": [
+        [-90.53714454174042, 33.545105661950174],
+        [-90.53922057151794, 33.54605797541501],
+    ],
+}
 DEFAULT_TEST_LINESTRING = json.dumps(DEFAULT_TEST_LINESTRING)
+DEFAULT_TEST_LINESTRING_PTP = json.dumps(DEFAULT_TEST_LINESTRING_PTP)
 
 DEFAULT_TEST_POLYGON = {
     "type": "Polygon",
@@ -179,6 +187,8 @@ DEFAULT_TEST_GEO_COLLECTION = json.dumps(DEFAULT_TEST_GEO_COLLECTION)
 
 DEFAULT_NAME = "Test Object"
 DEFAULT_HEIGHT = 10.0
+DEFAULT_PTP_HEIGHT_0 = 40.0
+DEFAULT_PTP_HEIGHT_1 = 1.0
 DEFAULT_MAX_RADIUS = 14.2
 DEFAULT_HEADING = 0.0
 DEFAULT_AZIMUTH = 120.0
@@ -446,9 +456,9 @@ class WorkspaceBaseTestCase(TestCase):
             owner=self.testuser,
             frequency=DEFAULT_FREQUENCY,
             map_session=self.test_session,
-            radio0hgt=DEFAULT_HEIGHT,
-            radio1hgt=DEFAULT_HEIGHT,
-            geojson=DEFAULT_TEST_LINESTRING,
+            radio0hgt=DEFAULT_PTP_HEIGHT_0,
+            radio1hgt=DEFAULT_PTP_HEIGHT_1,
+            geojson=DEFAULT_TEST_LINESTRING_PTP,
         )
         self.test_ptp_link.save()
 

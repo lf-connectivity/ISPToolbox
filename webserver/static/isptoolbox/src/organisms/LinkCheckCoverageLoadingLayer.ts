@@ -1,6 +1,7 @@
 import { Feature, Geometry, Point } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import { isBeta } from '../LinkCheckUtils';
+import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../utils/IMapboxDrawPlugin';
 import { BaseWorkspaceManager } from '../workspace/BaseWorkspaceManager';
 import {
     AccessPointCoverageResponse,
@@ -9,6 +10,7 @@ import {
     ViewshedProgressResponse,
     WorkspaceFeatureTypes
 } from '../workspace/WorkspaceConstants';
+import { AccessPoint } from '../workspace/WorkspaceFeatures';
 import { AccessPointSector } from '../workspace/WorkspaceSectorFeature';
 import { BUILDING_OUTLINE_LAYER } from './RadiusAndBuildingCoverageRenderer';
 
@@ -72,11 +74,11 @@ const COVERAGE_LOADING_SOURCE = 'coverage-loading-source';
 const COVERAGE_LOADING_LAYER = 'coverage-loading-layer';
 const IMAGE_NAME = 'loading-spinner';
 
-export class LinkCheckCoverageLoadingLayer {
+export class LinkCheckCoverageLoadingLayer implements IMapboxDrawPlugin {
     map: mapboxgl.Map;
     private static _instance: LinkCheckCoverageLoadingLayer;
 
-    private sectorsLoading: Set<string>;
+    private uuidsLoading: Set<string>;
 
     constructor(map: mapboxgl.Map) {
         if (LinkCheckCoverageLoadingLayer._instance) {
@@ -85,7 +87,7 @@ export class LinkCheckCoverageLoadingLayer {
 
         this.map = map;
         this.map.addImage(IMAGE_NAME, loadingSpinner, { pixelRatio: 2 });
-        this.sectorsLoading = new Set();
+        this.uuidsLoading = new Set();
 
         this.map.addSource(COVERAGE_LOADING_SOURCE, {
             type: 'geojson',
@@ -112,48 +114,59 @@ export class LinkCheckCoverageLoadingLayer {
         PubSub.subscribe(LOSWSEvents.VIEWSHED_PROGRESS_MSG, this.onCoverageStartLoad.bind(this));
         PubSub.subscribe(LOSWSEvents.AP_MSG, this.onCoverageFinishLoad.bind(this));
 
+        initializeMapboxDrawInterface(this, this.map);
+
         LinkCheckCoverageLoadingLayer._instance = this;
     }
 
     private updateCoverageLayer() {
-        let towerFeatures: Array<Feature<Geometry, any>> = [];
-        this.sectorsLoading.forEach((uuid: string) => {
-            let feature = BaseWorkspaceManager.getFeatureByUuid(uuid) as AccessPointSector;
-            towerFeatures.push((feature as AccessPointSector).ap.getFeatureData());
+        let towerFeatures: Set<Feature<Geometry, any>> = new Set();
+        this.uuidsLoading.forEach((uuid: string) => {
+            let feature = BaseWorkspaceManager.getFeatureByUuid(uuid);
+            switch (feature.getFeatureType()) {
+                case WorkspaceFeatureTypes.AP:
+                    towerFeatures.add((feature as AccessPoint).getFeatureData());
+                    break;
+                case WorkspaceFeatureTypes.SECTOR:
+                    towerFeatures.add((feature as AccessPointSector).ap.getFeatureData());
+                    break;
+            }
         });
 
         const loadingSource = this.map.getSource(COVERAGE_LOADING_SOURCE);
         if (loadingSource.type === 'geojson') {
             const fc: GeoJSON.FeatureCollection = {
                 type: 'FeatureCollection',
-                features: towerFeatures
+                features: Array.from(towerFeatures)
             };
             loadingSource.setData(fc);
         }
     }
 
     private onCoverageStartLoad(msg: string, data: ViewshedProgressResponse) {
-        if (isBeta()) {
-            // Only consider sector loading, not tower loading
-            if (!this.sectorsLoading.has(data.uuid)) {
-                let feature = BaseWorkspaceManager.getFeatureByUuid(data.uuid);
-                if (feature.getFeatureType() === WorkspaceFeatureTypes.SECTOR) {
-                    this.sectorsLoading.add(data.uuid);
-                    this.updateCoverageLayer();
-                }
-            }
+        if (!this.uuidsLoading.has(data.uuid)) {
+            this.uuidsLoading.add(data.uuid);
+            this.updateCoverageLayer();
         }
     }
 
     private onCoverageFinishLoad(msg: string, data: AccessPointCoverageResponse) {
-        if (isBeta()) {
-            if (
-                data.status === AccessPointCoverageResponseStatus.COMPLETED &&
-                this.sectorsLoading.delete(data.uuid)
-            ) {
-                this.updateCoverageLayer();
-            }
+        if (
+            data.status === AccessPointCoverageResponseStatus.COMPLETED &&
+            this.uuidsLoading.delete(data.uuid)
+        ) {
+            this.updateCoverageLayer();
         }
+    }
+
+    drawUpdateCallback(event: { features: Array<GeoJSON.Feature>; action: string }) {
+        event.features.every((feat: GeoJSON.Feature) => {
+            if (feat.properties?.uuid && this.uuidsLoading.has(feat.properties.uuid)) {
+                this.updateCoverageLayer();
+                return false;
+            }
+            return true;
+        });
     }
 
     static getInstance() {

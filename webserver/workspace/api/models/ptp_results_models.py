@@ -57,7 +57,7 @@ class PointToPointServiceability(
             return val
 
     def calculate_hash(self):
-        return "123"
+        return f"{self.ptp.pk}|{self.ptp.geojson.json}|{self.ptp.frequency}|{self.ptp.radio0hgt}|{self.ptpradio1hgt}"
 
     @gis_data.setter
     def gis_data(self, val):

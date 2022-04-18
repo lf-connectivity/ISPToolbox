@@ -11,10 +11,20 @@ from django.contrib.auth import (
 
 class CustomCheckboxInput(forms.CheckboxInput):
     template_name = 'workspace/atoms/custom_checkbox.html'
-    custom_message = "It’s okay to contact me via email to participate in interviews."
+    custom_message = "It's okay to contact me via email to participate in \
+        interviews and/or surveys that may be conducted for the purposes of personalizing \
+        and improving Meta Products, support research and innovation for social good, and \
+        for other purposes described in the "
+    custom_link = "https://www.facebook.com/privacy/explanation/"
+    custom_link_text = "Meta Data Policy"
 
     def get_context(self, name, value, attrs):
-        attrs = {**(attrs or {}), 'custom_message': _(self.custom_message)}
+        attrs = {
+            **(attrs or {}),
+            'custom_message': _(self.custom_message),
+            'custom_link': self.custom_link,
+            'custom_link_text': _(self.custom_link_text)
+        }
         return super().get_context(name, value, attrs)
 
 

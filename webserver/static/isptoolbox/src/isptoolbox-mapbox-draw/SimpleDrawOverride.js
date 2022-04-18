@@ -6,7 +6,7 @@ import {
 } from './DrawModeUtils.js';
 import moveFeatures from '@mapbox/mapbox-gl-draw/src/lib/move_features';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
+import { WorkspaceFeatureTypes, WorkspaceEvents } from '../workspace/WorkspaceConstants';
 import * as _ from 'lodash';
 
 export function OverrideSimple(highlightAssociatedSectors = false) {
@@ -119,6 +119,14 @@ export function OverrideSimple(highlightAssociatedSectors = false) {
                 // $FlowFixMe[prop-missing]
                 lat: e.lngLat.lat - state.dragMoveLocation.lat
             };
+
+            // Are we dragging features?
+            let editableFeatureIds = editableFeatures.map((f) => f.id);
+            if (editableFeatureIds.length) {
+                PubSub.publish(WorkspaceEvents.DRAGGING_FEATURES, {
+                    featureIds: editableFeatureIds
+                });
+            }
 
             moveFeatures(editableFeatures, delta);
 

@@ -268,7 +268,6 @@ export abstract class RadiusAndBuildingCoverageRenderer
 
         if (selection === this.last_selection) {
             dragging = true;
-            PubSub.publish(WorkspaceEvents.DRAGGING_FEATURES, { featureIds: ids });
         } else {
             this.last_selection = selection;
         }

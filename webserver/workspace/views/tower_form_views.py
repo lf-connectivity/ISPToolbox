@@ -9,7 +9,7 @@ from workspace.models import (
     AccessPointSector,
     AccessPointCoverageBuildings,
     AccessPointSectorSerializer,
-    Viewshed
+    Viewshed,
 )
 
 import logging
@@ -139,7 +139,7 @@ class SectorFormView(TooltipFormView):
             context.update(
                 {
                     "viewshed_status": {
-                        "status": viewshed.task_status.value,
+                        "status": viewshed.task_status,
                         "progress_message": viewshed.progress_message,
                         "time_remaining": viewshed.time_remaining,
                     },

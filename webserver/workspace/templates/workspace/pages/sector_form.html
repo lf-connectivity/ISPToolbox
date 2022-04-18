@@ -107,6 +107,7 @@
                 <a class="fbonly">FB-Only: Sector Debug Info</a>
                 <div class="fbonly d-none">
                     {% workspace_feature_dump "workspace.models.AccessPointSectorSerializer" uuid "uuid,ap" %}
+                    <p style="font-family: monospace">viewshed_status: {{ viewshed_status }}</p>
                 </div>
             </div>
         {% endfbonly %}

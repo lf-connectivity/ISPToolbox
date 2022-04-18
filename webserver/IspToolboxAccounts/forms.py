@@ -11,10 +11,12 @@ from django.contrib.auth import (
 
 class CustomCheckboxInput(forms.CheckboxInput):
     template_name = 'workspace/atoms/custom_checkbox.html'
-    custom_message = "It's okay to contact me via email to participate in \
-        interviews and/or surveys that may be conducted for the purposes of personalizing \
-        and improving Meta Products, support research and innovation for social good, and \
-        for other purposes described in the "
+    custom_message = (
+        "It's okay to contact me via email to participate in interviews "
+        "and/or surveys that may be conducted for the purposes of personalizing "
+        "and improving Meta Products, support research and innovation for social "
+        "good, and for other purposes described in the "
+    )
     custom_link = "https://www.facebook.com/privacy/explanation/"
     custom_link_text = "Meta Data Policy"
 

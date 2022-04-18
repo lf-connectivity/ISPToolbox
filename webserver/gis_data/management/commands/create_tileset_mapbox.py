@@ -1,7 +1,6 @@
 import argparse
 import logging
 from django.core.management.base import BaseCommand
-from django.contrib.gis.geos import GEOSGeometry
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
 
 

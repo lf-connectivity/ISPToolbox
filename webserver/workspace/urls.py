@@ -124,10 +124,13 @@ urlpatterns = [
     path('workspace/table/serviceable/', views.SectorTableServiceableView.as_view(), name="sector_table_serviceable"),
     # Tables Update, Delete
     path('workspace/ajax/session/update/<uuid:pk>/', views.SessionUpdateView.as_view(), name="ajax_session_update"),
+    path('workspace/ajax/session/create/', views.SessionCreateView.as_view(), name="ajax_session_create"),
     path('workspace/ajax/session/delete/<uuid:pk>/', views.SessionDeleteView.as_view(), name="ajax_session_delete"),
     path('workspace/ajax/tower/update/<uuid:pk>/', views.TowerUpdateView.as_view(), name="ajax_tower_update"),
+    path('workspace/ajax/tower/create/<uuid:map_session>/', views.TowerCreateView.as_view(), name="ajax_tower_create"),
     path('workspace/ajax/tower/delete/<uuid:pk>/', views.TowerDeleteView.as_view(), name="ajax_tower_delete"),
     path('workspace/ajax/sector/update/<uuid:pk>/', views.SectorUpdateView.as_view(), name="ajax_sector_update"),
+    path('workspace/ajax/sector/create/<uuid:map_session>/<uuid:tower>/', views.SectorCreateView.as_view(), name="ajax_sector_create"),
     path('workspace/ajax/sector/delete/<uuid:pk>/', views.SectorDeleteView.as_view(), name="ajax_sector_delete"),
     # Ajax
     path('workspace/ajax/ap-los/coverage/<uuid:uuid>/',

@@ -1,5 +1,6 @@
 import { LinkCheckPage } from '../LinkCheckPage';
 import {BaseWorkspaceManager} from '../workspace/BaseWorkspaceManager';
+import {djangoUrl} from '../utils/djangoUrl';
 
 $(() => {
     //@ts-ignore
@@ -11,4 +12,4 @@ $(() => {
     new LinkCheckPage(networkID, userRequestIdentity);
 });
 
-export default {BaseWorkspaceManager};
+export default {BaseWorkspaceManager, djangoUrl};

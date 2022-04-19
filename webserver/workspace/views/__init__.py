@@ -64,9 +64,10 @@ from .table_views import (
 from .marketing_views import (
     ServiceabilityExportView, ServiceabilityExportCsvView
 )
-from .update_delete_views import (
+from .create_update_delete_views import (
     TowerDeleteView, TowerUpdateView, SectorDeleteView, SectorUpdateView,
-    SessionDeleteView, SessionUpdateView,
+    SessionDeleteView, SessionUpdateView, SectorCreateView, TowerCreateView,
+    SessionCreateView
 )
 
 import workspace.utils.import_utils

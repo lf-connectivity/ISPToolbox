@@ -14,6 +14,7 @@
     $('#{{modal_id}}').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var tower = button.data('tower');
+        var session = button.data('session');
         if(tower) {
             var table = $('#{{table_id}}').DataTable({
                 retrieve: true,
@@ -45,5 +46,11 @@
                 },
             );
         }
+        var node = $('#{{modal_id}}').find('.create-btn');
+        node.removeAttr("hx-get");
+        node.removeAttr("hx-swap");
+        htmx.process('.create-btn')
+        {% comment %} node.attr("hx-get", isptoolbox.djangoUrl("workspace:ajax_sector_create", session, tower));
+        htmx.process(node); {% endcomment %}
     })
 {% endblock %}

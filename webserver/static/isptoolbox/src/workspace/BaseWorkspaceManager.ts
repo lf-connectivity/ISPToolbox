@@ -430,4 +430,8 @@ export abstract class BaseWorkspaceManager implements IMapboxDrawPlugin {
         if(feat)
             feat.delete();
     }
+
+    static create_by_uuid(uuid: string){
+        console.log(uuid);
+    }
 }

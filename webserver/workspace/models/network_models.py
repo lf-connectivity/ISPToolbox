@@ -303,8 +303,11 @@ class AccessPointLocation(UnitPreferencesModelMixin, WorkspaceFeature):
     def coordinates(self, value):
         try:
             coords = value.split(",")
-            self.geojson.x = float(coords[1])
-            self.geojson.y = float(coords[0])
+            if self.geojson is None:
+                self.geojson = Point(float(coords[1]), float(coords[0]))
+            else:
+                self.geojson.x = float(coords[1])
+                self.geojson.y = float(coords[0])
         except Exception:
             logging.exception("failed to parse coordinates")
 

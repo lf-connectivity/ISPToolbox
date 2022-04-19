@@ -94,6 +94,7 @@ class TowerTableView(AjaxDatatableView):
         row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")
         row['view'] = f"""
             <a href="#" class="btn btn-edit btn-tooltip" data-tower="{obj.pk}"
+                data-session="{obj.map_session.pk}"
                 data-toggle="modal" tabindex="-1" data-target="#sector_modal"
                 title data-original-title="View Access Points">
                <img src="{img_view}"/>

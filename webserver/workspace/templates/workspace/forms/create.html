@@ -17,7 +17,7 @@
         {% include "workspace/atoms/isptoolbox_close_icon.html" %}
     </button>
 </div>
-<form hx-post="{{ request.path }}" hx-swap="innerHTML" hx-target="#edit_modal_body">
+<form hx-post="{{ request.path }}" hx-swap="innerHTML" hx-target="#create_modal_body">
     {% csrf_token %}
     <div class="modal-body">
         <h3 class="modal-title" >{% translate "Edit"%}
@@ -32,7 +32,7 @@
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-primary isptoolbox-btn"
-            id="ap-delete-confirm-btn">{% translate "Update"%}</button>
+            id="ap-delete-confirm-btn">{% translate "Create"%}</button>
     </div>
 </form>
 {% endspaceless %}

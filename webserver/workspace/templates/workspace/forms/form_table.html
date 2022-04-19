@@ -1,11 +1,13 @@
+{% load workspace_debug %}
+
 {{ form.non_field_errors }}
 <table class="table table-sm table-modal theme-table">
     <thead class="thead-modal">
-        <tr>{% for field in form %}<th> {{ field.label | safe }} </th>{% endfor %}</tr>
+        <tr>{% for field in form %}<th {% if field.is_hidden %} style="display: none;" {% endif %}>{{ field.label | safe }}</th>{% endfor %}</tr>
     </thead>
     <tbody>
         <tr>{% for field in form %}
-            <td>
+            <td {% if field.is_hidden %} style="display: none;" {% endif %}>
                 {% block field %}
                     {{field}}
                 {% endblock field %}

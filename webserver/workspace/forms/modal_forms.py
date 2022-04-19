@@ -11,7 +11,7 @@ class ModelFormUnitsMixin:
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
-        if instance.get_units == workspace_models.WorkspaceMapSession.UnitPreferences.IMPERIAL:
+        if instance is not None and instance.get_units == workspace_models.WorkspaceMapSession.UnitPreferences.IMPERIAL:
             kwargs['initial'].update(
                 {
                     field: getattr(instance, field_properties['imperial_name'])
@@ -29,6 +29,7 @@ class ModelFormUnitsMixin:
 
 class AccessPointLocationModalForm(forms.ModelForm):
     coordinates = forms.CharField(label="Coordinates", validators=[AccessPointLocation.coordinates_validator])
+    map_session = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
@@ -54,6 +55,8 @@ class AccessPointLocationModalForm(forms.ModelForm):
 
 
 class AccessPointSectorModalForm(ModelFormUnitsMixin, forms.ModelForm):
+    map_session = forms.CharField(widget=forms.HiddenInput())
+    ap = forms.CharField(widget=forms.HiddenInput())
     imperial_fields = {
         'height': {'imperial_name': 'height_ft'},
         'radius': {'imperial_name': 'radius_miles'},
@@ -79,7 +82,7 @@ class AccessPointSectorModalForm(ModelFormUnitsMixin, forms.ModelForm):
     class Meta:
         model = workspace_models.AccessPointSector
         exclude = [
-            'owner', 'map_session', 'session', 'uneditable', 'geojson', 'no_check_radius'
+            'owner', 'map_session', 'session', 'uneditable', 'geojson', 'no_check_radius', 'ap'
         ]
         labels = {
             'radius': 'Distance',

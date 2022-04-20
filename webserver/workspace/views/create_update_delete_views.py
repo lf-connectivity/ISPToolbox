@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from workspace import models as workspace_models
 from workspace import forms as workspace_forms
-from django.core.exceptions import PermissionDenied
 
 
 class HTMXDeleteMixin:
@@ -94,6 +93,8 @@ class TowerDeleteView(HTMXDeleteMixin, DeleteView):
                 {'name': 'Tower', 'modal': 'tower_modal'},
                 {'name': 'Delete'}
             ]
+        if 'confirm' not in kwargs:
+            kwargs['confirm'] = 'tower_modal'
         return super().get_context_data(**kwargs)
 
 
@@ -112,6 +113,8 @@ class TowerUpdateView(HTMXUpdateMixin, UpdateView):
                 {'name': 'Tower', 'modal': 'tower_modal'},
                 {'name': 'Update'}
             ]
+        if 'confirm' not in kwargs:
+            kwargs['confirm'] = 'tower_modal'
         return super().get_context_data(**kwargs)
 
 
@@ -123,7 +126,11 @@ class TowerCreateView(HTMXCreateMixin, CreateView):
     def pre_save_form(self, form):
         form.instance.owner = self.request.user
         # Get Session, checking if owned by request user
-        form.instance.map_session = workspace_models.WorkspaceMapSession.get_rest_queryset(self.request).get(pk=self.kwargs.get('map_session', None))
+        form.instance.map_session = (
+            workspace_models.WorkspaceMapSession
+            .get_rest_queryset(self.request)
+            .get(pk=self.kwargs.get('map_session', None))
+        )
 
     def get_form_kwargs(self, *args, **kwargs):
         form_kwargs = super(CreateView, self).get_form_kwargs(*args, **kwargs)
@@ -159,6 +166,8 @@ class SectorDeleteView(HTMXDeleteMixin, DeleteView):
                 {'name': 'Access Point', 'modal': 'sector_modal'},
                 {'name': 'Delete'}
             ]
+        if 'confirm' not in kwargs:
+            kwargs['confirm'] = 'sector_modal'
         return super().get_context_data(**kwargs)
 
 
@@ -178,6 +187,8 @@ class SectorUpdateView(HTMXUpdateMixin, UpdateView):
                 {'name': 'Access Point', 'modal': 'sector_modal'},
                 {'name': 'Update'}
             ]
+        if 'confirm' not in kwargs:
+            kwargs['confirm'] = 'sector_modal'
         return super().get_context_data(**kwargs)
 
 
@@ -189,9 +200,17 @@ class SectorCreateView(HTMXCreateMixin, CreateView):
     def pre_save_form(self, form):
         form.instance.owner = self.request.user
         # Get Session, checking if owned by request user
-        form.instance.map_session = workspace_models.WorkspaceMapSession.get_rest_queryset(self.request).get(pk=self.kwargs.get('map_session', None))
+        form.instance.map_session = (
+            workspace_models.WorkspaceMapSession
+            .get_rest_queryset(self.request)
+            .get(pk=self.kwargs.get('map_session', None))
+        )
         # Get Tower, checking if owned by request user
-        form.instance.ap = workspace_models.AccessPointLocation.get_rest_queryset(self.request).get(pk=self.kwargs.get('tower', None))
+        form.instance.ap = (
+            workspace_models.AccessPointLocation
+            .get_rest_queryset(self.request)
+            .get(pk=self.kwargs.get('tower', None))
+        )
 
     def get_form_kwargs(self, *args, **kwargs):
         form_kwargs = super(CreateView, self).get_form_kwargs(*args, **kwargs)

@@ -74,7 +74,6 @@ class TowerTableView(AjaxDatatableView):
         {'name': 'coordinates', 'title': 'Coordinates', 'visible': True, 'searchable': False, 'orderable': False},
         {'name': 'sector_count', 'title': 'Sectors', 'visible': True, 'searchable': False, 'orderable': False},
         {'name': 'last_updated', 'title': 'Modified', 'visible': True},
-        {'name': 'view', 'title': '', 'placeholder': True, 'searchable': False, 'orderable': False, },
         {'name': 'edit', 'title': '', 'placeholder': True, 'searchable': False, 'orderable': False, },
         {'name': 'delete', 'title': '', 'placeholder': True, 'searchable': False, 'orderable': False, },
     ]
@@ -92,12 +91,12 @@ class TowerTableView(AjaxDatatableView):
 
         row['coordinates'] = "{:.6f}, {:.6f}".format(obj.lat, obj.lng)
         row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")
-        row['view'] = f"""
-            <a href="#" class="btn btn-edit btn-tooltip" data-tower="{obj.pk}"
+        row['sector_count'] = f"""
+            <a href="#" class="btn btn-edit btn-tooltip d-flex" data-tower="{obj.pk}"
                 data-session="{obj.map_session.pk}"
                 data-toggle="modal" tabindex="-1" data-target="#sector_modal"
                 title data-original-title="View Access Points">
-               <img src="{img_view}"/>
+               {obj.sector_count}<img class="my-auto ml-3" src="{img_view}"/>
             </a>
         """
         row['edit'] = f"""

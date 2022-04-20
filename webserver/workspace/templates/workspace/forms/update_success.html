@@ -15,7 +15,7 @@
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         {% include "workspace/atoms/isptoolbox_close_icon.html" %}
     </button>
-</div>
+</div>  
 <div class="modal-body">
     <h3 class="modal-title">{% translate "Successfully updated "%}"{{object.name}}"</h3>
 </div>
@@ -23,5 +23,8 @@
     <button class="btn btn-primary isptoolbox-btn" data-dismiss="modal">{% translate "Close"%}</button>
 </div>
 <script>
+    {% if confirm %}
+    $('#{{confirm}}').modal('show')
+    {% endif %}
     isptoolbox.BaseWorkspaceManager.refresh_by_uuid("{{object.pk}}")
 </script>

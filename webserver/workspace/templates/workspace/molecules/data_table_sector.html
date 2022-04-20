@@ -7,50 +7,64 @@
 </ol>
 {{ block.super}}
 {% endblock %}
+
 {% block init_table %}
-{{ block.super }}
 {% endblock %}
-{% block extra_js %}
-    $('#{{modal_id}}').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var tower = button.data('tower');
-        var session = button.data('session');
-        if(tower) {
+
+{% block on_show_modal %}
+    var button = $(event.relatedTarget);
+    var tower = button.data('tower');
+    var session = button.data('session');
+    if(tower) {
+        var attr = $('#{{table_id}}').attr('init');
+        var initialized = typeof attr !== typeof undefined && attr !== false;
+        if(initialized)
+        {
             var table = $('#{{table_id}}').DataTable({
                 retrieve: true,
                 paging: false
             });
             table.destroy()
             $('#{{table_id}}').html("");
-            $("#tower_modal").modal("hide");
-            AjaxDatatableViewUtils.initialize_table(
-                $('#{{table_id}}'),
-                "{{ table_ajax_url }}", {
-                    // extra_options (example)
-                    processing: false,
-                    autoWidth: false,
-                    scrollX: false,
-                    bLengthChange: false,
-                    pagingType: "simple",
-                    drawCallback: ()=>{
-                        htmx.process('#{{table_id}}');
-                        $('.btn-tooltip').tooltip('hide');
-                        $('.btn-tooltip').tooltip({
-                            delay: { show: 500, hide: 100 },
-                            placement: 'top',
-                            trigger : 'hover'
-                        });
-                    }
-                }, {
-                    tower
-                },
-            );
+            $("#{{modal_id}}_search").html("");
+                $("#{{modal_id}}_pagination").html("");
         }
+        AjaxDatatableViewUtils.initialize_table(
+            $('#{{table_id}}'),
+            "{{ table_ajax_url }}", {
+                // extra_options (example)
+                processing: false,
+                autoWidth: false,
+                scrollX: false,
+                bLengthChange: false,
+                pagingType: "simple",
+                language: {
+                    emptyTable: "No Sectors were found",
+                    search: ""
+                },
+                drawCallback: ()=>{
+                    htmx.process('#{{table_id}}');
+                    $('.btn-tooltip').tooltip('hide');
+                    $('.btn-tooltip').tooltip({
+                        delay: { show: 500, hide: 100 },
+                        placement: 'top',
+                        trigger : 'hover'
+                    });
+                    $("#{{modal_id}}_search").html($("#{{modal_id}}").find(".dataTables_filter"));
+                    $("#{{modal_id}}_pagination").html($("#{{table_id}}_paginate"));
+                }
+            }, {
+                tower
+            },
+        );
+        $('#{{table_id}}').attr("init", "initialized");
+    }
+    if(tower && session)
+    {
         var node = $('#{{modal_id}}').find('.create-btn');
-        node.removeAttr("hx-get");
-        node.removeAttr("hx-swap");
-        htmx.process('.create-btn')
-        {% comment %} node.attr("hx-get", isptoolbox.djangoUrl("workspace:ajax_sector_create", session, tower));
-        htmx.process(node); {% endcomment %}
-    })
+        node.attr("hx-get", isptoolbox.djangoUrl("workspace:ajax_sector_create", session, tower));
+        node.attr("hx-swap", "innerHTML");
+        node.attr("hx-target", "#create_modal_body");
+        htmx.process('.create-btn');
+    }
 {% endblock %}

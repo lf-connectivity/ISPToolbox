@@ -29,7 +29,7 @@ class ModelFormUnitsMixin:
 
 class AccessPointLocationModalForm(forms.ModelForm):
     coordinates = forms.CharField(label="Coordinates", validators=[AccessPointLocation.coordinates_validator])
-    map_session = forms.CharField(widget=forms.HiddenInput())
+    map_session = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance', None)
@@ -55,8 +55,8 @@ class AccessPointLocationModalForm(forms.ModelForm):
 
 
 class AccessPointSectorModalForm(ModelFormUnitsMixin, forms.ModelForm):
-    map_session = forms.CharField(widget=forms.HiddenInput())
-    ap = forms.CharField(widget=forms.HiddenInput())
+    map_session = forms.CharField(widget=forms.HiddenInput(), required=False)
+    ap = forms.CharField(widget=forms.HiddenInput(), required=False)
     imperial_fields = {
         'height': {'imperial_name': 'height_ft'},
         'radius': {'imperial_name': 'radius_miles'},

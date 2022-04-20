@@ -7,11 +7,16 @@
     </thead>
     <tbody>
         <tr>{% for field in form %}
-            <td {% if field.is_hidden %} style="display: none;" {% endif %}>
+            <td
+            {% if field.is_hidden %} style="display: none;" {% endif %}
+            {% if field.errors %} class="error-input" {% endif %}
+            >
                 {% block field %}
                     {{field}}
                 {% endblock field %}
+                {% if not hide_errors %}
                 {{ field.errors }}
+                {% endif %}
             </td>
             {% endfor %}
         </tr>

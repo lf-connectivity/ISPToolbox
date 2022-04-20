@@ -20,7 +20,6 @@
 {% endblock %}
 {% block sector_table %}
     {% url 'workspace:sector_table' as table_ajax_url %}
-    {% url 'workspace:ajax_sector_create' session.pk as create_object_url %}
     {% with header="Access Points" table_id="sector_data_table" modal_id="sector_modal" table_ajax_url=table_ajax_url model_name="Sector" %}
     {% include "workspace/molecules/data_table_sector.html"%}
     {% endwith %}

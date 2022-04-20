@@ -10,6 +10,7 @@ AjaxDatatableViewUtils.initialize_table(
         scrollX: false,
         bLengthChange: false,
         pagingType: "simple",
+        language: { search: "" },
         drawCallback: ()=>{
             htmx.process('#{{table_id}}');
             $('.btn-tooltip').tooltip('hide');
@@ -18,6 +19,8 @@ AjaxDatatableViewUtils.initialize_table(
                 placement: 'top',
                 trigger : 'hover'
             });
+            $("#{{modal_id}}_search").html($("#{{modal_id}}").find(".dataTables_filter"));
+            $("#{{modal_id}}_pagination").html($("#{{table_id}}_paginate"));
         }
     }, {
         map_session: "{{session.pk}}"

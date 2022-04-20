@@ -6,9 +6,9 @@
             <div class="modal-header">
                 <h3 class="modal-title" id="{{ modal_id }}Label">{{ header }}</h3>
                 <div class="d-flex flex-row">
+                    <div id="{{modal_id}}_search" class="isptoolbox-form"></div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <svg width="14" height="16"
-                            viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M13 1L1 14.5467" stroke="black" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round"></path>
                             <path d="M1 1L13 14.5467" stroke="black" stroke-width="2" stroke-linecap="round"
@@ -28,13 +28,15 @@
                 </div>
                 {% endblock %}
             </div>
-            <div class="modal-footer d-flex justify-content-start">
-                <button
-                    class="btn btn-outline-primary isptoolbox-btn mr-1 create-btn"
+            <div class="modal-footer d-flex justify-content-between">
+                <a href="#" class="mr-1 create-btn" hx-ext="debug"
+                    {% if create_object_url %}
                     hx-get="{{create_object_url}}"
                     hx-swap="innerHTML"
                     hx-target="#create_modal_body"
-                    data-toggle="modal" data-target="#create_modal">{% blocktrans %}Add {{model_name}}{% endblocktrans %}</button>
+                    {% endif %}
+                    data-toggle="modal" data-target="#create_modal">{% blocktrans %}+ Add {{model_name}}{% endblocktrans %}</a>
+                <div id="{{modal_id}}_pagination"></div>
             </div>
         </div>
     </div>
@@ -45,12 +47,15 @@
         AjaxDatatableViewUtils.initialize_table(
             $('#{{table_id}}'),
             "{{ table_ajax_url }}", {
-                // extra_options (example)
                 processing: false,
                 autoWidth: false,
                 scrollX: false,
                 bLengthChange: false,
                 pagingType: "simple",
+                language: {
+                    emptyTable: "No items were found",
+                    search: ""
+                },
                 drawCallback: () => {
                     htmx.process('#{{table_id}}');
                     $('.btn-tooltip').tooltip('hide');
@@ -62,6 +67,8 @@
                         placement: 'top',
                         trigger: 'hover'
                     });
+                    $("#{{modal_id}}_search").html($("#{{modal_id}}").find(".dataTables_filter"));
+                    $("#{{modal_id}}_pagination").html($("#{{table_id}}_paginate"));
                 }
             }, {},
         );
@@ -70,9 +77,9 @@
             $('#{{modal_id}}').modal("hide");
         });
         $('#{{modal_id}}').on('show.bs.modal', function (event) {
+            {% block on_show_modal %}
             $('#{{table_id}}').DataTable().ajax.reload(null, false);
+            {% endblock %}
         });
-        {% block extra_js %}
-        {% endblock %}
     });
 </script>

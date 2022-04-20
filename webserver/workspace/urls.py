@@ -130,7 +130,11 @@ urlpatterns = [
     path('workspace/ajax/tower/create/<uuid:map_session>/', views.TowerCreateView.as_view(), name="ajax_tower_create"),
     path('workspace/ajax/tower/delete/<uuid:pk>/', views.TowerDeleteView.as_view(), name="ajax_tower_delete"),
     path('workspace/ajax/sector/update/<uuid:pk>/', views.SectorUpdateView.as_view(), name="ajax_sector_update"),
-    path('workspace/ajax/sector/create/<uuid:map_session>/<uuid:tower>/', views.SectorCreateView.as_view(), name="ajax_sector_create"),
+    path(
+         'workspace/ajax/sector/create/<uuid:map_session>/<uuid:tower>/',
+         views.SectorCreateView.as_view(),
+         name="ajax_sector_create"
+     ),
     path('workspace/ajax/sector/delete/<uuid:pk>/', views.SectorDeleteView.as_view(), name="ajax_sector_delete"),
     # Ajax
     path('workspace/ajax/ap-los/coverage/<uuid:uuid>/',

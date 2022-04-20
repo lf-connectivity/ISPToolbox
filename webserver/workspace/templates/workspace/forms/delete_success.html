@@ -23,5 +23,8 @@
     <button class="btn btn-primary isptoolbox-btn" data-dismiss="modal">{% translate "Close"%}</button>
 </div>
 <script>
+    {% if confirm %}
+    $('#{{confirm}}').modal('show')
+    {% endif %}
     isptoolbox.BaseWorkspaceManager.delete_by_uuid("{{object.pk}}")
 </script>

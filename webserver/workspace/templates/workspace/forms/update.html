@@ -22,12 +22,19 @@
     <div class="modal-body">
         <h3 class="modal-title" >{% translate "Edit"%}
         </h3>
-        <div class="isptoolbox-form">
+        <div class="table-responsive isptoolbox-form">
+            {% with hide_errors=True %}
             {% if form.units %}
             {% include "workspace/forms/form_table_with_units.html" %}
             {% else %}
             {% include "workspace/forms/form_table.html" %}
             {% endif %}
+            {% endwith %}
+        </div>
+        <div class="isptoolbox-form">
+        {% for field in form %}
+        {{ field.errors }}
+        {% endfor %}
         </div>
     </div>
     <div class="modal-footer">

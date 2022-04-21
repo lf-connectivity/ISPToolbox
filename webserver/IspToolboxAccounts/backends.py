@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.conf import settings
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
+
 class EmailBackend(ModelBackend):
     def authenticate(self, request, email=None, password=None, **kwargs):
         try:
@@ -25,6 +26,7 @@ if settings.PROD:
             user.save()
             return super().save_user(user, *args, **kwargs)
 
+
 class FBLoginAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(self, request, socialaccount):
         return settings.ENABLE_ACCOUNT_CREATION
@@ -34,3 +36,4 @@ class FBLoginAdapter(DefaultSocialAccountAdapter):
         if not sociallogin.is_existing:
             sociallogin.state['next'] = settings.ACCOUNT_SIGNUP_REDIRECT_URL
         return super().save_user(request, sociallogin, form)
+    

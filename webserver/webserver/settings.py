@@ -234,8 +234,10 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERSION": "v10.0",
     }
 }
+SOCIALACCOUNT_ADAPTER = 'IspToolboxAccounts.backends.FBLoginAdapter'
 
-ENABLE_ACCOUNT_CREATION = False
+
+ENABLE_ACCOUNT_CREATION = True if DEBUG else False
 
 # These keys have full access to AWS S3 and secrets manager
 

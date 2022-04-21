@@ -123,21 +123,15 @@ urlpatterns = [
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + \
     static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 # Facebook SDK Login
-if not settings.ENABLE_ACCOUNT_CREATION:
-    social_login = [
-        path('fb-sdk/facebook/login/token/',
-             views.RespondOkView.as_view(), name="facebook_login_by_token"),
-        path('fb-sdk/facebook/login/',
-             views.RespondOkView.as_view(), name="facebook_login"),
-        path('fb-sdk/facebook/login/callback/',
-             views.RespondOkView.as_view(), name="facebook_callback"),
-        path('fb-sdk/social/', include('allauth.socialaccount.urls')),
-    ]
-else:
-    social_login = [
-        path('fb-sdk/', include('allauth.socialaccount.providers.facebook.urls')),
-        path('fb-sdk/social/', include('allauth.socialaccount.urls')),
-    ]
+
+social_login = [
+     path('fb-sdk/', include('allauth.socialaccount.providers.facebook.urls')),
+     path('fb-sdk/social/', include('allauth.socialaccount.urls')),
+
+     # Quick hack for error views from allauth templates.
+     path('fb-sdk/account-login,', views.RespondOkView.as_view(), name="account_login"),
+     path('fb-sdk/account-signup,', views.RespondOkView.as_view(), name="account_signup"),
+]
 urlpatterns += social_login
 
 if settings.PROD:

@@ -1,7 +1,7 @@
 from django.contrib.auth.backends import ModelBackend, UserModel
 from django.db.models import Q
 from django.conf import settings
-
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
 class EmailBackend(ModelBackend):
     def authenticate(self, request, email=None, password=None, **kwargs):
@@ -24,3 +24,13 @@ if settings.PROD:
             user.is_superuser = True
             user.save()
             return super().save_user(user, *args, **kwargs)
+
+class FBLoginAdapter(DefaultSocialAccountAdapter):
+    def is_open_for_signup(self, request, socialaccount):
+        return settings.ENABLE_ACCOUNT_CREATION
+
+    def save_user(self, request, sociallogin, form=None):
+        # Redirect to questionnaire if new account
+        if not sociallogin.is_existing:
+            sociallogin.state['next'] = settings.ACCOUNT_SIGNUP_REDIRECT_URL
+        return super().save_user(request, sociallogin, form)

@@ -129,7 +129,7 @@ const disclaimer = new Shepherd.Tour({
 });
 disclaimer.addStep({
     id: 'disclaimer',
-    text: "{% translate 'This tool is intended for informational purposes only, and is provided \"as is\" solely in order to generate estimates. Please perform independent market research and consult an expert before deploying a network. Facebook makes no warranties regarding the accuracy of the tool or the third-party data sources and tools referenced below. Users are encouraged to check cited sources for latest updates and to learn more. Data is only available in the United States and Canada.'%}",
+    text: "{% blocktranslate %}This tool is intended for informational purposes only, and is provided \"as is\" solely in order to generate estimates. Please perform independent market research and consult an expert before deploying a network. Facebook makes no warranties regarding the accuracy of the tool or the third-party data sources and tools referenced below. Users are encouraged to check cited {% endblocktranslate %}<a href=\"{% url "workspace:sources" sources_page="market_eval" %}\" target=\"_blank\">{% translate "sources" %}</a> {% blocktranslate %}for latest updates and to learn more. Data is only available in the United States and Canada.{% endblocktranslate %}",
     attachTo: {
         element: '#disclaimer-link',
         on: 'top'

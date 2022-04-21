@@ -38,7 +38,6 @@ from .session_views import (
 )
 from .error_views import Error500View, Error404View, Error403View, AdminGeneric403View
 from .social_views import FBDeauthorizeSocialView, FBDataDeletionView
-from .legal_views import DataPolicy, Cookies, TermsOfService
 from .multiplayer_views import MultiplayerTestView
 from .tour_views import NuxTourView
 from .sources_views import WorkspaceSourcesView

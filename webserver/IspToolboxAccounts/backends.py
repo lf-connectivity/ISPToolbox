@@ -36,4 +36,3 @@ class FBLoginAdapter(DefaultSocialAccountAdapter):
         if not sociallogin.is_existing:
             sociallogin.state['next'] = settings.ACCOUNT_SIGNUP_REDIRECT_URL
         return super().save_user(request, sociallogin, form)
-    

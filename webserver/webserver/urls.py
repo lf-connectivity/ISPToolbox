@@ -126,11 +126,7 @@ urlpatterns = [
 
 social_login = [
      path('fb-sdk/', include('allauth.socialaccount.providers.facebook.urls')),
-     path('fb-sdk/social/', include('allauth.socialaccount.urls')),
-
-     # Quick hack for error views from allauth templates.
-     path('fb-sdk/account-login,', views.RespondOkView.as_view(), name="account_login"),
-     path('fb-sdk/account-signup,', views.RespondOkView.as_view(), name="account_signup"),
+     path('fb-sdk/social/', include('allauth.socialaccount.urls'))
 ]
 urlpatterns += social_login
 

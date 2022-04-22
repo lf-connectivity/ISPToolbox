@@ -40,6 +40,14 @@
             svg
                 margin-left: 3px
 
+
+@media (min-width: $breakpoint-md)
+    .disclaimer-links
+        display: grid !important
+        grid-template-columns: 1fr 1fr
+        grid-template-rows: 1fr 1fr 1fr
+        white-space: nowrap
+
 @media (min-width: $breakpoint-sm)
     .workspace-footer
         align-items: center
@@ -62,4 +70,3 @@
             padding-left: 0 !important
         a:last-child
             padding-right: 0 !important
-

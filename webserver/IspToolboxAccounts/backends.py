@@ -8,6 +8,8 @@ from allauth.socialaccount.providers.base import AuthError
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 import logging
 
+from IspToolboxAccounts.models import IspToolboxUserSignUpInfo
+
 
 class EmailBackend(ModelBackend):
     def authenticate(self, request, email=None, password=None, **kwargs):

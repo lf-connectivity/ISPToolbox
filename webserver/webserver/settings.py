@@ -234,8 +234,10 @@ SOCIALACCOUNT_PROVIDERS = {
         "VERSION": "v10.0",
     }
 }
-SOCIALACCOUNT_ADAPTER = 'IspToolboxAccounts.backends.FBLoginAdapter'
-
+SOCIALACCOUNT_ADAPTER = "IspToolboxAccounts.backends.FBLoginAdapter"
+SOCIALACCOUNT_FORMS = {
+    "signup": "IspToolboxAccounts.forms.IspToolboxSocialUserSignUpInfoForm"
+}
 
 ENABLE_ACCOUNT_CREATION = True if DEBUG else False
 

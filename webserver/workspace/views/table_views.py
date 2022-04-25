@@ -32,8 +32,8 @@ class SessionTableView(AjaxDatatableView):
 
     def customize_row(self, row, obj):
         # Load Images
-        img_edit = static('isptoolbox/images/edit.png')
-        img_delete = static('isptoolbox/images/delete.png')
+        img_edit = static('isptoolbox/images/pen_icon.svg')
+        img_delete = static('isptoolbox/images/trash_icon.svg')
         path = reverse_lazy('workspace:edit_network_by_uuid', kwargs={'session_id': obj.pk})
         # Modify Rows
         row['name'] = f'<a href="{path}">{obj.name}</a>'
@@ -85,9 +85,9 @@ class TowerTableView(AjaxDatatableView):
         return qs
 
     def customize_row(self, row, obj):
-        img_edit = static('isptoolbox/images/edit.png')
-        img_delete = static('isptoolbox/images/delete.png')
-        img_view = static('isptoolbox/images/view.png')
+        img_edit = static('isptoolbox/images/pen_icon.svg')
+        img_delete = static('isptoolbox/images/trash_icon.svg')
+        img_view = static('isptoolbox/images/tower_icon.svg')
 
         row['coordinates'] = "{:.6f}, {:.6f}".format(obj.lat, obj.lng)
         row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")
@@ -154,8 +154,8 @@ class SectorTableView(AjaxDatatableView):
 
     def customize_row(self, row, obj):
         # Load Images
-        img_edit = static('isptoolbox/images/edit.png')
-        img_delete = static('isptoolbox/images/delete.png')
+        img_edit = static('isptoolbox/images/pen_icon.svg')
+        img_delete = static('isptoolbox/images/trash_icon.svg')
         # Modify Rows
         if hasattr(self, 'units'):
             if self.units == workspace_models.WorkspaceMapSession.UnitPreferences.METRIC:

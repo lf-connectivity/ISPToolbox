@@ -250,7 +250,7 @@ export class RdofGeoOverlay extends MapboxGeoOverlay {
     }
 
     getName(properties: any): string {
-        return `RDOF xxxx${properties.cbgid.slice(-5)}`;
+        return `RDOF x${properties.cbgid.slice(-5)}`;
     }
 }
 
@@ -339,7 +339,7 @@ export class CensusBlocksGeoOverlay extends MapboxGeoOverlay {
     }
 
     getName(properties: any): string {
-        return `Census Block xxxx${properties.blockcode.slice(-5)}`;
+        return `Census Block x${properties.blockcode.slice(-5)}`;
     }
 }
 

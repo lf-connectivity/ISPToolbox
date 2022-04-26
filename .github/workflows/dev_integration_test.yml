@@ -33,8 +33,6 @@ jobs:
       - name: Run Django Test Suite
         run: |
           # Test then cleanup containers
-          docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py makemigrations
-          docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py migrate
           make test
           docker stop $(docker ps -a -f "name=isptoolbox_" -q)
           docker rm $(docker ps -a -f "name=isptoolbox_" -q)

@@ -26,6 +26,8 @@ jobs:
       - name: Build Docker Containers
         run: |
           make setup_dev
+          docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py makemigrations
+          docker-compose -f docker-compose.yml -f docker-compose.dev.yml run django-app python3 manage.py migrate
           make default_objects
           make static_test
           docker stop $(docker ps -a -f "name=isptoolbox_" -q)
@@ -40,7 +42,7 @@ jobs:
         with:
           start: make run_test
           wait-on: "http://localhost:8000, http://localhost:8020"
-    # TODO: fix coverage tests
+      # TODO: fix coverage tests
       # - name: Generate E2E test backend coverage
       #   run: |
       #     docker stop $(docker ps -a -f "name=isptoolbox_" -q)

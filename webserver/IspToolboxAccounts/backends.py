@@ -8,6 +8,8 @@ from allauth.socialaccount.providers.base import AuthError
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 import logging
 
+from IspToolboxAccounts.utils import enable_account_creation
+
 
 class EmailBackend(ModelBackend):
     def authenticate(self, request, email=None, password=None, **kwargs):
@@ -34,7 +36,7 @@ if settings.PROD:
 
 class FBLoginAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(self, request, socialaccount):
-        return settings.ENABLE_ACCOUNT_CREATION
+        return enable_account_creation()
 
     def authentication_error(
         self, request, provider_id, error=None, exception=None, extra_context=None

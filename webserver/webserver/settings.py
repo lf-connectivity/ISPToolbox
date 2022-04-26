@@ -239,7 +239,8 @@ SOCIALACCOUNT_FORMS = {
     "signup": "IspToolboxAccounts.forms.IspToolboxSocialUserSignUpInfoForm"
 }
 
-ENABLE_ACCOUNT_CREATION = True if DEBUG else False
+WAFFLE_CREATE_MISSING_FLAGS = True
+WAFFLE_CREATE_MISSING_SWITCHES = True
 
 # These keys have full access to AWS S3 and secrets manager
 

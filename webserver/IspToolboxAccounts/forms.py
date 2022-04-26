@@ -9,6 +9,8 @@ from django.contrib.auth import authenticate
 
 from allauth.socialaccount.forms import SignupForm
 
+from IspToolboxAccounts.utils import enable_account_creation
+
 
 class CustomCheckboxInput(forms.CheckboxInput):
     template_name = "workspace/atoms/custom_checkbox.html"
@@ -60,7 +62,7 @@ class IspToolboxUserCreationForm(UserCreationForm):
                 attrs={"placeholder": "Company Provided Registration Code"}
             ),
         )
-        if not settings.ENABLE_ACCOUNT_CREATION
+        if not enable_account_creation()
         else ""
     )
 

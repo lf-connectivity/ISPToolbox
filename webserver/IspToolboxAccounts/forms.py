@@ -4,7 +4,6 @@ from django import forms
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
-from django.conf import settings
 from django.contrib.auth import authenticate
 
 from allauth.socialaccount.forms import SignupForm

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <visibility>1</visibility>
+    <Style id="shape-style-id">
+      <BalloonStyle/>
+      <LineStyle>
+        <color>50FF7800</color>
+        <width>5</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>50FF7800</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+    </Style>
+    <Style id="buildings-style-id">
+      <BalloonStyle/>
+      <LineStyle>
+        <color>ff06ff22</color>
+        <width>1</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>ff06ff22</color>
+        <fill>1</fill>
+        <outline>1</outline>
+      </PolyStyle>
+    </Style>
+    <Folder>
+      <visibility>1</visibility>
+      <Placemark>
+        <name>shape</name>
+        <visibility>1</visibility>
+        <styleUrl>#shape-style-id</styleUrl>
+        <Polygon>
+          <outerBoundaryIs>
+            <LinearRing>
+              <coordinates>-122.150942,37.486921 -122.144529,37.486655 -122.145703,37.484527 -122.146918,37.483329 -122.148553,37.482730 -122.149727,37.482564 -122.150900,37.482564 -122.150942,37.486921</coordinates>
+            </LinearRing>
+          </outerBoundaryIs>
+        </Polygon>
+      </Placemark>
+      <Placemark>
+        <name>shape</name>
+        <visibility>1</visibility>
+        <styleUrl>#shape-style-id</styleUrl>
+        <Polygon>
+          <outerBoundaryIs>
+            <LinearRing>
+              <coordinates>-122.140770,37.471955 -122.140817,37.472722 -122.140958,37.473481 -122.141192,37.474226 -122.141515,37.474949 -122.141926,37.475643 -122.142420,37.476301 -122.142993,37.476918 -122.143638,37.477487 -122.144350,37.478002 -122.145122,37.478460 -122.145946,37.478854 -122.146814,37.479183 -122.147719,37.479441 -122.148651,37.479628 -122.149602,37.479740 -122.150561,37.479778 -122.151521,37.479740 -122.152471,37.479628 -122.153404,37.479441 -122.154308,37.479183 -122.155177,37.478854 -122.156001,37.478460 -122.156773,37.478002 -122.157485,37.477487 -122.158130,37.476918 -122.158702,37.476301 -122.159196,37.475643 -122.159607,37.474949 -122.159931,37.474226 -122.160164,37.473481 -122.160305,37.472722 -122.160352,37.471955 -122.160305,37.471188 -122.160164,37.470429 -122.159931,37.469684 -122.159607,37.468961 -122.159196,37.468267 -122.158702,37.467609 -122.158130,37.466992 -122.157485,37.466423 -122.156773,37.465908 -122.156001,37.465450 -122.155177,37.465056 -122.154308,37.464727 -122.153404,37.464469 -122.152471,37.464282 -122.151521,37.464169 -122.150561,37.464132 -122.149602,37.464169 -122.148651,37.464282 -122.147719,37.464469 -122.146814,37.464727 -122.145946,37.465056 -122.145122,37.465450 -122.144350,37.465908 -122.143638,37.466423 -122.142993,37.466992 -122.142420,37.467609 -122.141926,37.468267 -122.141515,37.468961 -122.141192,37.469684 -122.140958,37.470429 -122.140817,37.471188 -122.140770,37.471955</coordinates>
+            </LinearRing>
+          </outerBoundaryIs>
+        </Polygon>
+      </Placemark>
+      <Placemark>
+        <name>shape</name>
+        <visibility>1</visibility>
+        <styleUrl>#shape-style-id</styleUrl>
+        <Polygon>
+          <outerBoundaryIs>
+            <LinearRing>
+              <coordinates>-122.179362,37.486544 -122.166249,37.483626 -122.167842,37.478666 -122.183774,37.477985 -122.179362,37.486544</coordinates>
+            </LinearRing>
+          </outerBoundaryIs>
+        </Polygon>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

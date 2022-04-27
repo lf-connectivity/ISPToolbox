@@ -138,7 +138,7 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
     )
     contact_me = forms.BooleanField(
         label="Help us shape the future of ISP Toolbox ",
-        required=True,
+        required=False,
         label_suffix=" ",
         widget=CustomCheckboxInput,
         initial=True,

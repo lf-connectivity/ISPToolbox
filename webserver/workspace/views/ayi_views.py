@@ -1,13 +1,13 @@
 from django.shortcuts import redirect, render
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 from IspToolboxAccounts.forms import IspToolboxAccessDataForm
 from workspace.models import AccessInformationJob
 from django.core.paginator import Paginator
 from celery.states import READY_STATES
+from guest_user.mixins import RegularUserRequiredMixin
 
 
-class AccessYourInformationView(LoginRequiredMixin, View):
+class AccessYourInformationView(RegularUserRequiredMixin, View):
     """
     This view allows users to download their information
     We don't really have an obligation for it to be easily parseable -

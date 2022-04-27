@@ -3,7 +3,6 @@ from django.urls import reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 from django.views.generic.edit import CreateView, UpdateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from IspToolboxAccounts.forms import (
     IspToolboxUserCreationForm,
     IspToolboxUserSignUpInfoForm,
@@ -14,15 +13,18 @@ from IspToolboxAccounts.forms import (
 )
 from django.contrib.auth import logout
 
+from guest_user.functions import is_guest_user
+from guest_user.mixins import RegularUserRequiredMixin
 
-class WorkspaceDashboard(LoginRequiredMixin, View):
+
+class WorkspaceDashboard(RegularUserRequiredMixin, View):
     def get(self, request):
         return render(request, "workspace/pages/dashboard.html")
 
 
 class DefaultWorkspaceView(View):
     def get(self, request, **kwargs):
-        if request.user.is_authenticated:
+        if request.user.is_authenticated and not is_guest_user(request.user):
             return redirect(reverse_lazy("workspace:workspace_dashboard"))
         showSurvey = (
             not request.user.is_anonymous
@@ -42,7 +44,7 @@ class DefaultWorkspaceView(View):
         )
 
 
-class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
+class OptionalInfoWorkspaceView(RegularUserRequiredMixin, CreateView):
     form_class = IspToolboxUserSignUpInfoForm
     template_name = "workspace/pages/optional_info.html"
     success_url = reverse_lazy("workspace:workspace_dashboard")
@@ -72,7 +74,7 @@ class OptionalInfoWorkspaceView(LoginRequiredMixin, CreateView):
             return super().get(request)
 
 
-class OptionalInfoWorkspaceUpdateView(LoginRequiredMixin, UpdateView):
+class OptionalInfoWorkspaceUpdateView(RegularUserRequiredMixin, UpdateView):
     form_class = IspToolboxUserSignUpInfoForm
     template_name = "workspace/pages/optional_info.html"
     success_url = reverse_lazy("workspace:workspace_dashboard")
@@ -91,7 +93,7 @@ class OptionalInfoWorkspaceUpdateView(LoginRequiredMixin, UpdateView):
             return redirect("workspace:optional_info")
 
 
-class AccountSettingsView(LoginRequiredMixin, View):
+class AccountSettingsView(RegularUserRequiredMixin, View):
     def get(self, request, **kwargs):
         context = {
             "nav_include_account_dropdown": True,

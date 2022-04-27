@@ -1,3 +1,4 @@
+{% load static %}
 <form action="{% url 'workspace:session_import_kmz' %}" method="POST" enctype="multipart/form-data">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -10,7 +11,7 @@
             <div class="modal-body">
                 <p>
                     Your files must contain outlines of areas. These files can be exported from other GIS Tools.
-                    <a href="https://isptoolbox-public-hosted-files.s3-us-west-2.amazonaws.com/ISPToolbox-Sample.kml"
+                    <a href="{% if tool == 'los_check' %}{% static "isptoolbox/samples/sample-network.kml" %}{% else %}{% static "isptoolbox/samples/sample-market.kml" %}{% endif %}"
                         style="display: inline-block;">
                         Download Sample File
                         <svg width="19" height="19" fill="none" xmlns="http://www.w3.org/2000/svg">

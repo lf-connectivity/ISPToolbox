@@ -1,10 +1,20 @@
 {% load i18n %}
-<div id="signin_container" class="{% if showSignUp %}d-none{% endif %} container signup_container onboarding_container">
-    <h1 class="heading-2">{% blocktranslate %}We'd like to get to know you{% endblocktranslate %}</h1>
-    <p class="onboarding_container--intro-copy large">{% blocktranslate %}The following questions will help us understand how our tools can best serve your business.{% endblocktranslate %}</p>
-    <form method="post" class="isptoolbox-form survey-form py-3">
-        {% csrf_token %}
-        {% include 'workspace/molecules/optional_survey_form.html' %}
-        <input class="btn isptoolbox-btn btn-primary" type="submit" value="Complete Profile">
-    </form>
+<div class="card">
+    <div class="card-body">
+        {% block header %}
+        <div class="card-title">
+            <h3 class="pb-3 my-1">{% translate "Business Info"%}</h3>
+            <p>{% blocktranslate %}The following questions help us understand how our tools can best serve your
+                business.{% endblocktranslate %}</p>
+        </div>
+        {% endblock %}
+        <form action={{ request.path }} method="post" class="pb-3">
+            {% csrf_token %}
+            <fieldset class="isptoolbox-form onboarding_container" id="account_info_form">
+                {% include 'workspace/molecules/optional_survey_form.html' %}
+                <input class="btn isptoolbox-btn btn-primary mt-2" type="submit" name="user_info"
+                    value="{% translate 'Update Info'%}">
+            </fieldset>
+        </form>
+    </div>
 </div>

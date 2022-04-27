@@ -70,24 +70,9 @@
                 </div>
             </div>
             <div class="user-details mt-4 w-100">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-title">
-                            <h3 class="pb-3 my-1">{% translate "Business Info"%}</h3>
-                            <p>{% blocktranslate %}The following questions help us understand how our tools can best serve your business.{% endblocktranslate %}</p>
-                        </div>
-                        <form action={{ request.path }} method="post" class="pb-3">
-                            {% csrf_token %}
-                            <fieldset class="isptoolbox-form onboarding_container" id="account_info_form">
-                                {% with optional_account_form as form %}
-                                {% include 'workspace/molecules/optional_survey_form.html' %}
-                                {% endwith %}
-                                <input class="btn isptoolbox-btn btn-primary mt-2" type="submit" name="user_info"
-                                    value="{% translate 'Update Info'%}">
-                            </fieldset>
-                        </form>
-                    </div>
-                </div>
+                {% with optional_account_form as form %}
+                {% include "workspace/organisms/optional_survey.html" %}
+                {% endwith %}
             </div>
         </div>
     </div>

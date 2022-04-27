@@ -1,7 +1,9 @@
 {% extends "workspace/pages/base.html" %}
-
+{% load i18n %}
 {% block content %}
-<div class="container" style="margin-top: 50px;">
-    {% include 'workspace/organisms/optional_survey.html' %}
+<div class="container settings-page account_settings">
+    <div class="user-details w-100 my-5" style="margin-top: 100px !important;">
+        {% include "workspace/organisms/optional_survey_isolated.html" %}
+    </div>
 </div>
 {% endblock %}

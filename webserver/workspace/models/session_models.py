@@ -1,3 +1,6 @@
+import shlex
+import shutil
+import subprocess
 from django.db import models
 from django.conf import settings
 from rest_framework import serializers
@@ -151,7 +154,10 @@ class WorkspaceMapSession(models.Model):
         return geojson_utils.merge_feature_collections(*fcs)
 
     def get_session_kml(self):
+        # Get the session as geojson
         geojson = self.get_session_geojson()
+
+        # Write to Tempfile
         with tempfile.NamedTemporaryFile(
             "w", prefix=self.uuid.hex, suffix=".geojson"
         ) as tmp_file_geojson:
@@ -161,13 +167,20 @@ class WorkspaceMapSession(models.Model):
                     default=lambda x: x.hex if isinstance(x, uuid.UUID) else None,
                 )
             )
+            tmp_file_geojson.flush()
 
+            # Create KML file using ogr2ogr
             with tempfile.NamedTemporaryFile(
                 "w", prefix=self.uuid.hex, suffix=".kml"
             ) as tmp_file:
-                gdal.VectorTranslate(tmp_file.name, tmp_file_geojson.name)
-                with open(tmp_file.name, "r") as kml_output:
-                    return kml_output.read()
+                try:
+                    command = shlex.split(f'ogr2ogr -skipfailures {tmp_file.name} {tmp_file_geojson.name} -lco RFC7946=YES -nln isptoolbox')
+                    subprocess.check_output(command, encoding="UTF-8", stderr=subprocess.STDOUT)
+                    with open(tmp_file.name, "r") as kml_output:
+                        return kml_output.read()
+                except Exception:
+                    logging.exception("failed to convert session to KML")
+                    return ""
 
     @classmethod
     def get_or_create_demo_view(cls, request):

@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.gis.geos import Point
@@ -65,8 +66,16 @@ class EditNetworkView(AllowGuestUserMixin, View):
         else:
             workspace_account = False
             if session_id:
-                return redirect("workspace:edit_account_network")
-            session, _ = WorkspaceMapSession.get_or_create_demo_view(request)
+                try:
+                    session = get_object_or_404(
+                        workspace_models.WorkspaceMapSession,
+                        owner=request.user,
+                        uuid=session_id
+                    )
+                except Http404:
+                    return redirect("workspace:edit_account_network")
+            else:
+                session, _ = WorkspaceMapSession.get_or_create_demo_view(request)
 
         context = {
             "session": session,

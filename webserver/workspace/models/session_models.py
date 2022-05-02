@@ -1,5 +1,4 @@
 import shlex
-import shutil
 import subprocess
 from django.db import models
 from django.conf import settings
@@ -13,7 +12,6 @@ import uuid
 import json
 import tempfile
 import logging
-from osgeo import gdal
 from IspToolboxApp.util.s3 import writeS3Object, createPresignedUrl
 from workspace.utils.import_session import (
     convert_file_to_workspace_session,
@@ -153,6 +151,10 @@ class WorkspaceMapSession(models.Model):
         ]
         return geojson_utils.merge_feature_collections(*fcs)
 
+    @classmethod
+    def __create_ogr_command(cls, input_file, output_file):
+        return shlex.split(f'ogr2ogr -skipfailures {output_file} {input_file} -lco RFC7946=YES -nln isptoolbox')
+
     def get_session_kml(self):
         # Get the session as geojson
         geojson = self.get_session_geojson()
@@ -174,8 +176,8 @@ class WorkspaceMapSession(models.Model):
                 "w", prefix=self.uuid.hex, suffix=".kml"
             ) as tmp_file:
                 try:
-                    command = shlex.split(f'ogr2ogr -skipfailures {tmp_file.name} {tmp_file_geojson.name} -lco RFC7946=YES -nln isptoolbox')
-                    subprocess.check_output(command, encoding="UTF-8", stderr=subprocess.STDOUT)
+                    cmd = WorkspaceMapSession.__create_ogr_command(tmp_file_geojson.name, tmp_file.name)
+                    subprocess.check_output(cmd, encoding="UTF-8", stderr=subprocess.STDOUT)
                     with open(tmp_file.name, "r") as kml_output:
                         return kml_output.read()
                 except Exception:

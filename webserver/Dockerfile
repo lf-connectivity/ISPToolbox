@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian/snapshot:bookworm-20220316
 RUN apt-get update --fix-missing && \
     apt-get install -y wget bzip2 ca-certificates curl git && \
     apt-get clean

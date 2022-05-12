@@ -1,12 +1,13 @@
 {% load i18n %}
 <div class="workspace-footer">
     <div class="container_copyright">
-        <p>Meta &#169; {% now "Y" %}</p>
+        <p>&#169; {% now "Y" %} Meta</p>
     </div>
     <div class="container_links">
-    <a href="https://www.facebook.com/privacy/explanation/" target="_blank">{% trans "Privacy"%}</a>
-    <a href="https://www.facebook.com/policy/" target="_blank">{% trans "Legal"%}</a>
-    <a href="https://www.facebook.com/legal/commercial_terms" target="_blank">{% trans "Commercial Terms"%}</a>
+    <a href="https://transparency.fb.com/policies/community-standards/" target="_blank">{% trans "Community Standards"%}</a>
+    <a href="https://www.facebook.com/policy.php/" target="_blank">{% trans "Data Policy"%}</a>
+    <a href="https://www.facebook.com/terms.php/" target="_blank">{% trans "Terms"%}</a>
+    <a href="https://www.facebook.com/policy/cookies/" target="_blank">{% trans "Cookie Policy"%}</a>
     <a class="arrow-link" href='https://www.facebook.com/fbctoolbox' target="_blank">
         {% trans "Contact"%} 
         <svg

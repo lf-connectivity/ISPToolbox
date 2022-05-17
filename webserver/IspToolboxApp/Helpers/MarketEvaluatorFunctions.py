@@ -12,6 +12,7 @@ from gis_data.models import (
     TribalLands,
 )
 from django.db import connections
+from django.db.utils import Error as DjangoDbBaseError
 from IspToolboxApp.models import Form477Dec2020
 
 
@@ -83,7 +84,7 @@ def medianIncome(include, result={}, read_only=False):
                     "numbuildings": row_dict["numbuildings"],
                     "done": done,
                 }
-        except BaseException as e:
+        except DjangoDbBaseError as e:
             return {"averageMedianIncome": 0, "error": str(e), "done": done}
     else:
         done = True
@@ -97,7 +98,7 @@ def medianIncome(include, result={}, read_only=False):
                 results = cursor.fetchone()
                 averageMedianIncome = results[0]
             return {"averageMedianIncome": averageMedianIncome, "done": done}
-        except BaseException as e:
+        except DjangoDbBaseError as e:
             return {"averageMedianIncome": 0, "error": str(e), "done": done}
 
 
@@ -123,7 +124,7 @@ def grantGeog(cbgid):
             cursor.execute(query_skeleton, [cbgid])
             result = cursor.fetchone()
             resp = {"error": 0, "cbgid": result[0], "geojson": result[1]}
-    except BaseException:
+    except DjangoDbBaseError:
         resp = {"error": -2}
     return resp
 
@@ -136,7 +137,7 @@ def zipGeog(zipcode):
     try:
         resp["geojson"] = Tl2019UsZcta510.getZipGeog(zipcode)
         resp["zip"] = zipcode
-    except BaseException:
+    except DjangoDbBaseError:
         resp = {"error": -2}
     return resp
 
@@ -152,7 +153,7 @@ def countyGeog(statecode, countycode, state, county):
         resp["countycode"] = countycode
         resp["county"] = county
         resp["state"] = state
-    except BaseException:
+    except DjangoDbBaseError:
         resp = {"error": -2}
     return resp
 
@@ -165,7 +166,7 @@ def censusBlockGeog(blockcode):
     try:
         resp["geojson"] = Tl2020UsCensusBlocks.getBlockGeog(blockcode)
         resp["blockcode"] = blockcode
-    except BaseException:
+    except DjangoDbBaseError:
         resp = {"error": -2}
     return resp
 
@@ -179,7 +180,7 @@ def tribalGeog(geoid, namelsad):
         resp["geojson"] = TribalLands.getTribalGeog(geoid)
         resp["geoid"] = geoid
         resp["namelsad"] = namelsad
-    except BaseException:
+    except DjangoDbBaseError:
         resp = {"error": -2}
     return resp
 

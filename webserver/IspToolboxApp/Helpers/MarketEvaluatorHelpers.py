@@ -1,4 +1,5 @@
 from django.db import connections
+from django.db.utils import Error as DjangoDbBaseError
 import logging
 import json
 from shapely.geometry import shape
@@ -222,12 +223,10 @@ def getOSMBuildings(include, exclude, callback=None):
 
         return response
 
-    except Exception as e:
+    except DjangoDbBaseError as e:
         logging.info("OSM query failed")
         response['error'] = str(e)
         raise e
-
-    return response
 
 
 def getMicrosoftBuildings(include, exclude, callback=None):
@@ -268,7 +267,7 @@ def getMicrosoftBuildings(include, exclude, callback=None):
                 "geometries": buildings
             }
             return response
-    except Exception as e:
+    except DjangoDbBaseError as e:
         logging.info("Failed to get buildings")
         response['error'] = str(e)
     return response
@@ -298,7 +297,7 @@ def getMicrosoftBuildingsOffset(include, offset, read_only):
             cursor.execute(query_skeleton, [include, offset])
             db_resp = cursor.fetchone()
             resp = {"gc": json.loads(db_resp[1]), "offset": str(db_resp[0])}
-    except BaseException:
+    except DjangoDbBaseError:
         resp = {"gc": {"type": "GeometryCollection",
                        "geometries": []}, "offset": str(0)}
     return resp

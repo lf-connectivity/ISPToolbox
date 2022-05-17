@@ -1,3 +1,4 @@
+from IspToolboxApp.utils import market_evaluator_async_task
 from celery_async import celery_app as app
 from area import area
 from django.db import connections
@@ -44,7 +45,7 @@ def genBuildingCount(include, channelName, uuid):
         sync_send(channelName, "building.count", str(buildingCount), uuid)
 
 
-@app.task
+@market_evaluator_async_task("polygon.area", error_resp='-1', is_pipeline_task=True)
 def genPolySize(pipeline_uuid, channelName, uuid, read_only=False):
     '''
         Computes the area in applicable include geometry in miles squared.

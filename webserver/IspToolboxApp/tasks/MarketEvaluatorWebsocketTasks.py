@@ -1,27 +1,29 @@
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from IspToolboxApp.Helpers.MarketEvaluatorFunctions import serviceProviders, broadbandNow, mlabSpeed, \
-    grantGeog, zipGeog, countyGeog, medianIncome, censusBlockGeog, tribalGeog
-from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, getMicrosoftBuildingsOffset, \
-    getOSMBuildings
+from IspToolboxApp.Helpers.MarketEvaluatorFunctions import (
+    serviceProviders,
+    broadbandNow,
+    grantGeog,
+    zipGeog,
+    countyGeog,
+    medianIncome,
+    censusBlockGeog,
+    tribalGeog,
+)
+from IspToolboxApp.Helpers.MarketEvaluatorHelpers import (
+    checkIfPrecomputedBuildingsAvailable,
+    getMicrosoftBuildingsOffset,
+    getOSMBuildings,
+)
+from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlabGlobal
 from gis_data.models.hrsl import HrslUsa15, HrslBra15
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from django.contrib.humanize.templatetags.humanize import intcomma
 import logging
 from celery_async import celery_app as app
 
-
-def sync_send(channelName, consumer, value, uuid):
-    channel_layer = get_channel_layer()
-    resp = {
-        "uuid": uuid,
-        "type": consumer,
-        "value": value,
-    }
-    async_to_sync(channel_layer.send)(channelName, resp)
+from IspToolboxApp.utils import market_evaluator_async_task, sync_send
 
 
-@app.task
+@market_evaluator_async_task("building.overlays", error_resp={"gc": None, "offset": '0'}, is_pipeline_task=True)
 def genBuildings(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
         uuid=pipeline_uuid
@@ -51,7 +53,7 @@ def genBuildings(pipeline_uuid, channelName, uuid, read_only=False):
         sync_send(channelName, "building.overlays", resp, uuid)
 
 
-@app.task
+@market_evaluator_async_task("median.income", is_pipeline_task=True)
 def genMedianIncome(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
         uuid=pipeline_uuid
@@ -76,7 +78,7 @@ def genMedianIncome(pipeline_uuid, channelName, uuid, read_only=False):
         sync_send(channelName, "median.income", resp, uuid)
 
 
-@app.task
+@market_evaluator_async_task("service.providers", is_pipeline_task=True)
 def genServiceProviders(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
         uuid=pipeline_uuid
@@ -85,7 +87,7 @@ def genServiceProviders(pipeline_uuid, channelName, uuid, read_only=False):
     sync_send(channelName, "service.providers", result, uuid)
 
 
-@app.task
+@market_evaluator_async_task("broadband.now", is_pipeline_task=True)
 def genBroadbandNow(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
         uuid=pipeline_uuid
@@ -94,14 +96,14 @@ def genBroadbandNow(pipeline_uuid, channelName, uuid, read_only=False):
     sync_send(channelName, "broadband.now", result, uuid)
 
 
-@app.task
+@market_evaluator_async_task("median.speeds", is_pipeline_task=True)
 def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson
     result = StandardizedMlabGlobal.genPostalCodeSpeeds(include, read_only)
     sync_send(channelName, "median.speeds", result, uuid)
 
 
-@app.task
+@market_evaluator_async_task("population", is_pipeline_task=True)
 def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson
     try:
@@ -114,31 +116,31 @@ def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
     sync_send(channelName, "population", returnval, uuid)
 
 
-@app.task
+@market_evaluator_async_task("grant.geog")
 def getGrantGeog(grantId, channelName, uuid):
     result = grantGeog(grantId)
     sync_send(channelName, "grant.geog", result, uuid)
 
 
-@app.task
+@market_evaluator_async_task("zip.geog")
 def getZipGeog(zipcode, channelName, uuid):
     result = zipGeog(zipcode)
     sync_send(channelName, "zip.geog", result, uuid)
 
 
-@app.task
+@market_evaluator_async_task("county.geog")
 def getCountyGeog(statecode, countycode, state, county, channelName, uuid):
     result = countyGeog(statecode, countycode, state, county)
     sync_send(channelName, "county.geog", result, uuid)
 
 
-@app.task
+@market_evaluator_async_task("censusblock.geog")
 def getCensusBlockGeog(blockcode, channelName, uuid):
     result = censusBlockGeog(blockcode)
     sync_send(channelName, "censusblock.geog", result, uuid)
 
 
-@app.task
+@market_evaluator_async_task("tribal.geog")
 def getTribalGeog(geoid, namelsad, channelName, uuid):
     result = tribalGeog(geoid, namelsad)
     sync_send(channelName, "tribal.geog", result, uuid)

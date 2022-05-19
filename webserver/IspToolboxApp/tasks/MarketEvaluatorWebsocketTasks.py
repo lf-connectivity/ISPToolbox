@@ -109,7 +109,7 @@ def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
     "population",
     error_resp={"population": "error", "error": ERR_TIMEOUT},
     is_pipeline_task=True,
-) 
+)
 def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson
     try:

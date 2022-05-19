@@ -17,13 +17,15 @@ from IspToolboxApp.models.MLabSpeedDataModels import StandardizedMlabGlobal
 from gis_data.models.hrsl import HrslUsa15, HrslBra15
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.db.utils import Error as DjangoDbBaseError
 import logging
-from celery_async import celery_app as app
 
-from IspToolboxApp.utils import market_evaluator_async_task, sync_send
+from IspToolboxApp.utils import ERR_TIMEOUT, market_evaluator_async_task, sync_send
 
 
-@market_evaluator_async_task("building.overlays", error_resp={"gc": None, "offset": '0'}, is_pipeline_task=True)
+@market_evaluator_async_task(
+    "building.overlays", error_resp={"gc": None, "offset": str(ERR_TIMEOUT)}, is_pipeline_task=True
+)
 def genBuildings(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
         uuid=pipeline_uuid
@@ -103,7 +105,11 @@ def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
     sync_send(channelName, "median.speeds", result, uuid)
 
 
-@market_evaluator_async_task("population", is_pipeline_task=True)
+@market_evaluator_async_task(
+    "population",
+    error_resp={"population": "error", "error": ERR_TIMEOUT},
+    is_pipeline_task=True,
+) 
 def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson
     try:
@@ -111,7 +117,7 @@ def genPopulation(pipeline_uuid, channelName, uuid, read_only=False):
         population += HrslUsa15.get_intersection_population(include, read_only)
         population += HrslBra15.get_intersection_population(include, read_only)
         returnval = {"population": intcomma(population), "error": 0}
-    except Exception:
+    except DjangoDbBaseError:
         returnval = {"population": "error", "error": -1}
     sync_send(channelName, "population", returnval, uuid)
 

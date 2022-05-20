@@ -1,7 +1,5 @@
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from django.db import connection
-from celery import current_task
 from celery_async import celery_app as app
 from celery.exceptions import SoftTimeLimitExceeded
 from django.conf import settings

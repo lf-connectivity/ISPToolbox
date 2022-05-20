@@ -84,7 +84,10 @@ export type MedianSpeed = {
     pct_area: string;
 };
 
-export type MedianSpeedResponse = Array<MedianSpeed>;
+export type MedianSpeedResponse = {
+    error: number;
+    speeds: Array<MedianSpeed>;
+};
 
 export type ServiceProvidersResponse = {
     error: number;

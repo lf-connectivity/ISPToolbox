@@ -17,7 +17,7 @@ $(document).ready(function () {
 
     function averageMedianSpeeds(resp: MedianSpeedResponse) {
         let speeds = [0, 0];
-        resp.forEach((v) => {
+        resp.speeds.forEach((v) => {
             speeds[0] += parseFloat(v.pct_area) * parseFloat(v['Download (Mbit/s)']);
             speeds[1] += parseFloat(v.pct_area) * parseFloat(v['Upload (Mbit/s)']);
         });

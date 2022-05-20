@@ -414,7 +414,7 @@ CHANNEL_LAYERS = {
 }
 
 # Market Eval timeout
-MARKET_EVAL_TASK_SOFT_TIME_LIMIT = 0.01
+MARKET_EVAL_TASK_SOFT_TIME_LIMIT = 30
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

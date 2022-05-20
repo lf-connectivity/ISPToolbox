@@ -98,10 +98,13 @@ def genBroadbandNow(pipeline_uuid, channelName, uuid, read_only=False):
     sync_send(channelName, "broadband.now", result, uuid)
 
 
-@market_evaluator_async_task("median.speeds", is_pipeline_task=True)
+@market_evaluator_async_task(
+    "median.speeds", error_resp={"error": ERR_TIMEOUT, "speeds": []}, is_pipeline_task=True
+)
 def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson
-    result = StandardizedMlabGlobal.genPostalCodeSpeeds(include, read_only)
+    speeds = StandardizedMlabGlobal.genPostalCodeSpeeds(include, read_only)
+    result = {"error": 0, "speeds": speeds}
     sync_send(channelName, "median.speeds", result, uuid)
 
 

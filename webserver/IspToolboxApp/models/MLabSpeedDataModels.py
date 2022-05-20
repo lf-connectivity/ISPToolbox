@@ -9,6 +9,7 @@
 # GENERATED USING: python manage.py inspectdb --database gis_data mlab_uszip_10_5_2020
 from django.contrib.gis.db import models
 from django.db import connections
+from django.db.utils import Error as DjangoDbBaseError
 from django.contrib.gis.geos import GEOSGeometry
 
 
@@ -89,7 +90,7 @@ class StandardizedMlab(models.Model):
                     for row in cursor.fetchall()
                 ]
         # Above query can fail due to self-intersecting polygons in complex multipolygon geometry cases.  In this case fallback to a simple average.
-        except Exception:
+        except DjangoDbBaseError:
             with connections['gis_data'].cursor() as cursor:
                 areaJson = area_of_interest.json
                 cursor.execute(mlab_query_fallback, [areaJson])
@@ -224,7 +225,7 @@ class StandardizedMlabGlobal(models.Model):
                     for row in cursor.fetchall()
                 ]
         # Above query can fail due to self-intersecting polygons in complex multipolygon geometry cases.  In this case fallback to a simple average.
-        except Exception:
+        except DjangoDbBaseError:
             with connections['gis_data'].cursor() as cursor:
                 aoi = area_of_interest.ewkb
                 cursor.execute(mlab_query_fallback, [aoi, aoi])

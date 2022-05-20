@@ -251,19 +251,19 @@ export class MarketEvaluatorSidebarManager {
         let medianDownload = 0;
         let medianUpload = 0;
 
-        if (response.length > 0) {
+        if (response.speeds.length > 0) {
             // Check if there's a percent area that exists, because
             // it might not be there, especially with complex polygons.
-            if (response[0].pct_area) {
-                response.forEach((zip: MedianSpeed) => {
+            if (response.speeds[0].pct_area) {
+                response.speeds.forEach((zip: MedianSpeed) => {
                     medianDownload +=
                         parseFloat(zip['Download (Mbit/s)']) * parseFloat(zip.pct_area);
                     medianUpload += parseFloat(zip['Upload (Mbit/s)']) * parseFloat(zip.pct_area);
                 });
             } else {
-                response.forEach((zip: MedianSpeed) => {
-                    medianDownload += parseFloat(zip['Download (Mbit/s)']) / response.length;
-                    medianUpload += parseFloat(zip['Upload (Mbit/s)']) / response.length;
+                response.speeds.forEach((zip: MedianSpeed) => {
+                    medianDownload += parseFloat(zip['Download (Mbit/s)']) / response.speeds.length;
+                    medianUpload += parseFloat(zip['Upload (Mbit/s)']) / response.speeds.length;
                 });
             }
 

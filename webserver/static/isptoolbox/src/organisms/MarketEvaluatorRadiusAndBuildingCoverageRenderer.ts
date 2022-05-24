@@ -161,13 +161,15 @@ export class MarketEvaluatorRadiusAndBuildingCoverageRenderer extends RadiusAndB
     }
 
     onBuildingOverlayMsg(msg: string, response: BuildingOverlaysResponse) {
+        let bounds: number[] = [Number.MIN_VALUE, Number.MAX_VALUE];
         if (response.gc !== null && response.offset !== null) {
             if (response.offset === '0') {
                 this.buildingOverlays.geometries = [];
             }
             this.buildingOverlays.geometries.push(...response.gc.geometries);
+            bounds = this.calculateMinMaxBuildingSizes();
         }
-        PubSub.publish('filter.bounds_update', this.calculateMinMaxBuildingSizes());
+        PubSub.publish('filter.bounds_update', bounds);
         this.renderBuildings();
     }
 

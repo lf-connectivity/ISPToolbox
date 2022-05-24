@@ -50,6 +50,8 @@
     &--label
         margin-bottom: 0
         max-width: 60%
+    &--label.failed
+        color: $error-color
     a:hover
         cursor: pointer
     &--value-section
@@ -64,6 +66,8 @@
         font-family: $brand-font-family-mono
     &--value.loaded h4
         color: $brand-dark-gray-color
+    &--value.failed h4
+        color: $error-color
     &--spinner-container
         display: flex
         align-items: center

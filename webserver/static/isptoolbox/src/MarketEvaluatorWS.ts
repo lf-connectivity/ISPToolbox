@@ -98,6 +98,7 @@ export type ServiceProvidersResponse = {
 };
 
 export type BroadbandNowResponse = {
+    error: number;
     bbnPriceRange: Array<string> | null;
 };
 

@@ -24,7 +24,9 @@ from IspToolboxApp.utils import ERR_TIMEOUT, market_evaluator_async_task, sync_s
 
 
 @market_evaluator_async_task(
-    "building.overlays", error_resp={"gc": None, "offset": str(ERR_TIMEOUT)}, is_pipeline_task=True
+    "building.overlays",
+    error_resp={"gc": None, "offset": str(ERR_TIMEOUT)},
+    is_pipeline_task=True,
 )
 def genBuildings(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
@@ -55,7 +57,9 @@ def genBuildings(pipeline_uuid, channelName, uuid, read_only=False):
         sync_send(channelName, "building.overlays", resp, uuid)
 
 
-@market_evaluator_async_task("median.income", is_pipeline_task=True)
+@market_evaluator_async_task(
+    "median.income", error_resp={"error": str(ERR_TIMEOUT)}, is_pipeline_task=True
+)
 def genMedianIncome(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
         uuid=pipeline_uuid
@@ -89,7 +93,11 @@ def genServiceProviders(pipeline_uuid, channelName, uuid, read_only=False):
     sync_send(channelName, "service.providers", result, uuid)
 
 
-@market_evaluator_async_task("broadband.now", is_pipeline_task=True)
+@market_evaluator_async_task(
+    "broadband.now",
+    error_resp={"bbnPriceRange": None, "error": ERR_TIMEOUT},
+    is_pipeline_task=True,
+)
 def genBroadbandNow(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(
         uuid=pipeline_uuid
@@ -99,7 +107,9 @@ def genBroadbandNow(pipeline_uuid, channelName, uuid, read_only=False):
 
 
 @market_evaluator_async_task(
-    "median.speeds", error_resp={"error": ERR_TIMEOUT, "speeds": []}, is_pipeline_task=True
+    "median.speeds",
+    error_resp={"error": ERR_TIMEOUT, "speeds": []},
+    is_pipeline_task=True,
 )
 def genMedianSpeeds(pipeline_uuid, channelName, uuid, read_only=False):
     include = MarketEvaluatorPipeline.objects.get(uuid=pipeline_uuid).include_geojson

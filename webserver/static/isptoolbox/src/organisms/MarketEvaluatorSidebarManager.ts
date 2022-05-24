@@ -14,6 +14,7 @@ import { getCookie } from '../utils/Cookie';
 import { SQM_2_SQFT, WorkspaceEvents } from '../workspace/WorkspaceConstants';
 //@ts-ignore
 import geojsonArea from '@mapbox/geojson-area';
+import { renderQueryTimeout } from '../utils/ConnectionIssues';
 
 const BUILDING_COUNT_BASE_ID = 'me-out-buildings';
 const BUILDING_FILTER_TOGGLE = 'building-filter-btn';
@@ -30,6 +31,7 @@ const COMPETITOR_MODAL_NOT_LOADED_ID = 'me-competitor-modal-not-loaded';
 
 const SIDEBAR_VALUE_DIV_CLASS = 'market-eval-section--value';
 const SIDEBAR_VALUE_LOADED_CLASS = 'loaded';
+const SIDEBAR_VALUE_FAILED_CLASS = 'failed';
 
 const DEFAULT_PADDING = 1;
 
@@ -51,6 +53,7 @@ const MODAL_AJAX_URL = '/pro/modals/market-eval-competitor-modal/';
 export class MarketEvaluatorSidebarManager {
     private buildingOverlays: GeometryCollection;
     private buildingCount: number;
+    private buildingMsgError: boolean;
     private polygonArea: number;
     private marketPenetrationPct: number;
     private buildingOverlaysLoading: boolean;
@@ -163,6 +166,7 @@ export class MarketEvaluatorSidebarManager {
 
     private resetStats() {
         this.buildingCount = 0;
+        this.buildingMsgError = false;
         this.polygonArea = 0;
         this.serviceProvidersResponse = undefined;
         this.bbnResponse = undefined;
@@ -187,6 +191,10 @@ export class MarketEvaluatorSidebarManager {
     }
 
     private onBuildingOverlayMsg(msg: any, response: BuildingOverlaysResponse) {
+        if (parseFloat(response.offset) < 0) {
+            this.buildingMsgError = true;
+        }
+
         if (response.gc !== null && response.offset !== null) {
             this.buildingOverlaysLoading = !response.done;
             if (response.offset === '0') {
@@ -203,7 +211,8 @@ export class MarketEvaluatorSidebarManager {
 
     private updateBuildingStats() {
         const polygons = [];
-        if (this.buildingOverlays) {
+        $(`#${MARKET_PENETRATION_INPUT_ID}`).prop('disabled', this.buildingMsgError);
+        if (this.buildingOverlays && !this.buildingMsgError) {
             for (const poly of this.buildingOverlays.geometries) {
                 // Convert sq m to sq ft
                 const area = SQM_2_SQFT * geojsonArea.geometry(poly);
@@ -219,6 +228,10 @@ export class MarketEvaluatorSidebarManager {
             );
             this.updateBuildingDensity();
             this.updatePotentialLeads();
+        } else if (this.buildingMsgError) {
+            this.setIDValue(BUILDING_COUNT_BASE_ID, 0, false, false, true);
+            this.updateBuildingDensity();
+            this.updatePotentialLeads();
         }
     }
 
@@ -229,7 +242,13 @@ export class MarketEvaluatorSidebarManager {
 
     private onServiceProviderMsg(msg: any, response: ServiceProvidersResponse) {
         this.serviceProvidersResponse = response;
-        this.setIDValue(SERVICE_PROVIDERS_BASE_ID, response.competitors.length, false, false);
+        this.setIDValue(
+            SERVICE_PROVIDERS_BASE_ID,
+            response.competitors ? response.competitors.length : 0,
+            false,
+            false,
+            this.serviceProvidersResponse.error !== 0
+        );
         this.updateCompetitorModalLink(false);
     }
 
@@ -240,11 +259,23 @@ export class MarketEvaluatorSidebarManager {
 
     private onIncomeMsg(msg: any, response: MedianIncomeResponse) {
         let incomeInThousands = Math.trunc(response.averageMedianIncome / 1000.0);
-        this.setIDValue(AVG_INCOME_BASE_ID, `\$${incomeInThousands}K`, false, false);
+        this.setIDValue(
+            AVG_INCOME_BASE_ID,
+            `\$${incomeInThousands}K`,
+            false,
+            false,
+            !!response.error && response.error !== '0'
+        );
     }
 
     private onPopulationMsg(msg: any, response: PopulationResponse) {
-        this.setIDValue(POPULATION_BASE_ID, response.population, false, false);
+        this.setIDValue(
+            POPULATION_BASE_ID,
+            response.population,
+            false,
+            false,
+            response.error !== 0
+        );
     }
 
     private onSpeedsMsg(msg: any, response: MedianSpeedResponse) {
@@ -277,7 +308,7 @@ export class MarketEvaluatorSidebarManager {
                 false
             );
         } else {
-            this.setIDValue(MEDIAN_SPEEDS_BASE_ID, `N/A`, false, false);
+            this.setIDValue(MEDIAN_SPEEDS_BASE_ID, `N/A`, false, false, response.error !== 0);
         }
     }
 
@@ -296,7 +327,9 @@ export class MarketEvaluatorSidebarManager {
             BUILDING_DENSITY_BASE_ID,
             message,
             this.buildingOverlaysLoading,
-            this.buildingOverlaysLoading
+            this.buildingOverlaysLoading,
+            // Poly Area <0 = error
+            this.polygonArea < 0 || this.buildingMsgError
         );
     }
 
@@ -306,7 +339,8 @@ export class MarketEvaluatorSidebarManager {
             POTENTIAL_LEADS_BASE_ID,
             potentialLeads,
             this.buildingOverlaysLoading,
-            this.buildingOverlaysLoading
+            this.buildingOverlaysLoading,
+            this.buildingMsgError
         );
     }
 
@@ -319,7 +353,12 @@ export class MarketEvaluatorSidebarManager {
             this.toggleShowElement(COMPETITOR_MODAL_LOADED_ID, false);
             this.toggleShowElement(COMPETITOR_MODAL_NOT_LOADED_ID, true);
         } else {
-            if (this.serviceProvidersResponse !== undefined && this.bbnResponse !== undefined) {
+            if (
+                this.serviceProvidersResponse !== undefined &&
+                this.bbnResponse !== undefined &&
+                this.serviceProvidersResponse.error === 0 &&
+                this.bbnResponse.error === 0
+            ) {
                 $.ajax({
                     url: MODAL_AJAX_URL,
                     method: 'POST',
@@ -340,30 +379,58 @@ export class MarketEvaluatorSidebarManager {
         }
     }
 
-    private setIDValue(element: string, value: any, isLoading: boolean, grayOut: boolean = false) {
-        // Get the padding. If the id value is defined in padding, use that,
-        // otherwise use the default.
-        let padding = PADDING[element] || DEFAULT_PADDING;
-
-        // Don't pad if not grayed out.
-        let html = grayOut ? String(value).padStart(padding, '0') : String(value);
-        if (isLoading) {
-            html += LOADING_ENDING[element] || '';
-        }
+    private setIDValue(
+        element: string,
+        value: any,
+        isLoading: boolean,
+        grayOut: boolean = false,
+        error: boolean = false
+    ) {
+        let html: string;
+        let showLoadingSpinner;
         let parent = $(`#${element}`).parent();
+        let label = parent.parent().parent().find(`p.market-eval-section--label`);
 
-        if (!grayOut) {
-            if (parent.hasClass(SIDEBAR_VALUE_DIV_CLASS)) {
-                parent.addClass(SIDEBAR_VALUE_LOADED_CLASS);
-            }
-        } else {
+        if (error) {
+            html = '\u207b\u207b\u207b\u207b\u207b';
+            showLoadingSpinner = false;
+
             if (parent.hasClass(SIDEBAR_VALUE_DIV_CLASS)) {
                 parent.removeClass(SIDEBAR_VALUE_LOADED_CLASS);
+                parent.addClass(SIDEBAR_VALUE_FAILED_CLASS);
             }
+            label.addClass(SIDEBAR_VALUE_FAILED_CLASS);
+            renderQueryTimeout();
+        } else {
+            // Get the padding. If the id value is defined in padding, use that,
+            // otherwise use the default.
+            let padding = PADDING[element] || DEFAULT_PADDING;
+
+            // Don't pad if not grayed out.
+            html = grayOut ? String(value).padStart(padding, '0') : String(value);
+            if (isLoading) {
+                html += LOADING_ENDING[element] || '';
+            }
+
+            if (parent.hasClass(SIDEBAR_VALUE_DIV_CLASS)) {
+                parent.removeClass(SIDEBAR_VALUE_FAILED_CLASS);
+            }
+
+            if (!grayOut) {
+                if (parent.hasClass(SIDEBAR_VALUE_DIV_CLASS)) {
+                    parent.addClass(SIDEBAR_VALUE_LOADED_CLASS);
+                }
+            } else {
+                if (parent.hasClass(SIDEBAR_VALUE_DIV_CLASS)) {
+                    parent.removeClass(SIDEBAR_VALUE_LOADED_CLASS);
+                }
+            }
+            label.removeClass(SIDEBAR_VALUE_FAILED_CLASS);
+            showLoadingSpinner = isLoading;
         }
 
         $(`#${element}`).html(html);
-        this.toggleShowElement(`${element}-loading-spinner`, isLoading);
+        this.toggleShowElement(`${element}-loading-spinner`, showLoadingSpinner);
     }
 
     private toggleShowElement(element: string, show: boolean) {

@@ -113,7 +113,7 @@ def broadbandNow(include, read_only):
         else:
             price_range = [str(col) for col in row]
 
-        return {"bbnPriceRange": price_range}
+        return {"bbnPriceRange": price_range, "error": 0}
 
 
 def grantGeog(cbgid):

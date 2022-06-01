@@ -71,9 +71,8 @@ export class MarketEvaluatorPage extends ISPToolboxAbstractAppPage {
     }
 
     onMapLoad() {
-        // stuff might go here later
-        new MarketEvaluatorMapLayerSidebarManager(this.map, this.draw);
         new MarketEvaluatorWorkspaceManager(this.map, this.draw);
+        new MarketEvaluatorMapLayerSidebarManager(this.map, this.draw);
 
         // Tooltips
         new AjaxTowerPopup(this.map, this.draw, ISPToolboxTool.MARKET_EVAL);

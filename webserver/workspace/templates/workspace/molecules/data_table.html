@@ -70,7 +70,9 @@
                     $("#{{modal_id}}_search").html($("#{{modal_id}}").find(".dataTables_filter"));
                     $("#{{modal_id}}_pagination").html($("#{{table_id}}_paginate"));
                 }
-            }, {},
+            }, {
+                tool: "{{tool}}"
+            },
         );
         {% endblock %}
         $(".modal").not('#{{modal_id}}').on('show.bs.modal', function (event) {

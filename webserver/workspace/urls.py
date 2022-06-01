@@ -24,7 +24,7 @@ urlpatterns = [
     # Market Evaluator
     path('market/<uuid:session_id>/export/',
          views.MarketEvaluatorSessionExportView.as_view(), name="market_eval_export"),
-    path('market/<uuid:session_id>/', views.MarketEvaluatorView.as_view()),
+    path('market/<uuid:session_id>/', views.MarketEvaluatorView.as_view(), name="edit_market_by_uuid"),
     path('market/<uuid:session_id>/<str:name>/',
          views.MarketEvaluatorView.as_view(), name="market_eval"),
     path('market/', views.MarketEvaluatorView.as_view(), name="market_eval_entry"),

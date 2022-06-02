@@ -36,7 +36,11 @@ class SessionTableView(AjaxDatatableView):
         # Load Images
         img_edit = static('isptoolbox/images/pen_icon.svg')
         img_delete = static('isptoolbox/images/trash_icon.svg')
-        path = reverse_lazy('workspace:edit_network_by_uuid' if self.tool == 'los_check' else 'workspace:edit_market_by_uuid', kwargs={'session_id': obj.pk})
+        path_name = 'workspace:edit_network_by_uuid' if self.tool == 'los_check' else 'workspace:edit_market_by_uuid'
+        path = reverse_lazy(
+            path_name,
+            kwargs={'session_id': obj.pk}
+        )
         # Modify Rows
         row['name'] = f'<a href="{path}">{obj.name}</a>'
         row['last_updated'] = obj.last_updated.strftime("%m/%d/%Y<br><sub>%H:%M:%S</sub>")

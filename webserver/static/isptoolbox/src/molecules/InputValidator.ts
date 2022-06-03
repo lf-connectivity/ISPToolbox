@@ -28,3 +28,22 @@ export function validateNumber(min: number, max: number, num: number, inputId?: 
     }
     return corrected;
 }
+
+export function validateNumberMarkInvalid(min: number, max: number, num: number, inputId?: string) {
+    let validated: number | null;
+    if (num > max || isNaN(num)) {
+        validated = null;
+    } else if (num < min) {
+        validated = null;
+    } else {
+        validated = num;
+    }
+
+    if (inputId) {
+        validated == null
+            ? $(inputId).addClass('is-invalid')
+            : $(inputId).removeClass('is-invalid');
+    }
+
+    return validated;
+}

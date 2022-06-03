@@ -11,6 +11,7 @@ export default class LOSCheckLinkProfileView extends CollapsibleComponent {
             LOSCheckLinkProfileView._instance = this;
 
             $('#data-container').on('shown.bs.collapse', this.onShow.bind(this));
+            $('#data-container').on('hidden.bs.collapse', this.resetInputs.bind(this));
         }
     }
 
@@ -22,6 +23,21 @@ export default class LOSCheckLinkProfileView extends CollapsibleComponent {
     protected hideComponent() {
         //@ts-ignore
         $('#data-container').collapse('hide');
+    }
+
+    protected resetInputs() {
+        // revert inputs back to normal
+        ['#lat-lng-0', '#lat-lng-1', '#hgt-0', '#hgt-1'].forEach((htmlId: string) => {
+            let original = $(htmlId).data('original');
+            if (original) {
+                $(htmlId).val(original);
+            }
+            $(htmlId).removeClass('is-invalid');
+        });
+
+        ['#radio-update-btn-0', '#radio-update-btn-1'].forEach((buttonId: string) => {
+            $(buttonId).addClass('d-none');
+        });
     }
 
     static getInstance() {

@@ -1,4 +1,8 @@
-import { validateNumber, validateString } from './molecules/InputValidator';
+import {
+    validateNumber,
+    validateNumberMarkInvalid,
+    validateString
+} from './molecules/InputValidator';
 
 import { ft2m } from './LinkCalcUtils';
 
@@ -112,6 +116,13 @@ export const validateLng = validateNumber.bind(undefined, MIN_LNG, MAX_LNG);
 export const validateLat = validateNumber.bind(undefined, MIN_LAT, MAX_LAT);
 export const validateRadius = validateNumber.bind(undefined, MIN_RADIUS, MAX_RADIUS);
 export const validateHeight = validateNumber.bind(undefined, MIN_HEIGHT, MAX_HEIGHT);
+
+// TODO: rename after workspace launch
+export const validateHeightMarkInvalid = validateNumberMarkInvalid.bind(
+    undefined,
+    MIN_HEIGHT,
+    MAX_HEIGHT
+);
 export const validateName = validateString.bind(undefined, MAX_NAME_LEN);
 
 export enum UnitSystems {

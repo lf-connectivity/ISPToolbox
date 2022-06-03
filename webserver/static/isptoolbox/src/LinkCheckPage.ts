@@ -26,7 +26,13 @@ import { isUnitsUS } from './utils/MapPreferences';
 import PubSub from 'pubsub-js';
 import { LOSCheckWorkspaceManager } from './workspace/LOSCheckWorkspaceManager';
 import { WorkspaceFeatureTypes } from './workspace/WorkspaceConstants';
-import { validateHeight, getUnits, UnitSystems, isBeta } from './LinkCheckUtils';
+import {
+    validateHeight,
+    getUnits,
+    UnitSystems,
+    isBeta,
+    validateHeightMarkInvalid
+} from './LinkCheckUtils';
 import {
     LinkCheckCPEClickCustomerConnectPopup,
     LinkCheckCustomerConnectPopup,
@@ -451,67 +457,83 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                 }
             });
             this.selectedFeatureID = features.length ? features[0] : null;
+            $('#lat-lng-0').data('original', $('#lat-lng-0').val() as string);
+            $('#lat-lng-1').data('original', $('#lat-lng-0').val() as string);
+            $('#hgt-0').data('original', $('#hgt-0').val() as string);
+            $('#hgt-1').data('original', $('#hgt-1').val() as string);
         }
 
         this.updateLinkProfile();
         this.link_chart.redraw();
 
         // Update Callbacks for Radio Heights
-        $('#hgt-0').change(
-            _.debounce((e: any) => {
-                let height = validateHeight(parseFloat(String($('#hgt-0').val())), 'hgt-0');
-                this.updateLinkChart(true);
-                if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
-                    if (this.workspaceLinkSelected()) {
-                        let link = this.draw.get(this.selectedFeatureID);
-                        let ap = LOSCheckWorkspaceManager.getFeatureByUuid(
-                            link?.properties?.ap || link?.properties?.sector
-                        );
-                        ap.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
-                        this.map.fire('draw.update', { features: [ap.getFeatureData()] });
-                    } else {
-                        this.draw.setFeatureProperty(
-                            this.selectedFeatureID,
-                            'radio0hgt',
-                            isUnitsUS() ? ft2m(height) : height
-                        );
-                        this.map.fire('draw.update', {
-                            features: [this.draw.get(this.selectedFeatureID)]
-                        });
-                    }
+        const createShowUpdateButtonCallbacks = (
+            latLngId: string,
+            heightId: string,
+            updateButtonId: string
+        ) => {
+            const showUpdateButtonCallback = () => {
+                const latLngOriginal = $(latLngId).data('original');
+                const heightOriginal = $(heightId).data('original');
+                const latLngVal = $(latLngId).val();
+                const heightVal = $(heightId).val();
+
+                if (
+                    latLngOriginal &&
+                    heightOriginal &&
+                    latLngVal &&
+                    heightVal &&
+                    (latLngVal !== latLngOriginal || heightVal !== heightOriginal)
+                ) {
+                    $(updateButtonId).removeClass('d-none');
+                } else {
+                    $(updateButtonId).addClass('d-none');
                 }
-            }, 500)
-        );
-        $('#hgt-1').change(
-            _.debounce((e: any) => {
-                let height = validateHeight(parseFloat(String($('#hgt-1').val())), 'hgt-1');
-                this.updateLinkChart(true);
-                if (this.selectedFeatureID != null && this.draw.get(this.selectedFeatureID)) {
-                    if (this.workspaceLinkSelected()) {
-                        let link = this.draw.get(this.selectedFeatureID);
-                        let cpe = LOSCheckWorkspaceManager.getFeatureByUuid(link?.properties?.cpe);
-                        cpe.setFeatureProperty('height', isUnitsUS() ? ft2m(height) : height);
-                        this.map.fire('draw.update', { features: [cpe.getFeatureData()] });
-                    } else {
-                        this.draw.setFeatureProperty(
-                            this.selectedFeatureID,
-                            'radio1hgt',
-                            isUnitsUS() ? ft2m(height) : height
-                        );
-                        this.map.fire('draw.update', {
-                            features: [this.draw.get(this.selectedFeatureID)]
-                        });
-                    }
+            };
+
+            $(latLngId).on('input', showUpdateButtonCallback);
+            $(heightId).on('input', showUpdateButtonCallback);
+        };
+
+        const createUpdateButtonClickCallback = (
+            latLngId: string,
+            heightId: string,
+            updateButtonId: string,
+            coord1: number
+        ) => {
+            $(updateButtonId).on('click', () => {
+                const latLngOriginal = $(latLngId).data('original');
+                const heightOriginal = $(heightId).data('original');
+                const latLngVal = $(latLngId).val();
+                const heightVal = $(heightId).val();
+
+                let valid = true;
+
+                // Validate inputs
+                if (this.selectedFeatureID == null) {
+                    valid = false;
+                } else if (
+                    (latLngVal !== latLngOriginal &&
+                        parseFormLatitudeLongitude(latLngId) === null) ||
+                    (heightVal !== heightOriginal &&
+                        validateHeightMarkInvalid(
+                            parseFloat(String($(heightId).val())),
+                            heightId
+                        ) === null)
+                ) {
+                    valid = false;
+                } else {
+                    // Set new original + make update buttons disappear
+                    $(latLngId).data('original', latLngVal as string);
+                    $(heightId).data('original', heightVal as string);
+                    $(updateButtonId).addClass('d-none');
                 }
-            }, 500)
-        );
-        const createRadioCoordinateChangeCallback = (htmlId: string, coord1: number) => {
-            $(htmlId).on(
-                'change',
-                _.debounce(() => {
-                    if (this.selectedFeatureID != null) {
+
+                if (valid && this.selectedFeatureID != null) {
+                    // Coordinate change
+                    if (latLngVal !== latLngOriginal) {
                         const feat = this.draw.get(this.selectedFeatureID);
-                        let coords = parseFormLatitudeLongitude(htmlId);
+                        let coords = parseFormLatitudeLongitude(latLngId);
                         if (coords != null) {
                             coords = [coords[1], coords[0]];
                             if (
@@ -538,11 +560,52 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                             }
                         }
                     }
-                }, 500)
-            );
+
+                    // Height change
+                    if (heightVal !== heightOriginal) {
+                        let height = validateHeightMarkInvalid(
+                            parseFloat(String($(heightId).val())),
+                            heightId
+                        );
+                        this.updateLinkChart(true);
+                        if (this.draw.get(this.selectedFeatureID)) {
+                            if (this.workspaceLinkSelected()) {
+                                let link = this.draw.get(this.selectedFeatureID);
+                                let point = LOSCheckWorkspaceManager.getFeatureByUuid(
+                                    coord1 === 0
+                                        ? link?.properties?.ap || link?.properties?.sector
+                                        : link?.properties?.cpe
+                                );
+                                point.setFeatureProperty(
+                                    'height',
+                                    isUnitsUS() ? ft2m(height) : height
+                                );
+                                point.setFeatureProperty(
+                                    'height_ft',
+                                    isUnitsUS() ? height : m2ft(height)
+                                );
+                                this.map.fire('draw.update', {
+                                    features: [point.getFeatureData()]
+                                });
+                            } else {
+                                this.draw.setFeatureProperty(
+                                    this.selectedFeatureID,
+                                    `radio${coord1}hgt`,
+                                    isUnitsUS() ? ft2m(height) : height
+                                );
+                                this.map.fire('draw.update', {
+                                    features: [this.draw.get(this.selectedFeatureID)]
+                                });
+                            }
+                        }
+                    }
+                }
+            });
         };
-        createRadioCoordinateChangeCallback('#lat-lng-0', 0);
-        createRadioCoordinateChangeCallback('#lat-lng-1', 1);
+        createShowUpdateButtonCallbacks('#lat-lng-0', '#hgt-0', '#radio-update-btn-0');
+        createShowUpdateButtonCallbacks('#lat-lng-1', '#hgt-1', '#radio-update-btn-1');
+        createUpdateButtonClickCallback('#lat-lng-0', '#hgt-0', '#radio-update-btn-0', 0);
+        createUpdateButtonClickCallback('#lat-lng-1', '#hgt-1', '#radio-update-btn-1', 1);
     }
 
     onGeocoderLoad() {
@@ -593,6 +656,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         }
     }
 
+    setHeight(radio: number, height: number) {
+        $(`#hgt-${radio}`).val(height);
+        $(`#hgt-${radio}`).data('original', height.toString());
+    }
+
+    setLatLng(radio: number, latLng: string) {
+        $(`#lat-lng-${radio}`).val(latLng);
+        $(`#lat-lng-${radio}`).data('original', latLng);
+    }
+
     showLinkCheckProfile() {
         //@ts-ignore
         $('#data-container').collapse('show');
@@ -638,14 +711,18 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             }
             const feat = update.features[0];
             this.selectedFeatureID = String(feat.id);
+            $('#radio-btn-update-0').addClass('d-none');
+            $('#radio-btn-update-1').addClass('d-none');
 
             if (feat.geometry.type === 'LineString') {
-                $('#lat-lng-0').val(
+                this.setLatLng(
+                    0,
                     `${feat.geometry.coordinates[0][1].toFixed(
                         5
                     )}, ${feat.geometry.coordinates[0][0].toFixed(5)}`
                 );
-                $('#lat-lng-1').val(
+                this.setLatLng(
+                    1,
                     `${feat.geometry.coordinates[1][1].toFixed(
                         5
                     )}, ${feat.geometry.coordinates[1][0].toFixed(5)}`
@@ -672,14 +749,16 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                     );
                 }
 
-                $('#hgt-0').val(
+                this.setHeight(
+                    0,
                     Math.round(
                         isUnitsUS()
                             ? ap.getFeatureProperty('height_ft')
                             : ap.getFeatureProperty('height')
                     )
                 );
-                $('#hgt-1').val(
+                this.setHeight(
+                    1,
                     Math.round(
                         isUnitsUS()
                             ? cpe.getFeatureProperty('height_ft')
@@ -741,7 +820,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         m2ft(radio0hgt)
                     );
                 }
-                $('#hgt-0').val(Math.round(isUnitsUS() ? m2ft(radio0hgt) : radio0hgt));
+                this.setHeight(0, Math.round(isUnitsUS() ? m2ft(radio0hgt) : radio0hgt));
                 let radio1hgt = isUnitsUS()
                     ? feat.properties?.radio1hgt
                     : feat.properties?.radio1hgt_ft;
@@ -758,7 +837,7 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
                         m2ft(radio1hgt)
                     );
                 }
-                $('#hgt-1').val(Math.round(isUnitsUS() ? m2ft(radio1hgt) : radio1hgt));
+                this.setHeight(1, Math.round(isUnitsUS() ? m2ft(radio1hgt) : radio1hgt));
                 $('#radio_name-0').text(DEFAULT_RADIO_0_NAME);
                 $('#radio_name-1').text(DEFAULT_RADIO_1_NAME);
                 this.radio_names[0] = DEFAULT_RADIO_0_NAME;

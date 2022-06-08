@@ -136,13 +136,6 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         choices=IspToolboxUserSignUpInfo.GOAL_CHOICES,
     )
-    contact_me = forms.BooleanField(
-        label="Help us shape the future of ISP Toolbox ",
-        required=False,
-        label_suffix=" ",
-        widget=CustomCheckboxInput,
-        initial=True,
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -159,7 +152,6 @@ class IspToolboxUserSignUpInfoForm(forms.ModelForm):
         "individual_role",
         "subscriber_size",
         "company_goal",
-        "contact_me",
     ]
     error_css_class = "error"
     required_css_class = "required"
@@ -186,7 +178,6 @@ class IspToolboxSocialUserSignUpInfoForm(SignupForm, IspToolboxUserSignUpInfoFor
         "individual_role",
         "subscriber_size",
         "company_goal",
-        "contact_me",
     ]
 
     class Meta:

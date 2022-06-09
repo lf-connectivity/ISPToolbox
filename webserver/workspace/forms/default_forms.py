@@ -62,6 +62,7 @@ class NewWorkspaceSessionFromKMZForm(forms.Form):
             attrs={
                 'accept':
                 ", ".join([
+                    '.kml', '.kmz', '.json', '.geojson',
                     'application/vnd.google-earth.kml+xml',
                     'application/vnd.google-earth.kmz',
                     'application/geo+json',

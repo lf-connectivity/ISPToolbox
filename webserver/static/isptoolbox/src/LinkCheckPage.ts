@@ -965,20 +965,26 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         }
     }
 
-    renderNewLinkProfile() {
-        // Check if we can update the chart
-        if (this.link_chart != null) {
-            if (this._elevation.length > 1 && this._lidar.length > 1) {
+    /**
+     * Update Y-Axis limits of chart based on data
+     */
+    updateLimits(){
+        if(this.link_chart != null)
+        {
+            let data : Array<number> = [];
+            if(this._elevation.length > 1) {
                 const tx_h = this.getRadioHeightFromUI('0') + this._elevation[0];
                 const rx_h =
                     this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
-                this.link_chart.yAxis[0].update({
-                    min: Math.min(...[...this._lidar, tx_h, rx_h]),
-                    max: Math.max(...[...this._lidar, tx_h, rx_h])
-                });
-            } else if (this._elevation.length > 1) {
-                this.link_chart.yAxis[0].update({ min: Math.min(...this._elevation) });
+                data = [...data, ...this._elevation,tx_h, rx_h];
             }
+            if(this._lidar.length > 1) {
+                data = [...data, ...this._lidar];
+            }
+            this.link_chart.yAxis[0].update({
+                min: Math.min(...data),
+                max: Math.max(...data)
+            });
         }
     }
 
@@ -1012,20 +1018,9 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         }
         if (this._elevation != null && this.lidar3dview?.updateLinkHeight != null && update3DView) {
             this.highlightCurrentPosition(false);
-
-            const tx_hgt = this.getRadioHeightFromUI('0') + this._elevation[0];
-            const rx_hgt =
-                this.getRadioHeightFromUI('1') + this._elevation[this._elevation.length - 1];
-            this.lidar3dview?.updateLinkHeight(tx_hgt, rx_hgt, !update3DView);
-            if (this._lidar != null) {
-                this.link_chart.yAxis[0].update({
-                    min: Math.min(...[...this._lidar, tx_hgt, rx_hgt]),
-                    max: Math.max(...[...this._lidar, tx_hgt, rx_hgt])
-                });
-            }
-
             this.lidar3dview?.moveLocation3DView();
         }
+        this.updateLimits();
     }
 
     /**
@@ -1157,7 +1152,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
             );
         }
 
-        this.renderNewLinkProfile();
         this.updateLinkChart();
         this.lidar3dview?.updateLink();
 
@@ -1214,7 +1208,6 @@ export class LinkCheckPage extends ISPToolboxAbstractAppPage {
         this.data_resolution = response.res;
         this.link_status.updateLoadingStatus(response.still_loading);
 
-        this.renderNewLinkProfile();
         this.updateLinkChart();
         this.updateAxes();
 

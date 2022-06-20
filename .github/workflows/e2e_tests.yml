@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [synchronize, opened]
     branches:
-      - master
+      - main
 jobs:
   cypress-run:
     runs-on: self-hosted

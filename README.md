@@ -160,9 +160,9 @@ const ISPTOOLBOX_BACKEND_WS_PROTOCOL = 'ws://'; //@nocommit 'wss://';
 
 Option 1: Github action
 
-1. push latest code change to github master branch, wait for workflow to complete successfully. Make sure aws cli is configured locally -
+1. push latest code change to github main branch, wait for workflow to complete successfully. Make sure aws cli is configured locally -
 
-   ` git push origin master`
+   ` git push origin main`
 
    `aws configure`
 

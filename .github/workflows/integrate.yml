@@ -3,7 +3,7 @@ name: Build, Test, Push New Image to Prod
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   build:
     runs-on: self-hosted

@@ -381,7 +381,6 @@ DJANGO_ORM_DB_CREDENTIALS = {
     "port": "5432",
 }
 
-
 PROD_DJANGO_ORM_DB_CREDENTIALS = json.loads(
     get_secret(
         "prod/isptoolbox_django",
@@ -389,6 +388,13 @@ PROD_DJANGO_ORM_DB_CREDENTIALS = json.loads(
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 )
+
+GOOGLE_ELEVATION_API_KEY = PROD_DJANGO_ORM_DB_CREDENTIALS.get('GOOGLE_ELEVATION_API_KEY')
+
+msft_earth_ai_key_primary = PROD_DJANGO_ORM_DB_CREDENTIALS.get('msft_earth_ai_key_primary')
+
+msft_earth_ai_key_secondary = PROD_DJANGO_ORM_DB_CREDENTIALS.get('msft_earth_ai_key_secondary')
+
 PROD_DJANGO_ORM_DB_CREDENTIALS.update(
     {
         "name": "django_db",

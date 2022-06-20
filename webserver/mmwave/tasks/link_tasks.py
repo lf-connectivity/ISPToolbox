@@ -30,7 +30,7 @@ from mmwave.scripts.load_lidar_boundaries import (
 from mmwave.scripts.create_higher_resolution_boundaries import updatePointCloudBoundariesTask
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
 from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
-
+from django.conf import settings
 
 GOOGLE_MAPS_SAMPLE_LIMIT = 512
 DEFAULT_NUM_SAMPLES_PER_M = 1
@@ -75,7 +75,7 @@ def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
             getElevationProfile(link_profile[mid_pt], rx, mid_pt)
 
     path = str(tx.y) + ',' + str(tx.x) + '|' + str(rx.y) + ',' + str(rx.x)
-    params = {'key': google_maps_api_key, 'path': path, 'samples': samples}
+    params = {'key': settings.GOOGLE_ELEVATION_API_KEY, 'path': path, 'samples': samples}
     try:
         r = requests.get(
             'https://maps.googleapis.com/maps/api/elevation/json', params=params)
@@ -97,7 +97,7 @@ def getElevationProfile(tx, rx, samples=MAXIMUM_NUM_POINTS_RETURNED):
 
 def getDTMPoint(pt: Point) -> float:
     try:
-        params = {'key': google_maps_api_key, 'locations': f'{pt.y},{pt.x}'}
+        params = {'key': settings.GOOGLE_ELEVATION_API_KEY, 'locations': f'{pt.y},{pt.x}'}
         r = requests.get(
             'https://maps.googleapis.com/maps/api/elevation/json', params=params)
         elevation_resp = r.json()

@@ -7,8 +7,6 @@
         <h1 class="heading-2">Let's get you set up</h1>
         <p class="onboarding_container--intro-copy large">Creating an account will give you the ability to save and reuse files across ISP Toolbox.</p>
 
-        {% include 'workspace/organisms/value_props.html' %}
-
         <div class="fb-login-button"
             data-onlogin="FB.getLoginStatus((response) => {allauth.facebook.onLoginSuccess(response, {% url 'workspace:workspace_dashboard' %}, '')});"
             data-width="" data-size="large"

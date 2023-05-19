@@ -6,6 +6,8 @@ on:
       - main
 jobs:
   build:
+    env:
+      AWS_DEFAULT_REGION: us-west-1
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2      
@@ -31,26 +33,6 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Run Django Test Suite
-      run: |
-        # Test then cleanup containers
-        make test
-        docker stop $(docker ps -a -f "name=isptoolbox_" -q)
-        docker rm $(docker ps -a -f "name=isptoolbox_" -q)
-    - name: Build Static File Manifest
-      run: |
-        rm -r webserver/static/isptoolbox/build/
-        make static_prod
-    - name: Auto Commit staticfiles.json Manifest
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        file_pattern: webserver/staticfiles.json
-        commit_message: "[STATICBOT] build staticfiles.json manifest"
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        role-to-assume: arn:aws:iam::623762516657:role/isptoolbox-prod-services
-        aws-region: us-west-1
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1

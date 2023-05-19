@@ -27,12 +27,27 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         echo "if you're seeing this, your code is ugly ( ͡ಥ ͜ʖ ͡ಥ)"
-        flake8 . --count --max-complexity=11 --max-line-length=127 --statistics --exclude *migrations*,*__init__.py
+        flake8 . --count --max-complexity=11 --max-line-length=127 --statistics --exclude *migrations*,*__init__.py 
     - name: Log into Docker Hub
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Run Django Test Suite
+      run: |
+        # Test then cleanup containers
+        make test
+        docker stop $(docker ps -a -f "name=isptoolbox_" -q)
+        docker rm $(docker ps -a -f "name=isptoolbox_" -q)
+    - name: Build Static File Manifest
+      run: |
+        rm -r webserver/static/isptoolbox/build/
+        make static_prod
+    - name: Auto Commit staticfiles.json Manifest
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        file_pattern: webserver/staticfiles.json
+        commit_message: "[STATICBOT] build staticfiles.json manifest"
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:

@@ -11,11 +11,8 @@ max_workers = 32
 config = TransferConfig(max_concurrency=250)
 
 bucket_name = 'isptoolbox-export-file'
-s3_resource = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-s3_client = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                         config=botocore.config.Config(max_pool_connections=max_workers))
+s3_resource = boto3.resource('s3')
+s3_client = boto3.client('s3', config=botocore.config.Config(max_pool_connections=max_workers))
 
 
 class S3PublicExportMixin():

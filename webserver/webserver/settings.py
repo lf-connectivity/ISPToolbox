@@ -250,8 +250,6 @@ WAFFLE_CREATE_MISSING_SWITCHES = True
 FB_SDK_SECRETS = json.loads(
     get_secret(
         "prod/fb_sdk_isptoolbox",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 )
 # App ID
@@ -267,8 +265,6 @@ MAPBOX_ACCOUNT = "isptoolbox"
 MAPBOX_SECRETS = json.loads(
     get_secret(
         "prod/mapbox",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 )
 MAPBOX_ACCESS_TOKEN_BACKEND = MAPBOX_SECRETS["MAPBOX_ACCESS_TOKEN_BACKEND"]
@@ -281,8 +277,6 @@ if PROD:
 TILESET_SECRETS = json.loads(
     get_secret(
         "prod/tileset_jwt_secret",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 )
 TILESET_LAMBDA_EDGE_SECRET = TILESET_SECRETS["TILESET_LAMBDA_EDGE_SECRET"]
@@ -291,8 +285,6 @@ TILESET_LAMBDA_EDGE_SECRET = TILESET_SECRETS["TILESET_LAMBDA_EDGE_SECRET"]
 CLOUD_RF = json.loads(
     get_secret(
         "prod/cloudrf",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 )
 
@@ -303,8 +295,6 @@ CLOUDRF_KEY = CLOUD_RF["cloud_rf_key"]
 ELASTICSEARCH_SECRETS = json.loads(
     get_secret(
         "prod/elastic_search_asn",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 )
 
@@ -368,8 +358,6 @@ WSGI_APPLICATION = "webserver.wsgi.application"
 GIS_DB_CREDENTIALS = json.loads(
     get_secret(
         "prod/gis_db",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 )
 DJANGO_ORM_DB_CREDENTIALS = {
@@ -384,8 +372,6 @@ DJANGO_ORM_DB_CREDENTIALS = {
 PROD_DJANGO_ORM_DB_CREDENTIALS = json.loads(
     get_secret(
         "prod/isptoolbox_django",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     )
 )
 
@@ -549,8 +535,6 @@ if PROD:
     SAML_SECRETS = json.loads(
         get_secret(
             SAML_SECRETS_LOCATION,
-            aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         )
     )
 

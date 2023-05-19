@@ -3,7 +3,6 @@ import boto3
 import botocore
 from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
-from django.conf import settings
 import concurrent.futures
 from functools import lru_cache
 

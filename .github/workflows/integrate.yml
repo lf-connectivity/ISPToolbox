@@ -46,6 +46,11 @@ jobs:
       with:
         file_pattern: webserver/staticfiles.json
         commit_message: "[STATICBOT] build staticfiles.json manifest"
+    - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::623762516657:role/isptoolbox-prod-services
+          aws-region: us-west-1
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1

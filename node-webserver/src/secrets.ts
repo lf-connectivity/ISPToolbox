@@ -21,14 +21,9 @@
 var AWS = require("aws-sdk"),
   region = "us-west-1";
 
-const credentials = new AWS.Credentials(
-  AWS_ACCESS_KEY_ID,
-  AWS_SECRET_ACCESS_KEY
-);
 // Create a Secrets Manager client
 var client = new AWS.SecretsManager({
   region: region,
-  credentials,
 });
 
 // In this sample we only handle the specific exceptions for the 'GetSecretValue' API.

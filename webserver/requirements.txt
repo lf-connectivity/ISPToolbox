@@ -91,7 +91,7 @@ six==1.15.0
 sqlparse==0.3.1
 tablib==2.0.0
 threadpoolctl==2.1.0
-tornado==6.1
+tornado==6.3.3
 turfpy==0.0.7
 txaio==20.4.1
 uritemplate==3.0.1

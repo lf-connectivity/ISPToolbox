@@ -95,7 +95,7 @@ tornado==6.1
 turfpy==0.0.7
 txaio==20.4.1
 uritemplate==3.0.1
-urllib3==1.25.10
+urllib3==1.26.17
 uvicorn==0.17.4
 uvloop==0.14.0
 vine==5.0.0

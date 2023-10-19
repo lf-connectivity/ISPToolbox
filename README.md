@@ -381,3 +381,5 @@ Check our [contributing guide](CONTRIBUTING.md) to learn about how to contribute
 ## License
 
 ISPToolbox is licensed under the [MIT License](LICENSE).
+
+Users must review the licenses for the data that is accessed and assess whether their own use of the data complies with the licenses of said data.

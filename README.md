@@ -372,3 +372,12 @@ Configure gatekeepers at: https://isptoolbox.io/admin/waffle/
 Grant or block access to certain features
 Uses the library: https://waffle.readthedocs.io/en/stable/
 Keep in mind the differences between local database and production database
+
+
+## Contributing
+
+Check our [contributing guide](CONTRIBUTING.md) to learn about how to contribute to the project.
+
+## License
+
+ISPToolbox is licensed under the [MIT License](LICENSE).

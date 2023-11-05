@@ -95,11 +95,11 @@ tornado==6.3.3
 turfpy==0.0.7
 txaio==20.4.1
 uritemplate==3.0.1
-urllib3==1.26.5
+urllib3==1.26.18
 uvicorn==0.17.4
 uvloop==0.14.0
 vine==5.0.0
-wagtail==4.1.4
+wagtail==4.1.9
 watchdog==0.10.3
 wcwidth==0.2.5
 Willow==1.4

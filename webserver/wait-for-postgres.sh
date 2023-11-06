@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 #!/bin/bash
 # wait-for-postgres.sh
 # this file is needed for automated testing to make sure the postgres

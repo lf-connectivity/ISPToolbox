@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e 
+# (c) Meta Platforms, Inc. and affiliates. Copyright
+set -e
 echo "Checking for any outstanding migrations"
 make prod_check_migrations
 # DEPLOY LATEST ECR DOCKER IMAGES TO ECS, PRODUCTION

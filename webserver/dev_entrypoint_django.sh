@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 ## DO NOT USE FOR PRODUCTION - only for local dev testing
 echo "Creating database migrations"
 python3 manage.py makemigrations

@@ -1,4 +1,5 @@
 #!/bin/bash/
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 set -e
 # Set Variables
 TOKEN=

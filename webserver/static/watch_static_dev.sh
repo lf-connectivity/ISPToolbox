@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 npm install -g sass@1.32.8
 cd /usr/src/app/isptoolbox
 npm install

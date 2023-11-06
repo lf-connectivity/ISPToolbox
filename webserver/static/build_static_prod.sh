@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # exit if any of the commands error
 set -e
 

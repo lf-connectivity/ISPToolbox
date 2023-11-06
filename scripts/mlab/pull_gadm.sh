@@ -1,4 +1,5 @@
 #!/bin/bash
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # Pull GADM files - theses are boundary files for different countries - be careful with the license
 wget https://biogeo.ucdavis.edu/data/gadm3.6/shp/gadm36_BRA_shp.zip
 mkdir gadm36_BRA

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 sudo apt-get update
 sudo apt-get install -y python3.8 python3-pip
 echo "Making python3.8 and pip3 defaults ~/.bash_aliases"

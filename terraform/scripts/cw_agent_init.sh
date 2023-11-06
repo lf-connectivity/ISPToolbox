@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 sudo yum -y install amazon-cloudwatch-agent
 sudo touch /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json 
 echo '{

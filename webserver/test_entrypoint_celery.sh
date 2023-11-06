@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 ## DO NOT USE FOR PRODUCTION - only for integration testing
 
 # purge tasks before starting new one

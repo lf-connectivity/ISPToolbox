@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 /// <reference types="cypress" />
 
 Cypress.Commands.add("los_click_tower", () => {

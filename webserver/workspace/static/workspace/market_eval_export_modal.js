@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 $(() => {
     $('#market-eval-export-frm').on('submit', function (event) {
         event.preventDefault();

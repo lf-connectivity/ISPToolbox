@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 const lambda = require('./index.js');
 
 const TEST_ALERT = {

@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 const circle = require('@turf/circle').default;
 import * as Constants from '@mapbox/mapbox-gl-draw/src/constants';
 

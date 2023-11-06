@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 /// <reference types="cypress" />
 
 const CENTER_THRESHOLD = 1e-6;

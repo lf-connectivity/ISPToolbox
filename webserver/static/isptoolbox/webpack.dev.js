@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 const { ModuleFilenameHelpers } = require('webpack');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');

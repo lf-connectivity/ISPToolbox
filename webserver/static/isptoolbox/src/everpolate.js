@@ -1,30 +1,30 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.everpolate=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
     'use strict'
-    
+
     // Expose module API:
-    
+
     module.exports.polynomial = require('./polynomial.js')
     module.exports.linear = require('./linear.js')
     module.exports.linearRegression = require('./linearRegression.js')
     module.exports.step = require('./step.js')
-    
+
     },{"./linear.js":3,"./linearRegression.js":4,"./polynomial.js":5,"./step.js":6}],2:[function(require,module,exports){
     'use strict'
-    
+
     /**
      * Makes argument to be an array if it's not
      *
      * @param input
      * @returns {Array}
      */
-    
+
     module.exports.makeItArrayIfItsNot = function (input) {
       return Object.prototype.toString.call( input ) !== '[object Array]'
         ? [input]
         : input
     }
-    
+
     /**
      *
      * Utilizes bisection method to search an interval to which
@@ -35,7 +35,7 @@
      * @param {Array} intervals
      * @returns {Number}
      */
-    
+
     module.exports.findIntervalLeftBorderIndex = function (point, intervals) {
       //If point is beyond given intervals
       if (point < intervals[0])
@@ -57,11 +57,11 @@
     }
     },{}],3:[function(require,module,exports){
     'use strict'
-    
+
     var help = require('./help')
-    
+
     module.exports = evaluateLinear
-    
+
     /**
      * Evaluates interpolating line/lines at the set of numbers
      * or at a single number for the function y=f(x)
@@ -72,7 +72,7 @@
      * @param {Array} functionValuesY             set of distinct y=f(x) values
      * @returns {Array}
      */
-    
+
     function evaluateLinear (pointsToEvaluate, functionValuesX, functionValuesY) {
       var results = []
       pointsToEvaluate = help.makeItArrayIfItsNot(pointsToEvaluate)
@@ -85,7 +85,7 @@
       })
       return results
     }
-    
+
     /**
      *
      * Evaluates y-value at given x point for line that passes
@@ -98,20 +98,20 @@
      * @param y1
      * @returns {Number}
      */
-    
+
     function linearInterpolation (x, x0, y0, x1, y1) {
       var a = (y1 - y0) / (x1 - x0)
       var b = -a * x0 + y0
       return a * x + b
     }
-    
+
     },{"./help":2}],4:[function(require,module,exports){
     'use strict'
-    
+
     module.exports = linearRegression
-    
+
     var help = require('./help')
-    
+
     /**
      * Computes Linear Regression slope, intercept, r-squared and returns
      * a function which can be used for evaluating linear regression
@@ -121,7 +121,7 @@
      * @param functionValuesY {Array}
      * @returns {Object}
      */
-    
+
     function linearRegression(functionValuesX, functionValuesY){
       var regression = {}
         , x = functionValuesX
@@ -132,7 +132,7 @@
         , sum_xy = 0
         , sum_xx = 0
         , sum_yy = 0
-    
+
       for (var i = 0; i < y.length; i++) {
         sum_x += x[i]
         sum_y += y[i]
@@ -140,7 +140,7 @@
         sum_xx += (x[i]*x[i])
         sum_yy += (y[i]*y[i])
       }
-    
+
       regression.slope = (n * sum_xy - sum_x * sum_y) / (n*sum_xx - sum_x * sum_x)
       regression.intercept = (sum_y - regression.slope * sum_x)/n
       regression.rSquared = Math.pow((n*sum_xy - sum_x*sum_y)/Math.sqrt((n*sum_xx-sum_x*sum_x)*(n*sum_yy-sum_y*sum_y)),2)
@@ -153,17 +153,17 @@
         })
         return result
       }
-    
+
       return regression
     }
-    
+
     },{"./help":2}],5:[function(require,module,exports){
     'use strict'
-    
+
     var help = require('./help')
-    
+
     module.exports = evaluatePolynomial
-    
+
     /**
      * Evaluates interpolating polynomial at the set of numbers
      * or at a single number for the function y=f(x)
@@ -174,7 +174,7 @@
      * @param {Array} functionValuesY             set of distinct y=f(x) values
      * @returns {Array}                           interpolating polynomial
      */
-    
+
      function evaluatePolynomial (pointsToEvaluate, functionValuesX, functionValuesY) {
       var results = []
       pointsToEvaluate = help.makeItArrayIfItsNot(pointsToEvaluate)
@@ -184,7 +184,7 @@
       })
       return results
     }
-    
+
     /**
      * Neville's Iterated Interpolation algorithm implementation
      * http://en.wikipedia.org/wiki/Neville's_algorithm <- for reference
@@ -194,7 +194,7 @@
      * @param {Array} Y                            set of distinct y=f(x) values
      * @returns {number}                           interpolating polynomial
      */
-    
+
     function nevillesIteratedInterpolation (x, X, Y) {
       var Q = [Y]
       for (var i = 1; i < X.length; i++) {
@@ -205,14 +205,14 @@
       }
       return Q[j-1][i-1]
     }
-    
+
     },{"./help":2}],6:[function(require,module,exports){
     'use strict'
-    
+
     var help = require('./help')
-    
+
     module.exports = step
-    
+
     /**
      * Evaluates interpolating step function at the set of numbers
      * or at a single number
@@ -223,7 +223,7 @@
      * @param {Array} functionValuesY             set of distinct y=f(x) values
      * @returns {Array}
      */
-    
+
     function step (pointsToEvaluate, functionValuesX, functionValuesY) {
       var results = []
       pointsToEvaluate = help.makeItArrayIfItsNot(pointsToEvaluate)
@@ -232,6 +232,6 @@
       })
       return results
     }
-    
+
     },{"./help":2}]},{},[1])(1)
     });

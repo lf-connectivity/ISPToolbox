@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 'use strict';
 
 const querystring = require('querystring');
@@ -35,10 +35,10 @@ function checkTilesetMatchesURI(tileset, uri) {
 
 /**
  * Check if user is allowed to access tile based on access token
- * @param {*} event 
+ * @param {*} event
  * @param {*} context
  * @param {*} callback
- * @returns 
+ * @returns
  */
 exports.handler = async (event, context, callback) => {
   const request = event.Records[0].cf.request;

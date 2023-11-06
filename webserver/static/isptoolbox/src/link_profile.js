@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export function createLinkChart(link_chart, highLightPointOnGround, moveLocation3DView, mouseLeave, setExtremes) {
     const mouseOverDebounceFunction = _.debounce( (e) => {
         const point = { x: e.target.x, y: e.target.y };

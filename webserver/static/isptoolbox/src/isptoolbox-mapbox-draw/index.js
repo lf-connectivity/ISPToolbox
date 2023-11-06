@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { LinkMode} from './LinkDrawMode.js';
 import { OverrideSimple } from './SimpleDrawOverride.js';
 import { OverrideDirect } from './DirectDrawOverride.js';
@@ -10,6 +10,6 @@ import { APDrawMode } from './APDrawMode.js';
 
 export {
     LinkMode, OverrideDirect, OverrideSimple,
-    CPEDrawMode, combineStyles, 
+    CPEDrawMode, combineStyles,
     load_custom_icons, APDrawMode, OverrideDrawPolygon
 }

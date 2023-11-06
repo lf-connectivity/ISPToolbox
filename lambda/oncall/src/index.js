@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 'use strict';
 
 const querystring = require('querystring');
@@ -59,9 +59,9 @@ async function alertOncall(msg, options) {
 
 /**
  * Send page to oncall for isptoolbox
- * @param {*} event 
+ * @param {*} event
  * @param {*} context
- * @returns 
+ * @returns
  */
 exports.handler = async (event, context) => {
     const sns_msg = event.Records[0].Sns;

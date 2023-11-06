@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 /// <reference types="cypress" />
 
 export const MARKET_EVAL_PAGE = "/pro/market/";

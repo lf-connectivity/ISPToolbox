@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { renderLinkEnds } from './LinkDrawMode.js';
 import {
     createSupplementaryPointsForCircle,

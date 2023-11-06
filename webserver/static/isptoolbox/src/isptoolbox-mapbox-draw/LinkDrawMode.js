@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { addDrawingInstructions, getMessageLink } from "./styles/drawing_instructions";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 function _LinkMode() {

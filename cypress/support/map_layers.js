@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export const TOWER_ICON = "tower-icon";
 export const COVERAGE_AREA_ICON = "coverage-area-icon";
 

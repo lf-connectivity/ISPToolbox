@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 /// <reference types="cypress" />
 
 import { not_exist_or_not_be_visible } from ".";

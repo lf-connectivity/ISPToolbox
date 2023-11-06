@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 'use strict';
 
 const redis = require('redis');
@@ -44,14 +44,14 @@ async function getStatsRedis(){
 
 /**
  * Send page to oncall for isptoolbox
- * @param {*} event 
+ * @param {*} event
  * @param {*} context
- * @returns 
+ * @returns
  */
 exports.handler = async (event, context, callback) => {
     const stats = await getStatsRedis();
     const params = {
-        MetricData: 
+        MetricData:
             Object.keys(stats).map( k => {
                     return {
                         'MetricName': 'queue_length',

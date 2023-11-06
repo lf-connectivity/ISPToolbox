@@ -1,4 +1,4 @@
-// (c) Meta Platforms, Inc. and affiliates
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 'use strict';
 var fs = require('fs');
 
@@ -21,7 +21,7 @@ exports.handler = (event, context, callback) => {
         loadEmptyTile();
         response.status = 200;
         response.statusDescription = "Tile not found"
-        response.headers['content-type'] = [{key: 'Content-Type', value: "image/png"}]; 
+        response.headers['content-type'] = [{key: 'Content-Type', value: "image/png"}];
         response.body = empty_tile.toString('base64');
         response.bodyEncoding = 'base64';
     }

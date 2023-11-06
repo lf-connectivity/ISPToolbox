@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { LinkCheckLocationSearchTool } from '../../../organisms/LinkCheckLocationSearchTool';
 import { BaseWorkspaceManager } from '../../../workspace/BaseWorkspaceManager';
 import { WorkspaceFeatureTypes } from '../../../workspace/WorkspaceConstants';

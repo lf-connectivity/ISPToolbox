@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export function clickedOnMapCanvas(e: any) {
     return (
         e.originalEvent &&

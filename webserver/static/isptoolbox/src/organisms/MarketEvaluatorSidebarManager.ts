@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { GeometryCollection } from '@turf/turf';
 import {
     BroadbandNowResponse,

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import * as _ from 'lodash';
 import { LOSWSEvents, WorkspaceFeatureTypes } from './WorkspaceConstants';

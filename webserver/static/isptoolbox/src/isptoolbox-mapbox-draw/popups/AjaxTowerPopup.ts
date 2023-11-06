@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from '../../utils/IMapboxDrawPlugin';
 import { parseLatitudeLongitude } from '../../utils/LatLngInputUtils';

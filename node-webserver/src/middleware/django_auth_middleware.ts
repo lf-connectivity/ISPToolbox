@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import * as socketio from "socket.io";
 import Redis from "ioredis";
 

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { Feature, Point } from 'geojson';
 import LOSCheckWS from '../../../LOSCheckWS';
 import { getCookie } from '../../../utils/Cookie';

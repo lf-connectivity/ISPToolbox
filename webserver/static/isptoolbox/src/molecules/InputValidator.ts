@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 // Removes single quotes from a string
 export function sanitizeString(str: string) {
     return str.replace(/'/g, '&#39;');

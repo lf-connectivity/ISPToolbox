@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export function getCookie(name: string) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

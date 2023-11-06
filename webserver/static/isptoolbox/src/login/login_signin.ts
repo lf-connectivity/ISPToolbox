@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 $(() => {
     function showLoginModal() {
         $('#signin_container').removeClass('d-none');

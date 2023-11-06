@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import * as _ from 'lodash';
 
 export function setConnectionStatus(online: boolean) {

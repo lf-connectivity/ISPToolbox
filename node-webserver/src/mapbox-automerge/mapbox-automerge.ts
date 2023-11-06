@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import AutoMerge from "automerge";
 import Redis from "ioredis";
 

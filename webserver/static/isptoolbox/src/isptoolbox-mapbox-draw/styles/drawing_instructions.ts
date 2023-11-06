@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 // modify mapbox draw mode to render instructions to help user accomplish their task
 export function addDrawingInstructions(drawing_mode: any, getMessage: (state: any) => string) {
     const addDrawInstructions = (state: any, geojson: any, display: any) => {

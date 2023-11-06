@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 const DAYS_IN_YEAR = 365;
 
 export function sunriseTime(latitude: number, day_of_year: number): number {

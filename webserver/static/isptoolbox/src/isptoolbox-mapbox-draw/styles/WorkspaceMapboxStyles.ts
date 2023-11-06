@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { SectorMapboxDrawState, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';
 
 export const WorkspaceMapboxStyles = [

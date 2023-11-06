@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { djangoUrl } from '../../utils/djangoUrl';
 import { LinkCheckBasePopup, createLoadingHTMLContent, createErrorHTMLContent } from './LinkCheckBasePopup';
 

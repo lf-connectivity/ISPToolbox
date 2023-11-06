@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import { MarketEvaluatorTowerPopup } from '../isptoolbox-mapbox-draw/popups/TowerPopups';
 import MarketEvaluatorMapLayerSidebarManager from '../MarketEvaluatorMapLayerSidebarManager';

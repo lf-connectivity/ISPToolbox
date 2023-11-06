@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 /**
  * Reverse URL Lookup Utility - requires script tag
  * @param name name of url to reverse lookup url

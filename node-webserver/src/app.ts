@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 "use strict";
 /**
  * Nodejs Server used for high-throughput websocket connections

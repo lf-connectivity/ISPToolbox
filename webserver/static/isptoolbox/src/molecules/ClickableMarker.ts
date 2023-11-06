@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 // Shamelessly copied off of https://bl.ocks.org/chriswhong/8977c0d4e869e9eaf06b4e9fda80f3ab
 //@ts-ignore
 const mapboxgl = window.mapboxgl;

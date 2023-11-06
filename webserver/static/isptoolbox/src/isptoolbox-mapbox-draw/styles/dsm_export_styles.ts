@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export const dsmExportStyles = [
     {
         id: 'gl-draw-polygon-midpoint',

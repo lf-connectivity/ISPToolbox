@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export function addHoverTooltip(selector: string, placement: string = 'top') {
     // @ts-ignore
     $(selector).tooltip({

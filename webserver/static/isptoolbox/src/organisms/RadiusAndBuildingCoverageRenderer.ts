@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import mapboxgl from 'mapbox-gl';
 import * as _ from 'lodash';
 import { createGeoJSONCircle } from '../isptoolbox-mapbox-draw/DrawModeUtils';

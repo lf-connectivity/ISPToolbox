@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 // Create new mapbox Map
 import * as MapboxGL from 'mapbox-gl';
 import { MapboxSDKClient } from './MapboxSDKClient.js';

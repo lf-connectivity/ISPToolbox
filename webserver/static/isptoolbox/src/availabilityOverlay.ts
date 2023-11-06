@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import * as MapboxGL from 'mapbox-gl';
 import { getCookie } from './utils/Cookie';
 var _ = require('lodash');

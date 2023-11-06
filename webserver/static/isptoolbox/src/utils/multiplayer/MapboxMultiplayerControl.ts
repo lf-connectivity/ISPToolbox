@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import mapboxgl from 'mapbox-gl';
 import { MultiplayerConnection } from './MultiplayerConnection';
 import { MultiplayerEvents } from './MultiplayerEvents';

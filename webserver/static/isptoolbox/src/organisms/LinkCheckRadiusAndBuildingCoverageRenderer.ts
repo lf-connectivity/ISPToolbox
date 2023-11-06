@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import mapboxgl from 'mapbox-gl';
 import * as _ from 'lodash';
 import * as StyleConstants from '../isptoolbox-mapbox-draw/styles/StyleConstants';

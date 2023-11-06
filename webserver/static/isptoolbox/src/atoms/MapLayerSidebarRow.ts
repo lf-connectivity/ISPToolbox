@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { WorkspaceFeatureTypes } from '../workspace/WorkspaceConstants';
 
 export function generateMapLayerSidebarRow(feature: GeoJSON.Feature): undefined | HTMLDivElement {

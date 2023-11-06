@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 const SERVICEABLE_BUILDINGS_COLOR = '#34eb46';
 const UNSERVICEABLE_BUILDINGS_COLOR = '#ff2f00';
 const UNKNOWN_BUILDINGS_COLOR = '#ccc';

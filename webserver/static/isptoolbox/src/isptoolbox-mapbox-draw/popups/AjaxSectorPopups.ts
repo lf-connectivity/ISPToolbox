@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { DeleteFromPopupConfirmationModal } from './DeleteFromPopupConfirmationModal';
 import { addHoverTooltip, hideHoverTooltip } from '../../organisms/HoverTooltip';
 import { renderAjaxOperationFailed } from '../../utils/ConnectionIssues';

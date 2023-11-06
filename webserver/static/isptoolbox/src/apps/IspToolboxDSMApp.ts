@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import * as MapboxGL from 'mapbox-gl';
 import LidarAvailabilityLayer from '../availabilityOverlay';
 import { getMapDefault } from '../utils/MapDefaults';

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { Polygon, Feature } from 'geojson';
 
 export enum BuildingCoverageStatus {

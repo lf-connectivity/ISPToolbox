@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export namespace Potree {
     export class Annotation {
         constructor(options: { position: [number, number, number]; title: string });

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export enum ISPToolboxTool {
     MARKET_EVAL = 'market_evaluator',
     LOS_CHECK = 'los_check'

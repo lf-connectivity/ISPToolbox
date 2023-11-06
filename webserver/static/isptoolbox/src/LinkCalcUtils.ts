@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 // @ts-ignore
 import everpolate from './everpolate.js';
 const speed_of_light = 299792458; // m/s

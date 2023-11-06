@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { MapboxMultiplayerControl } from '../utils/multiplayer/MapboxMultiplayerControl';
 import { MultiplayerConnection } from '../utils/multiplayer/MultiplayerConnection';
 

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 /**  Copyright Facebook 2021
  *
  * Connection Manager for Market Evaluator Websocket

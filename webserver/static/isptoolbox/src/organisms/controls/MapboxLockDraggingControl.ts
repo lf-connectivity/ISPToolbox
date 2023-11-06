@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { getCookie } from '../../utils/Cookie';
 import { getSessionID } from '../../utils/MapPreferences';
 

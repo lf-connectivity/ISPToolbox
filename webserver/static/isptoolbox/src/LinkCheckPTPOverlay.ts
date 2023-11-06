@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import mapboxgl from "mapbox-gl";
 import { IMapboxDrawPlugin, initializeMapboxDrawInterface } from "./utils/IMapboxDrawPlugin";

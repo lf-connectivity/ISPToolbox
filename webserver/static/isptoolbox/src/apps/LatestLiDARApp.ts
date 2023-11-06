@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import LidarAvailabilityLayer from '../availabilityOverlay';
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 const NEW_GIS_DATA_SOURCE = 'new-gis-source';

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 /**  Copyright Facebook 2020
  *
  * Connection Manager for LOS Check Websocket

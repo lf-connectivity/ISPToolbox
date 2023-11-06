@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 export class LinkStatus {
     obstructions: Array<[number, number]> = [];
     still_loading: boolean = false;

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import CollapsibleComponent from '../atoms/CollapsibleComponent';
 
 // More stuff will go in later right now the only purpose of this is to show/hide

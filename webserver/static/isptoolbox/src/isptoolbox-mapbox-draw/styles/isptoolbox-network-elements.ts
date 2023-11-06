@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import cpe_icon from './cpe-icon.svg';
 import cpe_active_icon from './cpe-active-icon.svg';
 import ap_icon from './ap-icon.svg';

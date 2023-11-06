@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { BaseWorkspaceFeature } from './BaseWorkspaceFeature';
 import { Feature, Point } from 'geojson';
 

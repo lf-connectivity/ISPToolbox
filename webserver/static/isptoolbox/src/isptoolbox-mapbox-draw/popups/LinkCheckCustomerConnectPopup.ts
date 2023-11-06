@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import mapboxgl, * as MapboxGL from 'mapbox-gl';
 import { Feature, Geometry, Point, LineString, GeoJsonProperties, Position } from 'geojson';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';

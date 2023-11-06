@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { last } from 'lodash';
 
 export function parseLatitudeLongitude(val: string): [number, number] | null {

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import mapboxgl from 'mapbox-gl';
 import { m2ft, roundToDecimalPlaces } from '../../LinkCalcUtils';
 import { ASREvents, WorkspaceFeatureTypes } from '../../workspace/WorkspaceConstants';

@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { Feature, Geometry, Point } from 'geojson';
 import mapboxgl from 'mapbox-gl';
 import { isBeta } from '../LinkCheckUtils';

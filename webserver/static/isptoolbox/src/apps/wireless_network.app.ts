@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates. Copyright
 import { LinkCheckPage } from '../LinkCheckPage';
 import {BaseWorkspaceManager} from '../workspace/BaseWorkspaceManager';
 import {djangoUrl} from '../utils/djangoUrl';

@@ -1,3 +1,4 @@
+-- (c) Meta Platforms, Inc. and affiliates. Copyright
 -- Schema for BroadbandNow data
 BEGIN;
 CREATE TABLE IF NOT EXISTS "broadbandnow" (

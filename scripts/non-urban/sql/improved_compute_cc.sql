@@ -1,3 +1,4 @@
+-- (c) Meta Platforms, Inc. and affiliates. Copyright
 DROP TABLE IF EXISTS computed_community_connect;
 
 CREATE TABLE "public"."computed_community_connect" (
@@ -13,4 +14,3 @@ WITH good_geog AS (
 INSERT INTO computed_community_connect (zipcode, geog, download, upload)
 SELECT DISTINCT good_geog.zipcode as zipcode, good_geog.geog as geog, down, up FROM good_geog, tl_2019_us_urban
 WHERE NOT St_Intersects("good_geog"."geog", "tl_2019_us_urban"."geog");
-

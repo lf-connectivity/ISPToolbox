@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 /// <reference types="cypress" />
 
 import { not_exist_or_not_be_visible } from ".";

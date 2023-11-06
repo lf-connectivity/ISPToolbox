@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 /**
  * A singleton instance of a mapbox client for draw modes
  */

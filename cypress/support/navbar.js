@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 /// <reference types="cypress" />
 
 import { assertion_within_subject } from "./assertions";

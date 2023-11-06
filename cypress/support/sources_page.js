@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 /// <reference types="cypress" />
 
 export const FOOTNOTES_SECTION = "footnotes-section";

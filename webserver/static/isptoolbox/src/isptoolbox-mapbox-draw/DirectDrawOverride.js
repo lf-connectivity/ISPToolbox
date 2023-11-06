@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 import { renderLinkEnds } from './LinkDrawMode.js';
 import {
     createSupplementaryPointsForGeojson,

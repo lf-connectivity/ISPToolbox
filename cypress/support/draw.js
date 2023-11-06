@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 /// <reference types="cypress" />
 
 Cypress.Commands.add("draw_get_features", () => {

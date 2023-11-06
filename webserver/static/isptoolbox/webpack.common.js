@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 const path = require('path');
 
 module.exports = {

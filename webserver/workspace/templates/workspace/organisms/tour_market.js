@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 {% load nux i18n %}
 const tour_dots = '<svg width="48" height="10" viewBox="0 0 48 10" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="5" r="5" fill="#EDEDED"/><circle cx="24" cy="5" r="5" fill="#A2A2A2"/><circle cx="43" cy="5" r="5" fill="#EDEDED"/></svg>';
 const style_dots = "btn px-4 ml-2";

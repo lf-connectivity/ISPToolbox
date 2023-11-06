@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 
 export function CPEDrawMode() {

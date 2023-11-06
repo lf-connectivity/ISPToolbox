@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 $(() => {
     $('#market-eval-export-frm').on('submit', function (event) {
         event.preventDefault();

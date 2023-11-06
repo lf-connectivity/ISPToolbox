@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 import { LinkMode} from './LinkDrawMode.js';
 import { OverrideSimple } from './SimpleDrawOverride.js';
 import { OverrideDirect } from './DirectDrawOverride.js';

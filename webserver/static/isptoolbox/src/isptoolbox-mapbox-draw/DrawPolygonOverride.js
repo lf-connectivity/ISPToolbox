@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 import { getMessagePolygon, addDrawingInstructions } from "./styles/drawing_instructions";
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 

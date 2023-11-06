@@ -1,3 +1,4 @@
+// (c) Meta Platforms, Inc. and affiliates
 'use strict';
 
 const querystring = require('querystring');

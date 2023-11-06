@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 resource "aws_ecs_cluster" "webserver-production" {
   name = "${var.ecs_cluster_name}-webserver-cluster"
 }

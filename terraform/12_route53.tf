@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 ### ======================================== route53 ========================================
 data "aws_route53_zone" "fbctower_domain" {
   name         = "fbctower.com."

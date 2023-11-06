@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 
 resource "aws_db_subnet_group" "production" {
   name       = "main"

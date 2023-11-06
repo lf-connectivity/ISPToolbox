@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # Production Load Balancer
 resource "aws_lb" "production" {
   name               = "${var.ecs_cluster_name}-alb"

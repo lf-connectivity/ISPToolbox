@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 ### ======================================== Elasticache ========================================
 resource "aws_elasticache_subnet_group" "production" {
   name       = "isptoolbox-elasticache-subnet-main"

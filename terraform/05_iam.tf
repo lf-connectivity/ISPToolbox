@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 resource "aws_iam_role" "ecs-host-role" {
   name               = "ecs_host_role_prod"
   assume_role_policy = file("policies/ecs-role.json")

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 resource "aws_autoscaling_group" "ecs-cluster-webserver" {
   name                 = "${var.ecs_cluster_name}-web_auto_scaling_group"
   min_size             = var.autoscale_min

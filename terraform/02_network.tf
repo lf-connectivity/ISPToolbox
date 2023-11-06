@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # Production VPC
 resource "aws_vpc" "production-vpc" {
   cidr_block           = "10.0.0.0/16"

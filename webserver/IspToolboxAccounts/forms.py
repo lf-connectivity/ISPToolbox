@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib.auth.forms import UserCreationForm
 from IspToolboxAccounts.models import User, IspToolboxUserSignUpInfo
 from django import forms

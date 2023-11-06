@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.test import TestCase
 from mmwave.scripts.create_dsm_for_ept import createTileDSM
 from mmwave.models import EPTLidarPointCloud, LidarDSMTileModel

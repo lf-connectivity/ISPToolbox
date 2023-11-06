@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from celery import current_task
 from celery.utils.log import get_task_logger
 from workspace.models import (

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.db import models
 from rest_framework import serializers
 from workspace.models import AccessPointLocation

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views import View

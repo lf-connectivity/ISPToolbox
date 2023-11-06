@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.core.management.base import BaseCommand
 from mmwave.scripts.load_lidar_boundaries import loadBoundariesFromEntWine
 from mmwave.tasks import updateLidarMetaData

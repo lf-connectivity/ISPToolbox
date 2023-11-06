@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from IspToolboxApp.utils import ERR_TIMEOUT, market_evaluator_async_task
 from celery_async import celery_app as app
 from area import area

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from datetime import datetime
 from dataUpdate.util.clients import dbClient
 from bots.alert_fb_oncall import sendEmailToISPToolboxOncall

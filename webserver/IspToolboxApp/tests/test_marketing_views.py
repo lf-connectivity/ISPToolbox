@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.test import TestCase, Client
 from IspToolboxApp.views.RetargetingPixelView import marketing_api_secret
 import json

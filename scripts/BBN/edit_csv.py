@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 """
 Script to preprocess CSV files from BroadbandNow data. The script does three things:
 

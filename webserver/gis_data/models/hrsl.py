@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # This is an auto-generated Django model module.
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry

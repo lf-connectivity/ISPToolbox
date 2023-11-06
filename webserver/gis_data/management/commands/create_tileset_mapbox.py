@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import argparse
 import logging
 from django.core.management.base import BaseCommand

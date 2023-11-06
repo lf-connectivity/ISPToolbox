@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.http.response import JsonResponse
 from workspace.models import WorkspaceMapSession, WorkspaceMapSessionSerializer
 from django.urls import reverse

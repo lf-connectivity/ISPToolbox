@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.http.response import Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.views import View

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from ajax_datatable.views import AjaxDatatableView
 from workspace import models as workspace_models
 from django.urls import reverse_lazy

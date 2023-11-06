@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from celery.utils.log import get_task_logger
 from mmwave.models import EPTLidarPointCloud
 from typing import Iterable

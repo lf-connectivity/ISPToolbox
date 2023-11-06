@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from .test_geomodels import WorkspaceBaseTestCase
 from workspace.models import WorkspaceMapSessionSerializer
 

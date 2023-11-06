@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from IspToolboxAccounts.models import PageVisit
 import logging
 

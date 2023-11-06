@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.test import TestCase
 from django.test import Client
 from workspace import models as workspace_models

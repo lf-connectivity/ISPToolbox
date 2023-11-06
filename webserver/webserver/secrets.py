@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # Utility function to get secrets from AWS Secret Manager
 
 import boto3

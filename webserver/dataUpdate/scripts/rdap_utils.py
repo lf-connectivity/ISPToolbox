@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import requests
 from typing import Dict, List, Tuple
 import json

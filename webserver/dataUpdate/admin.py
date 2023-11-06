@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib import admin
 from dataUpdate.models import Source
 from dataUpdate.tasks import updateCCData, updateMlabData, updateCbrsData

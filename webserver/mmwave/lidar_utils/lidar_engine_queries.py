@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.db import connections
 
 _FESM_LPC_PROJ_QUERY = """

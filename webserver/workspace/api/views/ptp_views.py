@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from workspace.api import models as workspace_models
 from .task_api_views import (
     TaskAPICreateView, TaskAPIRetrieveDeleteView, TaskAPIStopView

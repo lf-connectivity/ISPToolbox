@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from mmwave.lidar_utils.SlippyTiles import getTiles, getBoundaryofTile, DEFAULT_OUTPUT_ZOOM
 from mmwave.lidar_utils.DSMEngine import DSMEngine
 from celery_async.celery import celery_app as app

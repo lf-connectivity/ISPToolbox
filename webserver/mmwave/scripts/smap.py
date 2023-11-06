@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import datetime
 from storages.backends.s3boto3 import S3Boto3Storage
 from mmwave.models import TGLink

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # Sources should be in the format
 # {
 #     'link': <URL>,

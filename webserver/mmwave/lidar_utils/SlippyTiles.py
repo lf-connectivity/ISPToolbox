@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import math
 from django.contrib.gis.geos import GEOSGeometry, Polygon
 

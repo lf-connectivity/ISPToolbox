@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from mmwave.models import EPTLidarPointCloud
 from mmwave.lidar_utils.pdal_templates import getLidarPointsAroundLink
 from enum import IntEnum

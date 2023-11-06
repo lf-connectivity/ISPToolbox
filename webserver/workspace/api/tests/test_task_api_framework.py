@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.urls import reverse
 from rest_framework.status import (
     HTTP_200_OK,

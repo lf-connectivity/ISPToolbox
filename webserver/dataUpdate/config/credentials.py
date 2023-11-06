@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # DB for monthly update scripts, not guaranteed to be up to up to date with prod GIS db.
 TEST_GIS_DB = {
     'NAME': 'postgres',

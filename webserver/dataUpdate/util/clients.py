@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from dataUpdate.config.credentials import TEST_GIS_DB
 from django.conf import settings
 

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 def createGeometryCollection(geometries):
     return """{"type":"GeometryCollection", "geometries": [""" + \
      ",".join(geometries) + """]}"""

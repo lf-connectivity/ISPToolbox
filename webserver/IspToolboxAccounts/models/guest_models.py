@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from guest_user.models import GuestManager
 from django.contrib.auth import get_user_model
 from django.db import models

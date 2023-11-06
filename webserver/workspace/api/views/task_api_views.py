@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, mixins
 from rest_framework.schemas.openapi import AutoSchema

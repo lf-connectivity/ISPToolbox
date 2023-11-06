@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 def create_initial_sources():
     from dataUpdate.models import Source
     from datetime import date

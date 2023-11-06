@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from .test_geomodels import WorkspaceBaseTestCase
 from django.urls import reverse_lazy
 

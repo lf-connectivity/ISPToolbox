@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.html import format_html_join

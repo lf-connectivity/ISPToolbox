@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from typing import List
 from urllib.parse import urlparse
 from django.contrib.gis.db.models.fields import GeometryField

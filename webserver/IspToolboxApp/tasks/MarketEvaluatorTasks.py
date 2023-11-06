@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from IspToolboxApp.models.MarketEvaluatorModels import MarketEvaluatorPipeline
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import checkIfPrecomputedBuildingsAvailable, \
     checkIfIncomeProvidersAvailable, queryBuildingOutlines

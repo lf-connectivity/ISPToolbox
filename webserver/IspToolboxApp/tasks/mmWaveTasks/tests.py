@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import mmwave
 
 bb = [-0.3999924659729004, 49.15775509179997, -

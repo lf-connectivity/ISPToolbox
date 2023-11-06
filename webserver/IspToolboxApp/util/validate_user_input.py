@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from area import area
 from django.contrib.gis.geos import GEOSGeometry
 import logging

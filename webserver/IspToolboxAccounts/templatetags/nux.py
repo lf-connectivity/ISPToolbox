@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.template import Library
 from django.utils.safestring import mark_safe
 from IspToolboxAccounts.models import NewUserExperience

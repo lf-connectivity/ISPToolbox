@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.views import View
 from django.contrib.gis.geos import GEOSGeometry, WKBWriter
 from django.utils.decorators import method_decorator

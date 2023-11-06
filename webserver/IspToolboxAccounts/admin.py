@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib import admin
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models.query import QuerySet

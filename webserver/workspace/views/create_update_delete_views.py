@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.shortcuts import render
 from django.views.generic.edit import DeleteView, UpdateView, CreateView
 from workspace import models as workspace_models

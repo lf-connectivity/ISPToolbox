@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from IspToolboxApp.tasks.mmWaveTasks.mmwave import getOSMNodes
 from typing import List, Dict
 from django.contrib.gis.geos import GEOSGeometry, LineString, Point

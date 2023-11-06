@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.db import connections
 from django.db.utils import Error as DjangoDbBaseError
 import logging

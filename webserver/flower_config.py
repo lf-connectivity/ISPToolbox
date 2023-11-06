@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import webserver.settings as django_settings
 
 broker_url = django_settings.CELERY_BROKER_URL

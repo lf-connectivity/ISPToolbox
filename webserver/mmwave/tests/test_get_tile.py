@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.test.testcases import TestCase
 from IspToolboxApp.util.s3 import findPointCloudPrefix
 

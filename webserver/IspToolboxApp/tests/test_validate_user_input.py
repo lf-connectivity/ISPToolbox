@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.test import TestCase
 from IspToolboxApp.util.validate_user_input import (
     validateUserInputMarketEvaluator, InvalidMarketEvaluatorRequest,

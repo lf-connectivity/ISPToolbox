@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.db import transaction
 from django.contrib.gis.geos import Point
 from turfpy import measurement

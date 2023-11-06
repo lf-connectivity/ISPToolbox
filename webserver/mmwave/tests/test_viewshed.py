@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.test import RequestFactory, TestCase
 from django.contrib.gis.geos import Point
 from workspace.models import Viewshed, AccessPointLocation

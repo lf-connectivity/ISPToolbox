@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.core.management.base import BaseCommand
 from allauth.socialaccount.models import SocialApp
 from django.conf import settings

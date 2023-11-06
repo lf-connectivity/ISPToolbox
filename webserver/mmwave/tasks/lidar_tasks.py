@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from mmwave.scripts.update_lidar_metadata import (
     update_lidar_metadata, alert_oncall_status
 )

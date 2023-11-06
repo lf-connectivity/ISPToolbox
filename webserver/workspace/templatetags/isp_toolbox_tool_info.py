@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # TODO: Better engineering: Rename source pages/pages in general to match tool names
 # so we can put this info in one place instead of many.
 

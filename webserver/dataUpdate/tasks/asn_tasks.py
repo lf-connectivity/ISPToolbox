@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from dataUpdate.scripts.load_asn_elasticsearch import updateASNElasticSearch
 from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from celery_async import celery_app as app

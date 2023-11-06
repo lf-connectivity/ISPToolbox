@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.core.management.base import BaseCommand
 from mmwave.lidar_utils.show_latest_pt_clouds import createNewPointCloudAvailability
 

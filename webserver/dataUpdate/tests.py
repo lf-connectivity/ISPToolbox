@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.db import IntegrityError
 from django.test import TestCase
 from dataUpdate.models import Source

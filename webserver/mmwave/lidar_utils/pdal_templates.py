@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import json
 from django.contrib.gis.geos import Point
 from geopy.distance import distance as geopy_distance

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from dataUpdate.util.clients import dbClient, bqClient
 from bots.alert_fb_oncall import sendEmailToISPToolboxOncall
 from datetime import datetime

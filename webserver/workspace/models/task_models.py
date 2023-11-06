@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from celery.result import AsyncResult
 from django.conf import settings
 from django.db import models

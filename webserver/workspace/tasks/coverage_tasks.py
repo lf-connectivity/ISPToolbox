@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from workspace.models import (
     AccessPointLocation, AccessPointCoverageBuildings, BuildingCoverage,
     Viewshed

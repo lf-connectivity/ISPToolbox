@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # Scripts to Update Form 477 Table
 
 # 1. get zip file from fcc website

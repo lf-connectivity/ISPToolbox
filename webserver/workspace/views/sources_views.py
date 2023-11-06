@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from dataclasses import dataclass
 from django.http.response import Http404
 from django.shortcuts import render

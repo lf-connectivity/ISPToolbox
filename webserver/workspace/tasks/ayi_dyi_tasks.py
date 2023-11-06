@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from uuid import UUID
 from celery_async import celery_app as app
 from workspace.models import AccessInformationJob, DeleteInformationJob

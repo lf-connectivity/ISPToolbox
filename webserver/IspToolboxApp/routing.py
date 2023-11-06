@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.urls import re_path
 
 from IspToolboxApp.consumers import MarketEvaluatorConsumer

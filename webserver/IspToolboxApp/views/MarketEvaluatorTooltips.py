@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.utils.translation import gettext as _
 
 # flake8: noqa

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from celery_async import celery_app as app
 from IspToolboxApp.tasks.building_outline_task.building_outline_task import getTiles, getTileImages
 import pickle

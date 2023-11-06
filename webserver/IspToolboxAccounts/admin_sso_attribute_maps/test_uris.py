@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 __author__ = 'rolandh'
 
 EDUPERSON_OID = "urn:oid:1.3.6.1.4.1.5923.1.1.1."

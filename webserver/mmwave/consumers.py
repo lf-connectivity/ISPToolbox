@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from mmwave import tasks as mmwave_tasks
 from workspace import tasks as workspace_tasks

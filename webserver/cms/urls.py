@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.urls import path, include
 # Wagtails CMS
 from wagtail.admin import urls as wagtailadmin_urls

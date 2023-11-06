@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.shortcuts import render, redirect
 from django.views import View
 from workspace import models

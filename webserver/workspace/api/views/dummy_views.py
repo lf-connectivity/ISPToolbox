@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 
 from workspace.api.models.dummy_models import DummyTaskSerializer
 from .task_api_views import TaskAPICreateView, TaskAPIRetrieveDeleteView, TaskAPIStopView

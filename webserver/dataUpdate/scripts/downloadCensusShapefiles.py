@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 """
 Downloads census shapefiles (only available state by state) to the monthly update DB for use as market evaluator overlay.
 

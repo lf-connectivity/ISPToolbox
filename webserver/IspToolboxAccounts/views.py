@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib.auth import login, authenticate
 from django.contrib.gis.geos.point import Point
 from django.urls.base import reverse

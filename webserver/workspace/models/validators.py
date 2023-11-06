@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.geos.linestring import LineString
 from django.core.exceptions import ValidationError

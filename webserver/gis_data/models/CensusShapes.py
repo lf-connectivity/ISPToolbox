@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # This is an auto-generated Django model module.
 #   * Make sure each model has one field with primary_key=True
 from django.contrib.gis.db import models

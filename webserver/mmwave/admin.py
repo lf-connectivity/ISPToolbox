@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib import admin
 from mmwave import models
 from django.db.models import Count

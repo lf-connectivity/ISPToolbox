@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from celery_async import celery_app as app
 from IspToolboxApp.models.MarketingConvertModels import MarketingPinConversion
 import datetime

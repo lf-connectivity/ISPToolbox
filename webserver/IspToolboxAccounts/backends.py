@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib.auth.backends import ModelBackend, UserModel
 from django.db.models import Q
 from django.conf import settings

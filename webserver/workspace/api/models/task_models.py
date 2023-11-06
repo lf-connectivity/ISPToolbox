@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from rest_framework import serializers
 import logging
 from celery_async import celery_app as app

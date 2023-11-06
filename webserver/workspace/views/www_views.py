@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.http.response import Http404
 from storages.backends.s3boto3 import S3Boto3Storage
 from mmwave.scripts.smap import create_filepath_engagement_data

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 # ISPToolbox Income Data Update Script
 # RUN FROM /webserver: python -m dataUpdate.scripts.update_income
 # Developed using the census data API: https://www.census.gov/data/developers/guidance/api-user-guide.Example_API_Queries.html

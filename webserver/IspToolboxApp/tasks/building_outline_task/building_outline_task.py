@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

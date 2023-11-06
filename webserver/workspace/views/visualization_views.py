@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from workspace.models import (

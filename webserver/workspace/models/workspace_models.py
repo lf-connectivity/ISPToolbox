@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.db import models
 from django.conf import settings
 from rest_framework import serializers

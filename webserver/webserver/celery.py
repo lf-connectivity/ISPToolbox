@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 import os
 from celery import Celery
 from celery.schedules import crontab

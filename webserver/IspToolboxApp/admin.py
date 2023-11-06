@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.contrib import admin
 from django.db.models import Count
 from django.db.models.functions import Trunc

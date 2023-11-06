@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.test import Client

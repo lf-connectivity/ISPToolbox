@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.core.management.base import BaseCommand
 from isptoolbox_storage.mapbox.upload_tileset import uploadNewTileset
 import argparse

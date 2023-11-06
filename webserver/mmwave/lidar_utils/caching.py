@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.core.cache import caches
 
 _CACHE_NAME = 'los'

@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.views import View
 from django.http import JsonResponse
 from gis_data.models import Tl2019UsZcta510, Tl2019UsCounty

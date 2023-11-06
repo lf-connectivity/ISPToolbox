@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from celery_async import celery_app as app
 from workspace.api import models as workspace_models
 from celery.utils.log import get_task_logger

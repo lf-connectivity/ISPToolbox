@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.test import TestCase
 from IspToolboxApp.models.MarketingConvertModels import MarketingPinConversion
 from IspToolboxApp.tasks.MarketingPinConversionTasks import ConvertPins

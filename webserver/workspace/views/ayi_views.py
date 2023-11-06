@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.shortcuts import redirect, render
 from django.views import View
 from IspToolboxAccounts.forms import IspToolboxAccessDataForm

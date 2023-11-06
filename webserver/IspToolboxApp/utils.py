@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from celery_async import celery_app as app

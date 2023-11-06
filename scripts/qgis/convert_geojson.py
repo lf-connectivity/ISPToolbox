@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 #!/usr/bin/env python3
 import json
 import argparse

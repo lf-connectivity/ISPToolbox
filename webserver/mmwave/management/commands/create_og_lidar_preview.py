@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.core.management.base import BaseCommand
 from mmwave.scripts.create_lidar_availability_preview import createOpenGraphPreviewImage
 from datetime import date

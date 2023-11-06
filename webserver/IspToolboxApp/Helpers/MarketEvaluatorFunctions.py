@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from IspToolboxApp.Helpers.MarketEvaluatorHelpers import (
     getQueryTemplate,
     checkIfPolyInCanada,

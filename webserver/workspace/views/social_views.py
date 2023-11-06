@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from django.urls import reverse
 from django.views import View
 from django.http import JsonResponse

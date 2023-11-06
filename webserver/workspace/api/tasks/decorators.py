@@ -1,3 +1,4 @@
+# (c) Meta Platforms, Inc. and affiliates. Copyright
 from celery import current_task
 from celery_async import celery_app as app
 from functools import wraps
